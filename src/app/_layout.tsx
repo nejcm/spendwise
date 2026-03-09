@@ -6,13 +6,21 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteProvider } from 'expo-sqlite';
 import * as React from 'react';
-import { StyleSheet } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { AppState, StyleSheet } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 import { useThemeConfig } from '@/components/ui/use-theme-config';
 
+import {
+  checkBudgetAlerts,
+  checkUpcomingBills,
+  setupNotifications,
+} from '@/features/notifications/notifications';
+import { LockScreen } from '@/features/security/lock-screen';
+import { getLockTimeoutMinutes, isPinEnabled } from '@/features/security/use-security';
 import { processRecurringRules } from '@/features/subscriptions/api';
 import { APIProvider } from '@/lib/api';
 import { loadSelectedTheme } from '@/lib/hooks/use-selected-theme';
@@ -23,6 +31,9 @@ import '../global.css';
 async function initDb(db: SQLiteDatabase) {
   await migrateDbIfNeeded(db);
   await processRecurringRules(db);
+  await setupNotifications();
+  await checkBudgetAlerts(db);
+  await checkUpcomingBills(db);
 }
 
 export { ErrorBoundary } from 'expo-router';
@@ -41,6 +52,33 @@ SplashScreen.setOptions({
   fade: true,
 });
 
+function SecurityLock() {
+  const [isLocked, setIsLocked] = useState(() => isPinEnabled());
+  const backgroundTimeRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'background' || state === 'inactive') {
+        backgroundTimeRef.current = Date.now();
+      }
+      else if (state === 'active') {
+        if (!isPinEnabled()) {
+          return;
+        }
+        const ms = getLockTimeoutMinutes() * 60 * 1000;
+        const elapsed
+          = backgroundTimeRef.current !== null ? Date.now() - backgroundTimeRef.current : Infinity;
+        if (elapsed >= ms) {
+          setIsLocked(true);
+        }
+      }
+    });
+    return () => sub.remove();
+  }, []);
+
+  return <LockScreen visible={isLocked} onUnlock={() => setIsLocked(false)} />;
+}
+
 export default function RootLayout() {
   return (
     <Providers>
@@ -48,6 +86,7 @@ export default function RootLayout() {
         <Stack.Screen name="(app)" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       </Stack>
+      <SecurityLock />
     </Providers>
   );
 }

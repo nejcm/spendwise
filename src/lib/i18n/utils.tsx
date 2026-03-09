@@ -1,8 +1,8 @@
 import type TranslateOptions from 'i18next';
 import type { Language, resources } from './resources';
 import type { RecursiveKeyOf } from './types';
+import { memoize } from 'es-toolkit/compat';
 import i18n from 'i18next';
-import memoize from 'lodash.memoize';
 import { useCallback } from 'react';
 import { I18nManager, NativeModules, Platform } from 'react-native';
 

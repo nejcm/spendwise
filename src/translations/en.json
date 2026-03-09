@@ -107,24 +107,17 @@
     "title": "Spendwise"
   },
   "security": {
-    "biometric": "Biometric Authentication",
-    "biometric_desc": "Use fingerprint or face to unlock",
-    "biometric_prompt": "Authenticate to unlock Spendwise",
-    "confirm_pin": "Confirm new PIN",
-    "enter_current_pin": "Enter current PIN",
-    "enter_pin": "Enter PIN",
-    "enter_pin_label": "Enter your 4-digit PIN",
+    "app_lock": "App Lock",
+    "app_lock_desc": "Require device authentication to open the app",
     "lock_after": "Lock after",
-    "pin_desc": "Require PIN to open the app",
-    "pin_lock": "PIN Lock",
-    "pin_mismatch": "PINs do not match. Try again.",
-    "set_new_pin": "Enter new PIN",
-    "set_pin": "Set PIN",
+    "locked": "App is locked",
+    "no_device_lock_desc": "Please set up a PIN, password, or biometric lock in your device settings first.",
+    "no_device_lock_title": "No Device Lock Found",
     "timeout_immediately": "Immediately",
     "title": "Security",
-    "use_biometric": "Use Biometrics",
-    "verify_to_disable": "Verify PIN to disable",
-    "wrong_pin": "Incorrect PIN. Try again."
+    "unlock": "Unlock",
+    "unlock_prompt": "Authenticate to unlock Spendwise",
+    "verify_to_disable": "Verify identity to disable lock"
   },
   "settings": {
     "about": "About",

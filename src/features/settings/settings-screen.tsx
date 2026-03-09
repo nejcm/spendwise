@@ -39,6 +39,14 @@ export function SettingsScreen() {
               text="settings.subscriptions"
               onPress={() => router.push('/settings/subscriptions' as any)}
             />
+            <SettingsItem
+              text="settings.security"
+              onPress={() => router.push('/settings/security' as any)}
+            />
+            <SettingsItem
+              text="settings.import"
+              onPress={() => router.push('/import' as any)}
+            />
           </SettingsContainer>
 
           <SettingsContainer title="settings.generale">

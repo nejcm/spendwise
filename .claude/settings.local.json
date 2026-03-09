@@ -6,7 +6,7 @@
       "Bash(pnpm lint)",
       "Bash(pnpm lint --ignore-pattern \".github/**\")",
       "Bash(npx eslint src/)",
-      "Bash(npx eslint --fix src/translations/en.json src/translations/ar.json)",
+      "Bash(npx eslint --fix src/translations/en.json)",
       "Bash(node -e \"console.log\\(require\\(''expo-sqlite/package.json''\\).version\\)\")",
       "Bash(ls src/components/ui/colors*)",
       "Bash(npx eslint --fix src/features/transactions/ src/features/home/ src/app/transactions/)",
@@ -18,7 +18,10 @@
       "Bash(node -e \"const p = require\\(''./package.json''\\); const deps = {...p.dependencies,...p.devDependencies}; [''react-native-gifted-charts'',''expo-linear-gradient'',''expo-haptics''].forEach\\(d => console.log\\(d, deps[d] || ''NOT INSTALLED''\\)\\)\")",
       "Bash(npx expo install expo-haptics expo-linear-gradient react-native-gifted-charts)",
       "Bash(npx eslint src/features/insights/ src/features/subscriptions/ src/features/transactions/components/transaction-list.tsx --fix)",
-      "Bash(npx eslint src/app/_layout.tsx --fix)"
+      "Bash(npx eslint src/app/_layout.tsx --fix)",
+      "Bash(node -e \"const p = require\\(''./package.json''\\); const deps = {...p.dependencies,...p.devDependencies}; [''expo-document-picker'',''expo-local-authentication'',''expo-notifications'',''expo-crypto''].forEach\\(d => console.log\\(d, deps[d] || ''NOT INSTALLED''\\)\\)\")",
+      "Bash(npx expo install expo-document-picker expo-local-authentication expo-notifications)",
+      "Bash(pnpm lint --fix)"
     ]
   }
 }

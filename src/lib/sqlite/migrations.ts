@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-const DATABASE_VERSION = 4;
+const DATABASE_VERSION = 5;
 
 /**
  * Runs on first open. Sets WAL mode and runs schema migrations via PRAGMA user_version.
@@ -121,8 +121,24 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
     `);
   }
 
-  // Future migrations:
-  // if (currentDbVersion < 5) { ... goals ... }
+  if (currentDbVersion < 5) {
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS goals (
+        id TEXT PRIMARY KEY NOT NULL,
+        name TEXT NOT NULL,
+        target_amount INTEGER NOT NULL,
+        current_amount INTEGER NOT NULL DEFAULT 0,
+        deadline TEXT,
+        icon TEXT,
+        color TEXT NOT NULL DEFAULT '#4ECDC4',
+        is_completed INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+
+      ALTER TABLE transactions ADD COLUMN goal_id TEXT REFERENCES goals(id);
+    `);
+  }
 
   await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
 }

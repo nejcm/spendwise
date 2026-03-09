@@ -20,7 +20,7 @@ import {
   setupNotifications,
 } from '@/features/notifications/notifications';
 import { LockScreen } from '@/features/security/lock-screen';
-import { getLockTimeoutMinutes, isPinEnabled } from '@/features/security/use-security';
+import { getLockTimeoutMinutes, isLockEnabled } from '@/features/security/use-security';
 import { processRecurringRules } from '@/features/subscriptions/api';
 import { APIProvider } from '@/lib/api';
 import { loadSelectedTheme } from '@/lib/hooks/use-selected-theme';
@@ -53,7 +53,7 @@ SplashScreen.setOptions({
 });
 
 function SecurityLock() {
-  const [isLocked, setIsLocked] = useState(() => isPinEnabled());
+  const [isLocked, setIsLocked] = useState(() => isLockEnabled());
   const backgroundTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -62,7 +62,7 @@ function SecurityLock() {
         backgroundTimeRef.current = Date.now();
       }
       else if (state === 'active') {
-        if (!isPinEnabled()) {
+        if (!isLockEnabled()) {
           return;
         }
         const ms = getLockTimeoutMinutes() * 60 * 1000;

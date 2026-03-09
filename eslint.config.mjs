@@ -46,6 +46,7 @@ export default antfu(
   // Custom rules
   {
     rules: {
+      'antfu/if-newline': 'off',
       'style/arrow-parens': ['error', 'always'],
       'max-params': ['error', 3],
       'react/display-name': 'off',

@@ -1,20 +1,53 @@
 {
+  "budgets": {
+    "left_to_spend": "المتبقي للإنفاق",
+    "no_budgets": "لا توجد ميزانيات بعد",
+    "over_budget": "تجاوز الميزانية",
+    "title": "الميزانيات"
+  },
+  "common": {
+    "back": "رجوع",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "done": "تم",
+    "edit": "تعديل",
+    "loading": "جاري التحميل...",
+    "next": "التالي",
+    "save": "حفظ"
+  },
+  "home": {
+    "expenses": "المصروفات",
+    "income": "الدخل",
+    "no_transactions": "لا توجد معاملات بعد",
+    "recent_transactions": "المعاملات الأخيرة",
+    "see_all": "عرض الكل",
+    "title": "الرئيسية",
+    "total_balance": "الرصيد الإجمالي"
+  },
   "onboarding": {
-    "message": "مرحبا بكم في موقع تطبيق obytes"
+    "account_name": "اسم الحساب",
+    "account_type": "نوع الحساب",
+    "create_account": "أنشئ حسابك الأول",
+    "feature1": "تتبع دخلك ومصروفاتك",
+    "feature2": "حدد ميزانيات والتزم بها",
+    "feature3": "احصل على رؤى حول إنفاقك",
+    "finish_setup": "إنهاء الإعداد",
+    "get_started": "ابدأ الآن",
+    "opening_balance": "الرصيد الافتتاحي",
+    "select_currency": "اختر عملتك",
+    "subtitle": "تحكم في أموالك",
+    "title": "Spendwise"
   },
   "settings": {
-    "about": "حول التطبيق ",
+    "about": "حول التطبيق",
     "app_name": "اسم التطبيق",
     "arabic": "عربي",
     "english": "إنجليزي",
     "generale": "عام",
-    "github": "جيثب",
     "language": "لغة",
     "links": "الروابط",
-    "logout": "تسجيل خروج",
     "more": "أكثر",
     "privacy": "سياسة الخصوصية",
-    "rate": "تقييم",
     "share": "شارك",
     "support": "الدعم",
     "support_us": "ادعمنا",
@@ -26,8 +59,20 @@
       "title": "سمة"
     },
     "title": "إعدادات",
-    "version": "إصدار",
-    "website": "موقع الكتروني"
+    "version": "إصدار"
   },
-  "welcome": "test arabic"
+  "transactions": {
+    "account": "الحساب",
+    "add": "إضافة معاملة",
+    "amount": "المبلغ",
+    "category": "الفئة",
+    "date": "التاريخ",
+    "expense": "مصروف",
+    "income": "دخل",
+    "no_transactions": "لا توجد معاملات بعد",
+    "note": "ملاحظة",
+    "payee": "المستفيد",
+    "title": "المعاملات",
+    "transfer": "تحويل"
+  }
 }

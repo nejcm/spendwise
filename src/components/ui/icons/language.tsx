@@ -19,7 +19,7 @@ export function Language({ ...props }: SvgProps) {
           fill="#192332"
         />
         <Text
-        // fontFamily="HelveticaNeueLTArabic-Bold, Helvetica Neue LT Arabic"
+          // fontFamily="HelveticaNeueLTArabic-Bold, Helvetica Neue LT Arabic"
           fontSize={30}
           fontWeight="bold"
           fill="#FFF"

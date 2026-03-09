@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm add date-fns)",
+      "Bash(pnpm type-check)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm lint --ignore-pattern \".github/**\")",
+      "Bash(npx eslint src/)",
+      "Bash(npx eslint --fix src/translations/en.json src/translations/ar.json)",
+      "Bash(node -e \"console.log\\(require\\(''expo-sqlite/package.json''\\).version\\)\")",
+      "Bash(ls src/components/ui/colors*)",
+      "Bash(npx eslint --fix src/features/transactions/ src/features/home/ src/app/transactions/)",
+      "Bash(npx eslint src/features/transactions/ src/features/home/ src/app/transactions/)",
+      "Bash(npx eslint --fix src/features/transactions/components/transaction-edit-form.tsx src/features/transactions/components/quick-add-sheet.tsx)"
+    ]
+  }
+}

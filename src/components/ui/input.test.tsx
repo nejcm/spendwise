@@ -31,9 +31,7 @@ describe('input component ', () => {
   it('should render the placeholder correctly ', () => {
     render(<Input testID="input" placeholder="Enter your username" />);
     expect(screen.getByTestId('input')).toBeOnTheScreen();
-    expect(
-      screen.getByPlaceholderText('Enter your username'),
-    ).toBeOnTheScreen();
+    expect(screen.getByPlaceholderText('Enter your username')).toBeOnTheScreen();
   });
 
   it('should render the label correctly ', () => {
@@ -47,29 +45,18 @@ describe('input component ', () => {
     render(<Input testID="input" error="This is an error message" />);
     expect(screen.getByTestId('input')).toBeOnTheScreen();
 
-    expect(screen.getByTestId('input-error')).toHaveTextContent(
-      'This is an error message',
-    );
+    expect(screen.getByTestId('input-error')).toHaveTextContent('This is an error message');
   });
   it('should render the label, error message & placeholder correctly ', () => {
     render(
-      <Input
-        testID="input"
-        label="Username"
-        placeholder="Enter your username"
-        error="This is an error message"
-      />,
+      <Input testID="input" label="Username" placeholder="Enter your username" error="This is an error message" />,
     );
     expect(screen.getByTestId('input')).toBeOnTheScreen();
 
     expect(screen.getByTestId('input-label')).toHaveTextContent('Username');
     expect(screen.getByTestId('input-error')).toBeOnTheScreen();
-    expect(screen.getByTestId('input-error')).toHaveTextContent(
-      'This is an error message',
-    );
-    expect(
-      screen.getByPlaceholderText('Enter your username'),
-    ).toBeOnTheScreen();
+    expect(screen.getByTestId('input-error')).toHaveTextContent('This is an error message');
+    expect(screen.getByPlaceholderText('Enter your username')).toBeOnTheScreen();
   });
 
   it('should trigger onFocus event correctly ', async () => {
@@ -91,9 +78,7 @@ describe('input component ', () => {
   });
   it('should trigger onChangeText event correctly', async () => {
     const onChangeText = jest.fn();
-    const { user } = setup(
-      <Input testID="input" onChangeText={onChangeText} />,
-    );
+    const { user } = setup(<Input testID="input" onChangeText={onChangeText} />);
 
     const input = screen.getByTestId('input');
     await user.type(input, '123456789');

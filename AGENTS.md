@@ -36,16 +36,19 @@ Root Files:
 ## How: Development Workflow
 
 **Essential Commands:**
+
 ```bash
 pnpm start              # Start dev server
 pnpm ios/android        # Run on platform
 pnpm lint               # ESLint check
 pnpm type-check         # TypeScript validation
 pnpm test               # Run Jest tests
-pnpm check-all          # All quality checks
+pnpm lint:ts            # All quality checks
+pnpm format             # Format code
 ```
 
 **Environment-Specific:**
+
 ```bash
 pnpm start:preview              # Preview environment
 pnpm ios:production             # Production iOS

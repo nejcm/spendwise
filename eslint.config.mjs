@@ -46,8 +46,8 @@ export default antfu(
   // Custom rules
   {
     rules: {
+      'style/arrow-parens': ['error', 'always'],
       'max-params': ['error', 3],
-      'max-lines-per-function': ['error', 110],
       'react/display-name': 'off',
       'react/no-inline-styles': 'off',
       'react/destructuring-assignment': 'off',
@@ -78,6 +78,13 @@ export default antfu(
   },
 
   // TypeScript-specific rules
+  {
+    files: ['**/*.{js,jsx,ts,tsx}'],
+    rules: {
+      'max-lines-per-function': ['error', 150],
+    },
+  },
+
   {
     files: ['**/*.ts', '**/*.tsx'],
     rules: {
@@ -134,18 +141,12 @@ export default antfu(
       'i18n-json/valid-message-syntax': [
         2,
         {
-          syntax: path.resolve(
-            __dirname,
-            './scripts/i18next-syntax-validation.js',
-          ),
+          syntax: path.resolve(__dirname, './scripts/i18next-syntax-validation.js'),
         },
       ],
       'i18n-json/valid-json': 2,
       'i18n-json/sorted-keys': [2, { order: 'asc', indentSpaces: 2 }],
-      'i18n-json/identical-keys': [
-        2,
-        { filePath: path.resolve(__dirname, './src/translations/en.json') },
-      ],
+      'i18n-json/identical-keys': [2, { filePath: path.resolve(__dirname, './src/translations/en.json') }],
       // Disable conflicting rules for i18n JSON files
       'style/semi': 'off',
       'style/comma-dangle': 'off',

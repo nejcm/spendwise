@@ -75,10 +75,7 @@ export function Input({ ref, ...props }: NInputProps & { ref?: React.Ref<NTextIn
   return (
     <View className={styles.container()}>
       {label && (
-        <Text
-          testID={testID ? `${testID}-label` : undefined}
-          className={styles.label()}
-        >
+        <Text testID={testID ? `${testID}-label` : undefined} className={styles.label()}>
           {label}
         </Text>
       )}
@@ -97,10 +94,7 @@ export function Input({ ref, ...props }: NInputProps & { ref?: React.Ref<NTextIn
         ])}
       />
       {error && (
-        <Text
-          testID={testID ? `${testID}-error` : undefined}
-          className="text-sm text-danger-400 dark:text-danger-600"
-        >
+        <Text testID={testID ? `${testID}-error` : undefined} className="text-sm text-danger-400 dark:text-danger-600">
           {error}
         </Text>
       )}

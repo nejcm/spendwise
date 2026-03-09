@@ -1,6 +1,4 @@
-export function getFieldError(
-  field: any,
-): string | undefined {
+export function getFieldError(field: any): string | undefined {
   if (!field.state.meta.isTouched || !field.state.meta.errors.length) {
     return undefined;
   }

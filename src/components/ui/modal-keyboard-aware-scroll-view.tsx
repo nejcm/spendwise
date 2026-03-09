@@ -16,27 +16,19 @@ import type { KeyboardAwareScrollViewProps } from 'react-native-keyboard-control
         );
         }
  */
-import {
-
-  createBottomSheetScrollableComponent,
-  SCROLLABLE_TYPE,
-} from '@gorhom/bottom-sheet';
+import { createBottomSheetScrollableComponent, SCROLLABLE_TYPE } from '@gorhom/bottom-sheet';
 import { memo } from 'react';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import Reanimated from 'react-native-reanimated';
 
-const AnimatedScrollView
-  = Reanimated.createAnimatedComponent<KeyboardAwareScrollViewProps>(
-    KeyboardAwareScrollView,
-  );
+const AnimatedScrollView = Reanimated.createAnimatedComponent(KeyboardAwareScrollView);
 const BottomSheetScrollViewComponent = createBottomSheetScrollableComponent<
   BottomSheetScrollViewMethods,
   BottomSheetScrollViewProps
 >(SCROLLABLE_TYPE.SCROLLVIEW, AnimatedScrollView);
 const BottomSheetKeyboardAwareScrollView = memo(BottomSheetScrollViewComponent);
 
-BottomSheetKeyboardAwareScrollView.displayName
-  = 'BottomSheetKeyboardAwareScrollView';
+BottomSheetKeyboardAwareScrollView.displayName = 'BottomSheetKeyboardAwareScrollView';
 
 export default BottomSheetKeyboardAwareScrollView as (
   props: BottomSheetScrollViewProps & KeyboardAwareScrollViewProps,

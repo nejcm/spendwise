@@ -46,29 +46,21 @@ export function LoginForm({ onSubmit = () => {} }: LoginFormProps) {
   });
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior="padding"
-      keyboardVerticalOffset={10}
-    >
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding" keyboardVerticalOffset={10}>
       <View className="flex-1 justify-center p-4">
         <View className="items-center justify-center">
-          <Text
-            testID="form-title"
-            className="pb-6 text-center text-4xl font-bold"
-          >
+          <Text testID="form-title" className="pb-6 text-center text-4xl font-bold">
             Sign In
           </Text>
 
           <Text className="mb-6 max-w-xs text-center text-gray-500">
-            Welcome! 👋 This is a demo login screen! Feel free to use any email
-            and password to sign in and try it out.
+            Welcome! 👋 This is a demo login screen! Feel free to use any email and password to sign in and try it out.
           </Text>
         </View>
 
         <form.Field
           name="name"
-          children={field => (
+          children={(field) => (
             <Input
               testID="name"
               label="Name"
@@ -82,7 +74,7 @@ export function LoginForm({ onSubmit = () => {} }: LoginFormProps) {
 
         <form.Field
           name="email"
-          children={field => (
+          children={(field) => (
             <Input
               testID="email-input"
               label="Email"
@@ -96,7 +88,7 @@ export function LoginForm({ onSubmit = () => {} }: LoginFormProps) {
 
         <form.Field
           name="password"
-          children={field => (
+          children={(field) => (
             <Input
               testID="password-input"
               label="Password"
@@ -111,14 +103,9 @@ export function LoginForm({ onSubmit = () => {} }: LoginFormProps) {
         />
 
         <form.Subscribe
-          selector={state => [state.isSubmitting]}
+          selector={(state) => [state.isSubmitting]}
           children={([isSubmitting]) => (
-            <Button
-              testID="login-button"
-              label="Login"
-              onPress={form.handleSubmit}
-              loading={isSubmitting}
-            />
+            <Button testID="login-button" label="Login" onPress={form.handleSubmit} loading={isSubmitting} />
           )}
         />
       </View>

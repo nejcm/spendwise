@@ -41,7 +41,7 @@ Root Files:
 pnpm start              # Start dev server
 pnpm ios/android        # Run on platform
 pnpm lint               # ESLint check
-pnpm type-check         # TypeScript validation
+pnpm lint:ts            # TypeScript validation
 pnpm test               # Run Jest tests
 pnpm lint:ts            # All quality checks
 pnpm format             # Format code

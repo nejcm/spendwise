@@ -98,7 +98,10 @@
     "tailwind-variants": "^3.2.2",
     "uniwind": "^1.5.0",
     "zod": "^4.3.6",
-    "zustand": "^5.0.11"
+    "zustand": "^5.0.11",
+    "expo-haptics": "~15.0.8",
+    "expo-linear-gradient": "~15.0.8",
+    "react-native-gifted-charts": "^1.4.76"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^7.7.0",

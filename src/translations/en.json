@@ -1,9 +1,37 @@
 {
+  "accounts": {
+    "add": "Add Account",
+    "color": "Color",
+    "edit": "Edit Account",
+    "from_account": "From Account",
+    "name": "Account Name",
+    "name_placeholder": "e.g. Main Checking",
+    "no_accounts": "No accounts yet",
+    "opening_balance": "Opening Balance",
+    "to_account": "To Account",
+    "total_balance": "Total Balance",
+    "transfer": "Transfer",
+    "transfer_note": "Transfer note",
+    "type": "Account Type"
+  },
   "budgets": {
+    "budget_name": "Budget Name",
+    "budgeted": "budgeted",
+    "categories": "Category Budgets",
+    "category_budgets": "Category Budgets",
+    "create": "Create Budget",
+    "delete_confirm": "Are you sure you want to delete this budget?",
+    "detail": "Budget Detail",
+    "left": "left",
     "left_to_spend": "Left to spend",
+    "name_placeholder": "e.g. Monthly Budget",
     "no_budgets": "No budgets yet",
+    "over": "over",
     "over_budget": "Over budget",
-    "title": "Budgets"
+    "period": "Period",
+    "spent": "spent",
+    "title": "Budgets",
+    "total_amount": "Total Budget Amount"
   },
   "common": {
     "back": "Back",
@@ -24,6 +52,11 @@
     "title": "Home",
     "total_balance": "Total Balance"
   },
+  "insights": {
+    "monthly_trend": "Monthly Trend",
+    "spending_by_category": "Spending by Category",
+    "title": "Insights"
+  },
   "onboarding": {
     "account_name": "Account name",
     "account_type": "Account type",
@@ -40,15 +73,23 @@
   },
   "settings": {
     "about": "About",
+    "accounts": "Accounts",
     "app_name": "App Name",
     "arabic": "Arabic",
+    "categories": "Categories",
+    "category_name": "Category Name",
+    "default": "Default",
     "english": "English",
+    "expense_categories": "Expense Categories",
+    "finance": "Finance",
     "generale": "General",
+    "income_categories": "Income Categories",
     "language": "Language",
     "links": "Links",
     "more": "More",
     "privacy": "Privacy Policy",
     "share": "Share",
+    "subscriptions": "Recurring Rules",
     "support": "Support",
     "support_us": "Support Us",
     "terms": "Terms of Service",
@@ -59,11 +100,22 @@
       "title": "Theme"
     },
     "title": "Settings",
+    "transfer": "Transfer",
     "version": "Version"
+  },
+  "subscriptions": {
+    "create": "New Recurring Rule",
+    "frequency": "Frequency",
+    "no_rules": "No recurring rules yet",
+    "remove": "Remove",
+    "remove_confirm": "Remove recurring rule",
+    "this_rule": "this rule",
+    "title": "Recurring Rules"
   },
   "transactions": {
     "account": "Account",
     "add": "Add Transaction",
+    "all": "All",
     "amount": "Amount",
     "category": "Category",
     "date": "Date",
@@ -72,6 +124,7 @@
     "no_transactions": "No transactions yet",
     "note": "Note",
     "payee": "Payee",
+    "search": "Search transactions...",
     "title": "Transactions",
     "transfer": "Transfer"
   }

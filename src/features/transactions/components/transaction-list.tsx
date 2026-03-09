@@ -2,9 +2,9 @@ import type { DateGroup, TransactionWithCategory } from '../types';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
-import { View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { EmptyList, Text } from '@/components/ui';
 
 import { formatDate } from '@/lib/format';
@@ -13,10 +13,18 @@ import { TransactionCard } from './transaction-card';
 type Props = {
   transactions: TransactionWithCategory[];
   isLoading: boolean;
+  onRefresh?: () => void;
 };
 
-export function TransactionList({ transactions, isLoading }: Props) {
+export function TransactionList({ transactions, isLoading, onRefresh }: Props) {
   const router = useRouter();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await onRefresh?.();
+    setRefreshing(false);
+  };
 
   const sections = useMemo(() => groupByDate(transactions), [transactions]);
 
@@ -56,6 +64,11 @@ export function TransactionList({ transactions, isLoading }: Props) {
       renderItem={renderItem}
       getItemType={(item) => (typeof item === 'string' ? 'header' : 'row')}
       ListEmptyComponent={<EmptyList isLoading={isLoading} />}
+      refreshControl={
+        onRefresh
+          ? <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          : undefined
+      }
     />
   );
 }

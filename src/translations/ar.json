@@ -1,9 +1,37 @@
 {
+  "accounts": {
+    "add": "إضافة حساب",
+    "color": "اللون",
+    "edit": "تعديل الحساب",
+    "from_account": "من حساب",
+    "name": "اسم الحساب",
+    "name_placeholder": "مثل: الحساب الجاري",
+    "no_accounts": "لا توجد حسابات بعد",
+    "opening_balance": "الرصيد الافتتاحي",
+    "to_account": "إلى حساب",
+    "total_balance": "الرصيد الإجمالي",
+    "transfer": "تحويل",
+    "transfer_note": "ملاحظة التحويل",
+    "type": "نوع الحساب"
+  },
   "budgets": {
+    "budget_name": "اسم الميزانية",
+    "budgeted": "مخصص",
+    "categories": "ميزانيات الفئات",
+    "category_budgets": "ميزانيات الفئات",
+    "create": "إنشاء ميزانية",
+    "delete_confirm": "هل أنت متأكد من حذف هذه الميزانية؟",
+    "detail": "تفاصيل الميزانية",
+    "left": "متبقي",
     "left_to_spend": "المتبقي للإنفاق",
+    "name_placeholder": "مثل: الميزانية الشهرية",
     "no_budgets": "لا توجد ميزانيات بعد",
+    "over": "تجاوز",
     "over_budget": "تجاوز الميزانية",
-    "title": "الميزانيات"
+    "period": "الفترة",
+    "spent": "مصروف",
+    "title": "الميزانيات",
+    "total_amount": "إجمالي الميزانية"
   },
   "common": {
     "back": "رجوع",
@@ -24,6 +52,11 @@
     "title": "الرئيسية",
     "total_balance": "الرصيد الإجمالي"
   },
+  "insights": {
+    "monthly_trend": "الاتجاه الشهري",
+    "spending_by_category": "الإنفاق حسب الفئة",
+    "title": "الرؤى"
+  },
   "onboarding": {
     "account_name": "اسم الحساب",
     "account_type": "نوع الحساب",
@@ -40,15 +73,23 @@
   },
   "settings": {
     "about": "حول التطبيق",
+    "accounts": "الحسابات",
     "app_name": "اسم التطبيق",
     "arabic": "عربي",
+    "categories": "الفئات",
+    "category_name": "اسم الفئة",
+    "default": "افتراضي",
     "english": "إنجليزي",
+    "expense_categories": "فئات المصروفات",
+    "finance": "المالية",
     "generale": "عام",
+    "income_categories": "فئات الدخل",
     "language": "لغة",
     "links": "الروابط",
     "more": "أكثر",
     "privacy": "سياسة الخصوصية",
     "share": "شارك",
+    "subscriptions": "القواعد المتكررة",
     "support": "الدعم",
     "support_us": "ادعمنا",
     "terms": "شروط الخدمة",
@@ -59,11 +100,22 @@
       "title": "سمة"
     },
     "title": "إعدادات",
+    "transfer": "تحويل",
     "version": "إصدار"
+  },
+  "subscriptions": {
+    "create": "قاعدة متكررة جديدة",
+    "frequency": "التكرار",
+    "no_rules": "لا توجد قواعد متكررة بعد",
+    "remove": "حذف",
+    "remove_confirm": "حذف القاعدة المتكررة",
+    "this_rule": "هذه القاعدة",
+    "title": "القواعد المتكررة"
   },
   "transactions": {
     "account": "الحساب",
     "add": "إضافة معاملة",
+    "all": "الكل",
     "amount": "المبلغ",
     "category": "الفئة",
     "date": "التاريخ",
@@ -72,6 +124,7 @@
     "no_transactions": "لا توجد معاملات بعد",
     "note": "ملاحظة",
     "payee": "المستفيد",
+    "search": "بحث في المعاملات...",
     "title": "المعاملات",
     "transfer": "تحويل"
   }

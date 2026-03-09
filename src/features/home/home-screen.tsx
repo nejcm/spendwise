@@ -7,6 +7,8 @@ import { useMemo, useRef } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
+import { useCategorySpend } from '@/features/insights/api';
+import { SpendingByCategory } from '@/features/insights/components/spending-by-category';
 import { useMonthSummary, useRecentTransactions, useTotalBalance } from '@/features/transactions/api';
 import { QuickAddSheet } from '@/features/transactions/components/quick-add-sheet';
 import { TransactionCard } from '@/features/transactions/components/transaction-card';
@@ -25,6 +27,7 @@ export function HomeScreen() {
   const { data: totalBalance = 0 } = useTotalBalance();
   const { data: monthSummary } = useMonthSummary(currentMonth);
   const { data: recentTransactions = [] } = useRecentTransactions(5);
+  const { data: categorySpend = [] } = useCategorySpend(currentMonth);
 
   return (
     <View className="flex-1">
@@ -49,6 +52,21 @@ export function HomeScreen() {
                 <Text className="mt-1 text-xl font-bold text-danger-500">
                   {formatCurrency(monthSummary.expense, currency)}
                 </Text>
+              </View>
+            </View>
+          )}
+
+          {/* Insights preview */}
+          {categorySpend.length > 0 && (
+            <View className="mt-6">
+              <View className="flex-row items-center justify-between">
+                <Text className="text-lg font-semibold">{translate('insights.title')}</Text>
+                <Pressable onPress={() => router.push('/insights' as any)}>
+                  <Text className="text-sm font-medium text-primary-400">{translate('home.see_all')}</Text>
+                </Pressable>
+              </View>
+              <View className="mt-2 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
+                <SpendingByCategory data={categorySpend.slice(0, 5)} />
               </View>
             </View>
           )}

@@ -1,5 +1,6 @@
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import type { SQLiteDatabase } from 'expo-sqlite';
 
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -9,13 +10,20 @@ import { StyleSheet } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
+
 import { useThemeConfig } from '@/components/ui/use-theme-config';
 
+import { processRecurringRules } from '@/features/subscriptions/api';
 import { APIProvider } from '@/lib/api';
 import { loadSelectedTheme } from '@/lib/hooks/use-selected-theme';
 import { migrateDbIfNeeded } from '@/lib/sqlite';
 // Import  global CSS file
 import '../global.css';
+
+async function initDb(db: SQLiteDatabase) {
+  await migrateDbIfNeeded(db);
+  await processRecurringRules(db);
+}
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -54,7 +62,7 @@ function Providers({ children }: { children: React.ReactNode }) {
     >
       <KeyboardProvider>
         <ThemeProvider value={theme}>
-          <SQLiteProvider databaseName="spendwise.db" onInit={migrateDbIfNeeded}>
+          <SQLiteProvider databaseName="spendwise.db" onInit={initDb}>
             <APIProvider>
               <BottomSheetModalProvider>
                 {children}

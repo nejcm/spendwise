@@ -1,20 +1,12 @@
 {
   "View": {
     "prefix": "v",
-    "body": [
-      "<View className=\"flex-1 items-center justify-center\">",
-      "  $1",
-      "</View>",
-    ],
+    "body": ["<View className=\"flex-1 items-center justify-center\">", "  $1", "</View>"],
     "description": "A Simple View ",
   },
   "Text": {
     "prefix": "t",
-    "body": [
-      "<Text variant=\"body\" className=\"text-center\">",
-      "  $1",
-      "</Text>",
-    ],
+    "body": ["<Text variant=\"body\" className=\"text-center\">", "  $1", "</Text>"],
     "description": "A Simple Text",
   },
   "export *": {

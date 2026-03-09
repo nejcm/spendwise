@@ -29,24 +29,12 @@ export function ThemeItem() {
     [],
   );
 
-  const theme = React.useMemo(
-    () => themes.find(t => t.value === selectedTheme),
-    [selectedTheme, themes],
-  );
+  const theme = React.useMemo(() => themes.find((t) => t.value === selectedTheme), [selectedTheme, themes]);
 
   return (
     <>
-      <SettingsItem
-        text="settings.theme.title"
-        value={theme?.label}
-        onPress={modal.present}
-      />
-      <Options
-        ref={modal.ref}
-        options={themes}
-        onSelect={onSelect}
-        value={theme?.value}
-      />
+      <SettingsItem text="settings.theme.title" value={theme?.label} onPress={modal.present} />
+      <Options ref={modal.ref} options={themes} onSelect={onSelect} value={theme?.value} />
     </>
   );
 }

@@ -1,56 +1,56 @@
-import { Link, Redirect, SplashScreen, Tabs } from 'expo-router';
+import { Redirect, SplashScreen, Tabs } from 'expo-router';
 import * as React from 'react';
 import { useCallback, useEffect } from 'react';
 
-import { Pressable, Text } from '@/components/ui';
 import {
-  Feed as FeedIcon,
+  PieChart as BudgetsIcon,
+  Home as HomeIcon,
   Settings as SettingsIcon,
-  Style as StyleIcon,
+  Receipt as TransactionsIcon,
 } from '@/components/ui/icons';
-import { useAuthStore as useAuth } from '@/features/auth/use-auth-store';
 import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
 
 export default function TabLayout() {
-  const status = useAuth.use.status();
   const [isFirstTime] = useIsFirstTime();
   const hideSplash = useCallback(async () => {
     await SplashScreen.hideAsync();
   }, []);
+
   useEffect(() => {
-    if (status !== 'idle') {
-      const timer = setTimeout(() => {
-        hideSplash();
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [hideSplash, status]);
+    const timer = setTimeout(() => {
+      hideSplash();
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [hideSplash]);
 
   if (isFirstTime) {
     return <Redirect href="/onboarding" />;
   }
-  if (status === 'signOut') {
-    return <Redirect href="/login" />;
-  }
+
   return (
     <Tabs>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Feed',
-          tabBarIcon: ({ color }) => <FeedIcon color={color} />,
-          headerRight: () => <CreateNewPostLink />,
-          tabBarButtonTestID: 'feed-tab',
+          title: 'Home',
+          tabBarIcon: ({ color }) => <HomeIcon color={color} />,
+          tabBarButtonTestID: 'home-tab',
         }}
       />
-
       <Tabs.Screen
-        name="style"
+        name="transactions"
         options={{
-          title: 'Style',
-          headerShown: false,
-          tabBarIcon: ({ color }) => <StyleIcon color={color} />,
-          tabBarButtonTestID: 'style-tab',
+          title: 'Transactions',
+          tabBarIcon: ({ color }) => <TransactionsIcon color={color} />,
+          tabBarButtonTestID: 'transactions-tab',
+        }}
+      />
+      <Tabs.Screen
+        name="budgets"
+        options={{
+          title: 'Budgets',
+          tabBarIcon: ({ color }) => <BudgetsIcon color={color} />,
+          tabBarButtonTestID: 'budgets-tab',
         }}
       />
       <Tabs.Screen
@@ -63,15 +63,5 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
-  );
-}
-
-function CreateNewPostLink() {
-  return (
-    <Link href="/feed/add-post" asChild>
-      <Pressable>
-        <Text className="px-3 text-primary-300">Create</Text>
-      </Pressable>
-    </Link>
   );
 }

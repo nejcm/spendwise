@@ -32,23 +32,14 @@ describe('button component ', () => {
   });
   it('should call onClick handler when clicked', async () => {
     const onClick = jest.fn();
-    const { user } = setup(
-      <Button testID="button" label="Click the button" onPress={onClick} />,
-    );
+    const { user } = setup(<Button testID="button" label="Click the button" onPress={onClick} />);
     expect(screen.getByTestId('button')).toBeOnTheScreen();
     await user.press(screen.getByTestId('button'));
     expect(onClick).toHaveBeenCalledTimes(1);
   });
   it('should be disabled when loading', async () => {
     const onClick = jest.fn();
-    const { user } = setup(
-      <Button
-        testID="button"
-        loading={true}
-        label="Click the button"
-        onPress={onClick}
-      />,
-    );
+    const { user } = setup(<Button testID="button" loading={true} label="Click the button" onPress={onClick} />);
     expect(screen.getByTestId('button')).toBeOnTheScreen();
     expect(screen.getByTestId('button-activity-indicator')).toBeOnTheScreen();
     expect(screen.getByTestId('button')).toBeDisabled();
@@ -62,13 +53,7 @@ describe('button component ', () => {
   it('shouldn\'t call onClick when disabled', async () => {
     const onClick = jest.fn();
     const { user } = setup(
-      <Button
-        testID="button"
-        label="Click the button"
-        disabled={true}
-        onPress={onClick}
-        variant="secondary"
-      />,
+      <Button testID="button" label="Click the button" disabled={true} onPress={onClick} variant="secondary" />,
     );
     expect(screen.getByTestId('button')).toBeOnTheScreen();
     await user.press(screen.getByTestId('button'));
@@ -81,30 +66,24 @@ describe('button component ', () => {
     render(<Button testID="button" size="lg" />);
     const button = screen.getByTestId('button');
     // TODO: should be fixed to use haveStyle instead of comparing the class name
-    const expectedStyle
-      = 'font-inter font-semibold text-white dark:text-black text-xl';
-    const receivedStyle
-      = button.props.children[0].props.children.props.className;
+    const expectedStyle = 'font-inter font-semibold text-white dark:text-black text-xl';
+    const receivedStyle = button.props.children[0].props.children.props.className;
     expect(receivedStyle).toContain(expectedStyle);
   });
   it('should apply correct styles for label when variant is secondary', () => {
     render(<Button testID="button" variant="secondary" label="Submit" />);
     const button = screen.getByTestId('button');
 
-    const expectedStyle
-      = 'font-inter font-semibold text-secondary-600 text-base';
-    const receivedStyle
-      = button.props.children[0].props.children.props.className;
+    const expectedStyle = 'font-inter font-semibold text-secondary-600 text-base';
+    const receivedStyle = button.props.children[0].props.children.props.className;
     expect(receivedStyle).toContain(expectedStyle);
   });
   it('should apply correct styles for label when is disabled', () => {
     render(<Button testID="button" label="Submit" disabled />);
     const button = screen.getByTestId('button');
 
-    const expectedStyle
-      = 'font-inter font-semibold text-base text-neutral-600 dark:text-neutral-600';
-    const receivedStyle
-      = button.props.children[0].props.children.props.className;
+    const expectedStyle = 'font-inter font-semibold text-base text-neutral-600 dark:text-neutral-600';
+    const receivedStyle = button.props.children[0].props.children.props.className;
     expect(receivedStyle).toContain(expectedStyle);
   });
 });

@@ -1,6 +1,42 @@
 {
+  "budgets": {
+    "left_to_spend": "Left to spend",
+    "no_budgets": "No budgets yet",
+    "over_budget": "Over budget",
+    "title": "Budgets"
+  },
+  "common": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "done": "Done",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "next": "Next",
+    "save": "Save"
+  },
+  "home": {
+    "expenses": "Expenses",
+    "income": "Income",
+    "no_transactions": "No transactions yet",
+    "recent_transactions": "Recent Transactions",
+    "see_all": "See All",
+    "title": "Home",
+    "total_balance": "Total Balance"
+  },
   "onboarding": {
-    "message": "Welcome to obytes app site"
+    "account_name": "Account name",
+    "account_type": "Account type",
+    "create_account": "Create your first account",
+    "feature1": "Track your income and expenses",
+    "feature2": "Set budgets and stay on track",
+    "feature3": "Get insights into your spending",
+    "finish_setup": "Finish Setup",
+    "get_started": "Get Started",
+    "opening_balance": "Opening balance",
+    "select_currency": "Select your currency",
+    "subtitle": "Take control of your finances",
+    "title": "Spendwise"
   },
   "settings": {
     "about": "About",
@@ -8,13 +44,10 @@
     "arabic": "Arabic",
     "english": "English",
     "generale": "General",
-    "github": "Github",
     "language": "Language",
     "links": "Links",
-    "logout": "Logout",
     "more": "More",
     "privacy": "Privacy Policy",
-    "rate": "Rate",
     "share": "Share",
     "support": "Support",
     "support_us": "Support Us",
@@ -26,8 +59,20 @@
       "title": "Theme"
     },
     "title": "Settings",
-    "version": "Version",
-    "website": "Website"
+    "version": "Version"
   },
-  "welcome": "Welcome to obytes app site"
+  "transactions": {
+    "account": "Account",
+    "add": "Add Transaction",
+    "amount": "Amount",
+    "category": "Category",
+    "date": "Date",
+    "expense": "Expense",
+    "income": "Income",
+    "no_transactions": "No transactions yet",
+    "note": "Note",
+    "payee": "Payee",
+    "title": "Transactions",
+    "transfer": "Transfer"
+  }
 }

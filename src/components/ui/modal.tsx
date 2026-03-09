@@ -29,10 +29,7 @@
  *
  */
 
-import type {
-  BottomSheetBackdropProps,
-  BottomSheetModalProps,
-} from '@gorhom/bottom-sheet';
+import type { BottomSheetBackdropProps, BottomSheetModalProps } from '@gorhom/bottom-sheet';
 import { BottomSheetModal, useBottomSheet } from '@gorhom/bottom-sheet';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
@@ -63,18 +60,18 @@ export function useModal() {
   return { ref, present, dismiss };
 }
 
-export function Modal({ ref, snapPoints: _snapPoints = ['60%'] as (string | number)[], title, detached = false, ...props }: ModalProps & { ref?: ModalRef }) {
-  const detachedProps = React.useMemo(
-    () => getDetachedProps(detached),
-    [detached],
-  );
+export function Modal({
+  ref,
+  snapPoints: _snapPoints = ['60%'] as (string | number)[],
+  title,
+  detached = false,
+  ...props
+}: ModalProps & { ref?: ModalRef }) {
+  const detachedProps = React.useMemo(() => getDetachedProps(detached), [detached]);
   const modal = useModal();
   const snapPoints = React.useMemo(() => _snapPoints, [_snapPoints]);
 
-  React.useImperativeHandle(
-    ref,
-    () => (modal.ref.current as BottomSheetModal) || null,
-  );
+  React.useImperativeHandle(ref, () => (modal.ref.current as BottomSheetModal) || null);
 
   const renderHandleComponent = React.useCallback(
     () => (
@@ -153,9 +150,7 @@ const ModalHeader = React.memo(({ title, dismiss }: ModalHeaderProps) => {
         <View className="flex-row px-2 py-4">
           <View className="size-6" />
           <View className="flex-1">
-            <Text className="text-center text-[16px] font-bold text-[#26313D] dark:text-white">
-              {title}
-            </Text>
+            <Text className="text-center text-[16px] font-bold text-[#26313D] dark:text-white">{title}</Text>
           </View>
         </View>
       )}
@@ -174,13 +169,7 @@ function CloseButton({ close }: { close: () => void }) {
       accessibilityRole="button"
       accessibilityHint="closes the modal"
     >
-      <Svg
-        className="fill-neutral-300 dark:fill-white"
-        width={24}
-        height={24}
-        fill="none"
-        viewBox="0 0 24 24"
-      >
+      <Svg className="fill-neutral-300 dark:fill-white" width={24} height={24} fill="none" viewBox="0 0 24 24">
         <Path d="M18.707 6.707a1 1 0 0 0-1.414-1.414L12 10.586 6.707 5.293a1 1 0 0 0-1.414 1.414L10.586 12l-5.293 5.293a1 1 0 1 0 1.414 1.414L12 13.414l5.293 5.293a1 1 0 0 0 1.414-1.414L13.414 12l5.293-5.293Z" />
       </Svg>
     </Pressable>

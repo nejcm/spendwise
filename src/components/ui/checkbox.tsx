@@ -1,13 +1,9 @@
+/* eslint-disable react-refresh/only-export-components */
 import type { PressableProps } from 'react-native';
 import { MotiView } from 'moti';
 import * as React from 'react';
 import { useCallback } from 'react';
-import {
-  I18nManager,
-  Pressable,
-
-  View,
-} from 'react-native';
+import { I18nManager, Pressable, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 import colors from '@/components/ui/colors';
@@ -32,14 +28,7 @@ export type IconProps = {
   checked: boolean;
 };
 
-export function Root({
-  checked = false,
-  children,
-  onChange,
-  disabled,
-  className = '',
-  ...props
-}: RootProps) {
+export function Root({ checked = false, children, onChange, disabled, className = '', ...props }: RootProps) {
   const handleChange = useCallback(() => {
     onChange(!checked);
   }, [onChange, checked]);
@@ -47,9 +36,7 @@ export function Root({
   return (
     <Pressable
       onPress={handleChange}
-      className={`flex-row items-center ${className} ${
-        disabled ? 'opacity-50' : ''
-      }`}
+      className={`flex-row items-center ${className} ${disabled ? 'opacity-50' : ''}`}
       accessibilityState={{ checked }}
       disabled={disabled}
       {...props}
@@ -127,15 +114,7 @@ function CheckboxBase({
   return (
     <CheckboxRoot checked={checked} testID={testID} {...props}>
       <CheckboxIcon checked={checked} />
-      {label
-        ? (
-            <Label
-              text={label}
-              testID={testID ? `${testID}-label` : undefined}
-              className="pr-2"
-            />
-          )
-        : null}
+      {label ? <Label text={label} testID={testID ? `${testID}-label` : undefined} className="pr-2" /> : null}
     </CheckboxRoot>
   );
 }
@@ -180,20 +159,11 @@ function RadioRoot({ checked = false, children, ...props }: RootProps) {
   );
 }
 
-function RadioBase({
-  checked = false,
-  testID,
-  label,
-  ...props
-}: RootProps & { label?: string }) {
+function RadioBase({ checked = false, testID, label, ...props }: RootProps & { label?: string }) {
   return (
     <RadioRoot checked={checked} testID={testID} {...props}>
       <RadioIcon checked={checked} />
-      {label
-        ? (
-            <Label text={label} testID={testID ? `${testID}-label` : undefined} />
-          )
-        : null}
+      {label ? <Label text={label} testID={testID ? `${testID}-label` : undefined} /> : null}
     </RadioRoot>
   );
 }
@@ -205,9 +175,7 @@ export const Radio = Object.assign(RadioBase, {
 });
 
 export function SwitchIcon({ checked = false }: IconProps) {
-  const translateX = checked
-    ? THUMB_OFFSET
-    : WIDTH - THUMB_WIDTH - THUMB_OFFSET;
+  const translateX = checked ? THUMB_OFFSET : WIDTH - THUMB_WIDTH - THUMB_OFFSET;
 
   const backgroundColor = checked ? colors.primary[300] : colors.charcoal[400];
 
@@ -247,20 +215,11 @@ function SwitchRoot({ checked = false, children, ...props }: RootProps) {
   );
 }
 
-function SwitchBase({
-  checked = false,
-  testID,
-  label,
-  ...props
-}: RootProps & { label?: string }) {
+function SwitchBase({ checked = false, testID, label, ...props }: RootProps & { label?: string }) {
   return (
     <SwitchRoot checked={checked} testID={testID} {...props}>
       <SwitchIcon checked={checked} />
-      {label
-        ? (
-            <Label text={label} testID={testID ? `${testID}-label` : undefined} />
-          )
-        : null}
+      {label ? <Label text={label} testID={testID ? `${testID}-label` : undefined} /> : null}
     </SwitchRoot>
   );
 }

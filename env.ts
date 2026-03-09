@@ -20,8 +20,9 @@ const envSchema = z.object({
 });
 
 // Config records per environment
-const EXPO_PUBLIC_APP_ENV = (process.env.EXPO_PUBLIC_APP_ENV
-  ?? 'development') as z.infer<typeof envSchema>['EXPO_PUBLIC_APP_ENV'];
+const EXPO_PUBLIC_APP_ENV = (process.env.EXPO_PUBLIC_APP_ENV ?? 'development') as z.infer<
+  typeof envSchema
+>['EXPO_PUBLIC_APP_ENV'];
 
 const BUNDLE_IDS = {
   development: 'com.spendwise.development',
@@ -66,9 +67,11 @@ function getValidatedEnv(env: z.infer<typeof envSchema>) {
 
   if (parsed.success === false) {
     const errorMessage
-      = `❌ Invalid environment variables:${
-        JSON.stringify(parsed.error.flatten().fieldErrors, null, 2)
-      }\n❌ Missing variables in .env file for APP_ENV=${EXPO_PUBLIC_APP_ENV}`
+      = `❌ Invalid environment variables:${JSON.stringify(
+        parsed.error.flatten().fieldErrors,
+        null,
+        2,
+      )}\n❌ Missing variables in .env file for APP_ENV=${EXPO_PUBLIC_APP_ENV}`
       + `\n💡 Tip: If you recently updated the .env file, try restarting with -c flag to clear the cache.`;
 
     if (STRICT_ENV_VALIDATION) {

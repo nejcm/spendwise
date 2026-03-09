@@ -12,19 +12,9 @@ type Props = {
   tx?: TxKeyPath;
 } & TextProps;
 
-export function Text({
-  className = '',
-  style,
-  tx,
-  children,
-  ...props
-}: Props) {
+export function Text({ className = '', style, tx, children, ...props }: Props) {
   const textStyle = React.useMemo(
-    () =>
-      twMerge(
-        'font-inter text-base font-normal text-black dark:text-white',
-        className,
-      ),
+    () => twMerge('font-inter text-base font-normal text-black dark:text-white', className),
     [className],
   );
 

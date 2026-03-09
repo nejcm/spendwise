@@ -91,13 +91,22 @@ type Props = {
   loading?: boolean;
   className?: string;
   textClassName?: string;
-} & ButtonVariants & Omit<PressableProps, 'disabled'>;
+} & ButtonVariants
+& Omit<PressableProps, 'disabled'>;
 
-export function Button({ ref, label: text, loading = false, variant = 'default', disabled = false, size = 'default', className = '', testID, textClassName = '', ...props }: Props & { ref?: React.RefObject<View | null> }) {
-  const styles = React.useMemo(
-    () => button({ variant, disabled, size }),
-    [variant, disabled, size],
-  );
+export function Button({
+  ref,
+  label: text,
+  loading = false,
+  variant = 'default',
+  disabled = false,
+  size = 'default',
+  className = '',
+  testID,
+  textClassName = '',
+  ...props
+}: Props & { ref?: React.RefObject<View | null> }) {
+  const styles = React.useMemo(() => button({ variant, disabled, size }), [variant, disabled, size]);
 
   return (
     <Pressable

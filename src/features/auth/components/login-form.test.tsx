@@ -1,3 +1,4 @@
+/* eslint-disable e18e/prefer-static-regex */
 import type { LoginFormProps } from './login-form';
 
 import * as React from 'react';

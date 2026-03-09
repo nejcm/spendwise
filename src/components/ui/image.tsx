@@ -10,20 +10,8 @@ export type ImgProps = ImageProps & {
 
 const StyledImage = withUniwind(NImage);
 
-export function Image({
-  style,
-  className,
-  placeholder = 'L6PZfSi_.AyE_3t7t7R**0o#DgR4',
-  ...props
-}: ImgProps) {
-  return (
-    <StyledImage
-      className={className}
-      placeholder={placeholder}
-      style={style}
-      {...props}
-    />
-  );
+export function Image({ style, className, placeholder = 'L6PZfSi_.AyE_3t7t7R**0o#DgR4', ...props }: ImgProps) {
+  return <StyledImage className={className} placeholder={placeholder} style={style} {...props} />;
 }
 
 export function preloadImages(sources: string[]) {

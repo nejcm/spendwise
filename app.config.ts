@@ -10,9 +10,11 @@ import Env from './env';
 
 const EXPO_ACCOUNT_OWNER = 'obytes';
 const EAS_PROJECT_ID = 'c3e1075b-6fe7-4686-aa49-35b46a229044';
+const IS_CI = process.env.CI === 'true';
 
 const appIconBadgeConfig: AppIconBadgeConfig = {
-  enabled: Env.EXPO_PUBLIC_APP_ENV !== 'production',
+  // Avoid CI prebuild failures from image processing in badge plugin.
+  enabled: Env.EXPO_PUBLIC_APP_ENV !== 'production' && !IS_CI,
   badges: [
     {
       text: Env.EXPO_PUBLIC_APP_ENV,

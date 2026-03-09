@@ -2,10 +2,7 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { PressableProps } from 'react-native';
 import type { SvgProps } from 'react-native-svg';
-import {
-  BottomSheetFlatList,
-
-} from '@gorhom/bottom-sheet';
+import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { FlashList } from '@shopify/flash-list';
 import * as React from 'react';
 import { Platform, Pressable, View } from 'react-native';
@@ -68,7 +65,13 @@ function keyExtractor(item: OptionType) {
   return `select-item-${item.value}`;
 }
 
-export function Options({ ref, options, onSelect, value, testID }: OptionsProps & { ref?: React.RefObject<BottomSheetModal | null> }) {
+export function Options({
+  ref,
+  options,
+  onSelect,
+  value,
+  testID,
+}: OptionsProps & { ref?: React.RefObject<BottomSheetModal | null> }) {
   const height = options.length * 70 + 100;
   const snapPoints = React.useMemo(() => [height], [height]);
   const { theme } = useUniwind();
@@ -140,16 +143,7 @@ export type SelectProps = {
 };
 
 export function Select(props: SelectProps) {
-  const {
-    label,
-    value,
-    error,
-    options = [],
-    placeholder = 'select...',
-    disabled = false,
-    onSelect,
-    testID,
-  } = props;
+  const { label, value, error, options = [], placeholder = 'select...', disabled = false, onSelect, testID } = props;
   const modal = useModal();
 
   const onSelectOption = React.useCallback(
@@ -170,10 +164,7 @@ export function Select(props: SelectProps) {
   );
 
   const textValue = React.useMemo(
-    () =>
-      value !== undefined
-        ? (options?.filter(t => t.value === value)?.[0]?.label ?? placeholder)
-        : placeholder,
+    () => (value !== undefined ? (options?.filter((t) => t.value === value)?.[0]?.label ?? placeholder) : placeholder),
     [value, options, placeholder],
   );
 
@@ -181,10 +172,7 @@ export function Select(props: SelectProps) {
     <>
       <View className={styles.container()}>
         {label && (
-          <Text
-            testID={testID ? `${testID}-label` : undefined}
-            className={styles.label()}
-          >
+          <Text testID={testID ? `${testID}-label` : undefined} className={styles.label()}>
             {label}
           </Text>
         )}
@@ -200,40 +188,20 @@ export function Select(props: SelectProps) {
           <CaretDown />
         </Pressable>
         {error && (
-          <Text
-            testID={`${testID}-error`}
-            className="text-sm text-danger-300 dark:text-danger-600"
-          >
+          <Text testID={`${testID}-error`} className="text-sm text-danger-300 dark:text-danger-600">
             {error}
           </Text>
         )}
       </View>
-      <Options
-        testID={testID}
-        ref={modal.ref}
-        options={options}
-        onSelect={onSelectOption}
-      />
+      <Options testID={testID} ref={modal.ref} options={options} onSelect={onSelectOption} />
     </>
   );
 }
 
 function Check({ ...props }: SvgProps) {
   return (
-    <Svg
-      width={25}
-      height={24}
-      fill="none"
-      viewBox="0 0 25 24"
-      {...props}
-      className="stroke-black dark:stroke-white"
-    >
-      <Path
-        d="m20.256 6.75-10.5 10.5L4.506 12"
-        strokeWidth={2.438}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+    <Svg width={25} height={24} fill="none" viewBox="0 0 25 24" {...props} className="stroke-black dark:stroke-white">
+      <Path d="m20.256 6.75-10.5 10.5L4.506 12" strokeWidth={2.438} strokeLinecap="round" strokeLinejoin="round" />
     </Svg>
   );
 }

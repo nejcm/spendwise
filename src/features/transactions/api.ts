@@ -9,10 +9,10 @@ import type {
   TransactionWithCategory,
 } from './types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-
+import * as Haptics from 'expo-haptics';
 import { useSQLiteContext } from 'expo-sqlite';
-import { amountToCents } from '@/lib/format';
 
+import { amountToCents } from '@/lib/format';
 import { generateId } from '@/lib/sqlite';
 
 // ─── Query Keys ───
@@ -110,10 +110,12 @@ export function useCreateTransaction() {
   return useMutation({
     mutationFn: (data: TransactionFormData) => createTransaction(db, data),
     onSuccess: () => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       queryClient.invalidateQueries({ queryKey: keys.transactions });
       queryClient.invalidateQueries({ queryKey: keys.accountsWithBalance });
       queryClient.invalidateQueries({ queryKey: keys.totalBalance });
       queryClient.invalidateQueries({ queryKey: ['month-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['insights'] });
     },
   });
 }
@@ -129,6 +131,7 @@ export function useUpdateTransaction() {
       queryClient.invalidateQueries({ queryKey: keys.accountsWithBalance });
       queryClient.invalidateQueries({ queryKey: keys.totalBalance });
       queryClient.invalidateQueries({ queryKey: ['month-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['insights'] });
     },
   });
 }
@@ -144,6 +147,7 @@ export function useDeleteTransaction() {
       queryClient.invalidateQueries({ queryKey: keys.accountsWithBalance });
       queryClient.invalidateQueries({ queryKey: keys.totalBalance });
       queryClient.invalidateQueries({ queryKey: ['month-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['insights'] });
     },
   });
 }

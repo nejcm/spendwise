@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 4;
 
 /**
  * Runs on first open. Sets WAL mode and runs schema migrations via PRAGMA user_version.
@@ -77,9 +77,51 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
     await seedDefaultCategories(db);
   }
 
+  if (currentDbVersion < 3) {
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS budgets (
+        id TEXT PRIMARY KEY NOT NULL,
+        name TEXT NOT NULL,
+        period TEXT NOT NULL CHECK(period IN ('monthly','weekly','yearly')),
+        amount INTEGER NOT NULL,
+        start_date TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+
+      CREATE TABLE IF NOT EXISTS budget_lines (
+        id TEXT PRIMARY KEY NOT NULL,
+        budget_id TEXT NOT NULL REFERENCES budgets(id) ON DELETE CASCADE,
+        category_id TEXT NOT NULL REFERENCES categories(id),
+        amount INTEGER NOT NULL,
+        UNIQUE(budget_id, category_id)
+      );
+    `);
+  }
+
+  if (currentDbVersion < 4) {
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS recurring_rules (
+        id TEXT PRIMARY KEY NOT NULL,
+        account_id TEXT NOT NULL REFERENCES accounts(id),
+        category_id TEXT REFERENCES categories(id),
+        type TEXT NOT NULL CHECK(type IN ('income','expense')),
+        amount INTEGER NOT NULL,
+        note TEXT,
+        payee TEXT,
+        frequency TEXT NOT NULL CHECK(frequency IN ('daily','weekly','biweekly','monthly','yearly')),
+        start_date TEXT NOT NULL,
+        end_date TEXT,
+        next_due_date TEXT NOT NULL,
+        is_active INTEGER NOT NULL DEFAULT 1,
+        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+
+      ALTER TABLE transactions ADD COLUMN recurring_rule_id TEXT REFERENCES recurring_rules(id);
+    `);
+  }
+
   // Future migrations:
-  // if (currentDbVersion < 3) { ... budgets + budget_lines ... }
-  // if (currentDbVersion < 4) { ... recurring_rules ... }
   // if (currentDbVersion < 5) { ... goals ... }
 
   await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);

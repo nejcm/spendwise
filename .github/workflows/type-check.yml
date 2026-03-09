@@ -2,7 +2,7 @@
 # Source file: https://github.com/obytes/react-native-template-obytes/blob/master/.github/workflows/type-check.yml
 
 # ✍️ Description:
-# This action is used to run the type-check on the project.
+# This action is used to run the lint:ts on the project.
 # Runs on pull requests and pushes to  the main/master branches
 # Based on the event type:
 #   - If it's a pull request, it will run type checking, then add the check to the PR as well as annotate the code with the errors using reviewdog.
@@ -43,12 +43,12 @@ jobs:
         # We only need to add the reviewdog step if it's a pull request
         if: github.event_name == 'pull_request'
         run: |
-          pnpm type-check | reviewdog -name="tsc" -efm="%f(%l,%c): error TS%n: %m" -reporter="github-pr-review" -filter-mode="nofilter" -fail-on-error -tee
+          pnpm lint:ts | reviewdog -name="tsc" -efm="%f(%l,%c): error TS%n: %m" -reporter="github-pr-review" -filter-mode="nofilter" -fail-on-error -tee
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name:
           🏃‍♂️ Run TypeScript Commit
-          # If it's not a Pull Request then we just need to run the type-check
+          # If it's not a Pull Request then we just need to run the lint:ts
         if: github.event_name != 'pull_request'
-        run: pnpm type-check
+        run: pnpm lint:ts

@@ -1,11 +1,12 @@
 import type TranslateOptions from 'i18next';
-import type { Language, resources } from './resources';
+import type { Language } from '../../features/languages';
+import type { resources } from './resources';
 import type { RecursiveKeyOf } from './types';
 import { memoize } from 'es-toolkit/compat';
 import i18n from 'i18next';
 import { useCallback } from 'react';
-import { I18nManager, NativeModules, Platform } from 'react-native';
 
+import { I18nManager, NativeModules, Platform } from 'react-native';
 import { useMMKVString } from 'react-native-mmkv';
 import RNRestart from 'react-native-restart';
 import { storage } from '../storage';

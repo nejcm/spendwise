@@ -1,9 +1,11 @@
+import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { useRouter } from 'expo-router';
+import { usePathname, useRouter } from 'expo-router';
 import * as React from 'react';
-import { Platform, Pressable, View } from 'react-native';
 
+import { Platform, Pressable, View } from 'react-native';
 import { BellIcon, Home, PlusIcon, Receipt, UserIcon } from '@/components/ui/icons';
+import { QuickAddSheet } from '../../features/transactions/components/quick-add-sheet';
 
 type TabConfig = {
   name: string;
@@ -35,81 +37,78 @@ const TABS: TabConfig[] = [
 
 export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   const router = useRouter();
+  const pathname = usePathname() ?? '';
+  const addSheetRef = React.useRef<BottomSheetModal>(null);
+  console.log(pathname);
 
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        backgroundColor: '#ffffff',
-        paddingBottom: Platform.OS === 'ios' ? 28 : 12,
-        paddingTop: 12,
-        paddingHorizontal: 8,
-        borderTopWidth: 0,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-        elevation: 8,
-      }}
-    >
-      {TABS.map((tab) => {
-        const isAddButton = tab.name === '__add__';
+    <>
+      <View
+        className="flex-row border-t border-neutral-200 bg-white px-2 pt-2"
+        style={{
+          paddingBottom: Platform.OS === 'ios' ? 28 : 12,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.06,
+          shadowRadius: 12,
+          elevation: 8,
+        }}
+      >
+        {TABS.map((tab) => {
+          const isAddButton = tab.name === '__add__';
 
-        if (isAddButton) {
+          if (isAddButton) {
+            return (
+              <View key="add" className="flex-1 items-center justify-center">
+                <Pressable
+                  onPress={() => {
+                    if (pathname.startsWith('/budgets')) {
+                      router.push('/budgets/create');
+                      return;
+                    }
+                    addSheetRef.current?.present();
+                  }}
+                  className="size-12 items-center justify-center rounded-full bg-black"
+                  style={({ pressed }) => ({
+                    opacity: pressed ? 0.85 : 1,
+                  })}
+                >
+                  <PlusIcon />
+                </Pressable>
+              </View>
+            );
+          }
+
+          const routeIndex = state.routes.findIndex((r) => r.name === tab.name);
+          const isActive = state.index === routeIndex;
+          const iconColor = isActive ? '#000000' : '#A3A3A3';
+
           return (
-            <View key="add" style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-              <Pressable
-                onPress={() => router.push('/transactions/create')}
-                style={({ pressed }) => ({
-                  width: 56,
-                  height: 56,
-                  borderRadius: 28,
-                  backgroundColor: '#000000',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginTop: -20,
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 8,
-                  elevation: 8,
-                  opacity: pressed ? 0.85 : 1,
-                })}
-              >
-                <PlusIcon />
-              </Pressable>
-            </View>
-          );
-        }
-
-        const routeIndex = state.routes.findIndex((r) => r.name === tab.name);
-        const isActive = state.index === routeIndex;
-        const iconColor = isActive ? '#000000' : '#A3A3A3';
-
-        return (
-          <Pressable
-            key={tab.name}
-            onPress={() => {
-              if (routeIndex >= 0) {
-                const event = navigation.emit({
-                  type: 'tabPress',
-                  target: state.routes[routeIndex].key,
-                  canPreventDefault: true,
-                });
-                if (!event.defaultPrevented) {
-                  navigation.navigate(state.routes[routeIndex].name);
+            <Pressable
+              key={tab.name}
+              onPress={() => {
+                if (routeIndex >= 0) {
+                  const event = navigation.emit({
+                    type: 'tabPress',
+                    target: state.routes[routeIndex].key,
+                    canPreventDefault: true,
+                  });
+                  if (!event.defaultPrevented) {
+                    navigation.navigate(state.routes[routeIndex].name);
+                  }
                 }
-              }
-            }}
-            style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 6 }}
-          >
-            {tab.icon(iconColor)}
-            {isActive && (
-              <View className="size-1 rounded-full bg-black" />
-            )}
-          </Pressable>
-        );
-      })}
-    </View>
+              }}
+              className="flex-1 items-center justify-center gap-[5px]"
+            >
+              {tab.icon(iconColor)}
+              {isActive && (
+                <View className="size-1 rounded-full bg-black" />
+              )}
+            </Pressable>
+          );
+        })}
+      </View>
+      <QuickAddSheet sheetRef={addSheetRef} />
+    </>
   );
 }

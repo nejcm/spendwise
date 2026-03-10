@@ -1,8 +1,7 @@
-import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 
 import { Pressable, View } from 'react-native';
 
@@ -10,7 +9,6 @@ import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
 import { useCategorySpend } from '@/features/insights/api';
 import { SpendingByCategory } from '@/features/insights/components/spending-by-category';
 import { useMonthSummary, useRecentTransactions, useTotalBalance } from '@/features/transactions/api';
-import { QuickAddSheet } from '@/features/transactions/components/quick-add-sheet';
 import { TransactionCard } from '@/features/transactions/components/transaction-card';
 
 import { formatCurrency } from '@/lib/format';
@@ -20,7 +18,6 @@ import { translate } from '@/lib/i18n';
 export function HomeScreen() {
   const router = useRouter();
   const currency = getCurrency();
-  const sheetRef = useRef<BottomSheetModal>(null);
 
   const currentMonth = useMemo(() => format(new Date(), 'yyyy-MM'), []);
 
@@ -100,16 +97,6 @@ export function HomeScreen() {
           </View>
         </View>
       </ScrollView>
-
-      {/* FAB */}
-      <Pressable
-        className="absolute right-6 bottom-6 size-14 items-center justify-center rounded-full bg-primary-400 shadow-lg"
-        onPress={() => sheetRef.current?.present()}
-      >
-        <Text className="text-2xl font-bold text-white">+</Text>
-      </Pressable>
-
-      <QuickAddSheet sheetRef={sheetRef} />
     </View>
   );
 }

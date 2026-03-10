@@ -59,7 +59,7 @@ export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
           return (
             <View key="add" style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
               <Pressable
-                onPress={() => router.push('/transactions/create' as never)}
+                onPress={() => router.push('/transactions/create')}
                 style={({ pressed }) => ({
                   width: 56,
                   height: 56,
@@ -105,16 +105,8 @@ export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
           >
             {tab.icon(iconColor)}
             {isActive && (
-              <View
-                style={{
-                  width: 4,
-                  height: 4,
-                  borderRadius: 2,
-                  backgroundColor: '#000000',
-                }}
-              />
+              <View className="size-1 rounded-full bg-black" />
             )}
-            {!isActive && <View style={{ width: 4, height: 4 }} />}
           </Pressable>
         );
       })}

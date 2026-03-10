@@ -75,13 +75,6 @@ export function BudgetOverviewScreen() {
           </View>
         )}
       </ScrollView>
-
-      <Pressable
-        className="absolute right-6 bottom-6 size-14 items-center justify-center rounded-full bg-primary-400 shadow-lg"
-        onPress={() => router.push('/budgets/create' as any)}
-      >
-        <Text className="text-2xl font-bold text-white">+</Text>
-      </Pressable>
     </View>
   );
 }

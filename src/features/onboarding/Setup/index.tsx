@@ -18,6 +18,8 @@ const ACCOUNT_TYPES = [
   { label: 'Other', value: 'other' },
 ];
 
+const CURRENCY_OPTIONS = CURRENCIES.map((currency) => ({ ...currency, label: currency.value, subtext: currency.name }));
+
 export type SetupStepProps = {
   onBack: () => void;
   onNext: () => void;
@@ -60,7 +62,7 @@ export default function SetupStep({ onBack, onNext }: SetupStepProps) {
   return (
     <>
       <View className="flex-1">
-        <View className="bg-subtle px-6 py-8">
+        <View className="bg-subtle p-6">
           <View className="flex-row items-center justify-center gap-3">
             <Text className="text-2xl font-bold tracking-tight text-black">{translate('onboarding.create_account')}</Text>
           </View>
@@ -69,7 +71,7 @@ export default function SetupStep({ onBack, onNext }: SetupStepProps) {
           <IntroNav current={1} />
           <Select
             label={translate('onboarding.select_currency')}
-            options={CURRENCIES}
+            options={CURRENCY_OPTIONS}
             value={selectedCurrency}
             onSelect={setSelectedCurrency}
             containerClassName="mb-4"

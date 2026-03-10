@@ -1,17 +1,19 @@
 /* eslint-disable better-tailwindcss/no-unknown-classes */
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
+import type { ImageSource } from 'expo-image';
 import type { PressableProps } from 'react-native';
 import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { FlashList } from '@shopify/flash-list';
 import { Check } from 'lucide-react-native';
 import * as React from 'react';
 import { Platform, Pressable, View } from 'react-native';
+
 import { cn, tv } from 'tailwind-variants';
-
 import { useUniwind } from 'uniwind';
-import colors from '@/components/ui/colors';
 
+import colors from '@/components/ui/colors';
 import { CaretDown } from '@/components/ui/icons';
+import { Image } from './image';
 import { Modal, useModal } from './modal';
 import { Text } from './text';
 
@@ -74,9 +76,37 @@ const selectTv = tv({
 
 const List = Platform.OS === 'web' ? FlashList : BottomSheetFlatList;
 
-export type OptionType = { label: string; value: string | number };
+export type OptionType = { label: string; subtext?: string; value: string | number; image?: string | ImageSource };
 
 type SelectSize = 'sm' | 'default' | 'lg' | 'xl';
+
+const Option = React.memo(
+  ({
+    label,
+    selected = false,
+    checkColor,
+    image,
+    subtext,
+    ...props
+  }: PressableProps & Omit<OptionType, 'value'> & {
+    selected?: boolean;
+    checkColor: string;
+  }) => {
+    return (
+      <Pressable
+        className="flex-row items-center border-b border-neutral-300 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-800"
+        {...props}
+      >
+        {image && <Image source={image} className="mr-3 size-8 rounded-full" />}
+        <View className="flex-1">
+          <Text className="leading-tight dark:text-neutral-100">{label}</Text>
+          {subtext && <Text className="text-sm/snug text-neutral-500 dark:text-neutral-400">{subtext}</Text>}
+        </View>
+        {selected && <Check color={checkColor} size={18} strokeWidth={2.5} />}
+      </Pressable>
+    );
+  },
+);
 
 type OptionsProps = {
   options: OptionType[];
@@ -96,8 +126,6 @@ export function Options({
   value,
   testID,
 }: OptionsProps & { ref?: React.RefObject<BottomSheetModal | null> }) {
-  const height = options.length * 70 + 100;
-  const snapPoints = React.useMemo(() => [height], [height]);
   const { theme } = useUniwind();
   const isDark = theme === 'dark';
   const checkColor = isDark ? colors.white : colors.black;
@@ -109,6 +137,8 @@ export function Options({
         label={item.label}
         selected={value === item.value}
         checkColor={checkColor}
+        image={item.image}
+        subtext={item.subtext}
         onPress={() => onSelect(item)}
         testID={testID ? `${testID}-item-${item.value}` : undefined}
       />
@@ -120,7 +150,7 @@ export function Options({
     <Modal
       ref={ref}
       index={0}
-      snapPoints={snapPoints}
+      enableDynamicSizing
       backgroundStyle={{
         backgroundColor: isDark ? colors.neutral[800] : colors.white,
       }}
@@ -135,29 +165,6 @@ export function Options({
     </Modal>
   );
 }
-
-const Option = React.memo(
-  ({
-    label,
-    selected = false,
-    checkColor,
-    ...props
-  }: PressableProps & {
-    selected?: boolean;
-    label: string;
-    checkColor: string;
-  }) => {
-    return (
-      <Pressable
-        className="flex-row items-center border-b border-neutral-300 bg-white px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800"
-        {...props}
-      >
-        <Text className="flex-1 dark:text-neutral-100">{label}</Text>
-        {selected && <Check color={checkColor} size={18} strokeWidth={2.5} />}
-      </Pressable>
-    );
-  },
-);
 
 export type SelectProps = {
   value?: string | number;
@@ -178,7 +185,7 @@ export function Select(props: SelectProps) {
     value,
     error,
     options = [],
-    placeholder = 'select...',
+    placeholder = 'Select...',
     disabled = false,
     onSelect,
     testID,
@@ -187,10 +194,12 @@ export function Select(props: SelectProps) {
   } = props;
   const modal = useModal();
   const { theme } = useUniwind();
+  const [selectedOption, setSelectedOption] = React.useState<OptionType | null>(() => options.find((t) => t.value === value) ?? null);
   const iconColor = theme === 'dark' ? colors.white : colors.black;
 
   const onSelectOption = React.useCallback(
     (option: OptionType) => {
+      setSelectedOption(option);
       onSelect?.(option.value);
       modal.dismiss();
     },
@@ -207,11 +216,6 @@ export function Select(props: SelectProps) {
     [error, disabled, size],
   );
 
-  const textValue = React.useMemo(
-    () => (value !== undefined ? (options?.filter((t) => t.value === value)?.[0]?.label ?? placeholder) : placeholder),
-    [value, options, placeholder],
-  );
-
   return (
     <>
       <View className={cn(styles.container(), containerClassName)}>
@@ -226,8 +230,11 @@ export function Select(props: SelectProps) {
           onPress={modal.present}
           testID={testID ? `${testID}-trigger` : undefined}
         >
-          <View className="flex-1">
-            <Text className={styles.inputValue()}>{textValue}</Text>
+          <View className="flex-1 flex-row items-center gap-2">
+            {selectedOption?.image && <Image source={selectedOption.image} className="size-6 rounded-full" />}
+            <Text className={styles.inputValue()}>
+              {selectedOption?.label ?? placeholder ?? ''}
+            </Text>
           </View>
           <CaretDown color={iconColor} />
         </Pressable>

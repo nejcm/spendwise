@@ -104,7 +104,9 @@
     "opening_balance": "Opening balance",
     "select_currency": "Select your currency",
     "subtitle": "Take control of your finances",
-    "title": "Spendwise"
+    "title": "Spendwise",
+    "welcome_copy": "Track spending, manage budgets, and build better money habits in one place.",
+    "welcome_headline": "Smart money management"
   },
   "security": {
     "app_lock": "App Lock",
@@ -179,3 +181,5 @@
     "transfer": "Transfer"
   }
 }
+
+

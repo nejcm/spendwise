@@ -9,8 +9,6 @@ export function FocusAwareStatusBar({ hidden = false }: Props) {
   const isFocused = useIsFocused();
   const { theme } = useUniwind();
 
-  if (Platform.OS === 'web')
-    return null;
-
+  if (Platform.OS === 'web') return null;
   return isFocused ? <SystemBars style={theme === 'light' ? 'dark' : 'light'} hidden={hidden} /> : null;
 }

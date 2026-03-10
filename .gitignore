@@ -27,3 +27,4 @@ expo-env.d.ts
 !.env.example
 
 TODO.md
+.examples

@@ -23,7 +23,7 @@ export default function TabLayout() {
     return () => clearTimeout(timer);
   }, [hideSplash]);
 
-  if (isFirstTime) {
+  if (isFirstTime || true) {
     return <Redirect href="/onboarding" />;
   }
 

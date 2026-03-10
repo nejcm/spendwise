@@ -1,7 +1,10 @@
 import type { TxKeyPath } from '@/lib/i18n';
 
 import * as React from 'react';
+import { useUniwind } from 'uniwind';
+
 import { Pressable, Text, View } from '@/components/ui';
+import colors from '@/components/ui/colors';
 import { ArrowRight } from '@/components/ui/icons';
 
 type ItemProps = {
@@ -12,7 +15,10 @@ type ItemProps = {
 };
 
 export function SettingsItem({ text, value, icon, onPress }: ItemProps) {
+  const { theme } = useUniwind();
   const isPressable = onPress !== undefined;
+  const iconColor = theme === 'dark' ? colors.white : colors.neutral[400];
+
   return (
     <Pressable
       onPress={onPress}
@@ -27,7 +33,7 @@ export function SettingsItem({ text, value, icon, onPress }: ItemProps) {
         <Text className="text-neutral-600 dark:text-white">{value}</Text>
         {isPressable && (
           <View className="pl-2">
-            <ArrowRight />
+            <ArrowRight color={iconColor} size={16} />
           </View>
         )}
       </View>

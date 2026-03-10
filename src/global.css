@@ -5,7 +5,10 @@
 /* Define your theme in CSS (replaces tailwind.config.js) */
 @theme {
   /* Font families */
-  --font-family-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-family-sans: 'Roboto', ui-sans-serif, system-ui, sans-serif;
+  --font-family-bold: 'Roboto-Bold', ui-sans-serif, system-ui, sans-serif;
+  --font-family-medium: 'Roboto-Medium', ui-sans-serif, system-ui, sans-serif;
+  --font-family-regular: 'Roboto', ui-sans-serif, system-ui, sans-serif;
 
   /* Base colors */
   --color-white: #ffffff;
@@ -92,6 +95,9 @@
   --color-card: #ffffff;
   --color-card-foreground: #0a0a0a;
 
+  --color-surface: #f8f8f8;
+  --color-surface-foreground: #0a0a0a;
+
   --color-muted: #f5f5f5;
   --color-muted-foreground: #737373;
 
@@ -101,6 +107,8 @@
 
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
+
+  --color-subtle: #f7f0e9;
 }
 
 /* Dark mode colors */
@@ -109,19 +117,37 @@
     --color-background: #0a0a0a;
     --color-foreground: #fafafa;
 
-    --color-card: #171717;
+    --color-card: #1a1a1a;
     --color-card-foreground: #fafafa;
+
+    --color-surface: #111111;
+    --color-surface-foreground: #fafafa;
 
     --color-muted: #262626;
     --color-muted-foreground: #a3a3a3;
 
-    --color-border: #404040;
-    --color-input: #404040;
+    --color-border: #2e2e2e;
+    --color-input: #2e2e2e;
   }
 }
 
 /* Custom utilities (if needed) */
 @layer utilities {
+  /* .font-sans {
+    font-family: var(--font-family-sans);
+  }
+  .font-bold {
+    font-family: var(--font-family-bold);
+  }
+  .font-medium {
+    font-family: var(--font-family-medium);
+  }
+  .font-regular {
+    font-family: var(--font-family-regular);
+  } */
+  .bg-subtle {
+    background-color: var(--color-subtle);
+  }
   .text-balance {
     text-wrap: balance;
   }

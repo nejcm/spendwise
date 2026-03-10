@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import type { SvgProps } from 'react-native-svg';
 import {
+  Bell,
   ChartPie,
   ChevronDown,
   ChevronLeft,
@@ -10,10 +11,12 @@ import {
   HandHeart,
   House,
   Languages,
+  Plus,
   Receipt,
   Settings as SettingsIcon,
   Share2,
   Star,
+  User,
   Wallet as WalletIcon,
 } from 'lucide-react-native';
 import * as React from 'react';
@@ -77,3 +80,6 @@ export const Wallet = withDefaults(WalletIcon, { color: colors.black, size: 24, 
 export const Website = withDefaults(Globe, { color: colors.neutral[500], size: 24, strokeWidth: 1.75 });
 export const ReceiptIcon = withDefaults(Receipt, { color: colors.black, size: 24, strokeWidth: 2 });
 export { ReceiptIcon as Receipt };
+export const BellIcon = withDefaults(Bell, { color: colors.black, size: 24, strokeWidth: 2 });
+export const UserIcon = withDefaults(User, { color: colors.black, size: 24, strokeWidth: 2 });
+export const PlusIcon = withDefaults(Plus, { color: colors.white, size: 28, strokeWidth: 2 });

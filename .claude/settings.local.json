@@ -21,7 +21,11 @@
       "Bash(npx eslint src/app/_layout.tsx --fix)",
       "Bash(node -e \"const p = require\\(''./package.json''\\); const deps = {...p.dependencies,...p.devDependencies}; [''expo-document-picker'',''expo-local-authentication'',''expo-notifications'',''expo-crypto''].forEach\\(d => console.log\\(d, deps[d] || ''NOT INSTALLED''\\)\\)\")",
       "Bash(npx expo install expo-document-picker expo-local-authentication expo-notifications)",
-      "Bash(pnpm lint --fix)"
+      "Bash(pnpm lint --fix)",
+      "Bash(grep -A2 '\"\"lint\"\"' package.json)",
+      "Bash(grep -r \"max-warnings\" eslint.config.* .eslintrc*)",
+      "Bash(echo \"Exit: $?\")",
+      "Bash(node -e \"const m = require\\(''C:/Work/Personal/spendwise/node_modules/expo-router/ui''\\); console.log\\(Object.keys\\(m\\)\\)\")"
     ]
   }
 }

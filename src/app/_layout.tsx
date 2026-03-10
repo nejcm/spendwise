@@ -2,12 +2,13 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ThemeProvider } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteProvider } from 'expo-sqlite';
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { AppState, StyleSheet } from 'react-native';
+import { AppState, Platform, StyleSheet } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
@@ -91,8 +92,40 @@ export default function RootLayout() {
   );
 }
 
+function WebFontsLoader({
+  children,
+  fallback,
+}: {
+  children?: React.ReactNode;
+  fallback?: React.ReactNode;
+}) {
+  const hasFallback = !!fallback;
+  const [forceFallback, setForceFallback] = useState(hasFallback);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setForceFallback(false);
+    }, 500);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
+  const [loaded, error] = useFonts({
+    'Roboto': require('node_modules/@expo-google-fonts/roboto/400Regular/Roboto_400Regular.ttf'),
+    'Roboto-Medium': require('node_modules/@expo-google-fonts/roboto/500Medium/Roboto_500Medium.ttf'),
+    'Roboto-Bold': require('node_modules/@expo-google-fonts/roboto/700Bold/Roboto_700Bold.ttf'),
+    'Roboto-Black': require('node_modules/@expo-google-fonts/roboto/900Black/Roboto_900Black.ttf'),
+  });
+
+  return (loaded || error) && !forceFallback ? children : fallback;
+}
+
 function Providers({ children }: { children: React.ReactNode }) {
   const theme = useThemeConfig();
+  const FontLoader = Platform.OS === 'web' ? WebFontsLoader : React.Fragment;
+
   return (
     <GestureHandlerRootView
       style={styles.container}
@@ -103,10 +136,12 @@ function Providers({ children }: { children: React.ReactNode }) {
         <ThemeProvider value={theme}>
           <SQLiteProvider databaseName="spendwise.db" onInit={initDb}>
             <APIProvider>
-              <BottomSheetModalProvider>
-                {children}
-                <FlashMessage position="top" />
-              </BottomSheetModalProvider>
+              <FontLoader>
+                <BottomSheetModalProvider>
+                  {children}
+                  <FlashMessage position="top" />
+                </BottomSheetModalProvider>
+              </FontLoader>
             </APIProvider>
           </SQLiteProvider>
         </ThemeProvider>

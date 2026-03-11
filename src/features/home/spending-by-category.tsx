@@ -20,7 +20,7 @@ export function SpendingByCategory() {
     <View>
       <View className="mb-4 flex-row items-center justify-between">
         <Text className="text-lg font-semibold">{translate('common.categories')}</Text>
-        <Pressable onPress={() => router.push('/categories' as any)}>
+        <Pressable onPress={() => router.push('/categories')}>
           <Text className="text-sm font-semibold text-neutral-500">{translate('common.seeAll')}</Text>
         </Pressable>
       </View>

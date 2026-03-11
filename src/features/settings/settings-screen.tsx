@@ -1,11 +1,9 @@
 import Env from 'env';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
-import * as SQLite from 'expo-sqlite';
 import { useSQLiteContext } from 'expo-sqlite';
-import { ALargeSmall, Banknote, Bell, Delete, FileText, HelpCircle, Import, Link, List, LogOut, Settings, Share, Shield, User } from 'lucide-react-native';
+import { ALargeSmall, Banknote, Bell, FileText, HelpCircle, Import, Link, List, LogOut, Settings, Share, Shield, User } from 'lucide-react-native';
 
-import { Alert, Platform } from 'react-native';
 import { Button, FocusAwareStatusBar, Image, ScrollView, Text, View } from '@/components/ui';
 import { config } from '@/config';
 import { selectProfile, setIsFirstTime, useAppStore } from '@/lib/store';
@@ -22,28 +20,6 @@ export function SettingsScreen() {
   const router = useRouter();
   const profile = useAppStore(selectProfile);
   const db = useSQLiteContext();
-
-  async function doResetDatabase() {
-    await db.closeAsync();
-    await SQLite.deleteDatabaseAsync('spendwise.db');
-    if (Platform.OS === 'web') window.location.reload();
-    else router.replace('/');
-  }
-
-  function resetDatabase() {
-    if (Platform.OS === 'web') {
-      // eslint-disable-next-line no-alert
-      if (window.confirm('This will delete all data and restart the app. Are you sure?')) {
-        doResetDatabase();
-      }
-    }
-    else {
-      Alert.alert('Reset Database', 'This will delete all data and restart the app. Are you sure?', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Reset', style: 'destructive', onPress: doResetDatabase },
-      ]);
-    }
-  }
 
   return (
     <>
@@ -127,7 +103,6 @@ export function SettingsScreen() {
             <SettingsContainer title="settings.dev">
               <SettingsItem text="settings.reset" icon={<LogOut className={iconColor} size={20} />} onPress={() => setIsFirstTime(true)} />
               <SettingsItem text="settings.mock_data" icon={<FileText className={iconColor} size={20} />} onPress={() => mockData(db)} />
-              <SettingsItem text="settings.reset_db" icon={<Delete className={iconColor} size={20} />} onPress={resetDatabase} />
             </SettingsContainer>
           )}
 

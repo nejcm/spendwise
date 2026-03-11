@@ -137,12 +137,6 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
 }
 
 async function seedDefaults(db: SQLiteDatabase): Promise<void> {
-  const existing = await db.getFirstAsync<{ count: number }>(
-    'SELECT COUNT(*) as count FROM categories WHERE is_default = 1',
-  );
-  if (existing && existing.count > 0)
-    return;
-
   const expenseCategories = [
     {
       id: 'cat_food',
@@ -221,14 +215,14 @@ async function seedDefaults(db: SQLiteDatabase): Promise<void> {
 
   for (const cat of expenseCategories) {
     await db.runAsync(
-      'INSERT INTO categories (id, name, icon, color, type, is_default, sort_order) VALUES (?, ?, ?, ?, ?, 1, ?)',
+      'INSERT INTO categories (id, name, icon, color, type, sort_order) VALUES (?, ?, ?, ?, ?, ?)',
       [cat.id, cat.name, cat.icon, cat.color, 'expense', expenseCategories.indexOf(cat)],
     );
   }
 
   for (const cat of incomeCategories) {
     await db.runAsync(
-      'INSERT INTO categories (id, name, icon, color, type, is_default, sort_order) VALUES (?, ?, ?, ?, ?, 1, ?)',
+      'INSERT INTO categories (id, name, icon, color, type, sort_order) VALUES (?, ?, ?, ?, ?, ?)',
       [cat.id, cat.name, cat.icon, cat.color, 'income', incomeCategories.indexOf(cat)],
     );
   }

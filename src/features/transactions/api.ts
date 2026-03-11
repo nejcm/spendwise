@@ -308,7 +308,7 @@ async function deleteTransaction(db: SQLiteDatabase, id: string): Promise<void> 
 async function createCategory(db: SQLiteDatabase, data: CategoryFormData): Promise<string> {
   const id = generateId();
   await db.runAsync(
-    'INSERT INTO categories (id, name, color, type, is_default, sort_order) VALUES (?, ?, ?, ?, 0, ?)',
+    'INSERT INTO categories (id, name, color, type, sort_order) VALUES (?, ?, ?, ?, ?)',
     [id, data.name.trim(), data.color, data.type, data.sort_order],
   );
   return id;

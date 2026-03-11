@@ -1,4 +1,4 @@
-import type { Language } from '../../languages';
+import type { Language } from '../../languages/types';
 
 import type { OptionType } from '@/components/ui';
 import * as React from 'react';

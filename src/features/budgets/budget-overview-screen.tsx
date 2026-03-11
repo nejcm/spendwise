@@ -6,15 +6,15 @@ import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
 import { useGoals } from '@/features/goals/api';
 import { GoalCard } from '@/features/goals/components/goal-card';
 import { formatCurrency } from '@/lib/format';
-import { getCurrency } from '@/lib/hooks/use-currency';
 import { translate } from '@/lib/i18n';
+import { useAppStore } from '@/lib/store';
 
 import { useBudgetsOverview } from './api';
 import { BudgetCard } from './components/budget-card';
 
 export function BudgetOverviewScreen() {
   const router = useRouter();
-  const currency = getCurrency();
+  const currency = useAppStore.use.currency();
   const { data: budgets = [] } = useBudgetsOverview();
   const { data: goals = [] } = useGoals();
   const activeGoals = goals.filter((g) => !g.is_completed);

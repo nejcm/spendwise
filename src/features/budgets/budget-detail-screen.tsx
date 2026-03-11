@@ -4,8 +4,8 @@ import { Alert, View } from 'react-native';
 
 import { Button, FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
 import { formatCurrency } from '@/lib/format';
-import { getCurrency } from '@/lib/hooks/use-currency';
 import { translate } from '@/lib/i18n';
+import { useAppStore } from '@/lib/store';
 
 import { useBudgetWithProgress, useDeleteBudget } from './api';
 import { BudgetProgressBar } from './components/budget-progress-bar';
@@ -13,7 +13,7 @@ import { BudgetProgressBar } from './components/budget-progress-bar';
 export function BudgetDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const currency = getCurrency();
+  const currency = useAppStore.use.currency();
   const { data: budget } = useBudgetWithProgress(id ?? '');
   const deleteBudget = useDeleteBudget();
   if (!budget) {

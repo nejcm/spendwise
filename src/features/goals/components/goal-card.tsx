@@ -4,8 +4,7 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from '@/components/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
-
-import { getCurrency } from '@/lib/hooks/use-currency';
+import { useAppStore } from '@/lib/store';
 
 type Props = {
   goal: Goal;
@@ -13,7 +12,7 @@ type Props = {
 };
 
 export function GoalCard({ goal, onPress }: Props) {
-  const currency = getCurrency();
+  const currency = useAppStore.use.currency();
   const progress = goal.target_amount > 0
     ? Math.min((goal.current_amount / goal.target_amount) * 100, 100)
     : 0;

@@ -4,8 +4,7 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from '@/components/ui';
 import { formatCurrency, formatDate } from '@/lib/format';
-
-import { getCurrency } from '@/lib/hooks/use-currency';
+import { useAppStore } from '@/lib/store';
 
 import { FREQUENCY_LABELS } from '../types';
 
@@ -15,7 +14,7 @@ type Props = {
 };
 
 export function SubscriptionCard({ rule, onDelete }: Props) {
-  const currency = getCurrency();
+  const currency = useAppStore.use.currency();
   const isIncome = rule.type === 'income';
 
   return (

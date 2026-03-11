@@ -5,15 +5,14 @@ import { View } from 'react-native';
 import { PieChart } from 'react-native-gifted-charts';
 import { Text } from '@/components/ui';
 import { formatCurrency } from '@/lib/format';
-
-import { getCurrency } from '@/lib/hooks/use-currency';
+import { useAppStore } from '@/lib/store';
 
 type Props = {
   data: CategorySpend[];
 };
 
 export function SpendingByCategory({ data }: Props) {
-  const currency = getCurrency();
+  const currency = useAppStore.use.currency();
 
   if (data.length === 0) {
     return (

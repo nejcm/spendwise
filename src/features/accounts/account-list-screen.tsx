@@ -5,16 +5,14 @@ import { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
 import { formatCurrency } from '@/lib/format';
-import { getCurrency } from '@/lib/hooks/use-currency';
-
 import { translate } from '@/lib/i18n';
+import { useAppStore } from '@/lib/store';
 import { useAccountsWithBalance, useCreateAccount, useUpdateAccount } from './api';
 import { AccountCard } from './components/account-card';
-
 import { AccountForm } from './components/account-form';
 
 export function AccountListScreen() {
-  const currency = getCurrency();
+  const currency = useAppStore.use.currency();
   const { data: accounts = [] } = useAccountsWithBalance();
   const createAccount = useCreateAccount();
   const updateAccount = useUpdateAccount();

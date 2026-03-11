@@ -21,11 +21,11 @@ import {
   setupNotifications,
 } from '@/features/notifications/notifications';
 import { LockScreen } from '@/features/security/lock-screen';
-import { getLockTimeoutMinutes, isLockEnabled } from '@/features/security/use-security';
 import { processRecurringRules } from '@/features/subscriptions/api';
 import { APIProvider } from '@/lib/api';
 import { loadSelectedTheme } from '@/lib/hooks/use-selected-theme';
 import { migrateDbIfNeeded } from '@/lib/sqlite';
+import { setLockEnabled, useAppStore } from '../lib/store';
 // Import  global CSS file
 import '../global.css';
 
@@ -54,7 +54,7 @@ SplashScreen.setOptions({
 });
 
 function SecurityLock() {
-  const [isLocked, setIsLocked] = useState(() => isLockEnabled());
+  const isLocked = useAppStore.use.lockEnabled();
   const backgroundTimeRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -63,21 +63,19 @@ function SecurityLock() {
         backgroundTimeRef.current = Date.now();
       }
       else if (state === 'active') {
-        if (!isLockEnabled()) {
-          return;
-        }
-        const ms = getLockTimeoutMinutes() * 60 * 1000;
+        if (!useAppStore.getState().lockEnabled) return;
+        const ms = useAppStore.getState().lockTimeoutMinutes * 60 * 1000;
         const elapsed
           = backgroundTimeRef.current !== null ? Date.now() - backgroundTimeRef.current : Infinity;
         if (elapsed >= ms) {
-          setIsLocked(true);
+          setLockEnabled(true);
         }
       }
     });
     return () => sub.remove();
   }, []);
 
-  return <LockScreen visible={isLocked} onUnlock={() => setIsLocked(false)} />;
+  return <LockScreen visible={isLocked} onUnlock={() => setLockEnabled(false)} />;
 }
 
 export default function RootLayout() {

@@ -6,7 +6,7 @@ import * as z from 'zod';
 
 import { Button, FocusAwareStatusBar, Input, ScrollView, Text } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
-import { todayISO } from '@/lib/format';
+import { todayISO } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { useAccounts, useCreateTransfer } from './api';
 

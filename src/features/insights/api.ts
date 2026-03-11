@@ -38,14 +38,18 @@ async function getCategorySpend(db: SQLiteDatabase, month: string): Promise<Cate
 
   const rows = await db.getAllAsync<Omit<CategorySpend, 'percentage'>>(
     `SELECT
-       COALESCE(t.category_id, 'uncategorized') as category_id,
-       COALESCE(c.name, 'Uncategorized') as category_name,
-       COALESCE(c.color, '#90A4AE') as category_color,
-       SUM(t.amount) as total
-     FROM transactions t
-     LEFT JOIN categories c ON t.category_id = c.id
-     WHERE t.type = 'expense' AND t.date >= ? AND t.date < ?
-     GROUP BY t.category_id
+       c.id as category_id,
+       c.name as category_name,
+       c.color as category_color,
+       c.icon as category_icon,
+       COALESCE(SUM(CASE 
+         WHEN t.type = 'expense' AND t.date >= ? AND t.date < ? 
+         THEN t.amount 
+         ELSE 0 
+       END), 0) as total
+     FROM categories c
+     LEFT JOIN transactions t ON t.category_id = c.id
+     GROUP BY c.id, c.name, c.color
      ORDER BY total DESC`,
     [startDate, nextMonth],
   );

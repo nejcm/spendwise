@@ -7,8 +7,8 @@ import { useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
 
 import { Button, FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
+import { formatCurrency } from '@/features/formatting/helpers';
 import { useAccounts, useCreateTransaction } from '@/features/transactions/api';
-import { formatCurrency } from '@/lib/format';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 import { mapRows, parseCSV } from './csv-parser';

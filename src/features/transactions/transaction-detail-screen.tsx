@@ -5,7 +5,7 @@ import { useState } from 'react';
 
 import { Alert, View } from 'react-native';
 import { Button, FocusAwareStatusBar, Text } from '@/components/ui';
-import { centsToAmount, formatCurrency, formatDate } from '@/lib/format';
+import { centsToAmount, formatCurrency, formatDate } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 import { useAccounts, useCategories, useDeleteTransaction, useTransaction, useUpdateTransaction } from './api';

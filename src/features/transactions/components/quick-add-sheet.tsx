@@ -7,7 +7,7 @@ import { Pressable, View } from 'react-native';
 import * as z from 'zod';
 import { Button, Input, Modal, Text } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
-import { todayISO } from '@/lib/format';
+import { todayISO } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { useAccounts, useCategories, useCreateTransaction } from '../api';
 import { CategoryPicker } from './category-picker';

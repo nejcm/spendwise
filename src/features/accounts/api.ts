@@ -6,7 +6,7 @@ import type { Account, AccountWithBalance } from '@/features/accounts/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
 
-import { amountToCents } from '@/lib/format';
+import { amountToCents } from '@/features/formatting/helpers';
 import { generateId } from '@/lib/sqlite';
 
 const keys = {

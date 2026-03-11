@@ -6,8 +6,8 @@ import * as z from 'zod';
 
 import { Button, FocusAwareStatusBar, Input, ScrollView, Text } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
+import { formatCurrency, todayISO } from '@/features/formatting/helpers';
 import { useAccounts } from '@/features/transactions/api';
-import { formatCurrency, todayISO } from '@/lib/format';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 import { useAddGoalContribution, useDeleteGoal, useGoal } from './api';

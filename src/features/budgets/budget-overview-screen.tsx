@@ -3,9 +3,9 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 
 import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
+import { formatCurrency } from '@/features/formatting/helpers';
 import { useGoals } from '@/features/goals/api';
 import { GoalCard } from '@/features/goals/components/goal-card';
-import { formatCurrency } from '@/lib/format';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 

@@ -5,6 +5,7 @@ import { Modal, View } from 'react-native';
 
 import { Button, Text } from '@/components/ui';
 import { translate } from '@/lib/i18n';
+import { config } from '../../config';
 
 type Props = {
   onUnlock: () => void;
@@ -30,7 +31,7 @@ export function LockScreen({ visible, onUnlock }: Props) {
   return (
     <Modal animationType="fade" statusBarTranslucent transparent visible={visible}>
       <View className="flex-1 items-center justify-center bg-white dark:bg-neutral-900">
-        <Text className="mb-2 text-3xl font-bold">Spendwise</Text>
+        <Text className="mb-2 text-3xl font-bold">{config.appName}</Text>
         <Text className="mb-12 text-neutral-500">{translate('security.locked')}</Text>
         <Button label={translate('security.unlock')} onPress={authenticate} />
       </View>

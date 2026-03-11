@@ -1,4 +1,5 @@
 export const config = {
+  appName: 'Spendwise',
   links: {
     androidApp: 'TODO',
     iosApp: 'TODO',

@@ -1,12 +1,10 @@
-import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
 import { useState } from 'react';
 
 import { Button, Input, Select, Text, View } from '@/components/ui';
-import { amountToCents } from '@/lib/format';
+import { useCreateAccount } from '@/features/accounts/api';
 import { useCurrency } from '@/lib/hooks/use-currency';
 import { translate } from '@/lib/i18n';
-import { generateId } from '@/lib/sqlite';
 import { CURRENCIES } from '../../currencies';
 import IntroNav from '../Nav';
 
@@ -26,37 +24,27 @@ export type SetupStepProps = {
 };
 
 export default function SetupStep({ onBack, onNext }: SetupStepProps) {
-  const db = useSQLiteContext();
   const [, setCurrency] = useCurrency();
+  const createAccount = useCreateAccount();
 
   const [selectedCurrency, setSelectedCurrency] = useState<string | number>('EUR');
   const [accountName, setAccountName] = useState('Cash');
   const [accountType, setAccountType] = useState<string | number>('cash');
   const [openingBalance, setOpeningBalance] = useState('');
-  const [saving, setSaving] = useState(false);
 
-  const handleFinish = async () => {
-    if (saving) return;
-    setSaving(true);
-
-    try {
-      setCurrency(String(selectedCurrency));
-
-      const balanceCents = openingBalance ? amountToCents(Number.parseFloat(openingBalance) || 0) : 0;
-
-      await db.runAsync('INSERT INTO accounts (id, name, type, currency, initial_balance) VALUES (?, ?, ?, ?, ?)', [
-        generateId(),
-        accountName || 'Cash',
-        String(accountType),
-        String(selectedCurrency),
-        balanceCents,
-      ]);
-
-      onNext();
-    }
-    catch {
-      setSaving(false);
-    }
+  const handleFinish = () => {
+    setCurrency(String(selectedCurrency));
+    createAccount.mutate(
+      {
+        name: accountName || 'Cash',
+        type: String(accountType) as 'cash',
+        currency: String(selectedCurrency),
+        initial_balance: openingBalance || '0',
+        icon: null,
+        color: null,
+      },
+      { onSuccess: onNext },
+    );
   };
 
   return (
@@ -113,7 +101,7 @@ export default function SetupStep({ onBack, onNext }: SetupStepProps) {
           <Button
             label={translate('common.next')}
             onPress={handleFinish}
-            loading={saving}
+            loading={createAccount.isPending}
             className="flex-1"
             size="lg"
           />

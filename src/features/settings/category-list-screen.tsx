@@ -1,5 +1,3 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
 
 import { useState } from 'react';
@@ -7,16 +5,14 @@ import { Alert, Pressable, View } from 'react-native';
 import { Button, FocusAwareStatusBar, Input, ScrollView, Text } from '@/components/ui';
 
 import { ACCOUNT_COLORS } from '@/features/accounts/types';
-import { useCategories } from '@/features/transactions/api';
+import { useCategories, useCreateCategory, useDeleteCategory } from '@/features/transactions/api';
 
 import { translate } from '@/lib/i18n';
 
-import { generateId } from '@/lib/sqlite';
-
 export function CategoryListScreen() {
-  const db = useSQLiteContext();
-  const queryClient = useQueryClient();
   const { data: categories = [] } = useCategories();
+  const createCategory = useCreateCategory();
+  const deleteCategory = useDeleteCategory();
 
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState('');
@@ -26,18 +22,19 @@ export function CategoryListScreen() {
   const expenseCategories = categories.filter((c) => c.type === 'expense');
   const incomeCategories = categories.filter((c) => c.type === 'income');
 
-  const handleCreate = async () => {
+  const handleCreate = () => {
     if (!name.trim()) {
       return;
     }
-    const id = generateId();
-    await db.runAsync(
-      'INSERT INTO categories (id, name, color, type, is_default, sort_order) VALUES (?, ?, ?, ?, 0, ?)',
-      [id, name.trim(), color, type, categories.length],
+    createCategory.mutate(
+      { name, type, color, sort_order: categories.length },
+      {
+        onSuccess: () => {
+          setName('');
+          setShowForm(false);
+        },
+      },
     );
-    queryClient.invalidateQueries({ queryKey: ['categories'] });
-    setName('');
-    setShowForm(false);
   };
 
   const handleDelete = (id: string, catName: string, isDefault: number) => {
@@ -50,10 +47,7 @@ export function CategoryListScreen() {
       {
         text: translate('common.delete'),
         style: 'destructive',
-        onPress: async () => {
-          await db.runAsync('DELETE FROM categories WHERE id = ?', [id]);
-          queryClient.invalidateQueries({ queryKey: ['categories'] });
-        },
+        onPress: () => deleteCategory.mutate(id),
       },
     ]);
   };

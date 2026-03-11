@@ -32,6 +32,6 @@ export type BudgetWithProgress = Budget & {
 export type BudgetFormData = {
   name: string;
   period: BudgetPeriod;
-  amount: string;
-  lines: { category_id: string; amount: string }[];
+  amount: number;
+  lines: { category_id: string; amount: number }[];
 };

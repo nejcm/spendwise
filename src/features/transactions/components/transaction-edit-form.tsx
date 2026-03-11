@@ -1,67 +1,111 @@
 import type { Category } from '../types';
+import { useForm } from '@tanstack/react-form';
 import * as React from 'react';
-
 import { View } from 'react-native';
-import { Button, FocusAwareStatusBar, Input } from '@/components/ui';
 
+import * as z from 'zod';
+import { Button, FocusAwareStatusBar, Input } from '@/components/ui';
+import { getFieldError } from '@/components/ui/form-utils';
 import { translate } from '@/lib/i18n';
 import { CategoryPicker } from './category-picker';
 
+const schema = z.object({
+  amount: z.string().min(1, 'Amount is required'),
+  category_id: z.string().nullable(),
+  payee: z.string(),
+  note: z.string(),
+});
+
+export type TransactionEditFormValues = z.infer<typeof schema>;
+
 type Props = {
-  amount: string;
-  onAmountChange: (v: string) => void;
-  categoryId: string | null;
-  onCategorySelect: (cat: Category) => void;
+  initialValues: TransactionEditFormValues;
   categories: Category[];
-  payee: string;
-  onPayeeChange: (v: string) => void;
-  note: string;
-  onNoteChange: (v: string) => void;
-  onSave: () => void;
+  onSave: (data: TransactionEditFormValues) => void;
   onCancel: () => void;
   isSaving: boolean;
 };
 
-export function TransactionEditForm({
-  amount,
-  onAmountChange,
-  categoryId,
-  onCategorySelect,
-  categories,
-  payee,
-  onPayeeChange,
-  note,
-  onNoteChange,
-  onSave,
-  onCancel,
-  isSaving,
-}: Props) {
+export function TransactionEditForm({ initialValues, categories, onSave, onCancel, isSaving }: Props) {
+  const form = useForm({
+    defaultValues: initialValues,
+    validators: {
+      onChange: schema,
+    },
+    onSubmit: async ({ value }) => {
+      onSave(value);
+    },
+  });
+
   return (
     <View className="flex-1 px-4 pt-4">
       <FocusAwareStatusBar />
 
-      <Input
-        label={translate('transactions.amount')}
-        value={amount}
-        onChangeText={onAmountChange}
-        keyboardType="decimal-pad"
+      <form.Field
+        name="amount"
+        children={(field) => (
+          <Input
+            label={translate('transactions.amount')}
+            value={field.state.value}
+            onBlur={field.handleBlur}
+            onChangeText={field.handleChange}
+            keyboardType="decimal-pad"
+            error={getFieldError(field)}
+          />
+        )}
       />
 
-      <CategoryPicker
-        categories={categories}
-        selectedId={categoryId}
-        onSelect={onCategorySelect}
-        label={translate('transactions.category')}
+      <form.Field
+        name="category_id"
+        children={(field) => (
+          <CategoryPicker
+            categories={categories}
+            selectedId={field.state.value}
+            onSelect={(cat) => field.handleChange(cat.id)}
+            label={translate('transactions.category')}
+          />
+        )}
       />
 
-      <Input label={translate('transactions.payee')} value={payee} onChangeText={onPayeeChange} />
+      <form.Field
+        name="payee"
+        children={(field) => (
+          <Input
+            label={translate('transactions.payee')}
+            value={field.state.value}
+            onBlur={field.handleBlur}
+            onChangeText={field.handleChange}
+            error={getFieldError(field)}
+          />
+        )}
+      />
 
-      <Input label={translate('transactions.note')} value={note} onChangeText={onNoteChange} />
+      <form.Field
+        name="note"
+        children={(field) => (
+          <Input
+            label={translate('transactions.note')}
+            value={field.state.value}
+            onBlur={field.handleBlur}
+            onChangeText={field.handleChange}
+            error={getFieldError(field)}
+          />
+        )}
+      />
 
-      <View className="mt-4 gap-2">
-        <Button label={translate('common.save')} onPress={onSave} loading={isSaving} />
-        <Button label={translate('common.cancel')} variant="outline" onPress={onCancel} />
-      </View>
+      <form.Subscribe
+        selector={(state) => [state.isSubmitting]}
+        children={([isSubmittingForm]) => (
+          <View className="mt-4 gap-2">
+            <Button
+              label={translate('common.save')}
+              onPress={form.handleSubmit}
+              loading={(isSubmittingForm as boolean) || isSaving}
+            />
+            <Button label={translate('common.cancel')} variant="outline" onPress={onCancel} />
+          </View>
+        )}
+      />
     </View>
   );
 }

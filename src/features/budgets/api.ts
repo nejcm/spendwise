@@ -150,7 +150,7 @@ async function getBudgetLinesWithSpent(
 
 async function createBudget(db: SQLiteDatabase, data: BudgetFormData): Promise<string> {
   const id = generateId();
-  const totalCents = amountToCents(Number.parseFloat(data.amount) || 0);
+  const totalCents = amountToCents(data.amount || 0);
 
   await db.runAsync(
     `INSERT INTO budgets (id, name, period, amount, start_date)
@@ -160,7 +160,7 @@ async function createBudget(db: SQLiteDatabase, data: BudgetFormData): Promise<s
 
   for (const line of data.lines) {
     const lineId = generateId();
-    const lineCents = amountToCents(Number.parseFloat(line.amount) || 0);
+    const lineCents = amountToCents(line.amount || 0);
     if (lineCents > 0) {
       await db.runAsync(
         'INSERT INTO budget_lines (id, budget_id, category_id, amount) VALUES (?, ?, ?, ?)',
@@ -173,7 +173,7 @@ async function createBudget(db: SQLiteDatabase, data: BudgetFormData): Promise<s
 }
 
 async function updateBudget(db: SQLiteDatabase, id: string, data: BudgetFormData): Promise<void> {
-  const totalCents = amountToCents(Number.parseFloat(data.amount) || 0);
+  const totalCents = amountToCents(data.amount || 0);
 
   await db.runAsync(
     'UPDATE budgets SET name = ?, period = ?, amount = ?, updated_at = datetime(\'now\') WHERE id = ?',
@@ -184,7 +184,7 @@ async function updateBudget(db: SQLiteDatabase, id: string, data: BudgetFormData
 
   for (const line of data.lines) {
     const lineId = generateId();
-    const lineCents = amountToCents(Number.parseFloat(line.amount) || 0);
+    const lineCents = amountToCents(line.amount || 0);
     if (lineCents > 0) {
       await db.runAsync(
         'INSERT INTO budget_lines (id, budget_id, category_id, amount) VALUES (?, ?, ?, ?)',

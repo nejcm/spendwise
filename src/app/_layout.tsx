@@ -7,24 +7,23 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteProvider } from 'expo-sqlite';
 import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
-import { AppState, Platform, StyleSheet } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Platform, StyleSheet } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 import { useThemeConfig } from '@/components/ui/use-theme-config';
-
 import {
   checkBudgetAlerts,
   checkUpcomingBills,
   setupNotifications,
 } from '@/features/notifications/notifications';
-import { LockScreen } from '@/features/security/lock-screen';
+import { SecurityLock } from '@/features/security/security-lock';
 import { APIProvider } from '@/lib/api';
 import { loadSelectedTheme } from '@/lib/hooks/use-selected-theme';
-import { migrateDb } from '@/lib/sqlite';
-import { setLockEnabled, useAppStore } from '../lib/store';
+import { DatabaseErrorBoundary, migrateDb, OpfsCleaner } from '@/lib/sqlite';
 // Import  global CSS file
 import '../global.css';
 
@@ -50,31 +49,6 @@ SplashScreen.setOptions({
   duration: 500,
   fade: true,
 });
-
-function SecurityLock() {
-  const isLocked = useAppStore.use.lockEnabled();
-  const backgroundTimeRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    const sub = AppState.addEventListener('change', (state) => {
-      if (state === 'background' || state === 'inactive') {
-        backgroundTimeRef.current = Date.now();
-      }
-      else if (state === 'active') {
-        if (!useAppStore.getState().lockEnabled) return;
-        const ms = useAppStore.getState().lockTimeoutMinutes * 60 * 1000;
-        const elapsed
-          = backgroundTimeRef.current !== null ? Date.now() - backgroundTimeRef.current : Infinity;
-        if (elapsed >= ms) {
-          setLockEnabled(true);
-        }
-      }
-    });
-    return () => sub.remove();
-  }, []);
-
-  return <LockScreen visible={isLocked} onUnlock={() => setLockEnabled(false)} />;
-}
 
 export default function RootLayout() {
   return (
@@ -130,16 +104,20 @@ function Providers({ children }: { children: React.ReactNode }) {
     >
       <KeyboardProvider>
         <ThemeProvider value={theme}>
-          <SQLiteProvider databaseName="spendwise.db" onInit={initDb}>
-            <APIProvider>
-              <FontLoader>
-                <BottomSheetModalProvider>
-                  {children}
-                  <FlashMessage position="top" />
-                </BottomSheetModalProvider>
-              </FontLoader>
-            </APIProvider>
-          </SQLiteProvider>
+          <OpfsCleaner>
+            <DatabaseErrorBoundary>
+              <SQLiteProvider databaseName="spendwise.db" onInit={initDb}>
+                <APIProvider>
+                  <FontLoader>
+                    <BottomSheetModalProvider>
+                      {children}
+                      <FlashMessage position="top" />
+                    </BottomSheetModalProvider>
+                  </FontLoader>
+                </APIProvider>
+              </SQLiteProvider>
+            </DatabaseErrorBoundary>
+          </OpfsCleaner>
         </ThemeProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>

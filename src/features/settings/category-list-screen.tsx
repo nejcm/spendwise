@@ -1,13 +1,19 @@
+import { useForm } from '@tanstack/react-form';
 import * as React from 'react';
-
 import { useState } from 'react';
 import { Alert, Pressable, View } from 'react-native';
+import * as z from 'zod';
 import { Button, FocusAwareStatusBar, Input, ScrollView, Text } from '@/components/ui';
-
+import { getFieldError } from '@/components/ui/form-utils';
 import { ACCOUNT_COLORS } from '@/features/accounts/types';
 import { useCategories, useCreateCategory, useDeleteCategory } from '@/features/transactions/api';
-
 import { translate } from '@/lib/i18n';
+
+const schema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  type: z.enum(['expense', 'income']),
+  color: z.string(),
+});
 
 export function CategoryListScreen() {
   const { data: categories = [] } = useCategories();
@@ -15,27 +21,31 @@ export function CategoryListScreen() {
   const deleteCategory = useDeleteCategory();
 
   const [showForm, setShowForm] = useState(false);
-  const [name, setName] = useState('');
-  const [type, setType] = useState<'expense' | 'income'>('expense');
-  const [color, setColor] = useState(ACCOUNT_COLORS[0]);
+
+  const form = useForm({
+    defaultValues: {
+      name: '',
+      type: 'expense' as 'expense' | 'income',
+      color: ACCOUNT_COLORS[0],
+    },
+    validators: {
+      onChange: schema as any,
+    },
+    onSubmit: async ({ value }) => {
+      createCategory.mutate(
+        { name: value.name, type: value.type, color: value.color, sort_order: categories.length },
+        {
+          onSuccess: () => {
+            form.reset();
+            setShowForm(false);
+          },
+        },
+      );
+    },
+  });
 
   const expenseCategories = categories.filter((c) => c.type === 'expense');
   const incomeCategories = categories.filter((c) => c.type === 'income');
-
-  const handleCreate = () => {
-    if (!name.trim()) {
-      return;
-    }
-    createCategory.mutate(
-      { name, type, color, sort_order: categories.length },
-      {
-        onSuccess: () => {
-          setName('');
-          setShowForm(false);
-        },
-      },
-    );
-  };
 
   const handleDelete = (id: string, catName: string, isDefault: number) => {
     if (isDefault) {
@@ -80,39 +90,82 @@ export function CategoryListScreen() {
 
         {showForm && (
           <View className="mt-4 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
-            <Input label={translate('settings.category_name')} value={name} onChangeText={setName} />
-            <View className="mt-3 flex-row gap-2">
-              <Pressable
-                onPress={() => setType('expense')}
-                className={`rounded-full px-3 py-1.5 ${type === 'expense' ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
-              >
-                <Text className={`text-sm ${type === 'expense' ? 'font-semibold text-white' : ''}`}>
-                  {translate('transactions.expense')}
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={() => setType('income')}
-                className={`rounded-full px-3 py-1.5 ${type === 'income' ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
-              >
-                <Text className={`text-sm ${type === 'income' ? 'font-semibold text-white' : ''}`}>
-                  {translate('transactions.income')}
-                </Text>
-              </Pressable>
-            </View>
-            <View className="mt-3 flex-row flex-wrap gap-2">
-              {ACCOUNT_COLORS.map((c) => (
-                <Pressable
-                  key={c}
-                  onPress={() => setColor(c)}
-                  className={`size-8 rounded-full ${color === c ? 'border-2 border-primary-400' : ''}`}
-                  style={{ backgroundColor: c }}
+            <form.Field
+              name="name"
+              children={(field) => (
+                <Input
+                  label={translate('settings.category_name')}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChangeText={field.handleChange}
+                  error={getFieldError(field)}
                 />
-              ))}
-            </View>
-            <View className="mt-4 flex-row gap-3">
-              <Button label={translate('common.cancel')} variant="outline" onPress={() => setShowForm(false)} className="flex-1" />
-              <Button label={translate('common.save')} onPress={handleCreate} disabled={!name.trim()} className="flex-1" />
-            </View>
+              )}
+            />
+
+            <form.Field
+              name="type"
+              children={(field) => (
+                <View className="mt-3 flex-row gap-2">
+                  <Pressable
+                    onPress={() => field.handleChange('expense')}
+                    className={`rounded-full px-3 py-1.5 ${field.state.value === 'expense' ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
+                  >
+                    <Text className={`text-sm ${field.state.value === 'expense' ? 'font-semibold text-white' : ''}`}>
+                      {translate('transactions.expense')}
+                    </Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => field.handleChange('income')}
+                    className={`rounded-full px-3 py-1.5 ${field.state.value === 'income' ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
+                  >
+                    <Text className={`text-sm ${field.state.value === 'income' ? 'font-semibold text-white' : ''}`}>
+                      {translate('transactions.income')}
+                    </Text>
+                  </Pressable>
+                </View>
+              )}
+            />
+
+            <form.Field
+              name="color"
+              children={(field) => (
+                <View className="mt-3 flex-row flex-wrap gap-2">
+                  {ACCOUNT_COLORS.map((c) => (
+                    <Pressable
+                      key={c}
+                      onPress={() => field.handleChange(c)}
+                      className={`size-8 rounded-full ${field.state.value === c ? 'border-2 border-primary-400' : ''}`}
+                      style={{ backgroundColor: c }}
+                    />
+                  ))}
+                </View>
+              )}
+            />
+
+            <form.Subscribe
+              selector={(state) => [state.isSubmitting, state.values.name]}
+              children={([isSubmitting, name]) => (
+                <View className="mt-4 flex-row gap-3">
+                  <Button
+                    label={translate('common.cancel')}
+                    variant="outline"
+                    onPress={() => {
+                      form.reset();
+                      setShowForm(false);
+                    }}
+                    className="flex-1"
+                  />
+                  <Button
+                    label={translate('common.save')}
+                    onPress={form.handleSubmit}
+                    disabled={!(name as string).trim() || (isSubmitting as boolean) || createCategory.isPending}
+                    loading={(isSubmitting as boolean) || createCategory.isPending}
+                    className="flex-1"
+                  />
+                </View>
+              )}
+            />
           </View>
         )}
       </ScrollView>

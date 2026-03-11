@@ -23,10 +23,7 @@ export function TransactionDetailScreen() {
   const { data: accounts = [] } = useAccounts();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [editAmount, setEditAmount] = useState('');
-  const [editCategoryId, setEditCategoryId] = useState<string | null>(null);
-  const [editNote, setEditNote] = useState('');
-  const [editPayee, setEditPayee] = useState('');
+
   if (isLoading || !transaction) {
     return (
       <View className="flex-1 items-center justify-center">
@@ -38,30 +35,27 @@ export function TransactionDetailScreen() {
   if (isEditing) {
     return (
       <TransactionEditForm
-        amount={editAmount}
-        onAmountChange={setEditAmount}
-        categoryId={editCategoryId}
-        onCategorySelect={(cat) => setEditCategoryId(cat.id)}
+        initialValues={{
+          amount: String(centsToAmount(transaction.amount)),
+          category_id: transaction.category_id,
+          note: transaction.note || '',
+          payee: transaction.payee || '',
+        }}
         categories={categories}
-        payee={editPayee}
-        onPayeeChange={setEditPayee}
-        note={editNote}
-        onNoteChange={setEditNote}
         isSaving={updateMut.isPending}
         onCancel={() => setIsEditing(false)}
-        onSave={async () => {
-          if (!id)
-            return;
+        onSave={async (data) => {
+          if (!id) return;
           await updateMut.mutateAsync({
             id,
             data: {
               type: transaction.type as TransactionType,
-              amount: editAmount,
-              category_id: editCategoryId,
+              amount: data.amount,
+              category_id: data.category_id,
               account_id: transaction.account_id,
               date: transaction.date,
-              note: editNote,
-              payee: editPayee,
+              note: data.note,
+              payee: data.payee,
             },
           });
           setIsEditing(false);
@@ -72,13 +66,7 @@ export function TransactionDetailScreen() {
 
   const isIncome = transaction.type === 'income';
   const accountName = accounts.find((a) => a.id === transaction.account_id)?.name || '-';
-  const startEdit = () => {
-    setEditAmount(String(centsToAmount(transaction.amount)));
-    setEditCategoryId(transaction.category_id);
-    setEditNote(transaction.note || '');
-    setEditPayee(transaction.payee || '');
-    setIsEditing(true);
-  };
+
   const handleDelete = () => {
     Alert.alert(translate('common.delete'), 'Delete this transaction?', [
       { text: translate('common.cancel'), style: 'cancel' },
@@ -114,7 +102,7 @@ export function TransactionDetailScreen() {
       </View>
 
       <View className="mt-6 gap-2">
-        <Button label={translate('common.edit')} variant="outline" onPress={startEdit} />
+        <Button label={translate('common.edit')} variant="outline" onPress={() => setIsEditing(true)} />
         <Button label={translate('common.delete')} variant="destructive" onPress={handleDelete} />
       </View>
     </View>

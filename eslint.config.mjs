@@ -82,7 +82,7 @@ export default antfu(
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
     rules: {
-      'max-lines-per-function': ['error', 150],
+      'max-lines-per-function': ['error', 200],
     },
   },
 

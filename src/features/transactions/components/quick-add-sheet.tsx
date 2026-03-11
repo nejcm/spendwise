@@ -1,110 +1,172 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
-
-import type { TransactionType } from '../types';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { useForm } from '@tanstack/react-form';
 import * as React from 'react';
-import { useState } from 'react';
-
 import { Pressable, View } from 'react-native';
-import { Button, Input, Modal, Text } from '@/components/ui';
-import { todayISO } from '@/lib/format';
 
+import * as z from 'zod';
+import { Button, Input, Modal, Text } from '@/components/ui';
+import { getFieldError } from '@/components/ui/form-utils';
+import { todayISO } from '@/lib/format';
 import { translate } from '@/lib/i18n';
 import { useAccounts, useCategories, useCreateTransaction } from '../api';
 import { CategoryPicker } from './category-picker';
 
-type Props = {
-  sheetRef: React.RefObject<BottomSheetModal | null>;
-};
+const schema = z.object({
+  type: z.enum(['expense', 'income']),
+  amount: z.string().min(1, 'Amount is required'),
+  category_id: z.string().nullable(),
+  payee: z.string(),
+  note: z.string(),
+});
 
-const TYPE_OPTIONS: { label: string; value: TransactionType }[] = [
+const TYPE_OPTIONS: { label: string; value: 'expense' | 'income' }[] = [
   { label: 'Expense', value: 'expense' },
   { label: 'Income', value: 'income' },
 ];
 
-export function QuickAddSheet({ sheetRef }: Props) {
-  const [type, setType] = useState<TransactionType>('expense');
-  const [amount, setAmount] = useState('');
-  const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [note, setNote] = useState('');
-  const [payee, setPayee] = useState('');
-  const categoryType = type === 'transfer' ? undefined : type;
-  const { data: categories = [] } = useCategories(categoryType);
+export type QuickAddSheetProps = {
+  sheetRef: React.RefObject<BottomSheetModal | null>;
+};
+
+type QuickAddFormData = z.infer<typeof schema>;
+
+const defaultValues = {
+  type: 'expense' as 'expense' | 'income',
+  amount: '',
+  category_id: null as string | null,
+  payee: '',
+  note: '',
+} satisfies QuickAddFormData;
+
+export function QuickAddSheet({ sheetRef }: QuickAddSheetProps) {
   const { data: accounts = [] } = useAccounts();
   const createTransaction = useCreateTransaction();
+  const { data: expenseCategories = [] } = useCategories('expense');
+  const { data: incomeCategories = [] } = useCategories('income');
 
-  const resetForm = () => {
-    setAmount('');
-    setCategoryId(null);
-    setNote('');
-    setPayee('');
-    setType('expense');
-  };
-
-  const handleSave = async () => {
-    if (!amount || !accounts[0])
-      return;
-    await createTransaction.mutateAsync({
-      type,
-      amount,
-      category_id: categoryId,
-      account_id: accounts[0].id,
-      date: todayISO(),
-      note,
-      payee,
-    });
-    resetForm();
-    sheetRef.current?.dismiss();
-  };
+  const form = useForm({
+    defaultValues: {
+      ...defaultValues,
+      account_id: accounts[0]?.id ?? '',
+    },
+    validators: {
+      onChange: schema as any,
+    },
+    onSubmit: async ({ value }) => {
+      if (!accounts[0]) return;
+      await createTransaction.mutateAsync({
+        type: value.type,
+        amount: value.amount,
+        category_id: value.category_id,
+        account_id: accounts[0].id,
+        date: todayISO(),
+        note: value.note,
+        payee: value.payee,
+      });
+      form.reset();
+      sheetRef.current?.dismiss();
+    },
+  });
 
   return (
     <Modal ref={sheetRef} title={translate('transactions.add')} snapPoints={['85%']}>
       <BottomSheetScrollView className="flex-1 px-4 pb-8">
-        <View className="mb-4 flex-row gap-2">
-          {TYPE_OPTIONS.map((option) => (
-            <Pressable
-              key={option.value}
-              className={`flex-1 items-center rounded-xl py-2 ${
-                type === option.value ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-800'
-              }`}
-              onPress={() => {
-                setType(option.value);
-                setCategoryId(null);
-              }}
-            >
-              <Text className={`font-semibold ${type === option.value ? 'text-white' : 'dark:text-neutral-100'}`}>
-                {option.label}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
+        <form.Field
+          name="type"
+          children={(field) => (
+            <View className="mb-4 flex-row gap-2">
+              {TYPE_OPTIONS.map((option) => (
+                <Pressable
+                  key={option.value}
+                  className={`flex-1 items-center rounded-xl py-2 ${
+                    field.state.value === option.value ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-800'
+                  }`}
+                  onPress={() => {
+                    field.handleChange(option.value);
+                    form.setFieldValue('category_id', null);
+                  }}
+                >
+                  <Text className={`font-semibold ${field.state.value === option.value ? 'text-white' : 'dark:text-neutral-100'}`}>
+                    {option.label}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          )}
+        />
 
-        <Input
-          label={translate('transactions.amount')}
-          value={amount}
-          onChangeText={setAmount}
-          placeholder="0.00"
-          keyboardType="decimal-pad"
-          testID="amount-input"
+        <form.Field
+          name="amount"
+          children={(field) => (
+            <Input
+              label={translate('transactions.amount')}
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChangeText={field.handleChange}
+              placeholder="0.00"
+              keyboardType="decimal-pad"
+              testID="amount-input"
+              error={getFieldError(field)}
+            />
+          )}
         />
-        <CategoryPicker
-          categories={categories}
-          selectedId={categoryId}
-          onSelect={(cat) => setCategoryId(cat.id)}
-          label={translate('transactions.category')}
+
+        <form.Subscribe
+          selector={(state) => state.values.type}
+          children={(typeValue) => (
+            <form.Field
+              name="category_id"
+              children={(field) => (
+                <CategoryPicker
+                  categories={typeValue === 'expense' ? expenseCategories : incomeCategories}
+                  selectedId={field.state.value}
+                  onSelect={(cat) => field.handleChange(cat.id)}
+                  label={translate('transactions.category')}
+                />
+              )}
+            />
+          )}
         />
-        <Input
-          label={translate('transactions.payee')}
-          value={payee}
-          onChangeText={setPayee}
-          placeholder="e.g. Grocery Store"
+
+        <form.Field
+          name="payee"
+          children={(field) => (
+            <Input
+              label={translate('transactions.payee')}
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChangeText={field.handleChange}
+              placeholder="e.g. Grocery Store"
+              error={getFieldError(field)}
+            />
+          )}
         />
-        <Input label={translate('transactions.note')} value={note} onChangeText={setNote} placeholder="Optional note" />
-        <Button
-          label={translate('common.save')}
-          onPress={handleSave}
-          loading={createTransaction.isPending}
-          disabled={!amount || Number.parseFloat(amount) <= 0}
+
+        <form.Field
+          name="note"
+          children={(field) => (
+            <Input
+              label={translate('transactions.note')}
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChangeText={field.handleChange}
+              placeholder="Optional note"
+              error={getFieldError(field)}
+            />
+          )}
+        />
+
+        <form.Subscribe
+          selector={(state) => [state.isSubmitting, state.values.amount]}
+          children={([isSubmitting, amount]) => (
+            <Button
+              label={translate('common.save')}
+              onPress={form.handleSubmit}
+              loading={(isSubmitting as boolean) || createTransaction.isPending}
+              disabled={!(amount as string) || Number.parseFloat(amount as string) <= 0}
+            />
+          )}
         />
       </BottomSheetScrollView>
     </Modal>

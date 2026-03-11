@@ -4,12 +4,13 @@
       "Bash(pnpm lint*)",
       "Bash(pnpm add *)",
       "Bash(npx eslint*)",
-      "Bash(npx expo install*)",
       "Bash(node -e *)",
       "Bash(ls src/*)",
       "Bash(grep *)",
       "Bash(echo \"Exit: $?\")",
-      "Bash(cat *)"
+      "Bash(cat *)",
+      "Bash(pnpm install --frozen-lockfile)",
+      "Bash(npx tsc --noEmit)"
     ]
   }
 }

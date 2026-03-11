@@ -1,15 +1,26 @@
+import { useForm } from '@tanstack/react-form';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
-import { useState } from 'react';
 import { Alert, View } from 'react-native';
+import * as z from 'zod';
 
 import { Button, FocusAwareStatusBar, Input, ScrollView, Text } from '@/components/ui';
+import { getFieldError } from '@/components/ui/form-utils';
 import { useAccounts } from '@/features/transactions/api';
 import { formatCurrency, todayISO } from '@/lib/format';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
-
 import { useAddGoalContribution, useDeleteGoal, useGoal } from './api';
+
+const schema = z.object({
+  amount: z.string().min(1, 'Amount is required'),
+  account_id: z.string().min(1, 'Account is required'),
+});
+
+const defaultValues = {
+  amount: '',
+  account_id: '',
+};
 
 export function GoalDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -20,8 +31,21 @@ export function GoalDetailScreen() {
   const addContribution = useAddGoalContribution();
   const deleteGoal = useDeleteGoal();
 
-  const [amount, setAmount] = useState('');
-  const [accountId, setAccountId] = useState<string>(accounts[0]?.id ?? '');
+  const form = useForm({
+    defaultValues: {
+      ...defaultValues,
+      account_id: accounts[0]?.id ?? null,
+    },
+    validators: {
+      onChange: schema,
+    },
+    onSubmit: async ({ value }) => {
+      addContribution.mutate(
+        { goalId: goal!.id, amount: value.amount, accountId: value.account_id, date: todayISO() },
+        { onSuccess: () => form.setFieldValue('amount', '') },
+      );
+    },
+  });
 
   if (!goal) {
     return (
@@ -34,16 +58,6 @@ export function GoalDetailScreen() {
   const progress = goal.target_amount > 0
     ? Math.min((goal.current_amount / goal.target_amount) * 100, 100)
     : 0;
-
-  const handleContribute = () => {
-    if (!amount || !accountId) {
-      return;
-    }
-    addContribution.mutate(
-      { goalId: goal.id, amount, accountId, date: todayISO() },
-      { onSuccess: () => setAmount('') },
-    );
-  };
 
   const handleDelete = () => {
     Alert.alert(translate('common.delete'), `Delete "${goal.name}"?`, [
@@ -85,29 +99,50 @@ export function GoalDetailScreen() {
         {!goal.is_completed && (
           <View className="mb-4 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
             <Text className="mb-3 text-base font-semibold">{translate('goals.add_contribution')}</Text>
-            <Input
-              label={translate('transactions.amount')}
-              value={amount}
-              onChangeText={setAmount}
-              keyboardType="decimal-pad"
-              placeholder="0.00"
-            />
-            <View className="mt-3 flex-row flex-wrap gap-2">
-              {accounts.map((a) => (
-                <Button
-                  key={a.id}
-                  label={a.name}
-                  variant={accountId === a.id ? 'default' : 'outline'}
-                  onPress={() => setAccountId(a.id)}
-                  size="sm"
+
+            <form.Field
+              name="amount"
+              children={(field) => (
+                <Input
+                  label={translate('transactions.amount')}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChangeText={field.handleChange}
+                  keyboardType="decimal-pad"
+                  placeholder="0.00"
+                  error={getFieldError(field)}
                 />
-              ))}
-            </View>
-            <Button
-              label={translate('goals.contribute')}
-              onPress={handleContribute}
-              disabled={!amount || !accountId || addContribution.isPending}
-              className="mt-3"
+              )}
+            />
+
+            <form.Field
+              name="account_id"
+              children={(field) => (
+                <View className="mt-3 flex-row flex-wrap gap-2">
+                  {accounts.map((a) => (
+                    <Button
+                      key={a.id}
+                      label={a.name}
+                      variant={field.state.value === a.id ? 'default' : 'outline'}
+                      onPress={() => field.handleChange(a.id)}
+                      size="sm"
+                    />
+                  ))}
+                </View>
+              )}
+            />
+
+            <form.Subscribe
+              selector={(state) => [state.isSubmitting, state.values.amount, state.values.account_id]}
+              children={([isSubmitting, amount, accountId]) => (
+                <Button
+                  label={translate('goals.contribute')}
+                  onPress={form.handleSubmit}
+                  disabled={!(amount as string) || !(accountId as string) || (isSubmitting as boolean) || addContribution.isPending}
+                  loading={(isSubmitting as boolean) || addContribution.isPending}
+                  className="mt-3"
+                />
+              )}
             />
           </View>
         )}

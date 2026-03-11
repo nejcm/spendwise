@@ -6,16 +6,15 @@ import { useState } from 'react';
 import { Alert, View } from 'react-native';
 import { Button, FocusAwareStatusBar, Text } from '@/components/ui';
 import { centsToAmount, formatCurrency, formatDate } from '@/lib/format';
-import { getCurrency } from '@/lib/hooks/use-currency';
-
 import { translate } from '@/lib/i18n';
+import { useAppStore } from '@/lib/store';
 import { useAccounts, useCategories, useDeleteTransaction, useTransaction, useUpdateTransaction } from './api';
 import { TransactionEditForm } from './components/transaction-edit-form';
 
 export function TransactionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const currency = getCurrency();
+  const currency = useAppStore.use.currency();
 
   const { data: transaction, isLoading } = useTransaction(id ?? '');
   const updateMut = useUpdateTransaction();

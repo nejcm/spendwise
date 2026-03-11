@@ -9,7 +9,7 @@ export default function WelcomeStep({ onNext }: { onNext: () => void }) {
     <SafeAreaView className="flex-1 bg-white dark:bg-neutral-950">
       <View className="flex-[1.15] bg-subtle px-6 pt-8 pb-12">
         <View className="mb-10 flex-row items-center justify-center gap-3">
-          <Text className="text-3xl font-bold tracking-tight text-black">{translate('onboarding.title')}</Text>
+          <Text className="text-3xl font-bold tracking-tight text-black dark:text-black">{translate('onboarding.title')}</Text>
         </View>
 
         <View className="flex-1 items-center justify-center">

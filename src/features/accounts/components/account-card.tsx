@@ -5,8 +5,7 @@ import { Pressable, View } from 'react-native';
 import { Text } from '@/components/ui';
 import { formatCurrency } from '@/lib/format';
 
-import { getCurrency } from '@/lib/hooks/use-currency';
-
+import { useAppStore } from '@/lib/store';
 import { ACCOUNT_TYPE_LABELS } from '../types';
 
 type Props = {
@@ -15,7 +14,7 @@ type Props = {
 };
 
 export function AccountCard({ account, onPress }: Props) {
-  const currency = getCurrency();
+  const currency = useAppStore.use.currency();
   const bgColor = account.color || '#4ECDC4';
 
   return (

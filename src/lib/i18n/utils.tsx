@@ -1,5 +1,5 @@
 import type TranslateOptions from 'i18next';
-import type { Language } from '../../features/languages';
+import type { Language } from '../../features/languages/types';
 import type { resources } from './resources';
 import type { RecursiveKeyOf } from './types';
 import { memoize } from 'es-toolkit/compat';
@@ -7,16 +7,16 @@ import i18n from 'i18next';
 import { useCallback } from 'react';
 
 import { I18nManager, NativeModules, Platform } from 'react-native';
-import { useMMKVString } from 'react-native-mmkv';
 import RNRestart from 'react-native-restart';
-import { storage } from '../storage';
+
+import { getAppState, setLanguage, useAppStore } from '@/lib/store';
 
 type DefaultLocale = typeof resources.en.translation;
 export type TxKeyPath = RecursiveKeyOf<DefaultLocale>;
 
 export const LOCAL = 'local';
 
-export const getLanguage = () => storage.getString(LOCAL); // 'Marc' getItem<Language | undefined>(LOCAL);
+export const getLanguage = () => getAppState().language;
 
 export const translate = memoize(
   (key: TxKeyPath, options = undefined) => i18n.t(key, options) as unknown as string,
@@ -37,16 +37,16 @@ export function changeLanguage(lang: Language) {
 }
 
 export function useSelectedLanguage() {
-  const [language, setLang] = useMMKVString(LOCAL);
+  const language = useAppStore.use.language();
 
-  const setLanguage = useCallback(
+  const setLang = useCallback(
     (lang: Language) => {
-      setLang(lang);
+      setLanguage(lang);
       if (lang !== undefined)
-        changeLanguage(lang as Language);
+        changeLanguage(lang);
     },
-    [setLang],
+    [],
   );
 
-  return { language: language as Language, setLanguage };
+  return { language: language as Language, setLanguage: setLang };
 }

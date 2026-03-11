@@ -5,7 +5,7 @@ import { useUniwind } from 'uniwind';
 import { colors, FocusAwareStatusBar, ScrollView, Text, View } from '@/components/ui';
 import { Share, Support } from '@/components/ui/icons';
 import { translate } from '@/lib/i18n';
-import { useIsFirstTime } from '../../lib/hooks';
+import { setIsFirstTime } from '@/lib/store';
 import { LanguageItem } from './components/language-item';
 import { SettingsContainer } from './components/settings-container';
 import { SettingsItem } from './components/settings-item';
@@ -15,7 +15,6 @@ export function SettingsScreen() {
   const { theme } = useUniwind();
   const router = useRouter();
   const iconColor = theme === 'dark' ? colors.neutral[400] : colors.neutral[500];
-  const [, setFirstTime] = useIsFirstTime();
 
   return (
     <>
@@ -73,7 +72,7 @@ export function SettingsScreen() {
 
           {Env.EXPO_PUBLIC_APP_ENV === 'development' && (
             <SettingsContainer title="settings.dev">
-              <SettingsItem text="settings.reset" onPress={() => setFirstTime(true)} />
+              <SettingsItem text="settings.reset" onPress={() => setIsFirstTime(true)} />
             </SettingsContainer>
           )}
 

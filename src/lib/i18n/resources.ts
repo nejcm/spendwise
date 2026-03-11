@@ -1,4 +1,4 @@
-import type { Language } from '@/features/languages';
+import type { Language } from '@/features/languages/types';
 
 import en from '@/translations/en.json';
 

@@ -4,8 +4,7 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from '@/components/ui';
 import { formatCurrency } from '@/lib/format';
-
-import { getCurrency } from '@/lib/hooks/use-currency';
+import { useAppStore } from '@/lib/store';
 
 type Props = {
   transaction: TransactionWithCategory;
@@ -13,7 +12,7 @@ type Props = {
 };
 
 export const TransactionCard = React.memo(({ transaction, onPress }: Props) => {
-  const currency = getCurrency();
+  const currency = useAppStore.use.currency();
   const isIncome = transaction.type === 'income';
   const displayName = transaction.payee || transaction.category_name || 'Unknown';
 

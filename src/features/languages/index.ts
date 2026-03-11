@@ -1,6 +1,5 @@
+import type { Language } from './types';
 import { translate } from '../../lib/i18n';
-
-export type Language = 'en';
 
 export type LanguageOption = {
   name: string;

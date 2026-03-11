@@ -3,8 +3,8 @@ import { useState } from 'react';
 
 import { Button, Input, Select, Text, View } from '@/components/ui';
 import { useCreateAccount } from '@/features/accounts/api';
-import { useCurrency } from '@/lib/hooks/use-currency';
 import { translate } from '@/lib/i18n';
+import { setCurrency } from '@/lib/store';
 import { CURRENCIES } from '../../currencies';
 import IntroNav from '../Nav';
 
@@ -24,7 +24,6 @@ export type SetupStepProps = {
 };
 
 export default function SetupStep({ onBack, onNext }: SetupStepProps) {
-  const [, setCurrency] = useCurrency();
   const createAccount = useCreateAccount();
 
   const [selectedCurrency, setSelectedCurrency] = useState<string | number>('EUR');
@@ -32,19 +31,9 @@ export default function SetupStep({ onBack, onNext }: SetupStepProps) {
   const [accountType, setAccountType] = useState<string | number>('cash');
   const [openingBalance, setOpeningBalance] = useState('');
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     setCurrency(String(selectedCurrency));
-    createAccount.mutate(
-      {
-        name: accountName || 'Cash',
-        type: String(accountType) as 'cash',
-        currency: String(selectedCurrency),
-        initial_balance: openingBalance || '0',
-        icon: null,
-        color: null,
-      },
-      { onSuccess: onNext },
-    );
+    onNext();
   };
 
   return (
@@ -52,7 +41,7 @@ export default function SetupStep({ onBack, onNext }: SetupStepProps) {
       <View className="flex-1">
         <View className="bg-subtle p-6">
           <View className="flex-row items-center justify-center gap-3">
-            <Text className="text-2xl font-bold tracking-tight text-black">{translate('onboarding.create_account')}</Text>
+            <Text className="text-2xl font-bold tracking-tight text-black dark:text-black">{translate('onboarding.create_account')}</Text>
           </View>
         </View>
         <View className="px-6 pt-8">

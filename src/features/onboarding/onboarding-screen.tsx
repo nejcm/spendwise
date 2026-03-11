@@ -3,14 +3,13 @@ import * as React from 'react';
 import { useState } from 'react';
 
 import { FocusAwareStatusBar, View } from '@/components/ui';
-import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
+import { setIsFirstTime } from '@/lib/store';
 import SettingsStep from './Settings';
 import SetupStep from './Setup';
 import WelcomeStep from './Welcome';
 
 export function OnboardingScreen() {
   const [step, setStep] = useState(0);
-  const [_, setIsFirstTime] = useIsFirstTime();
   const router = useRouter();
 
   const onFinish = () => {

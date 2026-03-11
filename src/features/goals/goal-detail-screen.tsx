@@ -6,15 +6,15 @@ import { Alert, View } from 'react-native';
 import { Button, FocusAwareStatusBar, Input, ScrollView, Text } from '@/components/ui';
 import { useAccounts } from '@/features/transactions/api';
 import { formatCurrency, todayISO } from '@/lib/format';
-import { getCurrency } from '@/lib/hooks/use-currency';
 import { translate } from '@/lib/i18n';
+import { useAppStore } from '@/lib/store';
 
 import { useAddGoalContribution, useDeleteGoal, useGoal } from './api';
 
 export function GoalDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const currency = getCurrency();
+  const currency = useAppStore.use.currency();
   const { data: goal } = useGoal(id ?? '');
   const { data: accounts = [] } = useAccounts();
   const addContribution = useAddGoalContribution();

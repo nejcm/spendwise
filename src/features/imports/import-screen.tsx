@@ -9,9 +9,8 @@ import { Alert, Pressable, View } from 'react-native';
 import { Button, FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
 import { useAccounts, useCreateTransaction } from '@/features/transactions/api';
 import { formatCurrency } from '@/lib/format';
-import { getCurrency } from '@/lib/hooks/use-currency';
 import { translate } from '@/lib/i18n';
-
+import { useAppStore } from '@/lib/store';
 import { mapRows, parseCSV } from './csv-parser';
 
 type Step = 'map' | 'pick' | 'preview';
@@ -173,7 +172,7 @@ function PreviewStep({
 
 export function ImportScreen() {
   const router = useRouter();
-  const currency = getCurrency();
+  const currency = useAppStore.use.currency();
   const { data: accounts = [] } = useAccounts();
   const createTransaction = useCreateTransaction();
 

@@ -4,9 +4,8 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { Text } from '@/components/ui';
 import { formatCurrency } from '@/lib/format';
-import { getCurrency } from '@/lib/hooks/use-currency';
-
 import { translate } from '@/lib/i18n';
+import { useAppStore } from '@/lib/store';
 
 import { BudgetProgressBar } from './budget-progress-bar';
 
@@ -16,7 +15,7 @@ type Props = {
 };
 
 export function BudgetCard({ budget, onPress }: Props) {
-  const currency = getCurrency();
+  const currency = useAppStore.use.currency();
   const remaining = budget.amount - budget.total_spent;
   const isOver = remaining < 0;
 

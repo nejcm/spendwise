@@ -1,31 +1,27 @@
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as React from 'react';
-import { useState } from 'react';
 import { Alert, Pressable, Switch, View } from 'react-native';
 
 import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
 import { translate } from '@/lib/i18n';
-
-import {
-  getLockTimeoutMinutes,
-  isLockEnabled,
-  setLockEnabled,
-  setLockTimeoutMinutes,
-} from './use-security';
+import { setLockEnabled, setLockTimeoutMinutes, useAppStore } from '@/lib/store';
 
 const TIMEOUT_OPTIONS = [
   { label: translate('security.timeout_immediately'), value: 0 },
   { label: '1 min', value: 1 },
+  { label: '3 min', value: 3 },
   { label: '5 min', value: 5 },
   { label: '15 min', value: 15 },
+  { label: '30 min', value: 30 },
+  { label: '1 hour', value: 60 },
 ];
 
 export function SecuritySettingsScreen() {
-  const [lockEnabledState, setLockEnabledState] = useState(() => isLockEnabled());
-  const [timeoutVal, setTimeoutVal] = useState(() => getLockTimeoutMinutes());
+  const lockEnabled = useAppStore.use.lockEnabled();
+  const timeoutVal = useAppStore.use.lockTimeoutMinutes();
 
   const handleToggleLock = async () => {
-    if (lockEnabledState) {
+    if (lockEnabled) {
       const result = await LocalAuthentication.authenticateAsync({
         cancelLabel: translate('common.cancel'),
         disableDeviceFallback: false,
@@ -33,7 +29,6 @@ export function SecuritySettingsScreen() {
       });
       if (result.success) {
         setLockEnabled(false);
-        setLockEnabledState(false);
       }
     }
     else {
@@ -46,7 +41,6 @@ export function SecuritySettingsScreen() {
         return;
       }
       setLockEnabled(true);
-      setLockEnabledState(true);
     }
   };
 
@@ -61,7 +55,7 @@ export function SecuritySettingsScreen() {
               <Text className="text-sm text-neutral-500">{translate('security.app_lock_desc')}</Text>
             </View>
             <Switch
-              value={lockEnabledState}
+              value={lockEnabled}
               onValueChange={() => {
                 void handleToggleLock();
               }}
@@ -69,7 +63,7 @@ export function SecuritySettingsScreen() {
           </View>
         </View>
 
-        {lockEnabledState && (
+        {lockEnabled && (
           <View className="mb-6">
             <Text className="mb-2 text-sm font-medium text-neutral-600 dark:text-neutral-400">
               {translate('security.lock_after')}
@@ -83,7 +77,6 @@ export function SecuritySettingsScreen() {
                   }`}
                   onPress={() => {
                     setLockTimeoutMinutes(opt.value);
-                    setTimeoutVal(opt.value);
                   }}
                 >
                   <Text

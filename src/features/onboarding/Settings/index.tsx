@@ -15,7 +15,7 @@ export default function SettingsStep({ onBack, onNext }: SettingsStepProps) {
       <View className="flex-1">
         <View className="bg-subtle p-6">
           <View className="flex-row items-center justify-center gap-3">
-            <Text className="text-2xl font-bold tracking-tight text-black">{translate('onboarding.title')}</Text>
+            <Text className="text-2xl font-bold tracking-tight text-black dark:text-black">{translate('onboarding.title')}</Text>
           </View>
         </View>
         <View className="px-6 pt-8">

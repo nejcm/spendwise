@@ -12,12 +12,12 @@ import { useMonthSummary, useRecentTransactions, useTotalBalance } from '@/featu
 import { TransactionCard } from '@/features/transactions/components/transaction-card';
 
 import { formatCurrency } from '@/lib/format';
-import { getCurrency } from '@/lib/hooks/use-currency';
 import { translate } from '@/lib/i18n';
+import { useAppStore } from '@/lib/store';
 
 export function HomeScreen() {
   const router = useRouter();
-  const currency = getCurrency();
+  const currency = useAppStore.use.currency();
 
   const currentMonth = useMemo(() => format(new Date(), 'yyyy-MM'), []);
 

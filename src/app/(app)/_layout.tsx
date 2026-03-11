@@ -3,10 +3,10 @@ import * as React from 'react';
 import { useCallback, useEffect } from 'react';
 
 import { CustomTabBar } from '@/components/ui/custom-tab-bar';
-import { useIsFirstTime } from '@/lib/hooks/use-is-first-time';
+import { useAppStore } from '@/lib/store';
 
 export default function TabLayout() {
-  const [isFirstTime] = useIsFirstTime();
+  const isFirstTime = useAppStore.use.isFirstTime();
   const hideSplash = useCallback(async () => {
     await SplashScreen.hideAsync();
   }, []);

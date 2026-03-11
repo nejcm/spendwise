@@ -9,8 +9,7 @@ import { signIn } from './use-auth-store';
 export function LoginScreen() {
   const router = useRouter();
 
-  const onSubmit: LoginFormProps['onSubmit'] = (data) => {
-    console.log(data);
+  const onSubmit: LoginFormProps['onSubmit'] = (_data) => {
     signIn({ access: 'access-token', refresh: 'refresh-token' });
     router.push('/');
   };

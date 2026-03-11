@@ -1,4 +1,24 @@
+import type { CurrencyKey } from '../currencies';
+
 export type AccountType = 'cash' | 'checking' | 'savings' | 'credit_card' | 'investment' | 'other';
+
+export type Account = {
+  id: string;
+  name: string;
+  type: AccountType;
+  currency: CurrencyKey;
+  initial_balance: number;
+  icon: string | null;
+  color: string | null;
+  is_archived: number;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type AccountWithBalance = Account & {
+  balance: number; // computed: initial_balance + income - expense
+};
 
 export type AccountFormData = {
   name: string;

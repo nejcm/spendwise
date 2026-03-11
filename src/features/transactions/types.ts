@@ -43,24 +43,6 @@ export type Category = {
   created_at: string;
 };
 
-export type Account = {
-  id: string;
-  name: string;
-  type: string;
-  currency: string;
-  initial_balance: number;
-  icon: string | null;
-  color: string | null;
-  is_archived: number;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
-};
-
-export type AccountWithBalance = Account & {
-  balance: number; // computed: initial_balance + income - expense
-};
-
 export type MonthSummary = {
   income: number;
   expense: number;

@@ -1,4 +1,4 @@
-import type { AccountWithBalance } from '@/features/transactions/types';
+import type { AccountWithBalance } from '@/features/accounts/types';
 import * as React from 'react';
 
 import { Pressable, View } from 'react-native';

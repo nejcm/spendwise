@@ -21,7 +21,6 @@ import {
   setupNotifications,
 } from '@/features/notifications/notifications';
 import { LockScreen } from '@/features/security/lock-screen';
-import { processRecurringRules } from '@/features/subscriptions/api';
 import { APIProvider } from '@/lib/api';
 import { loadSelectedTheme } from '@/lib/hooks/use-selected-theme';
 import { migrateDbIfNeeded } from '@/lib/sqlite';
@@ -31,7 +30,6 @@ import '../global.css';
 
 async function initDb(db: SQLiteDatabase) {
   await migrateDbIfNeeded(db);
-  await processRecurringRules(db);
   await setupNotifications();
   await checkBudgetAlerts(db);
   await checkUpcomingBills(db);

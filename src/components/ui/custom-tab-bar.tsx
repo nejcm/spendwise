@@ -39,7 +39,6 @@ export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   const router = useRouter();
   const pathname = usePathname() ?? '';
   const addSheetRef = React.useRef<BottomSheetModal>(null);
-  console.log(pathname);
 
   return (
     <>

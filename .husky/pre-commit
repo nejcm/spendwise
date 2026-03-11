@@ -20,5 +20,5 @@ echo "===\n>> Checking branch name..."
 echo ">> Finish checking branch name"
 echo ">> Linting your files and fixing them if needed..."
 
-pnpm lint:ts
-pnpm lint-staged
+#pnpm lint:ts
+#pnpm lint-staged

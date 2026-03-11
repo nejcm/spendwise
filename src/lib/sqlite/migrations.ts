@@ -1,6 +1,23 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
+import { Platform } from 'react-native';
 
 const DATABASE_VERSION = 1;
+
+/**
+ * Drops all tables and recreates them. Safe on all platforms.
+ * Prefer this over deleteDatabaseAsync on web — that API has a bug where
+ * it removes the file from the VFS path map but doesn't return the handle
+ * to the available pool, causing SQLITE_CANTOPEN (14) on the next open
+ * within the same Worker session.
+ */
+export async function resetDb(db: SQLiteDatabase): Promise<void> {
+  await dropDb(db);
+  await migrateDb(db);
+  if (Platform.OS === 'web') {
+    // Reload the page so the Worker reinitialises its VFS state cleanly.
+    window.location.reload();
+  }
+}
 
 /**
  * Drops all tables and sets the user version to 0.

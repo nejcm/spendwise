@@ -1,149 +1,100 @@
-import { useForm } from '@tanstack/react-form';
 import * as React from 'react';
-import * as z from 'zod';
 
-import { Button, Input, Select, Text, View } from '@/components/ui';
-import { getFieldError } from '@/components/ui/form-utils';
-import { useCreateAccount } from '@/features/accounts/api';
+import { Button, Image, Input, Modal, Pressable, ScrollView, Text, useModal, View } from '@/components/ui';
 import { translate } from '@/lib/i18n';
-import { setCurrency } from '@/lib/store';
-import { CURRENCIES } from '../../currencies';
-import IntroNav from '../Nav';
-
-const schema = z.object({
-  currency: z.string().min(1, 'Currency required'),
-  account_name: z.string().min(1, 'Account name required'),
-  account_type: z.string().min(1, 'Account type required'),
-  opening_balance: z.string(),
-});
-
-const ACCOUNT_TYPES = [
-  { label: 'Cash', value: 'cash' },
-  { label: 'Checking Account', value: 'checking' },
-  { label: 'Savings Account', value: 'savings' },
-  { label: 'Credit Card', value: 'credit_card' },
-  { label: 'Other', value: 'other' },
-];
-
-const CURRENCY_OPTIONS = CURRENCIES.map((currency) => ({ ...currency, label: currency.value, subtext: currency.name }));
-
-const defaultValues = {
-  currency: 'EUR',
-  account_name: 'Cash',
-  account_type: 'cash',
-  opening_balance: '',
-};
+import { updateProfile, useAppStore } from '@/lib/store';
+import { AVATARS } from '../../profile';
+import OnboardingLayout from '../layout';
 
 export type SetupStepProps = {
   onBack: () => void;
   onNext: () => void;
+  currentStep: number;
 };
 
-export default function SetupStep({ onBack, onNext }: SetupStepProps) {
-  const createAccount = useCreateAccount();
+const avatars = Object.values(AVATARS);
 
-  const form = useForm({
-    defaultValues,
-    validators: {
-      onChange: schema,
-    },
-    onSubmit: async ({ value }) => {
-      setCurrency(value.currency);
-      onNext();
-    },
-  });
+export default function SetupStep({ onBack, onNext, currentStep }: SetupStepProps) {
+  const { name, avatar } = useAppStore((state) => state.profile);
+  const avatarModal = useModal();
 
   return (
     <>
-      <View className="flex-1">
-        <View className="bg-subtle p-6">
-          <View className="flex-row items-center justify-center gap-3">
-            <Text className="text-2xl font-bold tracking-tight text-black dark:text-black">{translate('onboarding.create_account')}</Text>
+      <OnboardingLayout
+        title={translate('onboarding.create_profile')}
+        currentStep={currentStep}
+        footer={(
+          <>
+            <Button
+              label={translate('common.back')}
+              variant="ghost"
+              size="lg"
+              fullWidth={false}
+              onPress={onBack}
+              accessibilityLabel={translate('common.back')}
+            />
+            <Button
+              label={translate('common.next')}
+              onPress={onNext}
+              className="flex-1"
+              size="lg"
+            />
+          </>
+        )}
+      >
+        <>
+          <Pressable
+            className="mb-10 items-center justify-center"
+            onPress={() => avatarModal.present()}
+            accessibilityLabel="Open avatar picker"
+            accessibilityRole="button"
+          >
+            <Image
+              source={avatars[avatar - 1]}
+              className="size-28 rounded-full"
+            />
+            <Text className="mt-2 text-xs text-neutral-400 dark:text-neutral-400">Tap to change</Text>
+          </Pressable>
+          <Input
+            value={name}
+            onChangeText={(text) => updateProfile({ name: text })}
+            placeholder={translate('onboarding.enter_name')}
+            style={{ textAlign: 'center' }}
+            size="xl"
+          />
+        </>
+      </OnboardingLayout>
+      <Modal
+        ref={avatarModal.ref}
+        title={translate('onboarding.choose_avatar')}
+      >
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 }}>
+          <View className="flex-row flex-wrap justify-center gap-3">
+            {avatars.map((imageSource, index) => {
+              const id = index + 1;
+              const isSelected = id === avatar;
+
+              return (
+                <Pressable
+                  key={id}
+                  onPress={() => {
+                    updateProfile({ avatar: id });
+                    avatarModal.dismiss();
+                  }}
+                  className={`rounded-full p-1 ${isSelected ? 'border-2 border-neutral-900 dark:border-white' : 'border border-transparent'}`}
+                  accessibilityLabel="Choose avatar"
+                  accessibilityRole="button"
+                >
+                  <Image
+                    source={imageSource}
+                    className="size-16 rounded-full"
+                  />
+                </Pressable>
+              );
+            })}
           </View>
-        </View>
-        <View className="px-6 pt-8">
-          <IntroNav current={1} />
-
-          <form.Field
-            name="currency"
-            children={(field) => (
-              <Select
-                label={translate('onboarding.select_currency')}
-                options={CURRENCY_OPTIONS}
-                value={field.state.value}
-                onSelect={(v) => field.handleChange(String(v))}
-                containerClassName="mb-4"
-              />
-            )}
-          />
-
-          <form.Field
-            name="account_name"
-            children={(field) => (
-              <Input
-                label={translate('onboarding.account_name')}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChangeText={field.handleChange}
-                placeholder="e.g. Cash, Main Bank"
-                containerClassName="mb-4"
-                error={getFieldError(field)}
-              />
-            )}
-          />
-
-          <form.Field
-            name="account_type"
-            children={(field) => (
-              <Select
-                label={translate('onboarding.account_type')}
-                options={ACCOUNT_TYPES}
-                value={field.state.value}
-                onSelect={(v) => field.handleChange(String(v))}
-                containerClassName="mb-4"
-              />
-            )}
-          />
-
-          <form.Field
-            name="opening_balance"
-            children={(field) => (
-              <Input
-                label={translate('onboarding.opening_balance')}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChangeText={field.handleChange}
-                placeholder="0.00"
-                keyboardType="decimal-pad"
-                error={getFieldError(field)}
-              />
-            )}
-          />
-        </View>
-
-        <form.Subscribe
-          selector={(state) => [state.isSubmitting]}
-          children={([isSubmitting]) => (
-            <View className="mt-auto w-full flex-row items-center gap-2 px-6 pb-8">
-              <Button
-                label={translate('common.back')}
-                variant="ghost"
-                size="lg"
-                fullWidth={false}
-                onPress={onBack}
-                accessibilityLabel={translate('common.back')}
-              />
-              <Button
-                label={translate('common.next')}
-                onPress={form.handleSubmit}
-                loading={(isSubmitting as boolean) || createAccount.isPending}
-                className="flex-1"
-                size="lg"
-              />
-            </View>
-          )}
-        />
-      </View>
+        </ScrollView>
+      </Modal>
     </>
   );
 }

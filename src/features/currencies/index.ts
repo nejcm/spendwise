@@ -22,4 +22,6 @@ export const CURRENCIES = [
   { name: 'US Dollar', value: 'USD', symbol: '$', image: require('../../../assets/flags/us.svg') },
 ] as const;
 
+export const CURRENCY_OPTIONS = CURRENCIES.map((currency) => ({ ...currency, label: currency.value, subtext: currency.name }));
+
 export type CurrencyKey = (typeof CURRENCIES)[number]['value'];

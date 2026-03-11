@@ -31,22 +31,22 @@ const selectTv = tv({
       sm: {
         label: 'text-xs',
         input: 'px-3 py-2',
-        inputValue: 'text-sm/5',
+        inputValue: 'text-sm/tight',
       },
       default: {
         label: 'text-sm',
-        input: 'px-4 py-3',
-        inputValue: 'text-base/5',
+        input: 'px-4 py-2',
+        inputValue: 'text-base/tight',
       },
       lg: {
         label: 'text-md',
-        input: 'px-5 py-4',
-        inputValue: 'text-lg/6',
+        input: 'px-5 py-3',
+        inputValue: 'text-xl/tight',
       },
       xl: {
         label: 'text-lg',
-        input: 'px-6 py-5',
-        inputValue: 'text-xl/6',
+        input: 'px-6 py-3',
+        inputValue: 'text-2xl/tight',
       },
     },
     focused: {

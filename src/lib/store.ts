@@ -22,7 +22,13 @@ const mmkvStorage: StateStorage = {
   removeItem: (name) => mmkv.remove(name),
 };
 
-type AppState = {
+export type AppState = {
+  // Profile
+  profile: {
+    name: string;
+    avatar: number;
+  };
+
   // Auth
   token: TokenType | null;
   authStatus: 'idle' | 'signOut' | 'signIn';
@@ -42,18 +48,17 @@ type AppState = {
 const _useAppStore = create<AppState>()(
   persist(
     (_set) => ({
-      // Auth
+      profile: {
+        name: '',
+        avatar: 1,
+      },
       token: null,
       authStatus: 'idle',
-
-      // Preferences
       currency: 'EUR',
       theme: 'system',
       colorTheme: 'red',
       isFirstTime: true,
       language: undefined,
-
-      // Security
       lockEnabled: false,
       lockTimeoutMinutes: 1,
     }),
@@ -61,6 +66,7 @@ const _useAppStore = create<AppState>()(
       name: 'app-storage',
       storage: createJSONStorage(() => mmkvStorage),
       partialize: (state) => ({
+        profile: state.profile,
         token: state.token,
         currency: state.currency,
         theme: state.theme,
@@ -77,6 +83,14 @@ export const useAppStore = createSelectors(_useAppStore);
 
 // Selectors
 export const getAppState = () => _useAppStore.getState();
+
+// Profile actions
+export function setProfile(profile: AppState['profile']) {
+  return _useAppStore.setState({ profile });
+}
+export function updateProfile(profile: Partial<AppState['profile']>) {
+  return _useAppStore.setState((state) => ({ profile: { ...state.profile, ...profile } }));
+}
 
 // Auth actions
 export function signIn(token: TokenType) {

@@ -109,6 +109,7 @@
   --color-destructive-foreground: #ffffff;
 
   --color-subtle: #f7f0e9;
+  --color-subtle-dark: #63605d;
 }
 
 /* Dark mode colors */
@@ -147,6 +148,12 @@
   } */
   .bg-subtle {
     background-color: var(--color-subtle);
+  }
+  .text-subtle {
+    color: var(--color-subtle);
+  }
+  .text-subtle-dark {
+    color: var(--color-subtle-dark);
   }
   .text-balance {
     text-wrap: balance;

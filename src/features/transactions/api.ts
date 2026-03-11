@@ -101,6 +101,39 @@ export function useMonthSummary(month: string) {
   });
 }
 
+// ─── Category Mutations ───
+
+type CategoryFormData = {
+  name: string;
+  type: 'expense' | 'income';
+  color: string;
+  sort_order: number;
+};
+
+export function useCreateCategory() {
+  const db = useSQLiteContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CategoryFormData) => createCategory(db, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.categories });
+    },
+  });
+}
+
+export function useDeleteCategory() {
+  const db = useSQLiteContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => deleteCategory(db, id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.categories });
+    },
+  });
+}
+
 // ─── Mutations ───
 
 export function useCreateTransaction() {
@@ -278,4 +311,17 @@ async function updateTransaction(db: SQLiteDatabase, id: string, data: Transacti
 
 async function deleteTransaction(db: SQLiteDatabase, id: string): Promise<void> {
   await db.runAsync('DELETE FROM transactions WHERE id = ?', [id]);
+}
+
+async function createCategory(db: SQLiteDatabase, data: CategoryFormData): Promise<string> {
+  const id = generateId();
+  await db.runAsync(
+    'INSERT INTO categories (id, name, color, type, is_default, sort_order) VALUES (?, ?, ?, ?, 0, ?)',
+    [id, data.name.trim(), data.color, data.type, data.sort_order],
+  );
+  return id;
+}
+
+async function deleteCategory(db: SQLiteDatabase, id: string): Promise<void> {
+  await db.runAsync('DELETE FROM categories WHERE id = ?', [id]);
 }

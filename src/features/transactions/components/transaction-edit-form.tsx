@@ -1,4 +1,4 @@
-import type { Category } from '../types';
+import type { Category } from '../../categories/types';
 import { useForm } from '@tanstack/react-form';
 import * as React from 'react';
 import { View } from 'react-native';
@@ -12,7 +12,6 @@ import { CategoryPicker } from './category-picker';
 const schema = z.object({
   amount: z.string().min(1, 'Amount is required'),
   category_id: z.string().nullable(),
-  payee: z.string(),
   note: z.string(),
 });
 
@@ -63,19 +62,6 @@ export function TransactionEditForm({ initialValues, categories, onSave, onCance
             selectedId={field.state.value}
             onSelect={(cat) => field.handleChange(cat.id)}
             label={translate('transactions.category')}
-          />
-        )}
-      />
-
-      <form.Field
-        name="payee"
-        children={(field) => (
-          <Input
-            label={translate('transactions.payee')}
-            value={field.state.value}
-            onBlur={field.handleBlur}
-            onChangeText={field.handleChange}
-            error={getFieldError(field)}
           />
         )}
       />

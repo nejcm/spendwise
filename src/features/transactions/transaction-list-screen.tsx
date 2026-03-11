@@ -39,8 +39,7 @@ export function TransactionListScreen() {
       const q = search.toLowerCase();
       result = result.filter(
         (t) =>
-          t.payee?.toLowerCase().includes(q)
-          || t.note?.toLowerCase().includes(q)
+          t.note?.toLowerCase().includes(q)
           || t.category_name?.toLowerCase().includes(q),
       );
     }

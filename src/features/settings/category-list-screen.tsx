@@ -47,11 +47,7 @@ export function CategoryListScreen() {
   const expenseCategories = categories.filter((c) => c.type === 'expense');
   const incomeCategories = categories.filter((c) => c.type === 'income');
 
-  const handleDelete = (id: string, catName: string, isDefault: number) => {
-    if (isDefault) {
-      Alert.alert('Info', 'Default categories cannot be deleted');
-      return;
-    }
+  const handleDelete = (id: string, catName: string) => {
     Alert.alert(translate('common.delete'), `Delete "${catName}"?`, [
       { text: translate('common.cancel'), style: 'cancel' },
       {
@@ -72,8 +68,7 @@ export function CategoryListScreen() {
             key={cat.id}
             name={cat.name}
             color={cat.color}
-            isDefault={!!cat.is_default}
-            onDelete={() => handleDelete(cat.id, cat.name, cat.is_default)}
+            onDelete={() => handleDelete(cat.id, cat.name)}
           />
         ))}
 
@@ -83,8 +78,7 @@ export function CategoryListScreen() {
             key={cat.id}
             name={cat.name}
             color={cat.color}
-            isDefault={!!cat.is_default}
-            onDelete={() => handleDelete(cat.id, cat.name, cat.is_default)}
+            onDelete={() => handleDelete(cat.id, cat.name)}
           />
         ))}
 
@@ -185,18 +179,14 @@ export function CategoryListScreen() {
 type CategoryRowProps = {
   name: string;
   color: string;
-  isDefault: boolean;
   onDelete: () => void;
 };
 
-function CategoryRow({ name, color, isDefault, onDelete }: CategoryRowProps) {
+function CategoryRow({ name, color, onDelete }: CategoryRowProps) {
   return (
     <Pressable onPress={onDelete} className="mb-1 flex-row items-center rounded-lg px-3 py-2.5">
       <View className="size-4 rounded-full" style={{ backgroundColor: color }} />
       <Text className="ml-3 flex-1 text-sm">{name}</Text>
-      {isDefault && (
-        <Text className="text-xs text-neutral-400">{translate('settings.default')}</Text>
-      )}
     </Pressable>
   );
 }

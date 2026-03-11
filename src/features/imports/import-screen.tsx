@@ -233,7 +233,6 @@ export function ImportScreen() {
         category_id: null,
         date: row.date,
         note: row.note,
-        payee: row.payee,
         type,
       });
       count++;

@@ -16,7 +16,6 @@ const schema = z.object({
   type: z.enum(['expense', 'income']),
   amount: z.string().min(1, 'Amount is required'),
   category_id: z.string().nullable(),
-  payee: z.string(),
   note: z.string(),
 });
 
@@ -35,7 +34,6 @@ const defaultValues = {
   type: 'expense' as 'expense' | 'income',
   amount: '',
   category_id: null as string | null,
-  payee: '',
   note: '',
 } satisfies QuickAddFormData;
 
@@ -62,7 +60,6 @@ export function QuickAddSheet({ sheetRef }: QuickAddSheetProps) {
         account_id: accounts[0].id,
         date: todayISO(),
         note: value.note,
-        payee: value.payee,
       });
       form.reset();
       sheetRef.current?.dismiss();
@@ -125,20 +122,6 @@ export function QuickAddSheet({ sheetRef }: QuickAddSheetProps) {
                   label={translate('transactions.category')}
                 />
               )}
-            />
-          )}
-        />
-
-        <form.Field
-          name="payee"
-          children={(field) => (
-            <Input
-              label={translate('transactions.payee')}
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChangeText={field.handleChange}
-              placeholder="e.g. Grocery Store"
-              error={getFieldError(field)}
             />
           )}
         />

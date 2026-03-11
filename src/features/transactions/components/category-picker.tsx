@@ -1,4 +1,4 @@
-import type { Category } from '../types';
+import type { Category } from '../../categories/types';
 import * as React from 'react';
 
 import { Pressable, View } from 'react-native';

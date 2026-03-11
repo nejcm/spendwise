@@ -1,3 +1,5 @@
+import type { CurrencyKey } from '../currencies';
+
 export type TransactionType = 'income' | 'expense' | 'transfer';
 
 export type Transaction = {
@@ -6,11 +8,9 @@ export type Transaction = {
   category_id: string | null;
   type: TransactionType;
   amount: number; // cents
-  currency: string;
+  currency: CurrencyKey;
   date: string; // ISO 8601 date
   note: string | null;
-  payee: string | null;
-  transfer_id: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -22,25 +22,12 @@ export type TransactionWithCategory = Transaction & {
 };
 
 export type TransactionFormData = {
-  type: TransactionType;
-  amount: string; // user input string, converted to cents on save
   category_id: string | null;
   account_id: string;
+  amount: string;
+  type: TransactionType;
   date: string;
   note: string;
-  payee: string;
-};
-
-export type Category = {
-  id: string;
-  name: string;
-  icon: string | null;
-  color: string;
-  type: 'income' | 'expense';
-  parent_id: string | null;
-  is_default: number;
-  sort_order: number;
-  created_at: string;
 };
 
 export type MonthSummary = {

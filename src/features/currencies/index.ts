@@ -20,4 +20,6 @@ export const CURRENCIES = [
   { name: 'South African Rand', value: 'ZAR', symbol: 'R', image: require('../../../assets/flags/za.svg') },
   { name: 'Thai Baht', value: 'THB', symbol: '฿', image: require('../../../assets/flags/th.svg') },
   { name: 'US Dollar', value: 'USD', symbol: '$', image: require('../../../assets/flags/us.svg') },
-];
+] as const;
+
+export type CurrencyKey = (typeof CURRENCIES)[number]['value'];

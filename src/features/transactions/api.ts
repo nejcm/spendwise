@@ -1,13 +1,12 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type {
-  Account,
-  AccountWithBalance,
   Category,
   MonthSummary,
   TransactionFormData,
   TransactionWithCategory,
 } from './types';
+import type { Account, AccountWithBalance } from '@/features/accounts/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { useSQLiteContext } from 'expo-sqlite';

@@ -1,8 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { AccountFormData } from './types';
-
-import type { Account, AccountWithBalance } from '@/features/transactions/types';
+import type { Account, AccountWithBalance } from '@/features/accounts/types';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';

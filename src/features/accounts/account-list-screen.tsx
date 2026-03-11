@@ -67,8 +67,8 @@ export function AccountListScreen() {
                 type: editingAccount.type as any,
                 currency: editingAccount.currency,
                 initial_balance: String(editingAccount.initial_balance / 100),
-                icon: editingAccount.icon,
-                color: editingAccount.color,
+                icon: editingAccount.icon ?? null,
+                color: editingAccount.color ?? null,
               }}
               onSubmit={handleUpdate}
               onCancel={() => setEditingId(null)}

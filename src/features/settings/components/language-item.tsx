@@ -1,18 +1,18 @@
 import type { Language } from '../../languages/types';
 
 import type { OptionType } from '@/components/ui';
+import { Languages } from 'lucide-react-native';
 import * as React from 'react';
-import { Options, useModal } from '@/components/ui';
 
+import { Options, useModal } from '@/components/ui';
 import { useSelectedLanguage } from '@/lib/i18n';
-import { LANGUAGES } from '../../languages';
+import { LANGUAGES_OPTIONS } from '../../languages';
 import { SettingsItem } from './settings-item';
 
-const LANGUAGES_OPTIONS = LANGUAGES.map((lang) => ({ ...lang, label: lang.name, value: lang.value }));
-
 export function LanguageItem() {
-  const { language, setLanguage } = useSelectedLanguage();
   const modal = useModal();
+  const { selected, setLanguage } = useSelectedLanguage();
+
   const onSelect = React.useCallback(
     (option: OptionType) => {
       setLanguage(option.value as Language);
@@ -21,12 +21,10 @@ export function LanguageItem() {
     [setLanguage, modal],
   );
 
-  const selectedLanguage = React.useMemo(() => LANGUAGES_OPTIONS.find((lang) => lang.value === language), [language]);
-
   return (
     <>
-      <SettingsItem text="settings.language" value={selectedLanguage?.label} onPress={modal.present} />
-      <Options ref={modal.ref} options={LANGUAGES_OPTIONS} onSelect={onSelect} value={selectedLanguage?.value} />
+      <SettingsItem text="settings.language" icon={<Languages className="text-foreground" size={20} />} value={selected?.name} onPress={modal.present} />
+      <Options ref={modal.ref} options={LANGUAGES_OPTIONS} onSelect={onSelect} value={selected?.value} />
     </>
   );
 }

@@ -16,3 +16,6 @@ export const AVATARS = {
   15: require('../../../assets/avatars/15.png'),
   16: require('../../../assets/avatars/16.png'),
 } as const;
+
+export const AVATARS_LIST = Object.values(AVATARS);
+export const getAvatar = (id: number) => AVATARS_LIST[id - 1];

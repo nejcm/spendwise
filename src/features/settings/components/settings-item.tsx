@@ -1,11 +1,11 @@
 import type { TxKeyPath } from '@/lib/i18n';
 
+import { ArrowRight } from 'lucide-react-native';
 import * as React from 'react';
-import { useUniwind } from 'uniwind';
 
+import { useUniwind } from 'uniwind';
 import { Pressable, Text, View } from '@/components/ui';
 import colors from '@/components/ui/colors';
-import { ArrowRight } from '@/components/ui/icons';
 
 type ItemProps = {
   text: TxKeyPath;
@@ -26,7 +26,7 @@ export function SettingsItem({ text, value, icon, onPress }: ItemProps) {
       className="flex-1 flex-row items-center justify-between px-4 py-2"
     >
       <View className="flex-row items-center">
-        {icon && <View className="pr-2">{icon}</View>}
+        {icon && <View className="mr-2">{icon}</View>}
         <Text tx={text} />
       </View>
       <View className="flex-row items-center">

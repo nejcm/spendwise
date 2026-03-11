@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Button, Image, Input, Modal, Pressable, ScrollView, Text, useModal, View } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import { updateProfile, useAppStore } from '@/lib/store';
-import { AVATARS } from '../../profile';
+import { AVATARS_LIST, getAvatar } from '../../profile';
 import OnboardingLayout from '../layout';
 
 export type SetupStepProps = {
@@ -11,8 +11,6 @@ export type SetupStepProps = {
   onNext: () => void;
   currentStep: number;
 };
-
-const avatars = Object.values(AVATARS);
 
 export default function SetupStep({ onBack, onNext, currentStep }: SetupStepProps) {
   const { name, avatar } = useAppStore((state) => state.profile);
@@ -23,6 +21,7 @@ export default function SetupStep({ onBack, onNext, currentStep }: SetupStepProp
       <OnboardingLayout
         title={translate('onboarding.create_profile')}
         currentStep={currentStep}
+        className="my-auto"
         footer={(
           <>
             <Button
@@ -50,10 +49,10 @@ export default function SetupStep({ onBack, onNext, currentStep }: SetupStepProp
             accessibilityRole="button"
           >
             <Image
-              source={avatars[avatar - 1]}
+              source={getAvatar(avatar)}
               className="size-28 rounded-full"
             />
-            <Text className="mt-2 text-xs text-neutral-400 dark:text-neutral-400">Tap to change</Text>
+            <Text className="mt-2 text-xs text-neutral-400 dark:text-neutral-400">{translate('onboarding.tap_to_change')}</Text>
           </Pressable>
           <Input
             value={name}
@@ -70,10 +69,9 @@ export default function SetupStep({ onBack, onNext, currentStep }: SetupStepProp
       >
         <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 }}>
           <View className="flex-row flex-wrap justify-center gap-3">
-            {avatars.map((imageSource, index) => {
+            {AVATARS_LIST.map((imageSource, index) => {
               const id = index + 1;
               const isSelected = id === avatar;
-
               return (
                 <Pressable
                   key={id}

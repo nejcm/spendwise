@@ -49,10 +49,10 @@ export function SecuritySettingsScreen() {
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-4">
         <View className="mb-6 rounded-xl bg-neutral-50 dark:bg-neutral-800">
-          <View className="flex-row items-center justify-between p-4">
+          <View className="flex-row items-center justify-between gap-4 p-4">
             <View className="flex-1">
               <Text className="font-medium">{translate('security.app_lock')}</Text>
-              <Text className="text-sm text-neutral-500">{translate('security.app_lock_desc')}</Text>
+              <Text className="text-xs text-neutral-500">{translate('security.app_lock_desc')}</Text>
             </View>
             <Switch
               value={lockEnabled}

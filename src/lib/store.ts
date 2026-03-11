@@ -1,10 +1,12 @@
 import type { StateStorage } from 'zustand/middleware';
 
+import type { CurrencyFormat, DateFormat, NumberFormat } from '@/features/formatting/constants';
 import type { Language } from '@/features/languages/types';
+import type { ThemeType } from '@/features/settings/theme';
 import { createMMKV } from 'react-native-mmkv';
+
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
-
 import { createSelectors } from '@/lib/utils';
 
 export type TokenType = {
@@ -12,7 +14,6 @@ export type TokenType = {
   refresh: string;
 };
 
-export type ThemeType = 'light' | 'dark' | 'system';
 export type ColorThemeType = 'red' | 'blue' | 'green' | 'purple' | 'orange' | 'black' | 'white';
 
 const mmkv = createMMKV();
@@ -35,6 +36,10 @@ export type AppState = {
 
   // Preferences
   currency: string;
+  currencyFormat: CurrencyFormat;
+  dateFormat: DateFormat;
+  numberFormat: NumberFormat;
+  monthStartDay: number;
   theme: ThemeType;
   colorTheme: ColorThemeType;
   isFirstTime: boolean;
@@ -55,6 +60,10 @@ const _useAppStore = create<AppState>()(
       token: null,
       authStatus: 'idle',
       currency: 'EUR',
+      currencyFormat: 'symbol-after',
+      dateFormat: 'DD/MM/YYYY',
+      numberFormat: 'stop',
+      monthStartDay: 1,
       theme: 'system',
       colorTheme: 'red',
       isFirstTime: true,
@@ -69,6 +78,9 @@ const _useAppStore = create<AppState>()(
         profile: state.profile,
         token: state.token,
         currency: state.currency,
+        currencyFormat: state.currencyFormat,
+        dateFormat: state.dateFormat,
+        monthStartDay: state.monthStartDay,
         theme: state.theme,
         isFirstTime: state.isFirstTime,
         language: state.language,
@@ -91,6 +103,7 @@ export function setProfile(profile: AppState['profile']) {
 export function updateProfile(profile: Partial<AppState['profile']>) {
   return _useAppStore.setState((state) => ({ profile: { ...state.profile, ...profile } }));
 }
+export const selectProfile = (state: AppState) => state.profile;
 
 // Auth actions
 export function signIn(token: TokenType) {
@@ -110,6 +123,22 @@ export function hydrateAuth() {
 // Preference actions
 export function setCurrency(currency: string) {
   return _useAppStore.setState({ currency });
+}
+
+export function setCurrencyFormat(currencyFormat: AppState['currencyFormat']) {
+  return _useAppStore.setState({ currencyFormat });
+}
+
+export function setDateFormat(dateFormat: AppState['dateFormat']) {
+  return _useAppStore.setState({ dateFormat });
+}
+
+export function setNumberFormat(numberFormat: AppState['numberFormat']) {
+  return _useAppStore.setState({ numberFormat });
+}
+
+export function setMonthStartDay(monthStartDay: number) {
+  return _useAppStore.setState({ monthStartDay });
 }
 
 export function setTheme(theme: ThemeType) {

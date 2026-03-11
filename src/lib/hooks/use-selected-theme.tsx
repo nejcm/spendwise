@@ -1,4 +1,4 @@
-import type { ThemeType } from '@/lib/store';
+import type { ThemeType } from '@/features/settings/theme';
 import * as React from 'react';
 
 import { Uniwind, useUniwind } from 'uniwind';

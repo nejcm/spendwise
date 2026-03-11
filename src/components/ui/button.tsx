@@ -7,13 +7,18 @@ import { tv } from 'tailwind-variants';
 
 const button = tv({
   slots: {
-    container: 'flex flex-row items-center justify-center rounded-md px-4',
+    container: 'flex flex-row items-center justify-center rounded-md px-4 text-black dark:text-white',
     label: 'font-family-sans text-base font-semibold',
     indicator: 'h-6 text-white',
   },
 
   variants: {
     variant: {
+      unstyled: {
+        container: 'bg-transparent',
+        label: 'text-black dark:text-white',
+        indicator: 'text-black dark:text-white',
+      },
       default: {
         container: 'bg-black dark:bg-white',
         label: 'text-white dark:text-black',

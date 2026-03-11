@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 
 import { Button, Input, Select, Text, View } from '@/components/ui';
+import { useCreateAccount } from '@/features/accounts/api';
 import { translate } from '@/lib/i18n';
 import { setCurrency } from '@/lib/store';
 import { CURRENCIES } from '../../currencies';
@@ -23,6 +24,8 @@ export type SetupStepProps = {
 };
 
 export default function SetupStep({ onBack, onNext }: SetupStepProps) {
+  const createAccount = useCreateAccount();
+
   const [selectedCurrency, setSelectedCurrency] = useState<string | number>('EUR');
   const [accountName, setAccountName] = useState('Cash');
   const [accountType, setAccountType] = useState<string | number>('cash');
@@ -87,6 +90,7 @@ export default function SetupStep({ onBack, onNext }: SetupStepProps) {
           <Button
             label={translate('common.next')}
             onPress={handleFinish}
+            loading={createAccount.isPending}
             className="flex-1"
             size="lg"
           />

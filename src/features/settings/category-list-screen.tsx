@@ -29,7 +29,7 @@ export function CategoryListScreen() {
       color: ACCOUNT_COLORS[0],
     },
     validators: {
-      onChange: schema as any,
+      onChange: schema,
     },
     onSubmit: async ({ value }) => {
       createCategory.mutate(

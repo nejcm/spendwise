@@ -1,5 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import type { CategoryFormData } from '../categories/types';
 import type {
   Category,
   MonthSummary,
@@ -9,8 +10,8 @@ import type {
 import type { Account, AccountWithBalance } from '@/features/accounts/types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
-import { useSQLiteContext } from 'expo-sqlite';
 
+import { useSQLiteContext } from 'expo-sqlite';
 import { amountToCents } from '@/lib/format';
 import { generateId } from '@/lib/sqlite';
 
@@ -101,13 +102,6 @@ export function useMonthSummary(month: string) {
 }
 
 // ─── Category Mutations ───
-
-type CategoryFormData = {
-  name: string;
-  type: 'expense' | 'income';
-  color: string;
-  sort_order: number;
-};
 
 export function useCreateCategory() {
   const db = useSQLiteContext();

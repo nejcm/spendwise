@@ -89,7 +89,7 @@ export default antfu(
   {
     files: ['**/*.ts', '**/*.tsx'],
     rules: {
-      'ts/consistent-type-definitions': ['error', 'type'], // Prefer type over interface
+      'ts/consistent-type-definitions': 'off', // Prefer type over interface
       'react-hooks/refs': 'off', // Allow useRef without exhaustive-deps
       'ts/consistent-type-imports': [
         'warn',

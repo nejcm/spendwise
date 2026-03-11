@@ -28,6 +28,7 @@ export type AccountFormProps = {
 const defaultValues: AccountFormData = {
   name: '',
   type: 'checking',
+  description: null,
   initial_balance: '0',
   color: ACCOUNT_COLORS[0],
   currency: 'USD',

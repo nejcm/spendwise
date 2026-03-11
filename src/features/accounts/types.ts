@@ -5,9 +5,11 @@ export type AccountType = 'cash' | 'checking' | 'savings' | 'credit_card' | 'inv
 export type Account = {
   id: string;
   name: string;
+  description: string | null;
   type: AccountType;
   currency: CurrencyKey;
   initial_balance: number;
+  budget?: number | null; // credit limit or budget cap
   icon: string | null;
   color: string | null;
   is_archived: number;
@@ -24,7 +26,9 @@ export type AccountFormData = {
   name: string;
   type: AccountType;
   currency: string;
+  description: string | null;
   initial_balance: string;
+  budget?: string | null;
   icon: string | null;
   color: string | null;
 };

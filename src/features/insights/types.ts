@@ -2,6 +2,7 @@ export type CategorySpend = {
   category_id: string;
   category_name: string;
   category_color: string;
+  category_icon: string;
   total: number;
   percentage: number;
 };

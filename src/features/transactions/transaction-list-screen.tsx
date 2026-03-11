@@ -6,7 +6,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 
 import { FocusAwareStatusBar, Text } from '@/components/ui';
-import { formatMonthYear } from '@/lib/format';
+import { formatMonthYear } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 
 import { useTransactions } from './api';

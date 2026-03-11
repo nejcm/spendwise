@@ -36,7 +36,7 @@ export function GoalListScreen() {
         {completed.length > 0 && (
           <>
             <Text className="mt-4 mb-2 text-sm font-semibold text-neutral-500">
-              {translate('goals.completed')}
+              {translate('common.completed')}
             </Text>
             {completed.map((goal) => (
               <GoalCard

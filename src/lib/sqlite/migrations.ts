@@ -1,39 +1,53 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-const DATABASE_VERSION = 5;
+const DATABASE_VERSION = 1;
+
+/**
+ * Drops all tables and sets the user version to 0.
+ */
+export async function dropDb(db: SQLiteDatabase): Promise<void> {
+  await db.execAsync(`
+    DROP TABLE IF EXISTS _meta;
+    DROP TABLE IF EXISTS accounts;
+    DROP TABLE IF EXISTS categories;
+    DROP TABLE IF EXISTS transactions;
+    DROP TABLE IF EXISTS budgets;
+    DROP TABLE IF EXISTS budget_lines;
+    DROP TABLE IF EXISTS recurring_rules;
+    DROP TABLE IF EXISTS goals;
+  `);
+  await db.execAsync(`PRAGMA user_version = 0`);
+}
 
 /**
  * Runs on first open. Sets WAL mode and runs schema migrations via PRAGMA user_version.
  * Bump DATABASE_VERSION and add a migration block when you change the schema.
  */
-export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
+export async function migrateDb(db: SQLiteDatabase): Promise<void> {
   const row = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
   const currentDbVersion = row?.user_version ?? 0;
 
-  if (currentDbVersion >= DATABASE_VERSION) {
-    return;
-  }
+  if (currentDbVersion >= DATABASE_VERSION) return;
 
   await db.execAsync('PRAGMA journal_mode = \'wal\'');
   await db.execAsync('PRAGMA foreign_keys = ON');
 
-  if (currentDbVersion === 0) {
-    await db.execAsync(`
+  await db.execAsync(`
       CREATE TABLE IF NOT EXISTS _meta (
         key TEXT PRIMARY KEY NOT NULL,
         value TEXT
       );
     `);
-  }
 
-  if (currentDbVersion < 2) {
-    await db.execAsync(`
+  await db.execAsync(`
       CREATE TABLE IF NOT EXISTS accounts (
         id TEXT PRIMARY KEY NOT NULL,
         name TEXT NOT NULL,
+        description TEXT,
         type TEXT NOT NULL CHECK(type IN ('cash','checking','savings','credit_card','investment','other')),
         currency TEXT NOT NULL DEFAULT 'EUR',
         initial_balance INTEGER NOT NULL DEFAULT 0,
+        budget INTEGER,
         icon TEXT,
         color TEXT,
         is_archived INTEGER NOT NULL DEFAULT 0,
@@ -47,9 +61,8 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
         name TEXT NOT NULL,
         icon TEXT,
         color TEXT NOT NULL,
+        default_currency TEXT NOT NULL DEFAULT 'EUR',
         type TEXT NOT NULL CHECK(type IN ('income','expense')),
-        parent_id TEXT REFERENCES categories(id),
-        is_default INTEGER NOT NULL DEFAULT 0,
         sort_order INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
       );
@@ -63,8 +76,6 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
         currency TEXT NOT NULL DEFAULT 'EUR',
         date TEXT NOT NULL,
         note TEXT,
-        payee TEXT,
-        transfer_id TEXT,
         created_at TEXT NOT NULL DEFAULT (datetime('now')),
         updated_at TEXT NOT NULL DEFAULT (datetime('now'))
       );
@@ -72,13 +83,7 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
       CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date DESC);
       CREATE INDEX IF NOT EXISTS idx_transactions_account ON transactions(account_id);
       CREATE INDEX IF NOT EXISTS idx_transactions_category ON transactions(category_id);
-    `);
 
-    await seedDefaultCategories(db);
-  }
-
-  if (currentDbVersion < 3) {
-    await db.execAsync(`
       CREATE TABLE IF NOT EXISTS budgets (
         id TEXT PRIMARY KEY NOT NULL,
         name TEXT NOT NULL,
@@ -96,11 +101,7 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
         amount INTEGER NOT NULL,
         UNIQUE(budget_id, category_id)
       );
-    `);
-  }
 
-  if (currentDbVersion < 4) {
-    await db.execAsync(`
       CREATE TABLE IF NOT EXISTS recurring_rules (
         id TEXT PRIMARY KEY NOT NULL,
         account_id TEXT NOT NULL REFERENCES accounts(id),
@@ -117,12 +118,6 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
       );
 
-      ALTER TABLE transactions ADD COLUMN recurring_rule_id TEXT REFERENCES recurring_rules(id);
-    `);
-  }
-
-  if (currentDbVersion < 5) {
-    await db.execAsync(`
       CREATE TABLE IF NOT EXISTS goals (
         id TEXT PRIMARY KEY NOT NULL,
         name TEXT NOT NULL,
@@ -135,15 +130,13 @@ export async function migrateDbIfNeeded(db: SQLiteDatabase): Promise<void> {
         created_at TEXT NOT NULL DEFAULT (datetime('now')),
         updated_at TEXT NOT NULL DEFAULT (datetime('now'))
       );
-
-      ALTER TABLE transactions ADD COLUMN goal_id TEXT REFERENCES goals(id);
     `);
-  }
 
+  await seedDefaults(db);
   await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
 }
 
-async function seedDefaultCategories(db: SQLiteDatabase): Promise<void> {
+async function seedDefaults(db: SQLiteDatabase): Promise<void> {
   const existing = await db.getFirstAsync<{ count: number }>(
     'SELECT COUNT(*) as count FROM categories WHERE is_default = 1',
   );
@@ -154,74 +147,74 @@ async function seedDefaultCategories(db: SQLiteDatabase): Promise<void> {
     {
       id: 'cat_food',
       name: 'Food & Dining',
-      icon: 'utensils',
+      icon: '🍽️',
       color: '#FF6B6B',
     },
     {
       id: 'cat_transport',
       name: 'Transportation',
-      icon: 'car',
+      icon: '🚗',
       color: '#4ECDC4',
     },
-    { id: 'cat_housing', name: 'Housing', icon: 'home', color: '#45B7D1' },
-    { id: 'cat_utilities', name: 'Utilities', icon: 'zap', color: '#96CEB4' },
+    { id: 'cat_housing', name: 'Housing', icon: '🏠', color: '#45B7D1' },
+    { id: 'cat_utilities', name: 'Utilities', icon: '💡', color: '#96CEB4' },
     {
       id: 'cat_entertainment',
       name: 'Entertainment',
-      icon: 'film',
+      icon: '🎬',
       color: '#FFEAA7',
     },
     {
       id: 'cat_shopping',
       name: 'Shopping',
-      icon: 'shopping-bag',
+      icon: '🛒',
       color: '#DDA0DD',
     },
     {
       id: 'cat_healthcare',
       name: 'Healthcare',
-      icon: 'heart',
+      icon: '🩺',
       color: '#FF8A80',
     },
-    { id: 'cat_education', name: 'Education', icon: 'book', color: '#82B1FF' },
+    { id: 'cat_education', name: 'Education', icon: '🎓', color: '#82B1FF' },
     {
       id: 'cat_personal',
       name: 'Personal Care',
-      icon: 'user',
+      icon: '🧴',
       color: '#EA80FC',
     },
     {
       id: 'cat_subscriptions',
       name: 'Subscriptions',
-      icon: 'repeat',
+      icon: '🔁',
       color: '#B388FF',
     },
     {
       id: 'cat_other_expense',
       name: 'Other',
-      icon: 'more-horizontal',
+      icon: '📦',
       color: '#90A4AE',
     },
   ];
 
   const incomeCategories = [
-    { id: 'cat_salary', name: 'Salary', icon: 'briefcase', color: '#66BB6A' },
+    { id: 'cat_salary', name: 'Salary', icon: '💼', color: '#66BB6A' },
     {
       id: 'cat_freelance',
       name: 'Freelance',
-      icon: 'laptop',
+      icon: '💻',
       color: '#26A69A',
     },
     {
       id: 'cat_investment',
       name: 'Investment',
-      icon: 'trending-up',
+      icon: '📈',
       color: '#42A5F5',
     },
     {
       id: 'cat_other_income',
       name: 'Other Income',
-      icon: 'plus-circle',
+      icon: '💰',
       color: '#78909C',
     },
   ];

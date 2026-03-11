@@ -7,7 +7,7 @@ import { useMemo, useState } from 'react';
 import { RefreshControl, View } from 'react-native';
 import { EmptyList, Text } from '@/components/ui';
 
-import { formatDate } from '@/lib/format';
+import { formatDate } from '@/features/formatting/helpers';
 import { TransactionCard } from './transaction-card';
 
 type Props = {

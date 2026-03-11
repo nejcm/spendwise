@@ -6,6 +6,14 @@ const config = getDefaultConfig(__dirname);
 
 config.resolver.assetExts = [...(config.resolver.assetExts || []), 'wasm'];
 
+config.server.enhanceMiddleware = (middleware) => {
+  return (req, res, next) => {
+    res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    middleware(req, res, next);
+  };
+};
+
 // Force CJS builds for packages that use import.meta in their ESM builds,
 // which Hermes does not support.
 const ESM_CJS_OVERRIDES = {

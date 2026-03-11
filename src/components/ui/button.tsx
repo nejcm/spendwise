@@ -95,9 +95,11 @@ const button = tv({
 });
 
 type ButtonVariants = VariantProps<typeof button>;
-type Props = {
+export type ButtonProps = {
   label?: string;
   loading?: boolean;
+  iconLeft?: React.ReactNode;
+  iconRight?: React.ReactNode;
   className?: string;
   textClassName?: string;
 } & ButtonVariants
@@ -105,6 +107,8 @@ type Props = {
 
 export function Button({
   ref,
+  iconLeft,
+  iconRight,
   label: text,
   loading = false,
   variant = 'default',
@@ -114,7 +118,7 @@ export function Button({
   testID,
   textClassName = '',
   ...props
-}: Props & { ref?: React.RefObject<View | null> }) {
+}: ButtonProps & { ref?: React.RefObject<View | null> }) {
   const styles = React.useMemo(() => button({ variant, disabled, size }), [variant, disabled, size]);
 
   return (
@@ -125,30 +129,30 @@ export function Button({
       ref={ref}
       testID={testID}
     >
-      {props.children
-        ? (
-            props.children
-          )
-        : (
-            <>
-              {loading
-                ? (
-                    <ActivityIndicator
-                      size="small"
-                      className={styles.indicator()}
-                      testID={testID ? `${testID}-activity-indicator` : undefined}
-                    />
-                  )
-                : (
-                    <Text
-                      testID={testID ? `${testID}-label` : undefined}
-                      className={styles.label({ className: textClassName })}
-                    >
-                      {text}
-                    </Text>
-                  )}
-            </>
-          )}
+      {props.children || (
+        <>
+          {loading
+            ? (
+                <ActivityIndicator
+                  size="small"
+                  className={styles.indicator()}
+                  testID={testID ? `${testID}-activity-indicator` : undefined}
+                />
+              )
+            : (
+                <>
+                  {iconLeft}
+                  <Text
+                    testID={testID ? `${testID}-label` : undefined}
+                    className={styles.label({ className: textClassName })}
+                  >
+                    {text}
+                  </Text>
+                  {iconRight}
+                </>
+              )}
+        </>
+      )}
     </Pressable>
   );
 }

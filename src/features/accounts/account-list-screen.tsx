@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { Pressable, View } from 'react-native';
 import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 import { useAccountsWithBalance, useCreateAccount, useUpdateAccount } from './api';

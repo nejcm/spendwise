@@ -46,7 +46,8 @@
     "test:ci": "pnpm run test --coverage",
     "test:watch": "pnpm run test --watch",
     "install-maestro": "curl -Ls 'https://get.maestro.mobile.dev' | bash",
-    "e2e-test": "maestro test .maestro/ -e APP_ID=com.obytes.development"
+    "e2e-test": "maestro test .maestro/ -e APP_ID=com.obytes.development",
+    "knip": "knip"
   },
   "dependencies": {
     "@expo-google-fonts/roboto": "~0.4.3",
@@ -144,7 +145,8 @@
     "prettier-plugin-tailwindcss": "~0.7.2",
     "tailwindcss": "4.2.1",
     "tsx": "~4.21.0",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "knip": "~5.86.0"
   },
   "expo": {
     "doctor": {

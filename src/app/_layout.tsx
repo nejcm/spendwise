@@ -23,13 +23,13 @@ import {
 import { LockScreen } from '@/features/security/lock-screen';
 import { APIProvider } from '@/lib/api';
 import { loadSelectedTheme } from '@/lib/hooks/use-selected-theme';
-import { migrateDbIfNeeded } from '@/lib/sqlite';
+import { migrateDb } from '@/lib/sqlite';
 import { setLockEnabled, useAppStore } from '../lib/store';
 // Import  global CSS file
 import '../global.css';
 
 async function initDb(db: SQLiteDatabase) {
-  await migrateDbIfNeeded(db);
+  await migrateDb(db);
   await setupNotifications();
   await checkBudgetAlerts(db);
   await checkUpcomingBills(db);

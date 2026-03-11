@@ -6,7 +6,7 @@ import { View } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
 import { Text } from '@/components/ui';
 
-import { centsToAmount } from '@/lib/format';
+import { centsToAmount } from '@/features/formatting/helpers';
 
 type Props = {
   data: MonthlyTotals[];

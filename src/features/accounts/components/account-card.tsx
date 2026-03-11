@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
 import { Text } from '@/components/ui';
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency } from '@/features/formatting/helpers';
 
 import { useAppStore } from '@/lib/store';
 import { ACCOUNT_TYPE_LABELS } from '../types';

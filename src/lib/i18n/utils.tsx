@@ -4,12 +4,13 @@ import type { resources } from './resources';
 import type { RecursiveKeyOf } from './types';
 import { memoize } from 'es-toolkit/compat';
 import i18n from 'i18next';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { I18nManager, NativeModules, Platform } from 'react-native';
 import RNRestart from 'react-native-restart';
 
 import { getAppState, setLanguage, useAppStore } from '@/lib/store';
+import { DEFAULT_LANGUAGE, LANGUAGES_OPTIONS } from '../../features/languages';
 
 type DefaultLocale = typeof resources.en.translation;
 export type TxKeyPath = RecursiveKeyOf<DefaultLocale>;
@@ -48,5 +49,7 @@ export function useSelectedLanguage() {
     [],
   );
 
-  return { language: language as Language, setLanguage: setLang };
+  const selected = useMemo(() => ((language ? LANGUAGES_OPTIONS.find((lang) => lang.value === language) : undefined) || DEFAULT_LANGUAGE), [language]);
+
+  return { language: language as Language, selected, setLanguage: setLang };
 }

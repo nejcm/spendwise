@@ -1,5 +1,4 @@
 import type { Language } from './types';
-import { translate } from '../../lib/i18n';
 
 export type LanguageOption = {
   name: string;
@@ -8,7 +7,7 @@ export type LanguageOption = {
 };
 
 export const LANGUAGES: LanguageOption[] = [
-  { name: translate('settings.english'), value: 'en', image: require('../../../assets/flags/us.svg') },
+  { name: 'English', value: 'en', image: require('../../../assets/flags/us.svg') },
 ];
 
 export const DEFAULT_LANGUAGE = LANGUAGES[0];

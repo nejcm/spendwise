@@ -1,10 +1,10 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { usePathname, useRouter } from 'expo-router';
-import * as React from 'react';
+import { BellIcon, Home, PlusIcon, Receipt, UserIcon } from 'lucide-react-native';
 
+import * as React from 'react';
 import { Platform, Pressable, View } from 'react-native';
-import { BellIcon, Home, PlusIcon, Receipt, UserIcon } from '@/components/ui/icons';
 import { QuickAddSheet } from '../../features/transactions/components/quick-add-sheet';
 
 type TabConfig = {
@@ -23,7 +23,7 @@ const TABS: TabConfig[] = [
   },
   {
     name: '__add__',
-    icon: () => <PlusIcon />,
+    icon: (color) => <PlusIcon color={color} size={24} strokeWidth={2} />,
   },
   {
     name: 'budgets',
@@ -37,7 +37,7 @@ const TABS: TabConfig[] = [
 
 export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   const router = useRouter();
-  const pathname = usePathname() ?? '';
+  const pathname = usePathname() || '';
   const addSheetRef = React.useRef<BottomSheetModal>(null);
 
   return (
@@ -72,7 +72,7 @@ export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
                     opacity: pressed ? 0.85 : 1,
                   })}
                 >
-                  <PlusIcon />
+                  {tab.icon('#ffffff')}
                 </Pressable>
               </View>
             );

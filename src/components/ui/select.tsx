@@ -4,7 +4,7 @@ import type { ImageSource } from 'expo-image';
 import type { PressableProps } from 'react-native';
 import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { FlashList } from '@shopify/flash-list';
-import { Check } from 'lucide-react-native';
+import { Check, ChevronDown } from 'lucide-react-native';
 import * as React from 'react';
 import { Platform, Pressable, View } from 'react-native';
 
@@ -12,7 +12,6 @@ import { cn, tv } from 'tailwind-variants';
 import { useUniwind } from 'uniwind';
 
 import colors from '@/components/ui/colors';
-import { CaretDown } from '@/components/ui/icons';
 import { Image } from './image';
 import { Modal, useModal } from './modal';
 import { Text } from './text';
@@ -25,7 +24,6 @@ const selectTv = tv({
       'border-grey-50 mt-0 flex-row items-center justify-center rounded-md border px-4 py-3 dark:border-neutral-500 dark:bg-neutral-800',
     inputValue: 'dark:text-neutral-100',
   },
-
   variants: {
     size: {
       sm: {
@@ -94,7 +92,7 @@ const Option = React.memo(
   }) => {
     return (
       <Pressable
-        className="flex-row items-center border-b border-neutral-300 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-800"
+        className="flex-row items-center border-b border-neutral-200 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-800"
         {...props}
       >
         {image && <Image source={image} className="mr-3 size-8 rounded-full" />}
@@ -236,7 +234,7 @@ export function Select(props: SelectProps) {
               {selectedOption?.label ?? placeholder ?? ''}
             </Text>
           </View>
-          <CaretDown color={iconColor} />
+          <ChevronDown color={iconColor} />
         </Pressable>
         {error && (
           <Text testID={`${testID}-error`} className="text-sm text-danger-300 dark:text-danger-600">

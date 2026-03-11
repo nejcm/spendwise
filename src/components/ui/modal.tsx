@@ -76,7 +76,7 @@ export function Modal({
   const renderHandleComponent = React.useCallback(
     () => (
       <>
-        <View className="my-2 h-1 w-12 self-center rounded-lg bg-gray-300 dark:bg-gray-700" />
+        <View className={`mt-2 ${title ? 'mb-2' : 'mb-8'} h-1 w-12 self-center rounded-lg bg-gray-300 dark:bg-gray-700`} />
         <ModalHeader title={title} dismiss={modal.dismiss} />
       </>
     ),

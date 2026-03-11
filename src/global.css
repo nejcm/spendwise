@@ -2,7 +2,6 @@
 @import 'tailwindcss';
 @import 'uniwind';
 
-/* Define your theme in CSS (replaces tailwind.config.js) */
 @theme {
   /* Font families */
   --font-family-sans: 'Roboto', ui-sans-serif, system-ui, sans-serif;
@@ -112,23 +111,57 @@
   --color-subtle-dark: #63605d;
 }
 
-/* Dark mode colors */
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-background: #0a0a0a;
-    --color-foreground: #fafafa;
+/* Theme specific variables */
+@layer theme {
+  :root {
+    @variant light {
+      /* Semantic colors - using primary for main brand color */
+      --color-background: #ffffff;
+      --color-foreground: #0a0a0a;
 
-    --color-card: #1a1a1a;
-    --color-card-foreground: #fafafa;
+      --color-card: #ffffff;
+      --color-card-foreground: #0a0a0a;
 
-    --color-surface: #111111;
-    --color-surface-foreground: #fafafa;
+      --color-surface: #f8f8f8;
+      --color-surface-foreground: #0a0a0a;
 
-    --color-muted: #262626;
-    --color-muted-foreground: #a3a3a3;
+      --color-muted: #f5f5f5;
+      --color-muted-foreground: #737373;
 
-    --color-border: #2e2e2e;
-    --color-input: #2e2e2e;
+      --color-border: #e5e5e5;
+      --color-input: #e5e5e5;
+      --color-ring: #ff6c00;
+
+      --color-destructive: #ef4444;
+      --color-destructive-foreground: #ffffff;
+
+      --color-subtle: #f7f0e9;
+      --color-subtle-dark: #63605d;
+    }
+    @variant dark {
+      /* Semantic colors - using primary for main brand color */
+      --color-background: #151921;
+      --color-foreground: #fafafa;
+
+      --color-card: #1a1a1a;
+      --color-card-foreground: #fafafa;
+
+      --color-surface: #111111;
+      --color-surface-foreground: #fafafa;
+
+      --color-muted: #262626;
+      --color-muted-foreground: #a3a3a3;
+
+      --color-border: #2e2e2e;
+      --color-input: #2e2e2e;
+      --color-ring: #ff6c00;
+
+      --color-destructive: #ef4444;
+      --color-destructive-foreground: #ffffff;
+
+      --color-subtle: #f7f0e9;
+      --color-subtle-dark: #63605d;
+    }
   }
 }
 

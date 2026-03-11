@@ -4,12 +4,17 @@ import { Button, Image, SafeAreaView, Text, View } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import IntroNav from '../Nav';
 
-export default function WelcomeStep({ onNext }: { onNext: () => void }) {
+export type WelcomeStepProps = {
+  onNext: () => void;
+  currentStep: number;
+};
+
+export default function WelcomeStep({ onNext, currentStep }: WelcomeStepProps) {
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-neutral-950">
       <View className="flex-[1.15] bg-subtle px-6 pt-8 pb-12">
         <View className="mb-10 flex-row items-center justify-center gap-3">
-          <Text className="text-3xl font-bold tracking-tight text-black dark:text-black">{translate('onboarding.title')}</Text>
+          <Text className="text-3xl font-bold tracking-tight text-subtle-dark dark:text-subtle-dark">{translate('onboarding.title')}</Text>
         </View>
 
         <View className="flex-1 items-center justify-center">
@@ -23,7 +28,7 @@ export default function WelcomeStep({ onNext }: { onNext: () => void }) {
 
       <View className="flex-1 justify-between px-6 py-8 dark:bg-neutral-950">
         <View>
-          <IntroNav current={0} />
+          <IntroNav current={currentStep} />
 
           <Text className="mb-4 text-center text-[1.75rem] font-bold text-black dark:text-white">
             {translate('onboarding.welcome_headline')}

@@ -12,25 +12,25 @@ const inputTv = tv({
     container: '',
     label: 'text-grey-100 mb-1 text-sm font-medium dark:text-neutral-100',
     input:
-      'mt-0 rounded-md border border-neutral-300 bg-neutral-100 px-4 py-3 font-family-sans text-base/5 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white',
+      'mt-0 rounded-md border border-neutral-300 bg-white px-4 py-3 font-family-sans text-base/5 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white',
   },
   variants: {
     size: {
       sm: {
         label: 'text-xs',
-        input: 'px-3 py-2 text-sm/5',
+        input: 'px-3 py-2 text-sm/tight',
       },
       default: {
         label: 'text-sm',
-        input: 'px-4 py-3 text-base/5',
+        input: 'px-4 py-2 text-base/tight',
       },
       lg: {
         label: 'text-md',
-        input: 'px-5 py-4 text-lg/6',
+        input: 'px-5 py-3 text-xl/tight',
       },
       xl: {
         label: 'text-lg',
-        input: 'px-6 py-5 text-xl/6',
+        input: 'px-6 py-3 text-2xl/tight',
       },
     },
     focused: {

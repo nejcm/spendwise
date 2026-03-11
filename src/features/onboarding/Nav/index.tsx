@@ -1,7 +1,7 @@
 /* eslint-disable react/no-array-index-key */
 import { View } from '@/components/ui';
 
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 
 export type IntroNavProps = {
   current: number;

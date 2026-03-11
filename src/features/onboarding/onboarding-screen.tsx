@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { FocusAwareStatusBar, View } from '@/components/ui';
 import { setIsFirstTime } from '@/lib/store';
+import LanguageStep from './Language';
 import SettingsStep from './Settings';
 import SetupStep from './Setup';
 import WelcomeStep from './Welcome';
@@ -20,9 +21,10 @@ export function OnboardingScreen() {
   return (
     <View className="flex h-full bg-white dark:bg-neutral-950">
       <FocusAwareStatusBar />
-      {step === 0 && <WelcomeStep onNext={() => setStep(1)} />}
-      {step === 1 && <SetupStep onBack={() => setStep(0)} onNext={() => setStep(2)} />}
-      {step === 2 && <SettingsStep onBack={() => setStep(1)} onNext={onFinish} />}
+      {step === 0 && <WelcomeStep onNext={() => setStep(1)} currentStep={0} />}
+      {step === 1 && <LanguageStep onBack={() => setStep(0)} onNext={() => setStep(2)} currentStep={1} />}
+      {step === 2 && <SetupStep onBack={() => setStep(1)} onNext={() => setStep(3)} currentStep={2} />}
+      {step === 3 && <SettingsStep onBack={() => setStep(2)} onNext={onFinish} currentStep={3} />}
     </View>
   );
 }

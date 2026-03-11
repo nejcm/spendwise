@@ -39,7 +39,6 @@ export function TransactionDetailScreen() {
           amount: String(centsToAmount(transaction.amount)),
           category_id: transaction.category_id,
           note: transaction.note || '',
-          payee: transaction.payee || '',
         }}
         categories={categories}
         isSaving={updateMut.isPending}
@@ -55,7 +54,6 @@ export function TransactionDetailScreen() {
               account_id: transaction.account_id,
               date: transaction.date,
               note: data.note,
-              payee: data.payee,
             },
           });
           setIsEditing(false);
@@ -96,7 +94,6 @@ export function TransactionDetailScreen() {
 
       <View className="gap-4 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
         <DetailRow label={translate('transactions.category')} value={transaction.category_name || '-'} />
-        <DetailRow label={translate('transactions.payee')} value={transaction.payee || '-'} />
         <DetailRow label={translate('transactions.note')} value={transaction.note || '-'} />
         <DetailRow label={translate('transactions.account')} value={accountName} />
       </View>

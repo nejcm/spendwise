@@ -1,8 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import type { CategoryFormData } from '../categories/types';
+import type { Category, CategoryFormData } from '../categories/types';
 import type {
-  Category,
   MonthSummary,
   TransactionFormData,
   TransactionWithCategory,
@@ -283,9 +282,9 @@ async function createTransaction(db: SQLiteDatabase, data: TransactionFormData):
   const amountCents = amountToCents(Number.parseFloat(data.amount) || 0);
 
   await db.runAsync(
-    `INSERT INTO transactions (id, account_id, category_id, type, amount, date, note, payee)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    [id, data.account_id, data.category_id, data.type, amountCents, data.date, data.note || null, data.payee || null],
+    `INSERT INTO transactions (id, account_id, category_id, type, amount, date, note)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [id, data.account_id, data.category_id, data.type, amountCents, data.date, data.note || null],
   );
 
   return id;
@@ -296,9 +295,9 @@ async function updateTransaction(db: SQLiteDatabase, id: string, data: Transacti
 
   await db.runAsync(
     `UPDATE transactions
-     SET account_id = ?, category_id = ?, type = ?, amount = ?, date = ?, note = ?, payee = ?, updated_at = datetime('now')
+     SET account_id = ?, category_id = ?, type = ?, amount = ?, date = ?, note = ?, updated_at = datetime('now')
      WHERE id = ?`,
-    [data.account_id, data.category_id, data.type, amountCents, data.date, data.note || null, data.payee || null, id],
+    [data.account_id, data.category_id, data.type, amountCents, data.date, data.note || null, id],
   );
 }
 

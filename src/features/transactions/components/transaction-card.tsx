@@ -14,7 +14,7 @@ type Props = {
 export const TransactionCard = React.memo(({ transaction, onPress }: Props) => {
   const currency = useAppStore.use.currency();
   const isIncome = transaction.type === 'income';
-  const displayName = transaction.payee || transaction.category_name || 'Unknown';
+  const displayName = transaction.category_name || 'Unknown';
 
   return (
     <Pressable className="flex-row items-center px-4 py-3" onPress={onPress}>

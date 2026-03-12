@@ -1,11 +1,10 @@
-import { Redirect, SplashScreen, Tabs } from 'expo-router';
+import { Redirect, SplashScreen, Stack } from 'expo-router';
 import * as React from 'react';
 import { useCallback, useEffect } from 'react';
 
-import { CustomTabBar } from '@/components/ui/custom-tab-bar';
 import { useAppStore } from '@/lib/store';
 
-export default function TabLayout() {
+export default function AppLayout() {
   const isFirstTime = useAppStore.use.isFirstTime();
   const hideSplash = useCallback(async () => {
     await SplashScreen.hideAsync();
@@ -23,47 +22,12 @@ export default function TabLayout() {
   }
 
   return (
-    <Tabs tabBar={(props) => <CustomTabBar {...props} />}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarButtonTestID: 'home-tab',
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="categories"
-        options={{
-          title: 'Categories',
-          tabBarButtonTestID: 'categories-tab',
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="stats"
-        options={{
-          title: 'Stats',
-          tabBarButtonTestID: 'stats-tab',
-          headerShown: false,
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          headerShown: false,
-          tabBarButtonTestID: 'settings-tab',
-        }}
-      />
-      <Tabs.Screen
-        name="transactions"
-        options={{
-          title: 'Transactions',
-          headerShown: false,
-          tabBarButtonTestID: 'transactions-tab',
-        }}
-      />
-    </Tabs>
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="categories" />
+      <Stack.Screen name="stats" />
+      <Stack.Screen name="settings" />
+      <Stack.Screen name="transactions" />
+    </Stack>
   );
 }

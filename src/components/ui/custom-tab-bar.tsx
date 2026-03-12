@@ -1,5 +1,4 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
-import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { usePathname, useRouter } from 'expo-router';
 import { Home, LayoutGrid, PieChart, PlusIcon, UserIcon } from 'lucide-react-native';
 
@@ -9,40 +8,52 @@ import { QuickAddSheet } from '../../features/transactions/components/quick-add-
 
 type TabConfig = {
   name: string;
+  path: string;
   icon: (color: string) => React.ReactNode;
 };
 
 const TABS: TabConfig[] = [
   {
     name: 'index',
+    path: '/',
     icon: (color) => <Home color={color} size={24} strokeWidth={2} />,
   },
   {
     name: 'categories',
+    path: '/categories',
     icon: (color) => <LayoutGrid color={color} size={24} strokeWidth={2} />,
   },
   {
     name: '__add__',
+    path: '__add__',
     icon: (color) => <PlusIcon color={color} size={24} strokeWidth={2} />,
   },
   /* {
     name: 'transactions',
+    path: '/transactions',
     icon: (color) => <Receipt color={color} size={24} strokeWidth={2} />,
   }, */
   {
     name: 'stats',
+    path: '/stats',
     icon: (color) => <PieChart color={color} size={24} strokeWidth={2} />,
   },
   {
     name: 'settings',
+    path: '/settings',
     icon: (color) => <UserIcon color={color} size={24} strokeWidth={2} />,
   },
 ];
 
-export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
+export function CustomTabBar() {
   const router = useRouter();
   const pathname = usePathname() || '';
   const addSheetRef = React.useRef<BottomSheetModal>(null);
+
+  const getIsActive = (tab: TabConfig): boolean => {
+    if (tab.name === 'index') return pathname === '/' || pathname === '';
+    return pathname.startsWith(tab.path);
+  };
 
   return (
     <>
@@ -82,25 +93,13 @@ export function CustomTabBar({ state, navigation }: BottomTabBarProps) {
             );
           }
 
-          const routeIndex = state.routes.findIndex((r) => r.name === tab.name);
-          const isActive = state.index === routeIndex;
+          const isActive = getIsActive(tab);
           const iconColor = isActive ? '#000000' : '#A3A3A3';
 
           return (
             <Pressable
               key={tab.name}
-              onPress={() => {
-                if (routeIndex >= 0) {
-                  const event = navigation.emit({
-                    type: 'tabPress',
-                    target: state.routes[routeIndex].key,
-                    canPreventDefault: true,
-                  });
-                  if (!event.defaultPrevented) {
-                    navigation.navigate(state.routes[routeIndex].name);
-                  }
-                }
-              }}
+              onPress={() => router.replace(tab.path as never)}
               className="flex-1 items-center justify-center gap-[5px]"
             >
               {tab.icon(iconColor)}

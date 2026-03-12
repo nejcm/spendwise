@@ -4,6 +4,7 @@ import { Pressable, View } from 'react-native';
 import { FocusAwareStatusBar, Image, Input, Modal, ScrollView, Text, useModal } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import { updateProfile, useAppStore } from '@/lib/store';
+import { defaultStyles } from '@/lib/theme/styles';
 
 import { AVATARS_LIST, getAvatar } from '.';
 
@@ -12,9 +13,9 @@ export function ProfileSettingsScreen() {
   const avatarModal = useModal();
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-background">
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 p-12">
+      <ScrollView className="flex-1 p-12" style={defaultStyles.transparentBg}>
         <Pressable
           className="mb-8 items-center justify-center"
           onPress={() => avatarModal.present()}
@@ -37,7 +38,10 @@ export function ProfileSettingsScreen() {
       </ScrollView>
 
       <Modal ref={avatarModal.ref} title={translate('onboarding.choose_avatar')}>
-        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 }}>
+        <ScrollView
+          style={defaultStyles.transparentBg}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 }}
+        >
           <View className="flex-row flex-wrap justify-center gap-3">
             {AVATARS_LIST.map((imageSource, index) => {
               const id = index + 1;

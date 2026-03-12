@@ -3,6 +3,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 
 import { Text } from '@/components/ui';
 import { translate } from '@/lib/i18n';
+import { defaultStyles } from '@/lib/theme/styles';
 
 import { useCategories } from '../api';
 
@@ -16,7 +17,11 @@ export function TransactionFilterBar({ selectedCategoryId, onSelectCategory }: P
 
   return (
     <View className="px-4 pb-2">
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <ScrollView
+        style={defaultStyles.transparentBg}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+      >
         <View className="flex-row gap-2">
           <Pressable
             onPress={() => onSelectCategory(null)}

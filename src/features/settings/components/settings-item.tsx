@@ -5,7 +5,6 @@ import * as React from 'react';
 
 import { useUniwind } from 'uniwind';
 import { Pressable, Text, View } from '@/components/ui';
-import colors from '@/components/ui/colors';
 
 type ItemProps = {
   text: TxKeyPath;
@@ -17,13 +16,13 @@ type ItemProps = {
 export function SettingsItem({ text, value, icon, onPress }: ItemProps) {
   const { theme } = useUniwind();
   const isPressable = onPress !== undefined;
-  const iconColor = theme === 'dark' ? colors.white : colors.neutral[400];
+  const iconColor = theme === 'dark' ? '#ffffff' : '#232633';
 
   return (
     <Pressable
       onPress={onPress}
       pointerEvents={isPressable ? 'auto' : 'none'}
-      className="flex-1 flex-row items-center justify-between px-4 py-2"
+      className="flex-1 flex-row items-center justify-between px-4 py-3"
     >
       <View className="flex-row items-center">
         {icon && <View className="mr-2">{icon}</View>}

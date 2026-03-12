@@ -86,29 +86,6 @@
   --color-danger-700: #b91c1c;
   --color-danger-800: #991b1b;
   --color-danger-900: #7f1d1d;
-
-  /* Semantic colors - using primary for main brand color */
-  --color-background: #ffffff;
-  --color-foreground: #0a0a0a;
-
-  --color-card: #ffffff;
-  --color-card-foreground: #0a0a0a;
-
-  --color-surface: #f8f8f8;
-  --color-surface-foreground: #0a0a0a;
-
-  --color-muted: #f5f5f5;
-  --color-muted-foreground: #737373;
-
-  --color-border: #e5e5e5;
-  --color-input: #e5e5e5;
-  --color-ring: #ff6c00;
-
-  --color-destructive: #ef4444;
-  --color-destructive-foreground: #ffffff;
-
-  --color-subtle: #f7f0e9;
-  --color-subtle-dark: #63605d;
 }
 
 /* Theme specific variables */
@@ -116,10 +93,10 @@
   :root {
     @variant light {
       /* Semantic colors - using primary for main brand color */
-      --color-background: #ffffff;
+      --color-background: #fcfcfc;
       --color-foreground: #0a0a0a;
 
-      --color-card: #ffffff;
+      --color-card: #efefef;
       --color-card-foreground: #0a0a0a;
 
       --color-surface: #f8f8f8;
@@ -140,10 +117,10 @@
     }
     @variant dark {
       /* Semantic colors - using primary for main brand color */
-      --color-background: #151921;
+      --color-background: #232633;
       --color-foreground: #fafafa;
 
-      --color-card: #1a1a1a;
+      --color-card: #1b1e28;
       --color-card-foreground: #fafafa;
 
       --color-surface: #111111;
@@ -152,8 +129,8 @@
       --color-muted: #262626;
       --color-muted-foreground: #a3a3a3;
 
-      --color-border: #2e2e2e;
-      --color-input: #2e2e2e;
+      --color-border: #1f222d;
+      --color-input: #2b2f3f;
       --color-ring: #ff6c00;
 
       --color-destructive: #ef4444;

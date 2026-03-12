@@ -2,7 +2,7 @@ import { FlashList as NFlashList } from '@shopify/flash-list';
 import { TextSearch } from 'lucide-react-native';
 import * as React from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { translate } from '../../lib/i18n';
+import { translate } from '@/lib/i18n';
 import { Text } from './text';
 
 type Props = {

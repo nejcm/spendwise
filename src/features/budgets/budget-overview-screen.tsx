@@ -8,6 +8,7 @@ import { useGoals } from '@/features/goals/api';
 import { GoalCard } from '@/features/goals/components/goal-card';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
+import { defaultStyles } from '@/lib/theme/styles';
 
 import { useBudgetsOverview } from './api';
 import { BudgetCard } from './components/budget-card';
@@ -26,7 +27,7 @@ export function BudgetOverviewScreen() {
   return (
     <View className="flex-1">
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-4">
+      <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         {budgets.length > 0 && (
           <View className="mb-4 items-center rounded-xl bg-primary-50 p-4 dark:bg-primary-900/20">
             <Text className="text-sm text-neutral-500">{translate('budgets.left_to_spend')}</Text>

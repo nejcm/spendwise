@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Button, Image, Input, Modal, Pressable, ScrollView, Text, useModal, View } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import { updateProfile, useAppStore } from '@/lib/store';
+import { defaultStyles } from '@/lib/theme/styles';
 import { AVATARS_LIST, getAvatar } from '../../profile';
 import OnboardingLayout from '../layout';
 
@@ -67,7 +68,10 @@ export default function SetupStep({ onBack, onNext, currentStep }: SetupStepProp
         ref={avatarModal.ref}
         title={translate('onboarding.choose_avatar')}
       >
-        <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 }}>
+        <ScrollView
+          style={defaultStyles.transparentBg}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 }}
+        >
           <View className="flex-row flex-wrap justify-center gap-3">
             {AVATARS_LIST.map((imageSource, index) => {
               const id = index + 1;

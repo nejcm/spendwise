@@ -36,6 +36,8 @@ import { Pressable, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { Path, Svg } from 'react-native-svg';
 
+import { defaultStyles } from '@/lib/theme/styles';
+import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import { Text } from './text';
 
 type ModalProps = BottomSheetModalProps & {
@@ -67,6 +69,7 @@ export function Modal({
   detached = false,
   ...props
 }: ModalProps & { ref?: ModalRef }) {
+  const theme = useThemeConfig();
   const detachedProps = React.useMemo(() => getDetachedProps(detached), [detached]);
   const modal = useModal();
   const snapPoints = React.useMemo(() => _snapPoints, [_snapPoints]);
@@ -87,6 +90,7 @@ export function Modal({
     <BottomSheetModal
       {...props}
       {...detachedProps}
+      backgroundStyle={theme.dark ? defaultStyles.backgroundDark : defaultStyles.background}
       ref={modal.ref}
       index={0}
       snapPoints={snapPoints}

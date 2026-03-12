@@ -41,6 +41,7 @@ export default antfu(
       'expo-env.d.ts',
       'migration/*',
       'uniwind-types.d.ts',
+      '.agents/',
     ],
   },
 

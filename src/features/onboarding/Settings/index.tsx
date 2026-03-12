@@ -4,8 +4,8 @@ import type { OptionType } from '@/components/ui';
 import * as React from 'react';
 import { Button, Options, Text, useModal } from '@/components/ui';
 import { translate } from '@/lib/i18n';
+import { useSelectedTheme } from '@/lib/theme/use-selected-theme';
 import { THEMES_OPTIONS } from '../../settings/theme';
-import { useSelectedTheme } from '../../theme/use-selected-theme';
 import OnboardingLayout from '../layout';
 
 export type SettingsStepProps = {

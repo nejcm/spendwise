@@ -4,6 +4,7 @@ import { Pressable, View } from 'react-native';
 
 import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
 import { translate } from '@/lib/i18n';
+import { defaultStyles } from '@/lib/theme/styles';
 
 import { useGoals } from './api';
 import { GoalCard } from './components/goal-card';
@@ -18,7 +19,7 @@ export function GoalListScreen() {
   return (
     <View className="flex-1">
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-4">
+      <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         {active.length === 0 && completed.length === 0 && (
           <View className="items-center py-16">
             <Text className="text-neutral-500">{translate('goals.no_goals')}</Text>

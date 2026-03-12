@@ -8,22 +8,22 @@ import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteProvider } from 'expo-sqlite';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { AppErrorBoundary } from '@/components/app-error-boundary';
 import { CustomTabBar } from '@/components/ui/custom-tab-bar';
-import { useThemeConfig } from '@/components/ui/use-theme-config';
 import {
   checkBudgetAlerts,
   checkUpcomingBills,
   setupNotifications,
 } from '@/features/notifications/notifications';
 import { SecurityLock } from '@/features/security/security-lock';
-import { loadSelectedTheme } from '@/features/theme/use-selected-theme';
 import { APIProvider } from '@/lib/api';
-import { DatabaseErrorBoundary, migrateDb, OpfsCleaner } from '@/lib/sqlite';
+import { DatabaseErrorBoundary, migrateDb } from '@/lib/sqlite';
+import { loadSelectedTheme } from '@/lib/theme/use-selected-theme';
+import { useThemeConfig } from '@/lib/theme/use-theme-config';
 // Import  global CSS file
 import '../global.css';
 
@@ -59,13 +59,11 @@ function PersistentTabBar() {
 export default function RootLayout() {
   return (
     <Providers>
-      <View style={styles.content}>
-        <Stack>
-          <Stack.Screen name="(app)" options={{ headerShown: false }} />
-          <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-        </Stack>
-        <PersistentTabBar />
-      </View>
+      <Stack>
+        <Stack.Screen name="(app)" options={{ headerShown: false }} />
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+      </Stack>
+      <PersistentTabBar />
       <SecurityLock />
     </Providers>
   );
@@ -97,9 +95,6 @@ function WebFontsLoader({
     'Inter-SemiBold': require('node_modules/@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf'),
     'Inter-Bold': require('node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf'),
     'Inter-Black': require('node_modules/@expo-google-fonts/inter/900Black/Inter_900Black.ttf'),
-    'Kanit': require('node_modules/@expo-google-fonts/kanit/400Regular/Kanit_400Regular.ttf'),
-    'Kanit-Medium': require('node_modules/@expo-google-fonts/kanit/500Medium/Kanit_500Medium.ttf'),
-    'Kanit-Bold': require('node_modules/@expo-google-fonts/kanit/700Bold/Kanit_700Bold.ttf'),
   });
 
   return (loaded || error) && !forceFallback ? children : fallback;
@@ -118,22 +113,20 @@ function Providers({ children }: { children: React.ReactNode }) {
     >
       <KeyboardProvider>
         <ThemeProvider value={theme}>
-          <OpfsCleaner>
-            <DatabaseErrorBoundary>
-              <SQLiteProvider databaseName="spendwise.db" onInit={initDb}>
-                <AppErrorBoundary>
-                  <APIProvider>
-                    <FontLoader>
-                      <BottomSheetModalProvider>
-                        {children}
-                        <FlashMessage position="top" />
-                      </BottomSheetModalProvider>
-                    </FontLoader>
-                  </APIProvider>
-                </AppErrorBoundary>
-              </SQLiteProvider>
-            </DatabaseErrorBoundary>
-          </OpfsCleaner>
+          <DatabaseErrorBoundary>
+            <SQLiteProvider databaseName="spendwise.db" onInit={initDb}>
+              <AppErrorBoundary>
+                <APIProvider>
+                  <FontLoader>
+                    <BottomSheetModalProvider>
+                      {children}
+                      <FlashMessage position="top" />
+                    </BottomSheetModalProvider>
+                  </FontLoader>
+                </APIProvider>
+              </AppErrorBoundary>
+            </SQLiteProvider>
+          </DatabaseErrorBoundary>
         </ThemeProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>
@@ -142,9 +135,6 @@ function Providers({ children }: { children: React.ReactNode }) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-  },
-  content: {
     flex: 1,
   },
 });

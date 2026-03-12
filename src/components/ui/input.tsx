@@ -1,10 +1,9 @@
 /* eslint-disable better-tailwindcss/no-unknown-classes */
 import type { TextInputProps } from 'react-native';
+import type { VariantProps } from 'tailwind-variants';
 import * as React from 'react';
 import { I18nManager, TextInput as NTextInput, StyleSheet, View } from 'react-native';
 import { cn, tv } from 'tailwind-variants';
-
-import colors from './colors';
 import { Text } from './text';
 
 const inputTv = tv({
@@ -12,7 +11,7 @@ const inputTv = tv({
     container: '',
     label: 'text-grey-100 mb-1 text-sm font-medium dark:text-neutral-100',
     input:
-      'mt-0 rounded-md border border-neutral-300 bg-white px-4 py-3 font-family-sans text-base/5 focus:border-black focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:focus:border-background',
+      'rounded-md border border-neutral-300 bg-input px-4 py-3 font-family-sans text-base/5 focus:border-foreground focus:outline-none dark:border-neutral-700 dark:text-white',
   },
   variants: {
     size: {
@@ -58,15 +57,12 @@ const inputTv = tv({
   },
 });
 
-type InputSize = 'sm' | 'default' | 'lg' | 'xl';
-
 export type NInputProps = {
   label?: string;
   disabled?: boolean;
   error?: string;
-  size?: InputSize;
   containerClassName?: string;
-} & Omit<TextInputProps, 'size'>;
+} & VariantProps<typeof inputTv> & Omit<TextInputProps, 'size'>;
 
 export function Input({ ref, ...props }: NInputProps & { ref?: React.Ref<NTextInput | null> }) {
   const { label, error, size = 'default', testID, onBlur: onBlurProp, onFocus: onFocusProp, containerClassName, ...inputProps } = props;
@@ -105,7 +101,7 @@ export function Input({ ref, ...props }: NInputProps & { ref?: React.Ref<NTextIn
       <NTextInput
         testID={testID}
         ref={ref}
-        placeholderTextColor={colors.neutral[400]}
+        placeholderTextColor="var(--color-neutral-400)"
         onBlur={onBlur}
         onFocus={onFocus}
         {...inputProps}

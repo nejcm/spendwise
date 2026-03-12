@@ -11,14 +11,15 @@ import { formatCurrency } from '@/features/formatting/helpers';
 import { useAccounts, useCreateTransaction } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
+import { defaultStyles } from '@/lib/theme/styles';
 import { mapRows, parseCSV } from './csv-parser';
 
 type Step = 'map' | 'pick' | 'preview';
 
-const COLUMN_FIELDS: (keyof ColumnMapping)[] = ['date', 'amount', 'payee', 'note', 'type'];
+const COLUMN_FIELDS: (keyof ColumnMapping)[] = ['date', 'amount', 'note', 'type'];
 
 function autoDetect(headers: string[]): ColumnMapping {
-  const m: ColumnMapping = { amount: null, date: null, note: null, payee: null, type: null };
+  const m: ColumnMapping = { amount: null, date: null, note: null, type: null };
   headers.forEach((h, i) => {
     const lower = h.toLowerCase();
     if (lower.includes('date')) {
@@ -26,13 +27,6 @@ function autoDetect(headers: string[]): ColumnMapping {
     }
     else if (lower.includes('amount') || lower.includes('value')) {
       m.amount = i;
-    }
-    else if (
-      lower.includes('payee')
-      || lower.includes('description')
-      || lower.includes('merchant')
-    ) {
-      m.payee = i;
     }
     else if (lower.includes('note') || lower.includes('memo')) {
       m.note = i;
@@ -137,11 +131,11 @@ function PreviewStep({
       </View>
       {preview.slice(0, 10).map((row) => (
         <View
-          key={`${row.date}-${row.amount}-${row.payee}`}
+          key={`${row.date}-${row.amount}`}
           className="mb-1 flex-row items-center justify-between rounded-lg bg-neutral-50 px-3 py-2 dark:bg-neutral-800"
         >
           <View className="flex-1">
-            <Text className="text-sm font-medium">{row.payee || row.note || '—'}</Text>
+            <Text className="text-sm font-medium">{row.note || '—'}</Text>
             <Text className="text-xs text-neutral-500">{row.date}</Text>
           </View>
           <Text
@@ -183,7 +177,6 @@ export function ImportScreen() {
     amount: null,
     date: null,
     note: null,
-    payee: null,
     type: null,
   });
   const [preview, setPreview] = useState<ParsedRow[]>([]);
@@ -244,9 +237,9 @@ export function ImportScreen() {
   };
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-background">
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-4">
+      <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         {step === 'pick' && (
           <View className="items-center py-16">
             <Text className="mb-2 text-lg font-medium">{translate('import.title')}</Text>

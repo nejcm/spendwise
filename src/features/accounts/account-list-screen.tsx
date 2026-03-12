@@ -7,6 +7,7 @@ import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
+import { defaultStyles } from '@/lib/theme/styles';
 import { useAccountsWithBalance, useCreateAccount, useUpdateAccount } from './api';
 import { AccountCard } from './components/account-card';
 import { AccountForm } from './components/account-form';
@@ -44,7 +45,7 @@ export function AccountListScreen() {
   return (
     <View className="flex-1">
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-4">
+      <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         <View className="mb-4 items-center rounded-xl bg-primary-50 p-4 dark:bg-primary-900/20">
           <Text className="text-sm text-neutral-500">{translate('accounts.total_balance')}</Text>
           <Text className="mt-1 text-2xl font-bold">{formatCurrency(totalBalance, currency)}</Text>

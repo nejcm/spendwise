@@ -6,8 +6,6 @@ import { useCallback } from 'react';
 import { I18nManager, Pressable, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import colors from '@/components/ui/colors';
-
 import { Text } from './text';
 
 const SIZE = 20;
@@ -61,7 +59,7 @@ function Label({ text, testID, className = '' }: LabelProps) {
 }
 
 export function CheckboxIcon({ checked = false }: IconProps) {
-  const color = checked ? colors.primary[300] : colors.charcoal[400];
+  const color = checked ? 'var(--color-primary-300)' : 'var(--color-charcoal-400)';
   return (
     <MotiView
       style={{
@@ -126,7 +124,7 @@ export const Checkbox = Object.assign(CheckboxBase, {
 });
 
 export function RadioIcon({ checked = false }: IconProps) {
-  const color = checked ? colors.primary[300] : colors.charcoal[400];
+  const color = checked ? 'var(--color-primary-300)' : 'var(--color-charcoal-400)';
   return (
     <MotiView
       style={{
@@ -177,7 +175,7 @@ export const Radio = Object.assign(RadioBase, {
 export function SwitchIcon({ checked = false }: IconProps) {
   const translateX = checked ? THUMB_OFFSET : WIDTH - THUMB_WIDTH - THUMB_OFFSET;
 
-  const backgroundColor = checked ? colors.primary[300] : colors.charcoal[400];
+  const backgroundColor = checked ? 'var(--color-primary-300)' : 'var(--color-charcoal-400)';
 
   return (
     <View className="w-[50px] justify-center">

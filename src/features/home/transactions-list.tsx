@@ -18,13 +18,13 @@ export default function TransactionsList() {
       <View className="flex-row items-center justify-between">
         <Text className="text-lg font-medium">{translate('home.recent_transactions')}</Text>
         <Pressable onPress={() => router.push('/(app)/transactions')}>
-          <Text className="text-sm font-medium text-neutral-500">{translate('home.see_all')}</Text>
+          <Text className="text-sm font-medium text-muted-foreground">{translate('home.see_all')}</Text>
         </Pressable>
       </View>
       {data.length === 0
         ? (
             <View className="mt-4 items-center rounded-xl bg-neutral-50 py-8 dark:bg-neutral-800">
-              <Text className="mb-2 text-neutral-500">{translate('home.no_transactions')}</Text>
+              <Text className="mb-2 text-muted-foreground">{translate('home.no_transactions')}</Text>
               <Button
                 label={translate('common.add')}
                 size="sm"

@@ -3,6 +3,7 @@ import { Alert, Platform, View } from 'react-native';
 
 import { Button, FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
 import { translate } from '@/lib/i18n';
+import { defaultStyles } from '@/lib/theme/styles';
 
 import { setupNotifications } from './notifications';
 
@@ -23,10 +24,10 @@ export function NotificationSettingsScreen() {
   };
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-background">
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-4">
-        <Text className="mb-4 text-sm text-neutral-600 dark:text-neutral-400">
+      <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
+        <Text className="mb-4 text-sm text-muted-foreground">
           Enable notifications to get alerts about budgets nearing their limits and upcoming recurring bills.
         </Text>
         <Button

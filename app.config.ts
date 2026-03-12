@@ -58,7 +58,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     adaptiveIcon: {
       foregroundImage: './assets/logo/spendwise.png',
-      backgroundColor: '#FFFFFF',
+      backgroundColor: '#ffffff',
     },
     package: Env.EXPO_PUBLIC_PACKAGE,
   },
@@ -71,7 +71,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-splash-screen',
       {
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#ffffff',
         image: './assets/logo/spendwise.png',
         imageWidth: 150,
       },
@@ -86,8 +86,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
             'node_modules/@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf',
             'node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf',
             'node_modules/@expo-google-fonts/inter/900Black/Inter_900Black.ttf',
-            'node_modules/@expo-google-fonts/lato/400Regular/Lato_400Regular.ttf',
-            'node_modules/@expo-google-fonts/lato/700Bold/Lato_700Bold.ttf',
           ],
         },
         android: {
@@ -114,19 +112,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
                 {
                   path: 'node_modules/@expo-google-fonts/inter/900Black/Inter_900Black.ttf',
                   weight: 900,
-                },
-              ],
-            },
-            {
-              fontFamily: 'Lato',
-              fontDefinitions: [
-                {
-                  path: 'node_modules/@expo-google-fonts/lato/400Regular/Lato_400Regular.ttf',
-                  weight: 400,
-                },
-                {
-                  path: 'node_modules/@expo-google-fonts/lato/700Bold/Lato_700Bold.ttf',
-                  weight: 700,
                 },
               ],
             },

@@ -52,7 +52,6 @@ function parseCSVLine(line: string): string[] {
 export type ColumnMapping = {
   date: number | null;
   amount: number | null;
-  payee: number | null;
   note: number | null;
   type: number | null; // column with "income"/"expense" or positive/negative
 };
@@ -60,7 +59,6 @@ export type ColumnMapping = {
 export type ParsedRow = {
   date: string;
   amount: number; // cents, positive = income, negative = expense
-  payee: string;
   note: string;
   isDuplicate?: boolean;
 };
@@ -76,7 +74,6 @@ export function mapRows(rows: string[][], mapping: ColumnMapping, hasHeader: boo
   for (const row of dataRows) {
     const rawDate = mapping.date !== null ? (row[mapping.date] ?? '') : '';
     const rawAmount = mapping.amount !== null ? (row[mapping.amount] ?? '') : '';
-    const rawPayee = mapping.payee !== null ? (row[mapping.payee] ?? '') : '';
     const rawNote = mapping.note !== null ? (row[mapping.note] ?? '') : '';
     const rawType = mapping.type !== null ? (row[mapping.type] ?? '') : '';
 
@@ -105,7 +102,6 @@ export function mapRows(rows: string[][], mapping: ColumnMapping, hasHeader: boo
     parsed.push({
       date: normalizeDate(rawDate),
       amount: amountCents,
-      payee: rawPayee,
       note: rawNote,
     });
   }

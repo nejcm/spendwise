@@ -8,6 +8,7 @@ import { Text } from '@/components/ui';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
+import { defaultStyles } from '@/lib/theme/styles';
 import { useCategorySpend } from '../insights/api';
 
 export function SpendingByCategory() {
@@ -30,7 +31,7 @@ export function SpendingByCategory() {
         ? (
             <Pressable
               onPress={() => router.push('/settings/categories')}
-              className="rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 p-4 dark:border-neutral-700 dark:bg-neutral-900"
+              className="rounded-2xl border border-dashed border-neutral-300 bg-card p-4 dark:border-neutral-700"
             >
               <View className="flex-row items-center">
                 <Plus className="mr-2 size-5 text-foreground" />
@@ -42,12 +43,16 @@ export function SpendingByCategory() {
             </Pressable>
           )
         : (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView
+              style={defaultStyles.transparentBg}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+            >
               <View className="flex-row gap-2">
                 {visibleCategories.map((item) => (
                   <View
                     key={item.category_id}
-                    className="w-34 rounded-xl bg-neutral-100 px-3 py-2 dark:bg-neutral-900"
+                    className="w-34 rounded-xl bg-card px-3 py-2"
                   >
                     <Text className="text-2xl font-medium">{item.category_icon}</Text>
                     <Text className="mt-2 text-xs font-medium text-neutral-500">{item.category_name}</Text>

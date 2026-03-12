@@ -6,6 +6,7 @@ import { Button, FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
+import { defaultStyles } from '@/lib/theme/styles';
 
 import { useBudgetWithProgress, useDeleteBudget } from './api';
 import { BudgetProgressBar } from './components/budget-progress-bar';
@@ -40,7 +41,7 @@ export function BudgetDetailScreen() {
   return (
     <View className="flex-1">
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-4">
+      <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         <View className="mb-4 items-center rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
           <Text className="text-lg font-bold">{budget.name}</Text>
           <View className="mt-3 w-full">

@@ -8,6 +8,7 @@ import { Button, FocusAwareStatusBar, Input, ScrollView, Text } from '@/componen
 import { getFieldError } from '@/components/ui/form-utils';
 import { todayISO } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
+import { defaultStyles } from '@/lib/theme/styles';
 import { useAccounts, useCreateTransfer } from './api';
 
 const schema = z.object({
@@ -52,7 +53,7 @@ export function TransferScreen() {
   return (
     <View className="flex-1">
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-4">
+      <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         <form.Field
           name="from_id"
           children={(field) => (

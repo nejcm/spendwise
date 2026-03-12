@@ -8,6 +8,7 @@ import { FocusAwareStatusBar, Options, ScrollView, useModal } from '@/components
 import { CURRENCY_OPTIONS } from '@/features/currencies';
 import { translate } from '@/lib/i18n';
 import { setCurrency, setCurrencyFormat, setDateFormat, setMonthStartDay, setNumberFormat, useAppStore } from '@/lib/store';
+import { defaultStyles } from '@/lib/theme/styles';
 import { CURRENCY_FORMAT_OPTIONS, DATE_FORMAT_OPTIONS, NUMBER_FORMAT_OPTIONS } from '../formatting/constants';
 import { SettingsContainer } from './components/settings-container';
 import { SettingsItem } from './components/settings-item';
@@ -96,9 +97,9 @@ export function FormattingSettingsScreen() {
   }, [modalType, dismiss]);
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-background">
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-8">
+      <ScrollView className="flex-1 px-4 pt-8" style={defaultStyles.transparentBg}>
         <SettingsContainer className="mb-2">
           <SettingsItem
             icon={<CircleDollarSign className={iconColor} size={20} />}

@@ -11,7 +11,7 @@ import { Platform, Pressable, View } from 'react-native';
 import { cn, tv } from 'tailwind-variants';
 import { useUniwind } from 'uniwind';
 
-import colors from '@/components/ui/colors';
+import { defaultStyles } from '@/lib/theme/styles';
 import { Image } from './image';
 import { Modal, useModal } from './modal';
 import { Text } from './text';
@@ -92,7 +92,7 @@ const Option = React.memo(
   }) => {
     return (
       <Pressable
-        className="flex-row items-center border-b border-neutral-200 bg-white p-3 dark:border-neutral-700 dark:bg-neutral-800"
+        className="flex-row items-center border-b border-neutral-200 p-3 dark:border-neutral-700"
         {...props}
       >
         {image && <Image source={image} className="mr-3 size-8 rounded-full" />}
@@ -126,7 +126,7 @@ export function Options({
 }: OptionsProps & { ref?: React.RefObject<BottomSheetModal | null> }) {
   const { theme } = useUniwind();
   const isDark = theme === 'dark';
-  const checkColor = isDark ? colors.white : colors.black;
+  const checkColor = isDark ? '#ffffff' : '#232633';
 
   const renderSelectItem = React.useCallback(
     ({ item }: { item: OptionType }) => (
@@ -149,9 +149,9 @@ export function Options({
       ref={ref}
       index={0}
       enableDynamicSizing
-      backgroundStyle={{
-        backgroundColor: isDark ? colors.neutral[800] : colors.white,
-      }}
+      backgroundStyle={
+        isDark ? defaultStyles.backgroundDark : defaultStyles.background
+      }
     >
       <List
         data={options}
@@ -193,7 +193,7 @@ export function Select(props: SelectProps) {
   const modal = useModal();
   const { theme } = useUniwind();
   const [selectedOption, setSelectedOption] = React.useState<OptionType | null>(() => options.find((t) => t.value === value) ?? null);
-  const iconColor = theme === 'dark' ? colors.white : colors.black;
+  const iconColor = theme === 'dark' ? '#ffffff' : '#232633';
 
   const onSelectOption = React.useCallback(
     (option: OptionType) => {

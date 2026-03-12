@@ -10,6 +10,7 @@ import { formatCurrency, todayISO } from '@/features/formatting/helpers';
 import { useAccounts } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
+import { defaultStyles } from '@/lib/theme/styles';
 import { useAddGoalContribution, useDeleteGoal, useGoal } from './api';
 
 const schema = z.object({
@@ -73,7 +74,7 @@ export function GoalDetailScreen() {
   return (
     <View className="flex-1">
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-4">
+      <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         <View className="mb-4 rounded-xl p-4" style={{ backgroundColor: `${goal.color}15` }}>
           <Text className="mb-1 text-lg font-bold">{goal.name}</Text>
           <View className="my-2 h-3 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">

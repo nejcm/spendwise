@@ -7,6 +7,7 @@ import * as z from 'zod';
 import { Button, FocusAwareStatusBar, Input, ScrollView, Text } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import { translate } from '@/lib/i18n';
+import { defaultStyles } from '@/lib/theme/styles';
 import { useCreateGoal } from './api';
 import { GOAL_COLORS } from './types';
 
@@ -44,7 +45,7 @@ export function GoalCreateScreen() {
   return (
     <View className="flex-1">
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-4">
+      <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         <form.Field
           name="name"
           children={(field) => (

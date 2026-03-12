@@ -5,6 +5,7 @@ import { Alert, Pressable, Switch, View } from 'react-native';
 import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import { setLockEnabled, setLockTimeoutMinutes, useAppStore } from '@/lib/store';
+import { defaultStyles } from '@/lib/theme/styles';
 
 const TIMEOUT_OPTIONS = [
   { label: translate('security.timeout_immediately'), value: 0 },
@@ -45,10 +46,10 @@ export function SecuritySettingsScreen() {
   };
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 bg-background">
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-4">
-        <View className="mb-6 rounded-xl bg-neutral-50 dark:bg-neutral-800">
+      <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
+        <View className="mb-6 rounded-xl bg-card">
           <View className="flex-row items-center justify-between gap-4 p-4">
             <View className="flex-1">
               <Text className="font-medium">{translate('security.app_lock')}</Text>

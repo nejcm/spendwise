@@ -6,6 +6,7 @@ import { cn } from 'tailwind-variants';
 import { Text } from '@/components/ui';
 import { formatCurrency, formatShortDate } from '@/features/formatting/helpers';
 import { useAppStore } from '@/lib/store';
+import { useThemeConfig } from '@/lib/theme/use-theme-config';
 
 export type TransactionCardProps = {
   transaction: TransactionWithCategory;
@@ -14,16 +15,17 @@ export type TransactionCardProps = {
 };
 
 export const TransactionCard = React.memo(({ transaction, onPress, className }: TransactionCardProps) => {
+  const theme = useThemeConfig();
   const currency = useAppStore.use.currency();
   const isIncome = transaction.type === 'income';
   const displayName = transaction.category_name || 'Unknown';
 
   return (
-    <Pressable className={cn('flex-row items-center gap-2 p-3', className)} onPress={onPress}>
+    <Pressable className={cn('flex-row items-center gap-3 p-3', className)} onPress={onPress}>
       <View
         className="size-10 items-center justify-center rounded-full"
         style={{
-          backgroundColor: `${transaction.category_color || '#90A4AE'}20`,
+          backgroundColor: `${transaction.category_color || '#90A4AE'}${theme.dark ? '50' : '20'}`,
         }}
       >
         <Text className="text-lg font-medium" style={{ color: transaction.category_color || '#90A4AE' }}>

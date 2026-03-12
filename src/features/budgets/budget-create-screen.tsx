@@ -9,6 +9,7 @@ import { Button, FocusAwareStatusBar, Input, ScrollView, Text } from '@/componen
 import { getFieldError } from '@/components/ui/form-utils';
 import { useCategories } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
+import { defaultStyles } from '@/lib/theme/styles';
 import { useCreateBudget } from './api';
 
 const schema = z.object({
@@ -58,7 +59,7 @@ export function BudgetCreateScreen() {
   return (
     <View className="flex-1">
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-4">
+      <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         <form.Field
           name="name"
           children={(field) => (

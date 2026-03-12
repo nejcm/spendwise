@@ -7,8 +7,9 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { ALargeSmall, Banknote, Bell, FileText, HelpCircle, Import, Link, List, LogOut, Settings, Share, Shield, User } from 'lucide-react-native';
 import { Button, FocusAwareStatusBar, Image, ScrollView, Text, View } from '@/components/ui';
 import { config } from '@/config';
+import { mockData } from '@/lib/sqlite/mock-data';
 import { selectProfile, setIsFirstTime, useAppStore } from '@/lib/store';
-import { mockData } from '../../lib/sqlite/mock-data';
+import { defaultStyles } from '@/lib/theme/styles';
 import { getAvatar } from '../profile';
 import { LanguageItem } from './components/language-item';
 import { SettingsContainer } from './components/settings-container';
@@ -26,7 +27,7 @@ export function SettingsScreen() {
   return (
     <>
       <FocusAwareStatusBar />
-      <ScrollView className="pb-12">
+      <ScrollView className="pb-12" style={defaultStyles.transparentBg}>
         <View className="flex-1 px-4 pt-16">
 
           <Button variant="unstyled" className="mx-auto mb-2 h-auto flex-col items-center justify-center" onPress={() => router.push('/settings/profile')}>

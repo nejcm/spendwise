@@ -12,8 +12,8 @@ import * as Haptics from 'expo-haptics';
 
 import { useSQLiteContext } from 'expo-sqlite';
 import { amountToCents } from '@/features/formatting/helpers';
+import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { generateId } from '@/lib/sqlite';
-import { getCurrentMonthRange } from '../../lib/date/helpers';
 
 // ─── Query Keys ───
 
@@ -83,21 +83,21 @@ export function useAccountsWithBalance() {
   });
 }
 
-export function useTotalBalance(month?: string) {
+export function useTotalBalance(yearMonth?: string) {
   const db = useSQLiteContext();
   return useQuery({
-    queryKey: [...keys.totalBalance, month],
-    queryFn: () => getTotalBalance(db, month),
+    queryKey: [...keys.totalBalance, yearMonth],
+    queryFn: () => getTotalBalance(db, yearMonth),
   });
 }
 
 // ─── Month Summary ───
 
-export function useMonthSummary(month: string) {
+export function useMonthSummary(yearMonth: string) {
   const db = useSQLiteContext();
   return useQuery({
-    queryKey: keys.monthSummary(month),
-    queryFn: () => getMonthSummary(db, month),
+    queryKey: keys.monthSummary(yearMonth),
+    queryFn: () => getMonthSummary(db, yearMonth),
   });
 }
 
@@ -242,12 +242,12 @@ async function getAccountsWithBalance(db: SQLiteDatabase): Promise<AccountWithBa
   );
 }
 
-async function getTotalBalance(db: SQLiteDatabase, month?: string): Promise<number> {
+async function getTotalBalance(db: SQLiteDatabase, yearMonth?: string): Promise<number> {
   let startDate: string | undefined;
-  let nextMonth: string | undefined;
+  let endDate: string | undefined;
 
-  if (month) {
-    [startDate, nextMonth] = getCurrentMonthRange(month);
+  if (yearMonth) {
+    [startDate, endDate] = getCurrentMonthRange(yearMonth);
   }
 
   const sql = `
@@ -263,23 +263,23 @@ async function getTotalBalance(db: SQLiteDatabase, month?: string): Promise<numb
         AS account_balance
       FROM accounts a
       LEFT JOIN transactions t ON t.account_id = a.id
-      ${startDate && nextMonth ? 'AND t.date >= ? AND t.date < ?' : ''}
+      ${startDate && endDate ? 'AND t.date >= ? AND t.date < ?' : ''}
       WHERE a.is_archived = 0
       GROUP BY a.id
     ) AS balances
   `;
 
   const params: (string | number)[] = [];
-  if (startDate && nextMonth) {
-    params.push(startDate, nextMonth);
+  if (startDate && endDate) {
+    params.push(startDate, endDate);
   }
 
   const result = await db.getFirstAsync<{ total: number }>(sql, params);
   return result?.total ?? 0;
 }
 
-async function getMonthSummary(db: SQLiteDatabase, month: string): Promise<MonthSummary> {
-  const [startDate, nextMonth] = getCurrentMonthRange(month);
+async function getMonthSummary(db: SQLiteDatabase, yearMonth: string): Promise<MonthSummary> {
+  const [startDate, endDate] = getCurrentMonthRange(yearMonth);
 
   const result = await db.getFirstAsync<{ income: number; expense: number }>(
     `SELECT
@@ -287,7 +287,7 @@ async function getMonthSummary(db: SQLiteDatabase, month: string): Promise<Month
        COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) as expense
      FROM transactions
      WHERE date >= ? AND date < ?`,
-    [startDate, nextMonth],
+    [startDate, endDate],
   );
 
   const income = result?.income ?? 0;

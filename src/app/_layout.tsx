@@ -92,10 +92,14 @@ function WebFontsLoader({
   }, []);
 
   const [loaded, error] = useFonts({
-    'Roboto': require('node_modules/@expo-google-fonts/roboto/400Regular/Roboto_400Regular.ttf'),
-    'Roboto-Medium': require('node_modules/@expo-google-fonts/roboto/500Medium/Roboto_500Medium.ttf'),
-    'Roboto-Bold': require('node_modules/@expo-google-fonts/roboto/700Bold/Roboto_700Bold.ttf'),
-    'Roboto-Black': require('node_modules/@expo-google-fonts/roboto/900Black/Roboto_900Black.ttf'),
+    'Inter': require('node_modules/@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf'),
+    'Inter-Medium': require('node_modules/@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf'),
+    'Inter-SemiBold': require('node_modules/@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf'),
+    'Inter-Bold': require('node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf'),
+    'Inter-Black': require('node_modules/@expo-google-fonts/inter/900Black/Inter_900Black.ttf'),
+    'Kanit': require('node_modules/@expo-google-fonts/kanit/400Regular/Kanit_400Regular.ttf'),
+    'Kanit-Medium': require('node_modules/@expo-google-fonts/kanit/500Medium/Kanit_500Medium.ttf'),
+    'Kanit-Bold': require('node_modules/@expo-google-fonts/kanit/700Bold/Kanit_700Bold.ttf'),
   });
 
   return (loaded || error) && !forceFallback ? children : fallback;

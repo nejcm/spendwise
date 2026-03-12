@@ -1,10 +1,11 @@
 import * as React from 'react';
-import { Alert, Platform, View } from 'react-native';
+import { Platform, View } from 'react-native';
 
 import { Button, FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
+import Alert from '@/components/ui/alert';
 import { translate } from '@/lib/i18n';
-import { defaultStyles } from '@/lib/theme/styles';
 
+import { defaultStyles } from '@/lib/theme/styles';
 import { setupNotifications } from './notifications';
 
 export function NotificationSettingsScreen() {

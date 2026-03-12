@@ -1,10 +1,11 @@
 import { useForm } from '@tanstack/react-form';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
-import { Alert, View } from 'react-native';
+import { View } from 'react-native';
 import * as z from 'zod';
 
 import { Button, FocusAwareStatusBar, Input, ScrollView, Text } from '@/components/ui';
+import Alert from '@/components/ui/alert';
 import { getFieldError } from '@/components/ui/form-utils';
 import { formatCurrency, todayISO } from '@/features/formatting/helpers';
 import { useAccounts } from '@/features/transactions/api';

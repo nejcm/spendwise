@@ -3,8 +3,9 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 import { useState } from 'react';
 
-import { Alert, View } from 'react-native';
+import { View } from 'react-native';
 import { Button, FocusAwareStatusBar, Text } from '@/components/ui';
+import Alert from '@/components/ui/alert';
 import { centsToAmount, formatCurrency, formatDate } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';

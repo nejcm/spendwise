@@ -4,9 +4,10 @@ import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { useState } from 'react';
-import { Alert, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { Button, FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
+import Alert from '@/components/ui/alert';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { useAccounts, useCreateTransaction } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';

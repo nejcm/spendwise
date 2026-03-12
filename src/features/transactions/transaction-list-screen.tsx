@@ -91,16 +91,13 @@ export function TransactionListScreen() {
           )}
         </View>
       </View>
-
       <TransactionFilterBar
         selectedCategoryId={categoryFilter}
         onSelectCategory={setCategoryFilter}
       />
-
       <View className="flex-1">
         <TransactionList transactions={filtered} isLoading={isLoading} onRefresh={() => void refetch()} />
       </View>
-
     </View>
   );
 }

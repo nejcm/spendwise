@@ -95,6 +95,7 @@ function WebFontsLoader({
 
 function Providers({ children }: { children: React.ReactNode }) {
   const theme = useThemeConfig();
+  // fix for web fonts loading
   const FontLoader = Platform.OS === 'web' ? WebFontsLoader : React.Fragment;
 
   return (

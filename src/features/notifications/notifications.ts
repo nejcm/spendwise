@@ -1,8 +1,10 @@
-import type { SQLiteDatabase } from 'expo-sqlite';
 import { addDays, format } from 'date-fns';
+import { eq, gte, lte, sql } from 'drizzle-orm';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
+import { db } from '@/lib/drizzle/db';
+import { budgetLines, budgets, categories, recurringRules, transactions } from '@/lib/drizzle/schema';
 import { storage } from '@/lib/storage';
 
 Notifications.setNotificationHandler({
@@ -54,33 +56,26 @@ async function send(title: string, body: string): Promise<void> {
   });
 }
 
-type BudgetRow = {
-  budget_amount: number;
-  id: string;
-  name: string;
-  total_spent: number;
-};
-
-export async function checkBudgetAlerts(db: SQLiteDatabase): Promise<void> {
-  if (!(await canNotify())) {
-    return;
-  }
+export async function checkBudgetAlerts(): Promise<void> {
+  if (!(await canNotify())) return;
 
   const month = format(new Date(), 'yyyy-MM');
 
-  const budgets = await db.getAllAsync<BudgetRow>(
-    `SELECT b.id, b.name, b.amount AS budget_amount,
-      COALESCE((
+  const rows = await db
+    .select({
+      id: budgets.id,
+      name: budgets.name,
+      budget_amount: budgets.amount,
+      total_spent: sql<number>`COALESCE((
         SELECT SUM(ABS(t.amount))
-        FROM transactions t
-        JOIN budget_lines bl ON bl.category_id = t.category_id AND bl.budget_id = b.id
-        WHERE t.type = 'expense' AND substr(t.date, 1, 7) = ?
-      ), 0) AS total_spent
-    FROM budgets b`,
-    [month],
-  );
+        FROM ${transactions} t
+        JOIN ${budgetLines} bl ON bl.category_id = t.category_id AND bl.budget_id = ${budgets.id}
+        WHERE t.type = 'expense' AND substr(t.date, 1, 7) = ${month}
+      ), 0)`,
+    })
+    .from(budgets);
 
-  for (const budget of budgets) {
+  for (const budget of rows) {
     const ratio = budget.budget_amount > 0 ? budget.total_spent / budget.budget_amount : 0;
 
     const key80 = budgetAlertKey(budget.id, 80, month);
@@ -100,28 +95,24 @@ export async function checkBudgetAlerts(db: SQLiteDatabase): Promise<void> {
   }
 }
 
-type RuleRow = {
-  id: string;
-  next_due_date: string;
-  payee: string | null;
-  category_name: string | null;
-};
-
-export async function checkUpcomingBills(db: SQLiteDatabase): Promise<void> {
-  if (!(await canNotify())) {
-    return;
-  }
+export async function checkUpcomingBills(): Promise<void> {
+  if (!(await canNotify())) return;
 
   const today = format(new Date(), 'yyyy-MM-dd');
   const inThreeDays = format(addDays(new Date(), 3), 'yyyy-MM-dd');
 
-  const rules = await db.getAllAsync<RuleRow>(
-    `SELECT r.id, r.next_due_date, r.payee, c.name AS category_name
-     FROM recurring_rules r
-     LEFT JOIN categories c ON r.category_id = c.id
-     WHERE r.is_active = 1 AND r.next_due_date >= ? AND r.next_due_date <= ?`,
-    [today, inThreeDays],
-  );
+  const rules = await db
+    .select({
+      id: recurringRules.id,
+      next_due_date: recurringRules.nextDueDate,
+      payee: recurringRules.payee,
+      category_name: categories.name,
+    })
+    .from(recurringRules)
+    .leftJoin(categories, eq(recurringRules.categoryId, categories.id))
+    .where(
+      sql`${eq(recurringRules.isActive, 1)} AND ${gte(recurringRules.nextDueDate, today)} AND ${lte(recurringRules.nextDueDate, inThreeDays)}`,
+    );
 
   for (const rule of rules) {
     const key = ruleAlertKey(rule.id, rule.next_due_date);

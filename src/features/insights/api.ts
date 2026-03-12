@@ -1,10 +1,12 @@
-import type { SQLiteDatabase } from 'expo-sqlite';
-
 import type { CategorySpend, MonthlyTotals } from './types';
 
 import { useQuery } from '@tanstack/react-query';
 import { format, subMonths } from 'date-fns';
-import { useSQLiteContext } from 'expo-sqlite';
+import { eq, gte, sql } from 'drizzle-orm';
+
+import { getCurrentMonthRange } from '@/lib/date/helpers';
+import { db } from '@/lib/drizzle/db';
+import { categories, transactions } from '@/lib/drizzle/schema';
 
 const keys = {
   categorySpend: (month: string) => ['insights', 'category-spend', month] as const,
@@ -12,47 +14,40 @@ const keys = {
 };
 
 export function useCategorySpend(month: string) {
-  const db = useSQLiteContext();
   return useQuery({
     queryKey: keys.categorySpend(month),
-    queryFn: () => getCategorySpend(db, month),
+    queryFn: () => getCategorySpend(month),
   });
 }
 
 export function useMonthlyTrend(numMonths: number = 6) {
-  const db = useSQLiteContext();
   return useQuery({
     queryKey: keys.monthlyTrend(numMonths),
-    queryFn: () => getMonthlyTrend(db, numMonths),
+    queryFn: () => getMonthlyTrend(numMonths),
   });
 }
 
 // ─── Database Functions ───
 
-async function getCategorySpend(db: SQLiteDatabase, month: string): Promise<CategorySpend[]> {
-  const [year, m] = month.split('-');
-  const startDate = `${year}-${m}-01`;
-  const nextMonth = Number(m) === 12
-    ? `${Number(year) + 1}-01-01`
-    : `${year}-${String(Number(m) + 1).padStart(2, '0')}-01`;
+async function getCategorySpend(month: string): Promise<CategorySpend[]> {
+  const [startDate, nextMonth] = getCurrentMonthRange(month);
 
-  const rows = await db.getAllAsync<Omit<CategorySpend, 'percentage'>>(
-    `SELECT
-       c.id as category_id,
-       c.name as category_name,
-       c.color as category_color,
-       c.icon as category_icon,
-       COALESCE(SUM(CASE 
-         WHEN t.type = 'expense' AND t.date >= ? AND t.date < ? 
-         THEN t.amount 
-         ELSE 0 
-       END), 0) as total
-     FROM categories c
-     LEFT JOIN transactions t ON t.category_id = c.id
-     GROUP BY c.id, c.name, c.color
-     ORDER BY total DESC`,
-    [startDate, nextMonth],
-  );
+  const rows = await db
+    .select({
+      category_id: categories.id,
+      category_name: categories.name,
+      category_color: categories.color,
+      category_icon: categories.icon,
+      total: sql<number>`COALESCE(SUM(CASE
+        WHEN ${transactions.type} = 'expense' AND ${transactions.date} >= ${startDate} AND ${transactions.date} < ${nextMonth}
+        THEN ${transactions.amount}
+        ELSE 0
+      END), 0)`,
+    })
+    .from(categories)
+    .leftJoin(transactions, eq(transactions.categoryId, categories.id))
+    .groupBy(categories.id, categories.name, categories.color)
+    .orderBy(sql`total DESC`);
 
   const grandTotal = rows.reduce((s, r) => s + r.total, 0);
 
@@ -62,30 +57,22 @@ async function getCategorySpend(db: SQLiteDatabase, month: string): Promise<Cate
   }));
 }
 
-async function getMonthlyTrend(db: SQLiteDatabase, numMonths: number): Promise<MonthlyTotals[]> {
-  const now = new Date();
-  const result: MonthlyTotals[] = [];
+async function getMonthlyTrend(numMonths: number): Promise<MonthlyTotals[]> {
+  const startDate = format(subMonths(new Date(), numMonths - 1), 'yyyy-MM-01');
 
-  for (let i = numMonths - 1; i >= 0; i--) {
-    const date = subMonths(now, i);
-    const month = format(date, 'yyyy-MM');
-    const [year, m] = month.split('-');
-    const startDate = `${year}-${m}-01`;
-    const nextMonth = Number(m) === 12
-      ? `${Number(year) + 1}-01-01`
-      : `${year}-${String(Number(m) + 1).padStart(2, '0')}-01`;
+  const rows = await db
+    .select({
+      month: sql<string>`strftime('%Y-%m', ${transactions.date})`,
+      income: sql<number>`COALESCE(SUM(CASE WHEN ${transactions.type} = 'income' THEN ${transactions.amount} ELSE 0 END), 0)`,
+      expense: sql<number>`COALESCE(SUM(CASE WHEN ${transactions.type} = 'expense' THEN ${transactions.amount} ELSE 0 END), 0)`,
+    })
+    .from(transactions)
+    .where(gte(transactions.date, startDate))
+    .groupBy(sql`strftime('%Y-%m', ${transactions.date})`);
 
-    const row = await db.getFirstAsync<{ income: number; expense: number }>(
-      `SELECT
-         COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) as income,
-         COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) as expense
-       FROM transactions
-       WHERE date >= ? AND date < ?`,
-      [startDate, nextMonth],
-    );
-
-    result.push({ month, income: row?.income ?? 0, expense: row?.expense ?? 0 });
-  }
-
-  return result;
+  // Fill in months with no transactions so the chart always shows numMonths bars
+  return Array.from({ length: numMonths }, (_, i) => {
+    const month = format(subMonths(new Date(), numMonths - 1 - i), 'yyyy-MM');
+    return rows.find((r) => r.month === month) ?? { month, income: 0, expense: 0 };
+  });
 }

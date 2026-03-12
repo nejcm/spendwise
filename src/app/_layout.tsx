@@ -1,17 +1,16 @@
-import type { SQLiteDatabase } from 'expo-sqlite';
-
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ThemeProvider } from '@react-navigation/native';
+import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import { useFonts } from 'expo-font';
 import { Stack, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { SQLiteProvider } from 'expo-sqlite';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
+
 import { AppErrorBoundary } from '@/components/app-error-boundary';
 import { CustomTabBar } from '@/components/ui/custom-tab-bar';
 import { useThemeConfig } from '@/components/ui/use-theme-config';
@@ -23,16 +22,12 @@ import {
 import { SecurityLock } from '@/features/security/security-lock';
 import { loadSelectedTheme } from '@/features/theme/use-selected-theme';
 import { APIProvider } from '@/lib/api';
-import { DatabaseErrorBoundary, migrateDb, OpfsCleaner } from '@/lib/sqlite';
-// Import  global CSS file
+import { db } from '@/lib/drizzle/db';
+import { seedDefaults } from '@/lib/drizzle/seeds';
+import { DatabaseErrorBoundary, OpfsCleaner } from '@/lib/sqlite';
+import migrations from '../../drizzle/migrations';
+// Import global CSS file
 import '../global.css';
-
-async function initDb(db: SQLiteDatabase) {
-  await migrateDb(db);
-  await setupNotifications();
-  await checkBudgetAlerts(db);
-  await checkUpcomingBills(db);
-}
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -97,12 +92,38 @@ function WebFontsLoader({
     'Inter-SemiBold': require('node_modules/@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf'),
     'Inter-Bold': require('node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf'),
     'Inter-Black': require('node_modules/@expo-google-fonts/inter/900Black/Inter_900Black.ttf'),
-    'Kanit': require('node_modules/@expo-google-fonts/kanit/400Regular/Kanit_400Regular.ttf'),
-    'Kanit-Medium': require('node_modules/@expo-google-fonts/kanit/500Medium/Kanit_500Medium.ttf'),
-    'Kanit-Bold': require('node_modules/@expo-google-fonts/kanit/700Bold/Kanit_700Bold.ttf'),
   });
 
   return (loaded || error) && !forceFallback ? children : fallback;
+}
+
+function MigrationWrapper({ children }: { children: React.ReactNode }) {
+  const { success, error } = useMigrations(db, migrations);
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    if (!success || initialized) return;
+
+    async function init() {
+      await seedDefaults().catch((err: unknown) => {
+        // Only suppress unique-constraint errors (categories already seeded on re-open)
+        const msg = err instanceof Error ? err.message : String(err);
+        if (!msg.includes('UNIQUE constraint failed')) throw err;
+      });
+      await setupNotifications();
+      await checkBudgetAlerts();
+      await checkUpcomingBills();
+      setInitialized(true);
+      SplashScreen.hideAsync();
+    }
+
+    init();
+  }, [success, initialized]);
+
+  if (error) return <DatabaseErrorBoundary>{null}</DatabaseErrorBoundary>;
+  if (!success || !initialized) return null;
+
+  return <>{children}</>;
 }
 
 function Providers({ children }: { children: React.ReactNode }) {
@@ -120,7 +141,7 @@ function Providers({ children }: { children: React.ReactNode }) {
         <ThemeProvider value={theme}>
           <OpfsCleaner>
             <DatabaseErrorBoundary>
-              <SQLiteProvider databaseName="spendwise.db" onInit={initDb}>
+              <MigrationWrapper>
                 <AppErrorBoundary>
                   <APIProvider>
                     <FontLoader>
@@ -131,7 +152,7 @@ function Providers({ children }: { children: React.ReactNode }) {
                     </FontLoader>
                   </APIProvider>
                 </AppErrorBoundary>
-              </SQLiteProvider>
+              </MigrationWrapper>
             </DatabaseErrorBoundary>
           </OpfsCleaner>
         </ThemeProvider>

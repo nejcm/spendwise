@@ -5,7 +5,9 @@ const { withUniwindConfig } = require('uniwind/metro');
 const config = getDefaultConfig(__dirname);
 
 config.resolver.assetExts = [...(config.resolver.assetExts || []), 'wasm'];
+config.resolver.sourceExts = [...(config.resolver.sourceExts || []), 'sql'];
 
+// Add COEP and COOP headers to support SharedArrayBuffer
 config.server.enhanceMiddleware = (middleware) => {
   return (req, res, next) => {
     res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');

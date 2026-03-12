@@ -2,7 +2,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import Env from 'env';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
 
 import { ALargeSmall, Banknote, Bell, FileText, HelpCircle, Import, Link, List, LogOut, Settings, Share, Shield, User } from 'lucide-react-native';
 import { Button, FocusAwareStatusBar, Image, ScrollView, Text, View } from '@/components/ui';
@@ -20,7 +19,6 @@ const iconColor = 'text-foreground';
 export function SettingsScreen() {
   const router = useRouter();
   const profile = useAppStore(selectProfile);
-  const db = useSQLiteContext();
   const queryClient = useQueryClient();
 
   return (
@@ -109,8 +107,7 @@ export function SettingsScreen() {
                 icon={<FileText className={iconColor} size={20} />}
                 onPress={async () => {
                   try {
-                    await mockData(db);
-                    console.log('Mock data import successfully');
+                    await mockData();
                   }
                   catch (err) {
                     console.error('Failed to import mock data', err);

@@ -1,12 +1,12 @@
-import type { SQLiteDatabase } from 'expo-sqlite';
-
 import type { Goal, GoalFormData } from './types';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useSQLiteContext } from 'expo-sqlite';
+import { eq, sql } from 'drizzle-orm';
+import { randomUUID } from 'expo-crypto';
 
 import { amountToCents } from '@/features/formatting/helpers';
-import { generateId } from '@/lib/sqlite';
+import { db } from '@/lib/drizzle/db';
+import { goals, transactions } from '@/lib/drizzle/schema';
 
 const keys = {
   goals: ['goals'] as const,
@@ -14,58 +14,50 @@ const keys = {
 };
 
 export function useGoals() {
-  const db = useSQLiteContext();
   return useQuery({
     queryKey: keys.goals,
-    queryFn: () => db.getAllAsync<Goal>(
-      'SELECT * FROM goals ORDER BY is_completed ASC, created_at DESC',
-    ),
+    queryFn: () => getGoals(),
   });
 }
 
 export function useGoal(id: string) {
-  const db = useSQLiteContext();
   return useQuery({
     queryKey: keys.goalDetail(id),
-    queryFn: () => db.getFirstAsync<Goal>('SELECT * FROM goals WHERE id = ?', [id]),
+    queryFn: () => getGoal(id),
     enabled: !!id,
   });
 }
 
 export function useCreateGoal() {
-  const db = useSQLiteContext();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: GoalFormData) => createGoal(db, data),
+    mutationFn: (data: GoalFormData) => createGoal(data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.goals }),
   });
 }
 
 export function useUpdateGoal() {
-  const db = useSQLiteContext();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (params: { id: string; data: GoalFormData }) =>
-      updateGoal(db, params.id, params.data),
+      updateGoal(params.id, params.data),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.goals }),
   });
 }
 
 export function useDeleteGoal() {
-  const db = useSQLiteContext();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => db.runAsync('DELETE FROM goals WHERE id = ?', [id]),
+    mutationFn: (id: string) => db.delete(goals).where(eq(goals.id, id)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.goals }),
   });
 }
 
 export function useAddGoalContribution() {
-  const db = useSQLiteContext();
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (params: { goalId: string; amount: string; accountId: string; date: string }) =>
-      addContribution(db, params),
+      addContribution(params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: keys.goals });
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
@@ -77,24 +69,70 @@ export function useAddGoalContribution() {
 
 // ─── DB Functions ───
 
-async function createGoal(db: SQLiteDatabase, data: GoalFormData): Promise<string> {
-  const id = generateId();
+async function getGoals(): Promise<Goal[]> {
+  const rows = await db
+    .select()
+    .from(goals)
+    .orderBy(goals.isCompleted, sql`${goals.createdAt} DESC`);
+
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    target_amount: r.targetAmount,
+    current_amount: r.currentAmount,
+    deadline: r.deadline ?? null,
+    icon: r.icon ?? null,
+    color: r.color,
+    is_completed: r.isCompleted ? 1 : 0,
+    created_at: r.createdAt,
+    updated_at: r.updatedAt,
+  })) as Goal[];
+}
+
+async function getGoal(id: string): Promise<Goal | null> {
+  const rows = await db.select().from(goals).where(eq(goals.id, id)).limit(1);
+  if (!rows[0]) return null;
+
+  const r = rows[0];
+  return {
+    id: r.id,
+    name: r.name,
+    target_amount: r.targetAmount,
+    current_amount: r.currentAmount,
+    deadline: r.deadline ?? null,
+    icon: r.icon ?? null,
+    color: r.color,
+    is_completed: r.isCompleted ? 1 : 0,
+    created_at: r.createdAt,
+    updated_at: r.updatedAt,
+  } as Goal;
+}
+
+async function createGoal(data: GoalFormData): Promise<string> {
+  const id = randomUUID();
   const cents = amountToCents(Number.parseFloat(data.target_amount) || 0);
-  await db.runAsync(
-    `INSERT INTO goals (id, name, target_amount, deadline, color)
-     VALUES (?, ?, ?, ?, ?)`,
-    [id, data.name.trim(), cents, data.deadline || null, data.color],
-  );
+  await db.insert(goals).values({
+    id,
+    name: data.name.trim(),
+    targetAmount: cents,
+    deadline: data.deadline || null,
+    color: data.color,
+  });
   return id;
 }
 
-async function updateGoal(db: SQLiteDatabase, id: string, data: GoalFormData): Promise<void> {
+async function updateGoal(id: string, data: GoalFormData): Promise<void> {
   const cents = amountToCents(Number.parseFloat(data.target_amount) || 0);
-  await db.runAsync(
-    `UPDATE goals SET name = ?, target_amount = ?, deadline = ?, color = ?, updated_at = datetime('now')
-     WHERE id = ?`,
-    [data.name.trim(), cents, data.deadline || null, data.color, id],
-  );
+  await db
+    .update(goals)
+    .set({
+      name: data.name.trim(),
+      targetAmount: cents,
+      deadline: data.deadline || null,
+      color: data.color,
+      updatedAt: sql`(datetime('now'))`,
+    })
+    .where(eq(goals.id, id));
 }
 
 type ContributionParams = {
@@ -104,29 +142,34 @@ type ContributionParams = {
   date: string;
 };
 
-async function addContribution(db: SQLiteDatabase, params: ContributionParams): Promise<void> {
+async function addContribution(params: ContributionParams): Promise<void> {
   const { goalId, amount, accountId, date } = params;
   const cents = amountToCents(Number.parseFloat(amount) || 0);
-  const txId = generateId();
 
-  // Create expense transaction tagged with goal
-  await db.runAsync(
-    `INSERT INTO transactions (id, account_id, type, amount, date, note, goal_id)
-     VALUES (?, ?, 'expense', ?, ?, 'Goal contribution', ?)`,
-    [txId, accountId, cents, date, goalId],
-  );
+  await db.transaction(async (tx) => {
+    await tx.insert(transactions).values({
+      id: randomUUID(),
+      accountId,
+      type: 'expense',
+      amount: cents,
+      date,
+      note: 'Goal contribution',
+    });
 
-  // Update goal current_amount
-  await db.runAsync(
-    `UPDATE goals SET current_amount = current_amount + ?, updated_at = datetime('now')
-     WHERE id = ?`,
-    [cents, goalId],
-  );
+    await tx
+      .update(goals)
+      .set({
+        currentAmount: sql`${goals.currentAmount} + ${cents}`,
+        updatedAt: sql`(datetime('now'))`,
+      })
+      .where(eq(goals.id, goalId));
 
-  // Mark complete if reached
-  await db.runAsync(
-    `UPDATE goals SET is_completed = 1, updated_at = datetime('now')
-     WHERE id = ? AND current_amount >= target_amount`,
-    [goalId],
-  );
+    // Mark complete if reached
+    await tx
+      .update(goals)
+      .set({ isCompleted: 1, updatedAt: sql`(datetime('now'))` })
+      .where(
+        sql`${goals.id} = ${goalId} AND ${goals.currentAmount} >= ${goals.targetAmount}`,
+      );
+  });
 }

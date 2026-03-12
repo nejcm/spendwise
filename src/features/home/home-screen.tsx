@@ -2,14 +2,13 @@ import { format } from 'date-fns';
 
 import * as React from 'react';
 import { View } from 'react-native';
-import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
+import { FocusAwareStatusBar, Image, ScrollView, Text } from '@/components/ui';
 import { formatCurrency } from '@/features/formatting/helpers';
 
 import { SpendingByCategory } from '@/features/home/spending-by-category';
 import { useMonthSummary } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
-import { config } from '../../config';
 import TransactionsList from './transactions-list';
 
 export function HomeScreen() {
@@ -23,7 +22,7 @@ export function HomeScreen() {
       <FocusAwareStatusBar />
       <ScrollView className="flex-1">
         <View className="flex-col gap-8 px-4 py-6">
-          <Text className="text-2xl font-bold text-foreground">{config.appName}</Text>
+          <Image source={require('../../../assets/spendwise.svg')} className="h-[24px] w-[120px]" />
           <View>
             <View className="flex-row items-center justify-between gap-2">
               <View>

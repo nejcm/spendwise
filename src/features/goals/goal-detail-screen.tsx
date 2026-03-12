@@ -88,7 +88,7 @@ export function GoalDetailScreen() {
               {' '}
               saved
             </Text>
-            <Text className="text-sm font-semibold">
+            <Text className="text-sm font-medium">
               {formatCurrency(goal.target_amount, currency)}
               {' '}
               target
@@ -98,7 +98,7 @@ export function GoalDetailScreen() {
 
         {!goal.is_completed && (
           <View className="mb-4 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
-            <Text className="mb-3 text-base font-semibold">{translate('goals.add_contribution')}</Text>
+            <Text className="mb-3 text-base font-medium">{translate('goals.add_contribution')}</Text>
 
             <form.Field
               name="amount"
@@ -149,7 +149,7 @@ export function GoalDetailScreen() {
 
         {goal.is_completed && (
           <View className="mb-4 items-center rounded-xl bg-success-50 p-4 dark:bg-success-900/20">
-            <Text className="font-semibold text-success-600">
+            <Text className="font-medium text-success-600">
               🎉
               {translate('goals.goal_reached')}
             </Text>

@@ -16,9 +16,9 @@ export default function TransactionsList() {
   return (
     <View>
       <View className="flex-row items-center justify-between">
-        <Text className="text-lg font-semibold">{translate('home.recent_transactions')}</Text>
+        <Text className="text-lg font-medium">{translate('home.recent_transactions')}</Text>
         <Pressable onPress={() => router.push('/(app)/transactions')}>
-          <Text className="text-sm font-semibold text-neutral-500">{translate('home.see_all')}</Text>
+          <Text className="text-sm font-medium text-neutral-500">{translate('home.see_all')}</Text>
         </Pressable>
       </View>
       {recentTransactions.length === 0

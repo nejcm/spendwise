@@ -1,17 +1,14 @@
-import type { BottomSheetModal } from '@gorhom/bottom-sheet';
+import type { MonthPickerRef } from './components/month-picker';
 import { format } from 'date-fns';
-import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react-native';
+import { ArrowLeftIcon, ArrowRightIcon, X } from 'lucide-react-native';
 import * as React from 'react';
-
 import { useCallback, useMemo, useRef, useState } from 'react';
-
-import { Pressable, TextInput, View } from 'react-native';
-import { FocusAwareStatusBar, Text } from '@/components/ui';
+import { Pressable, View } from 'react-native';
+import { FocusAwareStatusBar, Input, Text } from '@/components/ui';
 import { formatMonthYear } from '@/features/formatting/helpers';
-
 import { translate } from '@/lib/i18n';
 import { useTransactions } from './api';
-import { QuickAddSheet } from './components/quick-add-sheet';
+import { MonthPicker } from './components/month-picker';
 import { TransactionFilterBar } from './components/transaction-filter-bar';
 import { TransactionList } from './components/transaction-list';
 
@@ -19,7 +16,7 @@ export function TransactionListScreen() {
   const [currentMonth, setCurrentMonth] = useState(() => format(new Date(), 'yyyy-MM'));
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
-  const sheetRef = useRef<BottomSheetModal>(null);
+  const monthPickerRef = useRef<MonthPickerRef>(null);
 
   const { data: transactions = [], isLoading, refetch } = useTransactions(currentMonth);
 
@@ -58,20 +55,41 @@ export function TransactionListScreen() {
         <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
           <ArrowLeftIcon className="size-5 text-neutral-500" />
         </Pressable>
-        <Text className="text-lg font-semibold">{monthLabel}</Text>
+        <Pressable onPress={() => monthPickerRef.current?.present()} hitSlop={12} className="min-w-[120px] items-center">
+          <Text className="text-lg font-medium">{monthLabel}</Text>
+        </Pressable>
         <Pressable onPress={() => navigateMonth(1)} hitSlop={12}>
           <ArrowRightIcon className="size-5 text-neutral-500" />
         </Pressable>
       </View>
 
-      <View className="px-4 pb-2">
-        <TextInput
-          className="rounded-lg bg-neutral-100 px-3 py-2 text-sm dark:bg-neutral-800 dark:text-white"
-          placeholder={translate('transactions.search')}
-          value={search}
-          onChangeText={setSearch}
-          placeholderTextColor="#999"
-        />
+      <MonthPicker
+        ref={monthPickerRef}
+        selectedMonth={currentMonth}
+        onSelect={setCurrentMonth}
+      />
+
+      <View className="flex-row items-center gap-2 px-4 pb-2">
+        <View className="min-w-0 flex-1 flex-row items-center rounded-md border border-neutral-300 bg-white dark:border-neutral-700 dark:bg-neutral-800">
+          <Input
+            value={search}
+            placeholder={translate('transactions.search')}
+            onChangeText={setSearch}
+            size="sm"
+            containerClassName="min-w-0 flex-1"
+            className="rounded-r-none border-0 bg-transparent pr-8 focus:border-0"
+          />
+          {search.length > 0 && (
+            <Pressable
+              onPress={() => setSearch('')}
+              hitSlop={8}
+              className="absolute right-2 p-1"
+              pointerEvents="box-only"
+            >
+              <X className="size-5 text-neutral-500" />
+            </Pressable>
+          )}
+        </View>
       </View>
 
       <TransactionFilterBar
@@ -80,17 +98,9 @@ export function TransactionListScreen() {
       />
 
       <View className="flex-1">
-        <TransactionList transactions={filtered} isLoading={isLoading} onRefresh={refetch} />
+        <TransactionList transactions={filtered} isLoading={isLoading} onRefresh={() => void refetch()} />
       </View>
 
-      <Pressable
-        className="absolute right-6 bottom-6 size-14 items-center justify-center rounded-full bg-primary-400 shadow-lg"
-        onPress={() => sheetRef.current?.present()}
-      >
-        <Text className="text-2xl font-bold text-white">+</Text>
-      </Pressable>
-
-      <QuickAddSheet sheetRef={sheetRef} />
     </View>
   );
 }

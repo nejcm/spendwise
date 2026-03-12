@@ -88,7 +88,7 @@ export function BudgetCreateScreen() {
                       onPress={() => field.handleChange(p.value)}
                       className={`rounded-full px-3 py-1.5 ${field.state.value === p.value ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
                     >
-                      <Text className={`text-sm ${field.state.value === p.value ? 'font-semibold text-white' : ''}`}>
+                      <Text className={`text-sm ${field.state.value === p.value ? 'font-medium text-white' : ''}`}>
                         {p.label}
                       </Text>
                     </Pressable>
@@ -116,7 +116,7 @@ export function BudgetCreateScreen() {
           />
         </View>
 
-        <Text className="mt-6 mb-3 text-lg font-semibold">
+        <Text className="mt-6 mb-3 text-lg font-medium">
           {translate('budgets.category_budgets')}
         </Text>
 

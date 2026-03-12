@@ -52,7 +52,7 @@ export function BudgetOverviewScreen() {
 
         {/* Goals section */}
         <View className="mt-4 mb-2 flex-row items-center justify-between">
-          <Text className="text-base font-semibold">{translate('goals.title')}</Text>
+          <Text className="text-base font-medium">{translate('goals.title')}</Text>
           <Pressable onPress={() => router.push('/goals' as any)}>
             <Text className="text-sm text-primary-500">{translate('home.see_all')}</Text>
           </Pressable>

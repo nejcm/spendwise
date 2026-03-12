@@ -1,0 +1,62 @@
+import * as React from 'react';
+import { NativeModules, Platform, View } from 'react-native';
+import RNRestart from 'react-native-restart';
+
+import { Button } from '@/components/ui/button';
+import { Text } from '@/components/ui/text';
+import { translate } from '../lib/i18n';
+
+type Props = { children: React.ReactNode };
+type State = { error: Error | null; restarting: boolean };
+
+function restartApp() {
+  if (Platform.OS === 'web') {
+    window.location.reload();
+    return;
+  }
+  if (__DEV__) {
+    NativeModules.DevSettings?.reload?.();
+  }
+  else {
+    RNRestart.restart();
+  }
+}
+
+export class AppErrorBoundary extends React.Component<Props, State> {
+  state: State = { error: null, restarting: false };
+
+  static getDerivedStateFromError(error: Error): Partial<State> {
+    return { error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('[AppErrorBoundary]', error, errorInfo.componentStack);
+  }
+
+  handleRestart = () => {
+    this.setState({ restarting: true });
+    restartApp();
+  };
+
+  render() {
+    if (this.state.error) {
+      return (
+        <View className="flex-1 items-center justify-center bg-white p-6 dark:bg-neutral-900">
+          <Text className="mb-2 text-center text-lg font-bold text-neutral-900 dark:text-white">
+            {translate('errors.title')}
+          </Text>
+          <Text className="mb-6 text-center text-neutral-600 dark:text-neutral-400">
+            {translate('errors.description')}
+          </Text>
+          <Button
+            label={this.state.restarting ? 'Restarting…' : 'Restart app'}
+            onPress={this.handleRestart}
+            disabled={this.state.restarting}
+            variant="default"
+          />
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}

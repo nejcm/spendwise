@@ -10,13 +10,13 @@ import { EmptyList, Text } from '@/components/ui';
 import { formatDate } from '@/features/formatting/helpers';
 import { TransactionCard } from './transaction-card';
 
-type Props = {
+export type TransactionListProps = {
   transactions: TransactionWithCategory[];
   isLoading: boolean;
-  onRefresh?: () => void;
+  onRefresh?: () => Promise<void> | void;
 };
 
-export function TransactionList({ transactions, isLoading, onRefresh }: Props) {
+export function TransactionList({ transactions, isLoading, onRefresh }: TransactionListProps) {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -44,8 +44,8 @@ export function TransactionList({ transactions, isLoading, onRefresh }: Props) {
     ({ item }: { item: string | TransactionWithCategory }) => {
       if (typeof item === 'string') {
         return (
-          <View className="bg-neutral-50 px-4 py-2 dark:bg-neutral-900">
-            <Text className="text-sm font-semibold text-neutral-500">{formatDate(item)}</Text>
+          <View className="mt-4 px-4 py-2">
+            <Text className="text-sm font-medium text-neutral-500">{formatDate(item)}</Text>
           </View>
         );
       }
@@ -60,6 +60,7 @@ export function TransactionList({ transactions, isLoading, onRefresh }: Props) {
 
   return (
     <FlashList
+      className="pb-6"
       data={flatData}
       renderItem={renderItem}
       getItemType={(item) => (typeof item === 'string' ? 'header' : 'row')}

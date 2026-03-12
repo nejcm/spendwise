@@ -21,9 +21,9 @@ export function GoalCard({ goal, onPress }: Props) {
   return (
     <Pressable onPress={onPress} className="mb-3 rounded-xl p-4" style={{ backgroundColor: `${goal.color}15` }}>
       <View className="mb-2 flex-row items-center justify-between">
-        <Text className="text-base font-semibold">{goal.name}</Text>
+        <Text className="text-base font-medium">{goal.name}</Text>
         {goal.is_completed
-          ? <Text className="text-xs font-semibold text-success-600">✓ Complete</Text>
+          ? <Text className="text-xs font-medium text-success-600">✓ Complete</Text>
           : (
               <Text className="text-sm font-medium">
                 {Math.round(progress)}

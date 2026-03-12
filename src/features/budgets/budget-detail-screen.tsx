@@ -60,7 +60,7 @@ export function BudgetDetailScreen() {
           </View>
         </View>
 
-        <Text className="mb-3 text-lg font-semibold">{translate('budgets.categories')}</Text>
+        <Text className="mb-3 text-lg font-medium">{translate('budgets.categories')}</Text>
 
         {budget.lines.map((line) => (
           <CategoryBudgetRow key={line.id} line={line} currency={currency} />

@@ -14,6 +14,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 
+import { AppErrorBoundary } from '@/components/app-error-boundary';
 import { useThemeConfig } from '@/components/ui/use-theme-config';
 import {
   checkBudgetAlerts,
@@ -21,8 +22,8 @@ import {
   setupNotifications,
 } from '@/features/notifications/notifications';
 import { SecurityLock } from '@/features/security/security-lock';
+import { loadSelectedTheme } from '@/features/theme/use-selected-theme';
 import { APIProvider } from '@/lib/api';
-import { loadSelectedTheme } from '@/lib/hooks/use-selected-theme';
 import { DatabaseErrorBoundary, migrateDb, OpfsCleaner } from '@/lib/sqlite';
 // Import  global CSS file
 import '../global.css';
@@ -107,14 +108,16 @@ function Providers({ children }: { children: React.ReactNode }) {
           <OpfsCleaner>
             <DatabaseErrorBoundary>
               <SQLiteProvider databaseName="spendwise.db" onInit={initDb}>
-                <APIProvider>
-                  <FontLoader>
-                    <BottomSheetModalProvider>
-                      {children}
-                      <FlashMessage position="top" />
-                    </BottomSheetModalProvider>
-                  </FontLoader>
-                </APIProvider>
+                <AppErrorBoundary>
+                  <APIProvider>
+                    <FontLoader>
+                      <BottomSheetModalProvider>
+                        {children}
+                        <FlashMessage position="top" />
+                      </BottomSheetModalProvider>
+                    </FontLoader>
+                  </APIProvider>
+                </AppErrorBoundary>
               </SQLiteProvider>
             </DatabaseErrorBoundary>
           </OpfsCleaner>

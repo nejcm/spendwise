@@ -54,7 +54,7 @@ type MapStepProps = {
 function MapStep({ headers, mapping, onMapping, onNext }: MapStepProps) {
   return (
     <View>
-      <Text className="mb-4 text-lg font-semibold">{translate('import.map_columns')}</Text>
+      <Text className="mb-4 text-lg font-medium">{translate('import.map_columns')}</Text>
       {COLUMN_FIELDS.map((field) => (
         <View key={field} className="mb-4">
           <Text className="mb-1 text-sm font-medium text-neutral-600 dark:text-neutral-400">
@@ -81,7 +81,7 @@ function MapStep({ headers, mapping, onMapping, onNext }: MapStepProps) {
                 onPress={() => onMapping({ ...mapping, [field]: i })}
               >
                 <Text
-                  className={`text-xs ${mapping[field] === i ? 'font-semibold text-white' : ''}`}
+                  className={`text-xs ${mapping[field] === i ? 'font-medium text-white' : ''}`}
                 >
                   {h}
                 </Text>
@@ -116,7 +116,7 @@ function PreviewStep({
 }: PreviewStepProps) {
   return (
     <View>
-      <Text className="mb-2 text-lg font-semibold">
+      <Text className="mb-2 text-lg font-medium">
         {`${translate('import.preview_title')} (${preview.length} ${translate('import.rows')})`}
       </Text>
       <Text className="mb-3 text-sm font-medium text-neutral-600 dark:text-neutral-400">
@@ -129,7 +129,7 @@ function PreviewStep({
             className={`rounded-full px-3 py-1.5 ${accountId === a.id ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
             onPress={() => onAccountSelect(a.id)}
           >
-            <Text className={`text-sm ${accountId === a.id ? 'font-semibold text-white' : ''}`}>
+            <Text className={`text-sm ${accountId === a.id ? 'font-medium text-white' : ''}`}>
               {a.name}
             </Text>
           </Pressable>
@@ -145,7 +145,7 @@ function PreviewStep({
             <Text className="text-xs text-neutral-500">{row.date}</Text>
           </View>
           <Text
-            className={`text-sm font-semibold ${row.amount >= 0 ? 'text-success-600' : 'text-danger-500'}`}
+            className={`text-sm font-medium ${row.amount >= 0 ? 'text-success-600' : 'text-danger-500'}`}
           >
             {`${row.amount >= 0 ? '+' : ''}${formatCurrency(Math.abs(row.amount), currency)}`}
           </Text>
@@ -249,7 +249,7 @@ export function ImportScreen() {
       <ScrollView className="flex-1 px-4 pt-4">
         {step === 'pick' && (
           <View className="items-center py-16">
-            <Text className="mb-2 text-lg font-semibold">{translate('import.title')}</Text>
+            <Text className="mb-2 text-lg font-medium">{translate('import.title')}</Text>
             <Text className="mb-8 text-center text-neutral-500">
               {translate('import.pick_description')}
             </Text>

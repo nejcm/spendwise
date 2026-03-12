@@ -19,7 +19,7 @@ export function CategoriesScreen() {
     <View className="flex-1">
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-4">
-        <Text className="mb-4 text-lg font-semibold">
+        <Text className="mb-4 text-lg font-medium">
           {translate('common.categories')}
         </Text>
 
@@ -35,7 +35,7 @@ export function CategoriesScreen() {
                   <Text className="text-sm text-neutral-500">
                     {translate('insights.spending_by_category')}
                   </Text>
-                  <Text className="text-sm font-semibold">
+                  <Text className="text-sm font-medium">
                     {formatCurrency(totalSpent, currency)}
                   </Text>
                 </View>
@@ -59,7 +59,7 @@ export function CategoriesScreen() {
                           <Text className="text-sm font-medium">
                             {item.category_name}
                           </Text>
-                          <Text className="text-sm font-semibold">
+                          <Text className="text-sm font-medium">
                             {formatCurrency(item.total, currency)}
                           </Text>
                         </View>

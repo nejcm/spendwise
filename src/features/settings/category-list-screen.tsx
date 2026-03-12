@@ -62,7 +62,7 @@ export function CategoryListScreen() {
     <View className="flex-1">
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-4">
-        <Text className="mb-3 text-lg font-semibold">{translate('settings.expense_categories')}</Text>
+        <Text className="mb-3 text-lg font-medium">{translate('settings.expense_categories')}</Text>
         {expenseCategories.map((cat) => (
           <CategoryRow
             key={cat.id}
@@ -72,7 +72,7 @@ export function CategoryListScreen() {
           />
         ))}
 
-        <Text className="mt-6 mb-3 text-lg font-semibold">{translate('settings.income_categories')}</Text>
+        <Text className="mt-6 mb-3 text-lg font-medium">{translate('settings.income_categories')}</Text>
         {incomeCategories.map((cat) => (
           <CategoryRow
             key={cat.id}
@@ -105,7 +105,7 @@ export function CategoryListScreen() {
                     onPress={() => field.handleChange('expense')}
                     className={`rounded-full px-3 py-1.5 ${field.state.value === 'expense' ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
                   >
-                    <Text className={`text-sm ${field.state.value === 'expense' ? 'font-semibold text-white' : ''}`}>
+                    <Text className={`text-sm ${field.state.value === 'expense' ? 'font-medium text-white' : ''}`}>
                       {translate('transactions.expense')}
                     </Text>
                   </Pressable>
@@ -113,7 +113,7 @@ export function CategoryListScreen() {
                     onPress={() => field.handleChange('income')}
                     className={`rounded-full px-3 py-1.5 ${field.state.value === 'income' ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
                   >
-                    <Text className={`text-sm ${field.state.value === 'income' ? 'font-semibold text-white' : ''}`}>
+                    <Text className={`text-sm ${field.state.value === 'income' ? 'font-medium text-white' : ''}`}>
                       {translate('transactions.income')}
                     </Text>
                   </Pressable>

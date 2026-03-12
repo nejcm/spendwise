@@ -115,14 +115,43 @@ export function useCreateCategory() {
   });
 }
 
-export function useDeleteCategory() {
+export function useDeleteCategory(onSuccess?: () => void) {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: string) => deleteCategory(db, id),
     onSuccess: () => {
+      onSuccess?.();
       queryClient.invalidateQueries({ queryKey: keys.categories });
+    },
+  });
+}
+
+export function useUpdateCategory() {
+  const db = useSQLiteContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (params: { id: string; data: Pick<CategoryFormData, 'name' | 'type' | 'color' | 'sort_order'> }) =>
+      updateCategory(db, params.id, params.data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.categories });
+      queryClient.invalidateQueries({ queryKey: ['insights'] });
+    },
+  });
+}
+
+export function useUpdateCategoryOrder() {
+  const db = useSQLiteContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (items: Array<{ id: string; sort_order: number }>) =>
+      updateCategoryOrder(db, items),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: keys.categories });
+      queryClient.invalidateQueries({ queryKey: ['insights'] });
     },
   });
 }
@@ -327,11 +356,36 @@ async function createCategory(db: SQLiteDatabase, data: CategoryFormData): Promi
   const id = generateId();
   await db.runAsync(
     'INSERT INTO categories (id, name, color, type, sort_order) VALUES (?, ?, ?, ?, ?)',
-    [id, data.name.trim(), data.color, data.type, data.sort_order],
+    [id, data.name.trim(), data.color, data.type, data.sort_order ?? 999999],
   );
   return id;
 }
 
 async function deleteCategory(db: SQLiteDatabase, id: string): Promise<void> {
   await db.runAsync('DELETE FROM categories WHERE id = ?', [id]);
+}
+
+async function updateCategory(
+  db: SQLiteDatabase,
+  id: string,
+  data: CategoryFormData,
+): Promise<void> {
+  await db.runAsync('UPDATE categories SET name = ?, color = ?, type = ?, sort_order = ? WHERE id = ?', [
+    data.name.trim(),
+    data.color,
+    data.type,
+    data.sort_order ?? 999999,
+    id,
+  ]);
+}
+
+async function updateCategoryOrder(
+  db: SQLiteDatabase,
+  items: Array<{ id: string; sort_order: number }>,
+): Promise<void> {
+  await db.withTransactionAsync(async () => {
+    for (const item of items) {
+      await db.runAsync('UPDATE categories SET sort_order = ? WHERE id = ?', [item.sort_order, item.id]);
+    }
+  });
 }

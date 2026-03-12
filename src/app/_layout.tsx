@@ -22,7 +22,8 @@ import {
 import { SecurityLock } from '@/features/security/security-lock';
 import { APIProvider } from '@/lib/api';
 import { DatabaseErrorBoundary, migrateDb } from '@/lib/sqlite';
-import { loadSelectedTheme } from '@/lib/theme/use-selected-theme';
+import { loadSelectedTheme, useSelectedTheme } from '@/lib/theme/use-selected-theme';
+
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 // Import  global CSS file
 import '../global.css';
@@ -54,6 +55,26 @@ function PersistentTabBar() {
   const pathname = usePathname();
   if (pathname === '/onboarding') return null;
   return <CustomTabBar />;
+}
+
+function DevThemeToggle() {
+  const { selectedTheme, setSelectedTheme } = useSelectedTheme();
+
+  useEffect(() => {
+    if (!__DEV__ || Platform.OS !== 'web') return;
+
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === '0') {
+        e.preventDefault();
+        setSelectedTheme(selectedTheme === 'dark' ? 'light' : 'dark');
+      }
+    };
+
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [selectedTheme, setSelectedTheme]);
+
+  return null;
 }
 
 export default function RootLayout() {
@@ -121,6 +142,7 @@ function Providers({ children }: { children: React.ReactNode }) {
                     <BottomSheetModalProvider>
                       {children}
                       <FlashMessage position="top" />
+                      <DevThemeToggle />
                     </BottomSheetModalProvider>
                   </FontLoader>
                 </APIProvider>

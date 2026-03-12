@@ -33,6 +33,13 @@
     "title": "Budgets",
     "total_amount": "Total Budget Amount"
   },
+  "categories": {
+    "add_category": "Add Category",
+    "delete_confirm": "Are you sure you want to delete {{name}}?",
+    "edit_category": "Edit Category",
+    "sorting_tips": "Hold and drag to reorder categories",
+    "title": "Categories"
+  },
   "common": {
     "add": "Add",
     "amount": "Amount",
@@ -203,7 +210,7 @@
       "title": "Theme"
     },
     "title": "Settings",
-    "transfer": "Transfer",
+    "transactions": "Transactions",
     "version": "Version"
   },
   "subscriptions": {

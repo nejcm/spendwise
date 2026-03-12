@@ -4,7 +4,7 @@ import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
-import { ALargeSmall, Banknote, Bell, FileText, HelpCircle, Import, Link, List, LogOut, Settings, Share, Shield, User } from 'lucide-react-native';
+import { ALargeSmall, Banknote, Bell, FileText, HelpCircle, Import, LayoutGrid, Link, List, LogOut, Share, Shield, User } from 'lucide-react-native';
 import { Button, FocusAwareStatusBar, Image, ScrollView, Text, View } from '@/components/ui';
 import { config } from '@/config';
 import { mockData } from '@/lib/sqlite/mock-data';
@@ -39,17 +39,17 @@ export function SettingsScreen() {
             <SettingsItem
               icon={<Banknote className={iconColor} size={20} />}
               text="settings.accounts"
-              onPress={() => router.push('/settings/accounts')}
+              onPress={() => router.push('/accounts')}
+            />
+            <SettingsItem
+              icon={<LayoutGrid className={iconColor} size={20} />}
+              text="settings.categories"
+              onPress={() => router.push('/categories')}
             />
             <SettingsItem
               icon={<List className={iconColor} size={20} />}
-              text="settings.categories"
-              onPress={() => router.push('/settings/categories')}
-            />
-            <SettingsItem
-              icon={<Settings className={iconColor} size={20} />}
-              text="settings.transfer"
-              onPress={() => router.push('/settings/transfer')}
+              text="settings.transactions"
+              onPress={() => router.push('/transactions')}
             />
           </SettingsContainer>
 

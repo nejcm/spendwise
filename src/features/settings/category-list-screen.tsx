@@ -1,54 +1,33 @@
-import { useForm } from '@tanstack/react-form';
+import type { CategoryAddModalRef } from '@/components/category-add-modal';
 import * as React from 'react';
-import { useState } from 'react';
-import { Alert, Pressable, View } from 'react-native';
-import * as z from 'zod';
-import { Button, FocusAwareStatusBar, Input, ScrollView, Text } from '@/components/ui';
-import { getFieldError } from '@/components/ui/form-utils';
-import { ACCOUNT_COLORS } from '@/features/accounts/types';
-import { useCategories, useCreateCategory, useDeleteCategory } from '@/features/transactions/api';
-import { translate } from '@/lib/i18n';
 
-const schema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  type: z.enum(['expense', 'income']),
-  color: z.string(),
-});
+import { AlertRN, View } from 'react-native';
+import { CategoryAddModal } from '@/components/category-add-modal';
+import { CategoryGrid, FocusAwareStatusBar } from '@/components/ui';
+import {
+  useCategories,
+  useDeleteCategory,
+  useUpdateCategoryOrder,
+} from '@/features/transactions/api';
+import { translate } from '@/lib/i18n';
 
 export function CategoryListScreen() {
   const { data: categories = [] } = useCategories();
-  const createCategory = useCreateCategory();
   const deleteCategory = useDeleteCategory();
+  const updateOrder = useUpdateCategoryOrder();
+  const modalRef = React.useRef<CategoryAddModalRef>(null);
 
-  const [showForm, setShowForm] = useState(false);
-
-  const form = useForm({
-    defaultValues: {
-      name: '',
-      type: 'expense' as 'expense' | 'income',
-      color: ACCOUNT_COLORS[0],
-    },
-    validators: {
-      onChange: schema,
-    },
-    onSubmit: async ({ value }) => {
-      createCategory.mutate(
-        { name: value.name, type: value.type, color: value.color, sort_order: categories.length },
-        {
-          onSuccess: () => {
-            form.reset();
-            setShowForm(false);
-          },
-        },
-      );
-    },
-  });
-
-  const expenseCategories = categories.filter((c) => c.type === 'expense');
-  const incomeCategories = categories.filter((c) => c.type === 'income');
+  const gridCategories = categories.map((c) => ({
+    id: c.id,
+    name: c.name,
+    icon: c.icon,
+    color: c.color,
+    sort_order: c.sort_order,
+    type: c.type,
+  }));
 
   const handleDelete = (id: string, catName: string) => {
-    Alert.alert(translate('common.delete'), `Delete "${catName}"?`, [
+    AlertRN.alert(translate('common.delete'), `Delete "${catName}"?`, [
       { text: translate('common.cancel'), style: 'cancel' },
       {
         text: translate('common.delete'),
@@ -61,132 +40,13 @@ export function CategoryListScreen() {
   return (
     <View className="flex-1">
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-4">
-        <Text className="mb-3 text-lg font-medium">{translate('settings.expense_categories')}</Text>
-        {expenseCategories.map((cat) => (
-          <CategoryRow
-            key={cat.id}
-            name={cat.name}
-            color={cat.color}
-            onDelete={() => handleDelete(cat.id, cat.name)}
-          />
-        ))}
-
-        <Text className="mt-6 mb-3 text-lg font-medium">{translate('settings.income_categories')}</Text>
-        {incomeCategories.map((cat) => (
-          <CategoryRow
-            key={cat.id}
-            name={cat.name}
-            color={cat.color}
-            onDelete={() => handleDelete(cat.id, cat.name)}
-          />
-        ))}
-
-        {showForm && (
-          <View className="mt-4 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
-            <form.Field
-              name="name"
-              children={(field) => (
-                <Input
-                  label={translate('settings.category_name')}
-                  value={field.state.value}
-                  onBlur={field.handleBlur}
-                  onChangeText={field.handleChange}
-                  error={getFieldError(field)}
-                />
-              )}
-            />
-
-            <form.Field
-              name="type"
-              children={(field) => (
-                <View className="mt-3 flex-row gap-2">
-                  <Pressable
-                    onPress={() => field.handleChange('expense')}
-                    className={`rounded-full px-3 py-1.5 ${field.state.value === 'expense' ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
-                  >
-                    <Text className={`text-sm ${field.state.value === 'expense' ? 'font-medium text-white' : ''}`}>
-                      {translate('transactions.expense')}
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => field.handleChange('income')}
-                    className={`rounded-full px-3 py-1.5 ${field.state.value === 'income' ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
-                  >
-                    <Text className={`text-sm ${field.state.value === 'income' ? 'font-medium text-white' : ''}`}>
-                      {translate('transactions.income')}
-                    </Text>
-                  </Pressable>
-                </View>
-              )}
-            />
-
-            <form.Field
-              name="color"
-              children={(field) => (
-                <View className="mt-3 flex-row flex-wrap gap-2">
-                  {ACCOUNT_COLORS.map((c) => (
-                    <Pressable
-                      key={c}
-                      onPress={() => field.handleChange(c)}
-                      className={`size-8 rounded-full ${field.state.value === c ? 'border-2 border-primary-400' : ''}`}
-                      style={{ backgroundColor: c }}
-                    />
-                  ))}
-                </View>
-              )}
-            />
-
-            <form.Subscribe
-              selector={(state) => [state.isSubmitting, state.values.name]}
-              children={([isSubmitting, name]) => (
-                <View className="mt-4 flex-row gap-3">
-                  <Button
-                    label={translate('common.cancel')}
-                    variant="outline"
-                    onPress={() => {
-                      form.reset();
-                      setShowForm(false);
-                    }}
-                    className="flex-1"
-                  />
-                  <Button
-                    label={translate('common.save')}
-                    onPress={form.handleSubmit}
-                    disabled={!(name as string).trim() || (isSubmitting as boolean) || createCategory.isPending}
-                    loading={(isSubmitting as boolean) || createCategory.isPending}
-                    className="flex-1"
-                  />
-                </View>
-              )}
-            />
-          </View>
-        )}
-      </ScrollView>
-
-      {!showForm && (
-        <Pressable
-          className="absolute right-6 bottom-6 size-14 items-center justify-center rounded-full bg-primary-400 shadow-lg"
-          onPress={() => setShowForm(true)}
-        >
-          <Text className="text-2xl font-bold text-white">+</Text>
-        </Pressable>
-      )}
+      <CategoryGrid
+        categories={gridCategories}
+        onReorder={(items) => updateOrder.mutate(items)}
+        onAddPress={(type) => modalRef.current?.present(type)}
+        onDeletePress={handleDelete}
+      />
+      <CategoryAddModal ref={modalRef} />
     </View>
-  );
-}
-
-type CategoryRowProps = {
-  name: string;
-  color: string;
-  onDelete: () => void;
-};
-
-function CategoryRow({ name, color, onDelete }: CategoryRowProps) {
-  return (
-    <Pressable onPress={onDelete} className="mb-1 flex-row items-center rounded-lg px-3 py-2.5">
-      <View className="size-4 rounded-full" style={{ backgroundColor: color }} />
-      <Text className="ml-3 flex-1 text-sm">{name}</Text>
-    </Pressable>
   );
 }

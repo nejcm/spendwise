@@ -17,5 +17,5 @@ export type CategoryFormData = {
   name: string;
   type: 'expense' | 'income';
   color: string;
-  sort_order: number;
+  sort_order?: number | null;
 };

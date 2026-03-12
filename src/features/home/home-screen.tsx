@@ -16,7 +16,7 @@ export function HomeScreen() {
   const currency = useAppStore.use.currency();
   const profile = useAppStore.use.profile();
   const name = profile?.name?.trim() || translate('common.there');
-  const { data } = useMonthSummary(format(new Date(), 'MM'));
+  const { data } = useMonthSummary(format(new Date(), 'yyyy-MM'));
 
   return (
     <View className="flex-1">

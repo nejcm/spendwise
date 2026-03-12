@@ -35,15 +35,15 @@ export function HomeScreen() {
               </View>
             </View>
             <View className="mt-4 flex-row gap-3">
-              <View className="flex-1 gap-1 rounded-xl border border-neutral-200 px-4 py-3">
-                <Text className="text-lg font-bold text-success-500">
+              <View className="flex-1 gap-1 rounded-xl bg-success-500/8 px-4 py-3">
+                <Text className="text-lg font-bold text-success-600">
                   +
                   {' '}
                   {formatCurrency(data?.income ?? 0, currency)}
                 </Text>
                 <Text className="text-sm text-neutral-500">{translate('home.income')}</Text>
               </View>
-              <View className="flex-1 gap-1 rounded-xl border border-neutral-200 px-4 py-3">
+              <View className="flex-1 gap-1 rounded-xl bg-danger-500/8 px-4 py-3">
                 <Text className="text-lg font-bold text-danger-500">
                   -
                   {' '}

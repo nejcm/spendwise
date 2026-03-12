@@ -2,6 +2,7 @@ import type { TransactionWithCategory } from '../types';
 import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
+import { cn } from 'tailwind-variants';
 import { Text } from '@/components/ui';
 import { formatCurrency, formatShortDate } from '@/features/formatting/helpers';
 import { useAppStore } from '@/lib/store';
@@ -9,15 +10,16 @@ import { useAppStore } from '@/lib/store';
 export type TransactionCardProps = {
   transaction: TransactionWithCategory;
   onPress?: () => void;
+  className?: string;
 };
 
-export const TransactionCard = React.memo(({ transaction, onPress }: TransactionCardProps) => {
+export const TransactionCard = React.memo(({ transaction, onPress, className }: TransactionCardProps) => {
   const currency = useAppStore.use.currency();
   const isIncome = transaction.type === 'income';
   const displayName = transaction.category_name || 'Unknown';
 
   return (
-    <Pressable className="flex-row items-center gap-2 p-3" onPress={onPress}>
+    <Pressable className={cn('flex-row items-center gap-2 p-3', className)} onPress={onPress}>
       <View
         className="size-10 items-center justify-center rounded-full"
         style={{

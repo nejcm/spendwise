@@ -11,7 +11,7 @@ import { translate } from '@/lib/i18n';
 
 export default function TransactionsList() {
   const router = useRouter();
-  const { data: recentTransactions = [] } = useRecentTransactions(15);
+  const { data = [] } = useRecentTransactions(15);
 
   return (
     <View>
@@ -21,7 +21,7 @@ export default function TransactionsList() {
           <Text className="text-sm font-medium text-neutral-500">{translate('home.see_all')}</Text>
         </Pressable>
       </View>
-      {recentTransactions.length === 0
+      {data.length === 0
         ? (
             <View className="mt-4 items-center rounded-xl bg-neutral-50 py-8 dark:bg-neutral-800">
               <Text className="mb-2 text-neutral-500">{translate('home.no_transactions')}</Text>
@@ -35,12 +35,13 @@ export default function TransactionsList() {
             </View>
           )
         : (
-            <View className="mt-4 rounded-xl bg-neutral-100 dark:bg-neutral-800">
-              {recentTransactions.map((t) => (
+            <View className="mt-2">
+              {data.map((t) => (
                 <TransactionCard
                   key={t.id}
                   transaction={t}
                   onPress={() => router.push(`/transactions/${t.id}`)}
+                  className="px-0"
                 />
               ))}
             </View>

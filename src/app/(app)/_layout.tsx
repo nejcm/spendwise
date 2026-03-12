@@ -56,6 +56,14 @@ export default function TabLayout() {
           tabBarButtonTestID: 'settings-tab',
         }}
       />
+      <Tabs.Screen
+        name="transactions"
+        options={{
+          title: 'Transactions',
+          headerShown: false,
+          tabBarButtonTestID: 'transactions-tab',
+        }}
+      />
     </Tabs>
   );
 }

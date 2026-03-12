@@ -12,7 +12,6 @@ import { ACCOUNT_COLORS, ACCOUNT_TYPE_LABELS } from '../types';
 const schema = z.object({
   name: z.string().min(1, 'Name is required'),
   type: z.enum(['cash', 'checking', 'savings', 'credit_card', 'investment', 'other']),
-  initial_balance: z.string().regex(/^\d*\.?\d*$/, 'Invalid amount'),
   color: z.string(),
 });
 
@@ -29,7 +28,6 @@ const defaultValues: AccountFormData = {
   name: '',
   type: 'checking',
   description: null,
-  initial_balance: '0',
   color: ACCOUNT_COLORS[0],
   currency: 'USD',
   icon: null,
@@ -83,20 +81,6 @@ export function AccountForm({ initialData, onSubmit, onCancel, isSubmitting }: A
               ))}
             </View>
           </View>
-        )}
-      />
-
-      <form.Field
-        name="initial_balance"
-        children={(field) => (
-          <Input
-            label={translate('accounts.opening_balance')}
-            value={field.state.value}
-            onBlur={field.handleBlur}
-            onChangeText={field.handleChange}
-            keyboardType="decimal-pad"
-            error={getFieldError(field)}
-          />
         )}
       />
 

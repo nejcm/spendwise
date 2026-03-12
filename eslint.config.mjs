@@ -70,12 +70,18 @@ export default antfu(
         },
       ],
       'node/prefer-global/process': 'off', // process is commonly used in React Native configs
-      'ts/no-require-imports': 'off', // Sometimes needed for mocks
-      'ts/no-use-before-define': 'off', // Allow forward references in React components
       'no-console': 'off', // Console is useful for debugging
       'no-cond-assign': 'off', // Allow assignment in conditions when intentional
       'regexp/no-super-linear-backtracking': 'off', // Relax regex performance rules
       'regexp/no-unused-capturing-group': 'off', // Allow unused capturing groups
+      'unused-imports/no-unused-vars': [
+        'warn',
+        {
+          varsIgnorePattern: '^_',
+          argsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
     },
   },
 
@@ -90,7 +96,17 @@ export default antfu(
   {
     files: ['**/*.ts', '**/*.tsx'],
     rules: {
+      'ts/no-require-imports': 'off', // Sometimes needed for mocks
+      'ts/no-use-before-define': 'off', // Allow forward references in React components
       'ts/consistent-type-definitions': 'off', // Prefer type over interface
+      'ts/no-unused-vars': [
+        'warn',
+        {
+          varsIgnorePattern: '^_',
+          argsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
       'react-hooks/refs': 'off', // Allow useRef without exhaustive-deps
       'ts/consistent-type-imports': [
         'warn',

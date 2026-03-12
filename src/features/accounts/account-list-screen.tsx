@@ -67,7 +67,6 @@ export function AccountListScreen() {
                 type: editingAccount.type as any,
                 currency: editingAccount.currency,
                 description: editingAccount.description ?? null,
-                initial_balance: String(editingAccount.initial_balance / 100),
                 icon: editingAccount.icon ?? null,
                 color: editingAccount.color ?? null,
               }}

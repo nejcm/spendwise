@@ -4,11 +4,11 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 export async function mockData(db: SQLiteDatabase): Promise<void> {
   // Basic accounts
   await db.execAsync(`
-    INSERT INTO accounts (id, name, type, currency, initial_balance)
+    INSERT INTO accounts (id, name, type, currency)
     VALUES
-      ('acc_cash_wallet', 'Cash Wallet', 'cash', 'EUR', 15000),
-      ('acc_main_checking', 'Main Checking', 'checking', 'EUR', 250000),
-      ('acc_savings', 'Emergency Savings', 'savings', 'EUR', 500000);
+      ('acc_cash_wallet', 'Cash Wallet', 'cash', 'EUR'),
+      ('acc_main_checking', 'Main Checking', 'checking', 'EUR'),
+      ('acc_savings', 'Emergency Savings', 'savings', 'EUR');
   `);
 
   // Sample transactions (amounts are in cents)

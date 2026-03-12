@@ -71,7 +71,7 @@
   "home": {
     "add_category": "Add Category",
     "add_category_description": "Create categories to track your spending by where it goes.",
-    "available_balance": "Your available balance",
+    "available_balance": "Your balance for this month",
     "expenses": "Expenses",
     "hi": "Hi {{name}}",
     "income": "Income",

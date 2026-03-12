@@ -82,11 +82,11 @@ export function useAccountsWithBalance() {
   });
 }
 
-export function useTotalBalance() {
+export function useTotalBalance(month?: string) {
   const db = useSQLiteContext();
   return useQuery({
-    queryKey: keys.totalBalance,
-    queryFn: () => getTotalBalance(db),
+    queryKey: [...keys.totalBalance, month],
+    queryFn: () => getTotalBalance(db, month),
   });
 }
 
@@ -230,8 +230,7 @@ async function getAccounts(db: SQLiteDatabase): Promise<Account[]> {
 async function getAccountsWithBalance(db: SQLiteDatabase): Promise<AccountWithBalance[]> {
   return db.getAllAsync<AccountWithBalance>(
     `SELECT a.*,
-       a.initial_balance
-       + COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0)
+       COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0)
        - COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END), 0)
        as balance
      FROM accounts a
@@ -242,18 +241,44 @@ async function getAccountsWithBalance(db: SQLiteDatabase): Promise<AccountWithBa
   );
 }
 
-async function getTotalBalance(db: SQLiteDatabase): Promise<number> {
-  const result = await db.getFirstAsync<{ total: number }>(
-    `SELECT
-       COALESCE(SUM(a.initial_balance), 0)
-       + COALESCE(SUM(
-           (SELECT COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0)
-            - COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END), 0)
-            FROM transactions t WHERE t.account_id = a.id)
-         ), 0) as total
-     FROM accounts a
-     WHERE a.is_archived = 0`,
-  );
+async function getTotalBalance(db: SQLiteDatabase, month?: string): Promise<number> {
+  let startDate: string | undefined;
+  let nextMonth: string | undefined;
+
+  if (month) {
+    const [year, m] = month.split('-');
+    startDate = `${year}-${m}-01`;
+    nextMonth
+      = Number(m) === 12
+        ? `${Number(year) + 1}-01-01`
+        : `${year}-${String(Number(m) + 1).padStart(2, '0')}-01`;
+  }
+
+  const sql = `
+    SELECT
+      COALESCE(SUM(account_balance), 0) as total
+    FROM (
+      SELECT
+        a.id,
+        COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0)
+        - COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END), 0)
+        + COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount > 0 THEN t.amount ELSE 0 END), 0)
+        - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN ABS(t.amount) ELSE 0 END), 0)
+        AS account_balance
+      FROM accounts a
+      LEFT JOIN transactions t ON t.account_id = a.id
+      ${startDate && nextMonth ? 'AND t.date >= ? AND t.date < ?' : ''}
+      WHERE a.is_archived = 0
+      GROUP BY a.id
+    ) AS balances
+  `;
+
+  const params: (string | number)[] = [];
+  if (startDate && nextMonth) {
+    params.push(startDate, nextMonth);
+  }
+
+  const result = await db.getFirstAsync<{ total: number }>(sql, params);
   return result?.total ?? 0;
 }
 

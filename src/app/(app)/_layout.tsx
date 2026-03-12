@@ -33,18 +33,18 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="transactions"
+        name="categories"
         options={{
-          title: 'Transactions',
-          tabBarButtonTestID: 'transactions-tab',
+          title: 'Categories',
+          tabBarButtonTestID: 'categories-tab',
           headerShown: false,
         }}
       />
       <Tabs.Screen
-        name="budgets"
+        name="transactions"
         options={{
-          title: 'Budgets',
-          tabBarButtonTestID: 'budgets-tab',
+          title: 'Transactions',
+          tabBarButtonTestID: 'transactions-tab',
           headerShown: false,
         }}
       />

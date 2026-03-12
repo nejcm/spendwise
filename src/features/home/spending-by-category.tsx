@@ -30,7 +30,7 @@ export function SpendingByCategory() {
       {data.length === 0
         ? (
             <Pressable
-              onPress={() => router.push('/settings/categories')}
+              onPress={() => router.push('/categories')}
               className="rounded-2xl border border-dashed border-neutral-300 bg-card p-4 dark:border-neutral-700"
             >
               <View className="flex-row items-center">

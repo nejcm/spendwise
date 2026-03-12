@@ -22,7 +22,7 @@ import {
 import { SecurityLock } from '@/features/security/security-lock';
 import { loadSelectedTheme } from '@/features/theme/use-selected-theme';
 import { APIProvider } from '@/lib/api';
-import { db } from '@/lib/drizzle/db';
+import { db, initDb } from '@/lib/drizzle/db';
 import { seedDefaults } from '@/lib/drizzle/seeds';
 import { DatabaseErrorBoundary, OpfsCleaner } from '@/lib/sqlite';
 import migrations from '../../drizzle/migrations';
@@ -118,9 +118,20 @@ function MigrationWrapper({ children }: { children: React.ReactNode }) {
     init();
   }, [success, initialized]);
 
-  if (error) return <DatabaseErrorBoundary>{null}</DatabaseErrorBoundary>;
-  if (!success || !initialized) return null;
+  if (error) return <DatabaseErrorBoundary>Error initializing database</DatabaseErrorBoundary>;
+  if (!success || !initialized) return 'Waiting for database...';
 
+  return <>{children}</>;
+}
+
+function DbProvider({ children }: { children: React.ReactNode }) {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    initDb().then(() => setReady(true));
+  }, []);
+
+  if (!ready) return 'Waiting for database...';
   return <>{children}</>;
 }
 
@@ -139,18 +150,20 @@ function Providers({ children }: { children: React.ReactNode }) {
         <ThemeProvider value={theme}>
           <OpfsCleaner>
             <DatabaseErrorBoundary>
-              <MigrationWrapper>
-                <AppErrorBoundary>
-                  <APIProvider>
-                    <FontLoader>
-                      <BottomSheetModalProvider>
-                        {children}
-                        <FlashMessage position="top" />
-                      </BottomSheetModalProvider>
-                    </FontLoader>
-                  </APIProvider>
-                </AppErrorBoundary>
-              </MigrationWrapper>
+              <DbProvider>
+                <MigrationWrapper>
+                  <AppErrorBoundary>
+                    <APIProvider>
+                      <FontLoader>
+                        <BottomSheetModalProvider>
+                          {children}
+                          <FlashMessage position="top" />
+                        </BottomSheetModalProvider>
+                      </FontLoader>
+                    </APIProvider>
+                  </AppErrorBoundary>
+                </MigrationWrapper>
+              </DbProvider>
             </DatabaseErrorBoundary>
           </OpfsCleaner>
         </ThemeProvider>

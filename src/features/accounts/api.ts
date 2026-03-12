@@ -111,8 +111,7 @@ async function getAccounts(db: SQLiteDatabase): Promise<Account[]> {
 async function getAccountsWithBalance(db: SQLiteDatabase): Promise<AccountWithBalance[]> {
   return db.getAllAsync<AccountWithBalance>(
     `SELECT a.*,
-       a.initial_balance
-       + COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0)
+       COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0)
        - COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END), 0)
        + COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount > 0 THEN t.amount ELSE 0 END), 0)
        - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN ABS(t.amount) ELSE 0 END), 0)
@@ -127,24 +126,21 @@ async function getAccountsWithBalance(db: SQLiteDatabase): Promise<AccountWithBa
 
 async function createAccount(db: SQLiteDatabase, data: AccountFormData): Promise<string> {
   const id = generateId();
-  const balanceCents = amountToCents(Number.parseFloat(data.initial_balance) || 0);
 
   await db.runAsync(
-    `INSERT INTO accounts (id, name, type, currency, initial_balance, icon, color)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [id, data.name, data.type, data.currency, balanceCents, data.icon, data.color],
+    `INSERT INTO accounts (id, name, type, currency, icon, color)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [id, data.name, data.type, data.currency, data.icon, data.color],
   );
 
   return id;
 }
 
 async function updateAccount(db: SQLiteDatabase, id: string, data: AccountFormData): Promise<void> {
-  const balanceCents = amountToCents(Number.parseFloat(data.initial_balance) || 0);
-
   await db.runAsync(
-    `UPDATE accounts SET name = ?, type = ?, currency = ?, initial_balance = ?, icon = ?, color = ?, updated_at = datetime('now')
+    `UPDATE accounts SET name = ?, type = ?, currency = ?, icon = ?, color = ?, updated_at = datetime('now')
      WHERE id = ?`,
-    [data.name, data.type, data.currency, balanceCents, data.icon, data.color, id],
+    [data.name, data.type, data.currency, data.icon, data.color, id],
   );
 }
 

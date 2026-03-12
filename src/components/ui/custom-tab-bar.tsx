@@ -1,7 +1,7 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { usePathname, useRouter } from 'expo-router';
-import { BellIcon, Home, PlusIcon, Receipt, UserIcon } from 'lucide-react-native';
+import { Home, LayoutGrid, PlusIcon, Receipt, UserIcon } from 'lucide-react-native';
 
 import * as React from 'react';
 import { Platform, Pressable, View } from 'react-native';
@@ -18,16 +18,16 @@ const TABS: TabConfig[] = [
     icon: (color) => <Home color={color} size={24} strokeWidth={2} />,
   },
   {
-    name: 'transactions',
-    icon: (color) => <Receipt color={color} size={24} strokeWidth={2} />,
+    name: 'categories',
+    icon: (color) => <LayoutGrid color={color} size={24} strokeWidth={2} />,
   },
   {
     name: '__add__',
     icon: (color) => <PlusIcon color={color} size={24} strokeWidth={2} />,
   },
   {
-    name: 'budgets',
-    icon: (color) => <BellIcon color={color} size={24} strokeWidth={2} />,
+    name: 'transactions',
+    icon: (color) => <Receipt color={color} size={24} strokeWidth={2} />,
   },
   {
     name: 'settings',

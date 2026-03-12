@@ -8,7 +8,6 @@ export type Account = {
   description: string | null;
   type: AccountType;
   currency: CurrencyKey;
-  initial_balance: number;
   budget?: number | null; // credit limit or budget cap
   icon: string | null;
   color: string | null;
@@ -19,7 +18,7 @@ export type Account = {
 };
 
 export type AccountWithBalance = Account & {
-  balance: number; // computed: initial_balance + income - expense
+  balance: number; // computed: income - expense
 };
 
 export type AccountFormData = {
@@ -27,7 +26,6 @@ export type AccountFormData = {
   type: AccountType;
   currency: string;
   description: string | null;
-  initial_balance: string;
   budget?: string | null;
   icon: string | null;
   color: string | null;

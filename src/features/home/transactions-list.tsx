@@ -35,7 +35,7 @@ export default function TransactionsList() {
             </View>
           )
         : (
-            <View className="mt-2 rounded-xl bg-neutral-50 dark:bg-neutral-800">
+            <View className="mt-4 rounded-xl bg-neutral-100 dark:bg-neutral-800">
               {recentTransactions.map((t) => (
                 <TransactionCard
                   key={t.id}

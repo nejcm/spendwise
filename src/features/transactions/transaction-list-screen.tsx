@@ -1,14 +1,15 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import { format } from 'date-fns';
+import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react-native';
 import * as React from 'react';
+
 import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { Pressable, TextInput, View } from 'react-native';
-
 import { FocusAwareStatusBar, Text } from '@/components/ui';
 import { formatMonthYear } from '@/features/formatting/helpers';
-import { translate } from '@/lib/i18n';
 
+import { translate } from '@/lib/i18n';
 import { useTransactions } from './api';
 import { QuickAddSheet } from './components/quick-add-sheet';
 import { TransactionFilterBar } from './components/transaction-filter-bar';
@@ -53,13 +54,13 @@ export function TransactionListScreen() {
     <View className="flex-1">
       <FocusAwareStatusBar />
 
-      <View className="flex-row items-center justify-between px-4 py-3">
+      <View className="flex-row items-center justify-between p-4">
         <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
-          <Text className="text-2xl text-primary-400">&lt;</Text>
+          <ArrowLeftIcon className="size-5 text-neutral-500" />
         </Pressable>
         <Text className="text-lg font-semibold">{monthLabel}</Text>
         <Pressable onPress={() => navigateMonth(1)} hitSlop={12}>
-          <Text className="text-2xl text-primary-400">&gt;</Text>
+          <ArrowRightIcon className="size-5 text-neutral-500" />
         </Pressable>
       </View>
 

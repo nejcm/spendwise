@@ -63,7 +63,6 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
         description TEXT,
         type TEXT NOT NULL CHECK(type IN ('cash','checking','savings','credit_card','investment','other')),
         currency TEXT NOT NULL DEFAULT 'EUR',
-        initial_balance INTEGER NOT NULL DEFAULT 0,
         budget INTEGER,
         icon TEXT,
         color TEXT,
@@ -205,6 +204,12 @@ async function seedDefaults(db: SQLiteDatabase): Promise<void> {
       name: 'Other',
       icon: '📦',
       color: '#90A4AE',
+    },
+    {
+      id: '_unknown',
+      name: 'Unknown',
+      icon: '?',
+      color: '#333333',
     },
   ];
 

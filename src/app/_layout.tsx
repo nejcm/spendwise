@@ -3,18 +3,17 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteProvider } from 'expo-sqlite';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-
 import { KeyboardProvider } from 'react-native-keyboard-controller';
-
 import { AppErrorBoundary } from '@/components/app-error-boundary';
+import { CustomTabBar } from '@/components/ui/custom-tab-bar';
 import { useThemeConfig } from '@/components/ui/use-theme-config';
 import {
   checkBudgetAlerts,
@@ -51,13 +50,22 @@ SplashScreen.setOptions({
   fade: true,
 });
 
+function PersistentTabBar() {
+  const pathname = usePathname();
+  if (pathname === '/onboarding') return null;
+  return <CustomTabBar />;
+}
+
 export default function RootLayout() {
   return (
     <Providers>
-      <Stack>
-        <Stack.Screen name="(app)" options={{ headerShown: false }} />
-        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-      </Stack>
+      <View style={styles.content}>
+        <Stack>
+          <Stack.Screen name="(app)" options={{ headerShown: false }} />
+          <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+        </Stack>
+        <PersistentTabBar />
+      </View>
       <SecurityLock />
     </Providers>
   );
@@ -130,6 +138,9 @@ function Providers({ children }: { children: React.ReactNode }) {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  content: {
     flex: 1,
   },
 });

@@ -13,6 +13,7 @@ import * as Haptics from 'expo-haptics';
 import { useSQLiteContext } from 'expo-sqlite';
 import { amountToCents } from '@/features/formatting/helpers';
 import { generateId } from '@/lib/sqlite';
+import { getCurrentMonthRange } from '../../lib/date/helpers';
 
 // ─── Query Keys ───
 
@@ -246,12 +247,7 @@ async function getTotalBalance(db: SQLiteDatabase, month?: string): Promise<numb
   let nextMonth: string | undefined;
 
   if (month) {
-    const [year, m] = month.split('-');
-    startDate = `${year}-${m}-01`;
-    nextMonth
-      = Number(m) === 12
-        ? `${Number(year) + 1}-01-01`
-        : `${year}-${String(Number(m) + 1).padStart(2, '0')}-01`;
+    [startDate, nextMonth] = getCurrentMonthRange(month);
   }
 
   const sql = `
@@ -283,10 +279,7 @@ async function getTotalBalance(db: SQLiteDatabase, month?: string): Promise<numb
 }
 
 async function getMonthSummary(db: SQLiteDatabase, month: string): Promise<MonthSummary> {
-  const [year, m] = month.split('-');
-  const startDate = `${year}-${m}-01`;
-  const nextMonth
-    = Number(m) === 12 ? `${Number(year) + 1}-01-01` : `${year}-${String(Number(m) + 1).padStart(2, '0')}-01`;
+  const [startDate, nextMonth] = getCurrentMonthRange(month);
 
   const result = await db.getFirstAsync<{ income: number; expense: number }>(
     `SELECT

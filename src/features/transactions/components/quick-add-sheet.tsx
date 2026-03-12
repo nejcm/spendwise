@@ -84,7 +84,7 @@ export function QuickAddSheet({ sheetRef }: QuickAddSheetProps) {
                     form.setFieldValue('category_id', null);
                   }}
                 >
-                  <Text className={`font-semibold ${field.state.value === option.value ? 'text-white' : 'dark:text-neutral-100'}`}>
+                  <Text className={`font-medium ${field.state.value === option.value ? 'text-white' : 'dark:text-neutral-100'}`}>
                     {option.label}
                   </Text>
                 </Pressable>

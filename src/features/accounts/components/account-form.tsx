@@ -74,7 +74,7 @@ export function AccountForm({ initialData, onSubmit, onCancel, isSubmitting }: A
                   onPress={() => field.handleChange(t)}
                   className={`rounded-full px-3 py-1.5 ${field.state.value === t ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
                 >
-                  <Text className={`text-sm ${field.state.value === t ? 'font-semibold text-white' : ''}`}>
+                  <Text className={`text-sm ${field.state.value === t ? 'font-medium text-white' : ''}`}>
                     {ACCOUNT_TYPE_LABELS[t]}
                   </Text>
                 </Pressable>

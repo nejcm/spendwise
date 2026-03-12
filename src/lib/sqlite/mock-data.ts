@@ -20,8 +20,10 @@ export async function mockData(db: SQLiteDatabase): Promise<void> {
       ('tx_freelance_001', 'acc_main_checking', 'cat_freelance', 'income', 65000, 'EUR', date('now', '-10 days'), 'Freelance project'),
 
       -- Food & dining
-      ('tx_food_001', 'acc_cash_wallet', 'cat_food', 'expense', 1850, 'EUR', date('now', '-9 days'), 'Lunch with friends'),
-      ('tx_food_002', 'acc_cash_wallet', 'cat_food', 'expense', 4200, 'EUR', date('now', '-3 days'), 'Groceries'),
+      ('tx_food_001', 'acc_cash_wallet', 'cat_food', 'expense', 85, 'EUR', date('now', '-1 days'), 'Lunch with friends'),
+      ('tx_food_002', 'acc_cash_wallet', 'cat_food', 'expense', 60, 'EUR', date('now', '-9 days'), 'Lunch with friends'),
+      ('tx_food_003', 'acc_cash_wallet', 'cat_food', 'expense', 230, 'EUR', date('now', '-3 days'), 'Groceries'),
+      ('tx_food_004', 'acc_cash_wallet', 'cat_food', 'expense', 120, 'EUR', date('now', '0 days'), 'Groceries'),
 
       -- Transportation
       ('tx_transport_001', 'acc_main_checking', 'cat_transport', 'expense', 2500, 'EUR', date('now', '-8 days'), 'Monthly bus pass'),

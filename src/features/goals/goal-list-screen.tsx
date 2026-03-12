@@ -35,7 +35,7 @@ export function GoalListScreen() {
 
         {completed.length > 0 && (
           <>
-            <Text className="mt-4 mb-2 text-sm font-semibold text-neutral-500">
+            <Text className="mt-4 mb-2 text-sm font-medium text-neutral-500">
               {translate('common.completed')}
             </Text>
             {completed.map((goal) => (

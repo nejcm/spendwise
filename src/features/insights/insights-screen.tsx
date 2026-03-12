@@ -15,13 +15,13 @@ export function InsightsScreen() {
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-4">
         <View className="mb-6 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
-          <Text className="mb-4 text-lg font-semibold">
+          <Text className="mb-4 text-lg font-medium">
             {translate('insights.spending_by_category')}
           </Text>
         </View>
 
         <View className="mb-6 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
-          <Text className="mb-4 text-lg font-semibold">
+          <Text className="mb-4 text-lg font-medium">
             {translate('insights.monthly_trend')}
           </Text>
           <MonthlyTrend data={monthlyTrend} />

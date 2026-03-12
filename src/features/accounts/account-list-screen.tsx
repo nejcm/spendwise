@@ -60,7 +60,7 @@ export function AccountListScreen() {
 
         {editingId && editingAccount && (
           <View className="mb-4 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
-            <Text className="mb-3 text-lg font-semibold">{translate('accounts.edit')}</Text>
+            <Text className="mb-3 text-lg font-medium">{translate('accounts.edit')}</Text>
             <AccountForm
               initialData={{
                 name: editingAccount.name,
@@ -79,7 +79,7 @@ export function AccountListScreen() {
 
         {showForm && (
           <View className="mb-4 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
-            <Text className="mb-3 text-lg font-semibold">{translate('accounts.add')}</Text>
+            <Text className="mb-3 text-lg font-medium">{translate('accounts.add')}</Text>
             <AccountForm
               onSubmit={handleCreate}
               onCancel={() => setShowForm(false)}

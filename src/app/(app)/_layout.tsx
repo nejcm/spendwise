@@ -41,10 +41,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="transactions"
+        name="stats"
         options={{
-          title: 'Transactions',
-          tabBarButtonTestID: 'transactions-tab',
+          title: 'Stats',
+          tabBarButtonTestID: 'stats-tab',
           headerShown: false,
         }}
       />

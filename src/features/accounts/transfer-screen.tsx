@@ -67,7 +67,7 @@ export function TransferScreen() {
                     onPress={() => field.handleChange(a.id)}
                     className={`rounded-full px-3 py-1.5 ${field.state.value === a.id ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
                   >
-                    <Text className={`text-sm ${field.state.value === a.id ? 'font-semibold text-white' : ''}`}>
+                    <Text className={`text-sm ${field.state.value === a.id ? 'font-medium text-white' : ''}`}>
                       {a.name}
                     </Text>
                   </Pressable>
@@ -91,7 +91,7 @@ export function TransferScreen() {
                     onPress={() => field.handleChange(a.id)}
                     className={`rounded-full px-3 py-1.5 ${field.state.value === a.id ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
                   >
-                    <Text className={`text-sm ${field.state.value === a.id ? 'font-semibold text-white' : ''}`}>
+                    <Text className={`text-sm ${field.state.value === a.id ? 'font-medium text-white' : ''}`}>
                       {a.name}
                     </Text>
                   </Pressable>

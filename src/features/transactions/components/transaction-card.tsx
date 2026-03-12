@@ -24,7 +24,7 @@ export const TransactionCard = React.memo(({ transaction, onPress }: Transaction
           backgroundColor: `${transaction.category_color || '#90A4AE'}20`,
         }}
       >
-        <Text className="text-lg font-semibold" style={{ color: transaction.category_color || '#90A4AE' }}>
+        <Text className="text-lg font-medium" style={{ color: transaction.category_color || '#90A4AE' }}>
           {(transaction.category_icon || '?')}
         </Text>
       </View>
@@ -38,7 +38,7 @@ export const TransactionCard = React.memo(({ transaction, onPress }: Transaction
         </Text>
       </View>
       <Text
-        className={`text-base font-semibold ${isIncome ? 'text-success-600' : 'text-neutral-900 dark:text-neutral-100'}`}
+        className={`text-base font-medium ${isIncome ? 'text-success-600' : 'text-neutral-900 dark:text-neutral-100'}`}
       >
         {isIncome ? '+' : '-'}
         {formatCurrency(transaction.amount, currency)}

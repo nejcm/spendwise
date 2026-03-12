@@ -12,7 +12,7 @@ const inputTv = tv({
     container: '',
     label: 'text-grey-100 mb-1 text-sm font-medium dark:text-neutral-100',
     input:
-      'mt-0 rounded-md border border-neutral-300 bg-white px-4 py-3 font-family-sans text-base/5 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white',
+      'mt-0 rounded-md border border-neutral-300 bg-white px-4 py-3 font-family-sans text-base/5 focus:border-black focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:text-white dark:focus:border-background',
   },
   variants: {
     size: {
@@ -96,7 +96,7 @@ export function Input({ ref, ...props }: NInputProps & { ref?: React.Ref<NTextIn
   });
 
   return (
-    <View className={cn(styles.container(), props.containerClassName)}>
+    <View className={cn(styles.container(), containerClassName)}>
       {label && (
         <Text testID={testID ? `${testID}-label` : undefined} className={styles.label()}>
           {label}
@@ -106,10 +106,10 @@ export function Input({ ref, ...props }: NInputProps & { ref?: React.Ref<NTextIn
         testID={testID}
         ref={ref}
         placeholderTextColor={colors.neutral[400]}
-        className={styles.input()}
         onBlur={onBlur}
         onFocus={onFocus}
         {...inputProps}
+        className={cn(styles.input(), inputProps.className)}
         style={StyleSheet.flatten([
           { writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr' },
           { textAlign: I18nManager.isRTL ? 'right' : 'left' },

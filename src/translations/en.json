@@ -45,11 +45,18 @@
     "delete": "Delete",
     "done": "Done",
     "edit": "Edit",
+    "error": "Error",
+    "error_description": "An unexpected error occurred. Restart the app to continue.",
     "loading": "Loading...",
     "next": "Next",
+    "no_data": "No data found",
     "save": "Save",
     "seeAll": "See All",
     "there": "there"
+  },
+  "errors": {
+    "description": "Please restart the app or contact support if the problem persists.",
+    "title": "An unexpected error occurred"
   },
   "goals": {
     "add_contribution": "Add Contribution",

@@ -5,7 +5,7 @@ import { Sun } from 'lucide-react-native';
 import * as React from 'react';
 
 import { Options, useModal } from '@/components/ui';
-import { useSelectedTheme } from '@/lib/hooks/use-selected-theme';
+import { useSelectedTheme } from '@/features/theme/use-selected-theme';
 import { THEMES_OPTIONS } from '../theme';
 import { SettingsItem } from './settings-item';
 

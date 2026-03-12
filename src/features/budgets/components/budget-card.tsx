@@ -22,7 +22,7 @@ export function BudgetCard({ budget, onPress }: Props) {
   return (
     <Pressable onPress={onPress} className="mb-3 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
       <View className="mb-2 flex-row items-center justify-between">
-        <Text className="text-base font-semibold">{budget.name}</Text>
+        <Text className="text-base font-medium">{budget.name}</Text>
         <Text className={`text-sm font-medium ${isOver ? 'text-danger-500' : 'text-success-600'}`}>
           {isOver
             ? translate('budgets.over_budget')

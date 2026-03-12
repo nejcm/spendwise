@@ -16,6 +16,8 @@ const schema = z.object({
   type: z.enum(['expense', 'income']),
   amount: z.string().min(1, 'Amount is required'),
   category_id: z.string().nullable(),
+  account_id: z.string().min(1, 'Account is required'),
+  date: z.string().min(1, 'Date is required'),
   note: z.string(),
 });
 
@@ -34,6 +36,8 @@ const defaultValues = {
   type: 'expense' as 'expense' | 'income',
   amount: '',
   category_id: null as string | null,
+  account_id: '',
+  date: todayISO(),
   note: '',
 } satisfies QuickAddFormData;
 
@@ -52,13 +56,13 @@ export function QuickAddSheet({ sheetRef }: QuickAddSheetProps) {
       onChange: schema as any,
     },
     onSubmit: async ({ value }) => {
-      if (!accounts[0]) return;
+      if (!value.account_id) return;
       await createTransaction.mutateAsync({
         type: value.type,
         amount: value.amount,
         category_id: value.category_id,
-        account_id: accounts[0].id,
-        date: todayISO(),
+        account_id: value.account_id,
+        date: value.date,
         note: value.note,
       });
       form.reset();
@@ -77,7 +81,7 @@ export function QuickAddSheet({ sheetRef }: QuickAddSheetProps) {
                 <Pressable
                   key={option.value}
                   className={`flex-1 items-center rounded-xl py-2 ${
-                    field.state.value === option.value ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-800'
+                    field.state.value === option.value ? 'bg-black dark:bg-white' : 'bg-neutral-100 dark:bg-neutral-800'
                   }`}
                   onPress={() => {
                     field.handleChange(option.value);
@@ -94,6 +98,30 @@ export function QuickAddSheet({ sheetRef }: QuickAddSheetProps) {
         />
 
         <form.Field
+          name="account_id"
+          children={(field) => (
+            <>
+              <Text className="mb-2 text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                {translate('transactions.account')}
+              </Text>
+              <View className="mb-4 flex-row flex-wrap gap-2">
+                {accounts.map((a) => (
+                  <Pressable
+                    key={a.id}
+                    className={`rounded-full px-3 py-1.5 ${field.state.value === a.id ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-800'}`}
+                    onPress={() => field.handleChange(a.id)}
+                  >
+                    <Text className={`text-sm ${field.state.value === a.id ? 'font-medium text-white' : 'dark:text-neutral-100'}`}>
+                      {a.name}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </>
+          )}
+        />
+
+        <form.Field
           name="amount"
           children={(field) => (
             <Input
@@ -104,6 +132,20 @@ export function QuickAddSheet({ sheetRef }: QuickAddSheetProps) {
               placeholder="0.00"
               keyboardType="decimal-pad"
               testID="amount-input"
+              error={getFieldError(field)}
+            />
+          )}
+        />
+
+        <form.Field
+          name="date"
+          children={(field) => (
+            <Input
+              label={translate('transactions.date')}
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChangeText={field.handleChange}
+              placeholder="YYYY-MM-DD"
               error={getFieldError(field)}
             />
           )}
@@ -141,13 +183,18 @@ export function QuickAddSheet({ sheetRef }: QuickAddSheetProps) {
         />
 
         <form.Subscribe
-          selector={(state) => [state.isSubmitting, state.values.amount]}
-          children={([isSubmitting, amount]) => (
+          selector={(state) => [state.isSubmitting, state.values.amount, state.values.account_id, state.values.date]}
+          children={([isSubmitting, amount, accountId, date]) => (
             <Button
               label={translate('common.save')}
               onPress={form.handleSubmit}
               loading={(isSubmitting as boolean) || createTransaction.isPending}
-              disabled={!(amount as string) || Number.parseFloat(amount as string) <= 0}
+              disabled={
+                !(amount as string)
+                || Number.parseFloat(amount as string) <= 0
+                || !(accountId as string)
+                || !(date as string)
+              }
             />
           )}
         />

@@ -62,7 +62,7 @@ export type NInputProps = {
   disabled?: boolean;
   error?: string;
   containerClassName?: string;
-} & VariantProps<typeof inputTv> & Omit<TextInputProps, 'size'>;
+} & Omit<VariantProps<typeof inputTv>, 'error'> & Omit<TextInputProps, 'size'>;
 
 export function Input({ ref, ...props }: NInputProps & { ref?: React.Ref<NTextInput | null> }) {
   const { label, error, size = 'default', testID, onBlur: onBlurProp, onFocus: onFocusProp, containerClassName, ...inputProps } = props;
@@ -101,7 +101,7 @@ export function Input({ ref, ...props }: NInputProps & { ref?: React.Ref<NTextIn
       <NTextInput
         testID={testID}
         ref={ref}
-        placeholderTextColor="var(--color-neutral-400)"
+        placeholderTextColor="#6b7280"
         onBlur={onBlur}
         onFocus={onFocus}
         {...inputProps}

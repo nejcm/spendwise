@@ -42,15 +42,17 @@ async function getCategorySpend(db: SQLiteDatabase, month: string): Promise<Cate
        c.name as category_name,
        c.color as category_color,
        c.icon as category_icon,
-       COALESCE(SUM(CASE 
-         WHEN t.type = 'expense' AND t.date >= ? AND t.date < ? 
-         THEN t.amount 
-         ELSE 0 
+       c.type as category_type,
+       c.sort_order as sort_order,
+       COALESCE(SUM(CASE
+         WHEN t.type = c.type AND t.date >= ? AND t.date < ?
+         THEN t.amount
+         ELSE 0
        END), 0) as total
      FROM categories c
      LEFT JOIN transactions t ON t.category_id = c.id
-     GROUP BY c.id, c.name, c.color
-     ORDER BY total DESC`,
+     GROUP BY c.id, c.name, c.color, c.type, c.sort_order
+     ORDER BY c.sort_order ASC`,
     [startDate, nextMonth],
   );
 

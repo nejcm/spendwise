@@ -102,7 +102,7 @@
       --color-surface: #f8f8f8;
       --color-surface-foreground: #0a0a0a;
 
-      --color-muted: #f5f5f5;
+      --color-muted: #eeeeee;
       --color-muted-foreground: #737373;
 
       --color-border: #e5e5e5;
@@ -117,17 +117,17 @@
     }
     @variant dark {
       /* Semantic colors - using primary for main brand color */
-      --color-background: #232633;
+      --color-background: #1A1C20;
       --color-foreground: #fafafa;
 
-      --color-card: #1b1e28;
+      --color-card: #21232C;
       --color-card-foreground: #fafafa;
 
       --color-surface: #111111;
       --color-surface-foreground: #fafafa;
 
-      --color-muted: #262626;
-      --color-muted-foreground: #a3a3a3;
+      --color-muted: #393C42;
+      --color-muted-foreground: #a3a6aa;
 
       --color-border: #1f222d;
       --color-input: #2b2f3f;

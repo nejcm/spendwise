@@ -2,8 +2,8 @@
 import Svg from 'react-native-svg';
 import { withUniwind } from 'uniwind';
 
+export * from '../category-grid';
 export * from './button';
-export * from './category-grid';
 export * from './checkbox';
 export * from './focus-aware-status-bar';
 export * from './image';

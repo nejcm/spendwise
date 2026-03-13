@@ -49,7 +49,7 @@ export default function LanguageStep({ onBack, onNext, currentStep }: LanguageSt
           </>
         )}
       >
-        <Text className="mb-4 text-center text-lg text-neutral-400">
+        <Text className="mb-4 text-center text-lg text-gray-400">
           {translate('onboarding.select_language')}
         </Text>
         <Button variant="ghost" size="xl" className="items-center gap-4 text-4xl" onPress={modal.present}>

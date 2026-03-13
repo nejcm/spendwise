@@ -101,7 +101,7 @@ export function CategoryManageModal({ isOpen, onClose, initialValues }: Category
             <View className="mt-3 flex-row gap-2">
               <Pressable
                 onPress={() => field.handleChange('expense')}
-                className={`rounded-full px-3 py-1.5 ${field.state.value === 'expense' ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
+                className={`rounded-full px-3 py-1.5 ${field.state.value === 'expense' ? 'bg-primary-400' : 'bg-gray-100 dark:bg-gray-700'}`}
               >
                 <Text className={`text-sm ${field.state.value === 'expense' ? 'font-medium text-white' : ''}`}>
                   {translate('transactions.expense')}
@@ -109,7 +109,7 @@ export function CategoryManageModal({ isOpen, onClose, initialValues }: Category
               </Pressable>
               <Pressable
                 onPress={() => field.handleChange('income')}
-                className={`rounded-full px-3 py-1.5 ${field.state.value === 'income' ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
+                className={`rounded-full px-3 py-1.5 ${field.state.value === 'income' ? 'bg-primary-400' : 'bg-gray-100 dark:bg-gray-700'}`}
               >
                 <Text className={`text-sm ${field.state.value === 'income' ? 'font-medium text-white' : ''}`}>
                   {translate('transactions.income')}

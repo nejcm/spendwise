@@ -30,11 +30,11 @@ const keys = {
 
 // ─── Transaction Queries ───
 
-export function useTransactions(month: string) {
+export function useTransactions(date: string) {
   const db = useSQLiteContext();
   return useQuery({
-    queryKey: keys.transactionList(month),
-    queryFn: () => getTransactions(db, month),
+    queryKey: keys.transactionList(date),
+    queryFn: () => getTransactions(db, date),
   });
 }
 
@@ -80,6 +80,14 @@ export function useAccountsWithBalance() {
   return useQuery({
     queryKey: keys.accountsWithBalance,
     queryFn: () => getAccountsWithBalance(db),
+  });
+}
+
+export function useAccountsWithBalanceForMonth(yearMonth: string) {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: [...keys.accountsWithBalance, yearMonth],
+    queryFn: () => getAccountsWithBalanceForMonth(db, yearMonth),
   });
 }
 
@@ -209,11 +217,8 @@ export function useDeleteTransaction() {
 
 // ─── Database Functions ───
 
-async function getTransactions(db: SQLiteDatabase, month: string): Promise<TransactionWithCategory[]> {
-  const [year, m] = month.split('-');
-  const startDate = `${year}-${m}-01`;
-  const nextMonth
-    = Number(m) === 12 ? `${Number(year) + 1}-01-01` : `${year}-${String(Number(m) + 1).padStart(2, '0')}-01`;
+async function getTransactions(db: SQLiteDatabase, date: string): Promise<TransactionWithCategory[]> {
+  const [startDate, nextMonth] = getCurrentMonthRange(date);
 
   return db.getAllAsync<TransactionWithCategory>(
     `SELECT t.*, c.name as category_name, c.icon as category_icon, c.color as category_color
@@ -268,6 +273,29 @@ async function getAccountsWithBalance(db: SQLiteDatabase): Promise<AccountWithBa
      WHERE a.is_archived = 0
      GROUP BY a.id
      ORDER BY a.sort_order ASC`,
+  );
+}
+
+async function getAccountsWithBalanceForMonth(
+  db: SQLiteDatabase,
+  yearMonth: string,
+): Promise<AccountWithBalance[]> {
+  const [startDate, endDate] = getCurrentMonthRange(yearMonth);
+
+  return db.getAllAsync<AccountWithBalance>(
+    `SELECT a.*,
+       COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0)
+       - COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END), 0)
+       + COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount > 0 THEN t.amount ELSE 0 END), 0)
+       - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN ABS(t.amount) ELSE 0 END), 0)
+       as balance
+     FROM accounts a
+     LEFT JOIN transactions t ON t.account_id = a.id
+       AND t.date >= ? AND t.date < ?
+     WHERE a.is_archived = 0
+     GROUP BY a.id
+     ORDER BY a.sort_order ASC`,
+    [startDate, endDate],
   );
 }
 

@@ -82,7 +82,7 @@ describe('button component ', () => {
     render(<Button testID="button" label="Submit" disabled />);
     const button = screen.getByTestId('button');
 
-    const expectedStyle = 'font-family-sans font-medium text-base text-neutral-600 dark:text-neutral-600';
+    const expectedStyle = 'font-family-sans font-medium text-base text-gray-600 dark:text-gray-600';
     const receivedStyle = button.props.children[0].props.children.props.className;
     expect(receivedStyle).toContain(expectedStyle);
   });

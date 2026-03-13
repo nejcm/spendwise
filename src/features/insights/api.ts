@@ -5,17 +5,18 @@ import type { CategorySpend, MonthlyTotals } from './types';
 import { useQuery } from '@tanstack/react-query';
 import { format, subMonths } from 'date-fns';
 import { useSQLiteContext } from 'expo-sqlite';
+import { getCurrentMonthRange } from '../../lib/date/helpers';
 
 const keys = {
   categorySpend: (month: string) => ['insights', 'category-spend', month] as const,
   monthlyTrend: (months: number) => ['insights', 'monthly-trend', months] as const,
 };
 
-export function useCategorySpend(month: string) {
+export function useCategorySpend(date: string) {
   const db = useSQLiteContext();
   return useQuery({
-    queryKey: keys.categorySpend(month),
-    queryFn: () => getCategorySpend(db, month),
+    queryKey: keys.categorySpend(date),
+    queryFn: () => getCategorySpend(db, date),
   });
 }
 
@@ -29,12 +30,8 @@ export function useMonthlyTrend(numMonths: number = 6) {
 
 // ─── Database Functions ───
 
-async function getCategorySpend(db: SQLiteDatabase, month: string): Promise<CategorySpend[]> {
-  const [year, m] = month.split('-');
-  const startDate = `${year}-${m}-01`;
-  const nextMonth = Number(m) === 12
-    ? `${Number(year) + 1}-01-01`
-    : `${year}-${String(Number(m) + 1).padStart(2, '0')}-01`;
+async function getCategorySpend(db: SQLiteDatabase, date: string): Promise<CategorySpend[]> {
+  const [startDate, nextMonth] = getCurrentMonthRange(date);
 
   const rows = await db.getAllAsync<Omit<CategorySpend, 'percentage'>>(
     `SELECT

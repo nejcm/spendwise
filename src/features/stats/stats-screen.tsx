@@ -10,7 +10,7 @@ export function StatsScreen() {
       <ScrollView className="flex-1" style={defaultStyles.transparentBg}>
         <View className="gap-2 px-4 py-6">
           <Text className="text-2xl font-bold text-foreground">Stats</Text>
-          <Text className="text-sm text-neutral-500">
+          <Text className="text-sm text-gray-500">
             This screen is a placeholder for charts and insights.
           </Text>
         </View>

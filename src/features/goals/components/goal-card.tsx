@@ -32,7 +32,7 @@ export function GoalCard({ goal, onPress }: Props) {
             )}
       </View>
 
-      <View className="mb-2 h-2 w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
+      <View className="mb-2 h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
         <View
           className="h-2 rounded-full"
           style={{ width: `${progress}%`, backgroundColor: goal.color }}
@@ -40,18 +40,18 @@ export function GoalCard({ goal, onPress }: Props) {
       </View>
 
       <View className="flex-row justify-between">
-        <Text className="text-xs text-neutral-500">
+        <Text className="text-xs text-gray-500">
           {formatCurrency(goal.current_amount, currency)}
           {' '}
           saved
         </Text>
-        <Text className="text-xs text-neutral-500">
+        <Text className="text-xs text-gray-500">
           {goal.is_completed ? 'Goal reached!' : `${formatCurrency(remaining, currency)} to go`}
         </Text>
       </View>
 
       {goal.deadline && !goal.is_completed && (
-        <Text className="mt-1 text-xs text-neutral-400">
+        <Text className="mt-1 text-xs text-gray-400">
           Deadline:
           {' '}
           {formatDate(goal.deadline)}

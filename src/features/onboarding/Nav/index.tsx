@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 import { View } from '@/components/ui';
 
 const TOTAL_STEPS = 4;
@@ -16,7 +15,7 @@ export default function IntroNav({ current }: IntroNavProps) {
               <View key={index} className="h-3 w-6 rounded-full border-2 border-black bg-white dark:border-white dark:bg-white" />
             )
           : (
-              <View key={index} className="size-3 rounded-full bg-neutral-300 dark:bg-neutral-400" />
+              <View key={index} className="size-3 rounded-full bg-gray-300 dark:bg-gray-400" />
             )
       ))}
     </View>

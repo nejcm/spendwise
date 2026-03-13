@@ -10,11 +10,11 @@ export async function mockData(db: SQLiteDatabase): Promise<void> {
 
   // Basic accounts
   await db.execAsync(`
-    INSERT INTO accounts (id, name, type, currency)
+    INSERT INTO accounts (id, name, type, icon, color, currency)
     VALUES
-      ('acc_cash_wallet', 'Cash Wallet', 'cash', 'EUR'),
-      ('acc_main_checking', 'Main Checking', 'checking', 'EUR'),
-      ('acc_savings', 'Emergency Savings', 'savings', 'EUR');
+      ('acc_cash_wallet', 'Cash Wallet', 'cash', '💵', '#66BB6A', 'EUR'),
+      ('acc_main_checking', 'Main Checking', 'checking', '💳', '#4ECDC4', 'EUR'),
+      ('acc_savings', 'Emergency Savings', 'savings', '💰', '#45B7D1', 'EUR');
   `);
 
   // Sample transactions (amounts are in cents)
@@ -24,7 +24,7 @@ export async function mockData(db: SQLiteDatabase): Promise<void> {
       -- Income
       ('tx_salary_001', 'acc_main_checking', 'cat_salary', 'income', 320000, 'EUR', date('now', '-15 days'), 'Monthly salary'),
       ('tx_freelance_001', 'acc_main_checking', 'cat_freelance', 'income', 65000, 'EUR', date('now', '-10 days'), 'Freelance project'),
-      ('tx_salary_002', 'acc_main_checking', 'cat_salary', 'income', 320000, 'EUR', date('now', '-45 days'), 'Monthly salary'),
+      ('tx_salary_002', 'acc_main_checking', 'cat_salary', 'income', 345000, 'EUR', date('now', '-45 days'), 'Monthly salary'),
       ('tx_freelance_002', 'acc_main_checking', 'cat_freelance', 'income', 42000, 'EUR', date('now', '-33 days'), 'Freelance: website fixes'),
       ('tx_freelance_003', 'acc_main_checking', 'cat_freelance', 'income', 90000, 'EUR', date('now', '-21 days'), 'Freelance: mobile app feature'),
 

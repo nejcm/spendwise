@@ -19,10 +19,10 @@ import { Text } from './text';
 const selectTv = tv({
   slots: {
     container: '',
-    label: 'text-grey-100 mb-1 text-sm font-medium dark:text-neutral-100',
+    label: 'text-grey-100 mb-1 text-sm font-medium dark:text-gray-100',
     input:
-      'border-grey-50 mt-0 flex-row items-center justify-center rounded-md border px-4 py-3 dark:border-neutral-500 dark:bg-neutral-800',
-    inputValue: 'dark:text-neutral-100',
+      'border-grey-50 mt-0 flex-row items-center justify-center rounded-md border px-4 py-3 dark:border-gray-500 dark:bg-gray-800',
+    inputValue: 'dark:text-gray-100',
   },
   variants: {
     size: {
@@ -49,7 +49,7 @@ const selectTv = tv({
     },
     focused: {
       true: {
-        input: 'border-neutral-600',
+        input: 'border-gray-600',
       },
     },
     error: {
@@ -61,7 +61,7 @@ const selectTv = tv({
     },
     disabled: {
       true: {
-        input: 'bg-neutral-200',
+        input: 'bg-gray-200',
       },
     },
   },
@@ -92,13 +92,13 @@ const Option = React.memo(
   }) => {
     return (
       <Pressable
-        className="flex-row items-center border-b border-neutral-200 p-3 dark:border-neutral-700"
+        className="flex-row items-center border-b border-gray-200 p-3 dark:border-gray-700"
         {...props}
       >
         {image && <Image source={image} className="mr-3 size-8 rounded-full" />}
         <View className="flex-1">
-          <Text className="leading-tight dark:text-neutral-100">{label}</Text>
-          {subtext && <Text className="text-sm/snug text-neutral-500 dark:text-neutral-400">{subtext}</Text>}
+          <Text className="leading-tight dark:text-gray-100">{label}</Text>
+          {subtext && <Text className="text-sm/snug text-gray-500 dark:text-gray-400">{subtext}</Text>}
         </View>
         {selected && <Check color={checkColor} size={18} strokeWidth={2.5} />}
       </Pressable>

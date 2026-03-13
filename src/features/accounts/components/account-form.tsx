@@ -64,7 +64,7 @@ export function AccountForm({ initialData, onSubmit, onCancel, isSubmitting }: A
         name="type"
         children={(field) => (
           <View>
-            <Text className="mb-2 text-sm font-medium text-neutral-600 dark:text-neutral-400">
+            <Text className="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
               {translate('accounts.type')}
             </Text>
             <View className="flex-row flex-wrap gap-2">
@@ -72,7 +72,7 @@ export function AccountForm({ initialData, onSubmit, onCancel, isSubmitting }: A
                 <Pressable
                   key={t}
                   onPress={() => field.handleChange(t)}
-                  className={`rounded-full px-3 py-1.5 ${field.state.value === t ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
+                  className={`rounded-full px-3 py-1.5 ${field.state.value === t ? 'bg-primary-400' : 'bg-gray-100 dark:bg-gray-700'}`}
                 >
                   <Text className={`text-sm ${field.state.value === t ? 'font-medium text-white' : ''}`}>
                     {ACCOUNT_TYPE_LABELS[t]}
@@ -88,7 +88,7 @@ export function AccountForm({ initialData, onSubmit, onCancel, isSubmitting }: A
         name="color"
         children={(field) => (
           <View>
-            <Text className="mb-2 text-sm font-medium text-neutral-600 dark:text-neutral-400">
+            <Text className="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
               {translate('accounts.color')}
             </Text>
             <View className="flex-row flex-wrap gap-2">

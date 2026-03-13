@@ -22,7 +22,7 @@ export function GoalListScreen() {
       <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         {active.length === 0 && completed.length === 0 && (
           <View className="items-center py-16">
-            <Text className="text-neutral-500">{translate('goals.no_goals')}</Text>
+            <Text className="text-gray-500">{translate('goals.no_goals')}</Text>
           </View>
         )}
 
@@ -36,7 +36,7 @@ export function GoalListScreen() {
 
         {completed.length > 0 && (
           <>
-            <Text className="mt-4 mb-2 text-sm font-medium text-neutral-500">
+            <Text className="mt-4 mb-2 text-sm font-medium text-gray-500">
               {translate('common.completed')}
             </Text>
             {completed.map((goal) => (

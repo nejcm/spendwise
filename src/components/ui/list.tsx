@@ -17,8 +17,8 @@ export const EmptyList = React.memo(({ isLoading }: Props) => {
       {!isLoading
         ? (
             <View className="text-center">
-              <TextSearch size={100} className="mx-auto text-neutral-400" />
-              <Text className="pt-4 text-center text-lg text-neutral-500">{translate('common.no_data')}</Text>
+              <TextSearch size={100} className="mx-auto text-gray-400" />
+              <Text className="pt-4 text-center text-lg text-gray-500">{translate('common.no_data')}</Text>
             </View>
           )
         : (

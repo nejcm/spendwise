@@ -1,3 +1,5 @@
+import type { QueryClient } from '@tanstack/react-query';
+import type { SQLiteDatabase } from 'expo-sqlite';
 import { useQueryClient } from '@tanstack/react-query';
 import Env from 'env';
 import * as Linking from 'expo-linking';
@@ -10,6 +12,7 @@ import { config } from '@/config';
 import { mockData } from '@/lib/sqlite/mock-data';
 import { selectProfile, setIsFirstTime, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
+import { seedDefaults } from '../../lib/sqlite/seed';
 import { getAvatar } from '../profile';
 import { LanguageItem } from './components/language-item';
 import { SettingsContainer } from './components/settings-container';
@@ -17,6 +20,19 @@ import { SettingsItem } from './components/settings-item';
 import { ThemeItem } from './components/theme-item';
 
 const iconColor = 'text-foreground';
+
+async function seedMockData(db: SQLiteDatabase, queryClient: QueryClient) {
+  try {
+    await seedDefaults(db);
+    await mockData(db);
+    console.log('Mock data import successfully');
+  }
+  catch (err) {
+    console.error('Failed to import mock data', err);
+  }
+  queryClient.clear();
+  queryClient.invalidateQueries();
+}
 
 export function SettingsScreen() {
   const router = useRouter();
@@ -98,8 +114,16 @@ export function SettingsScreen() {
           </SettingsContainer>
 
           <SettingsContainer title="settings.links">
-            <SettingsItem text="settings.privacy" icon={<Link className={iconColor} size={20} />} onPress={() => {}} />
-            <SettingsItem text="settings.terms" icon={<Link className={iconColor} size={20} />} onPress={() => {}} />
+            <SettingsItem
+              text="settings.privacy"
+              icon={<Link className={iconColor} size={20} />}
+              onPress={() => router.push('/settings/privacy')}
+            />
+            <SettingsItem
+              text="settings.terms"
+              icon={<Link className={iconColor} size={20} />}
+              onPress={() => router.push('/settings/terms')}
+            />
           </SettingsContainer>
 
           {Env.EXPO_PUBLIC_APP_ENV === 'development' && (
@@ -108,17 +132,7 @@ export function SettingsScreen() {
               <SettingsItem
                 text="settings.mock_data"
                 icon={<FileText className={iconColor} size={20} />}
-                onPress={async () => {
-                  try {
-                    await mockData(db);
-                    console.log('Mock data import successfully');
-                  }
-                  catch (err) {
-                    console.error('Failed to import mock data', err);
-                  }
-                  queryClient.clear();
-                  queryClient.invalidateQueries();
-                }}
+                onPress={() => seedMockData(db, queryClient)}
               />
             </SettingsContainer>
           )}

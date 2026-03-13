@@ -23,7 +23,7 @@ export default function TransactionsList() {
       </View>
       {data.length === 0
         ? (
-            <View className="mt-4 items-center rounded-xl bg-neutral-50 py-8 dark:bg-neutral-800">
+            <View className="mt-4 items-center rounded-xl bg-gray-50 py-8 dark:bg-gray-800">
               <Text className="mb-2 text-muted-foreground">{translate('home.no_transactions')}</Text>
               <Button
                 label={translate('common.add')}

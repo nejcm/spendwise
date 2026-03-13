@@ -4,8 +4,8 @@ import * as React from 'react';
 import { View } from 'react-native';
 import { Image, ScrollView, Text } from '@/components/ui';
 import { formatCurrency } from '@/features/formatting/helpers';
-
-import { SpendingByCategory } from '@/features/home/spending-by-category';
+import { AccountsOverview } from '@/features/home/accounts-overview';
+import { CategoriesOverview } from '@/features/home/categories-overview';
 import { useMonthSummary } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
@@ -57,7 +57,8 @@ export function HomeScreen() {
               </View>
             </View>
           </View>
-          <SpendingByCategory />
+          <AccountsOverview />
+          <CategoriesOverview />
           <TransactionsList />
         </View>
       </ScrollView>

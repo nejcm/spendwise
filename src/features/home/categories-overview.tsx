@@ -11,7 +11,7 @@ import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { useCategorySpend } from '../insights/api';
 
-export function SpendingByCategory() {
+export function CategoriesOverview() {
   const router = useRouter();
   const currentMonth = React.useMemo(() => format(new Date(), 'yyyy-MM'), []);
   const { data = [] } = useCategorySpend(currentMonth);
@@ -23,7 +23,7 @@ export function SpendingByCategory() {
       <View className="mb-4 flex-row items-center justify-between">
         <Text className="text-lg font-medium">{translate('common.categories')}</Text>
         <Pressable onPress={() => router.push('/categories')}>
-          <Text className="text-sm font-medium text-neutral-500">{translate('common.seeAll')}</Text>
+          <Text className="text-sm font-medium text-muted-foreground">{translate('common.seeAll')}</Text>
         </Pressable>
       </View>
 
@@ -31,13 +31,13 @@ export function SpendingByCategory() {
         ? (
             <Pressable
               onPress={() => router.push('/categories')}
-              className="rounded-2xl border border-dashed border-neutral-300 bg-card p-4 dark:border-neutral-700"
+              className="rounded-2xl border border-dashed border-gray-300 bg-card p-4 dark:border-gray-700"
             >
               <View className="flex-row items-center">
                 <Plus className="mr-2 size-5 text-foreground" />
                 <Text className="text-sm font-medium text-foreground">{translate('home.add_category')}</Text>
               </View>
-              <Text className="mt-2 text-xs text-neutral-500">
+              <Text className="mt-2 text-xs text-muted-foreground">
                 {translate('home.add_category_description')}
               </Text>
             </Pressable>
@@ -54,8 +54,8 @@ export function SpendingByCategory() {
                     key={item.category_id}
                     className="w-34 rounded-xl bg-card px-3 py-2"
                   >
-                    <Text className="text-2xl font-medium">{item.category_icon}</Text>
-                    <Text className="mt-2 text-xs font-medium text-neutral-500">{item.category_name}</Text>
+                    <Text className="text-2xl">{item.category_icon || '?'}</Text>
+                    <Text className="mt-2 text-xs font-medium text-muted-foreground" numberOfLines={1}>{item.category_name}</Text>
                     <Text className="mt-1 text-base font-medium">
                       {formatCurrency(item.total, currency)}
                     </Text>

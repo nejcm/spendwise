@@ -36,7 +36,7 @@ export const CategoryGrid = React.memo(({
 
   return (
     <Animated.ScrollView ref={scrollRef} className="flex-1 bg-background">
-      <View className="flex-row gap-2 p-4">
+      <View className="flex-row gap-2 px-4 pb-4">
         <Pressable
           onPress={() => setActiveTab('expense')}
           className={`flex-1 rounded-full px-4 py-1.5 ${activeTab === 'expense' ? 'bg-foreground' : 'bg-muted'}`}
@@ -58,7 +58,7 @@ export const CategoryGrid = React.memo(({
       <View className="px-4 pb-4">
         {filteredItems.length === 0
           ? (
-              <AddPlaceholder onPress={() => onAddPress()} />
+              <AddPlaceholder onPress={onAddPress} />
             )
           : (
               <Sortable.Grid
@@ -69,6 +69,7 @@ export const CategoryGrid = React.memo(({
                 hapticsEnabled
                 scrollableRef={scrollRef}
                 keyExtractor={(item) => item.category_id}
+                onDragEnd={handleDragEnd}
                 renderItem={({ item }) => (
                   <CategoryGridCell
                     item={item}
@@ -76,12 +77,11 @@ export const CategoryGrid = React.memo(({
                     onPress={onPress}
                   />
                 )}
-                onDragEnd={handleDragEnd}
               />
             )}
 
         {filteredItems.length > 0 && (
-          <AddPlaceholder onPress={() => onAddPress()} />
+          <AddPlaceholder onPress={onAddPress} />
         )}
         <View className="mt-6 flex-row items-center justify-center gap-2">
           <Lightbulb className="size-3 text-muted-foreground" />
@@ -124,12 +124,12 @@ function CategoryGridCell({ item, currency, onPress }: CategoryGridCellProps) {
 
 function AddPlaceholder({ onPress }: { onPress: () => void }) {
   return (
-    <View className="w-[50%] flex-1 pr-1">
+    <View className="flex-1 pr-1">
       <Pressable
         onPress={onPress}
-        className="mt-3 flex-row items-center justify-center gap-1 rounded-xl border-2 border-dashed border-gray-300 py-5 dark:border-gray-500"
+        className="mt-3 flex-row items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 py-2 dark:border-gray-500"
       >
-        <Plus className="size-8 text-muted-foreground" />
+        <Plus className="size-6 text-muted-foreground" />
         <Text className="text-muted-foreground">{translate('common.add')}</Text>
       </Pressable>
     </View>

@@ -30,9 +30,9 @@ const button = tv({
         indicator: 'text-white',
       },
       outline: {
-        container: 'border border-neutral-400',
-        label: 'text-black dark:text-neutral-100',
-        indicator: 'text-black dark:text-neutral-100',
+        container: 'border border-gray-400',
+        label: 'text-black dark:text-gray-100',
+        indicator: 'text-black dark:text-gray-100',
       },
       destructive: {
         container: 'bg-red-600',
@@ -72,9 +72,9 @@ const button = tv({
     },
     disabled: {
       true: {
-        container: 'bg-neutral-300 dark:bg-neutral-300',
-        label: 'text-neutral-600 dark:text-neutral-600',
-        indicator: 'text-neutral-400 dark:text-neutral-400',
+        container: 'bg-gray-300 dark:bg-gray-300',
+        label: 'text-gray-600 dark:text-gray-600',
+        indicator: 'text-gray-400 dark:text-gray-400',
       },
     },
     fullWidth: {

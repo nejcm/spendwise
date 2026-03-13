@@ -58,7 +58,7 @@ export function TransferScreen() {
           name="from_id"
           children={(field) => (
             <>
-              <Text className="mb-4 text-sm font-medium text-neutral-600 dark:text-neutral-400">
+              <Text className="mb-4 text-sm font-medium text-gray-600 dark:text-gray-400">
                 {translate('accounts.from_account')}
               </Text>
               <View className="mb-4 flex-row flex-wrap gap-2">
@@ -66,7 +66,7 @@ export function TransferScreen() {
                   <Pressable
                     key={a.id}
                     onPress={() => field.handleChange(a.id)}
-                    className={`rounded-full px-3 py-1.5 ${field.state.value === a.id ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
+                    className={`rounded-full px-3 py-1.5 ${field.state.value === a.id ? 'bg-primary-400' : 'bg-gray-100 dark:bg-gray-700'}`}
                   >
                     <Text className={`text-sm ${field.state.value === a.id ? 'font-medium text-white' : ''}`}>
                       {a.name}
@@ -82,7 +82,7 @@ export function TransferScreen() {
           name="to_id"
           children={(field) => (
             <>
-              <Text className="mb-4 text-sm font-medium text-neutral-600 dark:text-neutral-400">
+              <Text className="mb-4 text-sm font-medium text-gray-600 dark:text-gray-400">
                 {translate('accounts.to_account')}
               </Text>
               <View className="mb-4 flex-row flex-wrap gap-2">
@@ -90,7 +90,7 @@ export function TransferScreen() {
                   <Pressable
                     key={a.id}
                     onPress={() => field.handleChange(a.id)}
-                    className={`rounded-full px-3 py-1.5 ${field.state.value === a.id ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
+                    className={`rounded-full px-3 py-1.5 ${field.state.value === a.id ? 'bg-primary-400' : 'bg-gray-100 dark:bg-gray-700'}`}
                   >
                     <Text className={`text-sm ${field.state.value === a.id ? 'font-medium text-white' : ''}`}>
                       {a.name}

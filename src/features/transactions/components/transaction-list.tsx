@@ -45,7 +45,7 @@ export function TransactionList({ transactions, isLoading, onRefresh }: Transact
       if (typeof item === 'string') {
         return (
           <View className="mt-4 px-4 py-2">
-            <Text className="text-sm font-medium text-neutral-500">{formatDate(item)}</Text>
+            <Text className="text-sm font-medium text-gray-500">{formatDate(item)}</Text>
           </View>
         );
       }

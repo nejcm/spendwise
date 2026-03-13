@@ -30,7 +30,7 @@ export function BudgetOverviewScreen() {
       <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         {budgets.length > 0 && (
           <View className="mb-4 items-center rounded-xl bg-primary-50 p-4 dark:bg-primary-900/20">
-            <Text className="text-sm text-neutral-500">{translate('budgets.left_to_spend')}</Text>
+            <Text className="text-sm text-gray-500">{translate('budgets.left_to_spend')}</Text>
             <Text className={`mt-1 text-2xl font-bold ${leftToSpend < 0 ? 'text-danger-500' : ''}`}>
               {formatCurrency(leftToSpend, currency)}
             </Text>
@@ -47,7 +47,7 @@ export function BudgetOverviewScreen() {
 
         {budgets.length === 0 && (
           <View className="items-center py-8">
-            <Text className="text-neutral-500">{translate('budgets.no_budgets')}</Text>
+            <Text className="text-gray-500">{translate('budgets.no_budgets')}</Text>
           </View>
         )}
 
@@ -69,7 +69,7 @@ export function BudgetOverviewScreen() {
 
         {activeGoals.length === 0 && (
           <View className="mb-8 items-center py-6">
-            <Text className="text-neutral-500">{translate('goals.no_goals')}</Text>
+            <Text className="text-gray-500">{translate('goals.no_goals')}</Text>
             <Pressable className="mt-2" onPress={() => router.push('/goals/create' as any)}>
               <Text className="text-sm text-primary-500">{translate('goals.create')}</Text>
             </Pressable>

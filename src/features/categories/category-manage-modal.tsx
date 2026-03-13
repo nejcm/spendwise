@@ -1,4 +1,4 @@
-import type { Category, CategoryFormData } from '../features/categories/types';
+import type { Category, CategoryFormData } from './types';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useForm } from '@tanstack/react-form';
 import * as React from 'react';
@@ -10,7 +10,7 @@ import { getFieldError } from '@/components/ui/form-utils';
 import { ACCOUNT_COLORS } from '@/features/accounts/types';
 import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
-import Alert from './ui/alert';
+import Alert from '../../components/ui/alert';
 
 const schema = z.object({
   name: z.string().min(1, 'Name is required'),

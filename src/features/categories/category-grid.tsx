@@ -1,14 +1,14 @@
-import type { CategorySpend } from '../features/insights/types';
+import type { CategorySpend } from '@/features/insights/types';
 import { Lightbulb, Plus } from 'lucide-react-native';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import Sortable from 'react-native-sortables';
+import { Text } from '@/components/ui';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '../lib/store';
-import { Text } from './ui/text';
+import { useAppStore } from '@/lib/store';
 
 export type CategoryGridProps = {
   categories: CategorySpend[];

@@ -15,18 +15,19 @@ type Props = {
 
 export function AccountCard({ account, onPress }: Props) {
   const currency = useAppStore.use.currency();
-  const bgColor = account.color || '#4ECDC4';
 
   return (
     <Pressable
       onPress={onPress}
-      className="mb-3 rounded-xl p-4"
-      style={{ backgroundColor: `${bgColor}15` }}
+      className="mb-3 rounded-xl bg-card p-4"
     >
-      <View className="flex-row items-center justify-between">
+      <View className="flex-row items-center justify-between gap-3">
+        {account.icon && (
+          <Text className="text-2xl">{account.icon}</Text>
+        )}
         <View className="flex-1">
-          <Text className="text-base font-medium">{account.name}</Text>
-          <Text className="mt-0.5 text-sm text-gray-500">
+          <Text className="text-base/snug">{account.name}</Text>
+          <Text className="text-sm text-muted-foreground">
             {ACCOUNT_TYPE_LABELS[account.type as keyof typeof ACCOUNT_TYPE_LABELS] || account.type}
           </Text>
         </View>

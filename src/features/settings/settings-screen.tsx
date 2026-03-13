@@ -6,7 +6,7 @@ import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
-import { ALargeSmall, Banknote, Bell, FileText, HelpCircle, Import, LayoutGrid, Link, List, LogOut, Share, Shield, User } from 'lucide-react-native';
+import { ALargeSmall, Banknote, Bell, Bot, FileText, HelpCircle, Import, LayoutGrid, Link, List, LogOut, Share, Shield, User } from 'lucide-react-native';
 import { Button, FocusAwareStatusBar, Image, ScrollView, Text, View } from '@/components/ui';
 import { config } from '@/config';
 import { mockData } from '@/lib/sqlite/mock-data';
@@ -74,6 +74,11 @@ export function SettingsScreen() {
               icon={<User className={iconColor} size={20} />}
               text="settings.profile"
               onPress={() => router.push('/settings/profile')}
+            />
+            <SettingsItem
+              icon={<Bot className={iconColor} size={20} />}
+              text="settings.ai"
+              onPress={() => router.push('/settings/ai')}
             />
             <SettingsItem
               icon={<Bell className={iconColor} size={20} />}

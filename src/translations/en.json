@@ -173,6 +173,10 @@
   "settings": {
     "about": "About",
     "accounts": "Accounts",
+    "ai": "AI",
+    "ai_provider": "AI Provider",
+    "ai_provider_desc": "Enter your API keys. They are stored securely on this device and used only to call the AI provider.",
+    "anthropic_api_key": "Anthropic API key",
     "app_name": "App Name",
     "categories": "Categories",
     "category_name": "Category Name",
@@ -219,6 +223,7 @@
     "more": "More",
     "notifications": "Notifications",
     "number_format": "Number format",
+    "openai_api_key": "OpenAI API key",
     "privacy": "Privacy Policy",
     "profile": "Profile",
     "reset": "Reset",

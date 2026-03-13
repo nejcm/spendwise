@@ -20,19 +20,19 @@ const inputTv = tv({
     size: {
       sm: {
         label: 'text-xs',
-        input: 'px-3 py-2 text-sm/tight',
+        input: 'p-2 text-sm/tight',
       },
       default: {
         label: 'text-sm',
-        input: 'px-4 py-2 text-base/tight',
+        input: 'px-3 py-2 text-base/tight',
       },
       lg: {
         label: 'text-md',
-        input: 'px-5 py-3 text-xl/tight',
+        input: 'px-4 py-2 text-xl/tight',
       },
       xl: {
         label: 'text-lg',
-        input: 'px-6 py-3 text-2xl/tight',
+        input: 'px-5 py-3 text-2xl/tight',
       },
     },
     focused: {

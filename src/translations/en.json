@@ -54,7 +54,12 @@
     "edit": "Edit",
     "error": "Error",
     "error_description": "An unexpected error occurred. Restart the app to continue.",
+    "expense": "Expense",
+    "expenses": "Expenses",
+    "income": "Income",
     "loading": "Loading...",
+    "month": "Month",
+    "net": "Net",
     "next": "Next",
     "no_data": "No data found",
     "save": "Save",
@@ -62,7 +67,8 @@
     "select_month": "Select Month",
     "select_month_year": "Select Month and Year",
     "select_year": "Select Year",
-    "there": "there"
+    "there": "there",
+    "year": "Year"
   },
   "date": {
     "months": {
@@ -231,6 +237,12 @@
     "title": "Settings",
     "transactions": "Transactions",
     "version": "Version"
+  },
+  "stats": {
+    "no_category_data": "No data for this period",
+    "title": "Statistics",
+    "top_expenses": "Top Expenses",
+    "top_income": "Top Income"
   },
   "subscriptions": {
     "create": "New Recurring Rule",

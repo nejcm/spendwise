@@ -14,3 +14,10 @@ export type MonthlyTotals = {
   income: number;
   expense: number;
 };
+
+export type WeeklyTotals = {
+  week: number;
+  label: string;
+  income: number;
+  expense: number;
+};

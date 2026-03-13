@@ -1,9 +1,8 @@
-import * as React from 'react';
+import type { Period } from '../types';
 
+import * as React from 'react';
 import { Pressable, Text, View } from '@/components/ui';
 import { translate } from '@/lib/i18n';
-
-type Period = 'month' | 'year';
 
 type Props = {
   value: Period;
@@ -13,6 +12,14 @@ type Props = {
 export function PeriodToggle({ value, onChange }: Props) {
   return (
     <View className="flex-row items-center justify-center gap-2 pb-4">
+      <Pressable
+        onPress={() => onChange('week')}
+        className={`min-w-18 items-center rounded-2xl px-4 py-1 ${value === 'week' ? 'bg-muted' : ''}`}
+      >
+        <Text className={`text-sm ${value === 'week' ? 'text-foreground' : 'text-muted-foreground'}`}>
+          {translate('common.week')}
+        </Text>
+      </Pressable>
       <Pressable
         onPress={() => onChange('month')}
         className={`min-w-18 items-center rounded-2xl px-4 py-1 ${value === 'month' ? 'bg-muted' : ''}`}

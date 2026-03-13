@@ -68,6 +68,7 @@
     "select_month_year": "Select Month and Year",
     "select_year": "Select Year",
     "there": "there",
+    "week": "Week",
     "year": "Year"
   },
   "date": {
@@ -242,7 +243,9 @@
     "no_category_data": "No data for this period",
     "title": "Statistics",
     "top_expenses": "Top Expenses",
-    "top_income": "Top Income"
+    "top_income": "Top Income",
+    "trend_monthly": "Weekly Breakdown",
+    "trend_yearly": "Monthly Breakdown"
   },
   "subscriptions": {
     "create": "New Recurring Rule",

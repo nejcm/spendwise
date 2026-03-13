@@ -98,7 +98,7 @@ export function GoalCreateScreen() {
             name="color"
             children={(field) => (
               <>
-                <Text className="mb-2 text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                <Text className="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
                   {translate('accounts.color')}
                 </Text>
                 <View className="flex-row flex-wrap gap-2">

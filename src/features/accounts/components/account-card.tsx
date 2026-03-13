@@ -26,7 +26,7 @@ export function AccountCard({ account, onPress }: Props) {
       <View className="flex-row items-center justify-between">
         <View className="flex-1">
           <Text className="text-base font-medium">{account.name}</Text>
-          <Text className="mt-0.5 text-sm text-neutral-500">
+          <Text className="mt-0.5 text-sm text-gray-500">
             {ACCOUNT_TYPE_LABELS[account.type as keyof typeof ACCOUNT_TYPE_LABELS] || account.type}
           </Text>
         </View>

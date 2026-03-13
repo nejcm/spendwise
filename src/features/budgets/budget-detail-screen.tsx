@@ -43,13 +43,13 @@ export function BudgetDetailScreen() {
     <View className="flex-1">
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
-        <View className="mb-4 items-center rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
+        <View className="mb-4 items-center rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
           <Text className="text-lg font-bold">{budget.name}</Text>
           <View className="mt-3 w-full">
             <BudgetProgressBar spent={budget.total_spent} total={budget.amount} height={12} />
           </View>
           <View className="mt-2 w-full flex-row justify-between">
-            <Text className="text-sm text-neutral-500">
+            <Text className="text-sm text-gray-500">
               {formatCurrency(budget.total_spent, currency)}
               {' '}
               {translate('budgets.spent')}
@@ -84,13 +84,13 @@ function CategoryBudgetRow({ line, currency }: { line: any; currency: string }) 
   const ratio = line.amount > 0 ? line.spent / line.amount : 0;
 
   return (
-    <View className="mb-3 rounded-xl bg-neutral-50 p-3 dark:bg-neutral-800">
+    <View className="mb-3 rounded-xl bg-gray-50 p-3 dark:bg-gray-800">
       <View className="mb-1 flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
           <View className="size-3 rounded-full" style={{ backgroundColor: line.category_color }} />
           <Text className="text-sm font-medium">{line.category_name}</Text>
         </View>
-        <Text className="text-sm text-neutral-500">
+        <Text className="text-sm text-gray-500">
           {formatCurrency(line.spent, currency)}
           {' '}
           /

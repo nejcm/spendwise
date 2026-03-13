@@ -52,7 +52,7 @@ function MapStep({ headers, mapping, onMapping, onNext }: MapStepProps) {
       <Text className="mb-4 text-lg font-medium">{translate('import.map_columns')}</Text>
       {COLUMN_FIELDS.map((field) => (
         <View key={field} className="mb-4">
-          <Text className="mb-1 text-sm font-medium text-neutral-600 dark:text-neutral-400">
+          <Text className="mb-1 text-sm font-medium text-gray-600 dark:text-gray-400">
             {translate(`import.field_${field}` as any)}
             {field === 'date' || field === 'amount'
               ? (
@@ -62,7 +62,7 @@ function MapStep({ headers, mapping, onMapping, onNext }: MapStepProps) {
           </Text>
           <View className="flex-row flex-wrap gap-2">
             <Pressable
-              className={`rounded-full px-3 py-1 ${mapping[field] === null ? 'bg-neutral-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
+              className={`rounded-full px-3 py-1 ${mapping[field] === null ? 'bg-gray-400' : 'bg-gray-100 dark:bg-gray-700'}`}
               onPress={() => onMapping({ ...mapping, [field]: null })}
             >
               <Text className={`text-xs ${mapping[field] === null ? 'text-white' : ''}`}>
@@ -72,7 +72,7 @@ function MapStep({ headers, mapping, onMapping, onNext }: MapStepProps) {
             {headers.map((h, i) => (
               <Pressable
                 key={h}
-                className={`rounded-full px-3 py-1 ${mapping[field] === i ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
+                className={`rounded-full px-3 py-1 ${mapping[field] === i ? 'bg-primary-400' : 'bg-gray-100 dark:bg-gray-700'}`}
                 onPress={() => onMapping({ ...mapping, [field]: i })}
               >
                 <Text
@@ -114,14 +114,14 @@ function PreviewStep({
       <Text className="mb-2 text-lg font-medium">
         {`${translate('import.preview_title')} (${preview.length} ${translate('import.rows')})`}
       </Text>
-      <Text className="mb-3 text-sm font-medium text-neutral-600 dark:text-neutral-400">
+      <Text className="mb-3 text-sm font-medium text-gray-600 dark:text-gray-400">
         {translate('transactions.account')}
       </Text>
       <View className="mb-4 flex-row flex-wrap gap-2">
         {accounts.map((a) => (
           <Pressable
             key={a.id}
-            className={`rounded-full px-3 py-1.5 ${accountId === a.id ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'}`}
+            className={`rounded-full px-3 py-1.5 ${accountId === a.id ? 'bg-primary-400' : 'bg-gray-100 dark:bg-gray-700'}`}
             onPress={() => onAccountSelect(a.id)}
           >
             <Text className={`text-sm ${accountId === a.id ? 'font-medium text-white' : ''}`}>
@@ -133,11 +133,11 @@ function PreviewStep({
       {preview.slice(0, 10).map((row) => (
         <View
           key={`${row.date}-${row.amount}`}
-          className="mb-1 flex-row items-center justify-between rounded-lg bg-neutral-50 px-3 py-2 dark:bg-neutral-800"
+          className="mb-1 flex-row items-center justify-between rounded-lg bg-gray-50 px-3 py-2 dark:bg-gray-800"
         >
           <View className="flex-1">
             <Text className="text-sm font-medium">{row.note || '—'}</Text>
-            <Text className="text-xs text-neutral-500">{row.date}</Text>
+            <Text className="text-xs text-gray-500">{row.date}</Text>
           </View>
           <Text
             className={`text-sm font-medium ${row.amount >= 0 ? 'text-success-600' : 'text-danger-500'}`}
@@ -147,7 +147,7 @@ function PreviewStep({
         </View>
       ))}
       {preview.length > 10 && (
-        <Text className="mt-2 text-center text-sm text-neutral-500">
+        <Text className="mt-2 text-center text-sm text-gray-500">
           {`+${preview.length - 10} more rows`}
         </Text>
       )}
@@ -244,7 +244,7 @@ export function ImportScreen() {
         {step === 'pick' && (
           <View className="items-center py-16">
             <Text className="mb-2 text-lg font-medium">{translate('import.title')}</Text>
-            <Text className="mb-8 text-center text-neutral-500">
+            <Text className="mb-8 text-center text-gray-500">
               {translate('import.pick_description')}
             </Text>
             <Button label={translate('import.pick_file')} onPress={pickFile} />

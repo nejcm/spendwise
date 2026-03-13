@@ -12,7 +12,7 @@ import { useAccountsWithBalance, useCreateAccount, useUpdateAccount } from './ap
 import { AccountCard } from './components/account-card';
 import { AccountForm } from './components/account-form';
 
-export function AccountListScreen() {
+export function AccountsScreen() {
   const currency = useAppStore.use.currency();
   const { data: accounts = [] } = useAccountsWithBalance();
   const createAccount = useCreateAccount();
@@ -47,7 +47,7 @@ export function AccountListScreen() {
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         <View className="mb-4 items-center rounded-xl bg-primary-50 p-4 dark:bg-primary-900/20">
-          <Text className="text-sm text-neutral-500">{translate('accounts.total_balance')}</Text>
+          <Text className="text-sm text-gray-500">{translate('accounts.total_balance')}</Text>
           <Text className="mt-1 text-2xl font-bold">{formatCurrency(totalBalance, currency)}</Text>
         </View>
 
@@ -60,7 +60,7 @@ export function AccountListScreen() {
         ))}
 
         {editingId && editingAccount && (
-          <View className="mb-4 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
+          <View className="mb-4 rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
             <Text className="mb-3 text-lg font-medium">{translate('accounts.edit')}</Text>
             <AccountForm
               initialData={{
@@ -79,7 +79,7 @@ export function AccountListScreen() {
         )}
 
         {showForm && (
-          <View className="mb-4 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
+          <View className="mb-4 rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
             <Text className="mb-3 text-lg font-medium">{translate('accounts.add')}</Text>
             <AccountForm
               onSubmit={handleCreate}
@@ -91,7 +91,7 @@ export function AccountListScreen() {
 
         {accounts.length === 0 && !showForm && (
           <View className="items-center py-8">
-            <Text className="text-neutral-500">{translate('accounts.no_accounts')}</Text>
+            <Text className="text-gray-500">{translate('accounts.no_accounts')}</Text>
           </View>
         )}
       </ScrollView>

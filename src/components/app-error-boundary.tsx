@@ -41,11 +41,11 @@ export class AppErrorBoundary extends React.Component<Props, State> {
   render() {
     if (this.state.error) {
       return (
-        <View className="flex-1 items-center justify-center bg-white p-6 dark:bg-neutral-900">
-          <Text className="mb-2 text-center text-lg font-bold text-neutral-900 dark:text-white">
+        <View className="flex-1 items-center justify-center bg-white p-6 dark:bg-gray-900">
+          <Text className="mb-2 text-center text-lg font-bold text-gray-900 dark:text-white">
             {translate('errors.title')}
           </Text>
-          <Text className="mb-6 text-center text-neutral-600 dark:text-neutral-400">
+          <Text className="mb-6 text-center text-gray-600 dark:text-gray-400">
             {translate('errors.description')}
           </Text>
           <Button

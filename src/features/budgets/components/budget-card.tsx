@@ -20,7 +20,7 @@ export function BudgetCard({ budget, onPress }: Props) {
   const isOver = remaining < 0;
 
   return (
-    <Pressable onPress={onPress} className="mb-3 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
+    <Pressable onPress={onPress} className="mb-3 rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
       <View className="mb-2 flex-row items-center justify-between">
         <Text className="text-base font-medium">{budget.name}</Text>
         <Text className={`text-sm font-medium ${isOver ? 'text-danger-500' : 'text-success-600'}`}>
@@ -33,12 +33,12 @@ export function BudgetCard({ budget, onPress }: Props) {
       <BudgetProgressBar spent={budget.total_spent} total={budget.amount} />
 
       <View className="mt-2 flex-row justify-between">
-        <Text className="text-xs text-neutral-500">
+        <Text className="text-xs text-gray-500">
           {formatCurrency(budget.total_spent, currency)}
           {' '}
           {translate('budgets.spent')}
         </Text>
-        <Text className="text-xs text-neutral-500">
+        <Text className="text-xs text-gray-500">
           {formatCurrency(budget.amount, currency)}
           {' '}
           {translate('budgets.budgeted')}

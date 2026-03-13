@@ -6,12 +6,15 @@ import { I18nManager, TextInput as NTextInput, StyleSheet, View } from 'react-na
 import { cn, tv } from 'tailwind-variants';
 import { Text } from './text';
 
+// eslint-disable-next-line react-refresh/only-export-components
+export const inputDefaults = 'rounded-md border border-gray-300 bg-input px-4 py-3 font-family-sans text-base/5 focus:border-foreground focus:outline-none dark:border-gray-700 dark:text-white';
+
 const inputTv = tv({
   slots: {
     container: '',
-    label: 'text-grey-100 mb-1 text-sm font-medium dark:text-neutral-100',
+    label: 'text-grey-100 mb-1 text-sm font-medium dark:text-gray-100',
     input:
-      'rounded-md border border-neutral-300 bg-input px-4 py-3 font-family-sans text-base/5 focus:border-foreground focus:outline-none dark:border-neutral-700 dark:text-white',
+      inputDefaults,
   },
   variants: {
     size: {
@@ -34,7 +37,7 @@ const inputTv = tv({
     },
     focused: {
       true: {
-        input: 'border-neutral-400 dark:border-neutral-300',
+        input: 'border-gray-400 dark:border-gray-300',
       },
     },
     error: {
@@ -45,7 +48,7 @@ const inputTv = tv({
     },
     disabled: {
       true: {
-        input: 'bg-neutral-200',
+        input: 'bg-gray-200',
       },
     },
   },

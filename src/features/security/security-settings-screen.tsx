@@ -54,7 +54,7 @@ export function SecuritySettingsScreen() {
           <View className="flex-row items-center justify-between gap-4 p-4">
             <View className="flex-1">
               <Text className="font-medium">{translate('security.app_lock')}</Text>
-              <Text className="text-xs text-neutral-500">{translate('security.app_lock_desc')}</Text>
+              <Text className="text-xs text-gray-500">{translate('security.app_lock_desc')}</Text>
             </View>
             <Switch
               value={lockEnabled}
@@ -67,7 +67,7 @@ export function SecuritySettingsScreen() {
 
         {lockEnabled && (
           <View className="mb-6">
-            <Text className="mb-2 text-sm font-medium text-neutral-600 dark:text-neutral-400">
+            <Text className="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
               {translate('security.lock_after')}
             </Text>
             <View className="flex-row flex-wrap gap-2">
@@ -75,7 +75,7 @@ export function SecuritySettingsScreen() {
                 <Pressable
                   key={opt.value}
                   className={`rounded-full px-4 py-2 ${
-                    timeoutVal === opt.value ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-700'
+                    timeoutVal === opt.value ? 'bg-primary-400' : 'bg-gray-100 dark:bg-gray-700'
                   }`}
                   onPress={() => {
                     setLockTimeoutMinutes(opt.value);

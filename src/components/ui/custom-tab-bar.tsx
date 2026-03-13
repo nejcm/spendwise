@@ -58,7 +58,7 @@ export function CustomTabBar() {
   return (
     <>
       <View
-        className="flex-row border-t border-neutral-200 bg-white px-2 pt-2"
+        className="flex-row border-t border-gray-200 bg-white px-2 pt-2"
         style={{
           paddingBottom: Platform.OS === 'ios' ? 28 : 12,
           shadowColor: '#000',
@@ -82,7 +82,7 @@ export function CustomTabBar() {
                     }
                     addSheetRef.current?.present();
                   }}
-                  className="size-12 items-center justify-center rounded-full bg-black"
+                  className="size-12 items-center justify-center rounded-full bg-gray-950"
                   style={({ pressed }) => ({
                     opacity: pressed ? 0.85 : 1,
                   })}

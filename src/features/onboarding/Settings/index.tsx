@@ -53,7 +53,7 @@ export default function SettingsStep({ onBack, onNext, currentStep }: SettingsSt
           </>
         )}
       >
-        <Text className="mb-4 text-center text-lg text-neutral-400">
+        <Text className="mb-4 text-center text-lg text-gray-400">
           {translate('onboarding.select_theme')}
         </Text>
         <Button variant="ghost" size="xl" className="text-4xl" onPress={modal.present}>

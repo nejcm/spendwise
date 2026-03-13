@@ -24,7 +24,7 @@ export function BudgetProgressBar({ spent, total, height = 8 }: Props) {
 
   return (
     <View
-      className="w-full overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700"
+      className="w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700"
       style={{ height }}
     >
       <View

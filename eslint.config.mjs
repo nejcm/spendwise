@@ -54,6 +54,7 @@ export default antfu(
       'react/display-name': 'off',
       'react/no-inline-styles': 'off',
       'react/destructuring-assignment': 'off',
+      'react/no-array-index-key': 'off',
       'react/require-default-props': 'off',
       'react-refresh/only-export-components': 'warn', // Too strict for React Native
       'unicorn/filename-case': [

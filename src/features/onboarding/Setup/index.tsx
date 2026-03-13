@@ -53,7 +53,7 @@ export default function SetupStep({ onBack, onNext, currentStep }: SetupStepProp
               source={getAvatar(avatar)}
               className="size-28 rounded-full"
             />
-            <Text className="mt-2 text-xs text-neutral-400 dark:text-neutral-400">{translate('onboarding.tap_to_change')}</Text>
+            <Text className="mt-2 text-xs text-gray-400 dark:text-gray-400">{translate('onboarding.tap_to_change')}</Text>
           </Pressable>
           <Input
             value={name}
@@ -83,7 +83,7 @@ export default function SetupStep({ onBack, onNext, currentStep }: SetupStepProp
                     updateProfile({ avatar: id });
                     avatarModal.dismiss();
                   }}
-                  className={`rounded-full p-1 ${isSelected ? 'border-2 border-neutral-900 dark:border-white' : 'border border-transparent'}`}
+                  className={`rounded-full p-1 ${isSelected ? 'border-2 border-gray-900 dark:border-white' : 'border border-transparent'}`}
                   accessibilityLabel="Choose avatar"
                   accessibilityRole="button"
                 >

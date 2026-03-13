@@ -25,9 +25,9 @@ export function TransactionFilterBar({ selectedCategoryId, onSelectCategory }: P
         <View className="flex-row gap-2">
           <Pressable
             onPress={() => onSelectCategory(null)}
-            className={`rounded-full px-3 py-1 ${!selectedCategoryId ? 'bg-black dark:bg-white' : 'bg-neutral-100 dark:bg-neutral-700'}`}
+            className={`rounded-full px-3 py-1 ${!selectedCategoryId ? 'bg-foreground' : 'bg-muted'}`}
           >
-            <Text className={`text-xs ${!selectedCategoryId ? 'font-medium text-white dark:text-black' : ''}`}>
+            <Text className={`text-xs ${!selectedCategoryId ? 'font-medium text-background' : ''}`}>
               {translate('transactions.all')}
             </Text>
           </Pressable>
@@ -35,9 +35,9 @@ export function TransactionFilterBar({ selectedCategoryId, onSelectCategory }: P
             <Pressable
               key={cat.id}
               onPress={() => onSelectCategory(selectedCategoryId === cat.id ? null : cat.id)}
-              className={`rounded-full px-3 py-1 ${selectedCategoryId === cat.id ? 'bg-black dark:bg-white' : 'bg-neutral-100 dark:bg-neutral-700'}`}
+              className={`rounded-full px-3 py-1 ${selectedCategoryId === cat.id ? 'bg-foreground' : 'bg-muted'}`}
             >
-              <Text className={`text-xs ${selectedCategoryId === cat.id ? 'font-medium text-white dark:text-black' : ''}`}>
+              <Text className={`text-xs ${selectedCategoryId === cat.id ? 'font-medium text-background' : ''}`}>
                 {cat.name}
               </Text>
             </Pressable>

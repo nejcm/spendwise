@@ -90,10 +90,10 @@ export function TransactionDetailScreen() {
           {isIncome ? '+' : '-'}
           {formatCurrency(transaction.amount, currency)}
         </Text>
-        <Text className="mt-1 text-neutral-500">{formatDate(transaction.date)}</Text>
+        <Text className="mt-1 text-gray-500">{formatDate(transaction.date)}</Text>
       </View>
 
-      <View className="gap-4 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
+      <View className="gap-4 rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
         <DetailRow label={translate('transactions.category')} value={transaction.category_name || '-'} />
         <DetailRow label={translate('transactions.note')} value={transaction.note || '-'} />
         <DetailRow label={translate('transactions.account')} value={accountName} />
@@ -110,7 +110,7 @@ export function TransactionDetailScreen() {
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <View className="flex-row justify-between">
-      <Text className="text-neutral-500">{label}</Text>
+      <Text className="text-gray-500">{label}</Text>
       <Text className="font-medium">{value}</Text>
     </View>
   );

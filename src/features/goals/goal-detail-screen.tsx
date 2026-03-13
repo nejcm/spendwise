@@ -78,14 +78,14 @@ export function GoalDetailScreen() {
       <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         <View className="mb-4 rounded-xl p-4" style={{ backgroundColor: `${goal.color}15` }}>
           <Text className="mb-1 text-lg font-bold">{goal.name}</Text>
-          <View className="my-2 h-3 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-700">
+          <View className="my-2 h-3 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
             <View
               className="h-3 rounded-full"
               style={{ width: `${progress}%`, backgroundColor: goal.color }}
             />
           </View>
           <View className="flex-row justify-between">
-            <Text className="text-sm text-neutral-600 dark:text-neutral-400">
+            <Text className="text-sm text-gray-600 dark:text-gray-400">
               {formatCurrency(goal.current_amount, currency)}
               {' '}
               saved
@@ -99,7 +99,7 @@ export function GoalDetailScreen() {
         </View>
 
         {!goal.is_completed && (
-          <View className="mb-4 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
+          <View className="mb-4 rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
             <Text className="mb-3 text-base font-medium">{translate('goals.add_contribution')}</Text>
 
             <form.Field

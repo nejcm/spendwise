@@ -9,8 +9,8 @@ import { Button, Input, Modal, Text } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import { todayISO } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
+import { CategoryPicker } from '../../categories/category-picker';
 import { useAccounts, useCategories, useCreateTransaction } from '../api';
-import { CategoryPicker } from './category-picker';
 
 const schema = z.object({
   type: z.enum(['expense', 'income']),
@@ -81,14 +81,14 @@ export function QuickAddSheet({ sheetRef }: QuickAddSheetProps) {
                 <Pressable
                   key={option.value}
                   className={`flex-1 items-center rounded-xl py-2 ${
-                    field.state.value === option.value ? 'bg-black dark:bg-white' : 'bg-neutral-100 dark:bg-neutral-800'
+                    field.state.value === option.value ? 'bg-black dark:bg-white' : 'bg-gray-100 dark:bg-gray-800'
                   }`}
                   onPress={() => {
                     field.handleChange(option.value);
                     form.setFieldValue('category_id', null);
                   }}
                 >
-                  <Text className={`font-medium ${field.state.value === option.value ? 'text-white' : 'dark:text-neutral-100'}`}>
+                  <Text className={`font-medium ${field.state.value === option.value ? 'text-white' : 'dark:text-gray-100'}`}>
                     {option.label}
                   </Text>
                 </Pressable>
@@ -101,17 +101,17 @@ export function QuickAddSheet({ sheetRef }: QuickAddSheetProps) {
           name="account_id"
           children={(field) => (
             <>
-              <Text className="mb-2 text-sm font-medium text-neutral-600 dark:text-neutral-400">
+              <Text className="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
                 {translate('transactions.account')}
               </Text>
               <View className="mb-4 flex-row flex-wrap gap-2">
                 {accounts.map((a) => (
                   <Pressable
                     key={a.id}
-                    className={`rounded-full px-3 py-1.5 ${field.state.value === a.id ? 'bg-primary-400' : 'bg-neutral-100 dark:bg-neutral-800'}`}
+                    className={`rounded-full px-3 py-1.5 ${field.state.value === a.id ? 'bg-primary-400' : 'bg-gray-100 dark:bg-gray-800'}`}
                     onPress={() => field.handleChange(a.id)}
                   >
-                    <Text className={`text-sm ${field.state.value === a.id ? 'font-medium text-white' : 'dark:text-neutral-100'}`}>
+                    <Text className={`text-sm ${field.state.value === a.id ? 'font-medium text-white' : 'dark:text-gray-100'}`}>
                       {a.name}
                     </Text>
                   </Pressable>

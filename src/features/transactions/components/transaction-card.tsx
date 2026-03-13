@@ -25,10 +25,10 @@ export const TransactionCard = React.memo(({ transaction, onPress, className }: 
       <View
         className="size-10 items-center justify-center rounded-full"
         style={{
-          backgroundColor: `${transaction.category_color || '#90A4AE'}${theme.dark ? '50' : '20'}`,
+          backgroundColor: `${transaction.category_color || '#90A4AE'}${theme.dark ? '10' : '20'}`,
         }}
       >
-        <Text className="text-lg font-medium" style={{ color: transaction.category_color || '#90A4AE' }}>
+        <Text className="text-xl font-medium" style={{ color: transaction.category_color || '#90A4AE' }}>
           {(transaction.category_icon || '?')}
         </Text>
       </View>
@@ -36,13 +36,13 @@ export const TransactionCard = React.memo(({ transaction, onPress, className }: 
         <Text className="text-base font-medium" numberOfLines={1}>
           {displayName}
         </Text>
-        <Text className="text-sm text-neutral-500" numberOfLines={1}>
+        <Text className="text-sm text-muted-foreground" numberOfLines={1}>
           {formatShortDate(transaction.date)}
           {transaction.note ? ` · ${transaction.note}` : ''}
         </Text>
       </View>
       <Text
-        className={`text-base font-medium ${isIncome ? 'text-success-600' : 'text-neutral-900 dark:text-neutral-100'}`}
+        className={`text-base font-medium ${isIncome ? 'text-success-600' : 'text-gray-900 dark:text-gray-100'}`}
       >
         {isIncome ? '+' : '-'}
         {formatCurrency(transaction.amount, currency)}

@@ -7,7 +7,7 @@ import * as z from 'zod';
 import { Button, FocusAwareStatusBar, Input } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import { translate } from '@/lib/i18n';
-import { CategoryPicker } from './category-picker';
+import { CategoryPicker } from '../../categories/category-picker';
 
 const schema = z.object({
   amount: z.string().min(1, 'Amount is required'),

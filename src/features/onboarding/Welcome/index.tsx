@@ -33,7 +33,7 @@ export default function WelcomeStep({ onNext, currentStep }: WelcomeStepProps) {
           <Text className="mb-4 text-center text-[1.75rem] font-bold text-black dark:text-white">
             {translate('onboarding.welcome_headline')}
           </Text>
-          <Text className="text-center text-lg/snug text-neutral-500 dark:text-neutral-400">
+          <Text className="text-center text-lg/snug text-gray-500 dark:text-gray-400">
             {translate('onboarding.welcome_copy')}
           </Text>
         </View>

@@ -1,109 +1,93 @@
-import type { AccountFormData } from './types';
+import type { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { format } from 'date-fns';
+import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react-native';
 import * as React from 'react';
-import { useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 import { Pressable, View } from 'react-native';
+import { MonthPicker, YearPicker } from '@/components/month-year-picker';
 import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
 import { formatCurrency } from '@/features/formatting/helpers';
+import { useAccountsWithBalanceForMonth } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
-import { useAccountsWithBalance, useCreateAccount, useUpdateAccount } from './api';
 import { AccountCard } from './components/account-card';
-import { AccountForm } from './components/account-form';
 
 export function AccountsScreen() {
   const currency = useAppStore.use.currency();
-  const { data: accounts = [] } = useAccountsWithBalance();
-  const createAccount = useCreateAccount();
-  const updateAccount = useUpdateAccount();
 
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const d = format(new Date(), 'yyyy-MM').split('-');
+    return [Number(d[0]), Number(d[1])];
+  });
+  const monthPickerRef = useRef<BottomSheetModal>(null);
+  const yearPickerRef = useRef<BottomSheetModal>(null);
+
+  const { data: accounts = [] } = useAccountsWithBalanceForMonth(selectedDate.join('-'));
+
+  const monthName = useMemo(
+    () => format(new Date(selectedDate[0], selectedDate[1] - 1, 1), 'MMMM'),
+    [selectedDate],
+  );
+
+  const navigateMonth = (direction: -1 | 1) => {
+    const d = new Date(selectedDate[0], selectedDate[1] - 1 + direction, 1);
+    setSelectedDate([d.getFullYear(), d.getMonth() + 1]);
+  };
 
   const totalBalance = accounts.reduce((sum, a) => sum + a.balance, 0);
-
-  const handleCreate = (data: AccountFormData) => {
-    createAccount.mutate(data, {
-      onSuccess: () => setShowForm(false),
-    });
-  };
-
-  const handleUpdate = (data: AccountFormData) => {
-    if (!editingId) {
-      return;
-    }
-    updateAccount.mutate({ id: editingId, data }, {
-      onSuccess: () => setEditingId(null),
-    });
-  };
-
-  const editingAccount = editingId
-    ? accounts.find((a) => a.id === editingId)
-    : undefined;
 
   return (
     <View className="flex-1">
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
-        <View className="mb-4 items-center rounded-xl bg-primary-50 p-4 dark:bg-primary-900/20">
-          <Text className="text-sm text-gray-500">{translate('accounts.total_balance')}</Text>
-          <Text className="mt-1 text-2xl font-bold">{formatCurrency(totalBalance, currency)}</Text>
+
+      <View className="flex-row items-center justify-between p-4">
+        <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
+          <ArrowLeftIcon className="size-5 text-muted-foreground" />
+        </Pressable>
+        <View className="flex-row items-center gap-1">
+          <Pressable onPress={() => monthPickerRef.current?.present()} hitSlop={12}>
+            <Text className="text-lg font-medium">{monthName}</Text>
+          </Pressable>
+          <Pressable onPress={() => yearPickerRef.current?.present()} hitSlop={12}>
+            <Text className="text-lg font-medium">{selectedDate[0]}</Text>
+          </Pressable>
+        </View>
+        <Pressable onPress={() => navigateMonth(1)} hitSlop={12}>
+          <ArrowRightIcon className="size-5 text-muted-foreground" />
+        </Pressable>
+      </View>
+      <MonthPicker
+        ref={monthPickerRef}
+        selectedMonth={selectedDate[1]}
+        onSelect={(m) => setSelectedDate((p) => [p[0], m])}
+      />
+      <YearPicker
+        ref={yearPickerRef}
+        selectedYear={selectedDate[0]}
+        onSelect={(y) => setSelectedDate((p) => [y, p[1]])}
+      />
+
+      <ScrollView className="flex-1 px-4" style={defaultStyles.transparentBg}>
+        <View className="flex-row items-center justify-between gap-2 px-4 pt-4 pb-6">
+          <Text className="">{translate('accounts.total_balance')}</Text>
+          <Text className="text-2xl font-bold">{formatCurrency(totalBalance, currency)}</Text>
         </View>
 
         {accounts.map((account) => (
           <AccountCard
             key={account.id}
             account={account}
-            onPress={() => setEditingId(account.id)}
           />
         ))}
 
-        {editingId && editingAccount && (
-          <View className="mb-4 rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
-            <Text className="mb-3 text-lg font-medium">{translate('accounts.edit')}</Text>
-            <AccountForm
-              initialData={{
-                name: editingAccount.name,
-                type: editingAccount.type as any,
-                currency: editingAccount.currency,
-                description: editingAccount.description ?? null,
-                icon: editingAccount.icon ?? null,
-                color: editingAccount.color ?? null,
-              }}
-              onSubmit={handleUpdate}
-              onCancel={() => setEditingId(null)}
-              isSubmitting={updateAccount.isPending}
-            />
-          </View>
-        )}
-
-        {showForm && (
-          <View className="mb-4 rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
-            <Text className="mb-3 text-lg font-medium">{translate('accounts.add')}</Text>
-            <AccountForm
-              onSubmit={handleCreate}
-              onCancel={() => setShowForm(false)}
-              isSubmitting={createAccount.isPending}
-            />
-          </View>
-        )}
-
-        {accounts.length === 0 && !showForm && (
+        {accounts.length === 0 && (
           <View className="items-center py-8">
             <Text className="text-gray-500">{translate('accounts.no_accounts')}</Text>
           </View>
         )}
       </ScrollView>
-
-      {!showForm && !editingId && (
-        <Pressable
-          className="absolute right-6 bottom-6 size-14 items-center justify-center rounded-full bg-primary-400 shadow-lg"
-          onPress={() => setShowForm(true)}
-        >
-          <Text className="text-2xl font-bold text-white">+</Text>
-        </Pressable>
-      )}
     </View>
   );
 }

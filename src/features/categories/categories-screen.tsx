@@ -39,7 +39,7 @@ export function CategoriesScreen() {
       <FocusAwareStatusBar />
       <View className="flex-row items-center justify-between p-4">
         <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
-          <ArrowLeftIcon className="size-5 text-gray-500" />
+          <ArrowLeftIcon className="size-5 text-muted-foreground" />
         </Pressable>
         <View className="flex-row items-center gap-1">
           <Pressable onPress={() => monthPickerRef.current?.present()} hitSlop={12}>
@@ -50,7 +50,7 @@ export function CategoriesScreen() {
           </Pressable>
         </View>
         <Pressable onPress={() => navigateMonth(1)} hitSlop={12}>
-          <ArrowRightIcon className="size-5 text-gray-500" />
+          <ArrowRightIcon className="size-5 text-muted-foreground" />
         </Pressable>
       </View>
       <CategoryGrid

@@ -1,15 +1,16 @@
-import type { CategoryManageModalProps } from '@/components/category-manage-modal';
+import type { CategoryManageModalProps } from '@/features/categories/category-manage-modal';
 import type { MonthPickerRef } from '@/features/transactions/components/month-picker';
 import { format } from 'date-fns';
 
 import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react-native';
 import * as React from 'react';
-import { CategoryManageModal } from '@/components/category-manage-modal';
-import { CategoryGrid, FocusAwareStatusBar, Pressable, Text, View } from '@/components/ui';
+import { FocusAwareStatusBar, Pressable, Text, View } from '@/components/ui';
+import { CategoryManageModal } from '@/features/categories/category-manage-modal';
 import { formatMonthYear } from '@/features/formatting/helpers';
 import { useCategorySpend } from '@/features/insights/api';
 import { useUpdateCategoryOrder } from '@/features/transactions/api';
 import { MonthPicker } from '@/features/transactions/components/month-picker';
+import { CategoryGrid } from './category-grid';
 
 export function CategoriesScreen() {
   const [modelProps, setModelProps] = React.useState<CategoryManageModalProps['initialValues'] | undefined>();

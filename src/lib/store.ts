@@ -24,7 +24,7 @@ const mmkvStorage: StateStorage = {
 };
 
 export type AppState = {
-  // Profile
+// Profile
   profile: {
     name: string;
     avatar: number;
@@ -48,6 +48,13 @@ export type AppState = {
   // Security
   lockEnabled: boolean;
   lockTimeoutMinutes: number;
+
+  // AI
+  aiProvider: 'openai' | 'anthropic';
+  openaiApiKey: string | null;
+  anthropicApiKey: string | null;
+
+  // Other
 };
 
 const _useAppStore = create<AppState>()(
@@ -70,6 +77,9 @@ const _useAppStore = create<AppState>()(
       language: undefined,
       lockEnabled: false,
       lockTimeoutMinutes: 1,
+      aiProvider: 'openai',
+      openaiApiKey: null,
+      anthropicApiKey: null,
     }),
     {
       name: 'app-storage',
@@ -86,6 +96,9 @@ const _useAppStore = create<AppState>()(
         language: state.language,
         lockEnabled: state.lockEnabled,
         lockTimeoutMinutes: state.lockTimeoutMinutes,
+        aiProvider: state.aiProvider,
+        openaiApiKey: state.openaiApiKey,
+        anthropicApiKey: state.anthropicApiKey,
       }),
     },
   ),
@@ -151,6 +164,19 @@ export function setIsFirstTime(isFirstTime: boolean) {
 
 export function setLanguage(language: Language) {
   return _useAppStore.setState({ language });
+}
+
+// AI actions
+export function setAiProvider(aiProvider: AppState['aiProvider']) {
+  return _useAppStore.setState({ aiProvider });
+}
+
+export function setOpenaiApiKey(openaiApiKey: string | null) {
+  return _useAppStore.setState({ openaiApiKey });
+}
+
+export function setAnthropicApiKey(anthropicApiKey: string | null) {
+  return _useAppStore.setState({ anthropicApiKey });
 }
 
 // Security actions

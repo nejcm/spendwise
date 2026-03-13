@@ -1,8 +1,10 @@
 import { format } from 'date-fns';
 
+import { useRouter } from 'expo-router';
+import { BotIcon } from 'lucide-react-native';
 import * as React from 'react';
 import { View } from 'react-native';
-import { Image, ScrollView, Text } from '@/components/ui';
+import { Button, Image, ScrollView, Text } from '@/components/ui';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { AccountsOverview } from '@/features/home/accounts-overview';
 import { CategoriesOverview } from '@/features/home/categories-overview';
@@ -15,6 +17,7 @@ import TransactionsList from './transactions-list';
 
 export function HomeScreen() {
   const theme = useThemeConfig();
+  const router = useRouter();
   const currency = useAppStore.use.currency();
   const profile = useAppStore.use.profile();
   const name = profile?.name?.trim() || translate('common.there');
@@ -24,10 +27,15 @@ export function HomeScreen() {
     <>
       <ScrollView className="flex-1" style={defaultStyles.transparentBg}>
         <View className="flex-col gap-8 px-4 py-6">
-          <Image
-            source={theme.dark ? require('../../../assets/spendwise-white.svg') : require('../../../assets/spendwise.svg')}
-            className="h-[24px] w-[120px]"
-          />
+          <View className="flex-row items-center justify-between gap-2">
+            <Image
+              source={theme.dark ? require('../../../assets/spendwise-white.svg') : require('../../../assets/spendwise.svg')}
+              className="h-[24px] w-[120px]"
+            />
+            <Button variant="secondary" className="h-9 rounded-full px-2" onPress={() => router.push('/ai')}>
+              <BotIcon size={22} className="text-muted-foreground" />
+            </Button>
+          </View>
           <View>
             <View className="flex-row items-center justify-between gap-2">
               <View>

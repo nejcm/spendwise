@@ -25,7 +25,7 @@ const button = tv({
         indicator: 'text-white dark:text-black',
       },
       secondary: {
-        container: 'bg-primary-600',
+        container: 'bg-muted',
         label: 'text-secondary-600',
         indicator: 'text-white',
       },
@@ -61,7 +61,7 @@ const button = tv({
         label: 'text-base',
       },
       lg: {
-        container: 'h-14 px-6',
+        container: 'h-12 px-6',
         label: 'text-lg',
       },
       xl: {

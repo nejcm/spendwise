@@ -70,9 +70,9 @@ export function AccountsScreen() {
       />
 
       <ScrollView className="flex-1 px-4" style={defaultStyles.transparentBg}>
-        <View className="flex-row items-center justify-between gap-2 px-4 pt-4 pb-6">
-          <Text className="">{translate('accounts.total_balance')}</Text>
-          <Text className="text-2xl font-bold">{formatCurrency(totalBalance, currency)}</Text>
+        <View className="flex-col items-center justify-between gap-2 px-4 pt-4 pb-6">
+          <Text className="text-sm text-muted-foreground">{translate('accounts.total_balance')}</Text>
+          <Text className="text-3xl font-bold">{formatCurrency(totalBalance, currency)}</Text>
         </View>
 
         {accounts.map((account) => (

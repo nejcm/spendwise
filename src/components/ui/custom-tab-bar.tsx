@@ -4,7 +4,7 @@ import { Home, LayoutGrid, PieChart, PlusIcon, UserIcon } from 'lucide-react-nat
 
 import * as React from 'react';
 import { Platform, Pressable, View } from 'react-native';
-import { QuickAddSheet } from '../../features/transactions/components/quick-add-sheet';
+import { QuickAddSheet } from '../quick-add-sheet';
 
 type TabConfig = {
   name: string;
@@ -76,11 +76,9 @@ export function CustomTabBar() {
               <View key="add" className="flex-1 items-center justify-center">
                 <Pressable
                   onPress={() => {
-                    if (pathname.startsWith('/budgets')) {
-                      router.push('/budgets/create');
-                      return;
-                    }
-                    addSheetRef.current?.present();
+                    addSheetRef.current?.present({
+                      pathname,
+                    });
                   }}
                   className="size-12 items-center justify-center rounded-full bg-gray-950"
                   style={({ pressed }) => ({
@@ -110,7 +108,7 @@ export function CustomTabBar() {
           );
         })}
       </View>
-      <QuickAddSheet sheetRef={addSheetRef} />
+      <QuickAddSheet sheetRef={addSheetRef} pathname={pathname} />
     </>
   );
 }

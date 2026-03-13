@@ -59,7 +59,7 @@ function Label({ text, testID, className = '' }: LabelProps) {
 }
 
 export function CheckboxIcon({ checked = false }: IconProps) {
-  const color = checked ? 'var(--color-primary-300)' : 'var(--color-charcoal-400)';
+  const color = checked ? 'var(--color-primary-300)' : 'var(--color-gray-400)';
   return (
     <MotiView
       style={{
@@ -124,7 +124,7 @@ export const Checkbox = Object.assign(CheckboxBase, {
 });
 
 export function RadioIcon({ checked = false }: IconProps) {
-  const color = checked ? 'var(--color-primary-300)' : 'var(--color-charcoal-400)';
+  const color = checked ? 'var(--color-primary-300)' : 'var(--color-gray-400)';
   return (
     <MotiView
       style={{
@@ -175,7 +175,7 @@ export const Radio = Object.assign(RadioBase, {
 export function SwitchIcon({ checked = false }: IconProps) {
   const translateX = checked ? THUMB_OFFSET : WIDTH - THUMB_WIDTH - THUMB_OFFSET;
 
-  const backgroundColor = checked ? 'var(--color-primary-300)' : 'var(--color-charcoal-400)';
+  const backgroundColor = checked ? 'var(--color-primary-300)' : 'var(--color-gray-400)';
 
   return (
     <View className="w-[50px] justify-center">

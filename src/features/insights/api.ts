@@ -1,7 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { MonthSummary } from '../transactions/types';
-import type { CategorySpend, MonthlyTotals } from './types';
+import type { CategorySpend, MonthlyTotals, WeeklyTotals } from './types';
 
 import { useQuery } from '@tanstack/react-query';
 import { format, subMonths } from 'date-fns';
@@ -13,6 +13,7 @@ const keys = {
   monthlyTrend: (months: number) => ['insights', 'monthly-trend', months] as const,
   yearlySummary: (year: number) => ['insights', 'yearly-summary', year] as const,
   categorySpendYear: (year: number) => ['insights', 'category-spend-year', year] as const,
+  weeklyTrend: (yearMonth: string) => ['insights', 'weekly-trend', yearMonth] as const,
 };
 
 export function useCategorySpend(date: string) {
@@ -36,6 +37,14 @@ export function useYearlySummary(year: number) {
   return useQuery({
     queryKey: keys.yearlySummary(year),
     queryFn: () => getYearlySummary(db, year),
+  });
+}
+
+export function useWeeklyTrend(yearMonth: string) {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: keys.weeklyTrend(yearMonth),
+    queryFn: () => getWeeklyTrend(db, yearMonth),
   });
 }
 
@@ -128,6 +137,45 @@ async function getCategorySpendForYear(db: SQLiteDatabase, year: number): Promis
     ...r,
     percentage: grandTotal > 0 ? (r.total / grandTotal) * 100 : 0,
   }));
+}
+
+async function getWeeklyTrend(db: SQLiteDatabase, yearMonth: string): Promise<WeeklyTotals[]> {
+  const [year, month] = yearMonth.split('-');
+  const daysInMonth = new Date(Number(year), Number(month), 0).getDate();
+
+  const weekRanges = [
+    { week: 1, start: 1, end: 7 },
+    { week: 2, start: 8, end: 14 },
+    { week: 3, start: 15, end: 21 },
+    { week: 4, start: 22, end: 28 },
+  ];
+  if (daysInMonth > 28) {
+    weekRanges.push({ week: 5, start: 29, end: daysInMonth });
+  }
+
+  const result: WeeklyTotals[] = [];
+  for (const { week, start, end } of weekRanges) {
+    const startDate = `${year}-${month}-${String(start).padStart(2, '0')}`;
+    const endDay = Math.min(end, daysInMonth);
+    const nextDay = endDay + 1;
+    const nextDate = nextDay > daysInMonth
+      ? (Number(month) === 12
+          ? `${Number(year) + 1}-01-01`
+          : `${year}-${String(Number(month) + 1).padStart(2, '0')}-01`)
+      : `${year}-${month}-${String(nextDay).padStart(2, '0')}`;
+
+    const row = await db.getFirstAsync<{ income: number; expense: number }>(
+      `SELECT
+         COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) as income,
+         COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) as expense
+       FROM transactions
+       WHERE date >= ? AND date < ?`,
+      [startDate, nextDate],
+    );
+
+    result.push({ week, label: `W${week}`, income: row?.income ?? 0, expense: row?.expense ?? 0 });
+  }
+  return result;
 }
 
 async function getMonthlyTrend(db: SQLiteDatabase, numMonths: number): Promise<MonthlyTotals[]> {

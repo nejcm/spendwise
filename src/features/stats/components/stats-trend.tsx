@@ -1,63 +1,91 @@
-import type { MonthlyTotals } from '@/features/insights/types';
-import { format, parseISO } from 'date-fns';
+import type { MonthlyTotals, WeeklyTotals } from '@/features/insights/types';
 
+import { format, parseISO } from 'date-fns';
 import * as React from 'react';
+import { useColorScheme } from 'react-native';
+import { BarChart } from 'react-native-gifted-charts';
+
 import { Text, View } from '@/components/ui';
+import { centsToAmount } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 
-const MAX_BAR_HEIGHT = 80;
-
-type Props = {
-  data: MonthlyTotals[];
-  period: 'week' | 'month' | 'year';
-  selected: number; // either a year or a month or a week
+export type StatsTrendProps = {
+  monthlyData: MonthlyTotals[];
+  weeklyData: WeeklyTotals[];
+  period: 'month' | 'year' | 'week';
 };
 
-export function StatsTrend({ data }: Props) {
-  const maxValue = React.useMemo(
-    () => Math.max(...data.flatMap((d) => [d.income, d.expense]), 1),
-    [data],
-  );
+export function StatsTrend({ monthlyData, weeklyData, period }: StatsTrendProps) {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+  const labelColor = isDark ? '#9ca3af' : '#6b7280';
+  const incomeColor = isDark ? '#2ebe7e' : '#2ebe7e';
+  const expenseColor = isDark ? '#e12f30' : '#e12f30';
 
-  if (data.length === 0) return null;
+  const barData = React.useMemo(() => {
+    if (period === 'year') {
+      return monthlyData.flatMap((d) => [
+        {
+          value: centsToAmount(d.income),
+          label: format(parseISO(`${d.month}-01`), 'MMM'),
+          spacing: 2,
+          labelWidth: 30,
+          labelTextStyle: { color: labelColor, fontSize: 10 },
+          frontColor: incomeColor,
+        },
+        {
+          value: centsToAmount(d.expense),
+          frontColor: expenseColor,
+          spacing: 12,
+        },
+      ]);
+    }
+
+    return weeklyData.flatMap((d) => [
+      {
+        value: centsToAmount(d.income),
+        label: d.label,
+        spacing: 2,
+        labelWidth: 36,
+        labelTextStyle: { color: labelColor, fontSize: 10 },
+        frontColor: incomeColor,
+      },
+      {
+        value: centsToAmount(d.expense),
+        frontColor: expenseColor,
+        spacing: 18,
+      },
+    ]);
+  }, [period, monthlyData, weeklyData, labelColor, incomeColor, expenseColor]);
+
+  if (barData.length === 0) return null;
 
   return (
-    <View className="p-4">
-      <View className="mb-4 flex-row gap-4">
+    <View className="mb-6 overflow-hidden rounded-2xl bg-card p-4">
+      <View className="mb-4 flex-row items-center justify-center gap-4">
         <View className="flex-row items-center gap-1.5">
-          <View className="size-2.5 rounded-full bg-green-500/25" />
+          <View className="size-2.5 rounded-full" style={{ backgroundColor: incomeColor }} />
           <Text className="text-xs text-muted-foreground">{translate('common.income')}</Text>
         </View>
         <View className="flex-row items-center gap-1.5">
-          <View className="size-2.5 rounded-full bg-red-500/25" />
+          <View className="size-2.5 rounded-full" style={{ backgroundColor: expenseColor }} />
           <Text className="text-xs text-muted-foreground">{translate('common.expenses')}</Text>
         </View>
       </View>
-      <View className="flex-row items-end gap-1">
-        {data.map((item) => {
-          const incomeHeight = Math.max((item.income / maxValue) * MAX_BAR_HEIGHT, item.income > 0 ? 2 : 0);
-          const expenseHeight = Math.max((item.expense / maxValue) * MAX_BAR_HEIGHT, item.expense > 0 ? 2 : 0);
-          const monthLabel = format(parseISO(`${item.month}-01`), 'MMM');
-          return (
-            <View key={item.month} className="flex-1 items-center gap-1">
-              <View
-                className="w-full flex-row items-end gap-0.5"
-                style={{ height: MAX_BAR_HEIGHT }}
-              >
-                <View
-                  className="flex-1 rounded-t-sm bg-green-500"
-                  style={{ height: incomeHeight }}
-                />
-                <View
-                  className="flex-1 rounded-t-sm bg-red-500"
-                  style={{ height: expenseHeight }}
-                />
-              </View>
-              <Text className="text-[10px] text-muted-foreground">{monthLabel}</Text>
-            </View>
-          );
-        })}
-      </View>
+      <BarChart
+        data={barData}
+        barWidth={period === 'year' ? 8 : 12}
+        spacing={period === 'year' ? 12 : 18}
+        roundedTop
+        roundedBottom
+        hideRules
+        xAxisThickness={0}
+        yAxisThickness={0}
+        yAxisTextStyle={{ color: labelColor, fontSize: 10 }}
+        noOfSections={3}
+        isAnimated
+        disablePress
+      />
     </View>
   );
 }

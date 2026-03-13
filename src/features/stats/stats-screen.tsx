@@ -1,28 +1,28 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 
+import type { Period } from './types';
 import { format } from 'date-fns';
 import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react-native';
-import * as React from 'react';
 
+import * as React from 'react';
 import { MonthPicker, YearPicker } from '@/components/month-year-picker';
 import { FocusAwareStatusBar, Pressable, ScrollView, Text, View } from '@/components/ui';
 import {
   useCategorySpend,
   useCategorySpendForYear,
   useMonthlyTrend,
+  useWeeklyTrend,
   useYearlySummary,
 } from '@/features/insights/api';
 import { useMonthSummary } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '@/lib/store';
 
+import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { CategoryBreakdown } from './components/category-breakdown';
 import { PeriodToggle } from './components/period-toggle';
 import { StatsTrend } from './components/stats-trend';
 import { Summary } from './components/summary';
-
-type Period = 'month' | 'year';
 
 export function StatsScreen() {
   const currency = useAppStore.use.currency();
@@ -37,21 +37,20 @@ export function StatsScreen() {
   const monthPickerRef = React.useRef<BottomSheetModal>(null);
   const yearPickerRef = React.useRef<BottomSheetModal>(null);
 
-  const yearMonth = selectedDate.join('-');
+  const yearMonth = `${selectedDate[0]}-${String(selectedDate[1]).padStart(2, '0')}`;
 
   // Month view hooks
   const { data: monthSummary } = useMonthSummary(yearMonth);
   const { data: monthCategorySpend = [] } = useCategorySpend(yearMonth);
-  const { data: trendMonth = [] } = useMonthlyTrend(6);
+  const { data: weeklyTrend = [] } = useWeeklyTrend(yearMonth);
 
   // Year view hooks
   const { data: yearlySummary } = useYearlySummary(selectedYear);
   const { data: yearCategorySpend = [] } = useCategorySpendForYear(selectedYear);
-  const { data: trendYear = [] } = useMonthlyTrend(12);
+  const { data: monthlyTrend = [] } = useMonthlyTrend(12);
 
   const summary = period === 'month' ? monthSummary : yearlySummary;
   const categorySpend = period === 'month' ? monthCategorySpend : yearCategorySpend;
-  const trend = period === 'month' ? trendMonth : trendYear;
 
   const monthName = React.useMemo(
     () => format(new Date(selectedDate[0], selectedDate[1] - 1, 1), 'MMMM'),
@@ -70,38 +69,55 @@ export function StatsScreen() {
         <Text className="pb-4 text-center text-2xl font-medium">{translate('stats.title')}</Text>
         <PeriodToggle value={period} onChange={setPeriod} />
 
-        {period === 'month'
-          ? (
-              <View className="flex-row items-center justify-between pb-6">
-                <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
-                  <ArrowLeftIcon className="size-5 text-muted-foreground" />
-                </Pressable>
-                <View className="flex-row items-center gap-1">
-                  <Pressable onPress={() => monthPickerRef.current?.present()} hitSlop={12}>
-                    <Text className="text-lg font-medium text-subtle-3">{monthName}</Text>
-                  </Pressable>
-                  <Pressable onPress={() => yearPickerRef.current?.present()} hitSlop={12}>
-                    <Text className="text-lg font-medium text-subtle-3">{selectedDate[0]}</Text>
-                  </Pressable>
-                </View>
-                <Pressable onPress={() => navigateMonth(1)} hitSlop={12}>
-                  <ArrowRightIcon className="size-5 text-muted-foreground" />
+        {period === 'week'
+          && (
+            <View className="flex-row items-center justify-between pb-6">
+              <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
+                <ArrowLeftIcon className="size-5 text-muted-foreground" />
+              </Pressable>
+              <View className="flex-row items-center gap-1">
+                <Pressable onPress={() => monthPickerRef.current?.present()} hitSlop={12}>
+                  <Text className="text-lg font-medium text-subtle-3">{format(new Date(), 'MMM')}</Text>
                 </Pressable>
               </View>
-            )
-          : (
-              <View className="flex-row items-center justify-between pb-6">
-                <Pressable onPress={() => setSelectedYear((y) => y - 1)} hitSlop={12}>
-                  <ArrowLeftIcon className="size-5 text-muted-foreground" />
+              <Pressable onPress={() => navigateMonth(1)} hitSlop={12}>
+                <ArrowRightIcon className="size-5 text-muted-foreground" />
+              </Pressable>
+            </View>
+          )}
+        {period === 'month'
+          && (
+            <View className="flex-row items-center justify-between pb-6">
+              <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
+                <ArrowLeftIcon className="size-5 text-muted-foreground" />
+              </Pressable>
+              <View className="flex-row items-center gap-1">
+                <Pressable onPress={() => monthPickerRef.current?.present()} hitSlop={12}>
+                  <Text className="text-lg font-medium text-subtle-3">{monthName}</Text>
                 </Pressable>
                 <Pressable onPress={() => yearPickerRef.current?.present()} hitSlop={12}>
-                  <Text className="text-lg font-medium text-card-foreground">{selectedYear}</Text>
-                </Pressable>
-                <Pressable onPress={() => setSelectedYear((y) => y + 1)} hitSlop={12}>
-                  <ArrowRightIcon className="size-5 text-muted-foreground" />
+                  <Text className="text-lg font-medium text-subtle-3">{selectedDate[0]}</Text>
                 </Pressable>
               </View>
-            )}
+              <Pressable onPress={() => navigateMonth(1)} hitSlop={12}>
+                <ArrowRightIcon className="size-5 text-muted-foreground" />
+              </Pressable>
+            </View>
+          )}
+        {period === 'year'
+          && (
+            <View className="flex-row items-center justify-between pb-6">
+              <Pressable onPress={() => setSelectedYear((y) => y - 1)} hitSlop={12}>
+                <ArrowLeftIcon className="size-5 text-muted-foreground" />
+              </Pressable>
+              <Pressable onPress={() => yearPickerRef.current?.present()} hitSlop={12}>
+                <Text className="text-lg font-medium text-subtle-3">{selectedYear}</Text>
+              </Pressable>
+              <Pressable onPress={() => setSelectedYear((y) => y + 1)} hitSlop={12}>
+                <ArrowRightIcon className="size-5 text-muted-foreground" />
+              </Pressable>
+            </View>
+          )}
 
         {summary && (
           <Summary
@@ -112,17 +128,24 @@ export function StatsScreen() {
           />
         )}
 
+        <StatsTrend
+          monthlyData={monthlyTrend}
+          weeklyData={weeklyTrend}
+          period={period}
+        />
+
         <CategoryBreakdown
           categories={categorySpend}
           currency={currency}
           type="expense"
-          limit={5}
+          limit={10}
         />
 
-        <StatsTrend
-          data={trend}
-          period={period}
-          selected={selectedDate[0]}
+        <CategoryBreakdown
+          categories={categorySpend}
+          currency={currency}
+          type="income"
+          limit={8}
         />
 
       </ScrollView>

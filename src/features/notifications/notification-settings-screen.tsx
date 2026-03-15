@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Platform, View } from 'react-native';
 
-import { Button, FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
+import { FocusAwareStatusBar, ScrollView, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { translate } from '@/lib/i18n';
 
@@ -31,7 +31,7 @@ export function NotificationSettingsScreen() {
         <Text className="mb-4 text-sm text-muted-foreground">
           Enable notifications to get alerts about budgets nearing their limits and upcoming recurring bills.
         </Text>
-        <Button
+        <SolidButton
           label={translate('settings.notifications')}
           onPress={() => {
             void handleEnable();

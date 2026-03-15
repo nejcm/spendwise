@@ -1,6 +1,7 @@
 import type { CurrencyFormat, DateFormat, NumberFormat } from '../formatting/constants';
 
 import type { OptionType } from '@/components/ui';
+import type { CurrencyKey } from '@/features/currencies';
 import { Calendar, Calendar1, CircleDollarSign, DecimalsArrowRight, Euro } from 'lucide-react-native';
 import * as React from 'react';
 import { View } from 'react-native';
@@ -24,7 +25,7 @@ const OptionsProps: Record<ModalType, {
   currency: {
     options: CURRENCY_OPTIONS,
     onSelect: (option: OptionType) => {
-      setCurrency(option.value as string);
+      setCurrency(option.value as CurrencyKey);
     },
   },
   currencyFormat: {

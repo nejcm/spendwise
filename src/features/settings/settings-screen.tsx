@@ -7,11 +7,12 @@ import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import { ALargeSmall, Banknote, Bell, Bot, FileText, HelpCircle, Import, LayoutGrid, Link, List, LogOut, Share, Shield, User } from 'lucide-react-native';
-import { Button, FocusAwareStatusBar, Image, ScrollView, Text, View } from '@/components/ui';
+import { FocusAwareStatusBar, Image, ScrollView, Text, View } from '@/components/ui';
 import { config } from '@/config';
 import { mockData } from '@/lib/sqlite/mock-data';
 import { selectProfile, setIsFirstTime, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
+import { GhostButton } from '../../components/ui/ghost-button';
 import { seedDefaults } from '../../lib/sqlite/seed';
 import { getAvatar } from '../profile';
 import { LanguageItem } from './components/language-item';
@@ -46,10 +47,10 @@ export function SettingsScreen() {
       <ScrollView className="pb-12" style={defaultStyles.transparentBg}>
         <View className="flex-1 px-4 pt-16">
 
-          <Button variant="unstyled" className="mx-auto mb-2 h-auto flex-col items-center justify-center" onPress={() => router.push('/settings/profile')}>
+          <GhostButton className="mx-auto mb-2 h-auto flex-col justify-center" onPress={() => router.push('/settings/profile')}>
             <Image source={getAvatar(profile.avatar)} className="mb-3 size-18 rounded-full" />
             <Text className="text-center">{profile.name}</Text>
-          </Button>
+          </GhostButton>
 
           <SettingsContainer title="settings.finance">
             <SettingsItem

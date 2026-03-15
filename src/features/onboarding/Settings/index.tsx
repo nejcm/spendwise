@@ -2,7 +2,8 @@ import type { ThemeType } from '../../settings/theme';
 
 import type { OptionType } from '@/components/ui';
 import * as React from 'react';
-import { Button, Options, Text, useModal } from '@/components/ui';
+import { Options, SolidButton, Text, useModal } from '@/components/ui';
+import { GhostButton } from '@/components/ui/ghost-button';
 import { translate } from '@/lib/i18n';
 import { useSelectedTheme } from '@/lib/theme/use-selected-theme';
 import { THEMES_OPTIONS } from '../../settings/theme';
@@ -36,15 +37,14 @@ export default function SettingsStep({ onBack, onNext, currentStep }: SettingsSt
         className="my-auto"
         footer={(
           <>
-            <Button
+            <GhostButton
               label={translate('common.back')}
-              variant="ghost"
               size="lg"
               fullWidth={false}
               onPress={onBack}
               accessibilityLabel={translate('common.back')}
             />
-            <Button
+            <SolidButton
               label={translate('onboarding.finish_setup')}
               onPress={onNext}
               className="flex-1"
@@ -56,9 +56,9 @@ export default function SettingsStep({ onBack, onNext, currentStep }: SettingsSt
         <Text className="mb-4 text-center text-lg text-gray-400">
           {translate('onboarding.select_theme')}
         </Text>
-        <Button variant="ghost" size="xl" className="text-4xl" onPress={modal.present}>
-          {theme?.label}
-        </Button>
+        <GhostButton size="xl" className="text-4xl" onPress={modal.present}>
+          <Text className="text-4xl">{theme?.label}</Text>
+        </GhostButton>
         <Options ref={modal.ref} options={THEMES_OPTIONS} onSelect={onSelect} value={theme?.value} />
       </OnboardingLayout>
     </>

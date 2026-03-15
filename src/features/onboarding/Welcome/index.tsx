@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Button, Image, SafeAreaView, Text, View } from '@/components/ui';
+import { Image, SafeAreaView, SolidButton, Text, View } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import IntroNav from '../Nav';
 
@@ -21,7 +21,7 @@ export default function WelcomeStep({ onNext, currentStep }: WelcomeStepProps) {
           <Image
             source={require('../../../../assets/intro.svg')}
             contentFit="contain"
-            className="size-full max-w-[360px]"
+            className="size-full max-w-[360]"
           />
         </View>
       </View>
@@ -38,10 +38,11 @@ export default function WelcomeStep({ onNext, currentStep }: WelcomeStepProps) {
           </Text>
         </View>
 
-        <Button
+        <SolidButton
           label={translate('onboarding.get_started')}
           onPress={onNext}
           className="mt-8"
+          fullWidth={true}
           size="lg"
         />
       </View>

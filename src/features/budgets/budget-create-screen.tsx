@@ -5,8 +5,9 @@ import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
 import * as z from 'zod';
-import { Button, FocusAwareStatusBar, Input, ScrollView, Text } from '@/components/ui';
+import { FocusAwareStatusBar, Input, ScrollView, SolidButton, Text } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
+import { OutlineButton } from '@/components/ui/outline-button';
 import { useCategories } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -38,7 +39,7 @@ const validators = {
 
 export function BudgetCreateScreen() {
   const router = useRouter();
-  const { data: categories = [] } = useCategories('expense');
+  const { data: categories = [] } = useCategories();
   const createBudget = useCreateBudget();
 
   const form = useForm({
@@ -146,13 +147,12 @@ export function BudgetCreateScreen() {
           selector={(state) => [state.isSubmitting, state.values.name, state.values.amount]}
           children={([isSubmitting, name, amount]) => (
             <View className="mt-6 mb-8 flex-row gap-3">
-              <Button
+              <OutlineButton
                 label={translate('common.cancel')}
-                variant="outline"
                 onPress={() => router.back()}
                 className="flex-1"
               />
-              <Button
+              <SolidButton
                 label={translate('common.save')}
                 onPress={form.handleSubmit}
                 disabled={!(name as string).trim() || !(amount as string) || createBudget.isPending}

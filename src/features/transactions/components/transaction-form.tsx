@@ -1,22 +1,30 @@
+import type { TransactionType } from '../types';
+import type { CurrencyKey } from '@/features/currencies';
+
 import { useForm } from '@tanstack/react-form';
 import * as React from 'react';
-import { Pressable, View } from 'react-native';
-
+import { View } from 'react-native';
 import * as z from 'zod';
-import { Button, Input, Text } from '@/components/ui';
+import { Input, ScrollView, Select, SolidButton, Text } from '@/components/ui';
+
+import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
+import { GhostButton } from '@/components/ui/ghost-button';
 import { CategoryPicker } from '@/features/categories/category-picker';
+import { CURRENCY_OPTIONS, CURRENCY_VALUES } from '@/features/currencies';
 import { todayISO } from '@/features/formatting/helpers';
-import { useAccounts, useCategories, useCreateTransaction } from '@/features/transactions/api';
+import { useAccounts, useCreateTransaction, useUpdateTransaction } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
+import { setCurrency, useAppStore } from '@/lib/store';
 
 const schema = z.object({
-  type: z.enum(['expense', 'income']),
-  amount: z.string().min(1, 'Amount is required'),
-  category_id: z.string().nullable(),
+  type: z.enum(['expense', 'income', 'transfer'] as TransactionType[]),
+  currency: z.enum(CURRENCY_VALUES as CurrencyKey[]),
+  amount: z.number(),
+  category_id: z.string().min(1, 'Category is required'),
   account_id: z.string().min(1, 'Account is required'),
   date: z.string().min(1, 'Date is required'),
-  note: z.string(),
+  note: z.string().nullable(),
 });
 
 const TYPE_OPTIONS: { label: string; value: 'expense' | 'income' }[] = [
@@ -25,70 +33,75 @@ const TYPE_OPTIONS: { label: string; value: 'expense' | 'income' }[] = [
 ];
 
 export type TransactionFormProps = {
-  initialValues?: TransactionFormData;
+  initialValues?: (Partial<TransactionFormData> & { id: never }) | (TransactionFormData & { id: string });
+  onSuccess?: () => void;
+  onCancel?: () => void;
 };
 
 type TransactionFormData = z.infer<typeof schema>;
 
 const defaultValues = {
-  type: 'expense' as 'expense' | 'income',
-  amount: '',
-  category_id: null as string | null,
+  type: 'expense',
+  category_id: '',
   account_id: '',
   date: todayISO(),
-  note: '',
-} satisfies TransactionFormData;
+  note: null,
+} satisfies Partial<TransactionFormData>;
 
-export function TransactionForm(_: TransactionFormProps) {
+export function TransactionForm({ initialValues, onSuccess, onCancel }: TransactionFormProps) {
   const { data: accounts = [] } = useAccounts();
+  const id = initialValues?.id;
   const createTransaction = useCreateTransaction();
-  const { data: expenseCategories = [] } = useCategories('expense');
-  const { data: incomeCategories = [] } = useCategories('income');
+  const updateTransaction = useUpdateTransaction();
+  const currency = useAppStore.use.currency();
 
   const form = useForm({
     defaultValues: {
       ...defaultValues,
       account_id: accounts[0]?.id ?? '',
-    },
+      ...initialValues,
+    } as TransactionFormData,
     validators: {
       onChange: schema,
     },
     onSubmit: async ({ value }) => {
-      if (!value.account_id) return;
-      await createTransaction.mutateAsync({
-        type: value.type,
-        amount: value.amount,
-        category_id: value.category_id,
-        account_id: value.account_id,
-        date: value.date,
-        note: value.note,
-      });
+      if (!value.account_id)
+        return;
+      if (id) {
+        await updateTransaction.mutateAsync({ id, data: value });
+        onSuccess?.();
+        return;
+      }
+      await createTransaction.mutateAsync(value);
       form.reset();
+      onSuccess?.();
     },
   });
 
   return (
-    <>
+    <View className="gap-4">
       <form.Field
         name="type"
         children={(field) => (
-          <View className="mb-4 flex-row gap-2">
-            {TYPE_OPTIONS.map((option) => (
-              <Pressable
-                key={option.value}
-                className={`flex-1 items-center rounded-xl py-2 ${
-                  field.state.value === option.value ? 'bg-black dark:bg-white' : 'bg-gray-100 dark:bg-gray-800'
-                }`}
-                onPress={() => {
-                  field.handleChange(option.value);
-                  form.setFieldValue('category_id', null);
-                }}
-              >
-                <Text className={`font-medium ${field.state.value === option.value ? 'text-white' : 'dark:text-gray-100'}`}>
-                  {option.label}
-                </Text>
-              </Pressable>
-            ))}
+          <View>
+            <Text className="mb-2 text-sm font-medium">
+              {translate('transactions.type')}
+            </Text>
+            <View className="flex-row gap-2">
+              {TYPE_OPTIONS.map((option) => (
+                <SolidButton
+                  key={option.value}
+                  size="sm"
+                  className="items-center rounded-3xl"
+                  color={field.state.value === option.value ? 'primary' : 'secondary'}
+                  label={option.label}
+                  onPress={() => {
+                    field.handleChange(option.value);
+                    form.setFieldValue('category_id', '');
+                  }}
+                />
+              ))}
+            </View>
           </View>
         )}
       />
@@ -96,70 +109,82 @@ export function TransactionForm(_: TransactionFormProps) {
       <form.Field
         name="account_id"
         children={(field) => (
-          <>
-            <Text className="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
+          <View>
+            <Text className="mb-2 text-sm font-medium">
               {translate('transactions.account')}
             </Text>
-            <View className="mb-4 flex-row flex-wrap gap-2">
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerClassName="flex-row gap-2"
+            >
               {accounts.map((a) => (
-                <Pressable
+                <SolidButton
                   key={a.id}
-                  className={`rounded-full px-3 py-1.5 ${field.state.value === a.id ? 'bg-primary-400' : 'bg-gray-100 dark:bg-gray-800'}`}
+                  size="sm"
+                  className="items-center rounded-3xl"
+                  color={field.state.value === a.id ? 'primary' : 'secondary'}
+                  label={`${a.icon} ${a.name}`}
                   onPress={() => field.handleChange(a.id)}
-                >
-                  <Text className={`text-sm ${field.state.value === a.id ? 'font-medium text-white' : 'dark:text-gray-100'}`}>
-                    {a.name}
-                  </Text>
-                </Pressable>
+                />
               ))}
-            </View>
-          </>
+            </ScrollView>
+          </View>
         )}
       />
-
-      <form.Field
-        name="amount"
-        children={(field) => (
-          <Input
-            label={translate('transactions.amount')}
-            value={field.state.value}
-            onBlur={field.handleBlur}
-            onChangeText={field.handleChange}
-            placeholder="0.00"
-            keyboardType="decimal-pad"
-            testID="amount-input"
-            error={getFieldError(field)}
-          />
-        )}
-      />
+      <View className="flex-row gap-3">
+        <Select
+          label={translate('transactions.currency')}
+          value={currency}
+          options={CURRENCY_OPTIONS}
+          onSelect={(value) => {
+            if (!value) return;
+            setCurrency(String(value) as CurrencyKey);
+          }}
+          size="md"
+          showChevron={false}
+          containerClassName="w-[96]"
+          stackBehavior="push"
+        />
+        <form.Field
+          name="amount"
+          children={(field) => (
+            <Input
+              label={translate('transactions.amount')}
+              value={String(field.state.value)}
+              onBlur={field.handleBlur}
+              onChangeText={(val) => field.handleChange(Number(val))}
+              placeholder="0.00"
+              keyboardType="decimal-pad"
+              testID="amount-input"
+              error={getFieldError(field)}
+              containerClassName="flex-1"
+            />
+          )}
+        />
+      </View>
 
       <form.Field
         name="date"
         children={(field) => (
-          <Input
+          <DateInput
             label={translate('transactions.date')}
             value={field.state.value}
-            onBlur={field.handleBlur}
-            onChangeText={field.handleChange}
-            placeholder="YYYY-MM-DD"
+            onChange={field.handleChange}
             error={getFieldError(field)}
+            modalProps={{ stackBehavior: 'push' }}
           />
         )}
       />
 
-      <form.Subscribe
-        selector={(state) => state.values.type}
-        children={(typeValue) => (
-          <form.Field
-            name="category_id"
-            children={(field) => (
-              <CategoryPicker
-                categories={typeValue === 'expense' ? expenseCategories : incomeCategories}
-                selectedId={field.state.value}
-                onSelect={(cat) => field.handleChange(cat.id)}
-                label={translate('transactions.category')}
-              />
-            )}
+      <form.Field
+        name="category_id"
+        children={(field) => (
+          <CategoryPicker
+            selectedId={field.state.value}
+            onSelect={(cat) => field.handleChange(cat.id)}
+            label={translate('transactions.category')}
+            error={getFieldError(field)}
           />
         )}
       />
@@ -169,31 +194,37 @@ export function TransactionForm(_: TransactionFormProps) {
         children={(field) => (
           <Input
             label={translate('transactions.note')}
-            value={field.state.value}
+            value={field.state.value || ''}
             onBlur={field.handleBlur}
             onChangeText={field.handleChange}
-            placeholder="Optional note"
+            placeholder={translate('common.note')}
             error={getFieldError(field)}
           />
         )}
       />
 
       <form.Subscribe
-        selector={(state) => [state.isSubmitting, state.values.amount, state.values.account_id, state.values.date]}
-        children={([isSubmitting, amount, accountId, date]) => (
-          <Button
-            label={translate('common.save')}
-            onPress={form.handleSubmit}
-            loading={(isSubmitting as boolean) || createTransaction.isPending}
-            disabled={
-              !(amount as string)
-              || Number.parseFloat(amount as string) <= 0
-              || !(accountId as string)
-              || !(date as string)
-            }
-          />
+        selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
+        children={(state) => (
+          <View className="flex-row gap-3">
+            {onCancel && (
+              <GhostButton
+                label={translate('common.cancel')}
+                onPress={onCancel}
+                color="secondary-alt"
+                className=""
+              />
+            )}
+            <SolidButton
+              label={translate('common.save')}
+              onPress={form.handleSubmit}
+              loading={(!!state.isSubmitting) || createTransaction.isPending || updateTransaction.isPending}
+              disabled={!schema.safeParse(state.values).success}
+              className="flex-1"
+            />
+          </View>
         )}
       />
-    </>
+    </View>
   );
 }

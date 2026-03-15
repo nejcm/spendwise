@@ -2,13 +2,14 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 import { View } from 'react-native';
 
-import { Button, FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
+import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
+import { OutlineButton } from '@/components/ui/outline-button';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
-import { defaultStyles } from '@/lib/theme/styles';
 
+import { defaultStyles } from '@/lib/theme/styles';
 import { useBudgetWithProgress, useDeleteBudget } from './api';
 import { BudgetProgressBar } from './components/budget-progress-bar';
 
@@ -69,9 +70,9 @@ export function BudgetDetailScreen() {
         ))}
 
         <View className="mt-6 mb-8">
-          <Button
+          <OutlineButton
             label={translate('common.delete')}
-            variant="destructive"
+            color="danger"
             onPress={handleDelete}
           />
         </View>

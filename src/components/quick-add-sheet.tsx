@@ -3,44 +3,62 @@ import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import * as React from 'react';
 
 import { Modal, Text } from '@/components/ui';
+import { AccountForm } from '@/features/accounts/components/account-form';
+import { TransactionForm } from '@/features/transactions/components/transaction-form';
 import { translate } from '@/lib/i18n';
-import { TransactionForm } from '../features/transactions/components/transaction-form';
+import { CategoryForm } from '../features/categories/category-form';
 
+export type QuickAddSheetData = {
+  pathname?: string;
+};
 export type QuickAddSheetProps = {
-  sheetRef: React.RefObject<BottomSheetModal | null>;
+  sheetRef: React.RefObject<BottomSheetModal<QuickAddSheetData> | null>;
   pathname: string;
 };
 
 function renderContent(pathname: string) {
-  if (pathname === '/' || pathname.startsWith('/transactions')) {
-    return <TransactionForm />;
-  }
-
   if (pathname.startsWith('/accounts')) {
     return (
-      <Text>
-        Accounts
-      </Text>
+      <>
+        <Text className="mb-4 text-center text-2xl font-bold">
+          {translate('accounts.add')}
+        </Text>
+        <AccountForm />
+      </>
     );
   }
 
   if (pathname.startsWith('/categories')) {
     return (
-      <Text>
-        Categories
-      </Text>
+      <>
+        <Text className="mb-4 text-center text-2xl font-bold">
+          {translate('categories.add')}
+        </Text>
+        <CategoryForm />
+      </>
     );
   }
 
-  return <TransactionForm />;
+  return (
+    <>
+      <Text className="mb-4 text-center text-2xl font-bold">
+        {translate('transactions.add')}
+      </Text>
+      <TransactionForm />
+    </>
+  );
 };
 
-export function QuickAddSheet({ sheetRef, pathname }: QuickAddSheetProps) {
+export function QuickAddSheet({ sheetRef }: QuickAddSheetProps) {
   return (
-    <Modal ref={sheetRef} title={translate('transactions.add')} snapPoints={['85%']}>
-      <BottomSheetScrollView className="flex-1 px-4 pb-8">
-        {renderContent(pathname)}
-      </BottomSheetScrollView>
+    <Modal ref={sheetRef} snapPoints={['85%']}>
+      {(data) => {
+        return (
+          <BottomSheetScrollView className="flex-1 px-4 pb-8">
+            {renderContent(String(data?.data?.pathname || ''))}
+          </BottomSheetScrollView>
+        );
+      }}
     </Modal>
   );
 }

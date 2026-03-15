@@ -4,7 +4,7 @@ import * as React from 'react';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import * as z from 'zod';
 
-import { Button, Input, Text, View } from '@/components/ui';
+import { Input, SolidButton, Text, View } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 
 const schema = z.object({
@@ -104,7 +104,7 @@ export function LoginForm({ onSubmit = () => {} }: LoginFormProps) {
         <form.Subscribe
           selector={(state) => [state.isSubmitting]}
           children={([isSubmitting]) => (
-            <Button testID="login-button" label="Login" onPress={form.handleSubmit} loading={isSubmitting} />
+            <SolidButton testID="login-button" label="Login" onPress={form.handleSubmit} loading={isSubmitting} />
           )}
         />
       </View>

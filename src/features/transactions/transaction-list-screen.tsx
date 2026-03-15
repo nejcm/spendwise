@@ -8,6 +8,7 @@ import { cn } from 'tailwind-variants';
 import { FocusAwareStatusBar, Input, inputDefaults, Text } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import { MonthPicker, YearPicker } from '../../components/month-year-picker';
+import { IconButton } from '../../components/ui/icon-button';
 import { useTransactions } from './api';
 import { TransactionFilterBar } from './components/transaction-filter-bar';
 import { TransactionList } from './components/transaction-list';
@@ -57,12 +58,9 @@ export function TransactionListScreen() {
       <FocusAwareStatusBar />
 
       <View className="flex-row items-center justify-between p-4">
-        <Pressable
-          onPress={() => navigateMonth(-1)}
-          hitSlop={12}
-        >
+        <IconButton size="sm" color="none" onPress={() => navigateMonth(-1)} hitSlop={12}>
           <ArrowLeftIcon className="size-5 text-muted-foreground" />
-        </Pressable>
+        </IconButton>
         <View className="flex-row items-center gap-1">
           <Pressable onPress={() => monthPickerRef.current?.present()} hitSlop={12}>
             <Text className="text-lg font-medium">{monthName}</Text>
@@ -71,12 +69,9 @@ export function TransactionListScreen() {
             <Text className="text-lg font-medium">{selectedDate[0]}</Text>
           </Pressable>
         </View>
-        <Pressable
-          onPress={() => navigateMonth(1)}
-          hitSlop={12}
-        >
+        <IconButton size="sm" color="none" onPress={() => navigateMonth(1)} hitSlop={12}>
           <ArrowRightIcon className="size-5 text-muted-foreground" />
-        </Pressable>
+        </IconButton>
       </View>
 
       <MonthPicker

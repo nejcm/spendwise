@@ -98,7 +98,7 @@ export function CustomTabBar() {
             <Pressable
               key={tab.name}
               onPress={() => router.replace(tab.path as never)}
-              className="flex-1 items-center justify-center gap-[5px]"
+              className="flex-1 items-center justify-center gap-1"
             >
               {tab.icon(iconColor)}
               {isActive && (

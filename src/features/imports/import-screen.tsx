@@ -1,17 +1,17 @@
-import type { ColumnMapping, ParsedRow } from './csv-parser';
+import type { CurrencyKey } from '../currencies';
 
+import type { ColumnMapping, ParsedRow } from './csv-parser';
 import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { useState } from 'react';
-import { Pressable, View } from 'react-native';
 
-import { Button, FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
+import { Pressable, View } from 'react-native';
+import { FocusAwareStatusBar, ScrollView, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { useAccounts, useCreateTransaction } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { mapRows, parseCSV } from './csv-parser';
 
@@ -20,7 +20,7 @@ type Step = 'map' | 'pick' | 'preview';
 const COLUMN_FIELDS: (keyof ColumnMapping)[] = ['date', 'amount', 'note', 'type'];
 
 function autoDetect(headers: string[]): ColumnMapping {
-  const m: ColumnMapping = { amount: null, date: null, note: null, type: null };
+  const m: ColumnMapping = { amount: null, date: null, note: null, type: null, currency: null };
   headers.forEach((h, i) => {
     const lower = h.toLowerCase();
     if (lower.includes('date')) {
@@ -34,6 +34,9 @@ function autoDetect(headers: string[]): ColumnMapping {
     }
     else if (lower.includes('type') || lower.includes('category')) {
       m.type = i;
+    }
+    else if (lower.includes('currency')) {
+      m.currency = i;
     }
   });
   return m;
@@ -85,15 +88,15 @@ function MapStep({ headers, mapping, onMapping, onNext }: MapStepProps) {
           </View>
         </View>
       ))}
-      <Button className="mt-2" label={translate('import.preview')} onPress={onNext} />
+      <SolidButton className="mt-2" label={translate('import.preview')} onPress={onNext} />
     </View>
   );
 }
 
-type PreviewStepProps = {
+export type PreviewStepProps = {
   accounts: { id: string; name: string }[];
   accountId: string;
-  currency: string;
+  currency: CurrencyKey;
   importing: boolean;
   onAccountSelect: (id: string) => void;
   onImport: () => void;
@@ -151,7 +154,7 @@ function PreviewStep({
           {`+${preview.length - 10} more rows`}
         </Text>
       )}
-      <Button
+      <SolidButton
         className="mt-4 mb-8"
         disabled={!accountId || importing}
         label={
@@ -167,7 +170,6 @@ function PreviewStep({
 
 export function ImportScreen() {
   const router = useRouter();
-  const currency = useAppStore.use.currency();
   const { data: accounts = [] } = useAccounts();
   const createTransaction = useCreateTransaction();
 
@@ -177,11 +179,13 @@ export function ImportScreen() {
   const [mapping, setMapping] = useState<ColumnMapping>({
     amount: null,
     date: null,
+    currency: null,
     note: null,
     type: null,
   });
   const [preview, setPreview] = useState<ParsedRow[]>([]);
   const [accountId, setAccountId] = useState<string>(accounts[0]?.id ?? '');
+  const [currency] = useState<CurrencyKey>('USD');
   const [importing, setImporting] = useState(false);
 
   const pickFile = async () => {
@@ -214,17 +218,16 @@ export function ImportScreen() {
   };
 
   const runImport = async () => {
-    if (!accountId) {
-      return;
-    }
+    if (!accountId) return;
     setImporting(true);
     let count = 0;
     for (const row of preview) {
       const type = row.amount >= 0 ? ('income' as const) : ('expense' as const);
       await createTransaction.mutateAsync({
         account_id: accountId,
-        amount: String(Math.abs(row.amount) / 100),
-        category_id: null,
+        amount: (Math.abs(row.amount) / 100),
+        currency: (mapping.currency ?? 'USD') as CurrencyKey,
+        category_id: '_unknown',
         date: row.date,
         note: row.note,
         type,
@@ -247,7 +250,7 @@ export function ImportScreen() {
             <Text className="mb-8 text-center text-gray-500">
               {translate('import.pick_description')}
             </Text>
-            <Button label={translate('import.pick_file')} onPress={pickFile} />
+            <SolidButton label={translate('import.pick_file')} onPress={pickFile} />
           </View>
         )}
         {step === 'map' && (

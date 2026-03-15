@@ -1,13 +1,12 @@
 import * as React from 'react';
 import { View } from 'react-native';
 
-import { Button, FocusAwareStatusBar, Input, ScrollView, Text } from '@/components/ui';
+import { FocusAwareStatusBar, Input, ScrollView, SolidButton, Text } from '@/components/ui';
 import { setAiProvider, setAnthropicApiKey, setOpenaiApiKey, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { translate } from '../../lib/i18n';
 
 export function AiSettingsScreen() {
-  const aiProvider = useAppStore.use.aiProvider();
   const openaiApiKey = useAppStore.use.openaiApiKey();
   const anthropicApiKey = useAppStore.use.anthropicApiKey();
 
@@ -15,8 +14,8 @@ export function AiSettingsScreen() {
   const [anthropicKey, setAnthropicKey] = React.useState(anthropicApiKey ?? '');
 
   const handleSave = React.useCallback(() => {
-    setOpenaiApiKey(openaiKey.trim() || null);
-    setAnthropicApiKey(anthropicKey.trim() || null);
+    setOpenaiApiKey(openaiKey.trim());
+    setAnthropicApiKey(anthropicKey.trim());
 
     if (openaiKey.trim() && !anthropicKey.trim()) {
       setAiProvider('openai');
@@ -63,7 +62,12 @@ export function AiSettingsScreen() {
         </View>
 
         <View className="mb-10">
-          <Button label="Save" onPress={handleSave} />
+          <SolidButton
+            fullWidth
+            label={translate('common.save')}
+            onPress={handleSave}
+            disabled={openaiApiKey === openaiKey.trim() && anthropicApiKey === anthropicKey.trim()}
+          />
         </View>
       </ScrollView>
     </View>

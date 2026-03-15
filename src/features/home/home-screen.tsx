@@ -4,7 +4,8 @@ import { useRouter } from 'expo-router';
 import { BotIcon } from 'lucide-react-native';
 import * as React from 'react';
 import { View } from 'react-native';
-import { Button, Image, ScrollView, Text } from '@/components/ui';
+import { Image, ScrollView, Text } from '@/components/ui';
+import { IconButton } from '@/components/ui/icon-button';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { AccountsOverview } from '@/features/home/accounts-overview';
 import { CategoriesOverview } from '@/features/home/categories-overview';
@@ -12,7 +13,7 @@ import { useMonthSummary } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
-import { useThemeConfig } from '../../lib/theme/use-theme-config';
+import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import TransactionsList from './transactions-list';
 
 export function HomeScreen() {
@@ -30,11 +31,11 @@ export function HomeScreen() {
           <View className="flex-row items-center justify-between gap-2">
             <Image
               source={theme.dark ? require('../../../assets/spendwise-white.svg') : require('../../../assets/spendwise.svg')}
-              className="h-[24px] w-[120px]"
+              className="h-[24] w-[120]"
             />
-            <Button variant="secondary" className="h-9 rounded-full px-2" onPress={() => router.push('/ai')}>
+            <IconButton size="sm" color="secondary" onPress={() => router.push('/ai')}>
               <BotIcon size={22} className="text-muted-foreground" />
-            </Button>
+            </IconButton>
           </View>
           <View>
             <View className="flex-row items-center justify-between gap-2">

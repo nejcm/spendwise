@@ -4,7 +4,7 @@ import * as React from 'react';
 import { View } from 'react-native';
 import * as z from 'zod';
 
-import { Button, FocusAwareStatusBar, Input, ScrollView, Text } from '@/components/ui';
+import { FocusAwareStatusBar, Input, ScrollView, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { getFieldError } from '@/components/ui/form-utils';
 import { formatCurrency, todayISO } from '@/features/formatting/helpers';
@@ -122,10 +122,9 @@ export function GoalDetailScreen() {
               children={(field) => (
                 <View className="mt-3 flex-row flex-wrap gap-2">
                   {accounts.map((a) => (
-                    <Button
+                    <SolidButton
                       key={a.id}
                       label={a.name}
-                      variant={field.state.value === a.id ? 'default' : 'outline'}
                       onPress={() => field.handleChange(a.id)}
                       size="sm"
                     />
@@ -137,7 +136,7 @@ export function GoalDetailScreen() {
             <form.Subscribe
               selector={(state) => [state.isSubmitting, state.values.amount, state.values.account_id]}
               children={([isSubmitting, amount, accountId]) => (
-                <Button
+                <SolidButton
                   label={translate('goals.contribute')}
                   onPress={form.handleSubmit}
                   disabled={!(amount as string) || !(accountId as string) || (isSubmitting as boolean) || addContribution.isPending}
@@ -158,9 +157,9 @@ export function GoalDetailScreen() {
           </View>
         )}
 
-        <Button
+        <SolidButton
           label={translate('common.delete')}
-          variant="destructive"
+          color="danger"
           onPress={handleDelete}
           className="mb-8"
         />

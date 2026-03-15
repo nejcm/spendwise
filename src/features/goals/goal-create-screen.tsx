@@ -4,8 +4,9 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import * as z from 'zod';
 
-import { Button, FocusAwareStatusBar, Input, ScrollView, Text } from '@/components/ui';
+import { FocusAwareStatusBar, Input, ScrollView, SolidButton, Text } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
+import { OutlineButton } from '@/components/ui/outline-button';
 import { translate } from '@/lib/i18n';
 import { defaultStyles } from '@/lib/theme/styles';
 import { useCreateGoal } from './api';
@@ -120,13 +121,12 @@ export function GoalCreateScreen() {
           selector={(state) => [state.isSubmitting, state.values.name, state.values.target_amount]}
           children={([isSubmitting, name, targetAmount]) => (
             <View className="mt-6 mb-8 flex-row gap-3">
-              <Button
+              <OutlineButton
                 label={translate('common.cancel')}
-                variant="outline"
                 onPress={() => router.back()}
                 className="flex-1"
               />
-              <Button
+              <SolidButton
                 label={translate('common.save')}
                 onPress={form.handleSubmit}
                 disabled={!(name as string).trim() || !(targetAmount as string) || createGoal.isPending}

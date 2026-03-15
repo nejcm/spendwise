@@ -1,91 +1,28 @@
+import type { ChatMessage } from '@/features/ai/service';
+import { Link } from 'expo-router';
+import { SendHorizonal } from 'lucide-react-native';
+
 import * as React from 'react';
 import { KeyboardAvoidingView, Platform } from 'react-native';
-
-import { Button, FocusAwareStatusBar, Input, ScrollView, Text, View } from '@/components/ui';
+import { FocusAwareStatusBar, Input, ScrollView, SolidButton, Text, View } from '@/components/ui';
+import { askAnthropic, askOpenAI } from '@/features/ai/service';
 import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
+import { IconButton } from '../../components/ui/icon-button';
 
-type ChatMessage = {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-};
-
-async function askOpenAI(apiKey: string, messages: ChatMessage[], question: string) {
-  const body = {
-    model: 'gpt-4o-mini',
-    messages: [
-      {
-        role: 'system',
-        content: 'You are a helpful assistant that helps users understand their personal finances and budgeting. Answer clearly and concisely.',
-      },
-      ...messages.map((m) => ({ role: m.role, content: m.content })),
-      { role: 'user', content: question },
-    ],
-  };
-
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    throw new Error('Failed to get response from OpenAI');
-  }
-
-  const json = await res.json();
-  const content = json.choices?.[0]?.message?.content ?? '';
-  return typeof content === 'string' ? content : String(content);
-}
-
-async function askAnthropic(apiKey: string, messages: ChatMessage[], question: string) {
-  const anthropicMessages = [
-    ...messages.map((m) => ({
-      role: m.role === 'user' ? 'user' : 'assistant',
-      content: [{ type: 'text', text: m.content }],
-    })),
-    {
-      role: 'user',
-      content: [{ type: 'text', text: question }],
-    },
-  ];
-
-  const body = {
-    model: 'claude-3-haiku-20240307',
-    max_tokens: 512,
-    system: 'You are a helpful assistant that helps users understand their personal finances and budgeting. Answer clearly and concisely.',
-    messages: anthropicMessages,
-  };
-
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    throw new Error('Failed to get response from Anthropic');
-  }
-
-  const json = await res.json();
-  const content = json.content?.[0]?.text ?? '';
-  return typeof content === 'string' ? content : String(content);
-}
+const PRESET_QUESTIONS = [
+  'Give me an overview of my spending this month.',
+  'How much did I spend on groceries last month?',
+  'Where am I overspending compared to my budget?',
+  'Help me create a monthly budget based on my recent transactions.',
+  'What subscriptions could I cancel to save money?',
+];
 
 export function AiScreen() {
-  const aiProvider = useAppStore.use.aiProvider();
+  const provider = useAppStore.use.aiProvider();
   const openaiApiKey = useAppStore.use.openaiApiKey();
   const anthropicApiKey = useAppStore.use.anthropicApiKey();
 
-  const [provider, setProvider] = React.useState(aiProvider);
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
   const [question, setQuestion] = React.useState('');
   const [loading, setLoading] = React.useState(false);
@@ -94,19 +31,10 @@ export function AiScreen() {
   const hasOpenAI = Boolean(openaiApiKey);
   const hasAnthropic = Boolean(anthropicApiKey);
 
-  const handleSend = React.useCallback(async () => {
-    const trimmed = question.trim();
+  const handleSend = React.useCallback(async (presetQuestion?: string) => {
+    const sourceQuestion = presetQuestion ?? question;
+    const trimmed = sourceQuestion.trim();
     if (!trimmed || loading) return;
-
-    if (provider === 'openai' && !openaiApiKey) {
-      setError('Please add your OpenAI API key in Settings > AI.');
-      return;
-    }
-    if (provider === 'anthropic' && !anthropicApiKey) {
-      setError('Please add your Anthropic API key in Settings > AI.');
-      return;
-    }
-
     setError(null);
 
     const userMessage: ChatMessage = {
@@ -138,11 +66,7 @@ export function AiScreen() {
     finally {
       setLoading(false);
     }
-  }, [anthropicApiKey, messages, openaiApiKey, provider, question, loading]);
-
-  React.useEffect(() => {
-    setProvider(aiProvider);
-  }, [aiProvider]);
+  }, [provider, anthropicApiKey, messages, openaiApiKey, question, loading]);
 
   return (
     <KeyboardAvoidingView
@@ -156,34 +80,42 @@ export function AiScreen() {
           contentContainerClassName="pb-4"
           style={defaultStyles.transparentBg}
         >
-          <View className="mb-4 flex-row rounded-full bg-muted p-1">
-            <Button
-              variant={provider === 'openai' ? 'default' : 'unstyled'}
-              className={`flex-1 rounded-full ${provider === 'openai' ? '' : 'bg-transparent'}`}
-              label="OpenAI"
-              disabled={!hasOpenAI}
-              onPress={() => setProvider('openai')}
-            />
-            <Button
-              variant={provider === 'anthropic' ? 'default' : 'unstyled'}
-              className={`ml-2 flex-1 rounded-full ${provider === 'anthropic' ? '' : 'bg-transparent'}`}
-              label="Anthropic"
-              disabled={!hasAnthropic}
-              onPress={() => setProvider('anthropic')}
-            />
-          </View>
-
-          {(!hasOpenAI && !hasAnthropic) && (
-            <View className="mb-4 rounded-xl bg-card p-4">
-              <Text className="text-sm text-muted-foreground">
-                Add an API key in
-                {' '}
-                <Text className="font-semibold">Settings &gt; AI</Text>
-                {' '}
-                to start chatting with the assistant.
-              </Text>
-            </View>
-          )}
+          {(!hasOpenAI && !hasAnthropic)
+            ? (
+                <View className="mb-4 rounded-xl bg-card p-4">
+                  <Text className="text-muted-foreground">
+                    Add an API key in
+                    <Link href="/settings/ai" className="mx-1 font-medium text-foreground underline">
+                      AI Setting
+                    </Link>
+                    to start chatting with the assistant.
+                  </Text>
+                </View>
+              )
+            : !messages.length
+                ? (
+                    <View className="my-4">
+                      <Text className="mb-2 text-muted-foreground">
+                        Ask the AI about your spending or budgeting...
+                      </Text>
+                      <View className="mt-3 flex flex-col space-y-2">
+                        {PRESET_QUESTIONS.map((q) => (
+                          <SolidButton
+                            key={q}
+                            color="secondary"
+                            size="sm"
+                            label={q}
+                            className="h-auto rounded-3xl px-4 py-2"
+                            textClassName="text-left text-muted-foreground leading-tight"
+                            onPress={() => {
+                              void handleSend(q);
+                            }}
+                          />
+                        ))}
+                      </View>
+                    </View>
+                  )
+                : null}
 
           {error && (
             <View className="mb-4 rounded-md bg-danger-500/10 p-3">
@@ -196,7 +128,7 @@ export function AiScreen() {
               key={m.id}
               className={`mb-2 max-w-[85%] rounded-2xl px-3 py-2 ${
                 m.role === 'user'
-                  ? 'self-end bg-primary'
+                  ? 'self-end bg-black'
                   : 'self-start bg-card'
               }`}
             >
@@ -209,28 +141,30 @@ export function AiScreen() {
           ))}
         </ScrollView>
 
-        <View className="border-t border-border bg-background px-4 pb-safe-offset-2 pt-2">
-          <Input
-            value={question}
-            onChangeText={setQuestion}
-            placeholder="Ask the AI about your spending or budgets..."
-            autoCapitalize="sentences"
-            autoCorrect
-            multiline
-          />
-          <View className="mt-2 flex-row items-center justify-end">
-            <Button
-              label="Send"
-              onPress={handleSend}
-              loading={loading}
-              disabled={!question.trim()}
-              variant="default"
-              className="min-w-[96px]"
+        <View className="border-t border-border bg-background px-4 pt-2 pb-safe-offset-2">
+          <View className="relative">
+            <Input
+              value={question}
+              onChangeText={setQuestion}
+              placeholder="Ask the AI about your spending or budgets..."
+              autoCapitalize="sentences"
+              autoCorrect
+              multiline
+              className="pr-12"
             />
+            <IconButton
+              size="sm"
+              onPress={() => {
+                void handleSend();
+              }}
+              disabled={loading || !question.trim()}
+              className="absolute right-2 bottom-3 rounded-full"
+            >
+              <SendHorizonal className="size-5 text-background disabled:text-foreground" />
+            </IconButton>
           </View>
         </View>
       </View>
     </KeyboardAvoidingView>
   );
 }
-

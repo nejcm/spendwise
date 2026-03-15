@@ -89,15 +89,15 @@ export async function seedDefaults(db: SQLiteDatabase): Promise<void> {
 
   for (const cat of expenseCategories) {
     await db.runAsync(
-      'INSERT INTO categories (id, name, icon, color, type, sort_order) VALUES (?, ?, ?, ?, ?, ?)',
-      [cat.id, cat.name, cat.icon, cat.color, 'expense', expenseCategories.indexOf(cat)],
+      'INSERT INTO categories (id, name, icon, color, sort_order) VALUES (?, ?, ?, ?, ?)',
+      [cat.id, cat.name, cat.icon, cat.color, expenseCategories.indexOf(cat)],
     );
   }
 
   for (const cat of incomeCategories) {
     await db.runAsync(
-      'INSERT INTO categories (id, name, icon, color, type, sort_order) VALUES (?, ?, ?, ?, ?, ?)',
-      [cat.id, cat.name, cat.icon, cat.color, 'income', incomeCategories.indexOf(cat)],
+      'INSERT INTO categories (id, name, icon, color, sort_order) VALUES (?, ?, ?, ?, ?)',
+      [cat.id, cat.name, cat.icon, cat.color, incomeCategories.indexOf(cat)],
     );
   }
 }

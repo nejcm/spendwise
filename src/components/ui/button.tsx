@@ -1,74 +1,77 @@
-/* eslint-disable better-tailwindcss/no-unknown-classes */
 import type { PressableProps, View } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
 import * as React from 'react';
 import { ActivityIndicator, Pressable, Text } from 'react-native';
 import { tv } from 'tailwind-variants';
 
-const button = tv({
+// eslint-disable-next-line react-refresh/only-export-components
+export const solidButton = tv({
   slots: {
-    container: 'flex flex-row items-center justify-center rounded-md px-4 text-black dark:text-white',
-    label: 'font-family-sans text-base font-medium',
+    container: 'flex flex-row items-center justify-center rounded-md px-4',
+    label: 'items-center font-family-sans text-base/snug font-medium',
     indicator: 'h-6 text-white',
   },
-
   variants: {
-    variant: {
-      unstyled: {
-        container: 'bg-transparent',
-        label: 'text-black dark:text-white',
-        indicator: 'text-black dark:text-white',
+    color: {
+      'primary': {
+        container: 'bg-foreground',
+        label: 'text-background',
+        indicator: 'text-background',
       },
-      default: {
-        container: 'bg-black dark:bg-white',
-        label: 'text-white dark:text-black',
-        indicator: 'text-white dark:text-black',
-      },
-      secondary: {
+      'secondary': {
         container: 'bg-muted',
-        label: 'text-secondary-600',
-        indicator: 'text-white',
+        label: 'text-foreground',
+        indicator: 'text-foreground',
       },
-      outline: {
-        container: 'border border-gray-400',
-        label: 'text-black dark:text-gray-100',
-        indicator: 'text-black dark:text-gray-100',
+      'primary-alt': {
+        container: 'bg-background',
+        label: 'text-foreground',
+        indicator: 'text-foreground',
       },
-      destructive: {
-        container: 'bg-red-600',
+      'secondary-alt': {
+        container: 'bg-muted-foreground',
+        label: 'text-foreground dark:text-background',
+        indicator: 'text-foreground dark:text-background',
+      },
+      'success': {
+        container: 'bg-success-600',
         label: 'text-white',
         indicator: 'text-white',
       },
-      ghost: {
-        container: 'bg-transparent',
-        label: 'text-black underline dark:text-white',
-        indicator: 'text-black dark:text-white',
+      'warning': {
+        container: 'bg-warning-600',
+        label: 'text-white',
+        indicator: 'text-white',
       },
-      link: {
-        container: 'bg-transparent',
-        label: 'text-black',
-        indicator: 'text-black',
+      'danger': {
+        container: 'bg-danger-600',
+        label: 'text-white',
+        indicator: 'text-white',
       },
     },
     size: {
+      xs: {
+        container: 'h-6 px-2',
+        label: 'text-xs/snug font-normal',
+        indicator: 'h-1.5',
+      },
       sm: {
-        container: 'h-8 px-3',
-        label: 'text-sm',
+        container: 'h-9 px-3',
+        label: 'text-sm/snug',
         indicator: 'h-2',
       },
-      default: {
-        container: 'h-10 px-4',
-        label: 'text-base',
+      md: {
+        container: 'h-11 px-4',
+        label: 'text-base/snug',
       },
       lg: {
-        container: 'h-12 px-6',
-        label: 'text-lg',
+        container: 'h-13 px-5',
+        label: 'text-lg/snug',
       },
       xl: {
-        container: 'h-16 px-8',
-        label: 'text-xl',
+        container: 'h-16 px-6',
+        label: 'text-xl/snug',
       },
-      icon: { container: 'size-9' },
     },
     disabled: {
       true: {
@@ -79,7 +82,7 @@ const button = tv({
     },
     fullWidth: {
       true: {
-        container: '',
+        container: 'w-full',
       },
       false: {
         container: 'self-center',
@@ -87,15 +90,14 @@ const button = tv({
     },
   },
   defaultVariants: {
-    variant: 'default',
     disabled: false,
-    fullWidth: true,
-    size: 'default',
+    fullWidth: false,
+    size: 'md',
   },
 });
 
-type ButtonVariants = VariantProps<typeof button>;
-export type ButtonProps = {
+type ButtonVariants = VariantProps<typeof solidButton>;
+export type SolidButtonProps = {
   label?: string;
   loading?: boolean;
   iconLeft?: React.ReactNode;
@@ -105,21 +107,22 @@ export type ButtonProps = {
 } & ButtonVariants
 & Omit<PressableProps, 'disabled'>;
 
-export function Button({
+export function SolidButton({
   ref,
   iconLeft,
   iconRight,
   label: text,
   loading = false,
-  variant = 'default',
   disabled = false,
-  size = 'default',
+  fullWidth = false,
+  size = 'md',
   className = '',
   testID,
   textClassName = '',
+  color = 'primary',
   ...props
-}: ButtonProps & { ref?: React.RefObject<View | null> }) {
-  const styles = React.useMemo(() => button({ variant, disabled, size }), [variant, disabled, size]);
+}: SolidButtonProps & { ref?: React.RefObject<View | null> }) {
+  const styles = React.useMemo(() => solidButton({ disabled, size, color, fullWidth }), [disabled, size, color, fullWidth]);
 
   return (
     <Pressable

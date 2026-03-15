@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react-native';
 import * as React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from '@/components/ui';
+import { GhostButton } from '@/components/ui/ghost-button';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { useAccountsWithBalanceForMonth } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
@@ -17,11 +18,11 @@ export function AccountsOverview() {
 
   return (
     <View>
-      <View className="mb-4 flex-row items-center justify-between">
+      <View className="mb-2 flex-row items-center justify-between">
         <Text className="text-lg font-medium">{translate('settings.accounts')}</Text>
-        <Pressable onPress={() => router.push('/accounts')}>
+        <GhostButton size="sm" className="px-0" onPress={() => router.push('/accounts')}>
           <Text className="text-sm font-medium text-muted-foreground">{translate('common.seeAll')}</Text>
-        </Pressable>
+        </GhostButton>
       </View>
 
       {accounts.length === 0

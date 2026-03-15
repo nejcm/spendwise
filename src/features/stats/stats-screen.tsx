@@ -19,6 +19,7 @@ import { translate } from '@/lib/i18n';
 
 import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
+import { IconButton } from '../../components/ui/icon-button';
 import { CategoryBreakdown } from './components/category-breakdown';
 import { PeriodToggle } from './components/period-toggle';
 import { StatsTrend } from './components/stats-trend';
@@ -72,50 +73,50 @@ export function StatsScreen() {
         {period === 'week'
           && (
             <View className="flex-row items-center justify-between pb-6">
-              <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
+              <IconButton size="sm" color="none" onPress={() => navigateMonth(-1)} hitSlop={12}>
                 <ArrowLeftIcon className="size-5 text-muted-foreground" />
-              </Pressable>
+              </IconButton>
               <View className="flex-row items-center gap-1">
                 <Pressable onPress={() => monthPickerRef.current?.present()} hitSlop={12}>
-                  <Text className="text-lg font-medium text-subtle-3">{format(new Date(), 'MMM')}</Text>
+                  <Text className="text-lg font-medium text-muted-foreground">{format(new Date(), 'MMMM')}</Text>
                 </Pressable>
               </View>
-              <Pressable onPress={() => navigateMonth(1)} hitSlop={12}>
+              <IconButton size="sm" color="none" onPress={() => navigateMonth(1)} hitSlop={12}>
                 <ArrowRightIcon className="size-5 text-muted-foreground" />
-              </Pressable>
+              </IconButton>
             </View>
           )}
         {period === 'month'
           && (
             <View className="flex-row items-center justify-between pb-6">
-              <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
+              <IconButton size="sm" color="none" onPress={() => navigateMonth(-1)} hitSlop={12}>
                 <ArrowLeftIcon className="size-5 text-muted-foreground" />
-              </Pressable>
+              </IconButton>
               <View className="flex-row items-center gap-1">
                 <Pressable onPress={() => monthPickerRef.current?.present()} hitSlop={12}>
-                  <Text className="text-lg font-medium text-subtle-3">{monthName}</Text>
+                  <Text className="text-lg font-medium text-muted-foreground">{monthName}</Text>
                 </Pressable>
                 <Pressable onPress={() => yearPickerRef.current?.present()} hitSlop={12}>
-                  <Text className="text-lg font-medium text-subtle-3">{selectedDate[0]}</Text>
+                  <Text className="text-lg font-medium text-muted-foreground">{selectedDate[0]}</Text>
                 </Pressable>
               </View>
-              <Pressable onPress={() => navigateMonth(1)} hitSlop={12}>
+              <IconButton size="sm" color="none" onPress={() => navigateMonth(1)} hitSlop={12}>
                 <ArrowRightIcon className="size-5 text-muted-foreground" />
-              </Pressable>
+              </IconButton>
             </View>
           )}
         {period === 'year'
           && (
             <View className="flex-row items-center justify-between pb-6">
-              <Pressable onPress={() => setSelectedYear((y) => y - 1)} hitSlop={12}>
+              <IconButton size="sm" color="none" onPress={() => setSelectedYear((y) => y - 1)} hitSlop={12}>
                 <ArrowLeftIcon className="size-5 text-muted-foreground" />
-              </Pressable>
+              </IconButton>
               <Pressable onPress={() => yearPickerRef.current?.present()} hitSlop={12}>
-                <Text className="text-lg font-medium text-subtle-3">{selectedYear}</Text>
+                <Text className="text-lg font-medium text-muted-foreground">{selectedYear}</Text>
               </Pressable>
-              <Pressable onPress={() => setSelectedYear((y) => y + 1)} hitSlop={12}>
+              <IconButton size="sm" color="none" onPress={() => setSelectedYear((y) => y + 1)} hitSlop={12}>
                 <ArrowRightIcon className="size-5 text-muted-foreground" />
-              </Pressable>
+              </IconButton>
             </View>
           )}
 

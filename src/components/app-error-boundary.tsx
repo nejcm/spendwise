@@ -2,7 +2,7 @@ import * as React from 'react';
 import { NativeModules, Platform, View } from 'react-native';
 import RNRestart from 'react-native-restart';
 
-import { Button } from '@/components/ui/button';
+import { SolidButton } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
 import { translate } from '../lib/i18n';
 
@@ -48,11 +48,10 @@ export class AppErrorBoundary extends React.Component<Props, State> {
           <Text className="mb-6 text-center text-gray-600 dark:text-gray-400">
             {translate('errors.description')}
           </Text>
-          <Button
+          <SolidButton
             label={this.state.restarting ? 'Restarting…' : 'Restart app'}
             onPress={this.handleRestart}
             disabled={this.state.restarting}
-            variant="default"
           />
         </View>
       );

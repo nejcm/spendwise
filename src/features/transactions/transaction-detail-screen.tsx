@@ -1,16 +1,16 @@
-import type { TransactionType } from './types';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 import { useState } from 'react';
 
 import { View } from 'react-native';
-import { Button, FocusAwareStatusBar, Text } from '@/components/ui';
+import { FocusAwareStatusBar, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
-import { centsToAmount, formatCurrency, formatDate } from '@/features/formatting/helpers';
+import { OutlineButton } from '@/components/ui/outline-button';
+import { formatCurrency, formatDate } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
-import { useAccounts, useCategories, useDeleteTransaction, useTransaction, useUpdateTransaction } from './api';
-import { TransactionEditForm } from './components/transaction-edit-form';
+import { useAccounts, useDeleteTransaction, useTransaction } from './api';
+import { TransactionForm } from './components/transaction-form';
 
 export function TransactionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -18,9 +18,7 @@ export function TransactionDetailScreen() {
   const currency = useAppStore.use.currency();
 
   const { data: transaction, isLoading } = useTransaction(id ?? '');
-  const updateMut = useUpdateTransaction();
   const deleteMut = useDeleteTransaction();
-  const { data: categories = [] } = useCategories(transaction?.type as 'income' | 'expense' | undefined);
   const { data: accounts = [] } = useAccounts();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -35,30 +33,10 @@ export function TransactionDetailScreen() {
 
   if (isEditing) {
     return (
-      <TransactionEditForm
-        initialValues={{
-          amount: String(centsToAmount(transaction.amount)),
-          category_id: transaction.category_id,
-          note: transaction.note || '',
-        }}
-        categories={categories}
-        isSaving={updateMut.isPending}
+      <TransactionForm
+        initialValues={transaction}
+        onSuccess={() => setIsEditing(false)}
         onCancel={() => setIsEditing(false)}
-        onSave={async (data) => {
-          if (!id) return;
-          await updateMut.mutateAsync({
-            id,
-            data: {
-              type: transaction.type as TransactionType,
-              amount: data.amount,
-              category_id: data.category_id,
-              account_id: transaction.account_id,
-              date: transaction.date,
-              note: data.note,
-            },
-          });
-          setIsEditing(false);
-        }}
       />
     );
   }
@@ -93,15 +71,15 @@ export function TransactionDetailScreen() {
         <Text className="mt-1 text-gray-500">{formatDate(transaction.date)}</Text>
       </View>
 
-      <View className="gap-4 rounded-xl bg-gray-50 p-4 dark:bg-gray-800">
+      <View className="gap-4 rounded-xl bg-card p-4">
         <DetailRow label={translate('transactions.category')} value={transaction.category_name || '-'} />
         <DetailRow label={translate('transactions.note')} value={transaction.note || '-'} />
         <DetailRow label={translate('transactions.account')} value={accountName} />
       </View>
 
-      <View className="mt-6 gap-2">
-        <Button label={translate('common.edit')} variant="outline" onPress={() => setIsEditing(true)} />
-        <Button label={translate('common.delete')} variant="destructive" onPress={handleDelete} />
+      <View className="mt-6 flex-row gap-2">
+        <OutlineButton label={translate('common.delete')} color="danger" onPress={handleDelete} />
+        <SolidButton className="flex-1" label={translate('common.edit')} onPress={() => setIsEditing(true)} />
       </View>
     </View>
   );

@@ -6,9 +6,8 @@ import { AiScreen } from '@/features/ai/ai-screen';
 export default function AiRoute() {
   return (
     <>
-      <Stack.Screen options={{ title: 'AI Assistant' }} />
+      <Stack.Screen options={{ headerShown: false }} />
       <AiScreen />
     </>
   );
 }
-

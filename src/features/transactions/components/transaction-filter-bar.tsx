@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
-import { Text } from '@/components/ui';
+import { SolidButton } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import { defaultStyles } from '@/lib/theme/styles';
 
@@ -23,24 +23,22 @@ export function TransactionFilterBar({ selectedCategoryId, onSelectCategory }: P
         showsHorizontalScrollIndicator={false}
       >
         <View className="flex-row gap-2">
-          <Pressable
+          <SolidButton
+            className="items-center rounded-2xl px-4"
+            color={!selectedCategoryId ? 'primary' : 'secondary'}
+            size="xs"
+            label={translate('transactions.all')}
             onPress={() => onSelectCategory(null)}
-            className={`rounded-full px-3 py-1 ${!selectedCategoryId ? 'bg-foreground' : 'bg-muted'}`}
-          >
-            <Text className={`text-xs ${!selectedCategoryId ? 'font-medium text-background' : ''}`}>
-              {translate('transactions.all')}
-            </Text>
-          </Pressable>
+          />
           {categories.map((cat) => (
-            <Pressable
+            <SolidButton
               key={cat.id}
+              className="items-center rounded-2xl"
+              color={selectedCategoryId === cat.id ? 'primary' : 'secondary'}
+              size="xs"
+              label={cat.name}
               onPress={() => onSelectCategory(selectedCategoryId === cat.id ? null : cat.id)}
-              className={`rounded-full px-3 py-1 ${selectedCategoryId === cat.id ? 'bg-foreground' : 'bg-muted'}`}
-            >
-              <Text className={`text-xs ${selectedCategoryId === cat.id ? 'font-medium text-background' : ''}`}>
-                {cat.name}
-              </Text>
-            </Pressable>
+            />
           ))}
         </View>
       </ScrollView>

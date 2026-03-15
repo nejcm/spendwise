@@ -4,8 +4,9 @@ import * as React from 'react';
 import { Alert, Pressable, View } from 'react-native';
 import * as z from 'zod';
 
-import { Button, FocusAwareStatusBar, Input, ScrollView, Text } from '@/components/ui';
+import { FocusAwareStatusBar, Input, ScrollView, SolidButton, Text } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
+import { OutlineButton } from '@/components/ui/outline-button';
 import { todayISO } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -137,13 +138,12 @@ export function TransferScreen() {
           selector={(state) => [state.isSubmitting, state.values.from_id, state.values.to_id, state.values.amount]}
           children={([isSubmitting, fromId, toId, amount]) => (
             <View className="mt-6 flex-row gap-3">
-              <Button
+              <OutlineButton
                 label={translate('common.cancel')}
-                variant="outline"
                 onPress={() => router.back()}
                 className="flex-1"
               />
-              <Button
+              <SolidButton
                 label={translate('accounts.transfer')}
                 onPress={form.handleSubmit}
                 disabled={!fromId || !toId || !(amount as string) || isPending}

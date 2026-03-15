@@ -67,16 +67,13 @@ async function getCategorySpend(db: SQLiteDatabase, date: string): Promise<Categ
        c.name as category_name,
        c.color as category_color,
        c.icon as category_icon,
-       c.type as category_type,
+       t.type as category_type,
        c.sort_order as sort_order,
-       COALESCE(SUM(CASE
-         WHEN t.type = c.type AND t.date >= ? AND t.date < ?
-         THEN t.amount
-         ELSE 0
-       END), 0) as total
+       COALESCE(SUM(t.amount), 0) as total
      FROM categories c
-     LEFT JOIN transactions t ON t.category_id = c.id
-     GROUP BY c.id, c.name, c.color, c.type, c.sort_order
+     JOIN transactions t ON t.category_id = c.id
+     WHERE t.type IN ('income','expense') AND t.date >= ? AND t.date < ?
+     GROUP BY c.id, c.name, c.color, c.icon, t.type, c.sort_order
      ORDER BY c.sort_order ASC`,
     [startDate, nextMonth],
   );
@@ -117,16 +114,13 @@ async function getCategorySpendForYear(db: SQLiteDatabase, year: number): Promis
        c.name as category_name,
        c.color as category_color,
        c.icon as category_icon,
-       c.type as category_type,
+       t.type as category_type,
        c.sort_order as sort_order,
-       COALESCE(SUM(CASE
-         WHEN t.type = c.type AND t.date >= ? AND t.date < ?
-         THEN t.amount
-         ELSE 0
-       END), 0) as total
+       COALESCE(SUM(t.amount), 0) as total
      FROM categories c
-     LEFT JOIN transactions t ON t.category_id = c.id
-     GROUP BY c.id, c.name, c.color, c.type, c.sort_order
+     JOIN transactions t ON t.category_id = c.id
+     WHERE t.type IN ('income','expense') AND t.date >= ? AND t.date < ?
+     GROUP BY c.id, c.name, c.color, c.icon, t.type, c.sort_order
      ORDER BY c.sort_order ASC`,
     [startDate, endDate],
   );

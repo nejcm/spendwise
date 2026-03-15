@@ -73,10 +73,10 @@
       --color-surface-foreground: #0a0a0a;
 
       --color-muted: #e9eaec;
-      --color-muted-foreground: #737373;
+      --color-muted-foreground: #838689;
 
-      --color-border: #e5e5e5;
-      --color-input: #e5e5e5;
+      --color-border: #d8dbdf;
+      --color-input: #fcfcfc;
       --color-ring: #ff6c00;
 
       --color-destructive: #ef4444;
@@ -90,19 +90,19 @@
     }
     @variant dark {
       /* Semantic colors - using primary for main brand color */
-      --color-background: #1A1C20;
+      --color-background: #1a1c20;
       --color-foreground: #fafafa;
 
-      --color-card: #21232C;
+      --color-card: #21232c;
       --color-card-foreground: #fafafa;
 
       --color-surface: #111111;
       --color-surface-foreground: #fafafa;
 
-      --color-muted: #393C49;
+      --color-muted: #393c49;
       --color-muted-foreground: #a3a6aa;
 
-      --color-border: #1f222d;
+      --color-border: #2b2f3f;
       --color-input: #2b2f3f;
       --color-ring: #ff6c00;
 
@@ -131,15 +131,6 @@
   }
   .font-regular {
     font-family: var(--font-family-regular);
-  }
-  .bg-subtle {
-    background-color: var(--color-subtle);
-  }
-  .text-subtle {
-    color: var(--color-subtle);
-  }
-  .text-subtle-dark {
-    color: var(--color-subtle-dark);
   }
   .text-balance {
     text-wrap: balance;

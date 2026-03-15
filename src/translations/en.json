@@ -2,6 +2,7 @@
   "accounts": {
     "add": "Add Account",
     "color": "Color",
+    "delete_confirm": "Are you sure you want to delete {{name}}?",
     "edit": "Edit Account",
     "from_account": "From Account",
     "name": "Account Name",
@@ -34,9 +35,10 @@
     "total_amount": "Total Budget Amount"
   },
   "categories": {
-    "add_category": "Add Category",
+    "add": "Add Category",
     "delete_confirm": "Are you sure you want to delete {{name}}?",
     "edit_category": "Edit Category",
+    "select_category": "Select Category",
     "sorting_tips": "Hold and drag to reorder categories",
     "title": "Categories"
   },
@@ -52,6 +54,7 @@
     "delete": "Delete",
     "done": "Done",
     "edit": "Edit",
+    "edit_mode": "Edit Mode",
     "error": "Error",
     "error_description": "An unexpected error occurred. Restart the app to continue.",
     "expense": "Expense",
@@ -62,8 +65,10 @@
     "net": "Net",
     "next": "Next",
     "no_data": "No data found",
+    "note": "Note",
     "save": "Save",
     "seeAll": "See All",
+    "select_date": "Select Date",
     "select_month": "Select Month",
     "select_month_year": "Select Month and Year",
     "select_year": "Select Year",
@@ -267,6 +272,7 @@
     "all": "All",
     "amount": "Amount",
     "category": "Category",
+    "currency": "Currency",
     "date": "Date",
     "expense": "Expense",
     "income": "Income",
@@ -275,6 +281,8 @@
     "payee": "Payee",
     "search": "Search transactions...",
     "title": "Transactions",
-    "transfer": "Transfer"
+    "transfer": "Transfer",
+    "type": "Type"
   }
 }
+

@@ -2,9 +2,10 @@ import { useRouter } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import * as React from 'react';
 
-import { Pressable, View } from 'react-native';
-import { Button, Text } from '@/components/ui';
+import { View } from 'react-native';
+import { SolidButton, Text } from '@/components/ui';
 
+import { GhostButton } from '@/components/ui/ghost-button';
 import { useRecentTransactions } from '@/features/transactions/api';
 import { TransactionCard } from '@/features/transactions/components/transaction-card';
 import { translate } from '@/lib/i18n';
@@ -15,27 +16,27 @@ export default function TransactionsList() {
 
   return (
     <View>
-      <View className="flex-row items-center justify-between">
+      <View className="mb-2 flex-row items-center justify-between">
         <Text className="text-lg font-medium">{translate('home.recent_transactions')}</Text>
-        <Pressable onPress={() => router.push('/(app)/transactions')}>
+        <GhostButton size="sm" className="px-0" onPress={() => router.push('/(app)/transactions')}>
           <Text className="text-sm font-medium text-muted-foreground">{translate('home.see_all')}</Text>
-        </Pressable>
+        </GhostButton>
       </View>
       {data.length === 0
         ? (
             <View className="mt-4 items-center rounded-xl bg-gray-50 py-8 dark:bg-gray-800">
               <Text className="mb-2 text-muted-foreground">{translate('home.no_transactions')}</Text>
-              <Button
+              <SolidButton
                 label={translate('common.add')}
                 size="sm"
                 iconLeft={<Plus className="mr-1 size-4 text-background" />}
                 onPress={() => router.push('/transactions/add')}
               >
-              </Button>
+              </SolidButton>
             </View>
           )
         : (
-            <View className="mt-2">
+            <View>
               {data.map((t) => (
                 <TransactionCard
                   key={t.id}

@@ -1,10 +1,11 @@
 import type { StateStorage } from 'zustand/middleware';
 
+import type { CurrencyKey } from '../features/currencies';
 import type { CurrencyFormat, DateFormat, NumberFormat } from '@/features/formatting/constants';
 import type { Language } from '@/features/languages/types';
 import type { ThemeType } from '@/features/settings/theme';
-import { createMMKV } from 'react-native-mmkv';
 
+import { createMMKV } from 'react-native-mmkv';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { createSelectors } from '@/lib/utils';
@@ -35,7 +36,7 @@ export type AppState = {
   authStatus: 'idle' | 'signOut' | 'signIn';
 
   // Preferences
-  currency: string;
+  currency: CurrencyKey;
   currencyFormat: CurrencyFormat;
   dateFormat: DateFormat;
   numberFormat: NumberFormat;
@@ -51,8 +52,8 @@ export type AppState = {
 
   // AI
   aiProvider: 'openai' | 'anthropic';
-  openaiApiKey: string | null;
-  anthropicApiKey: string | null;
+  openaiApiKey: string | undefined;
+  anthropicApiKey: string | undefined;
 
   // Other
 };
@@ -78,8 +79,8 @@ const _useAppStore = create<AppState>()(
       lockEnabled: false,
       lockTimeoutMinutes: 1,
       aiProvider: 'openai',
-      openaiApiKey: null,
-      anthropicApiKey: null,
+      openaiApiKey: undefined,
+      anthropicApiKey: undefined,
     }),
     {
       name: 'app-storage',
@@ -134,7 +135,7 @@ export function hydrateAuth() {
 }
 
 // Preference actions
-export function setCurrency(currency: string) {
+export function setCurrency(currency: CurrencyKey) {
   return _useAppStore.setState({ currency });
 }
 
@@ -171,11 +172,11 @@ export function setAiProvider(aiProvider: AppState['aiProvider']) {
   return _useAppStore.setState({ aiProvider });
 }
 
-export function setOpenaiApiKey(openaiApiKey: string | null) {
+export function setOpenaiApiKey(openaiApiKey: string) {
   return _useAppStore.setState({ openaiApiKey });
 }
 
-export function setAnthropicApiKey(anthropicApiKey: string | null) {
+export function setAnthropicApiKey(anthropicApiKey: string) {
   return _useAppStore.setState({ anthropicApiKey });
 }
 

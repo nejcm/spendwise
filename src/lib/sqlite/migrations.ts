@@ -79,7 +79,6 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
         icon TEXT,
         color TEXT NOT NULL,
         default_currency TEXT NOT NULL DEFAULT 'EUR',
-        type TEXT NOT NULL CHECK(type IN ('income','expense')),
         sort_order INTEGER NOT NULL DEFAULT 999999,
         created_at TEXT NOT NULL DEFAULT (datetime('now'))
       );

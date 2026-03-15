@@ -1,8 +1,9 @@
 import type { Language } from '../../languages/types';
 import type { OptionType } from '@/components/ui';
 import * as React from 'react';
-import { Button, Image, Options, Text, useModal } from '@/components/ui';
+import { Image, Options, SolidButton, Text, useModal } from '@/components/ui';
 import { translate, useSelectedLanguage } from '@/lib/i18n';
+import { GhostButton } from '../../../components/ui/ghost-button';
 import { LANGUAGES_OPTIONS } from '../../languages';
 import OnboardingLayout from '../layout';
 
@@ -32,15 +33,12 @@ export default function LanguageStep({ onBack, onNext, currentStep }: LanguageSt
         className="my-auto"
         footer={(
           <>
-            <Button
+            <GhostButton
               label={translate('common.back')}
-              variant="ghost"
               size="lg"
-              fullWidth={false}
               onPress={onBack}
-              accessibilityLabel={translate('common.back')}
             />
-            <Button
+            <SolidButton
               label={translate('common.next')}
               onPress={onNext}
               className="flex-1"
@@ -52,10 +50,10 @@ export default function LanguageStep({ onBack, onNext, currentStep }: LanguageSt
         <Text className="mb-4 text-center text-lg text-gray-400">
           {translate('onboarding.select_language')}
         </Text>
-        <Button variant="ghost" size="xl" className="items-center gap-4 text-4xl" onPress={modal.present}>
+        <GhostButton size="xl" className="items-center gap-4 text-4xl" onPress={modal.present}>
           <Image source={selected.image} className="size-10 rounded-full" />
           {selected.name}
-        </Button>
+        </GhostButton>
         <Options ref={modal.ref} options={LANGUAGES_OPTIONS} onSelect={onSelect} value={selected?.value} />
       </OnboardingLayout>
     </>

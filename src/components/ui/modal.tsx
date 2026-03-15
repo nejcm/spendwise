@@ -40,19 +40,19 @@ import { defaultStyles } from '@/lib/theme/styles';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import { Text } from './text';
 
-type ModalProps = BottomSheetModalProps & {
+export type ModalProps = BottomSheetModalProps & {
   title?: string;
 };
 
-type ModalRef = React.ForwardedRef<BottomSheetModal>;
+type ModalRef<T> = React.ForwardedRef<BottomSheetModal<T>>;
 
 type ModalHeaderProps = {
   title?: string;
   dismiss: () => void;
 };
 
-export function useModal() {
-  const ref = React.useRef<BottomSheetModal>(null);
+export function useModal<T>() {
+  const ref = React.useRef<BottomSheetModal<T>>(null);
   const present = React.useCallback((data?: any) => {
     ref.current?.present(data);
   }, []);
@@ -62,19 +62,19 @@ export function useModal() {
   return { ref, present, dismiss };
 }
 
-export function Modal({
+export function Modal<T>({
   ref,
   snapPoints: _snapPoints = ['60%'] as (string | number)[],
   title,
   detached = false,
   ...props
-}: ModalProps & { ref?: ModalRef }) {
+}: ModalProps & { ref?: ModalRef<T> }) {
   const theme = useThemeConfig();
   const detachedProps = React.useMemo(() => getDetachedProps(detached), [detached]);
-  const modal = useModal();
+  const modal = useModal<T>();
   const snapPoints = React.useMemo(() => _snapPoints, [_snapPoints]);
 
-  React.useImperativeHandle(ref, () => (modal.ref.current as BottomSheetModal) || null);
+  React.useImperativeHandle(ref, () => (modal.ref.current as BottomSheetModal<T>) || null);
 
   const renderHandleComponent = React.useCallback(
     () => (
@@ -154,7 +154,7 @@ const ModalHeader = React.memo(({ title, dismiss }: ModalHeaderProps) => {
         <View className="flex-row px-2 py-4">
           <View className="size-6" />
           <View className="flex-1">
-            <Text className="text-center text-[16px] font-bold text-[#26313D] dark:text-white">{title}</Text>
+            <Text className="text-center text-base font-bold text-[#26313D] dark:text-white">{title}</Text>
           </View>
         </View>
       )}

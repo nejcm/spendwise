@@ -5,6 +5,7 @@ import * as React from 'react';
 
 import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from '@/components/ui';
+import { GhostButton } from '@/components/ui/ghost-button';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
@@ -20,11 +21,11 @@ export function CategoriesOverview() {
 
   return (
     <View>
-      <View className="mb-4 flex-row items-center justify-between">
+      <View className="mb-2 flex-row items-center justify-between">
         <Text className="text-lg font-medium">{translate('common.categories')}</Text>
-        <Pressable onPress={() => router.push('/categories')}>
+        <GhostButton size="sm" className="px-0" onPress={() => router.push('/categories')}>
           <Text className="text-sm font-medium text-muted-foreground">{translate('common.seeAll')}</Text>
-        </Pressable>
+        </GhostButton>
       </View>
 
       {data.length === 0

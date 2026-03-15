@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { Button, Image, Input, Modal, Pressable, ScrollView, Text, useModal, View } from '@/components/ui';
+import { Image, Input, Modal, Pressable, ScrollView, SolidButton, Text, useModal, View } from '@/components/ui';
+import { GhostButton } from '@/components/ui/ghost-button';
 import { translate } from '@/lib/i18n';
 import { updateProfile, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -25,15 +26,12 @@ export default function SetupStep({ onBack, onNext, currentStep }: SetupStepProp
         className="my-auto"
         footer={(
           <>
-            <Button
+            <GhostButton
               label={translate('common.back')}
-              variant="ghost"
               size="lg"
-              fullWidth={false}
               onPress={onBack}
-              accessibilityLabel={translate('common.back')}
             />
-            <Button
+            <SolidButton
               label={translate('common.next')}
               onPress={onNext}
               className="flex-1"

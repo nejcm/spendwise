@@ -1,16 +1,16 @@
-/* eslint-disable better-tailwindcss/no-unknown-classes */
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { ImageSource } from 'expo-image';
 import type { PressableProps } from 'react-native';
+import type { VariantProps } from 'tailwind-variants';
+import type { ModalProps } from './modal';
 import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { FlashList } from '@shopify/flash-list';
 import { Check, ChevronDown } from 'lucide-react-native';
+
 import * as React from 'react';
 import { Platform, Pressable, View } from 'react-native';
-
 import { cn, tv } from 'tailwind-variants';
 import { useUniwind } from 'uniwind';
-
 import { defaultStyles } from '@/lib/theme/styles';
 import { Image } from './image';
 import { Modal, useModal } from './modal';
@@ -19,54 +19,71 @@ import { Text } from './text';
 const selectTv = tv({
   slots: {
     container: '',
-    label: 'text-grey-100 mb-1 text-sm font-medium dark:text-gray-100',
+    label: 'mb-1 text-sm/snug text-foreground',
     input:
-      'border-grey-50 mt-0 flex-row items-center justify-center rounded-md border px-4 py-3 dark:border-gray-500 dark:bg-gray-800',
-    inputValue: 'dark:text-gray-100',
+      'flex-row items-center justify-center rounded-lg border px-4 py-3',
+    inputValue: '',
+    image: 'size-6 rounded-full',
   },
   variants: {
-    size: {
-      sm: {
-        label: 'text-xs',
-        input: 'px-3 py-2',
-        inputValue: 'text-sm/tight',
-      },
+    color: {
       default: {
-        label: 'text-sm',
-        input: 'px-4 py-2',
-        inputValue: 'text-base/tight',
+        input: 'border-border bg-input focus:border-gray-800 focus:dark:border-gray-300',
+        inputValue: 'text-foreground',
       },
-      lg: {
-        label: 'text-md',
-        input: 'px-5 py-3',
-        inputValue: 'text-xl/tight',
-      },
-      xl: {
-        label: 'text-lg',
-        input: 'px-6 py-3',
-        inputValue: 'text-2xl/tight',
+      secondary: {
+        input: 'border-gray-300 bg-gray-200 focus:border-gray-800 dark:border-border dark:bg-input focus:dark:border-gray-300',
+        inputValue: 'text-foreground',
       },
     },
-    focused: {
-      true: {
-        input: 'border-gray-600',
+    size: {
+      xs: {
+        input: 'h-6 px-2',
+        label: 'text-xs/snug',
+        inputValue: 'text-xs/snug',
+        image: 'size-4',
+      },
+      sm: {
+        input: 'h-9 px-3',
+        label: 'text-xs/snug',
+        inputValue: 'text-sm/snug',
+        image: 'size-5',
+      },
+      md: {
+        input: 'h-11 px-3',
+        label: 'text-sm/snug',
+        inputValue: 'text-base/snug',
+        image: 'size-6',
+      },
+      lg: {
+        input: 'h-13 px-4',
+        label: 'text-base/snug',
+        inputValue: 'text-lg/snug',
+        image: 'size-7',
+      },
+      xl: {
+        input: 'h-16 px-5',
+        label: 'text-lg/snug',
+        inputValue: 'text-xl/snug',
+        image: 'size-8',
       },
     },
     error: {
       true: {
-        input: 'border-danger-600',
-        label: 'text-danger-600 dark:text-danger-600',
-        inputValue: 'text-danger-600',
+        input: 'border-danger-600 focus:border-danger-600 dark:border-danger-600',
+        label: '',
+        inputValue: '',
       },
     },
     disabled: {
       true: {
-        input: 'bg-gray-200',
+        input: 'bg-gray-100 dark:bg-gray-950',
       },
     },
   },
   defaultVariants: {
-    size: 'default',
+    size: 'md',
+    color: 'default',
     error: false,
     disabled: false,
   },
@@ -75,8 +92,6 @@ const selectTv = tv({
 const List = Platform.OS === 'web' ? FlashList : BottomSheetFlatList;
 
 export type OptionType = { label: string; subtext?: string; value: string | number; image?: string | ImageSource };
-
-type SelectSize = 'sm' | 'default' | 'lg' | 'xl';
 
 const Option = React.memo(
   ({
@@ -111,7 +126,7 @@ type OptionsProps = {
   onSelect: (option: OptionType) => void;
   value?: string | number;
   testID?: string;
-};
+} & Omit<ModalProps, 'children'>;
 
 function keyExtractor(item: OptionType) {
   return `select-item-${item.value}`;
@@ -123,6 +138,7 @@ export function Options({
   onSelect,
   value,
   testID,
+  ...rest
 }: OptionsProps & { ref?: React.RefObject<BottomSheetModal | null> }) {
   const { theme } = useUniwind();
   const isDark = theme === 'dark';
@@ -152,6 +168,7 @@ export function Options({
       backgroundStyle={
         isDark ? defaultStyles.backgroundDark : defaultStyles.background
       }
+      {...rest}
     >
       <List
         data={options}
@@ -173,9 +190,9 @@ export type SelectProps = {
   onSelect?: (value: string | number) => void;
   placeholder?: string;
   testID?: string;
-  size?: SelectSize;
   containerClassName?: string;
-};
+  showChevron?: boolean;
+} & Omit<VariantProps<typeof selectTv>, 'error'> & Omit<ModalProps, 'children'>;
 
 export function Select(props: SelectProps) {
   const {
@@ -187,13 +204,14 @@ export function Select(props: SelectProps) {
     disabled = false,
     onSelect,
     testID,
-    size = 'default',
+    size = 'md',
     containerClassName,
+    showChevron = true,
+    color,
+    ...rest
   } = props;
   const modal = useModal();
-  const { theme } = useUniwind();
   const [selectedOption, setSelectedOption] = React.useState<OptionType | null>(() => options.find((t) => t.value === value) ?? null);
-  const iconColor = theme === 'dark' ? '#ffffff' : '#232633';
 
   const onSelectOption = React.useCallback(
     (option: OptionType) => {
@@ -210,8 +228,9 @@ export function Select(props: SelectProps) {
         error: Boolean(error),
         disabled,
         size,
+        color,
       }),
-    [error, disabled, size],
+    [error, disabled, size, color],
   );
 
   return (
@@ -229,20 +248,23 @@ export function Select(props: SelectProps) {
           testID={testID ? `${testID}-trigger` : undefined}
         >
           <View className="flex-1 flex-row items-center gap-2">
-            {selectedOption?.image && <Image source={selectedOption.image} className="size-6 rounded-full" />}
-            <Text className={styles.inputValue()}>
+            {selectedOption?.image && <Image source={selectedOption.image} className={styles.image()} />}
+            <Text className={styles.inputValue({
+              className: !selectedOption?.label ? 'text-muted-foreground' : '',
+            })}
+            >
               {selectedOption?.label ?? placeholder ?? ''}
             </Text>
           </View>
-          <ChevronDown color={iconColor} />
+          {showChevron && <ChevronDown className="size-5 text-muted-foreground" />}
         </Pressable>
         {error && (
-          <Text testID={`${testID}-error`} className="text-sm text-danger-300 dark:text-danger-600">
+          <Text testID={`${testID}-error`} className="text-sm text-danger-500">
             {error}
           </Text>
         )}
       </View>
-      <Options testID={testID} ref={modal.ref} options={options} onSelect={onSelectOption} />
+      <Options testID={testID} ref={modal.ref} options={options} onSelect={onSelectOption} {...rest} />
     </>
   );
 }

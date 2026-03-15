@@ -57,11 +57,11 @@ export function useRecentTransactions(limit: number = 5) {
 
 // ─── Category Queries ───
 
-export function useCategories(type?: 'income' | 'expense') {
+export function useCategories(_type?: 'income' | 'expense') {
   const db = useSQLiteContext();
   return useQuery({
-    queryKey: [...keys.categories, type],
-    queryFn: () => getCategories(db, type),
+    queryKey: [...keys.categories],
+    queryFn: () => getCategories(db),
   });
 }
 
@@ -141,7 +141,7 @@ export function useUpdateCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (params: { id: string; data: Pick<CategoryFormData, 'name' | 'type' | 'color' | 'sort_order'> }) =>
+    mutationFn: (params: { id: string; data: Pick<CategoryFormData, 'name' | 'color' | 'sort_order'> }) =>
       updateCategory(db, params.id, params.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: keys.categories });
@@ -251,11 +251,8 @@ async function getRecentTransactions(db: SQLiteDatabase, limit: number): Promise
   );
 }
 
-async function getCategories(db: SQLiteDatabase, type?: 'income' | 'expense'): Promise<Category[]> {
-  if (type) {
-    return db.getAllAsync<Category>('SELECT * FROM categories WHERE type = ? ORDER BY sort_order ASC', [type]);
-  }
-  return db.getAllAsync<Category>('SELECT * FROM categories ORDER BY type ASC, sort_order ASC');
+async function getCategories(db: SQLiteDatabase): Promise<Category[]> {
+  return db.getAllAsync<Category>('SELECT * FROM categories ORDER BY sort_order ASC');
 }
 
 async function getAccounts(db: SQLiteDatabase): Promise<Account[]> {
@@ -354,7 +351,7 @@ async function getMonthSummary(db: SQLiteDatabase, yearMonth: string): Promise<M
 
 async function createTransaction(db: SQLiteDatabase, data: TransactionFormData): Promise<string> {
   const id = generateId();
-  const amountCents = amountToCents(Number.parseFloat(data.amount) || 0);
+  const amountCents = amountToCents(data.amount || 0);
 
   await db.runAsync(
     `INSERT INTO transactions (id, account_id, category_id, type, amount, date, note)
@@ -366,7 +363,7 @@ async function createTransaction(db: SQLiteDatabase, data: TransactionFormData):
 }
 
 async function updateTransaction(db: SQLiteDatabase, id: string, data: TransactionFormData): Promise<void> {
-  const amountCents = amountToCents(Number.parseFloat(data.amount) || 0);
+  const amountCents = amountToCents(data.amount || 0);
 
   await db.runAsync(
     `UPDATE transactions
@@ -383,8 +380,8 @@ async function deleteTransaction(db: SQLiteDatabase, id: string): Promise<void> 
 async function createCategory(db: SQLiteDatabase, data: CategoryFormData): Promise<string> {
   const id = generateId();
   await db.runAsync(
-    'INSERT INTO categories (id, name, color, type, sort_order) VALUES (?, ?, ?, ?, ?)',
-    [id, data.name.trim(), data.color, data.type, data.sort_order ?? 999999],
+    'INSERT INTO categories (id, name, color, sort_order) VALUES (?, ?, ?, ?)',
+    [id, data.name.trim(), data.color, data.sort_order ?? 999999],
   );
   return id;
 }
@@ -398,10 +395,9 @@ async function updateCategory(
   id: string,
   data: CategoryFormData,
 ): Promise<void> {
-  await db.runAsync('UPDATE categories SET name = ?, color = ?, type = ?, sort_order = ? WHERE id = ?', [
+  await db.runAsync('UPDATE categories SET name = ?, color = ?, sort_order = ? WHERE id = ?', [
     data.name.trim(),
     data.color,
-    data.type,
     data.sort_order ?? 999999,
     id,
   ]);

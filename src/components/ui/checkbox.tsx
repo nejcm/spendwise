@@ -67,7 +67,7 @@ export function CheckboxIcon({ checked = false }: IconProps) {
         width: SIZE,
         borderColor: color,
       }}
-      className="items-center justify-center rounded-[5px] border-2"
+      className="items-center justify-center rounded-md border-2"
       from={{ backgroundColor: 'transparent', borderColor: '#CCCFD6' }}
       animate={{
         backgroundColor: checked ? color : 'transparent',
@@ -132,7 +132,7 @@ export function RadioIcon({ checked = false }: IconProps) {
         width: SIZE,
         borderColor: color,
       }}
-      className="items-center justify-center rounded-[20px] border-2 bg-transparent"
+      className="items-center justify-center rounded-xl border-2 bg-transparent"
       from={{ borderColor: '#CCCFD6' }}
       animate={{
         borderColor: color,
@@ -140,7 +140,7 @@ export function RadioIcon({ checked = false }: IconProps) {
       transition={{ borderColor: { duration: 100, type: 'timing' } }}
     >
       <MotiView
-        className={`size-[10px] rounded-[10px] ${checked && 'bg-primary-300'}`}
+        className={`size-3 rounded-lg ${checked && 'bg-primary-300'}`}
         from={{ opacity: 0 }}
         animate={{ opacity: checked ? 1 : 0 }}
         transition={{ opacity: { duration: 50, type: 'timing' } }}
@@ -178,7 +178,7 @@ export function SwitchIcon({ checked = false }: IconProps) {
   const backgroundColor = checked ? 'var(--color-primary-300)' : 'var(--color-gray-400)';
 
   return (
-    <View className="w-[50px] justify-center">
+    <View className="w-[50] justify-center">
       <View className="overflow-hidden rounded-full">
         <View
           style={{

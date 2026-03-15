@@ -5,7 +5,7 @@ import { Pressable, View } from 'react-native';
 
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import Sortable from 'react-native-sortables';
-import { Text } from '@/components/ui';
+import { SolidButton, Text } from '@/components/ui';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
@@ -37,22 +37,20 @@ export const CategoryGrid = React.memo(({
   return (
     <Animated.ScrollView ref={scrollRef} className="flex-1 bg-background">
       <View className="flex-row gap-2 px-4 pb-4">
-        <Pressable
+        <SolidButton
           onPress={() => setActiveTab('expense')}
-          className={`flex-1 rounded-full px-4 py-1.5 ${activeTab === 'expense' ? 'bg-foreground' : 'bg-muted'}`}
-        >
-          <Text className={`text-center text-sm font-medium ${activeTab === 'expense' ? 'text-background' : ''}`}>
-            {translate('transactions.expense')}
-          </Text>
-        </Pressable>
-        <Pressable
+          size="sm"
+          color={activeTab === 'expense' ? 'primary' : 'secondary'}
+          className="flex-1 rounded-full px-4"
+          label={translate('transactions.expense')}
+        />
+        <SolidButton
           onPress={() => setActiveTab('income')}
-          className={`flex-1 rounded-full px-4 py-1.5 ${activeTab === 'income' ? 'bg-foreground' : 'bg-muted'}`}
-        >
-          <Text className={`text-center text-sm font-medium ${activeTab === 'income' ? 'text-background' : ''}`}>
-            {translate('transactions.income')}
-          </Text>
-        </Pressable>
+          size="sm"
+          color={activeTab === 'income' ? 'primary' : 'secondary'}
+          className="flex-1 rounded-full px-4"
+          label={translate('transactions.income')}
+        />
       </View>
 
       <View className="px-4 pb-4">

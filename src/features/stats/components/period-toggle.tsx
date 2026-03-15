@@ -1,7 +1,7 @@
 import type { Period } from '../types';
 
 import * as React from 'react';
-import { Pressable, Text, View } from '@/components/ui';
+import { SolidButton, View } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 
 type Props = {
@@ -12,30 +12,30 @@ type Props = {
 export function PeriodToggle({ value, onChange }: Props) {
   return (
     <View className="flex-row items-center justify-center gap-2 pb-4">
-      <Pressable
+      <SolidButton
+        className="min-w-18 items-center rounded-2xl"
+        color={value === 'week' ? 'secondary' : 'primary-alt'}
+        textClassName={value === 'week' ? '' : 'text-muted-foreground'}
+        size="sm"
+        label={translate('common.week')}
         onPress={() => onChange('week')}
-        className={`min-w-18 items-center rounded-2xl px-4 py-1 ${value === 'week' ? 'bg-muted' : ''}`}
-      >
-        <Text className={`text-sm ${value === 'week' ? 'text-foreground' : 'text-muted-foreground'}`}>
-          {translate('common.week')}
-        </Text>
-      </Pressable>
-      <Pressable
+      />
+      <SolidButton
         onPress={() => onChange('month')}
-        className={`min-w-18 items-center rounded-2xl px-4 py-1 ${value === 'month' ? 'bg-muted' : ''}`}
-      >
-        <Text className={`text-sm ${value === 'month' ? 'text-foreground' : 'text-muted-foreground'}`}>
-          {translate('common.month')}
-        </Text>
-      </Pressable>
-      <Pressable
+        className="min-w-18 items-center rounded-2xl"
+        color={value === 'month' ? 'secondary' : 'primary-alt'}
+        textClassName={value === 'month' ? 'text-foreground' : 'text-muted-foreground'}
+        size="sm"
+        label={translate('common.month')}
+      />
+      <SolidButton
         onPress={() => onChange('year')}
-        className={`min-w-18 items-center rounded-2xl px-4 py-1 ${value === 'year' ? 'bg-muted' : ''}`}
-      >
-        <Text className={`text-sm ${value === 'year' ? 'text-foreground' : 'text-muted-foreground'}`}>
-          {translate('common.year')}
-        </Text>
-      </Pressable>
+        className="min-w-18 items-center rounded-2xl"
+        color={value === 'year' ? 'secondary' : 'primary-alt'}
+        textClassName={value === 'year' ? 'text-foreground' : 'text-muted-foreground'}
+        size="sm"
+        label={translate('common.year')}
+      />
     </View>
   );
 }

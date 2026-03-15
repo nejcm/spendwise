@@ -52,6 +52,7 @@ function parseCSVLine(line: string): string[] {
 export type ColumnMapping = {
   date: number | null;
   amount: number | null;
+  currency: number | null;
   note: number | null;
   type: number | null; // column with "income"/"expense" or positive/negative
 };

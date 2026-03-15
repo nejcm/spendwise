@@ -81,7 +81,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
         )}
       />
 
-      <View className="mb-8 flex-row items-center gap-3">
+      <View className="mb-6 flex-row items-center gap-3">
         <form.Field
           name="color"
           children={(field) => (
@@ -110,12 +110,15 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
       </View>
 
       {!!id && (
-        <OutlineButton
-          label={translate('common.delete')}
-          color="danger"
-          onPress={() => onDeletePress(id, initialValues?.name ?? '')}
-          className="w-full"
-        />
+        <View className="mb-2 flex-row justify-center">
+          <OutlineButton
+            label={translate('common.delete')}
+            color="danger"
+            onPress={() => onDeletePress(id, initialValues?.name ?? '')}
+            className="min-w-24 rounded-full"
+            size="sm"
+          />
+        </View>
       )}
 
       <form.Subscribe

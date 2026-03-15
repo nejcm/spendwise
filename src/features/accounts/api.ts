@@ -9,6 +9,12 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { amountToCents } from '@/features/formatting/helpers';
 import { generateId } from '@/lib/sqlite';
 
+function budgetToCents(value: string | null | undefined): number | null {
+  if (value == null || value.trim() === '') return null;
+  const n = Number.parseFloat(value);
+  return Number.isFinite(n) ? amountToCents(n) : null;
+}
+
 const keys = {
   accounts: ['accounts'] as const,
   accountsWithBalance: ['accounts', 'balance'] as const,
@@ -127,20 +133,24 @@ async function getAccountsWithBalance(db: SQLiteDatabase): Promise<AccountWithBa
 async function createAccount(db: SQLiteDatabase, data: AccountFormData): Promise<string> {
   const id = generateId();
 
+  const budgetCents = budgetToCents(data.budget);
+
   await db.runAsync(
-    `INSERT INTO accounts (id, name, type, currency, icon, color)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [id, data.name, data.type, data.currency, data.icon, data.color],
+    `INSERT INTO accounts (id, name, description, type, currency, budget, icon, color)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [id, data.name, data.description ?? null, data.type, data.currency, budgetCents, data.icon, data.color],
   );
 
   return id;
 }
 
 async function updateAccount(db: SQLiteDatabase, id: string, data: AccountFormData): Promise<void> {
+  const budgetCents = budgetToCents(data.budget);
+
   await db.runAsync(
-    `UPDATE accounts SET name = ?, type = ?, currency = ?, icon = ?, color = ?, updated_at = datetime('now')
+    `UPDATE accounts SET name = ?, description = ?, type = ?, currency = ?, budget = ?, icon = ?, color = ?, updated_at = datetime('now')
      WHERE id = ?`,
-    [data.name, data.type, data.currency, data.icon, data.color, id],
+    [data.name, data.description ?? null, data.type, data.currency, budgetCents, data.icon, data.color, id],
   );
 }
 

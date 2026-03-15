@@ -1,6 +1,8 @@
 import type { CurrencyKey } from '../currencies';
+import { translate } from '../../lib/i18n';
 
-export type AccountType = 'cash' | 'checking' | 'savings' | 'credit_card' | 'investment' | 'other';
+export const ACCOUNT_TYPES = ['cash', 'checking', 'savings', 'credit_card', 'investment', 'other'] as const;
+export type AccountType = (typeof ACCOUNT_TYPES)[number];
 
 export type Account = {
   id: string;
@@ -32,10 +34,10 @@ export type AccountFormData = {
 };
 
 export const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
-  cash: 'Cash',
-  checking: 'Checking',
-  savings: 'Savings',
-  credit_card: 'Credit Card',
-  investment: 'Investment',
-  other: 'Other',
+  cash: translate('accounts.typeOptions.cash'),
+  checking: translate('accounts.typeOptions.checking'),
+  savings: translate('accounts.typeOptions.savings'),
+  credit_card: translate('accounts.typeOptions.credit_card'),
+  investment: translate('accounts.typeOptions.investment'),
+  other: translate('accounts.typeOptions.other'),
 };

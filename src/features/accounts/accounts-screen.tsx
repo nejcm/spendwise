@@ -9,7 +9,7 @@ import { useMemo, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { MonthPicker, YearPicker } from '@/components/month-year-picker';
 import { FocusAwareStatusBar, Modal, ScrollView, Text } from '@/components/ui';
-import { formatCurrency } from '@/features/formatting/helpers';
+import { centsToAmount, formatCurrency } from '@/features/formatting/helpers';
 import { useAccountsWithBalanceForMonth } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
@@ -76,7 +76,10 @@ export function AccountsScreen() {
       type: selectedAccount.type,
       currency: selectedAccount.currency,
       description: selectedAccount.description,
-      budget: selectedAccount.budget != null ? String(selectedAccount.budget) : null,
+      budget:
+        selectedAccount.budget != null
+          ? String(centsToAmount(selectedAccount.budget))
+          : null,
       icon: selectedAccount.icon,
       color: selectedAccount.color,
     };
@@ -133,7 +136,7 @@ export function AccountsScreen() {
             label={translate('common.add')}
             size="sm"
             color="secondary"
-            className="rounded-2xl px-5"
+            className="rounded-3xl px-5"
             textClassName="font-normal text-muted-foreground"
             onPress={openCreateAccountForm}
           />
@@ -141,7 +144,7 @@ export function AccountsScreen() {
 
         {accounts.length === 0 && (
           <View className="items-center py-8">
-            <Text className="text-gray-500">{translate('accounts.no_accounts')}</Text>
+            <Text className="text-muted-foreground">{translate('accounts.no_accounts')}</Text>
           </View>
         )}
       </ScrollView>

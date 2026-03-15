@@ -16,6 +16,7 @@ import { todayISO } from '@/features/formatting/helpers';
 import { useAccounts, useCreateTransaction, useUpdateTransaction } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
 import { setCurrency, useAppStore } from '@/lib/store';
+import { toNumber } from '../../../lib/number';
 
 const schema = z.object({
   type: z.enum(['expense', 'income', 'transfer'] as TransactionType[]),
@@ -151,9 +152,9 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
           children={(field) => (
             <Input
               label={translate('transactions.amount')}
-              value={String(field.state.value)}
+              value={(field.state.value?.toString())}
               onBlur={field.handleBlur}
-              onChangeText={(val) => field.handleChange(Number(val))}
+              onChangeText={(val) => field.handleChange(toNumber(val))}
               placeholder="0.00"
               keyboardType="decimal-pad"
               testID="amount-input"
@@ -206,13 +207,12 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
       <form.Subscribe
         selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
         children={(state) => (
-          <View className="flex-row gap-3">
+          <View className="mt-6 flex-row gap-3">
             {onCancel && (
               <GhostButton
                 label={translate('common.cancel')}
                 onPress={onCancel}
-                color="secondary-alt"
-                className=""
+                color="secondary"
               />
             )}
             <SolidButton

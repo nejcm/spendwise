@@ -50,9 +50,9 @@ export default function LanguageStep({ onBack, onNext, currentStep }: LanguageSt
         <Text className="mb-4 text-center text-lg text-gray-400">
           {translate('onboarding.select_language')}
         </Text>
-        <GhostButton size="xl" className="items-center gap-4 text-4xl" onPress={modal.present}>
+        <GhostButton size="xl" className="items-center gap-4" onPress={modal.present}>
           <Image source={selected.image} className="size-10 rounded-full" />
-          {selected.name}
+          <Text className="text-4xl text-foreground">{selected.name}</Text>
         </GhostButton>
         <Options ref={modal.ref} options={LANGUAGES_OPTIONS} onSelect={onSelect} value={selected?.value} />
       </OnboardingLayout>

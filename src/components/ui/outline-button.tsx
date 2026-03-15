@@ -8,7 +8,7 @@ import { solidButton } from './button';
 const outlineButton = tv({
   extend: solidButton,
   slots: {
-    container: 'flex flex-row items-center justify-center rounded-md border bg-transparent px-4',
+    container: 'flex flex-row items-center justify-center rounded-lg border bg-transparent px-4',
   },
   variants: {
     color: {
@@ -18,9 +18,9 @@ const outlineButton = tv({
         indicator: 'text-foreground',
       },
       'secondary': {
-        container: 'border-muted bg-transparent',
-        label: 'text-muted',
-        indicator: 'text-muted',
+        container: 'border-muted-foreground bg-transparent',
+        label: 'text-muted-foreground',
+        indicator: 'text-muted-foreground',
       },
       'primary-alt': {
         container: 'border-background bg-transparent',
@@ -28,9 +28,9 @@ const outlineButton = tv({
         indicator: 'text-background',
       },
       'secondary-alt': {
-        container: 'border-muted-foreground bg-transparent',
-        label: 'text-muted-foreground',
-        indicator: 'text-muted-foreground',
+        container: 'border-muted bg-transparent',
+        label: 'text-muted',
+        indicator: 'text-muted',
       },
       'success': {
         container: 'border-success-600 bg-transparent',

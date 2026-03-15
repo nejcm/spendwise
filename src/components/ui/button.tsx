@@ -7,7 +7,7 @@ import { tv } from 'tailwind-variants';
 // eslint-disable-next-line react-refresh/only-export-components
 export const solidButton = tv({
   slots: {
-    container: 'flex flex-row items-center justify-center rounded-md px-4',
+    container: 'flex flex-row items-center justify-center rounded-lg px-4',
     label: 'items-center font-family-sans text-base/snug font-medium',
     indicator: 'h-6 text-white',
   },
@@ -18,15 +18,15 @@ export const solidButton = tv({
         label: 'text-background',
         indicator: 'text-background',
       },
-      'secondary': {
-        container: 'bg-muted',
-        label: 'text-foreground',
-        indicator: 'text-foreground',
-      },
       'primary-alt': {
         container: 'bg-background',
         label: 'text-foreground',
         indicator: 'text-foreground',
+      },
+      'secondary': {
+        container: 'bg-muted',
+        label: 'text-muted-foreground',
+        indicator: 'text-muted-foreground',
       },
       'secondary-alt': {
         container: 'bg-muted-foreground',

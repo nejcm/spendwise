@@ -8,42 +8,42 @@ import { solidButton } from './button';
 const outlineButton = tv({
   extend: solidButton,
   slots: {
-    container: 'flex flex-row items-center justify-center rounded-md border-0 bg-transparent! px-4',
+    container: 'flex flex-row items-center justify-center rounded-lg border-0 px-4',
   },
   variants: {
     color: {
       'primary': {
-        container: '',
+        container: 'bg-transparent',
         label: 'text-foreground',
         indicator: 'text-foreground',
       },
-      'secondary': {
-        container: '',
-        label: 'text-muted',
-        indicator: 'text-muted',
-      },
       'primary-alt': {
-        container: '',
+        container: 'bg-transparent',
         label: 'text-background',
         indicator: 'text-background',
       },
+      'secondary': {
+        container: 'bg-transparent',
+        label: 'text-muted-foreground',
+        indicator: 'text-muted-foreground',
+      },
       'secondary-alt': {
-        container: '',
-        label: 'text-subtle-5',
-        indicator: 'text-subtle-5',
+        container: 'bg-transparent',
+        label: 'text-muted-foreground',
+        indicator: 'text-muted-foreground',
       },
       'success': {
-        container: '',
+        container: 'bg-transparent',
         label: 'text-success-600',
         indicator: 'text-success-600',
       },
       'warning': {
-        container: '',
+        container: 'bg-transparent',
         label: 'text-warning-600',
         indicator: 'text-warning-600',
       },
       'danger': {
-        container: '',
+        container: 'bg-transparent',
         label: 'text-danger-600',
         indicator: 'text-danger-600',
       },

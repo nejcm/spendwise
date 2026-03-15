@@ -1,30 +1,39 @@
 import type { Category, CategoryFormData } from './types';
 import { useForm } from '@tanstack/react-form';
 import * as React from 'react';
-import { Pressable, View } from 'react-native';
-
+import { View } from 'react-native';
 import * as z from 'zod';
+
 import { Input, SolidButton } from '@/components/ui';
+import Alert from '@/components/ui/alert';
 import { getFieldError } from '@/components/ui/form-utils';
-import { ACCOUNT_COLORS } from '@/features/accounts/types';
+import { GhostButton } from '@/components/ui/ghost-button';
 import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
-import Alert from '../../components/ui/alert';
+import ColorSelector from '../../components/color-selector';
 import { OutlineButton } from '../../components/ui/outline-button';
 
 const schema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  name: z.string().min(1, translate('categories.name_required')),
+  icon: z.string().max(2).nullable(),
   color: z.string(),
-  sort_order: z.number().optional(),
 });
 
 type CategoryInitialValues = (Partial<CategoryFormData> & { id: undefined }) | (CategoryFormData & { id: Category['id'] });
 
 export type CategoryManageModalProps = {
   initialValues?: CategoryInitialValues;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 };
 
-export function CategoryForm({ initialValues }: CategoryManageModalProps) {
+const defaultValues: CategoryFormData = {
+  name: '',
+  icon: null,
+  color: 'bg-sky-600',
+};
+
+export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryManageModalProps) {
   const id = initialValues?.id;
   const { data: categories = [] } = useCategories();
   const createCategory = useCreateCategory();
@@ -32,102 +41,104 @@ export function CategoryForm({ initialValues }: CategoryManageModalProps) {
 
   const form = useForm({
     defaultValues: {
-      name: '',
-      color: ACCOUNT_COLORS[0],
+      ...defaultValues,
       ...initialValues,
     } as CategoryFormData,
     validators: { onChange: schema },
     onSubmit: async ({ value }) => {
-      const onSuccess = () => {
-        form.reset();
-      };
       if (id) {
-        updateCategory.mutate(
-          { id, data: value },
-          {
-            onSuccess,
-          },
-        );
+        await updateCategory.mutateAsync({ id, data: value });
+        onSuccess?.();
+        return;
       }
-      else {
-        createCategory.mutate(
-          { ...value, sort_order: categories.length },
-          {
-            onSuccess,
-          },
-        );
-      }
+      await createCategory.mutateAsync({ ...value, sort_order: categories.length });
+      form.reset();
+      onSuccess?.();
     },
   });
 
   const deleteCategory = useDeleteCategory();
-  const onDeletePress = (id: string, name: string) => {
+  const onDeletePress = (categoryId: string, name: string) => {
     Alert.alert(translate('common.delete'), translate('categories.delete_confirm', { name }), [
       { text: translate('common.cancel'), style: 'cancel' },
-      { text: translate('common.delete'), style: 'destructive', onPress: () => deleteCategory.mutate(id) },
+      { text: translate('common.delete'), style: 'destructive', onPress: () => deleteCategory.mutate(categoryId) },
     ]);
   };
 
   return (
-    <>
+    <View className="gap-4">
       <form.Field
         name="name"
         children={(field) => (
           <Input
-            label={translate('settings.category_name')}
+            label={translate('common.name')}
             value={field.state.value}
             onBlur={field.handleBlur}
+            placeholder={translate('categories.name_placeholder')}
             onChangeText={field.handleChange}
             error={getFieldError(field)}
           />
         )}
       />
 
-      <form.Field
-        name="color"
-        children={(field) => (
-          <View className="mt-3 flex-row flex-wrap gap-2">
-            {ACCOUNT_COLORS.map((c) => (
-              <Pressable
-                key={c}
-                onPress={() => field.handleChange(c)}
-                className={`size-8 rounded-full ${field.state.value === c ? 'border-2 border-primary-400' : ''}`}
-                style={{ backgroundColor: c }}
-              />
-            ))}
-          </View>
-        )}
-      />
+      <View className="flex-row items-center gap-3">
+        <form.Field
+          name="color"
+          children={(field) => (
+            <ColorSelector
+              value={field.state.value}
+              onSelect={(value) => field.handleChange(String(value))}
+              stackBehavior="push"
+              size="xl"
+            />
+          )}
+        />
+        <form.Field
+          name="icon"
+          children={(field) => (
+            <Input
+              value={field.state.value ?? ''}
+              onBlur={field.handleBlur}
+              onChangeText={(v) => field.handleChange(v.trim() || null)}
+              placeholder={translate('categories.icon_placeholder')}
+              containerClassName="flex-1"
+              className="text-3xl"
+              size="xl"
+            />
+          )}
+        />
+      </View>
 
       {!!id && (
-        <SolidButton
+        <OutlineButton
           label={translate('common.delete')}
           color="danger"
           onPress={() => onDeletePress(id, initialValues?.name ?? '')}
-          className="mt-8 w-full"
+          className="w-full"
         />
       )}
+
       <form.Subscribe
-        selector={(state) => [state.isSubmitting, state.values.name]}
-        children={([isSubmitting, name]) => (
-          <View className={`flex-row gap-3 ${id ? 'mt-4' : 'mt-8'}`}>
-            <OutlineButton
-              label={translate('common.cancel')}
-              onPress={() => {
-                form.reset();
-              }}
-              className="flex-1"
-            />
+        selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
+        children={(state) => (
+          <View className="mt-6 flex-row gap-3">
+            {onCancel && (
+              <GhostButton
+                label={translate('common.cancel')}
+                onPress={onCancel}
+                color="secondary"
+              />
+            )}
             <SolidButton
               label={translate('common.save')}
               onPress={form.handleSubmit}
-              disabled={!(name as string).trim() || (isSubmitting as boolean) || createCategory.isPending}
-              loading={(isSubmitting as boolean) || createCategory.isPending}
+              loading={(!!state.isSubmitting) || createCategory.isPending || updateCategory.isPending}
+              disabled={!schema.safeParse(state.values).success}
               className="flex-1"
             />
           </View>
         )}
       />
-    </>
+    </View>
   );
 }

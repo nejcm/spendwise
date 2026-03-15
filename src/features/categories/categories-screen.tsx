@@ -62,7 +62,7 @@ export function CategoriesScreen() {
               id: category.category_id,
               name: category.category_name,
               color: category.category_color,
-              sort_order: category.sort_order,
+              icon: category.category_icon,
             }
           : undefined)}
       />

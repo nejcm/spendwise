@@ -56,6 +56,9 @@ export type AppState = {
   anthropicApiKey: string | undefined;
 
   // Other
+  lastUsed: {
+    currency: CurrencyKey;
+  };
 };
 
 const _useAppStore = create<AppState>()(
@@ -67,7 +70,7 @@ const _useAppStore = create<AppState>()(
       },
       token: null,
       authStatus: 'idle',
-      currency: 'EUR',
+      currency: 'USD',
       currencyFormat: 'symbol-after',
       dateFormat: 'DD/MM/YYYY',
       numberFormat: 'stop',
@@ -81,6 +84,9 @@ const _useAppStore = create<AppState>()(
       aiProvider: 'openai',
       openaiApiKey: undefined,
       anthropicApiKey: undefined,
+      lastUsed: {
+        currency: 'USD',
+      },
     }),
     {
       name: 'app-storage',
@@ -188,3 +194,12 @@ export function setLockEnabled(lockEnabled: boolean) {
 export function setLockTimeoutMinutes(lockTimeoutMinutes: number) {
   return _useAppStore.setState({ lockTimeoutMinutes });
 }
+
+// Other actions
+export function setLastUsed(lastUsed: AppState['lastUsed']) {
+  return _useAppStore.setState({ lastUsed });
+}
+export function updateLastUsed(lastUsed: Partial<AppState['lastUsed']>) {
+  return _useAppStore.setState((state) => ({ lastUsed: { ...state.lastUsed, ...lastUsed } }));
+}
+export const selectLastUsed = (state: AppState) => state.lastUsed;

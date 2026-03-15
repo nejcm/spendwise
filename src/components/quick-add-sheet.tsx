@@ -16,14 +16,15 @@ export type QuickAddSheetProps = {
   pathname: string;
 };
 
-function renderContent(pathname: string) {
+function renderContent(pathname: string, sheetRef: React.RefObject<BottomSheetModal<QuickAddSheetData> | null>) {
+  const onSuccess = () => sheetRef.current?.dismiss();
   if (pathname.startsWith('/accounts')) {
     return (
       <>
         <Text className="mb-4 text-center text-2xl font-bold">
           {translate('accounts.add')}
         </Text>
-        <AccountForm />
+        <AccountForm onSuccess={onSuccess} />
       </>
     );
   }
@@ -34,7 +35,7 @@ function renderContent(pathname: string) {
         <Text className="mb-4 text-center text-2xl font-bold">
           {translate('categories.add')}
         </Text>
-        <CategoryForm />
+        <CategoryForm onSuccess={onSuccess} />
       </>
     );
   }
@@ -44,7 +45,7 @@ function renderContent(pathname: string) {
       <Text className="mb-4 text-center text-2xl font-bold">
         {translate('transactions.add')}
       </Text>
-      <TransactionForm />
+      <TransactionForm onSuccess={onSuccess} />
     </>
   );
 };
@@ -55,7 +56,7 @@ export function QuickAddSheet({ sheetRef }: QuickAddSheetProps) {
       {(data) => {
         return (
           <BottomSheetScrollView className="flex-1 px-4 pb-8">
-            {renderContent(String(data?.data?.pathname || ''))}
+            {renderContent(String(data?.data?.pathname || ''), sheetRef)}
           </BottomSheetScrollView>
         );
       }}

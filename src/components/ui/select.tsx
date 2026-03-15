@@ -1,6 +1,6 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { ImageSource } from 'expo-image';
-import type { PressableProps } from 'react-native';
+import type { FlatListProps, PressableProps } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
 import type { ModalProps } from './modal';
 import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
@@ -100,6 +100,8 @@ const Option = React.memo(
     checkColor,
     image,
     subtext,
+    className,
+    children,
     ...props
   }: PressableProps & Omit<OptionType, 'value'> & {
     selected?: boolean;
@@ -107,25 +109,33 @@ const Option = React.memo(
   }) => {
     return (
       <Pressable
-        className="flex-row items-center border-b border-gray-200 p-3 dark:border-gray-700"
+        className={cn('flex-1 flex-row items-center border-b border-gray-200 p-3 dark:border-gray-700', className)}
         {...props}
       >
-        {image && <Image source={image} className="mr-3 size-8 rounded-full" />}
-        <View className="flex-1">
-          <Text className="leading-tight dark:text-gray-100">{label}</Text>
-          {subtext && <Text className="text-sm/snug text-gray-500 dark:text-gray-400">{subtext}</Text>}
-        </View>
-        {selected && <Check color={checkColor} size={18} strokeWidth={2.5} />}
+        {children
+          || (
+            <>
+              {image && <Image source={image} className="mr-3 size-8 rounded-full" />}
+              <View className="flex-1">
+                <Text className="leading-tight dark:text-gray-100">{label}</Text>
+                {subtext && <Text className="text-sm/snug text-gray-500 dark:text-gray-400">{subtext}</Text>}
+              </View>
+              {selected && <Check color={checkColor} size={18} strokeWidth={2.5} />}
+            </>
+          )}
       </Pressable>
     );
   },
 );
 
-type OptionsProps = {
+export type OptionsProps = {
   options: OptionType[];
   onSelect: (option: OptionType) => void;
   value?: string | number;
   testID?: string;
+  className?: string;
+  listProps?: Partial<Pick<FlatListProps<OptionType>, 'numColumns'>>;
+  renderItem?: (item: OptionType) => React.ReactNode;
 } & Omit<ModalProps, 'children'>;
 
 function keyExtractor(item: OptionType) {
@@ -138,6 +148,9 @@ export function Options({
   onSelect,
   value,
   testID,
+  listProps,
+  className,
+  renderItem,
   ...rest
 }: OptionsProps & { ref?: React.RefObject<BottomSheetModal | null> }) {
   const { theme } = useUniwind();
@@ -153,11 +166,13 @@ export function Options({
         checkColor={checkColor}
         image={item.image}
         subtext={item.subtext}
+        children={renderItem?.(item)}
         onPress={() => onSelect(item)}
+        className={className}
         testID={testID ? `${testID}-item-${item.value}` : undefined}
       />
     ),
-    [checkColor, onSelect, value, testID],
+    [checkColor, onSelect, value, testID, className, renderItem],
   );
 
   return (
@@ -176,6 +191,7 @@ export function Options({
         renderItem={renderSelectItem}
         testID={testID ? `${testID}-modal` : undefined}
         estimatedItemSize={52}
+        {...listProps}
       />
     </Modal>
   );
@@ -191,25 +207,30 @@ export type SelectProps = {
   placeholder?: string;
   testID?: string;
   containerClassName?: string;
+  inputClassName?: string;
   showChevron?: boolean;
+  listProps?: OptionsProps['listProps'];
+  renderItem?: OptionsProps['renderItem'];
+  renderSelectedItem?: (item: OptionType | null) => React.ReactNode;
 } & Omit<VariantProps<typeof selectTv>, 'error'> & Omit<ModalProps, 'children'>;
 
-export function Select(props: SelectProps) {
-  const {
-    label,
-    value,
-    error,
-    options = [],
-    placeholder = 'Select...',
-    disabled = false,
-    onSelect,
-    testID,
-    size = 'md',
-    containerClassName,
-    showChevron = true,
-    color,
-    ...rest
-  } = props;
+export function Select({
+  label,
+  value,
+  error,
+  options = [],
+  placeholder = 'Select...',
+  disabled = false,
+  onSelect,
+  testID,
+  size = 'md',
+  containerClassName,
+  inputClassName,
+  showChevron = true,
+  color,
+  renderSelectedItem,
+  ...rest
+}: SelectProps) {
   const modal = useModal();
   const [selectedOption, setSelectedOption] = React.useState<OptionType | null>(() => options.find((t) => t.value === value) ?? null);
 
@@ -242,26 +263,33 @@ export function Select(props: SelectProps) {
           </Text>
         )}
         <Pressable
-          className={styles.input()}
+          className={cn(styles.input(), inputClassName)}
           disabled={disabled}
           onPress={modal.present}
           testID={testID ? `${testID}-trigger` : undefined}
         >
-          <View className="flex-1 flex-row items-center gap-2">
-            {selectedOption?.image && <Image source={selectedOption.image} className={styles.image()} />}
-            <Text className={styles.inputValue({
-              className: !selectedOption?.label ? 'text-muted-foreground' : '',
-            })}
-            >
-              {selectedOption?.label ?? placeholder ?? ''}
-            </Text>
-          </View>
-          {showChevron && <ChevronDown className="size-5 text-muted-foreground" />}
+          {renderSelectedItem?.(selectedOption)
+            || (
+              <>
+                <View className="flex-1 flex-row items-center gap-2">
+                  {selectedOption?.image && <Image source={selectedOption.image} className={styles.image()} />}
+                  <Text className={styles.inputValue({
+                    className: !selectedOption?.label ? 'text-muted-foreground' : '',
+                  })}
+                  >
+                    {selectedOption?.label ?? placeholder ?? ''}
+                  </Text>
+                </View>
+                {showChevron && <ChevronDown className="size-5 text-muted-foreground" />}
+              </>
+            )}
         </Pressable>
         {error && (
-          <Text testID={`${testID}-error`} className="text-sm text-danger-500">
-            {error}
-          </Text>
+          <View className="absolute top-full left-0 mt-1">
+            <Text testID={`${testID}-error`} className="text-sm text-danger-500">
+              {error}
+            </Text>
+          </View>
         )}
       </View>
       <Options testID={testID} ref={modal.ref} options={options} onSelect={onSelectOption} {...rest} />

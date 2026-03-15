@@ -15,13 +15,16 @@ import { CURRENCY_OPTIONS, CURRENCY_VALUES } from '@/features/currencies';
 import { todayISO } from '@/features/formatting/helpers';
 import { useAccounts, useCreateTransaction, useUpdateTransaction } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
-import { setCurrency, useAppStore } from '@/lib/store';
-import { toNumber } from '../../../lib/number';
+import { toNumber } from '@/lib/number';
+import { useAppStore } from '@/lib/store';
 
 const schema = z.object({
   type: z.enum(['expense', 'income', 'transfer'] as TransactionType[]),
   currency: z.enum(CURRENCY_VALUES as CurrencyKey[]),
-  amount: z.number(),
+  amount: z.string().min(1, translate('transactions.amount_required')).refine((v) => {
+    const n = toNumber(v);
+    return n != null && n > 0;
+  }, translate('transactions.amount_required')),
   category_id: z.string().min(1, 'Category is required'),
   account_id: z.string().min(1, 'Account is required'),
   date: z.string().min(1, 'Date is required'),
@@ -33,13 +36,15 @@ const TYPE_OPTIONS: { label: string; value: 'expense' | 'income' }[] = [
   { label: 'Income', value: 'income' },
 ];
 
+type TransactionFormData = z.infer<typeof schema>;
+
+type InitialValues = Omit<Partial<TransactionFormData>, 'amount'> & { amount?: number | string; id?: string };
+
 export type TransactionFormProps = {
-  initialValues?: (Partial<TransactionFormData> & { id: never }) | (TransactionFormData & { id: string });
+  initialValues?: InitialValues;
   onSuccess?: () => void;
   onCancel?: () => void;
 };
-
-type TransactionFormData = z.infer<typeof schema>;
 
 const defaultValues = {
   type: 'expense',
@@ -59,8 +64,10 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
   const form = useForm({
     defaultValues: {
       ...defaultValues,
+      currency,
       account_id: accounts[0]?.id ?? '',
       ...initialValues,
+      amount: initialValues?.amount?.toString() ?? '',
     } as TransactionFormData,
     validators: {
       onChange: schema,
@@ -68,12 +75,13 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
     onSubmit: async ({ value }) => {
       if (!value.account_id)
         return;
+      const data = { ...value, amount: toNumber(value.amount) ?? 0 };
       if (id) {
-        await updateTransaction.mutateAsync({ id, data: value });
+        await updateTransaction.mutateAsync({ id, data });
         onSuccess?.();
         return;
       }
-      await createTransaction.mutateAsync(value);
+      await createTransaction.mutateAsync(data);
       form.reset();
       onSuccess?.();
     },
@@ -81,6 +89,43 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
 
   return (
     <View className="gap-4">
+      <View className="mb-4 flex-row gap-3">
+        <form.Field
+          name="currency"
+          children={(field) => (
+            <Select
+              value={field.state.value}
+              options={CURRENCY_OPTIONS}
+              onSelect={(value) => {
+                if (!value) return;
+                field.handleChange(String(value) as CurrencyKey);
+              }}
+              size="lg"
+              showChevron={false}
+              containerClassName="w-[100]"
+              inputClassName="px-2"
+              stackBehavior="push"
+            />
+          )}
+        />
+        <form.Field
+          name="amount"
+          children={(field) => (
+            <Input
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChangeText={field.handleChange}
+              placeholder="0.00"
+              size="lg"
+              keyboardType="decimal-pad"
+              testID="amount-input"
+              error={getFieldError(field)}
+              containerClassName="flex-1"
+            />
+          )}
+        />
+      </View>
+
       <form.Field
         name="type"
         children={(field) => (
@@ -133,37 +178,6 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
           </View>
         )}
       />
-      <View className="flex-row gap-3">
-        <Select
-          label={translate('transactions.currency')}
-          value={currency}
-          options={CURRENCY_OPTIONS}
-          onSelect={(value) => {
-            if (!value) return;
-            setCurrency(String(value) as CurrencyKey);
-          }}
-          size="md"
-          showChevron={false}
-          containerClassName="w-[96]"
-          stackBehavior="push"
-        />
-        <form.Field
-          name="amount"
-          children={(field) => (
-            <Input
-              label={translate('transactions.amount')}
-              value={(field.state.value?.toString())}
-              onBlur={field.handleBlur}
-              onChangeText={(val) => field.handleChange(toNumber(val))}
-              placeholder="0.00"
-              keyboardType="decimal-pad"
-              testID="amount-input"
-              error={getFieldError(field)}
-              containerClassName="flex-1"
-            />
-          )}
-        />
-      </View>
 
       <form.Field
         name="date"

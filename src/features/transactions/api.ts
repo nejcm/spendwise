@@ -141,7 +141,7 @@ export function useUpdateCategory() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (params: { id: string; data: Pick<CategoryFormData, 'name' | 'color' | 'sort_order'> }) =>
+    mutationFn: (params: { id: string; data: Pick<CategoryFormData, 'name' | 'icon' | 'color' | 'sort_order'> }) =>
       updateCategory(db, params.id, params.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: keys.categories });
@@ -380,8 +380,8 @@ async function deleteTransaction(db: SQLiteDatabase, id: string): Promise<void> 
 async function createCategory(db: SQLiteDatabase, data: CategoryFormData): Promise<string> {
   const id = generateId();
   await db.runAsync(
-    'INSERT INTO categories (id, name, color, sort_order) VALUES (?, ?, ?, ?)',
-    [id, data.name.trim(), data.color, data.sort_order ?? 999999],
+    'INSERT INTO categories (id, name, icon, color, sort_order) VALUES (?, ?, ?, ?, ?)',
+    [id, data.name.trim(), data.icon?.trim() || null, data.color, data.sort_order ?? 999999],
   );
   return id;
 }
@@ -395,12 +395,10 @@ async function updateCategory(
   id: string,
   data: CategoryFormData,
 ): Promise<void> {
-  await db.runAsync('UPDATE categories SET name = ?, color = ?, sort_order = ? WHERE id = ?', [
-    data.name.trim(),
-    data.color,
-    data.sort_order ?? 999999,
-    id,
-  ]);
+  await db.runAsync(
+    'UPDATE categories SET name = ?, icon = ?, color = ?, sort_order = ? WHERE id = ?',
+    [data.name.trim(), data.icon?.trim() || null, data.color, data.sort_order ?? 999999, id],
+  );
 }
 
 async function updateCategoryOrder(

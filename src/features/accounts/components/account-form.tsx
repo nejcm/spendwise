@@ -9,8 +9,9 @@ import Alert from '@/components/ui/alert';
 import { getFieldError } from '@/components/ui/form-utils';
 import { OutlineButton } from '@/components/ui/outline-button';
 import { translate } from '@/lib/i18n';
+import { COLOR_OPTIONS } from '@/lib/theme/colors';
 import { useArchiveAccount, useCreateAccount, useUpdateAccount } from '../api';
-import { ACCOUNT_COLORS, ACCOUNT_TYPE_LABELS } from '../types';
+import { ACCOUNT_TYPE_LABELS } from '../types';
 
 const schema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -31,7 +32,7 @@ const defaultValues: AccountFormData = {
   name: '',
   type: 'checking',
   description: null,
-  color: ACCOUNT_COLORS[0],
+  color: COLOR_OPTIONS[0].value,
   currency: 'USD',
   icon: null,
 };
@@ -133,12 +134,12 @@ export function AccountForm({ initialData, accountId, onSuccess, onCancel }: Acc
               {translate('accounts.color')}
             </Text>
             <View className="flex-row flex-wrap gap-2">
-              {ACCOUNT_COLORS.map((c) => (
+              {COLOR_OPTIONS.map((c) => (
                 <Pressable
-                  key={c}
-                  onPress={() => field.handleChange(c)}
-                  className={`size-8 rounded-full ${field.state.value === c ? 'border-2 border-primary-400' : ''}`}
-                  style={{ backgroundColor: c }}
+                  key={c.value}
+                  onPress={() => field.handleChange(c.value)}
+                  className={`size-8 rounded-full ${field.state.value === c.value ? 'border-2 border-primary-400' : ''}`}
+                  style={{ backgroundColor: c.value }}
                 />
               ))}
             </View>

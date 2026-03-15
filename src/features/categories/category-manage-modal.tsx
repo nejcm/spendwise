@@ -26,7 +26,7 @@ export function CategoryManageModal({ isOpen, onClose, initialValues }: Category
   return (
     <Modal ref={modalRef} snapPoints={['55%']} onDismiss={onClose} title={id ? translate('categories.edit_category') : translate('categories.add')}>
       <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}>
-        <CategoryForm initialValues={initialValues} />
+        <CategoryForm initialValues={initialValues} onCancel={onClose} onSuccess={onClose} />
       </BottomSheetScrollView>
     </Modal>
   );

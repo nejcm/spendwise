@@ -1,19 +1,31 @@
 {
   "accounts": {
     "add": "Add Account",
+    "budget": "Budget / Credit limit",
     "color": "Color",
     "delete_confirm": "Are you sure you want to delete {{name}}?",
+    "description_placeholder": "Description...",
     "edit": "Edit Account",
     "from_account": "From Account",
+    "icon_placeholder": "e.g. 💰",
     "name": "Account Name",
     "name_placeholder": "e.g. Main Checking",
+    "name_required": "Name is required",
     "no_accounts": "No accounts yet",
     "opening_balance": "Opening Balance",
     "to_account": "To Account",
     "total_balance": "Total Balance",
     "transfer": "Transfer",
     "transfer_note": "Transfer note",
-    "type": "Account Type"
+    "type": "Account Type",
+    "typeOptions": {
+      "cash": "Cash",
+      "checking": "Checking",
+      "credit_card": "Credit Card",
+      "investment": "Investment",
+      "other": "Other",
+      "savings": "Savings"
+    }
   },
   "budgets": {
     "budget_name": "Budget Name",
@@ -56,6 +68,8 @@
     "complete": "Complete",
     "completed": "Completed",
     "delete": "Delete",
+    "description": "Description",
+    "description_placeholder": "Optional notes",
     "done": "Done",
     "edit": "Edit",
     "edit_mode": "Edit Mode",

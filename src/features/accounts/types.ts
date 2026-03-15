@@ -39,18 +39,3 @@ export const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
   investment: 'Investment',
   other: 'Other',
 };
-
-export const ACCOUNT_COLORS = [
-  '#FF6B6B',
-  '#4ECDC4',
-  '#45B7D1',
-  '#96CEB4',
-  '#FFEAA7',
-  '#DDA0DD',
-  '#FF8A80',
-  '#82B1FF',
-  '#EA80FC',
-  '#B388FF',
-  '#66BB6A',
-  '#42A5F5',
-];

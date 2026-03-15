@@ -147,7 +147,7 @@ export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInp
         )}
       </View>
       {error && (
-        <View className="absolute top-12 left-0 justify-center">
+        <View className="absolute top-full left-0 mt-1">
           <Text testID={testID ? `${testID}-error` : undefined} className="text-xs text-danger-500">
             {error}
           </Text>

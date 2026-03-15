@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useState } from 'react';
 
 import { View } from 'react-native';
-import { cn } from 'tailwind-variants';
+import DetailsSection from '@/components/details';
 import { FocusAwareStatusBar, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { OutlineButton } from '@/components/ui/outline-button';
@@ -72,30 +72,27 @@ export function TransactionDetailScreen() {
         <Text className="mt-1 text-gray-500">{formatDate(transaction.date)}</Text>
       </View>
 
-      <View className="mb-4 gap-4 rounded-xl bg-card p-4">
-        <DetailRow label={translate('transactions.category')} value={transaction ? `${transaction.category_icon} ${transaction.category_name}` : '-'} />
-        <DetailRow label={translate('transactions.account')} value={account ? `${account.icon} ${account.name}` : '-'} />
-        <DetailRow label={translate('transactions.type')} value={transaction.type} className="capitalize" />
-        <DetailRow label={translate('transactions.note')} value={transaction.note || '-'} />
-      </View>
-      <View className="mb-8 gap-4 rounded-xl bg-card p-4">
-        <DetailRow label="Created at" value={formatDate(transaction.created_at)} />
-        <DetailRow label="Updated at" value={formatDate(transaction.updated_at)} />
-      </View>
+      <DetailsSection
+        className="mb-4"
+        data={[
+          { label: translate('transactions.category'), value: transaction ? `${transaction.category_icon} ${transaction.category_name}` : '-' },
+          { label: translate('transactions.account'), value: account ? `${account.icon} ${account.name}` : '-' },
+          { label: translate('transactions.type'), value: transaction.type, className: 'capitalize' },
+          { label: translate('transactions.note'), value: transaction.note || '-' },
+        ]}
+      />
+      <DetailsSection
+        className="mb-8"
+        data={[
+          { label: 'Created at', value: formatDate(transaction.created_at) },
+          { label: 'Updated at', value: formatDate(transaction.updated_at) },
+        ]}
+      />
 
       <View className="flex-row gap-2">
         <OutlineButton label={translate('common.delete')} color="danger" onPress={handleDelete} />
         <SolidButton className="flex-1" label={translate('common.edit')} onPress={() => setIsEditing(true)} />
       </View>
-    </View>
-  );
-}
-
-function DetailRow({ label, value, className }: { label: string; value: string; className?: string }) {
-  return (
-    <View className="flex-row justify-between gap-2">
-      <Text className="text-muted-foreground">{label}</Text>
-      <Text className={cn('text-foreground', className)}>{value}</Text>
     </View>
   );
 }

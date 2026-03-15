@@ -5,14 +5,14 @@ import { Pressable, View } from 'react-native';
 
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import Sortable from 'react-native-sortables';
-import { SolidButton, Text } from '@/components/ui';
+import { Text } from '@/components/ui';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 
 export type CategoryGridProps = {
   categories: CategorySpend[];
-  onReorder: (items: Array<{ id: string; sort_order: number }>, type: 'expense' | 'income') => void;
+  onReorder: (items: Array<{ id: string; sort_order: number }>) => void;
   onAddPress: () => void;
   onPress: (category?: CategorySpend) => void;
 };
@@ -24,43 +24,23 @@ export const CategoryGrid = React.memo(({
   onPress,
 }: CategoryGridProps) => {
   const currency = useAppStore.use.currency();
-  const [activeTab, setActiveTab] = React.useState<'expense' | 'income'>('expense');
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
-
-  const filteredItems = React.useMemo(() => categories.filter((c) => c.category_type === activeTab), [categories, activeTab]);
 
   function handleDragEnd(params: { data: CategorySpend[] }) {
     const updates = params.data.map((item, idx) => ({ id: item.category_id, sort_order: idx }));
-    onReorder(updates, activeTab);
+    onReorder(updates);
   }
 
   return (
     <Animated.ScrollView ref={scrollRef} className="flex-1 bg-background">
-      <View className="flex-row gap-2 px-4 pb-4">
-        <SolidButton
-          onPress={() => setActiveTab('expense')}
-          size="sm"
-          color={activeTab === 'expense' ? 'primary' : 'secondary'}
-          className="flex-1 rounded-full px-4"
-          label={translate('transactions.expense')}
-        />
-        <SolidButton
-          onPress={() => setActiveTab('income')}
-          size="sm"
-          color={activeTab === 'income' ? 'primary' : 'secondary'}
-          className="flex-1 rounded-full px-4"
-          label={translate('transactions.income')}
-        />
-      </View>
-
       <View className="px-4 pb-4">
-        {filteredItems.length === 0
+        {categories.length === 0
           ? (
               <AddPlaceholder onPress={onAddPress} />
             )
           : (
               <Sortable.Grid
-                data={filteredItems}
+                data={categories}
                 columns={2}
                 columnGap={10}
                 rowGap={10}
@@ -77,10 +57,6 @@ export const CategoryGrid = React.memo(({
                 )}
               />
             )}
-
-        {filteredItems.length > 0 && (
-          <AddPlaceholder onPress={onAddPress} />
-        )}
         <View className="mt-6 flex-row items-center justify-center gap-2">
           <Lightbulb className="size-3 text-muted-foreground" />
           <Text className="text-sm text-muted-foreground">

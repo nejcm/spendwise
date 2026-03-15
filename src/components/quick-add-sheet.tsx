@@ -17,14 +17,14 @@ export type QuickAddSheetProps = {
 };
 
 function renderContent(pathname: string, sheetRef: React.RefObject<BottomSheetModal<QuickAddSheetData> | null>) {
-  const onSuccess = () => sheetRef.current?.dismiss();
+  const dismissModal = () => sheetRef.current?.dismiss();
   if (pathname.startsWith('/accounts')) {
     return (
       <>
         <Text className="mb-4 text-center text-2xl font-bold">
           {translate('accounts.add')}
         </Text>
-        <AccountForm onSuccess={onSuccess} />
+        <AccountForm onSuccess={dismissModal} onCancel={dismissModal} />
       </>
     );
   }
@@ -35,7 +35,7 @@ function renderContent(pathname: string, sheetRef: React.RefObject<BottomSheetMo
         <Text className="mb-4 text-center text-2xl font-bold">
           {translate('categories.add')}
         </Text>
-        <CategoryForm onSuccess={onSuccess} />
+        <CategoryForm onSuccess={dismissModal} onCancel={dismissModal} />
       </>
     );
   }
@@ -45,14 +45,14 @@ function renderContent(pathname: string, sheetRef: React.RefObject<BottomSheetMo
       <Text className="mb-4 text-center text-2xl font-bold">
         {translate('transactions.add')}
       </Text>
-      <TransactionForm onSuccess={onSuccess} />
+      <TransactionForm onSuccess={dismissModal} onCancel={dismissModal} />
     </>
   );
 };
 
 export function QuickAddSheet({ sheetRef }: QuickAddSheetProps) {
   return (
-    <Modal ref={sheetRef} snapPoints={['85%']}>
+    <Modal ref={sheetRef} enableDynamicSizing>
       {(data) => {
         return (
           <BottomSheetScrollView className="flex-1 px-4 pb-8">

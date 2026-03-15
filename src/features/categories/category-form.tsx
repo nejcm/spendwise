@@ -81,7 +81,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
         )}
       />
 
-      <View className="flex-row items-center gap-3">
+      <View className="mb-8 flex-row items-center gap-3">
         <form.Field
           name="color"
           children={(field) => (
@@ -121,7 +121,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
       <form.Subscribe
         selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
         children={(state) => (
-          <View className="mt-6 flex-row gap-3">
+          <View className="flex-row items-center gap-3">
             {onCancel && (
               <GhostButton
                 label={translate('common.cancel')}

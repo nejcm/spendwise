@@ -1,21 +1,30 @@
 import type { CurrencyKey } from '../../currencies';
 
-import type { CategorySpend } from '@/features/insights/types';
 import * as React from 'react';
 import { Text, View } from '@/components/ui';
+import { useCategorySpendByRange } from '@/features/insights/api';
 import { translate } from '@/lib/i18n';
 import { formatCurrency } from '../../formatting/helpers';
 
 export type CategoryBreakdownProps = {
-  categories: CategorySpend[];
+  startDate: string;
+  endDate: string;
   currency: CurrencyKey;
   type: 'expense' | 'income';
   limit?: number;
 };
 
-export function CategoryBreakdown({ categories, currency, type, limit = 5 }: CategoryBreakdownProps) {
+export function CategoryBreakdown({
+  startDate,
+  endDate,
+  currency,
+  type,
+  limit = 5,
+}: CategoryBreakdownProps) {
+  const { data: categories, isLoading } = useCategorySpendByRange(startDate, endDate);
+
   const filtered = React.useMemo(() => {
-    return categories
+    return (categories ?? [])
       .filter((c) => c.category_type === type && c.total > 0)
       .sort((a, b) => b.total - a.total)
       .slice(0, limit);
@@ -23,6 +32,8 @@ export function CategoryBreakdown({ categories, currency, type, limit = 5 }: Cat
 
   const maxTotal = filtered[0]?.total ?? 1;
   const title = type === 'expense' ? translate('stats.top_expenses') : translate('stats.top_income');
+
+  if (isLoading && !categories) return null;
 
   if (filtered.length === 0) {
     return (

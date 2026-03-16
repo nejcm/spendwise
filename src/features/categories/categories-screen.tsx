@@ -1,20 +1,19 @@
-import type { BottomSheetModal } from '@gorhom/bottom-sheet';
-
 import type { CategoryManageModalProps } from '@/features/categories/category-manage-modal';
 import type { TransactionFormProps } from '@/features/transactions/components/transaction-form';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeftIcon, ArrowRightIcon, FileWarning } from 'lucide-react-native';
+import { FileWarning } from 'lucide-react-native';
 import * as React from 'react';
-import { MonthPicker, YearPicker } from '@/components/month-year-picker';
-import { FocusAwareStatusBar, Modal, Pressable, Text, useModal, View } from '@/components/ui';
+import { PeriodSelector } from '@/components/period-selector';
+import { FocusAwareStatusBar, Modal, Text, useModal, View } from '@/components/ui';
+import { OutlineButton } from '@/components/ui/outline-button';
 import { CategoryManageModal } from '@/features/categories/category-manage-modal';
-import { useCategorySpend } from '@/features/insights/api';
+import { useCategorySpendByRange } from '@/features/insights/api';
 import { useUpdateCategoryOrder } from '@/features/transactions/api';
 import { TransactionForm } from '@/features/transactions/components/transaction-form';
+import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
-import { OutlineButton } from '../../components/ui/outline-button';
+import { setPeriodSelection, useAppStore } from '@/lib/store';
 import { CategoryGrid } from './category-grid';
 
 export function CategoriesScreen() {
@@ -23,26 +22,12 @@ export function CategoriesScreen() {
   const router = useRouter();
   const { edit } = useLocalSearchParams<{ edit?: string }>();
   const isEditMode = edit === 'true' || edit === '1';
-  // [year, month]
-  const [selectedDate, setSelectedDate] = React.useState(() => {
-    const date = format(new Date(), 'yyyy-MM');
-    const split = date.split('-');
-    return [Number(split[0]), Number(split[1])];
-  });
-  const monthPickerRef = React.useRef<BottomSheetModal>(null);
-  const yearPickerRef = React.useRef<BottomSheetModal>(null);
-  const { data } = useCategorySpend(selectedDate.join('-'));
+
+  const selection = useAppStore.use.periodSelection();
+  const [startDate, endDate] = React.useMemo(() => getPeriodRange(selection), [selection]);
+
+  const { data } = useCategorySpendByRange(startDate, endDate);
   const updateOrder = useUpdateCategoryOrder();
-
-  const monthName = React.useMemo(
-    () => format(new Date(selectedDate[0], selectedDate[1] - 1, 1), 'MMMM'),
-    [selectedDate],
-  );
-
-  const navigateMonth = (direction: -1 | 1) => {
-    const date = new Date(selectedDate[0], selectedDate[1] - 1 + direction, 1);
-    setSelectedDate([date.getFullYear(), date.getMonth() + 1]);
-  };
 
   const closeTransactionSheet = () => {
     transactionSheetRef.current?.dismiss();
@@ -68,22 +53,7 @@ export function CategoriesScreen() {
             </View>
           )
         : (
-            <View className="flex-row items-center justify-between p-4">
-              <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
-                <ArrowLeftIcon className="size-5 text-muted-foreground" />
-              </Pressable>
-              <View className="flex-row items-center gap-1">
-                <Pressable onPress={() => monthPickerRef.current?.present()} hitSlop={12}>
-                  <Text className="text-lg font-medium">{monthName}</Text>
-                </Pressable>
-                <Pressable onPress={() => yearPickerRef.current?.present()} hitSlop={12}>
-                  <Text className="text-lg font-medium">{selectedDate[0]}</Text>
-                </Pressable>
-              </View>
-              <Pressable onPress={() => navigateMonth(1)} hitSlop={12}>
-                <ArrowRightIcon className="size-5 text-muted-foreground" />
-              </Pressable>
-            </View>
+            <PeriodSelector selection={selection} onSelect={setPeriodSelection} />
           )}
       <CategoryGrid
         categories={data || []}
@@ -120,16 +90,6 @@ export function CategoriesScreen() {
           </BottomSheetScrollView>
         )}
       </Modal>
-      <MonthPicker
-        ref={monthPickerRef}
-        selectedMonth={selectedDate[1]}
-        onSelect={(month) => setSelectedDate((prev) => [prev[0], month])}
-      />
-      <YearPicker
-        ref={yearPickerRef}
-        selectedYear={selectedDate[0]}
-        onSelect={(year) => setSelectedDate((prev) => [year, prev[1]])}
-      />
     </View>
   );
 }

@@ -6,21 +6,29 @@ import type { CategorySpend, MonthlyTotals, WeeklyTotals } from './types';
 import { useQuery } from '@tanstack/react-query';
 import { format, subMonths } from 'date-fns';
 import { useSQLiteContext } from 'expo-sqlite';
-import { getCurrentMonthRange } from '../../lib/date/helpers';
 
 const keys = {
-  categorySpend: (month: string) => ['insights', 'category-spend', month] as const,
+  categorySpendRange: (startDate: string, endDate: string) => ['insights', 'category-spend-range', startDate, endDate] as const,
   monthlyTrend: (months: number) => ['insights', 'monthly-trend', months] as const,
   yearlySummary: (year: number) => ['insights', 'yearly-summary', year] as const,
   categorySpendYear: (year: number) => ['insights', 'category-spend-year', year] as const,
   weeklyTrend: (yearMonth: string) => ['insights', 'weekly-trend', yearMonth] as const,
+  summaryRange: (startDate: string, endDate: string) => ['insights', 'summary-range', startDate, endDate] as const,
 };
 
-export function useCategorySpend(date: string) {
+export function useSummaryByRange(startDate: string, endDate: string) {
   const db = useSQLiteContext();
   return useQuery({
-    queryKey: keys.categorySpend(date),
-    queryFn: () => getCategorySpend(db, date),
+    queryKey: keys.summaryRange(startDate, endDate),
+    queryFn: () => getSummaryByRange(db, startDate, endDate),
+  });
+}
+
+export function useCategorySpendByRange(startDate: string, endDate: string) {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: keys.categorySpendRange(startDate, endDate),
+    queryFn: () => getCategorySpendByRange(db, startDate, endDate),
   });
 }
 
@@ -58,9 +66,21 @@ export function useCategorySpendForYear(year: number) {
 
 // ─── Database Functions ───
 
-async function getCategorySpend(db: SQLiteDatabase, date: string): Promise<CategorySpend[]> {
-  const [startDate, nextMonth] = getCurrentMonthRange(date);
+async function getSummaryByRange(db: SQLiteDatabase, startDate: string, endDate: string): Promise<MonthSummary> {
+  const row = await db.getFirstAsync<{ income: number; expense: number }>(
+    `SELECT
+       COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) as income,
+       COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) as expense
+     FROM transactions
+     WHERE date >= ? AND date < ?`,
+    [startDate, endDate],
+  );
+  const income = row?.income ?? 0;
+  const expense = row?.expense ?? 0;
+  return { income, expense, balance: income - expense };
+}
 
+async function getCategorySpendByRange(db: SQLiteDatabase, startDate: string, endDate: string): Promise<CategorySpend[]> {
   const rows = await db.getAllAsync<Omit<CategorySpend, 'percentage'>>(
     `SELECT
        c.id as category_id,
@@ -75,7 +95,7 @@ async function getCategorySpend(db: SQLiteDatabase, date: string): Promise<Categ
        AND t.type IN ('income','expense') AND t.date >= ? AND t.date < ?
      GROUP BY c.id, c.name, c.color, c.icon, COALESCE(t.type, 'expense'), c.sort_order
      ORDER BY c.sort_order ASC`,
-    [startDate, nextMonth],
+    [startDate, endDate],
   );
 
   const grandTotal = rows.reduce((s, r) => s + r.total, 0);

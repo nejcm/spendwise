@@ -8,6 +8,7 @@ import type { ThemeType } from '@/features/settings/theme';
 import { createMMKV } from 'react-native-mmkv';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { currentPeriodSelection } from '@/lib/date/helpers';
 import { createSelectors } from '@/lib/utils';
 
 export type TokenType = {
@@ -16,6 +17,14 @@ export type TokenType = {
 };
 
 export type ColorThemeType = 'red' | 'blue' | 'green' | 'purple' | 'orange' | 'black' | 'white';
+
+export type PeriodMode = 'year' | 'month' | 'week' | 'custom';
+
+export type PeriodSelection
+  = | { mode: 'year'; year: number }
+    | { mode: 'month'; year: number; month: number }
+    | { mode: 'week'; year: number; week: number }
+    | { mode: 'custom'; startDate: string; endDate: string };
 
 const mmkv = createMMKV();
 const mmkvStorage: StateStorage = {
@@ -59,6 +68,9 @@ export type AppState = {
   lastUsed: {
     currency: CurrencyKey;
   };
+
+  // UI state (not persisted)
+  periodSelection: PeriodSelection;
 };
 
 const _useAppStore = create<AppState>()(
@@ -87,6 +99,7 @@ const _useAppStore = create<AppState>()(
       lastUsed: {
         currency: 'USD',
       },
+      periodSelection: currentPeriodSelection(),
     }),
     {
       name: 'app-storage',
@@ -193,6 +206,11 @@ export function setLockEnabled(lockEnabled: boolean) {
 
 export function setLockTimeoutMinutes(lockTimeoutMinutes: number) {
   return _useAppStore.setState({ lockTimeoutMinutes });
+}
+
+// Period selection actions
+export function setPeriodSelection(periodSelection: PeriodSelection) {
+  return _useAppStore.setState({ periodSelection });
 }
 
 // Other actions

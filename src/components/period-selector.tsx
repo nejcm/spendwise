@@ -1,4 +1,4 @@
-import type { PeriodSelection } from '../features/transactions/types';
+import type { PeriodSelection } from '@/lib/store';
 import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react-native';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';

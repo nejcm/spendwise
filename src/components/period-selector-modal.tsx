@@ -1,5 +1,5 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
-import type { PeriodMode, PeriodSelection } from '../features/transactions/types';
+import type { PeriodMode, PeriodSelection } from '@/lib/store';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { format } from 'date-fns';
 import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react-native';

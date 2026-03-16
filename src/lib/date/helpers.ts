@@ -1,4 +1,4 @@
-import type { PeriodSelection } from '@/features/transactions/types';
+import type { PeriodSelection } from '@/lib/store';
 import {
   addDays,
   addMonths,

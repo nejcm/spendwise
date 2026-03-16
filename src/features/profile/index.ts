@@ -15,6 +15,10 @@ export const AVATARS = {
   14: require('../../../assets/avatars/14.png'),
   15: require('../../../assets/avatars/15.png'),
   16: require('../../../assets/avatars/16.png'),
+  17: require('../../../assets/avatars/17.png'),
+  18: require('../../../assets/avatars/18.png'),
+  19: require('../../../assets/avatars/19.png'),
+  20: require('../../../assets/avatars/20.png'),
 } as const;
 
 export const AVATARS_LIST = Object.values(AVATARS);

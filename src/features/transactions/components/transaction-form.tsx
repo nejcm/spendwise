@@ -105,6 +105,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
             <Select
               value={field.state.value}
               options={CURRENCY_OPTIONS}
+              searchEnabled
               onSelect={(value) => {
                 if (!value) return;
                 field.handleChange(String(value) as CurrencyKey);

@@ -12,8 +12,10 @@ import { Pressable, View } from 'react-native';
 import { cn, tv } from 'tailwind-variants';
 import { useUniwind } from 'uniwind';
 import { IS_WEB } from '@/lib/base';
+import { translate } from '@/lib/i18n';
 import { defaultStyles } from '@/lib/theme/styles';
 import { Image } from './image';
+import { Input } from './input';
 import { Modal, useModal } from './modal';
 import { Text } from './text';
 
@@ -137,6 +139,8 @@ export type OptionsProps = {
   className?: string;
   listProps?: Partial<Pick<FlatListProps<OptionType>, 'numColumns'>>;
   renderItem?: (item: OptionType) => React.ReactNode;
+  searchEnabled?: boolean;
+  searchPlaceholder?: string;
 } & Omit<ModalProps, 'children'>;
 
 function keyExtractor(item: OptionType) {
@@ -152,11 +156,30 @@ export function Options({
   listProps,
   className,
   renderItem,
+  searchEnabled = false,
+  searchPlaceholder = translate('common.search'),
   ...rest
 }: OptionsProps & { ref?: React.RefObject<BottomSheetModal | null> }) {
   const { theme } = useUniwind();
   const isDark = theme === 'dark';
   const checkColor = isDark ? '#ffffff' : '#232633';
+
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const deferredSearchQuery = React.useDeferredValue(searchQuery);
+
+  const filteredOptions = React.useMemo(() => {
+    if (!searchEnabled) return options;
+
+    const query = deferredSearchQuery.trim().toLowerCase();
+    if (!query) return options;
+
+    return options.filter((option) => {
+      const labelMatch = option.label.toLowerCase().includes(query);
+      const subtextMatch = option.subtext?.toLowerCase().includes(query);
+
+      return labelMatch || subtextMatch;
+    });
+  }, [options, searchEnabled, deferredSearchQuery]);
 
   const renderSelectItem = React.useCallback(
     ({ item }: { item: OptionType }) => (
@@ -176,6 +199,23 @@ export function Options({
     [checkColor, onSelect, value, testID, className, renderItem],
   );
 
+  const listHeader = React.useMemo(
+    () =>
+      searchEnabled
+        ? (
+            <View className="px-3 pt-3 pb-2">
+              <Input
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                placeholder={searchPlaceholder}
+                testID={testID ? `${testID}-search` : undefined}
+              />
+            </View>
+          )
+        : null,
+    [searchEnabled, searchPlaceholder, searchQuery, testID],
+  );
+
   return (
     <Modal
       ref={ref}
@@ -187,9 +227,10 @@ export function Options({
       {...rest}
     >
       <List
-        data={options}
+        data={filteredOptions}
         keyExtractor={keyExtractor}
         renderItem={renderSelectItem}
+        ListHeaderComponent={listHeader}
         testID={testID ? `${testID}-modal` : undefined}
         estimatedItemSize={52}
         {...listProps}
@@ -213,6 +254,8 @@ export type SelectProps = {
   listProps?: OptionsProps['listProps'];
   renderItem?: OptionsProps['renderItem'];
   renderSelectedItem?: (item: OptionType | null) => React.ReactNode;
+  searchEnabled?: OptionsProps['searchEnabled'];
+  searchPlaceholder?: OptionsProps['searchPlaceholder'];
 } & Omit<VariantProps<typeof selectTv>, 'error'> & Omit<ModalProps, 'children'>;
 
 export function Select({
@@ -220,7 +263,7 @@ export function Select({
   value,
   error,
   options = [],
-  placeholder = 'Select...',
+  placeholder = translate('common.select'),
   disabled = false,
   onSelect,
   testID,
@@ -230,6 +273,8 @@ export function Select({
   showChevron = true,
   color,
   renderSelectedItem,
+  searchEnabled,
+  searchPlaceholder,
   ...rest
 }: SelectProps) {
   const modal = useModal();
@@ -293,7 +338,15 @@ export function Select({
           </View>
         )}
       </View>
-      <Options testID={testID} ref={modal.ref} options={options} onSelect={onSelectOption} {...rest} />
+      <Options
+        testID={testID}
+        ref={modal.ref}
+        options={options}
+        onSelect={onSelectOption}
+        searchEnabled={searchEnabled}
+        searchPlaceholder={searchPlaceholder}
+        {...rest}
+      />
     </>
   );
 }

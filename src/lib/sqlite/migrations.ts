@@ -2,7 +2,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import { IS_WEB } from '../base';
 import { seedDefaults } from './seed';
 
-const DATABASE_VERSION = 1;
+const DATABASE_VERSION = 2;
 
 /**
  * Drops all tables and recreates them. Safe on all platforms.
@@ -33,6 +33,7 @@ export async function dropDb(db: SQLiteDatabase): Promise<void> {
     DROP TABLE IF EXISTS budget_lines;
     DROP TABLE IF EXISTS recurring_rules;
     DROP TABLE IF EXISTS goals;
+    DROP TABLE IF EXISTS currency_rates;
   `);
   await db.execAsync(`PRAGMA user_version = 0`);
 }
@@ -50,103 +51,119 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
   await db.execAsync('PRAGMA journal_mode = \'wal\'');
   await db.execAsync('PRAGMA foreign_keys = ON');
 
-  await db.execAsync(`
-      CREATE TABLE IF NOT EXISTS _meta (
-        key TEXT PRIMARY KEY NOT NULL,
-        value TEXT
+  if (currentDbVersion < 1) {
+    await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS _meta (
+          key TEXT PRIMARY KEY NOT NULL,
+          value TEXT
+        );
+      `);
+
+    await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS accounts (
+          id TEXT PRIMARY KEY NOT NULL,
+          name TEXT NOT NULL,
+          description TEXT,
+          type TEXT NOT NULL CHECK(type IN ('cash','checking','savings','credit_card','investment','other')),
+          currency TEXT NOT NULL DEFAULT 'EUR',
+          budget INTEGER,
+          icon TEXT,
+          color TEXT,
+          is_archived INTEGER NOT NULL DEFAULT 0,
+          sort_order INTEGER NOT NULL DEFAULT 999999,
+          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+
+        CREATE TABLE IF NOT EXISTS categories (
+          id TEXT PRIMARY KEY NOT NULL,
+          name TEXT NOT NULL,
+          icon TEXT,
+          color TEXT NOT NULL,
+          sort_order INTEGER NOT NULL DEFAULT 999999,
+          created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+
+        CREATE TABLE IF NOT EXISTS transactions (
+          id TEXT PRIMARY KEY NOT NULL,
+          account_id TEXT NOT NULL REFERENCES accounts(id),
+          category_id TEXT REFERENCES categories(id),
+          type TEXT NOT NULL CHECK(type IN ('income','expense','transfer')),
+          amount INTEGER NOT NULL,
+          currency TEXT NOT NULL DEFAULT 'EUR',
+          date TEXT NOT NULL,
+          note TEXT,
+          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date DESC);
+        CREATE INDEX IF NOT EXISTS idx_transactions_account ON transactions(account_id);
+        CREATE INDEX IF NOT EXISTS idx_transactions_category ON transactions(category_id);
+
+        CREATE TABLE IF NOT EXISTS budgets (
+          id TEXT PRIMARY KEY NOT NULL,
+          name TEXT NOT NULL,
+          period TEXT NOT NULL CHECK(period IN ('monthly','weekly','yearly')),
+          amount INTEGER NOT NULL,
+          start_date TEXT NOT NULL,
+          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+
+        CREATE TABLE IF NOT EXISTS budget_lines (
+          id TEXT PRIMARY KEY NOT NULL,
+          budget_id TEXT NOT NULL REFERENCES budgets(id) ON DELETE CASCADE,
+          category_id TEXT NOT NULL REFERENCES categories(id),
+          amount INTEGER NOT NULL,
+          UNIQUE(budget_id, category_id)
+        );
+
+        CREATE TABLE IF NOT EXISTS recurring_rules (
+          id TEXT PRIMARY KEY NOT NULL,
+          account_id TEXT NOT NULL REFERENCES accounts(id),
+          category_id TEXT REFERENCES categories(id),
+          type TEXT NOT NULL CHECK(type IN ('income','expense')),
+          amount INTEGER NOT NULL,
+          note TEXT,
+          payee TEXT,
+          frequency TEXT NOT NULL CHECK(frequency IN ('daily','weekly','biweekly','monthly','yearly')),
+          start_date TEXT NOT NULL,
+          end_date TEXT,
+          next_due_date TEXT NOT NULL,
+          is_active INTEGER NOT NULL DEFAULT 1,
+          created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+
+        CREATE TABLE IF NOT EXISTS goals (
+          id TEXT PRIMARY KEY NOT NULL,
+          name TEXT NOT NULL,
+          target_amount INTEGER NOT NULL,
+          current_amount INTEGER NOT NULL DEFAULT 0,
+          deadline TEXT,
+          icon TEXT,
+          color TEXT NOT NULL DEFAULT '#4ECDC4',
+          is_completed INTEGER NOT NULL DEFAULT 0,
+          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+      `);
+
+    await seedDefaults(db);
+    await db.execAsync(`PRAGMA user_version = 1`);
+  }
+
+  if (currentDbVersion < 2) {
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS currency_rates (
+        base       TEXT NOT NULL,
+        quote      TEXT NOT NULL,
+        rate       REAL NOT NULL,
+        source     TEXT NOT NULL,
+        fetched_at TEXT NOT NULL DEFAULT (datetime('now')),
+        PRIMARY KEY (base, quote)
       );
     `);
-
-  await db.execAsync(`
-      CREATE TABLE IF NOT EXISTS accounts (
-        id TEXT PRIMARY KEY NOT NULL,
-        name TEXT NOT NULL,
-        description TEXT,
-        type TEXT NOT NULL CHECK(type IN ('cash','checking','savings','credit_card','investment','other')),
-        currency TEXT NOT NULL DEFAULT 'EUR',
-        budget INTEGER,
-        icon TEXT,
-        color TEXT,
-        is_archived INTEGER NOT NULL DEFAULT 0,
-        sort_order INTEGER NOT NULL DEFAULT 999999,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-      );
-
-      CREATE TABLE IF NOT EXISTS categories (
-        id TEXT PRIMARY KEY NOT NULL,
-        name TEXT NOT NULL,
-        icon TEXT,
-        color TEXT NOT NULL,
-        sort_order INTEGER NOT NULL DEFAULT 999999,
-        created_at TEXT NOT NULL DEFAULT (datetime('now'))
-      );
-
-      CREATE TABLE IF NOT EXISTS transactions (
-        id TEXT PRIMARY KEY NOT NULL,
-        account_id TEXT NOT NULL REFERENCES accounts(id),
-        category_id TEXT REFERENCES categories(id),
-        type TEXT NOT NULL CHECK(type IN ('income','expense','transfer')),
-        amount INTEGER NOT NULL,
-        currency TEXT NOT NULL DEFAULT 'EUR',
-        date TEXT NOT NULL,
-        note TEXT,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-      );
-
-      CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date DESC);
-      CREATE INDEX IF NOT EXISTS idx_transactions_account ON transactions(account_id);
-      CREATE INDEX IF NOT EXISTS idx_transactions_category ON transactions(category_id);
-
-      CREATE TABLE IF NOT EXISTS budgets (
-        id TEXT PRIMARY KEY NOT NULL,
-        name TEXT NOT NULL,
-        period TEXT NOT NULL CHECK(period IN ('monthly','weekly','yearly')),
-        amount INTEGER NOT NULL,
-        start_date TEXT NOT NULL,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-      );
-
-      CREATE TABLE IF NOT EXISTS budget_lines (
-        id TEXT PRIMARY KEY NOT NULL,
-        budget_id TEXT NOT NULL REFERENCES budgets(id) ON DELETE CASCADE,
-        category_id TEXT NOT NULL REFERENCES categories(id),
-        amount INTEGER NOT NULL,
-        UNIQUE(budget_id, category_id)
-      );
-
-      CREATE TABLE IF NOT EXISTS recurring_rules (
-        id TEXT PRIMARY KEY NOT NULL,
-        account_id TEXT NOT NULL REFERENCES accounts(id),
-        category_id TEXT REFERENCES categories(id),
-        type TEXT NOT NULL CHECK(type IN ('income','expense')),
-        amount INTEGER NOT NULL,
-        note TEXT,
-        payee TEXT,
-        frequency TEXT NOT NULL CHECK(frequency IN ('daily','weekly','biweekly','monthly','yearly')),
-        start_date TEXT NOT NULL,
-        end_date TEXT,
-        next_due_date TEXT NOT NULL,
-        is_active INTEGER NOT NULL DEFAULT 1,
-        created_at TEXT NOT NULL DEFAULT (datetime('now'))
-      );
-
-      CREATE TABLE IF NOT EXISTS goals (
-        id TEXT PRIMARY KEY NOT NULL,
-        name TEXT NOT NULL,
-        target_amount INTEGER NOT NULL,
-        current_amount INTEGER NOT NULL DEFAULT 0,
-        deadline TEXT,
-        icon TEXT,
-        color TEXT NOT NULL DEFAULT '#4ECDC4',
-        is_completed INTEGER NOT NULL DEFAULT 0,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-      );
-    `);
-
-  await seedDefaults(db);
-  await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
+    await db.execAsync(`PRAGMA user_version = 2`);
+  }
 }

@@ -55,7 +55,7 @@ function MapStep({ headers, mapping, onMapping, onNext }: MapStepProps) {
       <Text className="mb-4 text-lg font-medium">{translate('import.map_columns')}</Text>
       {COLUMN_FIELDS.map((field) => (
         <View key={field} className="mb-4">
-              <Text className="mb-1 text-sm font-medium text-gray-600 dark:text-gray-400">
+          <Text className="mb-1 text-sm font-medium text-gray-600 dark:text-gray-400">
             {translate(`import.field_${field}` as any)}
             {field === 'date' || field === 'amount'
               ? (
@@ -240,7 +240,8 @@ export function ImportScreen() {
       translate('import.complete_message', { count }),
       [
         { onPress: () => router.back(), text: translate('common.ok') },
-    ]);
+      ],
+    );
   };
 
   return (

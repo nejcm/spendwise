@@ -24,6 +24,7 @@ import { APIProvider } from '@/lib/api';
 import { IS_WEB } from '@/lib/base';
 import { DatabaseErrorBoundary, migrateDb } from '@/lib/sqlite';
 
+import { useCurrencyRates } from '@/features/currencies/api';
 import { loadSelectedTheme, useSelectedTheme } from '@/lib/theme/use-selected-theme';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 // Import  global CSS file
@@ -56,6 +57,11 @@ function PersistentTabBar() {
   const pathname = usePathname();
   if (pathname === '/onboarding') return null;
   return <CustomTabBar />;
+}
+
+function CurrencyRatesInitializer() {
+  useCurrencyRates();
+  return null;
 }
 
 function DevThemeToggle() {
@@ -139,6 +145,7 @@ function Providers({ children }: { children: React.ReactNode }) {
             <SQLiteProvider databaseName="spendwise.db" onInit={initDb}>
               <AppErrorBoundary>
                 <APIProvider>
+                  <CurrencyRatesInitializer />
                   <FontLoader>
                     <BottomSheetModalProvider>
                       {children}

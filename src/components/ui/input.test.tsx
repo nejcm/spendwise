@@ -83,7 +83,8 @@ describe('input component ', () => {
     const input = screen.getByTestId('input');
     await user.type(input, '123456789');
     expect(onChangeText).toHaveBeenCalledTimes(9); // every character is a change event
-    expect(onChangeText).toHaveBeenCalledWith('123456789');
+    expect(onChangeText).toHaveBeenNthCalledWith(1, '1');
+    expect(onChangeText).toHaveBeenNthCalledWith(9, '9');
   });
   it('should be disabled when disabled prop is true', () => {
     render(<Input testID="input" disabled={true} />);

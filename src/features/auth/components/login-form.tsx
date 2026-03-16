@@ -10,10 +10,7 @@ import { getFieldError } from '@/components/ui/form-utils';
 const schema = z.object({
   name: z.string().optional(),
   email: z
-    .email({
-      message: 'Email is required',
-    })
-    .min(1, 'Email is required'),
+    .email('Email is required'),
   password: z
     .string({
       message: 'Password is required',

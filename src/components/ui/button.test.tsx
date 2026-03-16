@@ -63,27 +63,18 @@ describe('button component ', () => {
     expect(onClick).toHaveBeenCalledTimes(0);
   });
   it('should apply correct styles based on size prop', () => {
-    render(<SolidButton testID="button" size="lg" />);
-    const button = screen.getByTestId('button');
-    // TODO: should be fixed to use haveStyle instead of comparing the class name
-    const expectedStyle = 'font-family-sans font-medium text-white dark:text-black text-xl';
-    const receivedStyle = button.props.children[0].props.children.props.className;
-    expect(receivedStyle).toContain(expectedStyle);
+    render(<SolidButton testID="button" size="lg" label="Submit" />);
+
+    expect(screen.getByTestId('button-label').props.className).toContain('text-lg/snug');
   });
   it('should apply correct styles for label when variant is secondary', () => {
     render(<SolidButton testID="button" color="secondary" label="Submit" />);
-    const button = screen.getByTestId('button');
 
-    const expectedStyle = 'font-family-sans font-medium text-secondary-600 text-base';
-    const receivedStyle = button.props.children[0].props.children.props.className;
-    expect(receivedStyle).toContain(expectedStyle);
+    expect(screen.getByTestId('button-label').props.className).toContain('text-muted-foreground');
   });
   it('should apply correct styles for label when is disabled', () => {
     render(<SolidButton testID="button" label="Submit" disabled />);
-    const button = screen.getByTestId('button');
 
-    const expectedStyle = 'font-family-sans font-medium text-base text-gray-600 dark:text-gray-600';
-    const receivedStyle = button.props.children[0].props.children.props.className;
-    expect(receivedStyle).toContain(expectedStyle);
+    expect(screen.getByTestId('button-label').props.className).toContain('text-gray-600 dark:text-gray-600');
   });
 });

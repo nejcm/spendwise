@@ -50,7 +50,7 @@ export default antfu(
     rules: {
       'antfu/if-newline': 'off',
       'style/arrow-parens': ['error', 'always'],
-      'max-params': ['error', 3],
+      'max-params': ['error', 4],
       'react/display-name': 'off',
       'react/no-inline-styles': 'off',
       'react/destructuring-assignment': 'off',

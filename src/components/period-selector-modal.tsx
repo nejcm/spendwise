@@ -8,9 +8,9 @@ import { View } from 'react-native';
 import { Modal, SolidButton, Text, useModal } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { IconButton } from '@/components/ui/icon-button';
-import { todayISO } from '@/features/formatting/helpers';
 import { currentISOWeek, getWeeksInYear } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
+import { todayISO } from '../features/formatting/helpers';
 import { GhostButton } from './ui/ghost-button';
 
 const CURRENT_YEAR = new Date().getFullYear();

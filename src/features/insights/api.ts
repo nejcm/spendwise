@@ -1,7 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { MonthSummary } from '../transactions/types';
-import type { CategorySpend, MonthlyTotals, WeeklyTotals } from './types';
+import type { CategorySpend, DailyTrendTotal, MonthlyTotals } from './types';
 
 import { useQuery } from '@tanstack/react-query';
 import { format, subMonths } from 'date-fns';
@@ -10,10 +10,9 @@ import { useSQLiteContext } from 'expo-sqlite';
 const keys = {
   categorySpendRange: (startDate: string, endDate: string) => ['insights', 'category-spend-range', startDate, endDate] as const,
   monthlyTrend: (months: number) => ['insights', 'monthly-trend', months] as const,
-  monthlyTrendForYear: (year: number) => ['insights', 'monthly-trend-year', year] as const,
+  trendRange: (startDate: string, endDate: string) => ['insights', 'trend-range', startDate, endDate] as const,
   yearlySummary: (year: number) => ['insights', 'yearly-summary', year] as const,
   categorySpendYear: (year: number) => ['insights', 'category-spend-year', year] as const,
-  weeklyTrend: (yearMonth: string) => ['insights', 'weekly-trend', yearMonth] as const,
   summaryRange: (startDate: string, endDate: string) => ['insights', 'summary-range', startDate, endDate] as const,
 };
 
@@ -33,6 +32,14 @@ export function useCategorySpendByRange(startDate: string, endDate: string) {
   });
 }
 
+export function useTrendByRange(startDate: string, endDate: string) {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: keys.trendRange(startDate, endDate),
+    queryFn: () => getTrendByRange(db, startDate, endDate),
+  });
+}
+
 export function useMonthlyTrend(numMonths: number = 6) {
   const db = useSQLiteContext();
   return useQuery({
@@ -41,27 +48,11 @@ export function useMonthlyTrend(numMonths: number = 6) {
   });
 }
 
-export function useMonthlyTrendForYear(year: number) {
-  const db = useSQLiteContext();
-  return useQuery({
-    queryKey: keys.monthlyTrendForYear(year),
-    queryFn: () => getMonthlyTrendForYear(db, year),
-  });
-}
-
 export function useYearlySummary(year: number) {
   const db = useSQLiteContext();
   return useQuery({
     queryKey: keys.yearlySummary(year),
     queryFn: () => getYearlySummary(db, year),
-  });
-}
-
-export function useWeeklyTrend(yearMonth: string) {
-  const db = useSQLiteContext();
-  return useQuery({
-    queryKey: keys.weeklyTrend(yearMonth),
-    queryFn: () => getWeeklyTrend(db, yearMonth),
   });
 }
 
@@ -115,6 +106,26 @@ async function getCategorySpendByRange(db: SQLiteDatabase, startDate: string, en
   }));
 }
 
+async function getTrendByRange(
+  db: SQLiteDatabase,
+  startDate: string,
+  endDate: string,
+): Promise<DailyTrendTotal[]> {
+  const rows = await db.getAllAsync<DailyTrendTotal>(
+    `SELECT
+       date,
+       COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) as income,
+       COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) as expense
+     FROM transactions
+     WHERE date >= ? AND date < ?
+     GROUP BY date
+     ORDER BY date ASC`,
+    [startDate, endDate],
+  );
+
+  return rows;
+}
+
 async function getYearlySummary(db: SQLiteDatabase, year: number): Promise<MonthSummary> {
   const startDate = `${year}-01-01`;
   const endDate = `${year + 1}-01-01`;
@@ -162,45 +173,6 @@ async function getCategorySpendForYear(db: SQLiteDatabase, year: number): Promis
   }));
 }
 
-async function getWeeklyTrend(db: SQLiteDatabase, yearMonth: string): Promise<WeeklyTotals[]> {
-  const [year, month] = yearMonth.split('-');
-  const daysInMonth = new Date(Number(year), Number(month), 0).getDate();
-
-  const weekRanges = [
-    { week: 1, start: 1, end: 7 },
-    { week: 2, start: 8, end: 14 },
-    { week: 3, start: 15, end: 21 },
-    { week: 4, start: 22, end: 28 },
-  ];
-  if (daysInMonth > 28) {
-    weekRanges.push({ week: 5, start: 29, end: daysInMonth });
-  }
-
-  const result: WeeklyTotals[] = [];
-  for (const { week, start, end } of weekRanges) {
-    const startDate = `${year}-${month}-${String(start).padStart(2, '0')}`;
-    const endDay = Math.min(end, daysInMonth);
-    const nextDay = endDay + 1;
-    const nextDate = nextDay > daysInMonth
-      ? (Number(month) === 12
-          ? `${Number(year) + 1}-01-01`
-          : `${year}-${String(Number(month) + 1).padStart(2, '0')}-01`)
-      : `${year}-${month}-${String(nextDay).padStart(2, '0')}`;
-
-    const row = await db.getFirstAsync<{ income: number; expense: number }>(
-      `SELECT
-         COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) as income,
-         COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) as expense
-       FROM transactions
-       WHERE date >= ? AND date < ?`,
-      [startDate, nextDate],
-    );
-
-    result.push({ week, label: `W${week}`, income: row?.income ?? 0, expense: row?.expense ?? 0 });
-  }
-  return result;
-}
-
 async function getMonthlyTrend(db: SQLiteDatabase, numMonths: number): Promise<MonthlyTotals[]> {
   const now = new Date();
   const result: MonthlyTotals[] = [];
@@ -213,31 +185,6 @@ async function getMonthlyTrend(db: SQLiteDatabase, numMonths: number): Promise<M
     const nextMonth = Number(m) === 12
       ? `${Number(year) + 1}-01-01`
       : `${year}-${String(Number(m) + 1).padStart(2, '0')}-01`;
-
-    const row = await db.getFirstAsync<{ income: number; expense: number }>(
-      `SELECT
-         COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) as income,
-         COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) as expense
-       FROM transactions
-       WHERE date >= ? AND date < ?`,
-      [startDate, nextMonth],
-    );
-
-    result.push({ month, income: row?.income ?? 0, expense: row?.expense ?? 0 });
-  }
-
-  return result;
-}
-
-async function getMonthlyTrendForYear(db: SQLiteDatabase, year: number): Promise<MonthlyTotals[]> {
-  const result: MonthlyTotals[] = [];
-
-  for (let m = 1; m <= 12; m++) {
-    const month = `${year}-${String(m).padStart(2, '0')}`;
-    const startDate = `${month}-01`;
-    const nextMonth = m === 12
-      ? `${year + 1}-01-01`
-      : `${year}-${String(m + 1).padStart(2, '0')}-01`;
 
     const row = await db.getFirstAsync<{ income: number; expense: number }>(
       `SELECT

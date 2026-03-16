@@ -21,3 +21,15 @@ export type WeeklyTotals = {
   income: number;
   expense: number;
 };
+
+export type DailyTrendTotal = {
+  date: string;
+  income: number;
+  expense: number;
+};
+
+export type TrendPoint = {
+  label: string;
+  income: number;
+  expense: number;
+};

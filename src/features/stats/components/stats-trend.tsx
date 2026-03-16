@@ -1,23 +1,23 @@
-import type { MonthlyTotals, WeeklyTotals } from '@/features/insights/types';
-
-import { format, parseISO } from 'date-fns';
+import type { PeriodMode } from '@/lib/store';
 import * as React from 'react';
 import { useColorScheme, useWindowDimensions } from 'react-native';
-import { BarChart } from 'react-native-gifted-charts';
 
+import { BarChart } from 'react-native-gifted-charts';
 import { Text, View } from '@/components/ui';
-import { centsToAmount } from '@/features/formatting/helpers';
+import { useTrendByRange } from '@/features/insights/api';
 import { translate } from '@/lib/i18n';
+import { centsToAmount } from '../../formatting/helpers';
+import { buildTrendSeries } from '../../insights/trend';
 
 export type StatsTrendProps = {
-  monthlyData: MonthlyTotals[];
-  weeklyData: WeeklyTotals[];
-  period: 'month' | 'year' | 'week';
+  period: PeriodMode;
+  startDate: string;
+  endDate: string;
 };
 
 const PAIR_GAP = 2;
 
-export function StatsTrend({ monthlyData, weeklyData, period }: StatsTrendProps) {
+export function StatsTrend({ period, startDate, endDate }: StatsTrendProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const { width: screenWidth } = useWindowDimensions();
@@ -25,56 +25,53 @@ export function StatsTrend({ monthlyData, weeklyData, period }: StatsTrendProps)
   const incomeColor = '#2ebe7e';
   const expenseColor = '#e12f30';
 
+  const { data } = useTrendByRange(startDate, endDate);
+
+  const trendData = React.useMemo(() =>
+    buildTrendSeries(period, startDate, endDate, data ?? []), [period, startDate, endDate, data]);
+
   const { barData, barWidth, spacing } = React.useMemo(() => {
-    const sourceData = period === 'year' ? monthlyData : weeklyData;
+    const sourceData = trendData || [];
     const groupCount = sourceData.length;
-    if (groupCount === 0) return { barData: [], barWidth: 8, spacing: 24 };
+    if (groupCount === 0) {
+      return { barData: [], barWidth: 8, spacing: 24 };
+    }
 
-    // Available width minus padding (px-4 + p-4 each side + yAxis ~40)
     const availableWidth = screenWidth - 104;
-
-    // Each group takes: 2 * barWidth + PAIR_GAP + spacing
-    // Total: groupCount * (2 * barWidth + PAIR_GAP + spacing) ≈ availableWidth
-    const targetBarWidth = period === 'year' ? 8 : 10;
+    const targetBarWidth = period === 'year' ? 8 : period === 'week' ? 12 : 10;
+    const minSpacing = period === 'week' ? 10 : 8;
     const computedSpacing = Math.max(
-      8,
+      minSpacing,
       Math.floor(availableWidth / groupCount - 2 * targetBarWidth - PAIR_GAP),
     );
     const labelWidth = 2 * targetBarWidth + PAIR_GAP;
+    const labelFontSize = period === 'year' ? 9 : groupCount > 7 ? 8 : 10;
 
-    const data
-      = period === 'year'
-        ? monthlyData.flatMap((m) => [
-            {
-              value: centsToAmount(m.income),
-              label: format(parseISO(`${m.month}-01`), 'MMM'),
-              spacing: PAIR_GAP,
-              labelWidth,
-              labelTextStyle: { color: labelColor, fontSize: 9, textAlign: 'center' as const },
-              frontColor: incomeColor,
-            },
-            {
-              value: centsToAmount(m.expense),
-              frontColor: expenseColor,
-            },
-          ])
-        : weeklyData.flatMap((w) => [
-            {
-              value: centsToAmount(w.income),
-              label: w.label,
-              spacing: PAIR_GAP,
-              labelWidth,
-              labelTextStyle: { color: labelColor, fontSize: 10, textAlign: 'center' as const },
-              frontColor: incomeColor,
-            },
-            {
-              value: centsToAmount(w.expense),
-              frontColor: expenseColor,
-            },
-          ]);
+    const data = sourceData.flatMap((point) => [
+      {
+        value: centsToAmount(point.income),
+        label: point.label,
+        spacing: PAIR_GAP,
+        labelWidth,
+        labelTextStyle: {
+          color: labelColor,
+          fontSize: labelFontSize,
+          textAlign: 'center' as const,
+        },
+        frontColor: incomeColor,
+      },
+      {
+        value: centsToAmount(point.expense),
+        frontColor: expenseColor,
+      },
+    ]);
 
-    return { barData: data, barWidth: targetBarWidth, spacing: computedSpacing };
-  }, [period, monthlyData, weeklyData, labelColor, screenWidth]);
+    return {
+      barData: data,
+      barWidth: targetBarWidth,
+      spacing: computedSpacing,
+    };
+  }, [period, trendData, labelColor, screenWidth]);
 
   if (barData.length === 0) return null;
 
@@ -91,11 +88,12 @@ export function StatsTrend({ monthlyData, weeklyData, period }: StatsTrendProps)
         </View>
       </View>
       <BarChart
+        key={`${period}-${startDate}-${endDate}`}
         data={barData}
         barWidth={barWidth}
         spacing={spacing}
+        initialSpacing={0}
         roundedTop
-        roundedBottom
         hideRules
         xAxisThickness={0}
         yAxisThickness={0}

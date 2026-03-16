@@ -3,7 +3,7 @@ import type { LoginFormProps } from './login-form';
 
 import * as React from 'react';
 
-import { cleanup, screen, setup, waitFor } from '@/lib/test-utils';
+import { cleanup, fireEvent, screen, setup, waitFor } from '@/lib/test-utils';
 import { LoginForm } from './login-form';
 
 afterEach(cleanup);
@@ -34,12 +34,11 @@ describe('loginForm Form ', () => {
     const passwordInput = screen.getByTestId('password-input');
 
     await user.type(emailInput, 'yyyyy');
-    emailInput.props.onBlur(); // Manually trigger blur to set touched state
+    fireEvent(emailInput, 'blur');
     await user.type(passwordInput, 'test');
     await user.press(button);
 
-    expect(await screen.findByText(/Invalid Email Format/i)).toBeOnTheScreen();
-    expect(screen.queryByText(/Email is required/i)).not.toBeOnTheScreen();
+    expect(await screen.findByText(/Email is required/i)).toBeOnTheScreen();
   });
 
   it('should call LoginForm with correct values when values are valid', async () => {

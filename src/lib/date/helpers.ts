@@ -15,3 +15,12 @@ export function getCurrentMonthRange(yearMonth: string): [string, string] {
 
   return [startDate, nextMonth];
 }
+
+export function tryFormatDate(date: string, dateFormat = 'yyyy-MM-dd') {
+  try {
+    return format(date, dateFormat);
+  }
+  catch (_) {
+    return undefined;
+  }
+}

@@ -11,6 +11,7 @@ import RNRestart from 'react-native-restart';
 
 import { getAppState, setLanguage, useAppStore } from '@/lib/store';
 import { DEFAULT_LANGUAGE, LANGUAGES_OPTIONS } from '../../features/languages';
+import { IS_WEB } from '../base';
 
 type DefaultLocale = typeof resources.en.translation;
 export type TxKeyPath = RecursiveKeyOf<DefaultLocale>;
@@ -32,7 +33,7 @@ export function changeLanguage(lang: Language) {
       NativeModules.DevSettings.reload();
     else RNRestart.restart();
   }
-  else if (Platform.OS === 'web') {
+  else if (IS_WEB) {
     window.location.reload();
   }
 }

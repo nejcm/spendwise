@@ -85,8 +85,8 @@ export function TransactionDetailScreen() {
       <DetailsSection
         className="mb-8"
         data={[
-          { label: 'Created at', value: formatDate(transaction.created_at) },
-          { label: 'Updated at', value: formatDate(transaction.updated_at) },
+          { label: translate('transactions.created_at'), value: formatDate(transaction.created_at) },
+          { label: translate('transactions.updated_at'), value: formatDate(transaction.updated_at) },
         ]}
       />
       <View className="mb-6 justify-center">

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Platform, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
+import { IS_WEB } from '../base';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const OPFS_CLEAR_FLAG = 'spendwise_clearOpfs';
@@ -19,7 +20,7 @@ async function doOpfsClear(): Promise<void> {
 //   detect the flag and clear the OPFS directory, then reload once more.
 // Phase 3: clean page load with fresh OPFS.
 export function OpfsCleaner({ children }: { children: React.ReactNode }) {
-  const needsClear = Platform.OS === 'web'
+  const needsClear = IS_WEB
     && typeof sessionStorage !== 'undefined'
     && sessionStorage.getItem(OPFS_CLEAR_FLAG) === '1';
 

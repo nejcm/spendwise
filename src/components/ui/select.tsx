@@ -8,9 +8,10 @@ import { FlashList } from '@shopify/flash-list';
 import { Check, ChevronDown } from 'lucide-react-native';
 
 import * as React from 'react';
-import { Platform, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { cn, tv } from 'tailwind-variants';
 import { useUniwind } from 'uniwind';
+import { IS_WEB } from '@/lib/base';
 import { defaultStyles } from '@/lib/theme/styles';
 import { Image } from './image';
 import { Modal, useModal } from './modal';
@@ -89,7 +90,7 @@ const selectTv = tv({
   },
 });
 
-const List = Platform.OS === 'web' ? FlashList : BottomSheetFlatList;
+const List = IS_WEB ? FlashList : BottomSheetFlatList;
 
 export type OptionType = { label: string; subtext?: string; value: string | number; image?: string | ImageSource };
 

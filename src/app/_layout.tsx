@@ -21,9 +21,10 @@ import {
 } from '@/features/notifications/notifications';
 import { SecurityLock } from '@/features/security/security-lock';
 import { APIProvider } from '@/lib/api';
+import { IS_WEB } from '@/lib/base';
 import { DatabaseErrorBoundary, migrateDb } from '@/lib/sqlite';
-import { loadSelectedTheme, useSelectedTheme } from '@/lib/theme/use-selected-theme';
 
+import { loadSelectedTheme, useSelectedTheme } from '@/lib/theme/use-selected-theme';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 // Import  global CSS file
 import '../global.css';
@@ -124,7 +125,7 @@ function WebFontsLoader({
 function Providers({ children }: { children: React.ReactNode }) {
   const theme = useThemeConfig();
   // fix for web fonts loading
-  const FontLoader = Platform.OS === 'web' ? WebFontsLoader : React.Fragment;
+  const FontLoader = IS_WEB ? WebFontsLoader : React.Fragment;
 
   return (
     <GestureHandlerRootView

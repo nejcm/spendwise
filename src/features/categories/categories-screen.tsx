@@ -4,7 +4,8 @@ import type { CategoryManageModalProps } from '@/features/categories/category-ma
 import type { TransactionFormProps } from '@/features/transactions/components/transaction-form';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { format } from 'date-fns';
-import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { ArrowLeftIcon, ArrowRightIcon, FileWarning } from 'lucide-react-native';
 import * as React from 'react';
 import { MonthPicker, YearPicker } from '@/components/month-year-picker';
 import { FocusAwareStatusBar, Modal, Pressable, Text, useModal, View } from '@/components/ui';
@@ -13,11 +14,15 @@ import { useCategorySpend } from '@/features/insights/api';
 import { useUpdateCategoryOrder } from '@/features/transactions/api';
 import { TransactionForm } from '@/features/transactions/components/transaction-form';
 import { translate } from '@/lib/i18n';
+import { OutlineButton } from '../../components/ui/outline-button';
 import { CategoryGrid } from './category-grid';
 
 export function CategoriesScreen() {
   const [categoryModal, setCategoryModal] = React.useState<CategoryManageModalProps['initialValues'] | undefined>();
   const { ref: transactionSheetRef } = useModal();
+  const router = useRouter();
+  const { edit } = useLocalSearchParams<{ edit?: string }>();
+  const isEditMode = edit === 'true' || edit === '1';
   // [year, month]
   const [selectedDate, setSelectedDate] = React.useState(() => {
     const date = format(new Date(), 'yyyy-MM');
@@ -46,30 +51,62 @@ export function CategoriesScreen() {
   return (
     <View className="flex-1 bg-background">
       <FocusAwareStatusBar />
-      <View className="flex-row items-center justify-between p-4">
-        <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
-          <ArrowLeftIcon className="size-5 text-muted-foreground" />
-        </Pressable>
-        <View className="flex-row items-center gap-1">
-          <Pressable onPress={() => monthPickerRef.current?.present()} hitSlop={12}>
-            <Text className="text-lg font-medium">{monthName}</Text>
-          </Pressable>
-          <Pressable onPress={() => yearPickerRef.current?.present()} hitSlop={12}>
-            <Text className="text-lg font-medium">{selectedDate[0]}</Text>
-          </Pressable>
-        </View>
-        <Pressable onPress={() => navigateMonth(1)} hitSlop={12}>
-          <ArrowRightIcon className="size-5 text-muted-foreground" />
-        </Pressable>
-      </View>
+      {isEditMode
+        ? (
+            <View className="flex-row items-center justify-center gap-2 py-2">
+              <FileWarning className="size-4 text-muted-foreground" />
+              <Text className="text-sm text-muted-foreground">
+                {translate('categories.edit_mode')}
+              </Text>
+              <OutlineButton
+                label={translate('common.exit')}
+                color="secondary"
+                onPress={() => router.replace('/categories')}
+                size="xs"
+                className="rounded-full px-5"
+              />
+            </View>
+          )
+        : (
+            <View className="flex-row items-center justify-between p-4">
+              <Pressable onPress={() => navigateMonth(-1)} hitSlop={12}>
+                <ArrowLeftIcon className="size-5 text-muted-foreground" />
+              </Pressable>
+              <View className="flex-row items-center gap-1">
+                <Pressable onPress={() => monthPickerRef.current?.present()} hitSlop={12}>
+                  <Text className="text-lg font-medium">{monthName}</Text>
+                </Pressable>
+                <Pressable onPress={() => yearPickerRef.current?.present()} hitSlop={12}>
+                  <Text className="text-lg font-medium">{selectedDate[0]}</Text>
+                </Pressable>
+              </View>
+              <Pressable onPress={() => navigateMonth(1)} hitSlop={12}>
+                <ArrowRightIcon className="size-5 text-muted-foreground" />
+              </Pressable>
+            </View>
+          )}
       <CategoryGrid
         categories={data || []}
         onReorder={(items) => updateOrder.mutate(items)}
         onAddPress={() => setCategoryModal({ id: undefined })}
-        onPress={(category) =>
-          category
-            ? transactionSheetRef.current?.present({ category_id: category.category_id } satisfies TransactionFormProps['initialValues'])
-            : setCategoryModal({ id: undefined })}
+        onPress={(category) => {
+          if (!category) {
+            setCategoryModal({ id: undefined });
+            return;
+          }
+          if (isEditMode) {
+            setCategoryModal({
+              id: category.category_id,
+              name: category.category_name,
+              color: category.category_color,
+              icon: category.category_icon || null,
+            });
+            return;
+          }
+          transactionSheetRef.current?.present({
+            category_id: category.category_id,
+          } satisfies TransactionFormProps['initialValues']);
+        }}
       />
       <CategoryManageModal isOpen={!!categoryModal} onClose={() => setCategoryModal(undefined)} initialValues={categoryModal} />
       <Modal ref={transactionSheetRef} snapPoints={['85%']} onDismiss={closeTransactionSheet} title={translate('transactions.add')}>

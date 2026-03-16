@@ -1,108 +1,140 @@
 # AGENTS Guide - Spendwise
 
-This repository is based on the [Obytes starter](https://starter.obytes.com) and uses Expo + React Native with a feature-oriented structure.
-
-Use this file as the default operating guide for AI coding agents working in this codebase.
+Spendwise is a local-first personal finance app built on Expo + React Native. Use this file as the default operating guide for AI agents working in this repository.
 
 ## What: Technology Stack
 
-- **Expo SDK 54** with React Native 0.81.5 - Managed React Native development
-- **TypeScript** - Strict type safety throughout
-- **Expo Router 6** - File-based routing (like Next.js)
-- **TailwindCSS** via Uniwind/Nativewind - Utility-first styling for React Native
-- **Zustand** - Lightweight global state management
-- **React Query** - Server state and data fetching
-- **TanStack Form + Zod** - Type-safe form handling and validation
-- **MMKV** - Encrypted local storage
-- **Jest + React Testing Library** - Unit testing
+- **Expo SDK 54** + **React Native 0.81.5**
+- **TypeScript** with strict project-wide typing
+- **Expo Router 6** for route files under `src/app`
+- **Uniwind** for utility-based React Native styling
+- **SQLite** for primary app data
+- **Zustand + MMKV** for persisted preferences and lightweight app state
+- **React Query** for async data access and cache invalidation
+- **TanStack Form + Zod** for forms and validation
+- **i18next** for translations
+- **Jest + React Native Testing Library + Maestro** for testing
 
 ## What: Project Structure
 
-```
+```text
 src/
-├── app/              # Expo Router file-based routes (add new routes here)
-├── features/         # Feature modules - auth, feed, settings are EXAMPLES
-├── components/ui/    # Pre-built UI components (button, input, modal, etc.)
-├── lib/              # Pre-configured utilities (api, auth, i18n, storage)
-├── translations/     # i18n files (en.json, ... - add more languages)
-└── global.css        # TailwindCSS configuration
+├── app/              # Expo Router route files and layouts
+├── features/         # Feature modules such as home, accounts, categories, transactions, stats, insights, budgets, goals, imports, currencies, settings, profile, onboarding, notifications, security, and AI
+├── components/       # Shared app components and UI primitives
+├── lib/              # SQLite, storage, theme, i18n, API/query providers, helpers
+├── translations/     # Translation JSON files
+└── global.css        # Uniwind theme/tokens/utilities
 
-Root Files:
-├── env.ts           # Environment config (CUSTOMIZE bundle IDs, API URLs)
-├── app.config.ts    # Expo configuration
-└── README.md        # Project-specific documentation
+Root files:
+├── env.ts            # Typed environment schema and derived Expo values
+├── app.config.ts     # Expo configuration
+├── eas.json          # EAS build profiles
+├── README.md         # Human-facing project overview
+└── docs/             # Deeper project documentation
 ```
+
+## How: App Architecture
+
+- Put screens, feature components, types, and query helpers together inside `src/features/[feature]`.
+- Add route entry points in `src/app`; keep route files thin and delegate screen logic to feature modules.
+- Treat **SQLite** as the source of truth for finance data such as accounts, transactions, budgets, goals, and currency rates.
+- Use **React Query** around SQLite reads/writes and invalidate related queries after mutations.
+- Use **Zustand + MMKV** for preferences and non-relational persisted state such as theme, onboarding state, formatting, lock settings, and AI provider keys.
+- Prefer shared UI primitives from `src/components/ui` before introducing new ad hoc controls.
+- Keep styling in `className` with Uniwind utilities and shared tokens rather than inline style objects when practical.
+- Always use `@/` absolute imports.
+
+## What: Important Runtime Behavior
+
+- App bootstrapping happens in `src/app/_layout.tsx`.
+- Startup initializes SQLite, runs migrations, sets up notifications, checks budget alerts, checks upcoming bills, and mounts the global providers.
+- The app uses a custom persistent tab bar instead of Expo Router's default tabs.
+- The AI feature sends client-side requests directly to provider APIs using user-supplied keys stored locally.
 
 ## How: Development Workflow
 
-**Essential Commands:**
+### Essential Commands
 
 ```bash
-pnpm start              # Start dev server
-pnpm ios/android        # Run on platform
-pnpm lint               # ESLint check
-pnpm lint:ts            # TypeScript validation
-pnpm test               # Run Jest tests
-pnpm lint:ts            # All quality checks
-pnpm format             # Format code
+pnpm start
+pnpm ios
+pnpm android
+pnpm web
+pnpm lint
+pnpm lint:ts
+pnpm lint:all
+pnpm test
+pnpm verify
+pnpm format
 ```
 
-**Environment-Specific:**
+### Useful Supporting Commands
 
 ```bash
-pnpm start:preview              # Preview environment
-pnpm ios:production             # Production iOS
-pnpm build:production:ios       # EAS production build
+pnpm start:preview
+pnpm start:production
+pnpm ios:preview
+pnpm ios:production
+pnpm android:preview
+pnpm android:production
+pnpm build:development:ios
+pnpm build:development:android
+pnpm build:preview:ios
+pnpm build:preview:android
+pnpm build:production:ios
+pnpm build:production:android
+pnpm install-maestro
+pnpm e2e-test
+pnpm doctor
+pnpm knip
 ```
 
-## How: Key Patterns
-
-- **Create features**: New folder in `src/features/[your-feature]/` with screens, components, API hooks
-- **Add routes**: Create files in `src/app/` (file-based routing)
-- **Forms**: Use TanStack Form + Zod (see `src/features/auth/components/login-form.tsx`)
-- **Data fetching**: Use React Query (see `src/features/feed/api.ts`)
-- **Global state**: Use Zustand (see `src/features/auth/use-auth-store.tsx`)
-- **Styling**: NativeWind/Tailwind classes (see `src/components/ui/button.tsx`)
-- **Storage**: Use MMKV via `src/lib/storage.tsx` for sensitive data
-- **Imports**: Always use `@/` prefix, never relative imports
+`pnpm e2e-test` assumes Maestro is installed and currently targets the development app id.
 
 ## How: Essential Rules
 
-- ✅ **DO** use absolute imports: `@/components/ui/button`
-- ✅ **DO** follow feature-based structure: `src/features/[name]/`
-- ✅ **DO** use TanStack Form for forms (not react-hook-form)
-- ✅ **DO** use MMKV storage for sensitive data (not AsyncStorage)
-- ✅ **DO** use EAS Build for production: `pnpm build:production:ios`
-- ✅ **DO** prefix env vars with `EXPO_PUBLIC_*` for app access
-- ❌ **DO NOT** modify `android/` or `ios/` directly (use Expo config plugins)
+- Do use absolute imports such as `@/features/transactions/api`.
+- Do keep route files minimal; move real UI and data logic into `src/features`.
+- Do use TanStack Form + Zod for non-trivial forms.
+- Do store relational finance data in SQLite, not in Zustand or MMKV.
+- Do use MMKV/Zustand for preferences, onboarding, lock state, and similar persisted app settings.
+- Do keep translations in `src/translations` and use translation keys instead of hardcoded strings.
+- Do update docs when adding major features, routes, or build/test workflows.
+- Do use existing EAS profiles and Expo config for platform/build changes.
+- Do not add new relative imports when an `@/` import is available.
+- Do not edit `android/` or `ios/` directly for app logic changes.
+- Do not introduce AsyncStorage for new persistence.
 
-## Platform and Build Rules
+## How: Testing Expectations
 
-- Do not directly edit native `android/` or `ios/` projects for app logic changes.
-- Use Expo config/plugins and app config (`app.config.ts`) when platform configuration is required.
-- For production build flows, follow existing EAS scripts and workflows.
+- Run targeted tests after substantial changes and prefer `pnpm verify` before finishing larger work.
+- Add or update Jest tests when changing helpers, form logic, or reusable components.
+- Consider Maestro coverage for critical app flows that change onboarding or navigation behavior.
+- Treat stale demo/starter test flows carefully; align new tests with actual Spendwise features.
 
-## Environment and Config
+## How: Docs And Rules
 
-- Use `EXPO_PUBLIC_*` prefix for variables required by app runtime.
-- Update `env.ts` and related config files rather than hardcoding environment values.
+- `README.md` is for humans onboarding to the repo.
+- `docs/*.md` contains deeper architecture, setup, testing, feature, and release references.
+- `AGENTS.md` is the canonical high-level AI instruction file.
+- `CLAUDE.md` should remain a lightweight compatibility pointer to this file.
+- `.cursor/rules/spendwise-core.mdc` contains the always-on Cursor rule version of the core conventions.
 
 ## Responses
 
-When giving responses and summaries be concise and short.
+Keep responses concise, concrete, and tied to the actual codebase.
 
 ## Plans
 
 When creating implementation plans:
 
-- Make plans concise and actionable - sacrifice grammar for concision when needed
-- Cite specific file paths and essential code snippets
-- Break down complex tasks into logical, testable steps
-- Consider dependencies between packages and modules
-- Plan for testing, error handling, and edge cases
-- At the end of each plan, list any unresolved questions that need clarification
-- Keep plans proportional to request complexity - don't over-engineer simple tasks
+- Make plans concise and actionable.
+- Cite specific file paths and only the most relevant code.
+- Break large work into logical, testable steps.
+- Call out dependencies, edge cases, and validation steps.
+- End with unresolved questions when requirements are ambiguous.
 
 ---
 
-Use this file for concise rules and commands; keep deep reference material in canonical docs.
+Use this file for durable agent guidance; keep deeper explanations in `docs/`.

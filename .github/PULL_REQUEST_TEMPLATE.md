@@ -1,23 +1,34 @@
-## What does this do?
+## Summary
 
-<!---
-_Describe what your changes **do**; did you add a $COOL_FEATURE? Write about it here._
--->
+Describe the user-facing or developer-facing change.
 
-## Why did you do this?
+## Why
 
-<!---
-_**Why** did you make these changes? This is your opportunity to provide the rationale that drove the design of your solution._
--->
+Describe the problem, motivation, or bug being addressed.
 
-## Who/what does this impact?
+## Scope
 
-<!---
-_Does your code affect something downstream? Are there side effects people should know about? Tag any developers that should be kept abreast of this change._
--->
+- Affected areas:
+- Routes / screens:
+- Data model / migrations:
+- Env / config changes:
 
-## How did you test this?
+## Testing
 
-<!---
-_How did you test your change? Document it here._
--->
+- [ ] `pnpm lint`
+- [ ] `pnpm lint:ts`
+- [ ] `pnpm test`
+- [ ] `pnpm verify`
+- [ ] `pnpm e2e-test` (if critical flows changed and Maestro/dev app id setup applies)
+
+List the commands you actually ran and any platform/device coverage:
+
+```text
+Paste results or brief notes here.
+```
+
+## Risks / Follow-ups
+
+- Known risks:
+- Follow-up work:
+- Rollout notes:

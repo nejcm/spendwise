@@ -33,3 +33,11 @@ export type DateGroup = {
   date: string;
   transactions: TransactionWithCategory[];
 };
+
+export type PeriodMode = 'year' | 'month' | 'week' | 'custom';
+
+export type PeriodSelection
+  = | { mode: 'year'; year: number }
+    | { mode: 'month'; year: number; month: number }
+    | { mode: 'week'; year: number; week: number }
+    | { mode: 'custom'; startDate: string; endDate: string };

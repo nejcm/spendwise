@@ -14,6 +14,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { AppErrorBoundary } from '@/components/app-error-boundary';
 import { CustomTabBar } from '@/components/ui/custom-tab-bar';
+import { useCurrencyRates } from '@/features/currencies/api';
 import {
   checkBudgetAlerts,
   checkUpcomingBills,
@@ -22,9 +23,8 @@ import {
 import { SecurityLock } from '@/features/security/security-lock';
 import { APIProvider } from '@/lib/api';
 import { IS_WEB } from '@/lib/base';
-import { DatabaseErrorBoundary, migrateDb } from '@/lib/sqlite';
 
-import { useCurrencyRates } from '@/features/currencies/api';
+import { DatabaseErrorBoundary, migrateDb } from '@/lib/sqlite';
 import { loadSelectedTheme, useSelectedTheme } from '@/lib/theme/use-selected-theme';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 // Import  global CSS file

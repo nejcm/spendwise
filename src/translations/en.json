@@ -106,8 +106,10 @@
     "select_year": "Select Year",
     "start_date": "Start Date",
     "there": "there",
+    "today": "Today",
     "week": "Week",
-    "year": "Year"
+    "year": "Year",
+    "yesterday": "Yesterday"
   },
   "date": {
     "months": {
@@ -246,14 +248,13 @@
         "symbol-before": "$1,234.56"
       },
       "dateFormat": {
-        "DD MMMM, YYYY": "15 February, 2026",
-        "DD.MM.YYYY": "15.02.2026",
-        "DD/MM/YYYY": "15/02/2026",
-        "MM.DD.YYYY": "02.15.2026",
-        "MM/DD/YYYY": "02/15/2026",
-        "MMMM DD, YYYY": "February 15, 2026",
-        "YYYY-MM-DD": "2026-02-15",
-        "YYYY/MM/DD": "2026/02/15"
+        "MM.dd.yyyy": "02.15.2026",
+        "MM/dd/yyyy": "02/15/2026",
+        "MMMM dd, yyyy": "February 15, 2026",
+        "dd MMMM, yyyy": "15 February, 2026",
+        "dd.MM.yyyy": "15.02.2026",
+        "dd/MM/yyyy": "15/02/2026",
+        "yyyy-MM-dd": "2026-02-15"
       },
       "numberFormat": {
         "comma": "1.234,56",

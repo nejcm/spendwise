@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { View } from 'react-native';
 import DetailsSection from '@/components/details';
-import { FocusAwareStatusBar, SolidButton, Text } from '@/components/ui';
+import { FocusAwareStatusBar, FormattedDate, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { OutlineButton } from '@/components/ui/outline-button';
 import { formatCurrency, formatDate } from '@/features/formatting/helpers';
@@ -20,7 +20,6 @@ export function TransactionDetailScreen() {
   const { data: transaction, isLoading } = useTransaction(id ?? '');
   const deleteMut = useDeleteTransaction();
   const { data: accounts = [] } = useAccounts();
-
   const [isEditing, setIsEditing] = useState(false);
 
   if (isLoading || !transaction) {
@@ -85,8 +84,8 @@ export function TransactionDetailScreen() {
       <DetailsSection
         className="mb-8"
         data={[
-          { label: translate('transactions.created_at'), value: formatDate(transaction.created_at) },
-          { label: translate('transactions.updated_at'), value: formatDate(transaction.updated_at) },
+          { label: translate('transactions.created_at'), value: <FormattedDate value={transaction.created_at} className="text-foreground" /> },
+          { label: translate('transactions.updated_at'), value: <FormattedDate value={transaction.updated_at} className="text-foreground" /> },
         ]}
       />
       <View className="mb-6 justify-center">

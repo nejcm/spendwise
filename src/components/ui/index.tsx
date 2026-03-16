@@ -5,6 +5,7 @@ import { withUniwind } from 'uniwind';
 export * from './button';
 export * from './checkbox';
 export * from './focus-aware-status-bar';
+export * from './formatted-text';
 export * from './image';
 export * from './input';
 export * from './list';

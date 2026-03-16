@@ -1,18 +1,19 @@
-import type { CategorySpend } from '@/features/insights/types';
+import type { CurrencyKey } from '../../currencies';
 
+import type { CategorySpend } from '@/features/insights/types';
 import * as React from 'react';
 import { Text, View } from '@/components/ui';
-import { formatCurrency } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
+import { formatCurrency } from '../../formatting/helpers';
 
-type Props = {
+export type CategoryBreakdownProps = {
   categories: CategorySpend[];
-  currency: string;
+  currency: CurrencyKey;
   type: 'expense' | 'income';
   limit?: number;
 };
 
-export function CategoryBreakdown({ categories, currency, type, limit = 5 }: Props) {
+export function CategoryBreakdown({ categories, currency, type, limit = 5 }: CategoryBreakdownProps) {
   const filtered = React.useMemo(() => {
     return categories
       .filter((c) => c.category_type === type && c.total > 0)

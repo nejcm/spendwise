@@ -136,7 +136,8 @@ export function tryFormatDate(date: string, dateFormat = 'yyyy-MM-dd') {
   try {
     return format(date, dateFormat);
   }
-  catch (_) {
+  catch (err) {
+    console.error('Error formatting date', err);
     return undefined;
   }
 }

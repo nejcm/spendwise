@@ -1,4 +1,8 @@
+import type { CurrencyKey } from '../currencies';
+import type { NumberFormat } from './constants';
 import { format, isToday, isYesterday, parseISO } from 'date-fns';
+import { translate } from '@/lib/i18n';
+import { DEFAULT_DATE_FORMAT } from '../../config';
 
 /**
  * Convert cents integer to display string.
@@ -14,17 +18,6 @@ export function centsToAmount(cents: number): number {
  */
 export function amountToCents(amount: number): number {
   return Math.round(amount * 100);
-}
-
-/**
- * Format cents as a currency string.
- * e.g., 1234, 'EUR' -> "€12.34"
- */
-export function formatCurrency(cents: number, currency: string = 'EUR', locale: string = 'en-US'): string {
-  return new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency,
-  }).format(centsToAmount(cents));
 }
 
 /**
@@ -49,17 +42,58 @@ export function formatSignedCurrency(options: SignedCurrencyOptions): string {
   return `${sign}${formatted}`;
 }
 
+const NUMBER_FORMAT_MAP: Record<NumberFormat, [string, Intl.NumberFormatOptions]> = {
+  'stop': ['de-DE', { useGrouping: false }],
+  'stop-space': ['de-DE', { useGrouping: true }],
+  'comma': ['en-US', { useGrouping: false }],
+  'comma-space': ['en-US', { useGrouping: true }],
+} as const;
+export function formatNumber(value: number | string, numberFormat: NumberFormat): string {
+  const number = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(number)) return String(value);
+
+  const [locale, opts] = NUMBER_FORMAT_MAP[numberFormat];
+  return new Intl.NumberFormat(locale, {
+    useGrouping: true,
+    maximumFractionDigits: 2,
+    ...opts,
+  }).format(number);
+}
+
+/**
+ * Format cents as a currency string.
+ * e.g., 1234, 'EUR' -> "€12.34"
+ *
+ * This currently relies on Intl and does not use user currency/number
+ * formatting preferences. Those preferences are applied by higher-level
+ * components when rendering textual values.
+ */
+export function formatCurrency(value: number | string, currency: CurrencyKey, numberFormat: NumberFormat = 'comma'): string {
+  const number = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(number)) return String(value);
+
+  const [locale, opts] = NUMBER_FORMAT_MAP[numberFormat];
+  return new Intl.NumberFormat(locale, {
+    useGrouping: true,
+    maximumFractionDigits: 20,
+    style: 'currency',
+    currency,
+    unitDisplay: 'narrow',
+    ...opts,
+  }).format(centsToAmount(number));
+}
+
 /**
  * Format an ISO date string for display.
- * Shows "Today", "Yesterday", or the formatted date.
+ * Shows "Today", "Yesterday", or the formatted date using the
+ * user's preferred date format from the store, unless an
+ * explicit format override is provided.
  */
-export function formatDate(isoDate: string, dateFormat: string = 'MMM d, yyyy'): string {
+export function formatDate(isoDate: string, displayFormat?: string): string {
   const date = parseISO(isoDate);
-  if (isToday(date))
-    return 'Today';
-  if (isYesterday(date))
-    return 'Yesterday';
-  return format(date, dateFormat);
+  if (isToday(date)) return translate('common.today');
+  if (isYesterday(date)) return translate('common.yesterday');
+  return format(date, displayFormat || DEFAULT_DATE_FORMAT);
 }
 
 /**

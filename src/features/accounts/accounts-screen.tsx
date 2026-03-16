@@ -8,13 +8,14 @@ import { useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
 import { FocusAwareStatusBar, Modal, ScrollView, Text } from '@/components/ui';
-import { centsToAmount, formatCurrency } from '@/features/formatting/helpers';
+import { centsToAmount } from '@/features/formatting/helpers';
 import { useAccountsWithBalanceForRange } from '@/features/transactions/api';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { setPeriodSelection, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { OutlineButton } from '../../components/ui/outline-button';
+import { formatCurrency } from '../formatting/helpers';
 import { AccountCard } from './components/account-card';
 import { AccountForm } from './components/account-form';
 

@@ -3,7 +3,7 @@ import { Text, View } from './ui';
 
 export type DetailsRowProps = {
   label: string;
-  value: string;
+  value: string | React.ReactNode;
   className?: string;
 };
 
@@ -11,7 +11,7 @@ export function DetailsRow({ label, value, className }: DetailsRowProps) {
   return (
     <View className="flex-row justify-between gap-2">
       <Text className="text-muted-foreground">{label}</Text>
-      <Text className={cn('text-foreground', className)}>{value}</Text>
+      {typeof value === 'string' ? <Text className={cn('text-foreground', className)}>{value}</Text> : value}
     </View>
   );
 }

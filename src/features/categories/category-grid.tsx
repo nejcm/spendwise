@@ -1,14 +1,15 @@
+import type { CurrencyKey } from '../currencies';
 import type { CategorySpend } from '@/features/insights/types';
 import { Lightbulb, Plus } from 'lucide-react-native';
 import * as React from 'react';
-import { Pressable, View } from 'react-native';
 
+import { Pressable, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import Sortable from 'react-native-sortables';
 import { Text } from '@/components/ui';
-import { formatCurrency } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
+import { formatCurrency } from '../formatting/helpers';
 
 export type CategoryGridProps = {
   categories: CategorySpend[];
@@ -70,7 +71,7 @@ export const CategoryGrid = React.memo(({
 
 export type CategoryGridCellProps = {
   item: CategorySpend;
-  currency: string;
+  currency: CurrencyKey;
   onPress: (category: CategorySpend) => void;
 };
 

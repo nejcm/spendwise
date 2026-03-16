@@ -16,7 +16,8 @@ import { todayISO } from '@/features/formatting/helpers';
 import { useAccounts, useCreateTransaction, useUpdateTransaction } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
 import { toNumber } from '@/lib/number';
-import { selectTransactionFormPrefs, setTransactionFormPrefs, useAppStore } from '@/lib/store';
+import { addLastUsedCurrency, selectLastUsedCurrencies, selectTransactionFormPrefs, setTransactionFormPrefs, useAppStore } from '@/lib/store';
+import { mergeCurrencyArrays } from '../../currencies/helpers';
 
 const schema = z.object({
   type: z.enum(['expense', 'income', 'transfer'] as TransactionType[]),
@@ -61,6 +62,8 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
   const id = initialValues?.id;
   const createTransaction = useCreateTransaction();
   const updateTransaction = useUpdateTransaction();
+  const lastUsedCurrencies = useAppStore(selectLastUsedCurrencies);
+  const orderedCurrencies = React.useMemo(() => mergeCurrencyArrays(lastUsedCurrencies, CURRENCY_OPTIONS), [lastUsedCurrencies]);
   const transactionFormPrefs = useAppStore(selectTransactionFormPrefs);
 
   const form = useForm({
@@ -92,6 +95,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
         category_id: data.category_id,
         account_id: data.account_id,
       });
+      addLastUsedCurrency(data.currency);
       onSuccess?.();
     },
   });
@@ -104,7 +108,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
           children={(field) => (
             <Select
               value={field.state.value}
-              options={CURRENCY_OPTIONS}
+              options={orderedCurrencies}
               searchEnabled
               onSelect={(value) => {
                 if (!value) return;

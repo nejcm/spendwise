@@ -12,7 +12,8 @@ import { GhostButton } from '@/components/ui/ghost-button';
 import { OutlineButton } from '@/components/ui/outline-button';
 import { CURRENCY_OPTIONS, CURRENCY_VALUES } from '@/features/currencies';
 import { translate } from '@/lib/i18n';
-import { selectAccountFormPrefs, setAccountFormPrefs, useAppStore } from '@/lib/store';
+import { addLastUsedCurrency, selectAccountFormPrefs, selectLastUsedCurrencies, setAccountFormPrefs, useAppStore } from '@/lib/store';
+import { mergeCurrencyArrays } from '../../currencies/helpers';
 import { useArchiveAccount, useCreateAccount, useUpdateAccount } from '../api';
 import { ACCOUNT_TYPE_LABELS, ACCOUNT_TYPES } from '../types';
 
@@ -49,6 +50,8 @@ export function AccountForm({ initialData, accountId, onSuccess, onCancel }: Acc
   const archiveAccount = useArchiveAccount();
   const isEditMode = Boolean(accountId);
   const accountFormPrefs = useAppStore(selectAccountFormPrefs);
+  const lastUsedCurrencies = useAppStore(selectLastUsedCurrencies);
+  const orderedCurrencies = React.useMemo(() => mergeCurrencyArrays(lastUsedCurrencies, CURRENCY_OPTIONS), [lastUsedCurrencies]);
 
   const form = useForm({
     defaultValues: {
@@ -78,6 +81,7 @@ export function AccountForm({ initialData, accountId, onSuccess, onCancel }: Acc
         type: data.type,
         currency: data.currency,
       });
+      addLastUsedCurrency(data.currency);
       onSuccess?.();
     },
   });
@@ -184,7 +188,7 @@ export function AccountForm({ initialData, accountId, onSuccess, onCancel }: Acc
             <Text className="mb-2 text-sm font-medium">{translate('settings.default_currency')}</Text>
             <Select
               value={field.state.value}
-              options={CURRENCY_OPTIONS}
+              options={orderedCurrencies}
               searchEnabled
               onSelect={(value) => {
                 if (!value) return;

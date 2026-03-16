@@ -12,6 +12,7 @@ import { GhostButton } from '@/components/ui/ghost-button';
 import { OutlineButton } from '@/components/ui/outline-button';
 import { CURRENCY_OPTIONS, CURRENCY_VALUES } from '@/features/currencies';
 import { translate } from '@/lib/i18n';
+import { selectAccountFormPrefs, setAccountFormPrefs, useAppStore } from '@/lib/store';
 import { useArchiveAccount, useCreateAccount, useUpdateAccount } from '../api';
 import { ACCOUNT_TYPE_LABELS, ACCOUNT_TYPES } from '../types';
 
@@ -47,9 +48,15 @@ export function AccountForm({ initialData, accountId, onSuccess, onCancel }: Acc
   const updateAccount = useUpdateAccount();
   const archiveAccount = useArchiveAccount();
   const isEditMode = Boolean(accountId);
+  const accountFormPrefs = useAppStore(selectAccountFormPrefs);
 
   const form = useForm({
-    defaultValues: { ...defaultValues, ...initialData } as z.infer<typeof schema>,
+    defaultValues: {
+      ...defaultValues,
+      type: accountFormPrefs?.type || defaultValues.type,
+      currency: accountFormPrefs?.currency || defaultValues.currency,
+      ...initialData,
+    } as z.infer<typeof schema>,
     validators: { onChange: schema },
     onSubmit: async ({ value }) => {
       const data: AccountFormData = {
@@ -61,8 +68,16 @@ export function AccountForm({ initialData, accountId, onSuccess, onCancel }: Acc
         color: value.color || null,
         budget: value.budget?.trim() ? value.budget : null,
       };
-      if (accountId) await updateAccount.mutateAsync({ id: accountId, data });
-      else await createAccount.mutateAsync(data);
+      if (accountId) {
+        await updateAccount.mutateAsync({ id: accountId, data });
+      }
+      else {
+        await createAccount.mutateAsync(data);
+      }
+      setAccountFormPrefs({
+        type: data.type,
+        currency: data.currency,
+      });
       onSuccess?.();
     },
   });

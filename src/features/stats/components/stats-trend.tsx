@@ -2,7 +2,7 @@ import type { MonthlyTotals, WeeklyTotals } from '@/features/insights/types';
 
 import { format, parseISO } from 'date-fns';
 import * as React from 'react';
-import { useColorScheme } from 'react-native';
+import { useColorScheme, useWindowDimensions } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
 
 import { Text, View } from '@/components/ui';
@@ -15,48 +15,66 @@ export type StatsTrendProps = {
   period: 'month' | 'year' | 'week';
 };
 
+const PAIR_GAP = 2;
+
 export function StatsTrend({ monthlyData, weeklyData, period }: StatsTrendProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const { width: screenWidth } = useWindowDimensions();
   const labelColor = isDark ? '#9ca3af' : '#6b7280';
-  const incomeColor = isDark ? '#2ebe7e' : '#2ebe7e';
-  const expenseColor = isDark ? '#e12f30' : '#e12f30';
+  const incomeColor = '#2ebe7e';
+  const expenseColor = '#e12f30';
 
-  const barData = React.useMemo(() => {
-    if (period === 'year') {
-      return monthlyData.flatMap((d) => [
-        {
-          value: centsToAmount(d.income),
-          label: format(parseISO(`${d.month}-01`), 'MMM'),
-          spacing: 2,
-          labelWidth: 30,
-          labelTextStyle: { color: labelColor, fontSize: 10 },
-          frontColor: incomeColor,
-        },
-        {
-          value: centsToAmount(d.expense),
-          frontColor: expenseColor,
-          spacing: 12,
-        },
-      ]);
-    }
+  const { barData, barWidth, spacing } = React.useMemo(() => {
+    const sourceData = period === 'year' ? monthlyData : weeklyData;
+    const groupCount = sourceData.length;
+    if (groupCount === 0) return { barData: [], barWidth: 8, spacing: 24 };
 
-    return weeklyData.flatMap((d) => [
-      {
-        value: centsToAmount(d.income),
-        label: d.label,
-        spacing: 2,
-        labelWidth: 36,
-        labelTextStyle: { color: labelColor, fontSize: 10 },
-        frontColor: incomeColor,
-      },
-      {
-        value: centsToAmount(d.expense),
-        frontColor: expenseColor,
-        spacing: 18,
-      },
-    ]);
-  }, [period, monthlyData, weeklyData, labelColor, incomeColor, expenseColor]);
+    // Available width minus padding (px-4 + p-4 each side + yAxis ~40)
+    const availableWidth = screenWidth - 104;
+
+    // Each group takes: 2 * barWidth + PAIR_GAP + spacing
+    // Total: groupCount * (2 * barWidth + PAIR_GAP + spacing) ≈ availableWidth
+    const targetBarWidth = period === 'year' ? 8 : 10;
+    const computedSpacing = Math.max(
+      8,
+      Math.floor(availableWidth / groupCount - 2 * targetBarWidth - PAIR_GAP),
+    );
+    const labelWidth = 2 * targetBarWidth + PAIR_GAP;
+
+    const data
+      = period === 'year'
+        ? monthlyData.flatMap((m) => [
+            {
+              value: centsToAmount(m.income),
+              label: format(parseISO(`${m.month}-01`), 'MMM'),
+              spacing: PAIR_GAP,
+              labelWidth,
+              labelTextStyle: { color: labelColor, fontSize: 9, textAlign: 'center' as const },
+              frontColor: incomeColor,
+            },
+            {
+              value: centsToAmount(m.expense),
+              frontColor: expenseColor,
+            },
+          ])
+        : weeklyData.flatMap((w) => [
+            {
+              value: centsToAmount(w.income),
+              label: w.label,
+              spacing: PAIR_GAP,
+              labelWidth,
+              labelTextStyle: { color: labelColor, fontSize: 10, textAlign: 'center' as const },
+              frontColor: incomeColor,
+            },
+            {
+              value: centsToAmount(w.expense),
+              frontColor: expenseColor,
+            },
+          ]);
+
+    return { barData: data, barWidth: targetBarWidth, spacing: computedSpacing };
+  }, [period, monthlyData, weeklyData, labelColor, screenWidth]);
 
   if (barData.length === 0) return null;
 
@@ -74,8 +92,8 @@ export function StatsTrend({ monthlyData, weeklyData, period }: StatsTrendProps)
       </View>
       <BarChart
         data={barData}
-        barWidth={period === 'year' ? 8 : 12}
-        spacing={period === 'year' ? 12 : 18}
+        barWidth={barWidth}
+        spacing={spacing}
         roundedTop
         roundedBottom
         hideRules

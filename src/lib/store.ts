@@ -1,9 +1,11 @@
 import type { StateStorage } from 'zustand/middleware';
 
 import type { CurrencyKey } from '../features/currencies';
+import type { Account } from '@/features/accounts/types';
 import type { CurrencyFormat, DateFormat, NumberFormat } from '@/features/formatting/constants';
 import type { Language } from '@/features/languages/types';
 import type { ThemeType } from '@/features/settings/theme';
+import type { Transaction } from '@/features/transactions/types';
 
 import { createMMKV } from 'react-native-mmkv';
 import { create } from 'zustand';
@@ -64,9 +66,14 @@ export type AppState = {
   openaiApiKey: string | undefined;
   anthropicApiKey: string | undefined;
 
-  // Other
   lastUsed: {
     currency: CurrencyKey;
+  };
+
+  // Form preferences
+  formPrefs: {
+    transactionForm: Partial<Pick<Transaction, 'type' | 'currency' | 'category_id' | 'account_id'>>;
+    accountForm: Partial<Pick<Account, 'type' | 'currency'>>;
   };
 
   // UI state (not persisted)
@@ -99,6 +106,10 @@ const _useAppStore = create<AppState>()(
       lastUsed: {
         currency: 'USD',
       },
+      formPrefs: {
+        transactionForm: {},
+        accountForm: {},
+      },
       periodSelection: currentPeriodSelection(),
     }),
     {
@@ -119,6 +130,7 @@ const _useAppStore = create<AppState>()(
         aiProvider: state.aiProvider,
         openaiApiKey: state.openaiApiKey,
         anthropicApiKey: state.anthropicApiKey,
+        formPrefs: state.formPrefs,
       }),
     },
   ),
@@ -221,3 +233,30 @@ export function updateLastUsed(lastUsed: Partial<AppState['lastUsed']>) {
   return _useAppStore.setState((state) => ({ lastUsed: { ...state.lastUsed, ...lastUsed } }));
 }
 export const selectLastUsed = (state: AppState) => state.lastUsed;
+
+// Form preference actions
+export function setTransactionFormPrefs(prefs: AppState['formPrefs']['transactionForm']) {
+  return _useAppStore.setState((state) => ({
+    formPrefs: {
+      ...state.formPrefs,
+      transactionForm: {
+        ...state.formPrefs.transactionForm,
+        ...prefs,
+      },
+    },
+  }));
+}
+
+export function setAccountFormPrefs(prefs: AppState['formPrefs']['accountForm']) {
+  return _useAppStore.setState((state) => ({
+    formPrefs: {
+      ...state.formPrefs,
+      accountForm: {
+        ...state.formPrefs.accountForm,
+        ...prefs,
+      },
+    },
+  }));
+}
+export const selectTransactionFormPrefs = (state: AppState) => state.formPrefs.transactionForm;
+export const selectAccountFormPrefs = (state: AppState) => state.formPrefs.accountForm;

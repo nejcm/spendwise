@@ -26,7 +26,7 @@ export type AccountWithBalance = Account & {
 export type AccountFormData = {
   name: string;
   type: AccountType;
-  currency: string;
+  currency: CurrencyKey;
   description: string | null;
   budget?: string | null;
   icon: string | null;

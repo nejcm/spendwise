@@ -16,7 +16,7 @@ import { todayISO } from '@/features/formatting/helpers';
 import { useAccounts, useCreateTransaction, useUpdateTransaction } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
 import { toNumber } from '@/lib/number';
-import { useAppStore } from '@/lib/store';
+import { selectTransactionFormPrefs, setTransactionFormPrefs, useAppStore } from '@/lib/store';
 
 const schema = z.object({
   type: z.enum(['expense', 'income', 'transfer'] as TransactionType[]),
@@ -48,41 +48,50 @@ export type TransactionFormProps = {
 
 const defaultValues = {
   type: 'expense',
+  currency: 'USD',
   category_id: '',
   account_id: '',
   date: todayISO(),
+  amount: '',
   note: null,
-} satisfies Partial<TransactionFormData>;
+} satisfies TransactionFormData;
 
 export function TransactionForm({ initialValues, onSuccess, onCancel }: TransactionFormProps) {
   const { data: accounts = [] } = useAccounts();
   const id = initialValues?.id;
   const createTransaction = useCreateTransaction();
   const updateTransaction = useUpdateTransaction();
-  const currency = useAppStore.use.currency();
+  const transactionFormPrefs = useAppStore(selectTransactionFormPrefs);
 
   const form = useForm({
     defaultValues: {
       ...defaultValues,
-      currency,
-      account_id: accounts[0]?.id ?? '',
+      type: transactionFormPrefs?.type || defaultValues.type,
+      currency: transactionFormPrefs?.currency || defaultValues.currency,
+      category_id: transactionFormPrefs?.category_id || '',
+      account_id: transactionFormPrefs?.account_id || (accounts[0]?.id ?? ''),
       ...initialValues,
-      amount: initialValues?.amount?.toString() ?? '',
+      amount: initialValues?.amount?.toString() || '',
     } as TransactionFormData,
     validators: {
       onChange: schema,
     },
     onSubmit: async ({ value }) => {
-      if (!value.account_id)
-        return;
+      if (!value.account_id) return;
       const data = { ...value, amount: toNumber(value.amount) ?? 0 };
       if (id) {
         await updateTransaction.mutateAsync({ id, data });
-        onSuccess?.();
-        return;
       }
-      await createTransaction.mutateAsync(data);
-      form.reset();
+      else {
+        await createTransaction.mutateAsync(data);
+        form.reset();
+      }
+      setTransactionFormPrefs({
+        type: data.type,
+        currency: data.currency,
+        category_id: data.category_id,
+        account_id: data.account_id,
+      });
       onSuccess?.();
     },
   });

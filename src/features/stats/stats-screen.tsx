@@ -4,7 +4,7 @@ import { PeriodSelector } from '@/components/period-selector';
 import { FocusAwareStatusBar, ScrollView, Text, View } from '@/components/ui';
 import {
   useCategorySpendByRange,
-  useMonthlyTrend,
+  useMonthlyTrendForYear,
   useSummaryByRange,
   useWeeklyTrend,
 } from '@/features/insights/api';
@@ -33,7 +33,10 @@ export function StatsScreen() {
   const { data: summary } = useSummaryByRange(startDate, endDate);
   const { data: categorySpend = [] } = useCategorySpendByRange(startDate, endDate);
   const { data: weeklyTrend = [] } = useWeeklyTrend(yearMonth);
-  const { data: monthlyTrend = [] } = useMonthlyTrend(12);
+  const trendYear = selection.mode === 'custom'
+    ? new Date(selection.startDate).getFullYear()
+    : selection.year;
+  const { data: monthlyTrend = [] } = useMonthlyTrendForYear(trendYear);
 
   return (
     <View className="flex-1 bg-background">
@@ -53,6 +56,7 @@ export function StatsScreen() {
         )}
 
         <StatsTrend
+          key={`${trendPeriod}-${startDate}`}
           monthlyData={monthlyTrend}
           weeklyData={weeklyTrend}
           period={trendPeriod}

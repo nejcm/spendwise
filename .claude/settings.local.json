@@ -10,7 +10,8 @@
       "Bash(echo \"Exit: $?\")",
       "Bash(cat *)",
       "Bash(pnpm install --frozen-lockfile)",
-      "Bash(npx tsc --noEmit)"
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx tsc:*)"
     ]
   }
 }

@@ -1,1 +1,1 @@
-export { TransactionListScreen as default } from '@/features/transactions/transaction-list-screen';
+export { TransactionsScreen as default } from '@/features/transactions/transactions-screen';

@@ -9,6 +9,7 @@ import Alert from '@/components/ui/alert';
 import { OutlineButton } from '@/components/ui/outline-button';
 import { formatCurrency, formatDate } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
+import { GhostButton } from '../../components/ui/ghost-button';
 import { useAccounts, useDeleteTransaction, useTransaction } from './api';
 import { TransactionForm } from './components/transaction-form';
 
@@ -46,7 +47,7 @@ export function TransactionDetailScreen() {
   const account = accounts.find((a) => a.id === transaction.account_id);
 
   const handleDelete = () => {
-    Alert.alert(translate('common.delete'), 'Delete this transaction?', [
+    Alert.alert(translate('common.delete'), translate('transactions.delete_confirmation'), [
       { text: translate('common.cancel'), style: 'cancel' },
       {
         text: translate('common.delete'),
@@ -88,9 +89,12 @@ export function TransactionDetailScreen() {
           { label: 'Updated at', value: formatDate(transaction.updated_at) },
         ]}
       />
+      <View className="mb-6 justify-center">
+        <OutlineButton label={translate('common.delete')} color="danger" onPress={handleDelete} className="rounded-3xl px-6" size="sm" />
+      </View>
 
       <View className="flex-row gap-2">
-        <OutlineButton label={translate('common.delete')} color="danger" onPress={handleDelete} />
+        <GhostButton color="secondary" label={translate('common.back')} onPress={() => router.back()} />
         <SolidButton className="flex-1" label={translate('common.edit')} onPress={() => setIsEditing(true)} />
       </View>
     </View>

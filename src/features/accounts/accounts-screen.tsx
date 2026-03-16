@@ -136,8 +136,8 @@ export function AccountsScreen() {
             label={translate('common.add')}
             size="sm"
             color="secondary"
-            className="rounded-3xl px-5"
-            textClassName="font-normal text-muted-foreground"
+            className="rounded-3xl px-6"
+            textClassName="font-normal"
             onPress={openCreateAccountForm}
           />
         </View>

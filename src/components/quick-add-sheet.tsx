@@ -50,9 +50,9 @@ function renderContent(pathname: string, sheetRef: React.RefObject<BottomSheetMo
   );
 };
 
-export function QuickAddSheet({ sheetRef }: QuickAddSheetProps) {
+export function QuickAddSheet({ sheetRef, pathname }: QuickAddSheetProps) {
   return (
-    <Modal ref={sheetRef} enableDynamicSizing>
+    <Modal ref={sheetRef} snapPoints={pathname.startsWith('/categories') ? ['50%'] : ['85%']}>
       {(data) => {
         return (
           <BottomSheetScrollView className="flex-1 px-4 pb-8">

@@ -55,7 +55,7 @@ function MapStep({ headers, mapping, onMapping, onNext }: MapStepProps) {
       <Text className="mb-4 text-lg font-medium">{translate('import.map_columns')}</Text>
       {COLUMN_FIELDS.map((field) => (
         <View key={field} className="mb-4">
-          <Text className="mb-1 text-sm font-medium text-gray-600 dark:text-gray-400">
+              <Text className="mb-1 text-sm font-medium text-gray-600 dark:text-gray-400">
             {translate(`import.field_${field}` as any)}
             {field === 'date' || field === 'amount'
               ? (
@@ -69,7 +69,7 @@ function MapStep({ headers, mapping, onMapping, onNext }: MapStepProps) {
               onPress={() => onMapping({ ...mapping, [field]: null })}
             >
               <Text className={`text-xs ${mapping[field] === null ? 'text-white' : ''}`}>
-                None
+                {translate('common.none')}
               </Text>
             </Pressable>
             {headers.map((h, i) => (
@@ -151,7 +151,7 @@ function PreviewStep({
       ))}
       {preview.length > 10 && (
         <Text className="mt-2 text-center text-sm text-gray-500">
-          {`+${preview.length - 10} more rows`}
+          {translate('import.more_rows', { count: preview.length - 10 })}
         </Text>
       )}
       <SolidButton
@@ -199,7 +199,7 @@ export function ImportScreen() {
     const text = await (await fetch(result.assets[0].uri)).text();
     const rows = parseCSV(text);
     if (rows.length < 2) {
-      Alert.alert('Error', 'CSV file must have at least a header row and one data row');
+      Alert.alert(translate('common.error'), translate('import.csv_min_rows_error'));
       return;
     }
     setHeaders(rows[0]);
@@ -210,7 +210,7 @@ export function ImportScreen() {
 
   const buildPreview = () => {
     if (mapping.date === null || mapping.amount === null) {
-      Alert.alert('Error', 'Date and Amount columns are required');
+      Alert.alert(translate('common.error'), translate('import.date_amount_required'));
       return;
     }
     setPreview(mapRows(allRows, mapping, true));
@@ -235,8 +235,11 @@ export function ImportScreen() {
       count++;
     }
     setImporting(false);
-    Alert.alert('Import Complete', `${count} transactions imported`, [
-      { onPress: () => router.back(), text: 'OK' },
+    Alert.alert(
+      translate('import.complete_title'),
+      translate('import.complete_message', { count }),
+      [
+        { onPress: () => router.back(), text: translate('common.ok') },
     ]);
   };
 

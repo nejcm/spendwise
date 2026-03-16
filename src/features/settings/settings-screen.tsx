@@ -61,7 +61,7 @@ export function SettingsScreen() {
             <SettingsItem
               icon={<LayoutGrid className={iconColor} size={20} />}
               text="settings.categories"
-              onPress={() => router.push('/categories')}
+              onPress={() => router.push({ pathname: '/categories', params: { edit: 'true' } })}
             />
             <SettingsItem
               icon={<List className={iconColor} size={20} />}

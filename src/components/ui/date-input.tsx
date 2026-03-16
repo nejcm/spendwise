@@ -9,7 +9,9 @@ import { Pressable, View } from 'react-native';
 import { Input } from '@/components/ui/input';
 import { Modal, useModal } from '@/components/ui/modal';
 import { formatDate, todayISO } from '@/features/formatting/helpers';
+import { IS_WEB } from '@/lib/base';
 import { translate } from '@/lib/i18n';
+import { tryFormatDate } from '../../lib/date/helpers';
 
 export type DateInputProps = {
   value: string;
@@ -20,6 +22,7 @@ export type DateInputProps = {
 
 export function DateInput({ label, value, onChange, error, modalProps, displayFormat, ...rest }: DateInputProps) {
   const { ref, present, dismiss } = useModal();
+
   const dateValue = React.useMemo(() => parseISO(value || todayISO()), [value]);
 
   const handleChange = React.useCallback(
@@ -30,6 +33,22 @@ export function DateInput({ label, value, onChange, error, modalProps, displayFo
     [onChange, dismiss],
   );
 
+  if (IS_WEB) {
+    return (
+      <Input
+        label={label}
+        value={value ? tryFormatDate(value, displayFormat) || value : ''}
+        placeholder={translate('common.select_date')}
+        textContentType="dateTime"
+        error={error}
+        onChangeText={(v) => {
+          const formatted = tryFormatDate(v, displayFormat) || v;
+          onChange(formatted);
+        }}
+        {...rest}
+      />
+    );
+  }
   return (
     <>
       <Pressable onPress={present}>
@@ -43,7 +62,6 @@ export function DateInput({ label, value, onChange, error, modalProps, displayFo
           {...rest}
         />
       </Pressable>
-
       <Modal ref={ref} snapPoints={['45%']} {...modalProps}>
         <View className="items-center px-4 pb-6">
           <DateTimePicker

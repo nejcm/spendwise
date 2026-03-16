@@ -1,16 +1,17 @@
 import * as React from 'react';
-import { NativeModules, Platform, View } from 'react-native';
+import { NativeModules, View } from 'react-native';
 import RNRestart from 'react-native-restart';
 
 import { SolidButton } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
-import { translate } from '../lib/i18n';
+import { IS_WEB } from '@/lib/base';
+import { translate } from '@/lib/i18n';
 
 type Props = { children: React.ReactNode };
 type State = { error: Error | null; restarting: boolean };
 
 function restartApp() {
-  if (Platform.OS === 'web') {
+  if (IS_WEB) {
     window.location.reload();
     return;
   }

@@ -13,9 +13,9 @@ import { defaultStyles } from '@/lib/theme/styles';
 import { useAccounts, useCreateTransfer } from './api';
 
 const schema = z.object({
-  from_id: z.string().min(1, 'From account required'),
-  to_id: z.string().min(1, 'To account required'),
-  amount: z.string().min(1, 'Amount required'),
+  from_id: z.string().min(1, translate('accounts.from_required')),
+  to_id: z.string().min(1, translate('accounts.to_required')),
+  amount: z.string().min(1, translate('transactions.amount_required')),
   note: z.string(),
 });
 
@@ -41,7 +41,10 @@ export function TransferScreen() {
     onSubmit: async ({ value }) => {
       if (!value.from_id || !value.to_id) return;
       if (value.from_id === value.to_id) {
-        Alert.alert('Error', 'Cannot transfer to the same account');
+        Alert.alert(
+          translate('common.error'),
+          translate('accounts.transfer_same_account_error'),
+        );
         return;
       }
       createTransfer(

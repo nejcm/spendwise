@@ -1,6 +1,7 @@
 /* eslint-disable no-alert */
 import type { AlertButton } from 'react-native';
-import { Alert as AlertRN, Platform } from 'react-native';
+import { Alert as AlertRN } from 'react-native';
+import { IS_WEB } from '@/lib/base';
 
 const alertPolyfill = {
   alert: (title: string, description: string, options?: AlertButton[]) => {
@@ -17,6 +18,6 @@ const alertPolyfill = {
   },
 };
 
-const Alert = Platform.OS === 'web' ? alertPolyfill : AlertRN;
+const Alert = IS_WEB ? alertPolyfill : AlertRN;
 
 export default Alert;

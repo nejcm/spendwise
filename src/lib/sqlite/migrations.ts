@@ -1,5 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import { Platform } from 'react-native';
+import { IS_WEB } from '../base';
 import { seedDefaults } from './seed';
 
 const DATABASE_VERSION = 1;
@@ -14,7 +14,7 @@ const DATABASE_VERSION = 1;
 export async function resetDb(db: SQLiteDatabase): Promise<void> {
   await dropDb(db);
   await migrateDb(db);
-  if (Platform.OS === 'web') {
+  if (IS_WEB) {
     // Reload the page so the Worker reinitialises its VFS state cleanly.
     window.location.reload();
   }

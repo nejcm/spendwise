@@ -15,12 +15,12 @@ export function NotificationSettingsScreen() {
       Alert.alert(
         translate('settings.notifications'),
         Platform.OS === 'ios'
-          ? 'Notifications settings have been opened. You can manage permissions in the system dialog.'
-          : 'Notification permissions have been requested. You can also adjust them in system settings.',
+          ? translate('notifications.ios_opened')
+          : translate('notifications.android_requested'),
       );
     }
     catch {
-      Alert.alert(translate('settings.notifications'), 'Unable to update notification settings.');
+      Alert.alert(translate('settings.notifications'), translate('notifications.update_error'));
     }
   };
 
@@ -29,7 +29,7 @@ export function NotificationSettingsScreen() {
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         <Text className="mb-4 text-sm text-muted-foreground">
-          Enable notifications to get alerts about budgets nearing their limits and upcoming recurring bills.
+          {translate('notifications.enable_description')}
         </Text>
         <SolidButton
           label={translate('settings.notifications')}

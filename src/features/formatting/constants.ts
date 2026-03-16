@@ -15,12 +15,12 @@ export const NUMBER_FORMAT_OPTIONS = [
 export type NumberFormat = (typeof NUMBER_FORMAT_OPTIONS)[number];
 
 export const DATE_FORMAT_OPTIONS = [
-  'DD/MM/YYYY', // 12/03/2026
-  'MM/DD/YYYY', // 03/12/2026
-  'YYYY-MM-DD', // 2026-03-12
-  'DD.MM.YYYY', // 12.03.2026
-  'MM.DD.YYYY', // 03.12.2026
-  'DD MMMM, YYYY', // 12 March, 2026
-  'MMMM DD, YYYY', // March 12, 2026
+  'dd/MM/yyyy', // 12/03/2026
+  'MM/dd/yyyy', // 03/12/2026
+  'yyyy-MM-dd', // 2026-03-12
+  'dd.MM.yyyy', // 12.03.2026
+  'MM.dd.yyyy', // 03.12.2026
+  'dd MMMM, yyyy', // 12 March, 2026
+  'MMMM dd, yyyy', // March 12, 2026
 ] as const;
 export type DateFormat = (typeof DATE_FORMAT_OPTIONS)[number];

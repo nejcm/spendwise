@@ -1,15 +1,16 @@
-import { TrendingDown, TrendingUp } from 'lucide-react-native';
+import type { CurrencyKey } from '../../currencies';
 
+import { TrendingDown, TrendingUp } from 'lucide-react-native';
 import * as React from 'react';
 import { Text, View } from '@/components/ui';
-import { formatCurrency } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
+import { formatCurrency } from '../../formatting/helpers';
 
 export type SummaryProps = {
   income: number;
   expense: number;
   balance: number;
-  currency: string;
+  currency: CurrencyKey;
 };
 
 export function Summary({ income, expense, balance, currency }: SummaryProps) {

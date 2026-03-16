@@ -92,7 +92,7 @@ const _useAppStore = create<AppState>()(
       authStatus: 'idle',
       currency: 'USD',
       currencyFormat: 'symbol-after',
-      dateFormat: 'DD/MM/YYYY',
+      dateFormat: 'dd/MM/yyyy',
       numberFormat: 'stop',
       monthStartDay: 1,
       theme: 'system',

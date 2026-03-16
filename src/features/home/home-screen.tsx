@@ -4,9 +4,8 @@ import { useRouter } from 'expo-router';
 import { BotIcon } from 'lucide-react-native';
 import * as React from 'react';
 import { View } from 'react-native';
-import { Image, ScrollView, Text } from '@/components/ui';
+import { FormattedCurrency, Image, ScrollView, Text } from '@/components/ui';
 import { IconButton } from '@/components/ui/icon-button';
-import { formatCurrency } from '@/features/formatting/helpers';
 import { AccountsOverview } from '@/features/home/accounts-overview';
 import { CategoriesOverview } from '@/features/home/categories-overview';
 import { useMonthSummary } from '@/features/transactions/api';
@@ -44,24 +43,16 @@ export function HomeScreen() {
                 <Text className="text-sm text-muted-foreground">{translate('home.available_balance')}</Text>
               </View>
               <View className="items-end">
-                <Text className="mt-1 text-2xl font-bold">{formatCurrency(data?.balance ?? 0, currency)}</Text>
+                <FormattedCurrency className="mt-1 text-2xl font-bold" value={data?.balance ?? 0} currency={currency} />
               </View>
             </View>
             <View className="mt-4 flex-row gap-3">
               <View className="flex-1 gap-1 rounded-xl bg-success-500/8 px-4 py-3 dark:bg-success-700/10">
-                <Text className="text-lg font-bold text-success-600">
-                  +
-                  {' '}
-                  {formatCurrency(data?.income ?? 0, currency)}
-                </Text>
+                <FormattedCurrency className="text-lg font-bold text-success-600" value={data?.income ?? 0} currency={currency} prefix="+" />
                 <Text className="text-sm text-muted-foreground">{translate('home.income')}</Text>
               </View>
               <View className="flex-1 gap-1 rounded-xl bg-danger-500/8 px-4 py-3 dark:bg-danger-600/6">
-                <Text className="text-lg font-bold text-danger-500">
-                  -
-                  {' '}
-                  {formatCurrency(data?.expense ?? 0, currency)}
-                </Text>
+                <FormattedCurrency className="text-lg font-bold text-danger-500" value={data?.expense ?? 0} currency={currency} prefix="-" />
                 <Text className="text-sm text-muted-foreground">{translate('home.expenses')}</Text>
               </View>
             </View>

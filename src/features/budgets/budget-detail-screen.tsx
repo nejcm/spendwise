@@ -1,15 +1,16 @@
+import type { CurrencyKey } from '../currencies';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
-import { View } from 'react-native';
 
+import { View } from 'react-native';
 import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { OutlineButton } from '@/components/ui/outline-button';
-import { formatCurrency } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '@/lib/store';
 
+import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
+import { formatCurrency } from '../formatting/helpers';
 import { useBudgetWithProgress, useDeleteBudget } from './api';
 import { BudgetProgressBar } from './components/budget-progress-bar';
 
@@ -81,7 +82,7 @@ export function BudgetDetailScreen() {
   );
 }
 
-function CategoryBudgetRow({ line, currency }: { line: any; currency: string }) {
+function CategoryBudgetRow({ line, currency }: { line: any; currency: CurrencyKey }) {
   const ratio = line.amount > 0 ? line.spent / line.amount : 0;
 
   return (

@@ -10,18 +10,19 @@ import { Input } from '@/components/ui/input';
 import { Modal, useModal } from '@/components/ui/modal';
 import { formatDate, todayISO } from '@/features/formatting/helpers';
 import { IS_WEB } from '@/lib/base';
+import { tryFormatDate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
-import { tryFormatDate } from '../../lib/date/helpers';
+import { useAppStore } from '@/lib/store';
 
 export type DateInputProps = {
   value: string;
   onChange: (date: string) => void;
   modalProps?: Partial<ModalProps>;
-  displayFormat?: string;
 } & Omit<InputProps, 'value' | 'onChange'>;
 
-export function DateInput({ label, value, onChange, error, modalProps, displayFormat, ...rest }: DateInputProps) {
+export function DateInput({ label, value, onChange, error, modalProps, ...rest }: DateInputProps) {
   const { ref, present, dismiss } = useModal();
+  const dateFormat = useAppStore.use.dateFormat();
 
   const dateValue = React.useMemo(() => parseISO(value || todayISO()), [value]);
 
@@ -37,12 +38,12 @@ export function DateInput({ label, value, onChange, error, modalProps, displayFo
     return (
       <Input
         label={label}
-        value={value ? tryFormatDate(value, displayFormat) || value : ''}
+        value={value ? tryFormatDate(value, dateFormat) || value : ''}
         placeholder={translate('common.select_date')}
         textContentType="dateTime"
         error={error}
         onChangeText={(v) => {
-          const formatted = tryFormatDate(v, displayFormat) || v;
+          const formatted = tryFormatDate(v, dateFormat) || v;
           onChange(formatted);
         }}
         {...rest}
@@ -54,7 +55,7 @@ export function DateInput({ label, value, onChange, error, modalProps, displayFo
       <Pressable onPress={present}>
         <Input
           label={label}
-          value={value ? formatDate(value, displayFormat) : 'Nope'}
+          value={value ? formatDate(value, dateFormat) : ''}
           placeholder={translate('common.select_date')}
           error={error}
           editable={false}

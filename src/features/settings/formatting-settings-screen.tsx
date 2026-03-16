@@ -2,7 +2,7 @@ import type { CurrencyFormat, DateFormat, NumberFormat } from '../formatting/con
 
 import type { OptionType } from '@/components/ui';
 import type { CurrencyKey } from '@/features/currencies';
-import { Calendar, Calendar1, CircleDollarSign, DecimalsArrowRight, Euro } from 'lucide-react-native';
+import { Calendar, CircleDollarSign, DecimalsArrowRight, Euro } from 'lucide-react-native';
 import * as React from 'react';
 import { View } from 'react-native';
 import { FocusAwareStatusBar, Options, ScrollView, useModal } from '@/components/ui';
@@ -76,7 +76,7 @@ export function FormattingSettingsScreen() {
   const currencyFormat = useAppStore.use.currencyFormat();
   const dateFormat = useAppStore.use.dateFormat();
   const numberFormat = useAppStore.use.numberFormat();
-  const monthStartDay = useAppStore.use.monthStartDay();
+  // const monthStartDay = useAppStore.use.monthStartDay();
   const modal = useModal();
   const { dismiss } = modal;
   const [modalType, setModalType] = React.useState<ModalType | undefined>();
@@ -133,14 +133,14 @@ export function FormattingSettingsScreen() {
             onPress={() => openModal('dateFormat')}
           />
         </SettingsContainer>
-        <SettingsContainer>
+        {/* <SettingsContainer>
           <SettingsItem
             icon={<Calendar1 className={iconColor} size={20} />}
             text="settings.month_start"
             value={String(monthStartDay)}
             onPress={() => openModal('monthStartDay')}
           />
-        </SettingsContainer>
+        </SettingsContainer> */}
 
         <Options
           ref={modal.ref}

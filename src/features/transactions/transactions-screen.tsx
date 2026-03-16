@@ -1,4 +1,3 @@
-import type { PeriodSelection } from './types';
 import { X } from 'lucide-react-native';
 import * as React from 'react';
 import { useMemo, useState } from 'react';
@@ -6,8 +5,9 @@ import { Pressable, View } from 'react-native';
 import { cn } from 'tailwind-variants';
 import { PeriodSelector } from '@/components/period-selector';
 import { FocusAwareStatusBar, Input, inputDefaultDefaults, inputDefaults } from '@/components/ui';
-import { currentPeriodSelection, getPeriodRange } from '@/lib/date/helpers';
+import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
+import { setPeriodSelection, useAppStore } from '@/lib/store';
 import { useTransactions } from './api';
 import { TransactionFilterBar } from './components/transaction-filter-bar';
 import { TransactionList } from './components/transaction-list';
@@ -15,7 +15,7 @@ import { TransactionList } from './components/transaction-list';
 const inputClassNames = cn(inputDefaults, inputDefaultDefaults, 'min-w-0 flex-1 flex-row items-center p-0');
 
 export function TransactionsScreen() {
-  const [selection, setSelection] = useState<PeriodSelection>(currentPeriodSelection);
+  const selection = useAppStore.use.periodSelection();
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
 
@@ -42,7 +42,7 @@ export function TransactionsScreen() {
     <View className="flex-1">
       <FocusAwareStatusBar />
 
-      <PeriodSelector selection={selection} onSelect={setSelection} />
+      <PeriodSelector selection={selection} onSelect={setPeriodSelection} />
 
       <View className="flex-row items-center gap-2 px-4 pb-2">
         <View className={inputClassNames}>

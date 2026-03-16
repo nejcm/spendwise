@@ -7,15 +7,16 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { formatCurrency } from '@/features/formatting/helpers';
+import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
-import { useCategorySpend } from '../insights/api';
+import { useCategorySpendByRange } from '../insights/api';
 
 export function CategoriesOverview() {
   const router = useRouter();
-  const currentMonth = React.useMemo(() => format(new Date(), 'yyyy-MM'), []);
-  const { data = [] } = useCategorySpend(currentMonth);
+  const [startDate, endDate] = React.useMemo(() => getCurrentMonthRange(format(new Date(), 'yyyy-MM')), []);
+  const { data = [] } = useCategorySpendByRange(startDate, endDate);
   const currency = useAppStore.use.currency();
   const visibleCategories = React.useMemo(() => data.filter((item) => item.total > 0), [data]);
 

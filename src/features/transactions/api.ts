@@ -91,6 +91,14 @@ export function useAccountsWithBalanceForMonth(yearMonth: string) {
   });
 }
 
+export function useAccountsWithBalanceForRange(startDate: string, endDate: string) {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: [...keys.accountsWithBalance, startDate, endDate],
+    queryFn: () => getAccountsWithBalanceForRange(db, startDate, endDate),
+  });
+}
+
 export function useTotalBalance(yearMonth?: string) {
   const db = useSQLiteContext();
   return useQuery({
@@ -277,6 +285,28 @@ async function getAccountsWithBalanceForMonth(
 ): Promise<AccountWithBalance[]> {
   const [startDate, endDate] = getCurrentMonthRange(yearMonth);
 
+  return db.getAllAsync<AccountWithBalance>(
+    `SELECT a.*,
+       COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0)
+       - COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END), 0)
+       + COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount > 0 THEN t.amount ELSE 0 END), 0)
+       - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN ABS(t.amount) ELSE 0 END), 0)
+       as balance
+     FROM accounts a
+     LEFT JOIN transactions t ON t.account_id = a.id
+       AND t.date >= ? AND t.date < ?
+     WHERE a.is_archived = 0
+     GROUP BY a.id
+     ORDER BY a.sort_order ASC`,
+    [startDate, endDate],
+  );
+}
+
+async function getAccountsWithBalanceForRange(
+  db: SQLiteDatabase,
+  startDate: string,
+  endDate: string,
+): Promise<AccountWithBalance[]> {
   return db.getAllAsync<AccountWithBalance>(
     `SELECT a.*,
        COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0)

@@ -38,7 +38,7 @@ const MODES: { key: PeriodMode; label: string }[] = [
   { key: 'custom', label: 'Custom' },
 ];
 
-type Props = {
+export type PeriodSelectorModalProps = {
   selection: PeriodSelection;
   onSelect: (s: PeriodSelection) => void;
 };
@@ -51,7 +51,7 @@ export function PeriodSelectorModal({
   ref,
   selection,
   onSelect,
-}: Props & { ref?: React.RefObject<BottomSheetModal | null> }) {
+}: PeriodSelectorModalProps & { ref?: React.RefObject<BottomSheetModal | null> }) {
   const modal = useModal();
 
   const [draft, setDraft] = React.useState<PeriodSelection>(() => defaultDraftFor(selection));
@@ -74,6 +74,11 @@ export function PeriodSelectorModal({
     onSelect(draft);
     modal.dismiss();
   }, [draft, onSelect, modal]);
+
+  const handleClear = React.useCallback(() => {
+    onSelect({ mode: 'month', year: new Date().getFullYear(), month: new Date().getMonth() + 1 });
+    modal.dismiss();
+  }, [onSelect, modal]);
 
   const switchMode = React.useCallback((mode: PeriodMode) => {
     const now = new Date();
@@ -153,8 +158,12 @@ export function PeriodSelectorModal({
           )}
         </View>
 
-        <View className="pt-4 pb-6">
-          <SolidButton label={translate('common.apply')} fullWidth onPress={handleApply} />
+        <View className="flex-row items-center justify-center gap-2 pt-4 pb-6">
+          <GhostButton
+            label={translate('common.clear')}
+            onPress={handleClear}
+          />
+          <SolidButton label={translate('common.apply')} className="flex-1" onPress={handleApply} />
         </View>
       </View>
     </Modal>

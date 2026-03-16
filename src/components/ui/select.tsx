@@ -92,15 +92,12 @@ const selectTv = tv({
   },
 });
 
-const List = IS_WEB ? FlashList : BottomSheetFlatList;
-
-export type OptionType = { label: string; subtext?: string; value: string | number; image?: string | ImageSource };
+export type OptionType = { label: string; subtext?: string; value: string | number; image?: string | ImageSource; className?: string };
 
 const Option = React.memo(
   ({
     label,
     selected = false,
-    checkColor,
     image,
     subtext,
     className,
@@ -108,7 +105,6 @@ const Option = React.memo(
     ...props
   }: PressableProps & Omit<OptionType, 'value'> & {
     selected?: boolean;
-    checkColor: string;
   }) => {
     return (
       <Pressable
@@ -123,7 +119,7 @@ const Option = React.memo(
                 <Text className="leading-tight dark:text-gray-100">{label}</Text>
                 {subtext && <Text className="text-sm/snug text-gray-500 dark:text-gray-400">{subtext}</Text>}
               </View>
-              {selected && <Check color={checkColor} size={18} strokeWidth={2.5} />}
+              {selected && <Check className="text-foreground" size={18} strokeWidth={2.5} />}
             </>
           )}
       </Pressable>
@@ -147,6 +143,8 @@ function keyExtractor(item: OptionType) {
   return `select-item-${item.value}`;
 }
 
+const List = IS_WEB ? FlashList : BottomSheetFlatList;
+
 export function Options({
   ref,
   options,
@@ -162,7 +160,6 @@ export function Options({
 }: OptionsProps & { ref?: React.RefObject<BottomSheetModal | null> }) {
   const { theme } = useUniwind();
   const isDark = theme === 'dark';
-  const checkColor = isDark ? '#ffffff' : '#232633';
 
   const [searchQuery, setSearchQuery] = React.useState('');
   const deferredSearchQuery = React.useDeferredValue(searchQuery);
@@ -187,16 +184,15 @@ export function Options({
         key={`select-item-${item.value}`}
         label={item.label}
         selected={value === item.value}
-        checkColor={checkColor}
         image={item.image}
         subtext={item.subtext}
         children={renderItem?.(item)}
         onPress={() => onSelect(item)}
-        className={className}
+        className={cn(className, item.className)}
         testID={testID ? `${testID}-item-${item.value}` : undefined}
       />
     ),
-    [checkColor, onSelect, value, testID, className, renderItem],
+    [onSelect, value, testID, className, renderItem],
   );
 
   const listHeader = React.useMemo(

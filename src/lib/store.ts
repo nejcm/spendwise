@@ -66,8 +66,9 @@ export type AppState = {
   openaiApiKey: string | undefined;
   anthropicApiKey: string | undefined;
 
+  // Other
   lastUsed: {
-    currency: CurrencyKey;
+    currencies: CurrencyKey[];
   };
 
   // Form preferences
@@ -105,6 +106,7 @@ const _useAppStore = create<AppState>()(
       anthropicApiKey: undefined,
       lastUsed: {
         currency: 'USD',
+        currencies: ['USD'],
       },
       formPrefs: {
         transactionForm: {},
@@ -130,6 +132,7 @@ const _useAppStore = create<AppState>()(
         aiProvider: state.aiProvider,
         openaiApiKey: state.openaiApiKey,
         anthropicApiKey: state.anthropicApiKey,
+        lastUsed: state.lastUsed,
         formPrefs: state.formPrefs,
       }),
     },
@@ -143,20 +146,23 @@ export const getAppState = () => _useAppStore.getState();
 
 // Profile actions
 export function setProfile(profile: AppState['profile']) {
-  return _useAppStore.setState({ profile });
+  return _useAppStore.setState((prev) => ({ ...prev, profile }));
 }
 export function updateProfile(profile: Partial<AppState['profile']>) {
-  return _useAppStore.setState((state) => ({ profile: { ...state.profile, ...profile } }));
+  return _useAppStore.setState((prev) => ({
+    ...prev,
+    profile: { ...prev.profile, ...profile },
+  }));
 }
 export const selectProfile = (state: AppState) => state.profile;
 
 // Auth actions
 export function signIn(token: TokenType) {
-  return _useAppStore.setState({ token, authStatus: 'signIn' });
+  return _useAppStore.setState((prev) => ({ ...prev, token, authStatus: 'signIn' }));
 }
 
 export function signOut() {
-  return _useAppStore.setState({ token: null, authStatus: 'signOut' });
+  return _useAppStore.setState((prev) => ({ ...prev, token: null, authStatus: 'signOut' }));
 }
 
 export function hydrateAuth() {
@@ -167,96 +173,111 @@ export function hydrateAuth() {
 
 // Preference actions
 export function setCurrency(currency: CurrencyKey) {
-  return _useAppStore.setState({ currency });
+  return _useAppStore.setState((prev) => ({ ...prev, currency }));
 }
 
 export function setCurrencyFormat(currencyFormat: AppState['currencyFormat']) {
-  return _useAppStore.setState({ currencyFormat });
+  return _useAppStore.setState((prev) => ({ ...prev, currencyFormat }));
 }
 
 export function setDateFormat(dateFormat: AppState['dateFormat']) {
-  return _useAppStore.setState({ dateFormat });
+  return _useAppStore.setState((prev) => ({ ...prev, dateFormat }));
 }
 
 export function setNumberFormat(numberFormat: AppState['numberFormat']) {
-  return _useAppStore.setState({ numberFormat });
+  return _useAppStore.setState((prev) => ({ ...prev, numberFormat }));
 }
 
 export function setMonthStartDay(monthStartDay: number) {
-  return _useAppStore.setState({ monthStartDay });
+  return _useAppStore.setState((prev) => ({ ...prev, monthStartDay }));
 }
 
 export function setTheme(theme: ThemeType) {
-  return _useAppStore.setState({ theme });
+  return _useAppStore.setState((prev) => ({ ...prev, theme }));
 }
 
 export function setIsFirstTime(isFirstTime: boolean) {
-  return _useAppStore.setState({ isFirstTime });
+  return _useAppStore.setState((prev) => ({ ...prev, isFirstTime }));
 }
 
 export function setLanguage(language: Language) {
-  return _useAppStore.setState({ language });
+  return _useAppStore.setState((prev) => ({ ...prev, language }));
 }
 
 // AI actions
 export function setAiProvider(aiProvider: AppState['aiProvider']) {
-  return _useAppStore.setState({ aiProvider });
+  return _useAppStore.setState((prev) => ({ ...prev, aiProvider }));
 }
 
 export function setOpenaiApiKey(openaiApiKey: string) {
-  return _useAppStore.setState({ openaiApiKey });
+  return _useAppStore.setState((prev) => ({ ...prev, openaiApiKey }));
 }
 
 export function setAnthropicApiKey(anthropicApiKey: string) {
-  return _useAppStore.setState({ anthropicApiKey });
+  return _useAppStore.setState((prev) => ({ ...prev, anthropicApiKey }));
 }
 
 // Security actions
 export function setLockEnabled(lockEnabled: boolean) {
-  return _useAppStore.setState({ lockEnabled });
+  return _useAppStore.setState((prev) => ({ ...prev, lockEnabled }));
 }
 
 export function setLockTimeoutMinutes(lockTimeoutMinutes: number) {
-  return _useAppStore.setState({ lockTimeoutMinutes });
+  return _useAppStore.setState((prev) => ({ ...prev, lockTimeoutMinutes }));
 }
 
 // Period selection actions
 export function setPeriodSelection(periodSelection: PeriodSelection) {
-  return _useAppStore.setState({ periodSelection });
+  return _useAppStore.setState((prev) => ({ ...prev, periodSelection }));
 }
 
 // Other actions
 export function setLastUsed(lastUsed: AppState['lastUsed']) {
-  return _useAppStore.setState({ lastUsed });
+  return _useAppStore.setState((prev) => ({ ...prev, lastUsed }));
 }
 export function updateLastUsed(lastUsed: Partial<AppState['lastUsed']>) {
-  return _useAppStore.setState((state) => ({ lastUsed: { ...state.lastUsed, ...lastUsed } }));
+  return _useAppStore.setState((state) => ({
+    ...state,
+    lastUsed: { ...state.lastUsed, ...lastUsed },
+  }));
 }
 export const selectLastUsed = (state: AppState) => state.lastUsed;
 
-// Form preference actions
-export function setTransactionFormPrefs(prefs: AppState['formPrefs']['transactionForm']) {
-  return _useAppStore.setState((state) => ({
-    formPrefs: {
-      ...state.formPrefs,
-      transactionForm: {
-        ...state.formPrefs.transactionForm,
-        ...prefs,
+export function addLastUsedCurrency(currency: CurrencyKey) {
+  return _useAppStore.setState((prev) => {
+    const existing = prev.lastUsed.currencies ?? [];
+    const deduped = [currency, ...existing.filter((c) => c !== currency)].slice(0, 5);
+    return {
+      ...prev,
+      lastUsed: {
+        ...prev.lastUsed,
+        currencies: deduped,
       },
+    };
+  });
+}
+export function selectLastUsedCurrencies(state: AppState) {
+  return state.lastUsed.currencies.length
+    ? state.lastUsed.currencies
+    : state.currency ? [state.currency] : undefined;
+}
+
+// Form preference actions
+function updateFormPrefs(prefs: Partial<AppState['formPrefs']>) {
+  return _useAppStore.setState((prev) => ({
+    ...prev,
+    formPrefs: {
+      ...prev.formPrefs,
+      ...prefs,
     },
   }));
 }
+export function setTransactionFormPrefs(prefs: AppState['formPrefs']['transactionForm']) {
+  return updateFormPrefs({ transactionForm: prefs });
+}
 
 export function setAccountFormPrefs(prefs: AppState['formPrefs']['accountForm']) {
-  return _useAppStore.setState((state) => ({
-    formPrefs: {
-      ...state.formPrefs,
-      accountForm: {
-        ...state.formPrefs.accountForm,
-        ...prefs,
-      },
-    },
-  }));
+  return updateFormPrefs({ accountForm: prefs });
 }
 export const selectTransactionFormPrefs = (state: AppState) => state.formPrefs.transactionForm;
 export const selectAccountFormPrefs = (state: AppState) => state.formPrefs.accountForm;

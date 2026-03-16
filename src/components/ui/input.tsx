@@ -8,6 +8,7 @@ import { cn, tv } from 'tailwind-variants';
 import { Text } from './text';
 
 export const inputDefaults = 'rounded-lg border font-family-sans focus:outline-none';
+export const inputDefaultDefaults = 'border-border bg-input text-foreground focus:border-gray-800 focus:dark:border-gray-300';
 export const labelDefaults = 'text-foreground mb-1 text-sm/snug';
 
 export const inputTv = tv({
@@ -20,7 +21,7 @@ export const inputTv = tv({
   variants: {
     color: {
       default: {
-        input: 'border-border bg-input text-foreground focus:border-gray-800 focus:dark:border-gray-300',
+        input: inputDefaultDefaults,
       },
       secondary: {
         input: 'border-gray-300 bg-gray-200 focus:border-gray-800 dark:border-border dark:bg-input dark:text-foreground focus:dark:border-gray-300',

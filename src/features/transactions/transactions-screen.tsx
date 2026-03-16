@@ -5,7 +5,7 @@ import * as React from 'react';
 import { useMemo, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { cn } from 'tailwind-variants';
-import { FocusAwareStatusBar, Input, inputDefaults, Text } from '@/components/ui';
+import { FocusAwareStatusBar, Input, inputDefaultDefaults, inputDefaults, Text } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import { MonthPicker, YearPicker } from '../../components/month-year-picker';
 import { IconButton } from '../../components/ui/icon-button';
@@ -13,7 +13,9 @@ import { useTransactions } from './api';
 import { TransactionFilterBar } from './components/transaction-filter-bar';
 import { TransactionList } from './components/transaction-list';
 
-export function TransactionListScreen() {
+const inputClassNames = cn(inputDefaults, inputDefaultDefaults, 'min-w-0 flex-1 flex-row items-center p-0');
+
+export function TransactionsScreen() {
   // [year, month]
   const [selectedDate, setSelectedDate] = useState(() => {
     const date = format(new Date(), 'yyyy-MM');
@@ -85,7 +87,7 @@ export function TransactionListScreen() {
         onSelect={(year) => setSelectedDate((prev) => [year, prev[1]])}
       />
       <View className="flex-row items-center gap-2 px-4 pb-2">
-        <View className={cn(inputDefaults, 'min-w-0 flex-1 flex-row items-center p-0')}>
+        <View className={inputClassNames}>
           <Input
             value={search}
             placeholder={translate('transactions.search')}

@@ -21,7 +21,7 @@ function renderContent(pathname: string, sheetRef: React.RefObject<BottomSheetMo
   if (pathname.startsWith('/accounts')) {
     return (
       <>
-        <Text className="mb-4 text-center text-2xl font-bold">
+        <Text className="mb-4 text-center text-xl font-bold">
           {translate('accounts.add')}
         </Text>
         <AccountForm onSuccess={dismissModal} onCancel={dismissModal} />
@@ -32,7 +32,7 @@ function renderContent(pathname: string, sheetRef: React.RefObject<BottomSheetMo
   if (pathname.startsWith('/categories')) {
     return (
       <>
-        <Text className="mb-4 text-center text-2xl font-bold">
+        <Text className="mb-4 text-center text-xl font-bold">
           {translate('categories.add')}
         </Text>
         <CategoryForm onSuccess={dismissModal} onCancel={dismissModal} />
@@ -42,7 +42,7 @@ function renderContent(pathname: string, sheetRef: React.RefObject<BottomSheetMo
 
   return (
     <>
-      <Text className="mb-4 text-center text-2xl font-bold">
+      <Text className="mb-4 text-center text-xl font-bold">
         {translate('transactions.add')}
       </Text>
       <TransactionForm onSuccess={dismissModal} onCancel={dismissModal} />

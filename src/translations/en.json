@@ -66,6 +66,7 @@
   "common": {
     "add": "Add",
     "amount": "Amount",
+    "apply": "Apply",
     "back": "Back",
     "cancel": "Cancel",
     "categories": "Categories",
@@ -78,6 +79,7 @@
     "done": "Done",
     "edit": "Edit",
     "edit_mode": "Edit Mode",
+    "end_date": "End Date",
     "error": "Error",
     "error_description": "An unexpected error occurred. Restart the app to continue.",
     "exit": "Exit",
@@ -99,6 +101,7 @@
     "select_month": "Select Month",
     "select_month_year": "Select Month and Year",
     "select_year": "Select Year",
+    "start_date": "Start Date",
     "there": "there",
     "week": "Week",
     "year": "Year"

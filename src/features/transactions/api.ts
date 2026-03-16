@@ -30,11 +30,11 @@ const keys = {
 
 // ─── Transaction Queries ───
 
-export function useTransactions(date: string) {
+export function useTransactions(startDate: string, endDate: string) {
   const db = useSQLiteContext();
   return useQuery({
-    queryKey: keys.transactionList(date),
-    queryFn: () => getTransactions(db, date),
+    queryKey: keys.transactionList(`${startDate}/${endDate}`),
+    queryFn: () => getTransactions(db, startDate, endDate),
   });
 }
 
@@ -217,16 +217,14 @@ export function useDeleteTransaction() {
 
 // ─── Database Functions ───
 
-async function getTransactions(db: SQLiteDatabase, date: string): Promise<TransactionWithCategory[]> {
-  const [startDate, nextMonth] = getCurrentMonthRange(date);
-
+async function getTransactions(db: SQLiteDatabase, startDate: string, endDate: string): Promise<TransactionWithCategory[]> {
   return db.getAllAsync<TransactionWithCategory>(
     `SELECT t.*, c.name as category_name, c.icon as category_icon, c.color as category_color
      FROM transactions t
      LEFT JOIN categories c ON t.category_id = c.id
      WHERE t.date >= ? AND t.date < ?
      ORDER BY t.date DESC, t.created_at DESC`,
-    [startDate, nextMonth],
+    [startDate, endDate],
   );
 }
 

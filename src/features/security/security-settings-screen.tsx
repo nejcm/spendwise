@@ -1,12 +1,13 @@
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as React from 'react';
-import { Pressable, Switch, View } from 'react-native';
+import { Pressable } from 'react-native';
 
-import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
+import { FocusAwareStatusBar, ScrollView, Switch, Text, View } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { translate } from '@/lib/i18n';
 import { setLockEnabled, setLockTimeoutMinutes, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
+import DetailsSection from '../../components/details';
 
 const TIMEOUT_OPTIONS = [
   { label: translate('security.timeout_immediately'), value: 0 },
@@ -22,15 +23,15 @@ export function SecuritySettingsScreen() {
   const lockEnabled = useAppStore.use.lockEnabled();
   const timeoutVal = useAppStore.use.lockTimeoutMinutes();
 
-  const handleToggleLock = async () => {
-    if (lockEnabled) {
+  const handleToggleLock = async (on: boolean) => {
+    if (!on) {
       const result = await LocalAuthentication.authenticateAsync({
         cancelLabel: translate('common.cancel'),
         disableDeviceFallback: false,
         promptMessage: translate('security.verify_to_disable'),
       });
       if (result.success) {
-        setLockEnabled(false);
+        setLockEnabled(on);
       }
     }
     else {
@@ -42,7 +43,7 @@ export function SecuritySettingsScreen() {
         );
         return;
       }
-      setLockEnabled(true);
+      setLockEnabled(on);
     }
   };
 
@@ -50,20 +51,21 @@ export function SecuritySettingsScreen() {
     <View className="flex-1 bg-background">
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
-        <View className="mb-6 rounded-xl bg-card">
-          <View className="flex-row items-center justify-between gap-4 p-4">
-            <View className="flex-1">
-              <Text className="font-medium">{translate('security.app_lock')}</Text>
-              <Text className="text-xs text-gray-500">{translate('security.app_lock_desc')}</Text>
-            </View>
+        <DetailsSection data={[{
+          label: translate('security.app_lock'),
+          labelClassName: 'text-foreground',
+          description: translate('security.app_lock_desc'),
+          value: (
             <Switch
-              value={lockEnabled}
-              onValueChange={() => {
-                void handleToggleLock();
+              checked={lockEnabled}
+              onChange={(checked) => {
+                void handleToggleLock(checked);
               }}
+              accessibilityLabel={translate('security.app_lock')}
             />
-          </View>
-        </View>
+          ),
+        }]}
+        />
 
         {lockEnabled && (
           <View className="mb-6">

@@ -56,6 +56,9 @@ export type AppState = {
   colorTheme: ColorThemeType;
   isFirstTime: boolean;
   language: Language | undefined;
+  notifications: {
+    global?: boolean;
+  };
 
   // Security
   lockEnabled: boolean;
@@ -103,6 +106,8 @@ function getDefaultState(): AppState {
     aiProvider: 'openai',
     openaiApiKey: undefined,
     anthropicApiKey: undefined,
+    notifications: {
+    },
     lastUsed: {
       currencies: ['USD'],
     },
@@ -120,24 +125,7 @@ const _useAppStore = create<AppState>()(
     {
       name: 'app-storage',
       storage: createJSONStorage(() => mmkvStorage),
-      partialize: (state) => ({
-        profile: state.profile,
-        token: state.token,
-        currency: state.currency,
-        currencyFormat: state.currencyFormat,
-        dateFormat: state.dateFormat,
-        monthStartDay: state.monthStartDay,
-        theme: state.theme,
-        isFirstTime: state.isFirstTime,
-        language: state.language,
-        lockEnabled: state.lockEnabled,
-        lockTimeoutMinutes: state.lockTimeoutMinutes,
-        aiProvider: state.aiProvider,
-        openaiApiKey: state.openaiApiKey,
-        anthropicApiKey: state.anthropicApiKey,
-        lastUsed: state.lastUsed,
-        formPrefs: state.formPrefs,
-      }),
+      partialize: (state) => (state),
     },
   ),
 );
@@ -288,3 +276,9 @@ export function setAccountFormPrefs(prefs: AppState['formPrefs']['accountForm'])
 }
 export const selectTransactionFormPrefs = (state: AppState) => state.formPrefs.transactionForm;
 export const selectAccountFormPrefs = (state: AppState) => state.formPrefs.accountForm;
+
+// Notifications actions
+export function updateNotifications(notifications: Partial<AppState['notifications']>) {
+  return _useAppStore.setState((prev) => ({ ...prev, notifications: { ...prev.notifications, ...notifications } }));
+}
+export const selectNotifications = (state: AppState) => state.notifications;

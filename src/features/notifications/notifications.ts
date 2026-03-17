@@ -1,9 +1,18 @@
+import type { QueryOptions } from '@tanstack/react-query';
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { addDays, format } from 'date-fns';
 import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
 
+import { Platform } from 'react-native';
 import { storage } from '@/lib/storage';
+
+export const NOTIFICATIONS_QUERY_KEY = ['notifications', 'canNotify'];
+
+export const notificationsQuery = {
+  queryKey: NOTIFICATIONS_QUERY_KEY,
+  gcTime: 10000,
+  queryFn: () => canNotify(),
+} satisfies QueryOptions<boolean>;
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -42,7 +51,7 @@ export async function setupNotifications(): Promise<void> {
   await Notifications.requestPermissionsAsync();
 }
 
-async function canNotify(): Promise<boolean> {
+export async function canNotify(): Promise<boolean> {
   const { status } = await Notifications.getPermissionsAsync();
   return status === 'granted';
 }

@@ -194,6 +194,7 @@
     "android_requested": "Notification permissions have been requested. You can also adjust them in system settings.",
     "enable_description": "Enable notifications to get alerts about budgets nearing their limits and upcoming recurring bills.",
     "ios_opened": "Notifications settings have been opened. You can manage permissions in the system dialog.",
+    "label": "Notifications",
     "update_error": "Unable to update notification settings."
   },
   "onboarding": {

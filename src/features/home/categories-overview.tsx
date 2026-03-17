@@ -1,9 +1,8 @@
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
-import { Plus } from 'lucide-react-native';
 import * as React from 'react';
 
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { Text } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { formatCurrency } from '@/features/formatting/helpers';
@@ -11,6 +10,7 @@ import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
+import { NoDataCard } from '../../components/no-data-card';
 import { useCategorySpendByRange } from '../insights/api';
 
 export function CategoriesOverview() {
@@ -19,30 +19,21 @@ export function CategoriesOverview() {
   const { data = [] } = useCategorySpendByRange(startDate, endDate);
   const currency = useAppStore.use.currency();
   const visibleCategories = React.useMemo(() => data.filter((item) => item.total > 0), [data]);
+  const hasCategories = visibleCategories.length > 0;
 
   return (
     <View>
       <View className="mb-2 flex-row items-center justify-between">
         <Text className="text-lg font-medium">{translate('common.categories')}</Text>
-        <GhostButton size="sm" className="px-0" onPress={() => router.push('/categories')}>
-          <Text className="text-sm font-medium text-muted-foreground">{translate('common.seeAll')}</Text>
-        </GhostButton>
+        {hasCategories && (
+          <GhostButton size="sm" className="px-0" onPress={() => router.push('/categories')}>
+            <Text className="text-sm font-medium text-muted-foreground">{translate('common.seeAll')}</Text>
+          </GhostButton>
+        )}
       </View>
-
-      {data.length === 0
+      {!hasCategories
         ? (
-            <Pressable
-              onPress={() => router.push('/categories')}
-              className="rounded-2xl border border-dashed border-gray-300 bg-card p-4 dark:border-gray-700"
-            >
-              <View className="flex-row items-center">
-                <Plus className="mr-2 size-5 text-foreground" />
-                <Text className="text-sm font-medium text-foreground">{translate('home.add_category')}</Text>
-              </View>
-              <Text className="mt-2 text-xs text-muted-foreground">
-                {translate('home.add_category_description')}
-              </Text>
-            </Pressable>
+            <NoDataCard onPress={() => router.push('/categories')} label={translate('home.add_category')} description={translate('home.add_category_description')} />
           )
         : (
             <ScrollView

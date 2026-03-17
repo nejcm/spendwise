@@ -7,6 +7,7 @@ import { AccountForm } from '@/features/accounts/components/account-form';
 import { TransactionForm } from '@/features/transactions/components/transaction-form';
 import { translate } from '@/lib/i18n';
 import { CategoryForm } from '../features/categories/category-form';
+import { ScheduledTransactionForm } from '../features/scheduled-transactions/components/scheduled-transaction-form';
 
 export type QuickAddSheetData = {
   pathname?: string;
@@ -25,6 +26,17 @@ function renderContent(pathname: string, sheetRef: React.RefObject<BottomSheetMo
           {translate('accounts.add')}
         </Text>
         <AccountForm onSuccess={dismissModal} onCancel={dismissModal} />
+      </>
+    );
+  }
+
+  if (pathname.startsWith('/scheduled')) {
+    return (
+      <>
+        <Text className="mb-4 text-center text-xl font-bold">
+          {translate('scheduled.add')}
+        </Text>
+        <ScheduledTransactionForm onSuccess={dismissModal} onCancel={dismissModal} />
       </>
     );
   }

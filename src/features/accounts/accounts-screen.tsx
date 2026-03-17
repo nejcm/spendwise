@@ -7,14 +7,14 @@ import * as React from 'react';
 import { useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
-import { FocusAwareStatusBar, Modal, ScrollView, Text } from '@/components/ui';
+import { FocusAwareStatusBar, Modal, ScrollView, SolidButton, Text } from '@/components/ui';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { useAccountsWithBalanceForRange } from '@/features/transactions/api';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { setPeriodSelection, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
-import { OutlineButton } from '../../components/ui/outline-button';
+import NoData from '../../components/no-data';
 import { formatCurrency } from '../formatting/helpers';
 import { AccountCard } from './components/account-card';
 import { AccountForm } from './components/account-form';
@@ -84,36 +84,35 @@ export function AccountsScreen() {
           <Text className="text-3xl font-bold">{formatCurrency(totalBalance, currency)}</Text>
         </View>
 
-        {accounts.map((account) => (
-          <AccountCard
-            key={account.id}
-            account={account}
-            onPress={() => openEditAccountForm(account)}
-          />
-        ))}
+        {accounts.length === 0
+          ? (
+              <NoData title={translate('accounts.no_accounts')} className="mt-6" />
+            )
+          : (
+              accounts.map((account) => (
+                <AccountCard
+                  key={account.id}
+                  account={account}
+                  onPress={() => openEditAccountForm(account)}
+                />
+              ))
+            )}
 
         <View className="mt-4 flex-row items-center justify-center">
-          <OutlineButton
-            iconLeft={<Plus className="mr-1 size-4 text-muted-foreground" />}
+          <SolidButton
+            iconLeft={<Plus className="mr-1 size-4 text-background" />}
             label={translate('common.add')}
             size="sm"
-            color="secondary"
-            className="rounded-3xl px-6"
-            textClassName="font-normal"
+            className="px-6"
             onPress={openCreateAccountForm}
           />
         </View>
 
-        {accounts.length === 0 && (
-          <View className="items-center py-8">
-            <Text className="text-muted-foreground">{translate('accounts.no_accounts')}</Text>
-          </View>
-        )}
       </ScrollView>
 
       <Modal
         ref={accountFormRef}
-        snapPoints={['68%']}
+        snapPoints={['80%']}
         title={translate(accountFormMode === 'edit' ? 'accounts.edit' : 'accounts.add')}
         onDismiss={handleAccountFormDismiss}
       >

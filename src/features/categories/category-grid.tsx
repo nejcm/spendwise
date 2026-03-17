@@ -1,6 +1,6 @@
 import type { CurrencyKey } from '../currencies';
 import type { CategorySpend } from '@/features/insights/types';
-import { Lightbulb, Plus } from 'lucide-react-native';
+import { Lightbulb } from 'lucide-react-native';
 import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
@@ -9,6 +9,7 @@ import Sortable from 'react-native-sortables';
 import { Text } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
+import { NoDataCard } from '../../components/no-data-card';
 import { formatCurrency } from '../formatting/helpers';
 
 export type CategoryGridProps = {
@@ -37,7 +38,7 @@ export const CategoryGrid = React.memo(({
       <View className="px-4 pb-4">
         {categories.length === 0
           ? (
-              <AddPlaceholder onPress={onAddPress} />
+              <NoDataCard onPress={onAddPress} label={translate('common.add')} />
             )
           : (
               <Sortable.Grid
@@ -94,19 +95,5 @@ function CategoryGridCell({ item, currency, onPress }: CategoryGridCellProps) {
         </Text>
       )}
     </Pressable>
-  );
-}
-
-function AddPlaceholder({ onPress }: { onPress: () => void }) {
-  return (
-    <View className="flex-1 pr-1">
-      <Pressable
-        onPress={onPress}
-        className="mt-3 flex-row items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 py-2 dark:border-gray-500"
-      >
-        <Plus className="size-6 text-muted-foreground" />
-        <Text className="text-muted-foreground">{translate('common.add')}</Text>
-      </Pressable>
-    </View>
   );
 }

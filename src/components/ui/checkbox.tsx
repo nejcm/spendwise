@@ -6,6 +6,7 @@ import { useCallback } from 'react';
 import { I18nManager, Pressable, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
+import { useCSSVariable } from 'uniwind';
 import { Text } from './text';
 
 const SIZE = 20;
@@ -59,19 +60,21 @@ function Label({ text, testID, className = '' }: LabelProps) {
 }
 
 export function CheckboxIcon({ checked = false }: IconProps) {
-  const color = checked ? 'var(--color-primary-300)' : 'var(--color-gray-400)';
+  const checkedColor = useCSSVariable('--color-foreground');
+  const uncheckedColor = useCSSVariable('--color-gray-400');
+  const color = checked ? String(checkedColor) : String(uncheckedColor);
   return (
     <MotiView
       style={{
         height: SIZE,
         width: SIZE,
-        borderColor: color,
+        borderColor: (color),
       }}
       className="items-center justify-center rounded-md border-2"
       from={{ backgroundColor: 'transparent', borderColor: '#CCCFD6' }}
       animate={{
-        backgroundColor: checked ? color : 'transparent',
-        borderColor: color,
+        backgroundColor: checked ? (color) : 'transparent',
+        borderColor: (color),
       }}
       transition={{
         backgroundColor: { type: 'timing', duration: 100 },
@@ -124,23 +127,25 @@ export const Checkbox = Object.assign(CheckboxBase, {
 });
 
 export function RadioIcon({ checked = false }: IconProps) {
-  const color = checked ? 'var(--color-primary-300)' : 'var(--color-gray-400)';
+  const checkedColor = useCSSVariable('--color-foreground');
+  const uncheckedColor = useCSSVariable('--color-gray-400');
+  const color = checked ? String(checkedColor) : String(uncheckedColor);
   return (
     <MotiView
       style={{
         height: SIZE,
         width: SIZE,
-        borderColor: color,
+        borderColor: (color),
       }}
       className="items-center justify-center rounded-xl border-2 bg-transparent"
       from={{ borderColor: '#CCCFD6' }}
       animate={{
-        borderColor: color,
+        borderColor: (color),
       }}
       transition={{ borderColor: { duration: 100, type: 'timing' } }}
     >
       <MotiView
-        className={`size-3 rounded-lg ${checked && 'bg-primary-300'}`}
+        className={`size-3 rounded-lg ${checked && 'bg-foreground'}`}
         from={{ opacity: 0 }}
         animate={{ opacity: checked ? 1 : 0 }}
         transition={{ opacity: { duration: 50, type: 'timing' } }}
@@ -175,7 +180,9 @@ export const Radio = Object.assign(RadioBase, {
 export function SwitchIcon({ checked = false }: IconProps) {
   const translateX = checked ? THUMB_OFFSET : WIDTH - THUMB_WIDTH - THUMB_OFFSET;
 
-  const backgroundColor = checked ? 'var(--color-primary-300)' : 'var(--color-gray-400)';
+  const checkedColor = useCSSVariable('--color-foreground');
+  const uncheckedColor = useCSSVariable('--color-gray-400');
+  const backgroundColor = checked ? String(checkedColor) : String(uncheckedColor);
 
   return (
     <View className="w-[50] justify-center">

@@ -142,6 +142,8 @@ App startup happens in `src/app/_layout.tsx`, where the app initializes SQLite, 
 
 ## Inspiration
 
+> This Project is based on [Obytes starter](https://starter.obytes.com)
+
 - [PocketGuard](https://pocketguard.com/)
 - [Wallet / BudgetBakers](https://budgetbakers.com/en/)
 

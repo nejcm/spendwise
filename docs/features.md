@@ -30,13 +30,12 @@
 - `src/app/settings/ai.tsx`
 - `src/app/settings/privacy.tsx`
 - `src/app/settings/terms.tsx`
-- `src/app/settings/transfer.tsx`
 
 ## Feature Modules
 
 ### Core Finance
 
-- `accounts`: account CRUD, account balances, and transfer flows
+- `accounts`: account CRUD, account balances
 - `categories`: category CRUD, ordering, picker/grid UI
 - `transactions`: list, detail, form, summaries, filters, and balance updates
 

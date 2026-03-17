@@ -1,24 +1,26 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import { IS_WEB } from '../base';
 import { seedDefaults } from './seed';
 
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 1;
 
 /**
- * Drops all tables and recreates them. Safe on all platforms.
- * Prefer this over deleteDatabaseAsync on web — that API has a bug where
- * it removes the file from the VFS path map but doesn't return the handle
- * to the available pool, causing SQLITE_CANTOPEN (14) on the next open
- * within the same Worker session.
+ * Clears all data from the database.
  */
-export async function resetDb(db: SQLiteDatabase): Promise<void> {
-  await dropDb(db);
-  await migrateDb(db);
-  if (IS_WEB) {
-    // Reload the page so the Worker reinitialises its VFS state cleanly.
-    window.location.reload();
-  }
-}
+export async function clearDbData(db: SQLiteDatabase): Promise<void> {
+  await db.execAsync(`
+    PRAGMA foreign_keys = OFF;
+    DELETE FROM recurring_rule_runs;
+    DELETE FROM recurring_rules;
+    DELETE FROM budget_lines;
+    DELETE FROM budgets;
+    DELETE FROM transactions;
+    DELETE FROM accounts;
+    DELETE FROM categories;
+    DELETE FROM goals;
+    DELETE FROM currency_rates;
+    PRAGMA foreign_keys = ON;
+  `);
+};
 
 /**
  * Drops all tables and sets the user version to 0.
@@ -32,6 +34,7 @@ export async function dropDb(db: SQLiteDatabase): Promise<void> {
     DROP TABLE IF EXISTS budgets;
     DROP TABLE IF EXISTS budget_lines;
     DROP TABLE IF EXISTS recurring_rules;
+    DROP TABLE IF EXISTS recurring_rule_runs;
     DROP TABLE IF EXISTS goals;
     DROP TABLE IF EXISTS currency_rates;
   `);
@@ -119,22 +122,6 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           UNIQUE(budget_id, category_id)
         );
 
-        CREATE TABLE IF NOT EXISTS recurring_rules (
-          id TEXT PRIMARY KEY NOT NULL,
-          account_id TEXT NOT NULL REFERENCES accounts(id),
-          category_id TEXT REFERENCES categories(id),
-          type TEXT NOT NULL CHECK(type IN ('income','expense')),
-          amount INTEGER NOT NULL,
-          note TEXT,
-          payee TEXT,
-          frequency TEXT NOT NULL CHECK(frequency IN ('daily','weekly','biweekly','monthly','yearly')),
-          start_date TEXT NOT NULL,
-          end_date TEXT,
-          next_due_date TEXT NOT NULL,
-          is_active INTEGER NOT NULL DEFAULT 1,
-          created_at TEXT NOT NULL DEFAULT (datetime('now'))
-        );
-
         CREATE TABLE IF NOT EXISTS goals (
           id TEXT PRIMARY KEY NOT NULL,
           name TEXT NOT NULL,
@@ -147,23 +134,49 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           created_at TEXT NOT NULL DEFAULT (datetime('now')),
           updated_at TEXT NOT NULL DEFAULT (datetime('now'))
         );
+
+         CREATE TABLE IF NOT EXISTS currency_rates (
+          base       TEXT NOT NULL,
+          quote      TEXT NOT NULL,
+          rate       REAL NOT NULL,
+          source     TEXT NOT NULL,
+          fetched_at TEXT NOT NULL DEFAULT (datetime('now')),
+          PRIMARY KEY (base, quote)
+        );
+
+        CREATE TABLE IF NOT EXISTS recurring_rules (
+          id TEXT PRIMARY KEY NOT NULL,
+          account_id TEXT NOT NULL REFERENCES accounts(id),
+          category_id TEXT REFERENCES categories(id),
+          type TEXT NOT NULL CHECK(type IN ('income','expense')),
+          amount INTEGER NOT NULL,
+          currency TEXT NOT NULL DEFAULT 'EUR',
+          note TEXT,
+          frequency TEXT NOT NULL CHECK(frequency IN ('daily','weekly','biweekly','monthly','yearly')),
+          start_date TEXT NOT NULL,
+          end_date TEXT,
+          next_due_date TEXT NOT NULL,
+          is_active INTEGER NOT NULL DEFAULT 1,
+          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+        
+        CREATE TABLE IF NOT EXISTS recurring_rule_runs (
+          id TEXT PRIMARY KEY NOT NULL,
+          rule_id TEXT NOT NULL REFERENCES recurring_rules(id) ON DELETE CASCADE,
+          scheduled_for_date TEXT NOT NULL,
+          transaction_id TEXT NOT NULL REFERENCES transactions(id) ON DELETE CASCADE,
+          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          UNIQUE(rule_id, scheduled_for_date)
+        );
+        CREATE INDEX IF NOT EXISTS idx_recurring_rules_next_due_date
+          ON recurring_rules(next_due_date);
+
+        CREATE INDEX IF NOT EXISTS idx_recurring_rule_runs_rule_date
+          ON recurring_rule_runs(rule_id, scheduled_for_date);
       `);
 
     await seedDefaults(db);
     await db.execAsync(`PRAGMA user_version = 1`);
-  }
-
-  if (currentDbVersion < 2) {
-    await db.execAsync(`
-      CREATE TABLE IF NOT EXISTS currency_rates (
-        base       TEXT NOT NULL,
-        quote      TEXT NOT NULL,
-        rate       REAL NOT NULL,
-        source     TEXT NOT NULL,
-        fetched_at TEXT NOT NULL DEFAULT (datetime('now')),
-        PRIMARY KEY (base, quote)
-      );
-    `);
-    await db.execAsync(`PRAGMA user_version = 2`);
   }
 }

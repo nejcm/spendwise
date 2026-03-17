@@ -29,7 +29,6 @@ export default function WelcomeStep({ onNext, currentStep }: WelcomeStepProps) {
       <View className="flex-1 justify-between bg-background px-6 py-8">
         <View>
           <IntroNav current={currentStep} />
-
           <Text className="mb-4 text-center text-[1.75rem] font-bold text-black dark:text-white">
             {translate('onboarding.welcome_headline')}
           </Text>

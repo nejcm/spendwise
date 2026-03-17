@@ -80,32 +80,6 @@ export function useArchiveAccount() {
   });
 }
 
-export function useCreateTransfer() {
-  const db = useSQLiteContext();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (params: TransferParams) => createTransfer(db, params),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: keys.accounts });
-      queryClient.invalidateQueries({ queryKey: keys.accountsWithBalance });
-      queryClient.invalidateQueries({ queryKey: keys.totalBalance });
-      queryClient.invalidateQueries({ queryKey: ['transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['month-summary'] });
-    },
-  });
-}
-
-// ─── Types ───
-
-type TransferParams = {
-  fromAccountId: string;
-  toAccountId: string;
-  amount: string;
-  date: string;
-  note: string;
-};
-
 // ─── Database Functions ───
 
 async function getAccounts(db: SQLiteDatabase): Promise<Account[]> {
@@ -158,25 +132,5 @@ async function archiveAccount(db: SQLiteDatabase, id: string): Promise<void> {
   await db.runAsync(
     'UPDATE accounts SET is_archived = 1, updated_at = datetime(\'now\') WHERE id = ?',
     [id],
-  );
-}
-
-async function createTransfer(db: SQLiteDatabase, params: TransferParams): Promise<void> {
-  const { fromAccountId, toAccountId, amount, date, note } = params;
-  const cents = amountToCents(Number.parseFloat(amount) || 0);
-  const transferId = generateId();
-  const outId = generateId();
-  const inId = generateId();
-
-  await db.runAsync(
-    `INSERT INTO transactions (id, account_id, type, amount, date, note, transfer_id)
-     VALUES (?, ?, 'transfer', ?, ?, ?, ?)`,
-    [outId, fromAccountId, -cents, date, note || null, transferId],
-  );
-
-  await db.runAsync(
-    `INSERT INTO transactions (id, account_id, type, amount, date, note, transfer_id)
-     VALUES (?, ?, 'transfer', ?, ?, ?, ?)`,
-    [inId, toAccountId, cents, date, note || null, transferId],
   );
 }

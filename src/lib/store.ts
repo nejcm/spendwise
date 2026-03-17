@@ -81,39 +81,42 @@ export type AppState = {
   periodSelection: PeriodSelection;
 };
 
+function getDefaultState(): AppState {
+  return {
+    profile: {
+      name: '',
+      avatar: 1,
+    },
+    token: null,
+    authStatus: 'idle',
+    currency: 'USD',
+    currencyFormat: 'symbol-after',
+    dateFormat: 'dd/MM/yyyy',
+    numberFormat: 'stop',
+    monthStartDay: 1,
+    theme: 'system',
+    colorTheme: 'red',
+    isFirstTime: true,
+    language: undefined,
+    lockEnabled: false,
+    lockTimeoutMinutes: 1,
+    aiProvider: 'openai',
+    openaiApiKey: undefined,
+    anthropicApiKey: undefined,
+    lastUsed: {
+      currencies: ['USD'],
+    },
+    formPrefs: {
+      transactionForm: {},
+      accountForm: {},
+    },
+    periodSelection: currentPeriodSelection(),
+  };
+}
+
 const _useAppStore = create<AppState>()(
   persist(
-    (_set) => ({
-      profile: {
-        name: '',
-        avatar: 1,
-      },
-      token: null,
-      authStatus: 'idle',
-      currency: 'USD',
-      currencyFormat: 'symbol-after',
-      dateFormat: 'dd/MM/yyyy',
-      numberFormat: 'stop',
-      monthStartDay: 1,
-      theme: 'system',
-      colorTheme: 'red',
-      isFirstTime: true,
-      language: undefined,
-      lockEnabled: false,
-      lockTimeoutMinutes: 1,
-      aiProvider: 'openai',
-      openaiApiKey: undefined,
-      anthropicApiKey: undefined,
-      lastUsed: {
-        currency: 'USD',
-        currencies: ['USD'],
-      },
-      formPrefs: {
-        transactionForm: {},
-        accountForm: {},
-      },
-      periodSelection: currentPeriodSelection(),
-    }),
+    (_set) => (getDefaultState()),
     {
       name: 'app-storage',
       storage: createJSONStorage(() => mmkvStorage),
@@ -140,6 +143,10 @@ const _useAppStore = create<AppState>()(
 );
 
 export const useAppStore = createSelectors(_useAppStore);
+
+export function clearAppStore() {
+  return _useAppStore.setState(getDefaultState());
+}
 
 // Selectors
 export const getAppState = () => _useAppStore.getState();

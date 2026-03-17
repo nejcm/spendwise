@@ -103,7 +103,6 @@ export async function checkBudgetAlerts(db: SQLiteDatabase): Promise<void> {
 type RuleRow = {
   id: string;
   next_due_date: string;
-  payee: string | null;
   category_name: string | null;
 };
 
@@ -116,17 +115,20 @@ export async function checkUpcomingBills(db: SQLiteDatabase): Promise<void> {
   const inThreeDays = format(addDays(new Date(), 3), 'yyyy-MM-dd');
 
   const rules = await db.getAllAsync<RuleRow>(
-    `SELECT r.id, r.next_due_date, r.payee, c.name AS category_name
+    `SELECT r.id, r.next_due_date, c.name AS category_name
      FROM recurring_rules r
      LEFT JOIN categories c ON r.category_id = c.id
-     WHERE r.is_active = 1 AND r.next_due_date >= ? AND r.next_due_date <= ?`,
+     WHERE r.is_active = 1
+       AND r.type = 'expense'
+       AND r.next_due_date >= ?
+       AND r.next_due_date <= ?`,
     [today, inThreeDays],
   );
 
   for (const rule of rules) {
     const key = ruleAlertKey(rule.id, rule.next_due_date);
     if (!wasNotified(key)) {
-      const name = rule.payee ?? rule.category_name ?? 'Bill';
+      const name = rule.category_name ?? 'Bill';
       const isToday = rule.next_due_date === today;
       const body = isToday ? `${name} is due today.` : `${name} is due on ${rule.next_due_date}.`;
       await send('Upcoming Bill', body);

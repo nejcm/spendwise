@@ -3,11 +3,12 @@ import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { useMemo, useState } from 'react';
+import { ActivityIndicator, RefreshControl, View } from 'react-native';
 
-import { RefreshControl, View } from 'react-native';
-import { EmptyList, Text } from '@/components/ui';
-
+import NoData from '@/components/no-data';
+import { Text } from '@/components/ui';
 import { formatDate } from '@/features/formatting/helpers';
+import { translate } from '@/lib/i18n';
 import { TransactionCard } from './transaction-card';
 
 export type TransactionListProps = {
@@ -55,7 +56,7 @@ export function TransactionList({ transactions, isLoading, onRefresh }: Transact
   );
 
   if (!isLoading && transactions.length === 0) {
-    return <EmptyList isLoading={false} />;
+    return <NoData title={translate('transactions.no_transactions')} className="py-16" />;
   }
 
   return (
@@ -64,7 +65,7 @@ export function TransactionList({ transactions, isLoading, onRefresh }: Transact
       data={flatData}
       renderItem={renderItem}
       getItemType={(item) => (typeof item === 'string' ? 'header' : 'row')}
-      ListEmptyComponent={<EmptyList isLoading={isLoading} />}
+      ListEmptyComponent={isLoading ? <ActivityIndicator /> : <NoData className="py-16" title={translate('transactions.no_transactions')} />}
       refreshControl={
         onRefresh
           ? <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />

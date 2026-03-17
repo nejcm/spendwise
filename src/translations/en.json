@@ -92,6 +92,8 @@
     "name": "Name",
     "net": "Net",
     "next": "Next",
+    "next_on": "Next on",
+    "no": "No",
     "no_data": "No data found",
     "none": "None",
     "note": "Note",
@@ -109,6 +111,7 @@
     "today": "Today",
     "week": "Week",
     "year": "Year",
+    "yes": "Yes",
     "yesterday": "Yesterday"
   },
   "date": {
@@ -151,6 +154,7 @@
   "home": {
     "add_category": "Add Category",
     "add_category_description": "Create categories to track your spending by where it goes.",
+    "add_transaction": "Add Transaction",
     "available_balance": "Your balance for this month",
     "expenses": "Expenses",
     "hi": "Hi {{name}}",
@@ -208,6 +212,28 @@
     "welcome_copy": "Track spending, manage budgets, and build better money habits in one place.",
     "welcome_headline": "Smart money management"
   },
+  "scheduled": {
+    "active": "Active",
+    "add": "Add Recurring Rule",
+    "clear_end_date": "Clear end date",
+    "create": "New Recurring Rule",
+    "end_date_invalid": "End date must be on or after the start date",
+    "frequency": "Frequency",
+    "frequencyOptions": {
+      "biweekly": "Every 2 weeks",
+      "daily": "Daily",
+      "monthly": "Monthly",
+      "weekly": "Weekly",
+      "yearly": "Yearly"
+    },
+    "next_due_date": "Next due",
+    "no_rules": "No recurring rules yet",
+    "remove": "Remove",
+    "remove_confirm": "Remove recurring rule",
+    "rule_not_found": "This recurring rule no longer exists.",
+    "this_rule": "this rule",
+    "title": "Recurring Rules"
+  },
   "security": {
     "app_lock": "App Lock",
     "app_lock_desc": "Require device authentication to open the app",
@@ -231,11 +257,13 @@
     "app_name": "App Name",
     "categories": "Categories",
     "category_name": "Category Name",
+    "clear": "Clear",
     "currency_format": "Currency format",
     "date_format": "Date format",
     "default": "Default",
     "default_currency": "Default currency",
     "dev": "Development",
+    "dump_db": "Dump DB tables",
     "english": "English",
     "expense_categories": "Expense Categories",
     "finance": "Finance",
@@ -278,9 +306,9 @@
     "profile": "Profile",
     "reset": "Reset",
     "reset_db": "Reset Database",
+    "scheduled": "Recurring Rules",
     "security": "Security",
     "share": "Share",
-    "subscriptions": "Recurring Rules",
     "support": "Support",
     "support_us": "Support Us",
     "terms": "Terms of Service",
@@ -301,15 +329,6 @@
     "top_income": "Top Income",
     "trend_monthly": "Weekly Breakdown",
     "trend_yearly": "Monthly Breakdown"
-  },
-  "subscriptions": {
-    "create": "New Recurring Rule",
-    "frequency": "Frequency",
-    "no_rules": "No recurring rules yet",
-    "remove": "Remove",
-    "remove_confirm": "Remove recurring rule",
-    "this_rule": "this rule",
-    "title": "Recurring Rules"
   },
   "transactions": {
     "account": "Account",

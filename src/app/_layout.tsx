@@ -15,11 +15,14 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { AppErrorBoundary } from '@/components/app-error-boundary';
 import { CustomTabBar } from '@/components/ui/custom-tab-bar';
 import { useCurrencyRates } from '@/features/currencies/api';
+import { todayISO } from '@/features/formatting/helpers';
 import {
   checkBudgetAlerts,
   checkUpcomingBills,
   setupNotifications,
 } from '@/features/notifications/notifications';
+import { ScheduledTransactionsProcessor } from '@/features/scheduled-transactions/scheduled-transactions-processor';
+import { processDueScheduledTransactions } from '@/features/scheduled-transactions/scheduler';
 import { SecurityLock } from '@/features/security/security-lock';
 import { APIProvider } from '@/lib/api';
 import { IS_WEB } from '@/lib/base';
@@ -33,6 +36,7 @@ import '../global.css';
 async function initDb(db: SQLiteDatabase) {
   await migrateDb(db);
   await setupNotifications();
+  await processDueScheduledTransactions(db, todayISO());
   await checkBudgetAlerts(db);
   await checkUpcomingBills(db);
 }
@@ -145,6 +149,7 @@ function Providers({ children }: { children: React.ReactNode }) {
             <SQLiteProvider databaseName="spendwise.db" onInit={initDb}>
               <AppErrorBoundary>
                 <APIProvider>
+                  <ScheduledTransactionsProcessor />
                   <CurrencyRatesInitializer />
                   <FontLoader>
                     <BottomSheetModalProvider>

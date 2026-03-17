@@ -31,4 +31,4 @@ export const CURRENCY_OPTIONS = CURRENCIES.map((currency) => ({
   subtext: currency.name,
 }));
 
-export const CURRENCY_VALUES = Object.keys(CURRENCIES) as CurrencyKey[];
+export const CURRENCY_VALUES = Object.keys(CURRENCIES_MAP) as CurrencyKey[];

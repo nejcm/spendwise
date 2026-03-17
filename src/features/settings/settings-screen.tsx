@@ -1,19 +1,16 @@
-import type { QueryClient } from '@tanstack/react-query';
-import type { SQLiteDatabase } from 'expo-sqlite';
 import { useQueryClient } from '@tanstack/react-query';
 import Env from 'env';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
-import { ALargeSmall, Banknote, Bell, Bot, FileText, HelpCircle, Import, LayoutGrid, Link, List, LogOut, Share, Shield, User } from 'lucide-react-native';
+import { ALargeSmall, Banknote, Bell, Bot, Database, DatabaseBackupIcon, DatabaseZap, HelpCircle, Import, LayoutGrid, Link, ListChecks, Printer, RefreshCcw, Share, Shield, User } from 'lucide-react-native';
 import { FocusAwareStatusBar, Image, ScrollView, Text, View } from '@/components/ui';
+import { GhostButton } from '@/components/ui/ghost-button';
 import { config } from '@/config';
-import { mockData } from '@/lib/sqlite/mock-data';
-import { selectProfile, setIsFirstTime, useAppStore } from '@/lib/store';
+import { clearData, dumpDbTables, resetData, seedMockData } from '@/lib/dev';
+import { selectProfile, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
-import { GhostButton } from '../../components/ui/ghost-button';
-import { seedDefaults } from '../../lib/sqlite/seed';
 import { getAvatar } from '../profile';
 import { LanguageItem } from './components/language-item';
 import { SettingsContainer } from './components/settings-container';
@@ -21,19 +18,6 @@ import { SettingsItem } from './components/settings-item';
 import { ThemeItem } from './components/theme-item';
 
 const iconColor = 'text-foreground';
-
-async function seedMockData(db: SQLiteDatabase, queryClient: QueryClient) {
-  try {
-    await seedDefaults(db);
-    await mockData(db);
-    console.log('Mock data import successfully');
-  }
-  catch (err) {
-    console.error('Failed to import mock data', err);
-  }
-  queryClient.clear();
-  queryClient.invalidateQueries();
-}
 
 export function SettingsScreen() {
   const router = useRouter();
@@ -64,9 +48,14 @@ export function SettingsScreen() {
               onPress={() => router.push({ pathname: '/categories', params: { edit: 'true' } })}
             />
             <SettingsItem
-              icon={<List className={iconColor} size={20} />}
+              icon={<ListChecks className={iconColor} size={20} />}
               text="settings.transactions"
               onPress={() => router.push('/transactions')}
+            />
+            <SettingsItem
+              icon={<RefreshCcw className={iconColor} size={20} />}
+              text="settings.scheduled"
+              onPress={() => router.push('/scheduled' as never)}
             />
           </SettingsContainer>
 
@@ -134,10 +123,12 @@ export function SettingsScreen() {
 
           {Env.EXPO_PUBLIC_APP_ENV === 'development' && (
             <SettingsContainer title="settings.dev">
-              <SettingsItem text="settings.reset" icon={<LogOut className={iconColor} size={20} />} onPress={() => setIsFirstTime(true)} />
+              <SettingsItem text="settings.clear" icon={<DatabaseZap className={iconColor} size={20} />} onPress={() => clearData(db, queryClient)} />
+              <SettingsItem text="settings.reset" icon={<DatabaseBackupIcon className={iconColor} size={20} />} onPress={() => resetData(db, queryClient)} />
+              <SettingsItem text="settings.dump_db" icon={<Printer className={iconColor} size={20} />} onPress={() => dumpDbTables(db)} />
               <SettingsItem
                 text="settings.mock_data"
-                icon={<FileText className={iconColor} size={20} />}
+                icon={<Database className={iconColor} size={20} />}
                 onPress={() => seedMockData(db, queryClient)}
               />
             </SettingsContainer>

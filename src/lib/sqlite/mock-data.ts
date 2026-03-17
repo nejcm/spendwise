@@ -5,6 +5,8 @@ export async function mockData(db: SQLiteDatabase): Promise<void> {
   // Clear existing mock data (safe order for foreign keys)
   await db.execAsync(`
     DELETE FROM transactions;
+    DELETE FROM recurring_rule_runs;
+    DELETE FROM recurring_rules;
     DELETE FROM accounts;
   `);
 
@@ -86,5 +88,12 @@ export async function mockData(db: SQLiteDatabase): Promise<void> {
       -- Savings transfer (represented as two sides for now)
       ('tx_transfer_out_savings', 'acc_main_checking', NULL, 'transfer', 50000, 'EUR', date('now', '-4 days'), 'Transfer to savings'),
       ('tx_transfer_in_savings', 'acc_savings', NULL, 'transfer', 50000, 'EUR', date('now', '-4 days'), 'Transfer from checking');
+  `);
+
+  // Sample recurring rules
+  await db.execAsync(`
+    INSERT INTO recurring_rules (id, account_id, category_id, type, amount, currency, note, frequency, start_date, end_date, next_due_date, is_active)
+    VALUES
+      ('rule_salary', 'acc_main_checking', 'cat_salary', 'income', 920000, 'EUR', 'Monthly salary', 'monthly', date('now', '-15 days'), NULL, date('now', '-15 days'), 1);
   `);
 }

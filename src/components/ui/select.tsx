@@ -92,7 +92,13 @@ const selectTv = tv({
   },
 });
 
-export type OptionType = { label: string; subtext?: string; value: string | number; image?: string | ImageSource; className?: string };
+export type OptionType<T extends string | number = string | number> = {
+  label: string;
+  subtext?: string;
+  value: T;
+  image?: string | ImageSource;
+  className?: string;
+};
 
 const Option = React.memo(
   ({
@@ -127,9 +133,9 @@ const Option = React.memo(
   },
 );
 
-export type OptionsProps = {
-  options: OptionType[];
-  onSelect: (option: OptionType) => void;
+export type OptionsProps<T extends string | number> = {
+  options: OptionType<T>[];
+  onSelect: (option: OptionType<T>) => void;
   value?: string | number;
   testID?: string;
   className?: string;
@@ -145,7 +151,7 @@ function keyExtractor(item: OptionType) {
 
 const List = IS_WEB ? FlashList : BottomSheetFlatList;
 
-export function Options({
+export function Options<T extends string | number>({
   ref,
   options,
   onSelect,
@@ -157,7 +163,7 @@ export function Options({
   searchEnabled = false,
   searchPlaceholder = translate('common.search'),
   ...rest
-}: OptionsProps & { ref?: React.RefObject<BottomSheetModal | null> }) {
+}: OptionsProps<T> & { ref?: React.RefObject<BottomSheetModal | null> }) {
   const { theme } = useUniwind();
   const isDark = theme === 'dark';
 
@@ -179,7 +185,7 @@ export function Options({
   }, [options, searchEnabled, deferredSearchQuery]);
 
   const renderSelectItem = React.useCallback(
-    ({ item }: { item: OptionType }) => (
+    ({ item }: { item: OptionType<T> }) => (
       <Option
         key={`select-item-${item.value}`}
         label={item.label}
@@ -235,26 +241,26 @@ export function Options({
   );
 }
 
-export type SelectProps = {
+export type SelectProps<T extends string | number = string | number> = {
   value?: string | number;
   label?: string;
   disabled?: boolean;
   error?: string;
-  options?: OptionType[];
-  onSelect?: (value: string | number) => void;
+  options?: OptionType<T>[];
+  onSelect?: (value: T) => void;
   placeholder?: string;
   testID?: string;
   containerClassName?: string;
   inputClassName?: string;
   showChevron?: boolean;
-  listProps?: OptionsProps['listProps'];
-  renderItem?: OptionsProps['renderItem'];
-  renderSelectedItem?: (item: OptionType | null) => React.ReactNode;
-  searchEnabled?: OptionsProps['searchEnabled'];
-  searchPlaceholder?: OptionsProps['searchPlaceholder'];
+  listProps?: OptionsProps<T>['listProps'];
+  renderItem?: OptionsProps<T>['renderItem'];
+  renderSelectedItem?: (item: OptionType<T> | null) => React.ReactNode;
+  searchEnabled?: OptionsProps<T>['searchEnabled'];
+  searchPlaceholder?: OptionsProps<T>['searchPlaceholder'];
 } & Omit<VariantProps<typeof selectTv>, 'error'> & Omit<ModalProps, 'children'>;
 
-export function Select({
+export function Select<T extends string | number>({
   label,
   value,
   error,
@@ -272,12 +278,12 @@ export function Select({
   searchEnabled,
   searchPlaceholder,
   ...rest
-}: SelectProps) {
+}: SelectProps<T>) {
   const modal = useModal();
-  const [selectedOption, setSelectedOption] = React.useState<OptionType | null>(() => options.find((t) => t.value === value) ?? null);
+  const [selectedOption, setSelectedOption] = React.useState<OptionType<T> | null>(() => options.find((t) => t.value === value) ?? null);
 
   const onSelectOption = React.useCallback(
-    (option: OptionType) => {
+    (option: OptionType<T>) => {
       setSelectedOption(option);
       onSelect?.(option.value);
       modal.dismiss();

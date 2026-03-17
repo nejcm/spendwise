@@ -382,9 +382,9 @@ async function createTransaction(db: SQLiteDatabase, data: TransactionFormData):
   const amountCents = amountToCents(data.amount || 0);
 
   await db.runAsync(
-    `INSERT INTO transactions (id, account_id, category_id, type, amount, date, note)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [id, data.account_id, data.category_id, data.type, amountCents, data.date, data.note || null],
+    `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, date, note)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [id, data.account_id, data.category_id, data.type, amountCents, data.currency, data.date, data.note || null],
   );
 
   return id;
@@ -395,9 +395,9 @@ async function updateTransaction(db: SQLiteDatabase, id: string, data: Transacti
 
   await db.runAsync(
     `UPDATE transactions
-     SET account_id = ?, category_id = ?, type = ?, amount = ?, date = ?, note = ?, updated_at = datetime('now')
+     SET account_id = ?, category_id = ?, type = ?, amount = ?, currency = ?, date = ?, note = ?, updated_at = datetime('now')
      WHERE id = ?`,
-    [data.account_id, data.category_id, data.type, amountCents, data.date, data.note || null, id],
+    [data.account_id, data.category_id, data.type, amountCents, data.currency, data.date, data.note || null, id],
   );
 }
 

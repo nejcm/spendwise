@@ -88,7 +88,7 @@ export function SettingsScreen() {
             <SettingsItem
               icon={<Import className={iconColor} size={20} />}
               text="settings.import"
-              onPress={() => router.push('/import')}
+              onPress={() => router.push('/settings/import-export')}
             />
             <LanguageItem />
             <ThemeItem />

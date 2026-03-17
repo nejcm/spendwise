@@ -9,68 +9,71 @@ export const solidButton = tv({
   slots: {
     container: 'flex flex-row items-center justify-center rounded-lg px-4',
     label: 'items-center font-family-sans text-base/snug font-medium',
-    indicator: 'h-6 text-white',
+    indicator: 'accent-background',
   },
   variants: {
     color: {
       'primary': {
         container: 'bg-foreground',
         label: 'text-background',
-        indicator: 'text-background',
+        indicator: 'accent-background',
       },
       'primary-alt': {
         container: 'bg-background',
         label: 'text-foreground',
-        indicator: 'text-foreground',
+        indicator: 'accent-foreground',
       },
       'secondary': {
         container: 'bg-muted',
         label: 'text-muted-foreground',
-        indicator: 'text-muted-foreground',
+        indicator: 'accent-muted-foreground',
       },
       'secondary-alt': {
         container: 'bg-muted-foreground',
         label: 'text-foreground dark:text-background',
-        indicator: 'text-foreground dark:text-background',
+        indicator: 'accent-foreground dark:accent-background',
       },
       'success': {
         container: 'bg-success-600',
         label: 'text-white',
-        indicator: 'text-white',
+        indicator: 'accent-white',
       },
       'warning': {
         container: 'bg-warning-600',
         label: 'text-white',
-        indicator: 'text-white',
+        indicator: 'accent-white',
       },
       'danger': {
         container: 'bg-danger-600',
         label: 'text-white',
-        indicator: 'text-white',
+        indicator: 'accent-white',
       },
     },
     size: {
       xs: {
         container: 'h-6 px-2',
         label: 'text-xs/snug font-normal',
-        indicator: 'h-1.5',
+        indicator: 'size-2',
       },
       sm: {
         container: 'h-9 px-3',
         label: 'text-sm/snug',
-        indicator: 'h-2',
+        indicator: 'size-3',
       },
       md: {
         container: 'h-11 px-4',
         label: 'text-base/snug',
+        indicator: 'size-4',
       },
       lg: {
         container: 'h-13 px-5',
         label: 'text-lg/snug',
+        indicator: 'size-5',
       },
       xl: {
         container: 'h-16 px-6',
         label: 'text-xl/snug',
+        indicator: 'size-6',
       },
     },
     disabled: {
@@ -137,8 +140,8 @@ export function SolidButton({
           {loading
             ? (
                 <ActivityIndicator
-                  size="small"
-                  className={styles.indicator()}
+                  size={size === 'xs' || size === 'sm' || size === 'md' ? 'small' : 'large'}
+                  colorClassName={styles.indicator()}
                   testID={testID ? `${testID}-activity-indicator` : undefined}
                 />
               )

@@ -15,7 +15,7 @@
 ### Secondary Routes
 
 - `src/app/onboarding.tsx`
-- `src/app/import/index.tsx`
+- `src/app/import-export/index.tsx`
 - `src/app/insights/index.tsx`
 - `src/app/transactions/[id].tsx`
 - `src/app/goals/index.tsx`

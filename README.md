@@ -148,6 +148,10 @@ App startup happens in `src/app/_layout.tsx`, where the app initializes SQLite, 
 - [Wallet / BudgetBakers](https://budgetbakers.com/en/)
 
 
+## Resources
+
+- Avatars: https://www.figma.com/design/LcTCGVae3fI72lJASdNtHn/Playful-Avatar-Creator---DrawKit--Community-?node-id=3-3&p=f&t=FrbHnCBsjZzFhIHh-0
+
 ## TODO
 
 ### Needs Product Polish

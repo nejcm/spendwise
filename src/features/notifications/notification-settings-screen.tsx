@@ -40,7 +40,6 @@ export function NotificationSettingsScreen() {
       <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         <DetailsSection data={[{
           label: translate('notifications.label'),
-          labelClassName: 'text-foreground',
           description: translate('notifications.enable_description'),
           value: (
             <Switch

@@ -86,6 +86,8 @@
     "exit": "Exit",
     "expense": "Expense",
     "expenses": "Expenses",
+    "export": "Export",
+    "import": "Import",
     "income": "Income",
     "loading": "Loading...",
     "month": "Month",
@@ -165,17 +167,24 @@
     "title": "Home",
     "total_balance": "Total Balance"
   },
-  "import": {
+  "import-export": {
     "complete_message": "{{count}} transactions imported",
     "complete_title": "Import Complete",
     "csv_min_rows_error": "CSV file must have at least a header row and one data row",
     "date_amount_required": "Date and Amount columns are required",
+    "export_description": "Export transactions to a CSV file",
+    "export_empty_error": "There are no transactions to export yet.",
+    "export_error": "Could not export transactions right now.",
+    "export_file": "Export CSV File",
+    "export_title": "Export Transactions",
+    "export_unavailable_error": "File sharing is not available on this device.",
     "field_amount": "Amount",
     "field_date": "Date",
     "field_note": "Note",
     "field_payee": "Payee",
     "field_type": "Type",
     "import": "Import",
+    "import_title": "Import Transactions",
     "map_columns": "Map Columns",
     "more_rows": "+{{count}} more rows",
     "pick_description": "Select a CSV file to import transactions",
@@ -183,7 +192,8 @@
     "preview": "Preview",
     "preview_title": "Preview",
     "rows": "rows",
-    "title": "Import Transactions"
+    "skip_column": "Skip Column",
+    "title": "Import/Export"
   },
   "insights": {
     "monthly_trend": "Monthly Trend",

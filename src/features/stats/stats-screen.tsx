@@ -16,7 +16,7 @@ export function StatsScreen() {
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
 
   return (
-    <View className="bg-background flex-1">
+    <View className="flex-1 bg-background">
       <FocusAwareStatusBar />
 
       <PeriodSelector selection={selection} onSelect={setPeriodSelection} />

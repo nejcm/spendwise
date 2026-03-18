@@ -70,7 +70,7 @@ export function AiScreen() {
 
   return (
     <KeyboardAvoidingView
-      className="bg-background flex-1"
+      className="flex-1 bg-background"
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <FocusAwareStatusBar />
@@ -82,10 +82,10 @@ export function AiScreen() {
         >
           {(!hasOpenAI && !hasAnthropic)
             ? (
-                <View className="bg-card mb-4 rounded-xl p-4">
+                <View className="mb-4 rounded-xl bg-card p-4">
                   <Text className="text-muted-foreground">
                     Add an API key in
-                    <Link href="/settings/ai" className="text-foreground mx-1 font-medium underline">
+                    <Link href="/settings/ai" className="mx-1 font-medium text-foreground underline">
                       AI Setting
                     </Link>
                     to start chatting with the assistant.
@@ -95,7 +95,7 @@ export function AiScreen() {
             : !messages.length
                 ? (
                     <View className="my-4">
-                      <Text className="text-muted-foreground mb-2">
+                      <Text className="mb-2 text-muted-foreground">
                         Ask the AI about your spending or budgeting...
                       </Text>
                       <View className="mt-3 flex flex-col space-y-2">
@@ -129,11 +129,11 @@ export function AiScreen() {
               className={`mb-2 max-w-[85%] rounded-2xl px-3 py-2 ${
                 m.role === 'user'
                   ? 'self-end bg-black'
-                  : 'bg-card self-start'
+                  : 'self-start bg-card'
               }`}
             >
               <Text
-                className={m.role === 'user' ? 'text-sm text-white' : 'text-foreground text-sm'}
+                className={m.role === 'user' ? 'text-sm text-white' : 'text-sm text-foreground'}
               >
                 {m.content}
               </Text>
@@ -141,7 +141,7 @@ export function AiScreen() {
           ))}
         </ScrollView>
 
-        <View className="border-border bg-background border-t px-4 pt-2 pb-safe-offset-2">
+        <View className="border-t border-border bg-background px-4 pt-2 pb-safe-offset-2">
           <View className="relative">
             <Input
               value={question}
@@ -160,7 +160,7 @@ export function AiScreen() {
               disabled={loading || !question.trim()}
               className="absolute right-2 bottom-3 rounded-full"
             >
-              <SendHorizonal className="text-background disabled:text-foreground size-5" />
+              <SendHorizonal className="size-5 text-background disabled:text-foreground" />
             </IconButton>
           </View>
         </View>

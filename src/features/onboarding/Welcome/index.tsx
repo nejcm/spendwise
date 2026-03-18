@@ -11,7 +11,7 @@ export type WelcomeStepProps = {
 
 export default function WelcomeStep({ onNext, currentStep }: WelcomeStepProps) {
   return (
-    <SafeAreaView className="bg-background flex-1">
+    <SafeAreaView className="flex-1 bg-background">
       <View className="flex-[1.15] bg-gray-200 px-6 pt-8 pb-12 dark:bg-gray-50">
         <View className="mb-10 flex-row items-center justify-center gap-3">
           <Text className="text-3xl font-bold tracking-tight text-gray-900">{translate('onboarding.title')}</Text>
@@ -26,7 +26,7 @@ export default function WelcomeStep({ onNext, currentStep }: WelcomeStepProps) {
         </View>
       </View>
 
-      <View className="bg-background flex-1 justify-between px-6 py-8">
+      <View className="flex-1 justify-between bg-background px-6 py-8">
         <View>
           <IntroNav current={currentStep} />
           <Text className="mb-4 text-center text-[1.75rem] font-bold text-black dark:text-white">

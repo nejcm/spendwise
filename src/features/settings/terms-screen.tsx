@@ -5,26 +5,26 @@ import { defaultStyles } from '@/lib/theme/styles';
 
 export function TermsScreen() {
   return (
-    <View className="bg-background flex-1">
+    <View className="flex-1 bg-background">
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-8 pb-12" style={defaultStyles.transparentBg}>
-        <Text className="text-foreground mb-4 text-2xl font-bold">
+        <Text className="mb-4 text-2xl font-bold text-foreground">
           Terms &amp; Conditions
         </Text>
 
-        <Text className="text-muted-foreground mb-4 text-sm">
+        <Text className="mb-4 text-sm text-muted-foreground">
           These terms and conditions apply to the Spendwise app (hereby referred to as
           &quot;Application&quot;) for mobile devices that was created by Nejc (hereby
           referred to as &quot;Service Provider&quot;) as an Open Source service.
         </Text>
 
-        <Text className="text-muted-foreground mb-4 text-sm">
+        <Text className="mb-4 text-sm text-muted-foreground">
           Upon downloading or utilizing the Application, you are automatically agreeing
           to the following terms. It is strongly advised that you thoroughly read and
           understand these terms prior to using the Application.
         </Text>
 
-        <Text className="text-muted-foreground mb-4 text-sm">
+        <Text className="mb-4 text-sm text-muted-foreground">
           The Service Provider is dedicated to ensuring that the Application is as
           beneficial and efficient as possible. As such, they reserve the right to
           modify the Application or charge for their services at any time and for any
@@ -32,7 +32,7 @@ export function TermsScreen() {
           or its services will be clearly communicated to you.
         </Text>
 
-        <Text className="text-muted-foreground mb-4 text-sm">
+        <Text className="mb-4 text-sm text-muted-foreground">
           The Application stores and processes personal data that you have provided to
           the Service Provider in order to provide the Service. It is your
           responsibility to maintain the security of your phone and access to the
@@ -44,19 +44,19 @@ export function TermsScreen() {
           Application not functioning correctly or at all.
         </Text>
 
-        <Text className="text-muted-foreground mb-4 text-sm">
+        <Text className="mb-4 text-sm text-muted-foreground">
           Please note that the Application utilizes third-party services that have
           their own Terms and Conditions. Below are the links to the Terms and
           Conditions of the third-party service providers used by the Application:
         </Text>
 
-        <Text className="text-muted-foreground mb-4 text-sm">
+        <Text className="mb-4 text-sm text-muted-foreground">
           • Google Play Services:
           {' '}
           https://policies.google.com/terms
         </Text>
 
-        <Text className="text-muted-foreground mb-4 text-sm">
+        <Text className="mb-4 text-sm text-muted-foreground">
           Please be aware that the Service Provider does not assume responsibility for
           certain aspects. Some functions of the Application require an active
           internet connection, which can be Wi-Fi or provided by your mobile network
@@ -65,7 +65,7 @@ export function TermsScreen() {
           have exhausted your data allowance.
         </Text>
 
-        <Text className="text-muted-foreground mb-4 text-sm">
+        <Text className="mb-4 text-sm text-muted-foreground">
           If you are using the application outside of a Wi-Fi area, please be aware
           that your mobile network provider&apos;s agreement terms still apply.
           Consequently, you may incur charges from your mobile provider for data usage
@@ -78,7 +78,7 @@ export function TermsScreen() {
           payer.
         </Text>
 
-        <Text className="text-muted-foreground mb-4 text-sm">
+        <Text className="mb-4 text-sm text-muted-foreground">
           Similarly, the Service Provider cannot always assume responsibility for your
           usage of the application. For instance, it is your responsibility to ensure
           that your device remains charged. If your device runs out of battery and you
@@ -86,7 +86,7 @@ export function TermsScreen() {
           responsible.
         </Text>
 
-        <Text className="text-muted-foreground mb-4 text-sm">
+        <Text className="mb-4 text-sm text-muted-foreground">
           In terms of the Service Provider&apos;s responsibility for your use of the
           application, it is important to note that while they strive to ensure that
           it is updated and accurate at all times, they do rely on third parties to
@@ -96,7 +96,7 @@ export function TermsScreen() {
           application.
         </Text>
 
-        <Text className="text-muted-foreground mb-4 text-sm">
+        <Text className="mb-4 text-sm text-muted-foreground">
           The Application incorporates Artificial Intelligence (AI) technologies to
           provide certain features or services. By using the Application, you
           acknowledge and agree that AI may be used to process data and deliver
@@ -104,7 +104,7 @@ export function TermsScreen() {
           applicable laws and is designed to benefit the user experience.
         </Text>
 
-        <Text className="text-muted-foreground mb-4 text-sm">
+        <Text className="mb-4 text-sm text-muted-foreground">
           The Service Provider may wish to update the application at some point. The
           application is currently available as per the requirements for the operating
           system (and for any additional systems they decide to extend the
@@ -121,27 +121,27 @@ export function TermsScreen() {
           the application, and (if necessary) delete it from your device.
         </Text>
 
-        <Text className="text-foreground mb-2 text-base font-semibold">
+        <Text className="mb-2 text-base font-semibold text-foreground">
           Changes to These Terms and Conditions
         </Text>
-        <Text className="text-muted-foreground mb-4 text-sm">
+        <Text className="mb-4 text-sm text-muted-foreground">
           The Service Provider may periodically update their Terms and Conditions.
           Therefore, you are advised to review this page regularly for any changes.
           The Service Provider will notify you of any changes by posting the new Terms
           and Conditions on this page.
         </Text>
 
-        <Text className="text-foreground mb-2 text-base font-semibold">
+        <Text className="mb-2 text-base font-semibold text-foreground">
           Contact Us
         </Text>
-        <Text className="text-muted-foreground mb-4 text-sm">
+        <Text className="mb-4 text-sm text-muted-foreground">
           If you have any questions or suggestions about the Terms and Conditions,
           please do not hesitate to contact the Service Provider at
           {' '}
           nmursi2@gmail.com.
         </Text>
 
-        <Text className="text-muted-foreground mt-2 text-xs">
+        <Text className="mt-2 text-xs text-muted-foreground">
           These terms and conditions are effective as of 2026-03-13.
         </Text>
       </ScrollView>

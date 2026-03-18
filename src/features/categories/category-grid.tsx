@@ -34,7 +34,7 @@ export const CategoryGrid = React.memo(({
   }
 
   return (
-    <Animated.ScrollView ref={scrollRef} className="bg-background flex-1">
+    <Animated.ScrollView ref={scrollRef} className="flex-1 bg-background">
       <View className="px-4 pb-4">
         {categories.length === 0
           ? (
@@ -60,8 +60,8 @@ export const CategoryGrid = React.memo(({
               />
             )}
         <View className="mt-6 flex-row items-center justify-center gap-2">
-          <Lightbulb className="text-muted-foreground size-3" />
-          <Text className="text-muted-foreground text-sm">
+          <Lightbulb className="size-3 text-muted-foreground" />
+          <Text className="text-sm text-muted-foreground">
             {translate('categories.sorting_tips')}
           </Text>
         </View>
@@ -80,12 +80,12 @@ function CategoryGridCell({ item, currency, onPress }: CategoryGridCellProps) {
   const emoji = item.category_icon && item.category_icon.trim() ? item.category_icon : item.category_name.charAt(0).toUpperCase();
 
   return (
-    <Pressable onPress={() => onPress(item)} className="bg-card rounded-xl p-3">
+    <Pressable onPress={() => onPress(item)} className="rounded-xl bg-card p-3">
       <View
         className="mb-1 flex-row items-center justify-start gap-2"
       >
         <Text className="text-xl">{emoji}</Text>
-        <Text className="text-muted-foreground w-full text-sm" numberOfLines={1}>
+        <Text className="w-full text-sm text-muted-foreground" numberOfLines={1}>
           {item.category_name}
         </Text>
       </View>

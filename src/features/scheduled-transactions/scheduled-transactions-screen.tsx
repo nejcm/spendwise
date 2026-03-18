@@ -40,7 +40,7 @@ export function ScheduledTransactionsScreen() {
                   label={translate('common.add')}
                   onPress={() => bottomSheetRef.current?.present()}
                   className="mt-4 min-w-24"
-                  iconLeft={<Plus className="text-background mr-2 size-4" />}
+                  iconLeft={<Plus className="mr-2 size-4 text-background" />}
                 />
               </NoData>
             </>
@@ -50,7 +50,7 @@ export function ScheduledTransactionsScreen() {
               {activeRules.map((rule) => (
                 <Pressable
                   key={rule.id}
-                  className="bg-card mb-3 rounded-xl p-4"
+                  className="mb-3 rounded-xl bg-card p-4"
                   onPress={() => router.push(`/scheduled/${rule.id}`)}
                 >
                   <View className="flex-row items-start justify-between gap-2">
@@ -60,7 +60,7 @@ export function ScheduledTransactionsScreen() {
                           {rule.note}
                         </Text>
                       )}
-                      <Text className={rule.note ? 'text-muted-foreground text-sm' : 'text-foreground text-base font-semibold'}>
+                      <Text className={rule.note ? 'text-sm text-muted-foreground' : 'text-base font-semibold text-foreground'}>
                         {rule.category_icon ? `${rule.category_icon} ${rule.category_name}` : translate('common.none')}
                       </Text>
                     </View>
@@ -69,12 +69,12 @@ export function ScheduledTransactionsScreen() {
                       {formatCurrency(rule.amount, rule.currency)}
                     </Text>
                   </View>
-                  <Text className="text-muted-foreground text-sm">
+                  <Text className="text-sm text-muted-foreground">
                     {rule.account_icon}
                     {' '}
                     {rule.account_name}
                   </Text>
-                  <Text className="text-muted-foreground text-sm">
+                  <Text className="text-sm text-muted-foreground">
                     {translate(`scheduled.frequencyOptions.${rule.frequency}`)}
                     {' '}
                     ·
@@ -93,27 +93,27 @@ export function ScheduledTransactionsScreen() {
                   {inactiveRules.map((rule) => (
                     <Pressable
                       key={rule.id}
-                      className="bg-card mb-3 rounded-xl p-4 opacity-70"
+                      className="mb-3 rounded-xl bg-card p-4 opacity-70"
                       onPress={() => router.push(`/scheduled/${rule.id}` as never)}
                     >
                       <View className="flex-row items-start justify-between gap-3">
                         <View className="flex-1 gap-1">
-                          <Text className="text-foreground text-base font-semibold">
+                          <Text className="text-base font-semibold text-foreground">
                             {`${rule.category_icon ?? ''} ${rule.category_name ?? translate('common.none')}`.trim()}
                           </Text>
-                          <Text className="text-muted-foreground text-sm">
+                          <Text className="text-sm text-muted-foreground">
                             {rule.account_icon}
                             {' '}
                             {rule.account_name}
                           </Text>
-                          <Text className="text-muted-foreground text-sm">
+                          <Text className="text-sm text-muted-foreground">
                             {translate('scheduled.next_due_date')}
                             :
                             {' '}
                             {formatDate(rule.next_due_date)}
                           </Text>
                         </View>
-                        <Text className="text-muted-foreground font-semibold">
+                        <Text className="font-semibold text-muted-foreground">
                           {formatCurrency(rule.amount, rule.currency)}
                         </Text>
                       </View>

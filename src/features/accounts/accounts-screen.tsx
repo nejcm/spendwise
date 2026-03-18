@@ -80,7 +80,7 @@ export function AccountsScreen() {
 
       <ScrollView className="flex-1 px-4" style={defaultStyles.transparentBg}>
         <View className="flex-col items-center justify-between gap-2 px-4 pt-4 pb-6">
-          <Text className="text-muted-foreground text-sm">{translate('accounts.total_balance')}</Text>
+          <Text className="text-sm text-muted-foreground">{translate('accounts.total_balance')}</Text>
           <Text className="text-3xl font-bold">{formatCurrency(totalBalance, currency)}</Text>
         </View>
 
@@ -100,7 +100,7 @@ export function AccountsScreen() {
 
         <View className="mt-4 flex-row items-center justify-center">
           <SolidButton
-            iconLeft={<Plus className="text-background mr-1 size-4" />}
+            iconLeft={<Plus className="mr-1 size-4 text-background" />}
             label={translate('common.add')}
             size="sm"
             className="px-6"

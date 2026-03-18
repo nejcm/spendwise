@@ -13,8 +13,8 @@ type Props = {
 export function SettingsContainer({ children, title, className }: Props) {
   return (
     <>
-      {title && <Text className="dark:text-muted-foreground mb-2 pt-6 font-bold" tx={title} />}
-      <View className={cn('bg-card rounded-xl py-1', className)}>
+      {title && <Text className="mb-2 pt-6 font-bold dark:text-muted-foreground" tx={title} />}
+      <View className={cn('rounded-xl bg-card py-1', className)}>
         {children}
       </View>
     </>

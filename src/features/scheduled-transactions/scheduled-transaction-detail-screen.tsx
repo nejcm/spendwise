@@ -34,7 +34,7 @@ export function ScheduledTransactionDetailScreen() {
   if (!rule) {
     return (
       <View className="flex-1 items-center justify-center gap-4 px-4">
-        <Text className="text-muted-foreground text-center">
+        <Text className="text-center text-muted-foreground">
           {translate('scheduled.rule_not_found')}
         </Text>
         <GhostButton

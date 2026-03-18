@@ -26,16 +26,16 @@ export function AiSettingsScreen() {
   }, [openaiKey, anthropicKey]);
 
   return (
-    <View className="bg-background flex-1">
+    <View className="flex-1 bg-background">
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
 
         <Text className="mb-1 text-lg font-medium">{translate('settings.ai_provider')}</Text>
-        <Text className="text-muted-foreground mb-6 text-sm">
+        <Text className="mb-6 text-sm text-muted-foreground">
           {translate('settings.ai_provider_desc')}
         </Text>
 
-        <View className="bg-card mb-4 rounded-xl p-4">
+        <View className="mb-4 rounded-xl bg-card p-4">
           <Input
             label={translate('settings.openai_api_key')}
             value={openaiKey}
@@ -48,7 +48,7 @@ export function AiSettingsScreen() {
           />
         </View>
 
-        <View className="bg-card mb-6 rounded-xl p-4">
+        <View className="mb-6 rounded-xl bg-card p-4">
           <Input
             label={translate('settings.anthropic_api_key')}
             value={anthropicKey}

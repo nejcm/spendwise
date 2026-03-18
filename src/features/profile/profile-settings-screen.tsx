@@ -13,7 +13,7 @@ export function ProfileSettingsScreen() {
   const avatarModal = useModal();
 
   return (
-    <View className="bg-background flex-1">
+    <View className="flex-1 bg-background">
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 p-12" style={defaultStyles.transparentBg}>
         <Pressable

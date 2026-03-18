@@ -52,7 +52,7 @@ export default function LanguageStep({ onBack, onNext, currentStep }: LanguageSt
         </Text>
         <GhostButton size="xl" className="items-center gap-4" onPress={modal.present}>
           <Image source={selected.image} className="size-10 rounded-full" />
-          <Text className="text-foreground text-4xl">{selected.name}</Text>
+          <Text className="text-4xl text-foreground">{selected.name}</Text>
         </GhostButton>
         <Options ref={modal.ref} options={LANGUAGES_OPTIONS} onSelect={onSelect} value={selected?.value} />
       </OnboardingLayout>

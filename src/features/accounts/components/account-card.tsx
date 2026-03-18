@@ -19,7 +19,7 @@ export function AccountCard({ account, onPress }: Props) {
   return (
     <Pressable
       onPress={onPress}
-      className="bg-card mb-3 rounded-xl p-4"
+      className="mb-3 rounded-xl bg-card p-4"
     >
       <View className="flex-row items-center justify-between gap-3">
         {account.icon && (
@@ -27,7 +27,7 @@ export function AccountCard({ account, onPress }: Props) {
         )}
         <View className="flex-1">
           <Text className="text-base/snug">{account.name}</Text>
-          <Text className="text-muted-foreground text-sm">
+          <Text className="text-sm text-muted-foreground">
             {ACCOUNT_TYPE_LABELS[account.type as keyof typeof ACCOUNT_TYPE_LABELS] || account.type}
           </Text>
         </View>

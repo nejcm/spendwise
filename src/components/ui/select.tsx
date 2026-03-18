@@ -22,7 +22,7 @@ import { Text } from './text';
 const selectTv = tv({
   slots: {
     container: '',
-    label: 'text-foreground mb-1 text-sm/snug',
+    label: 'mb-1 text-sm/snug text-foreground',
     input:
       'flex-row items-center justify-center rounded-lg border px-4 py-3',
     inputValue: '',
@@ -35,7 +35,7 @@ const selectTv = tv({
         inputValue: 'text-foreground',
       },
       secondary: {
-        input: 'dark:border-border dark:bg-input border-gray-300 bg-gray-200 focus:border-gray-800 focus:dark:border-gray-300',
+        input: 'border-gray-300 bg-gray-200 focus:border-gray-800 dark:border-border dark:bg-input focus:dark:border-gray-300',
         inputValue: 'text-foreground',
       },
     },
@@ -328,7 +328,7 @@ export function Select<T extends string | number>({
                     {selectedOption?.label ?? placeholder ?? ''}
                   </Text>
                 </View>
-                {showChevron && <ChevronDown className="text-muted-foreground size-5" />}
+                {showChevron && <ChevronDown className="size-5 text-muted-foreground" />}
               </>
             )}
         </Pressable>

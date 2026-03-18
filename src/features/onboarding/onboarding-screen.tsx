@@ -19,7 +19,7 @@ export function OnboardingScreen() {
   };
 
   return (
-    <View className="bg-background flex h-full">
+    <View className="flex h-full bg-background">
       <FocusAwareStatusBar />
       {step === 0 && <WelcomeStep onNext={() => setStep(1)} currentStep={0} />}
       {step === 1 && <LanguageStep onBack={() => setStep(0)} onNext={() => setStep(2)} currentStep={1} />}

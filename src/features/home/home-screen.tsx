@@ -39,8 +39,8 @@ export function HomeScreen() {
           <View>
             <View className="flex-row items-center justify-between gap-2">
               <View>
-                <Text className="text-foreground text-lg font-medium">{translate('home.hi', { name })}</Text>
-                <Text className="text-muted-foreground text-sm">{translate('home.available_balance')}</Text>
+                <Text className="text-lg font-medium text-foreground">{translate('home.hi', { name })}</Text>
+                <Text className="text-sm text-muted-foreground">{translate('home.available_balance')}</Text>
               </View>
               <View className="items-end">
                 <FormattedCurrency className="mt-1 text-2xl font-bold" value={data?.balance ?? 0} currency={currency} />
@@ -49,11 +49,11 @@ export function HomeScreen() {
             <View className="mt-4 flex-row gap-3">
               <View className="flex-1 gap-1 rounded-xl bg-success-500/8 px-4 py-3 dark:bg-success-700/10">
                 <FormattedCurrency className="text-lg font-bold text-success-600" value={data?.income ?? 0} currency={currency} prefix="+" />
-                <Text className="text-muted-foreground text-sm">{translate('home.income')}</Text>
+                <Text className="text-sm text-muted-foreground">{translate('home.income')}</Text>
               </View>
               <View className="flex-1 gap-1 rounded-xl bg-danger-500/8 px-4 py-3 dark:bg-danger-600/6">
                 <FormattedCurrency className="text-lg font-bold text-danger-500" value={data?.expense ?? 0} currency={currency} prefix="-" />
-                <Text className="text-muted-foreground text-sm">{translate('home.expenses')}</Text>
+                <Text className="text-sm text-muted-foreground">{translate('home.expenses')}</Text>
               </View>
             </View>
           </View>

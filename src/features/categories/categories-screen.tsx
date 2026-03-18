@@ -34,13 +34,13 @@ export function CategoriesScreen() {
   };
 
   return (
-    <View className="bg-background flex-1">
+    <View className="flex-1 bg-background">
       <FocusAwareStatusBar />
       {isEditMode
         ? (
             <View className="flex-row items-center justify-center gap-2 py-2">
-              <FileWarning className="text-muted-foreground size-4" />
-              <Text className="text-muted-foreground text-sm">
+              <FileWarning className="size-4 text-muted-foreground" />
+              <Text className="text-sm text-muted-foreground">
                 {translate('categories.edit_mode')}
               </Text>
               <OutlineButton

@@ -23,7 +23,7 @@ export function AccountsOverview() {
         <Text className="text-lg font-medium">{translate('settings.accounts')}</Text>
         {hasAccounts && (
           <GhostButton size="sm" className="px-0" onPress={() => router.push('/accounts')}>
-            <Text className="text-muted-foreground text-sm font-medium">{translate('common.seeAll')}</Text>
+            <Text className="text-sm font-medium text-muted-foreground">{translate('common.seeAll')}</Text>
           </GhostButton>
         )}
       </View>
@@ -44,13 +44,13 @@ export function AccountsOverview() {
                     <Pressable
                       key={account.id}
                       onPress={() => router.push('/accounts')}
-                      className="bg-card w-34 rounded-xl px-3 py-2"
+                      className="w-34 rounded-xl bg-card px-3 py-2"
                     >
                       <Text className="text-2xl">
                         {account.icon || '💵'}
                       </Text>
                       <Text
-                        className="text-muted-foreground mt-2 text-xs font-medium"
+                        className="mt-2 text-xs font-medium text-muted-foreground"
                         numberOfLines={1}
                       >
                         {account.name}

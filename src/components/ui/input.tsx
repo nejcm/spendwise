@@ -24,7 +24,7 @@ export const inputTv = tv({
         input: inputDefaultDefaults,
       },
       secondary: {
-        input: 'dark:border-border dark:bg-input dark:text-foreground border-gray-300 bg-gray-200 focus:border-gray-800 focus:dark:border-gray-300',
+        input: 'border-gray-300 bg-gray-200 focus:border-gray-800 dark:border-border dark:bg-input dark:text-foreground focus:dark:border-gray-300',
       },
     },
     size: {

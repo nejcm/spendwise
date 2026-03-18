@@ -14,7 +14,7 @@ export function DetailsRow({ label, labelClassName, description, value, classNam
     <View className="flex-row items-center justify-between gap-2">
       <View className="flex-1">
         <Text className={cn('text-muted-foreground', labelClassName)}>{label}</Text>
-        {!!description && <Text className="text-muted-foreground mt-0.5 text-sm/snug">{description}</Text>}
+        {!!description && <Text className="mt-0.5 text-sm/snug text-muted-foreground">{description}</Text>}
       </View>
       {typeof value === 'string' ? <Text className={cn('text-foreground', className)}>{value}</Text> : value}
     </View>
@@ -28,7 +28,7 @@ export type DetailsSectionProps = {
 
 export default function DetailsSection({ className, data }: DetailsSectionProps) {
   return (
-    <View className={cn('bg-card gap-4 rounded-xl p-4', className)}>
+    <View className={cn('gap-4 rounded-xl bg-card p-4', className)}>
       {data.map((row, index) => (
         <DetailsRow key={index} {...row} />
       )) }

@@ -27,7 +27,7 @@ export function CategoriesOverview() {
         <Text className="text-lg font-medium">{translate('common.categories')}</Text>
         {hasCategories && (
           <GhostButton size="sm" className="px-0" onPress={() => router.push('/categories')}>
-            <Text className="text-muted-foreground text-sm font-medium">{translate('common.seeAll')}</Text>
+            <Text className="text-sm font-medium text-muted-foreground">{translate('common.seeAll')}</Text>
           </GhostButton>
         )}
       </View>
@@ -45,10 +45,10 @@ export function CategoriesOverview() {
                 {visibleCategories.map((item) => (
                   <View
                     key={item.category_id}
-                    className="bg-card w-34 rounded-xl px-3 py-2"
+                    className="w-34 rounded-xl bg-card px-3 py-2"
                   >
                     <Text className="text-2xl">{item.category_icon || '?'}</Text>
-                    <Text className="text-muted-foreground mt-2 text-xs font-medium" numberOfLines={1}>{item.category_name}</Text>
+                    <Text className="mt-2 text-xs font-medium text-muted-foreground" numberOfLines={1}>{item.category_name}</Text>
                     <Text className="mt-1 text-base font-medium">
                       {formatCurrency(item.total, currency)}
                     </Text>

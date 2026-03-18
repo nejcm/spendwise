@@ -152,25 +152,34 @@ App startup happens in `src/app/_layout.tsx`, where the app initializes SQLite, 
 
 - Avatars: https://www.figma.com/design/LcTCGVae3fI72lJASdNtHn/Playful-Avatar-Creator---DrawKit--Community-?node-id=3-3&p=f&t=FrbHnCBsjZzFhIHh-0
 
-## TODO
+## Roadmap
 
-### Needs Product Polish
+High-level roadmap (subject to change):
 
-- [ ] Default currency consistency across all create/edit flows and displays
-- [ ] Data management UX for import, export, reset, and delete flows
-- [ ] Notification UX and messaging polish
-- [ ] Security UX polish for PIN/biometric setup and timeout behavior
-- [ ] General UI/UX refinement across the app
+### Money & currency
 
-### Missing Or Partial Features
+- [ ] Improve currency support (rates + consistent formatting, including default currency)
 
-- [ ] Scheduled income/expense automation using recurring rules
-- [ ] Budget overview flow and clearer budget navigation
-- [ ] Monthly/yearly budgeting model decisions
-- [ ] AI budgeting recommendations grounded in actual user data
+### Budgets
 
-### Documentation / Product Hygiene
+- [ ] Support global budgets and per-category budgets (monthly and yearly)
 
-- [ ] Replace placeholder app store links in `src/config/index.ts`
-- [ ] Refresh Maestro flows so they match current Spendwise journeys
-- [ ] Add export/import strategy notes once data management scope is finalized
+### Recurring transactions
+
+- [ ] Allow making existing transactions repeatable (recurring rules)
+
+### AI features
+
+- [ ] Recommendations and chat
+- [ ] Insights
+
+### Product polish
+
+- [ ] Improve overall UI/UX across the app
+  - [ ] Clear feedback for actions (toasts, errors, confirmations, etc.)
+- [ ] Add richer transaction details (e.g. merchant)
+
+### Quality & release
+
+- [ ] Expand test coverage (including Android)
+- [ ] Prepare and publish store app releases

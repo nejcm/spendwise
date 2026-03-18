@@ -39,7 +39,9 @@ export async function getCategorySpendByRange(
        c.icon as category_icon,
        COALESCE(t.type, 'expense') as category_type,
        c.sort_order as sort_order,
-       COALESCE(SUM(t.amount), 0) as total
+       COALESCE(SUM(t.amount), 0) as total,
+       COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0) as income_total,
+       COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END), 0) as expense_total
      FROM categories c
      LEFT JOIN transactions t ON t.category_id = c.id
        AND t.type IN ('income','expense') AND t.date >= ? AND t.date < ?

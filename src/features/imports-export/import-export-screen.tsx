@@ -1,20 +1,17 @@
 import type { ImportProps } from '@/features/imports-export/import';
 import { useMutation } from '@tanstack/react-query';
 import * as DocumentPicker from 'expo-document-picker';
-import { File, Paths } from 'expo-file-system';
 
-import * as Sharing from 'expo-sharing';
+import { ArrowDown, ArrowUp } from 'lucide-react-native';
 import * as React from 'react';
 import { useState } from 'react';
 import { View } from 'react-native';
 import DetailsSection from '@/components/details';
-import { FocusAwareStatusBar, ScrollView, SolidButton } from '@/components/ui';
+import { FocusAwareStatusBar, ScrollView, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
-import { useExportTransactions } from '@/features/imports-export/api';
-import { formatTransactionsCsv } from '@/features/imports-export/csv-export';
 import { autoDetectColumnMapping, parseCSV } from '@/features/imports-export/csv-parser';
+import { useExportBackup, useImportBackup } from '@/features/imports-export/hooks';
 import Import from '@/features/imports-export/import';
-import { IS_WEB } from '@/lib/base';
 import { translate } from '@/lib/i18n';
 import { defaultStyles } from '@/lib/theme/styles';
 
@@ -26,14 +23,53 @@ const initialCsvState: ImportProps['state'] = {
   mapping: { amount: null, date: null, currency: null, note: null, type: null },
 };
 
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
+function BackupSection() {
+  const exportBackup = useExportBackup();
+  const importBackup = useImportBackup();
+
+  return (
+    <>
+      <Text className="mb-2 font-bold dark:text-muted-foreground" tx="import-export.backup_section_title" />
+      <DetailsSection
+        className="mb-4"
+        data={[
+          {
+            label: translate('import-export.backup_download_label'),
+            description: translate('import-export.backup_download_description'),
+            value: (
+              <SolidButton
+                size="sm"
+                className="min-w-16"
+                iconLeft={<ArrowUp className="mr-1 size-4 text-background" />}
+                label={translate('common.export')}
+                loading={exportBackup.isPending}
+                onPress={() => void exportBackup.mutate()}
+              />
+            ),
+          },
+          {
+            label: translate('import-export.backup_restore_label'),
+            description: translate('import-export.backup_restore_description'),
+            value: (
+              <SolidButton
+                size="sm"
+                className="min-w-16"
+                iconLeft={<ArrowDown className="mr-1 size-4 text-background" />}
+                label={translate('common.import')}
+                loading={importBackup.isPending}
+                onPress={() => importBackup.mutate()}
+              />
+            ),
+          },
+        ]}
+      />
+    </>
+  );
 }
 
 export function ImportScreen() {
   const [screen, setScreen] = useState<Screen | undefined>();
   const [csvState, setCsvState] = useState<ImportProps['state']>(() => initialCsvState);
-  const exportTransactions = useExportTransactions();
 
   const pickFileMutation = useMutation({
     mutationFn: async () => {
@@ -64,54 +100,14 @@ export function ImportScreen() {
     },
   });
 
-  const exportFile = React.useCallback(async () => {
-    try {
-      const transactions = await exportTransactions.mutateAsync();
-      if (transactions.length === 0) {
-        throw new Error(translate('import-export.export_empty_error'));
-      }
-
-      const csv = formatTransactionsCsv(transactions);
-      const fileName = `spendwise-transactions-${new Date().toISOString().slice(0, 10)}.csv`;
-
-      if (IS_WEB) {
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = fileName;
-        link.click();
-        URL.revokeObjectURL(url);
-        return;
-      }
-
-      const file = new File(Paths.cache, fileName);
-      if (file.exists) file.delete();
-      file.create({ overwrite: true });
-      file.write(csv);
-
-      const canShare = await Sharing.isAvailableAsync();
-      if (!canShare) {
-        throw new Error(translate('import-export.export_unavailable_error'));
-      }
-
-      await Sharing.shareAsync(file.uri, {
-        dialogTitle: translate('import-export.export_file'),
-        mimeType: 'text/csv',
-        UTI: 'public.comma-separated-values-text',
-      });
-    }
-    catch (error) {
-      Alert.alert(translate('common.error'), getErrorMessage(error));
-    }
-  }, [exportTransactions]);
-
   return (
     <View className="flex-1 bg-background">
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         {!screen && (
           <>
+            <BackupSection />
+            <Text className="mb-2 font-bold dark:text-muted-foreground" tx="import-export.external_section_title" />
             <DetailsSection
               className="mb-4"
               data={[{
@@ -121,26 +117,13 @@ export function ImportScreen() {
                   <SolidButton
                     size="sm"
                     className="min-w-16"
+                    iconLeft={<ArrowDown className="mr-1 size-4 text-background" />}
                     label={translate('common.import')}
                     loading={pickFileMutation.isPending}
                     onPress={() => pickFileMutation.mutate()}
                   />
                 ),
               }]}
-            />
-            <DetailsSection data={[{
-              label: translate('import-export.export_title'),
-              description: translate('import-export.export_description'),
-              value: (
-                <SolidButton
-                  className="min-w-16"
-                  size="sm"
-                  label={translate('common.export')}
-                  loading={exportTransactions.isPending}
-                  onPress={() => void exportFile()}
-                />
-              ),
-            }]}
             />
           </>
         )}

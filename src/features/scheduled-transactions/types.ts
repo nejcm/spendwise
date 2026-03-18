@@ -1,5 +1,6 @@
 import type { CurrencyKey } from '@/features/currencies';
 
+// recurring rules and runs
 export type ScheduledTransactionType = 'income' | 'expense';
 export type ScheduledTransactionFrequency
   = | 'daily'
@@ -23,6 +24,14 @@ export type ScheduledTransaction = {
   is_active: number;
   created_at: string;
   updated_at: string;
+};
+
+export type ScheduledTransactionRun = {
+  id: string;
+  rule_id: string;
+  scheduled_for_date: string;
+  transaction_id: string;
+  created_at: string;
 };
 
 export type ScheduledTransactionFormData = Pick<

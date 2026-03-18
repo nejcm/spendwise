@@ -5,9 +5,9 @@ import type {
   ScheduledTransactionWithDetails,
 } from './types';
 
-import { amountToCents, todayISO } from '@/features/formatting/helpers';
+import { amountToCents } from '@/features/formatting/helpers';
 import { generateId } from '@/lib/sqlite';
-import { getFirstDueOnOrAfter } from './scheduler';
+import { getFirstDueOnOrAfter, isoDateToUnix, unixToISODate } from './scheduler';
 
 function normalizeText(value?: string | null): string | null {
   const normalized = value?.trim();
@@ -20,16 +20,21 @@ function deriveScheduleState(
     'end_date' | 'frequency' | 'is_active' | 'start_date'
   >,
 ) {
-  const nextDueDate = getFirstDueOnOrAfter({
-    startDate: data.start_date,
+  const todayStr = unixToISODate(Math.floor(Date.now() / 1000));
+  const nextDueDateStr = getFirstDueOnOrAfter({
+    startDate: unixToISODate(data.start_date),
     frequency: data.frequency,
-    targetDate: todayISO(),
-    endDate: data.end_date,
+    targetDate: todayStr,
+    endDate: data.end_date != null ? unixToISODate(data.end_date) : null,
   });
 
+  const nextDueDate = nextDueDateStr != null
+    ? isoDateToUnix(nextDueDateStr)
+    : (data.end_date ?? data.start_date);
+
   return {
-    isActive: data.is_active && nextDueDate !== null,
-    nextDueDate: nextDueDate ?? data.end_date ?? data.start_date,
+    isActive: data.is_active && nextDueDateStr !== null,
+    nextDueDate,
   };
 }
 
@@ -140,7 +145,7 @@ export async function updateScheduledTransaction(
        end_date = ?,
        next_due_date = ?,
        is_active = ?,
-       updated_at = datetime('now')
+       updated_at = strftime('%s','now')
      WHERE id = ?`,
     [
       data.account_id,

@@ -21,6 +21,7 @@ import { CategoryPicker } from '@/features/categories/category-picker';
 import { CURRENCY_OPTIONS, CURRENCY_VALUES } from '@/features/currencies';
 import { todayISO } from '@/features/formatting/helpers';
 import { useAccounts } from '@/features/transactions/api';
+import { dateToUnix } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { toNumber } from '@/lib/number';
 import {
@@ -137,6 +138,8 @@ export function ScheduledTransactionForm({
         ...value,
         amount: toNumber(value.amount) ?? 0,
         note: value.note || null,
+        start_date: dateToUnix(new Date(value.start_date)),
+        end_date: value.end_date ? dateToUnix(new Date(value.end_date)) : null,
       };
 
       if (id) {

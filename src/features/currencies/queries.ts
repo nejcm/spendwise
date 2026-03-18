@@ -12,12 +12,12 @@ export type CurrencyRate = {
   quote: string;
   rate: number;
   source: string;
-  fetched_at: string;
+  fetched_at: number; // Unix seconds
 };
 
 export type RatesMap = Record<string, number>;
 
-const STALE_MS = 24 * 60 * 60_000; // 24 hours
+const STALE_SECONDS = 24 * 60 * 60; // 24 hours
 
 // ─── Pure Conversion Helper ───
 
@@ -42,8 +42,8 @@ export async function getRates(db: SQLiteDatabase): Promise<CurrencyRate[]> {
   );
 }
 
-export async function getLastFetchedAt(db: SQLiteDatabase): Promise<string | null> {
-  const row = await db.getFirstAsync<{ last: string | null }>(
+export async function getLastFetchedAt(db: SQLiteDatabase): Promise<number | null> {
+  const row = await db.getFirstAsync<{ last: number | null }>(
     `SELECT MAX(fetched_at) as last FROM currency_rates`,
   );
   return row?.last ?? null;
@@ -56,7 +56,7 @@ export async function saveRates(
   rateMap: RateMap,
   source: string,
 ): Promise<void> {
-  const now = new Date().toISOString();
+  const now = Math.floor(Date.now() / 1000);
   await db.withTransactionAsync(async () => {
     for (const [quote, rate] of Object.entries(rateMap)) {
       if (rate == null) continue;
@@ -77,8 +77,7 @@ export function toRatesMap(rows: CurrencyRate[]): RatesMap {
 
 export async function loadOrFetchRates(db: SQLiteDatabase): Promise<RatesMap | undefined> {
   const lastFetched = await getLastFetchedAt(db);
-  const isStale
-    = !lastFetched || Date.now() - new Date(lastFetched).getTime() > STALE_MS;
+  const isStale = !lastFetched || Math.floor(Date.now() / 1000) - lastFetched > STALE_SECONDS;
 
   if (!isStale) {
     const rows = await getRates(db);

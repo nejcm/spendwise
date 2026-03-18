@@ -29,11 +29,11 @@ export function TransactionList({ transactions, isLoading, onRefresh }: Transact
 
   const sections = useMemo(() => groupByDate(transactions), [transactions]);
 
-  // Flatten groups into a mixed array of headers and items
+  // Flatten groups into a mixed array of headers (Unix seconds) and items
   const flatData = useMemo(() => {
-    const items: (string | TransactionWithCategory)[] = [];
+    const items: (number | TransactionWithCategory)[] = [];
     for (const group of sections) {
-      items.push(group.date); // date header
+      items.push(group.date); // date header (Unix seconds)
       for (const t of group.transactions) {
         items.push(t);
       }
@@ -42,8 +42,8 @@ export function TransactionList({ transactions, isLoading, onRefresh }: Transact
   }, [sections]);
 
   const renderItem = React.useCallback(
-    ({ item }: { item: string | TransactionWithCategory }) => {
-      if (typeof item === 'string') {
+    ({ item }: { item: number | TransactionWithCategory }) => {
+      if (typeof item === 'number') {
         return (
           <View className="mt-4 px-4 py-2">
             <Text className="text-sm font-medium text-gray-500">{formatDate(item)}</Text>
@@ -64,7 +64,7 @@ export function TransactionList({ transactions, isLoading, onRefresh }: Transact
       className="pb-6"
       data={flatData}
       renderItem={renderItem}
-      getItemType={(item) => (typeof item === 'string' ? 'header' : 'row')}
+      getItemType={(item) => (typeof item === 'number' ? 'header' : 'row')}
       ListEmptyComponent={isLoading ? <ActivityIndicator /> : <NoData className="py-16" title={translate('transactions.no_transactions')} />}
       refreshControl={
         onRefresh
@@ -76,16 +76,17 @@ export function TransactionList({ transactions, isLoading, onRefresh }: Transact
 }
 
 function groupByDate(transactions: TransactionWithCategory[]): DateGroup[] {
-  const groups: Map<string, TransactionWithCategory[]> = new Map();
+  const groups: Map<number, TransactionWithCategory[]> = new Map();
 
   for (const t of transactions) {
-    const dateKey = t.date.split('T')[0]; // normalize to date only
-    const existing = groups.get(dateKey);
+    // Normalize to day-start Unix seconds (floor to day boundary using 86400s/day)
+    const dayKey = Math.floor(t.date / 86400) * 86400;
+    const existing = groups.get(dayKey);
     if (existing) {
       existing.push(t);
     }
     else {
-      groups.set(dateKey, [t]);
+      groups.set(dayKey, [t]);
     }
   }
 

@@ -1,6 +1,7 @@
 import {
   advanceScheduledDate,
   getFirstDueOnOrAfter,
+  isoDateToUnix,
   planScheduledRuns,
 } from '@/features/scheduled-transactions/scheduler';
 
@@ -32,39 +33,41 @@ describe('scheduled transaction scheduler', () => {
   });
 
   it('plans catch-up dates and skips dates that were already posted', () => {
+    const d = isoDateToUnix;
     expect(
       planScheduledRuns(
         {
-          next_due_date: '2026-03-01',
+          next_due_date: d('2026-03-01'),
           frequency: 'weekly',
           end_date: null,
           is_active: 1,
         },
-        '2026-03-20',
-        new Set(['2026-03-08']),
+        d('2026-03-20'),
+        new Set([d('2026-03-08')]),
       ),
     ).toEqual({
-      dueDates: ['2026-03-01', '2026-03-15'],
+      dueDates: [d('2026-03-01'), d('2026-03-15')],
       isActive: true,
-      nextDueDate: '2026-03-22',
+      nextDueDate: d('2026-03-22'),
     });
   });
 
   it('deactivates rules once the end date has been fully consumed', () => {
+    const d = isoDateToUnix;
     expect(
       planScheduledRuns(
         {
-          next_due_date: '2026-03-01',
+          next_due_date: d('2026-03-01'),
           frequency: 'monthly',
-          end_date: '2026-03-01',
+          end_date: d('2026-03-01'),
           is_active: 1,
         },
-        '2026-03-31',
+        d('2026-03-31'),
       ),
     ).toEqual({
-      dueDates: ['2026-03-01'],
+      dueDates: [d('2026-03-01')],
       isActive: false,
-      nextDueDate: '2026-04-01',
+      nextDueDate: d('2026-04-01'),
     });
   });
 });

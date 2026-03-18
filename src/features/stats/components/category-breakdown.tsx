@@ -7,8 +7,8 @@ import { translate } from '@/lib/i18n';
 import { formatCurrency } from '../../formatting/helpers';
 
 export type CategoryBreakdownProps = {
-  startDate: string;
-  endDate: string;
+  startDate: number;
+  endDate: number;
   currency: CurrencyKey;
   type: 'expense' | 'income';
   limit?: number;

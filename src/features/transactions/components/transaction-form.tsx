@@ -14,6 +14,7 @@ import { CategoryPicker } from '@/features/categories/category-picker';
 import { CURRENCY_OPTIONS, CURRENCY_VALUES } from '@/features/currencies';
 import { todayISO } from '@/features/formatting/helpers';
 import { useAccounts, useCreateTransaction, useUpdateTransaction } from '@/features/transactions/api';
+import { dateToUnix } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { toNumber } from '@/lib/number';
 import { addLastUsedCurrency, selectLastUsedCurrencies, selectTransactionFormPrefs, setTransactionFormPrefs, useAppStore } from '@/lib/store';
@@ -81,7 +82,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
     },
     onSubmit: async ({ value }) => {
       if (!value.account_id) return;
-      const data = { ...value, amount: toNumber(value.amount) ?? 0 };
+      const data = { ...value, amount: toNumber(value.amount) ?? 0, date: dateToUnix(new Date(value.date)) };
       if (id) {
         await updateTransaction.mutateAsync({ id, data });
       }

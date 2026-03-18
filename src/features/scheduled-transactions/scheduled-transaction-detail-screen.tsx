@@ -7,6 +7,7 @@ import { FocusAwareStatusBar, FormattedDate, SolidButton, Text } from '@/compone
 import Alert from '@/components/ui/alert';
 import { OutlineButton } from '@/components/ui/outline-button';
 import { formatCurrency, formatDate } from '@/features/formatting/helpers';
+import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { GhostButton } from '../../components/ui/ghost-button';
 import {
@@ -54,6 +55,8 @@ export function ScheduledTransactionDetailScreen() {
             ...rule,
             amount: rule.amount / 100,
             is_active: Boolean(rule.is_active),
+            start_date: unixToISODate(rule.start_date),
+            end_date: rule.end_date ? unixToISODate(rule.end_date) : null,
           }}
           onSuccess={() => setIsEditing(false)}
           onCancel={() => setIsEditing(false)}

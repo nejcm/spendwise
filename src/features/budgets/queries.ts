@@ -3,6 +3,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import type { Budget, BudgetFormData, BudgetLineWithSpent, BudgetWithProgress } from './types';
 
 import { amountToCents } from '@/features/formatting/helpers';
+import { dateToUnix } from '@/lib/date/helpers';
 import { generateId } from '@/lib/sqlite';
 
 // ─── Read Queries ───
@@ -49,10 +50,10 @@ export async function getBudgetLinesWithSpent(
   month: string,
 ): Promise<BudgetLineWithSpent[]> {
   const [year, m] = month.split('-');
-  const startDate = `${year}-${m}-01`;
-  const nextMonth = Number(m) === 12
-    ? `${Number(year) + 1}-01-01`
-    : `${year}-${String(Number(m) + 1).padStart(2, '0')}-01`;
+  const y = Number(year);
+  const mo = Number(m); // 1-based
+  const startDate = dateToUnix(new Date(y, mo - 1, 1));
+  const nextMonth = dateToUnix(new Date(mo === 12 ? y + 1 : y, mo === 12 ? 0 : mo, 1));
 
   return db.getAllAsync<BudgetLineWithSpent>(
     `SELECT bl.*,
@@ -83,12 +84,10 @@ export async function createBudget(
   const id = generateId();
   const totalCents = amountToCents(data.amount || 0);
 
-  const { format } = await import('date-fns');
-
   await db.runAsync(
     `INSERT INTO budgets (id, name, period, amount, start_date)
      VALUES (?, ?, ?, ?, ?)`,
-    [id, data.name, data.period, totalCents, format(new Date(), 'yyyy-MM-dd')],
+    [id, data.name, data.period, totalCents, dateToUnix(new Date())],
   );
 
   for (const line of data.lines) {
@@ -113,7 +112,7 @@ export async function updateBudget(
   const totalCents = amountToCents(data.amount || 0);
 
   await db.runAsync(
-    'UPDATE budgets SET name = ?, period = ?, amount = ?, updated_at = datetime(\'now\') WHERE id = ?',
+    `UPDATE budgets SET name = ?, period = ?, amount = ?, updated_at = strftime('%s','now') WHERE id = ?`,
     [data.name, data.period, totalCents, id],
   );
 

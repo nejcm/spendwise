@@ -9,10 +9,10 @@ export type Transaction = {
   type: TransactionType;
   amount: number; // cents
   currency: CurrencyKey;
-  date: string; // ISO 8601 date
+  date: number; // Unix seconds
   note: string | null;
-  created_at: string;
-  updated_at: string;
+  created_at: number; // Unix seconds
+  updated_at: number; // Unix seconds
 };
 
 export type TransactionFormData = Pick<Transaction, 'account_id' | 'category_id' | 'amount' | 'currency' | 'note' | 'type' | 'date'>;
@@ -30,6 +30,6 @@ export type MonthSummary = {
 };
 
 export type DateGroup = {
-  date: string;
+  date: number; // Unix seconds
   transactions: TransactionWithCategory[];
 };

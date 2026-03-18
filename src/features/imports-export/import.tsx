@@ -185,7 +185,7 @@ export default function Import({ state, setMapping, onClose }: ImportProps) {
         amount: (type === 'transfer' ? row.amount : Math.abs(row.amount)) / 100,
         currency: (mapping.currency ?? 'USD') as CurrencyKey,
         category_id: '_unknown',
-        date: row.date,
+        date: Math.floor(new Date(row.date).getTime() / 1000),
         note: row.note,
         type,
       });

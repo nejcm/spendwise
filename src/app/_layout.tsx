@@ -16,7 +16,7 @@ import { AppErrorBoundary } from '@/components/app-error-boundary';
 import { GlobalSheet } from '@/components/global-sheet';
 import { CustomTabBar } from '@/components/ui/custom-tab-bar';
 import { useCurrencyRates } from '@/features/currencies/api';
-import { todayISO } from '@/features/formatting/helpers';
+import { todayUnix } from '@/features/formatting/helpers';
 import {
   checkBudgetAlerts,
   checkUpcomingBills,
@@ -37,7 +37,7 @@ import '../global.css';
 async function initDb(db: SQLiteDatabase) {
   await migrateDb(db);
   await setupNotifications();
-  await processDueScheduledTransactions(db, todayISO());
+  await processDueScheduledTransactions(db, todayUnix());
   await checkBudgetAlerts(db);
   await checkUpcomingBills(db);
 }

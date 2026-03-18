@@ -15,20 +15,33 @@ import {
   startOfYear,
 } from 'date-fns';
 
+/** Convert a Date or yyyy-MM-dd string to Unix seconds (UTC). */
+export function dateToUnix(date: Date | string): number {
+  if (typeof date === 'string') return Math.floor(new Date(date).getTime() / 1000);
+  return Math.floor(date.getTime() / 1000);
+}
+
+/** Convert Unix seconds to a Date object. */
+export function unixToDate(seconds: number): Date {
+  return new Date(seconds * 1000);
+}
+
+/** Convert Unix seconds to a yyyy-MM-dd ISO date string. */
+export function unixToISODate(seconds: number): string {
+  return format(new Date(seconds * 1000), 'yyyy-MM-dd');
+}
+
 /**
- * Get the start and end date of a month.
+ * Get the start and end of a month as Unix seconds (UTC).
  * @param yearMonth - The year and month in the format "YYYY-MM".
- * @returns An array with the start and end date of the month.
+ * @returns An array with the start (inclusive) and end (exclusive) Unix seconds.
  */
-export function getCurrentMonthRange(yearMonth: string): [string, string] {
+export function getCurrentMonthRange(yearMonth: string): [number, number] {
   const parsed = parse(yearMonth, 'yyyy-MM', new Date());
   const monthStart = startOfMonth(parsed);
   const nextMonthStart = addMonths(monthStart, 1);
 
-  const startDate = format(monthStart, 'yyyy-MM-dd');
-  const nextMonth = format(nextMonthStart, 'yyyy-MM-dd');
-
-  return [startDate, nextMonth];
+  return [dateToUnix(monthStart), dateToUnix(nextMonthStart)];
 }
 
 export function currentPeriodSelection(): PeriodSelection {
@@ -36,26 +49,26 @@ export function currentPeriodSelection(): PeriodSelection {
   return { mode: 'month', year: now.getFullYear(), month: now.getMonth() + 1 };
 }
 
-export function getPeriodRange(selection: PeriodSelection): [string, string] {
+export function getPeriodRange(selection: PeriodSelection): [number, number] {
   switch (selection.mode) {
     case 'year': {
       const start = startOfYear(new Date(selection.year, 0, 1));
       const end = startOfYear(addYears(start, 1));
-      return [format(start, 'yyyy-MM-dd'), format(end, 'yyyy-MM-dd')];
+      return [dateToUnix(start), dateToUnix(end)];
     }
     case 'month': {
       const monthStart = startOfMonth(new Date(selection.year, selection.month - 1, 1));
       const nextMonthStart = addMonths(monthStart, 1);
-      return [format(monthStart, 'yyyy-MM-dd'), format(nextMonthStart, 'yyyy-MM-dd')];
+      return [dateToUnix(monthStart), dateToUnix(nextMonthStart)];
     }
     case 'week': {
       const weekStart = startOfISOWeek(setISOWeek(startOfYear(new Date(selection.year, 0, 4)), selection.week));
       const weekEnd = addDays(endOfISOWeek(weekStart), 1);
-      return [format(weekStart, 'yyyy-MM-dd'), format(weekEnd, 'yyyy-MM-dd')];
+      return [dateToUnix(weekStart), dateToUnix(weekEnd)];
     }
     case 'custom': {
-      const end = format(addDays(new Date(selection.endDate), 1), 'yyyy-MM-dd');
-      return [selection.startDate, end];
+      const end = addDays(new Date(selection.endDate), 1);
+      return [dateToUnix(new Date(selection.startDate)), dateToUnix(end)];
     }
   }
 }

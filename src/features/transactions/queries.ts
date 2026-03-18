@@ -10,8 +10,8 @@ import { generateId } from '@/lib/sqlite';
 
 export async function getTransactions(
   db: SQLiteDatabase,
-  startDate: string,
-  endDate: string,
+  startDate: number,
+  endDate: number,
 ): Promise<TransactionWithCategory[]> {
   return db.getAllAsync<TransactionWithCategory>(
     `SELECT t.*, c.name as category_name, c.icon as category_icon, c.color as category_color
@@ -97,7 +97,7 @@ export async function updateTransaction(
 
   await db.runAsync(
     `UPDATE transactions
-     SET account_id = ?, category_id = ?, type = ?, amount = ?, currency = ?, date = ?, note = ?, updated_at = datetime('now')
+     SET account_id = ?, category_id = ?, type = ?, amount = ?, currency = ?, date = ?, note = ?, updated_at = strftime('%s','now')
      WHERE id = ?`,
     [data.account_id, data.category_id, data.type, amountCents, data.currency, data.date, data.note || null, id],
   );

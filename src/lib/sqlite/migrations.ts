@@ -1,7 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { seedDefaults } from './seed';
 
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 1;
 
 /**
  * Clears all data from the database.
@@ -72,8 +72,8 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           color TEXT,
           is_archived INTEGER NOT NULL DEFAULT 0,
           sort_order INTEGER NOT NULL DEFAULT 999999,
-          created_at TEXT NOT NULL DEFAULT (datetime('now')),
-          updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+          created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+          updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
         );
 
         CREATE TABLE IF NOT EXISTS categories (
@@ -82,7 +82,7 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           icon TEXT,
           color TEXT NOT NULL,
           sort_order INTEGER NOT NULL DEFAULT 999999,
-          created_at TEXT NOT NULL DEFAULT (datetime('now'))
+          created_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
         );
 
         CREATE TABLE IF NOT EXISTS transactions (
@@ -92,10 +92,11 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           type TEXT NOT NULL CHECK(type IN ('income','expense','transfer')),
           amount INTEGER NOT NULL,
           currency TEXT NOT NULL DEFAULT 'EUR',
-          date TEXT NOT NULL,
+          baseAmount INTEGER NOT NULL,
+          date INTEGER NOT NULL,
           note TEXT,
-          created_at TEXT NOT NULL DEFAULT (datetime('now')),
-          updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+          created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+          updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
         );
 
         CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date DESC);
@@ -107,9 +108,9 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           name TEXT NOT NULL,
           period TEXT NOT NULL CHECK(period IN ('monthly','weekly','yearly')),
           amount INTEGER NOT NULL,
-          start_date TEXT NOT NULL,
-          created_at TEXT NOT NULL DEFAULT (datetime('now')),
-          updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+          start_date INTEGER NOT NULL,
+          created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+          updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
         );
 
         CREATE TABLE IF NOT EXISTS budget_lines (
@@ -125,7 +126,7 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           quote      TEXT NOT NULL,
           rate       REAL NOT NULL,
           source     TEXT NOT NULL,
-          fetched_at TEXT NOT NULL DEFAULT (datetime('now')),
+          fetched_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
           PRIMARY KEY (base, quote)
         );
 
@@ -138,20 +139,20 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           currency TEXT NOT NULL DEFAULT 'EUR',
           note TEXT,
           frequency TEXT NOT NULL CHECK(frequency IN ('daily','weekly','biweekly','monthly','yearly')),
-          start_date TEXT NOT NULL,
-          end_date TEXT,
-          next_due_date TEXT NOT NULL,
+          start_date INTEGER NOT NULL,
+          end_date INTEGER,
+          next_due_date INTEGER NOT NULL,
           is_active INTEGER NOT NULL DEFAULT 1,
-          created_at TEXT NOT NULL DEFAULT (datetime('now')),
-          updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+          created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+          updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
         );
-        
+
         CREATE TABLE IF NOT EXISTS recurring_rule_runs (
           id TEXT PRIMARY KEY NOT NULL,
           rule_id TEXT NOT NULL REFERENCES recurring_rules(id) ON DELETE CASCADE,
-          scheduled_for_date TEXT NOT NULL,
+          scheduled_for_date INTEGER NOT NULL,
           transaction_id TEXT NOT NULL REFERENCES transactions(id) ON DELETE CASCADE,
-          created_at TEXT NOT NULL DEFAULT (datetime('now')),
+          created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
           UNIQUE(rule_id, scheduled_for_date)
         );
         CREATE INDEX IF NOT EXISTS idx_recurring_rules_next_due_date

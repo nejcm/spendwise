@@ -3,14 +3,15 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import type { MonthSummary } from '../transactions/types';
 import type { CategorySpend, DailyTrendTotal, MonthlyTotals } from './types';
 
-import { format, subMonths } from 'date-fns';
+import { subMonths } from 'date-fns';
+import { dateToUnix } from '@/lib/date/helpers';
 
 // ─── Read Queries ───
 
 export async function getSummaryByRange(
   db: SQLiteDatabase,
-  startDate: string,
-  endDate: string,
+  startDate: number,
+  endDate: number,
 ): Promise<MonthSummary> {
   const row = await db.getFirstAsync<{ income: number; expense: number }>(
     `SELECT
@@ -27,8 +28,8 @@ export async function getSummaryByRange(
 
 export async function getCategorySpendByRange(
   db: SQLiteDatabase,
-  startDate: string,
-  endDate: string,
+  startDate: number,
+  endDate: number,
 ): Promise<CategorySpend[]> {
   const rows = await db.getAllAsync<Omit<CategorySpend, 'percentage'>>(
     `SELECT
@@ -57,8 +58,8 @@ export async function getCategorySpendByRange(
 
 export async function getTrendByRange(
   db: SQLiteDatabase,
-  startDate: string,
-  endDate: string,
+  startDate: number,
+  endDate: number,
 ): Promise<DailyTrendTotal[]> {
   return db.getAllAsync<DailyTrendTotal>(
     `SELECT
@@ -77,8 +78,8 @@ export async function getYearlySummary(
   db: SQLiteDatabase,
   year: number,
 ): Promise<MonthSummary> {
-  const startDate = `${year}-01-01`;
-  const endDate = `${year + 1}-01-01`;
+  const startDate = dateToUnix(new Date(year, 0, 1));
+  const endDate = dateToUnix(new Date(year + 1, 0, 1));
 
   const row = await db.getFirstAsync<{ income: number; expense: number }>(
     `SELECT
@@ -98,8 +99,8 @@ export async function getCategorySpendForYear(
   db: SQLiteDatabase,
   year: number,
 ): Promise<CategorySpend[]> {
-  const startDate = `${year}-01-01`;
-  const endDate = `${year + 1}-01-01`;
+  const startDate = dateToUnix(new Date(year, 0, 1));
+  const endDate = dateToUnix(new Date(year + 1, 0, 1));
 
   const rows = await db.getAllAsync<Omit<CategorySpend, 'percentage'>>(
     `SELECT
@@ -135,12 +136,11 @@ export async function getMonthlyTrend(
 
   for (let i = numMonths - 1; i >= 0; i--) {
     const date = subMonths(now, i);
-    const month = format(date, 'yyyy-MM');
-    const [year, m] = month.split('-');
-    const startDate = `${year}-${m}-01`;
-    const nextMonth = Number(m) === 12
-      ? `${Number(year) + 1}-01-01`
-      : `${year}-${String(Number(m) + 1).padStart(2, '0')}-01`;
+    const year = date.getFullYear();
+    const month = date.getMonth(); // 0-based
+    const startDate = dateToUnix(new Date(year, month, 1));
+    const endDate = dateToUnix(new Date(year, month + 1, 1));
+    const monthLabel = `${year}-${String(month + 1).padStart(2, '0')}`;
 
     const row = await db.getFirstAsync<{ income: number; expense: number }>(
       `SELECT
@@ -148,10 +148,10 @@ export async function getMonthlyTrend(
          COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) as expense
        FROM transactions
        WHERE date >= ? AND date < ?`,
-      [startDate, nextMonth],
+      [startDate, endDate],
     );
 
-    result.push({ month, income: row?.income ?? 0, expense: row?.expense ?? 0 });
+    result.push({ month: monthLabel, income: row?.income ?? 0, expense: row?.expense ?? 0 });
   }
 
   return result;

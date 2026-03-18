@@ -63,6 +63,7 @@ export type AppState = {
   // Security
   lockEnabled: boolean;
   lockTimeoutMinutes: number;
+  isLocked: boolean; // runtime only — not persisted
 
   // AI
   aiProvider: 'openai' | 'anthropic';
@@ -103,6 +104,7 @@ function getDefaultState(): AppState {
     language: undefined,
     lockEnabled: false,
     lockTimeoutMinutes: 1,
+    isLocked: false,
     aiProvider: 'openai',
     openaiApiKey: undefined,
     anthropicApiKey: undefined,
@@ -125,7 +127,7 @@ const _useAppStore = create<AppState>()(
     {
       name: 'app-storage',
       storage: createJSONStorage(() => mmkvStorage),
-      partialize: (state) => (state),
+      partialize: ({ isLocked: _, periodSelection: __, ...rest }) => rest as AppState,
     },
   ),
 );
@@ -215,6 +217,10 @@ export function setAnthropicApiKey(anthropicApiKey: string) {
 // Security actions
 export function setLockEnabled(lockEnabled: boolean) {
   return _useAppStore.setState((prev) => ({ ...prev, lockEnabled }));
+}
+
+export function setIsLocked(isLocked: boolean) {
+  return _useAppStore.setState((prev) => ({ ...prev, isLocked }));
 }
 
 export function setLockTimeoutMinutes(lockTimeoutMinutes: number) {

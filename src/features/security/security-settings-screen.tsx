@@ -5,7 +5,7 @@ import { Pressable } from 'react-native';
 import { FocusAwareStatusBar, ScrollView, Switch, Text, View } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { translate } from '@/lib/i18n';
-import { setLockEnabled, setLockTimeoutMinutes, useAppStore } from '@/lib/store';
+import { setIsLocked, setLockEnabled, setLockTimeoutMinutes, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import DetailsSection from '../../components/details';
 
@@ -31,10 +31,19 @@ export function SecuritySettingsScreen() {
         promptMessage: translate('security.verify_to_disable'),
       });
       if (result.success) {
-        setLockEnabled(on);
+        setLockEnabled(false);
+        setIsLocked(false);
       }
     }
     else {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      if (!hasHardware) {
+        Alert.alert(
+          translate('security.no_hardware_title'),
+          translate('security.no_hardware_desc'),
+        );
+        return;
+      }
       const enrolled = await LocalAuthentication.isEnrolledAsync();
       if (!enrolled) {
         Alert.alert(
@@ -43,7 +52,7 @@ export function SecuritySettingsScreen() {
         );
         return;
       }
-      setLockEnabled(on);
+      setLockEnabled(true);
     }
   };
 

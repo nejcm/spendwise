@@ -38,7 +38,7 @@ export function StatsTrend({ period, startDate, endDate }: StatsTrendProps) {
     }
 
     const availableWidth = screenWidth - 104;
-    const targetBarWidth = period === 'year' ? 8 : period === 'week' ? 12 : 10;
+    const targetBarWidth = period === 'year' ? 8 : period === 'week' ? 12 : 24;
     const minSpacing = period === 'week' ? 10 : 8;
     const computedSpacing = Math.max(
       minSpacing,

@@ -24,9 +24,9 @@ export async function mockData(db: SQLiteDatabase): Promise<void> {
     INSERT INTO transactions (id, account_id, category_id, type, amount, currency, date, note)
     VALUES
       -- Income
-      ('tx_salary_001', 'acc_main_checking', 'cat_salary', 'income', 320000, 'EUR', strftime('%s', date('now', '-15 days')), 'Monthly salary'),
-      ('tx_freelance_001', 'acc_main_checking', 'cat_freelance', 'income', 65000, 'EUR', strftime('%s', date('now', '-10 days')), 'Freelance project'),
-      ('tx_salary_002', 'acc_main_checking', 'cat_salary', 'income', 345000, 'EUR', strftime('%s', date('now', '-45 days')), 'Monthly salary'),
+      ('tx_salary_001', 'acc_main_checking', 'cat_salary', 'income', 500000, 'EUR', strftime('%s', date('now', '-15 days')), 'Monthly salary'),
+      ('tx_freelance_001', 'acc_main_checking', 'cat_freelance', 'income', 120000, 'EUR', strftime('%s', date('now', '-10 days')), 'Freelance project'),
+      ('tx_salary_002', 'acc_main_checking', 'cat_salary', 'income', 520000, 'EUR', strftime('%s', date('now', '-45 days')), 'Monthly salary'),
       ('tx_freelance_002', 'acc_main_checking', 'cat_freelance', 'income', 42000, 'EUR', strftime('%s', date('now', '-33 days')), 'Freelance: website fixes'),
       ('tx_freelance_003', 'acc_main_checking', 'cat_freelance', 'income', 90000, 'EUR', strftime('%s', date('now', '-21 days')), 'Freelance: mobile app feature'),
 

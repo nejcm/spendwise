@@ -6,6 +6,8 @@ export type CategorySpend = {
   category_type: 'expense' | 'income';
   sort_order: number;
   total: number;
+  income_total: number;
+  expense_total: number;
   percentage: number;
 };
 

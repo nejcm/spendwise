@@ -61,7 +61,8 @@
     "name_required": "Name is required",
     "select_category": "Select Category",
     "sorting_tips": "Hold and drag to reorder categories",
-    "title": "Categories"
+    "title": "Categories",
+    "total_all_categories": "Total (All Categories)"
   },
   "common": {
     "add": "Add",
@@ -111,6 +112,7 @@
     "start_date": "Start Date",
     "there": "there",
     "today": "Today",
+    "total": "Total",
     "week": "Week",
     "year": "Year",
     "yes": "Yes",

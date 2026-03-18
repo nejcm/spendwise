@@ -54,6 +54,10 @@
     "postcss"
   ],
 
+  "eslint.workingDirectories": [
+    { "mode": "auto" }
+  ],
+
   "typescript.tsdk": "node_modules/typescript/lib",
   "cSpell.words": ["Flashlist"],
   "i18n-ally.localesPaths": ["src/translations/"],

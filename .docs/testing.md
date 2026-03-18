@@ -26,6 +26,7 @@ pnpm verify
 - Shared UI primitives with meaningful interaction
 - Feature logic that can regress without full device testing
 - Critical navigation and onboarding flows when routes or startup behavior change
+- **SQLite query functions** — import from `features/*/queries.ts` directly and run against in-memory SQLite (`openDatabaseAsync(':memory:')`); no React context or mocking needed
 
 ## Current Reality
 

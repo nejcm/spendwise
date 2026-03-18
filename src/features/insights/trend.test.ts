@@ -1,12 +1,15 @@
 import { buildTrendSeries } from '@/features/insights/trend';
+import { isoDateToUnix } from '@/features/scheduled-transactions/scheduler';
+
+const d = isoDateToUnix;
 
 describe('buildTrendSeries', () => {
   it('builds daily buckets for week mode', () => {
     expect(
-      buildTrendSeries('week', '2026-03-16', '2026-03-23', [
-        { date: '2026-03-16', income: 1000, expense: 500 },
-        { date: '2026-03-18', income: 300, expense: 200 },
-        { date: '2026-03-22', income: 0, expense: 700 },
+      buildTrendSeries('week', d('2026-03-16'), d('2026-03-23'), [
+        { date: d('2026-03-16'), income: 1000, expense: 500 },
+        { date: d('2026-03-18'), income: 300, expense: 200 },
+        { date: d('2026-03-22'), income: 0, expense: 700 },
       ]),
     ).toEqual([
       { label: 'Mon', income: 1000, expense: 500 },
@@ -21,11 +24,11 @@ describe('buildTrendSeries', () => {
 
   it('builds weekly buckets for month mode', () => {
     expect(
-      buildTrendSeries('month', '2026-03-01', '2026-04-01', [
-        { date: '2026-03-01', income: 1000, expense: 0 },
-        { date: '2026-03-07', income: 200, expense: 150 },
-        { date: '2026-03-08', income: 500, expense: 100 },
-        { date: '2026-03-31', income: 0, expense: 900 },
+      buildTrendSeries('month', d('2026-03-01'), d('2026-04-01'), [
+        { date: d('2026-03-01'), income: 1000, expense: 0 },
+        { date: d('2026-03-07'), income: 200, expense: 150 },
+        { date: d('2026-03-08'), income: 500, expense: 100 },
+        { date: d('2026-03-31'), income: 0, expense: 900 },
       ]),
     ).toEqual([
       { label: 'W1', income: 1200, expense: 150 },
@@ -38,9 +41,9 @@ describe('buildTrendSeries', () => {
 
   it('builds monthly buckets for year mode', () => {
     expect(
-      buildTrendSeries('year', '2026-01-01', '2027-01-01', [
-        { date: '2026-01-10', income: 100, expense: 10 },
-        { date: '2026-03-15', income: 300, expense: 30 },
+      buildTrendSeries('year', d('2026-01-01'), d('2027-01-01'), [
+        { date: d('2026-01-10'), income: 100, expense: 10 },
+        { date: d('2026-03-15'), income: 300, expense: 30 },
       ]),
     ).toEqual([
       { label: 'Jan', income: 100, expense: 10 },
@@ -60,11 +63,11 @@ describe('buildTrendSeries', () => {
 
   it('builds monthly buckets for longer custom ranges', () => {
     expect(
-      buildTrendSeries('custom', '2026-01-15', '2026-04-15', [
-        { date: '2026-01-20', income: 100, expense: 10 },
-        { date: '2026-02-02', income: 200, expense: 20 },
-        { date: '2026-03-18', income: 300, expense: 30 },
-        { date: '2026-04-01', income: 400, expense: 40 },
+      buildTrendSeries('custom', d('2026-01-15'), d('2026-04-15'), [
+        { date: d('2026-01-20'), income: 100, expense: 10 },
+        { date: d('2026-02-02'), income: 200, expense: 20 },
+        { date: d('2026-03-18'), income: 300, expense: 30 },
+        { date: d('2026-04-01'), income: 400, expense: 40 },
       ]),
     ).toEqual([
       { label: 'Jan', income: 100, expense: 10 },
@@ -76,10 +79,10 @@ describe('buildTrendSeries', () => {
 
   it('includes year context for custom ranges spanning multiple years', () => {
     expect(
-      buildTrendSeries('custom', '2026-12-15', '2027-02-15', [
-        { date: '2026-12-20', income: 100, expense: 10 },
-        { date: '2027-01-10', income: 200, expense: 20 },
-        { date: '2027-02-01', income: 300, expense: 30 },
+      buildTrendSeries('custom', d('2026-12-15'), d('2027-02-15'), [
+        { date: d('2026-12-20'), income: 100, expense: 10 },
+        { date: d('2027-01-10'), income: 200, expense: 20 },
+        { date: d('2027-02-01'), income: 300, expense: 30 },
       ]),
     ).toEqual([
       { label: 'Dec 26', income: 100, expense: 10 },

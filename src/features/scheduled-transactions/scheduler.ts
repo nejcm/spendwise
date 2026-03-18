@@ -6,7 +6,16 @@ import type {
   ScheduledTransactionFrequency,
 } from './types';
 import { addDays, addMonths, addWeeks, addYears, format, parseISO } from 'date-fns';
+import { unixToISODate } from '@/lib/date/helpers';
 import { generateId } from '@/lib/sqlite';
+
+export { unixToISODate };
+
+export function isoDateToUnix(iso: string): number {
+  return Math.floor(new Date(iso).getTime() / 1000);
+}
+
+// ─── Internal scheduling logic (strings) ───
 
 type ProcessResult = {
   createdTransactions: number;
@@ -59,33 +68,37 @@ export function getFirstDueOnOrAfter(args: {
 
 export function planScheduledRuns(
   rule: Pick<ScheduledTransaction, 'end_date' | 'frequency' | 'is_active' | 'next_due_date'>,
-  untilDate: string,
-  existingRunDates: Set<string> = new Set(),
+  untilUnix: number,
+  existingRunUnix: Set<number> = new Set(),
 ): ScheduledRunPlan {
-  let cursor = rule.next_due_date;
-  const dueDates: string[] = [];
+  const untilDate = unixToISODate(untilUnix);
+  let cursorStr = unixToISODate(rule.next_due_date);
+  const endDateStr = rule.end_date != null ? unixToISODate(rule.end_date) : null;
+  const dueDates: number[] = [];
 
   if (!rule.is_active) {
     return {
       dueDates,
       isActive: false,
-      nextDueDate: cursor,
+      nextDueDate: rule.next_due_date,
     };
   }
 
-  while (cursor <= untilDate && (!rule.end_date || cursor <= rule.end_date)) {
-    if (!existingRunDates.has(cursor)) {
-      dueDates.push(cursor);
+  while (cursorStr <= untilDate) {
+    if (endDateStr && cursorStr > endDateStr) break;
+    const cursorUnix = isoDateToUnix(cursorStr);
+    if (!existingRunUnix.has(cursorUnix)) {
+      dueDates.push(cursorUnix);
     }
-    cursor = advanceScheduledDate(cursor, rule.frequency);
+    cursorStr = advanceScheduledDate(cursorStr, rule.frequency);
   }
 
-  const isActive = !rule.end_date || cursor <= rule.end_date;
+  const isActive = !endDateStr || cursorStr <= endDateStr;
 
   return {
     dueDates,
     isActive,
-    nextDueDate: cursor,
+    nextDueDate: isoDateToUnix(cursorStr),
   };
 }
 
@@ -95,19 +108,19 @@ export function buildGeneratedTransactionNote(note?: string | null): string | nu
 }
 
 type ScheduledRunRow = {
-  scheduled_for_date: string;
+  scheduled_for_date: number;
 };
 
 export async function processDueScheduledTransactions(
   db: SQLiteDatabase,
-  today: string,
+  todayUnix: number,
 ): Promise<ProcessResult> {
   const rules = await db.getAllAsync<ScheduledTransaction>(
     `SELECT *
      FROM recurring_rules
      WHERE is_active = 1 AND next_due_date <= ?
      ORDER BY next_due_date ASC, created_at ASC`,
-    [today],
+    [todayUnix],
   );
 
   let createdTransactions = 0;
@@ -119,16 +132,16 @@ export async function processDueScheduledTransactions(
         `SELECT scheduled_for_date
          FROM recurring_rule_runs
          WHERE rule_id = ? AND scheduled_for_date <= ?`,
-        [rule.id, today],
+        [rule.id, todayUnix],
       );
 
       const plan = planScheduledRuns(
         rule,
-        today,
+        todayUnix,
         new Set(existingRuns.map((run) => run.scheduled_for_date)),
       );
 
-      for (const dueDate of plan.dueDates) {
+      for (const dueDateUnix of plan.dueDates) {
         const transactionId = generateId();
         const transactionNote = buildGeneratedTransactionNote(rule.note);
 
@@ -151,7 +164,7 @@ export async function processDueScheduledTransactions(
             rule.type,
             rule.amount,
             rule.currency,
-            dueDate,
+            dueDateUnix,
             transactionNote,
           ],
         );
@@ -164,7 +177,7 @@ export async function processDueScheduledTransactions(
             transaction_id
           )
           VALUES (?, ?, ?, ?)`,
-          [generateId(), rule.id, dueDate, transactionId],
+          [generateId(), rule.id, dueDateUnix, transactionId],
         );
 
         if ((runInsertResult.changes ?? 0) === 0) {
@@ -178,7 +191,7 @@ export async function processDueScheduledTransactions(
       if (plan.nextDueDate !== rule.next_due_date || Number(plan.isActive) !== rule.is_active) {
         await db.runAsync(
           `UPDATE recurring_rules
-           SET next_due_date = ?, is_active = ?, updated_at = datetime('now')
+           SET next_due_date = ?, is_active = ?, updated_at = strftime('%s','now')
            WHERE id = ?`,
           [plan.nextDueDate, Number(plan.isActive), rule.id],
         );
@@ -188,4 +201,10 @@ export async function processDueScheduledTransactions(
   });
 
   return { createdTransactions, updatedRules };
+}
+
+// ─── Legacy string-based helpers (used by queries.ts deriveScheduleState) ───
+
+export function todayISODate(): string {
+  return format(new Date(), 'yyyy-MM-dd');
 }

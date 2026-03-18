@@ -8,8 +8,8 @@ import { translate } from '@/lib/i18n';
 import { formatCurrency } from '../../formatting/helpers';
 
 export type SummaryProps = {
-  startDate: string;
-  endDate: string;
+  startDate: number;
+  endDate: number;
   currency: CurrencyKey;
 };
 

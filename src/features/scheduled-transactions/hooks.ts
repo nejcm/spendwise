@@ -7,7 +7,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { useSQLiteContext } from 'expo-sqlite';
 
-import { todayISO } from '@/features/formatting/helpers';
+import { todayUnix } from '@/features/formatting/helpers';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
 import * as queries from './queries';
@@ -17,7 +17,7 @@ import { processDueScheduledTransactions } from './scheduler';
 export async function syncDueScheduledTransactions(
   db: SQLiteDatabase,
   queryClient: QueryClient,
-  today: string = todayISO(),
+  today: number = todayUnix(),
 ): Promise<number> {
   const result = await processDueScheduledTransactions(db, today);
 

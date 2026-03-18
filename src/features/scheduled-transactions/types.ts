@@ -18,20 +18,20 @@ export type ScheduledTransaction = {
   currency: CurrencyKey;
   note: string | null;
   frequency: ScheduledTransactionFrequency;
-  start_date: string;
-  end_date: string | null;
-  next_due_date: string;
+  start_date: number; // Unix seconds
+  end_date: number | null; // Unix seconds
+  next_due_date: number; // Unix seconds
   is_active: number;
-  created_at: string;
-  updated_at: string;
+  created_at: number; // Unix seconds
+  updated_at: number; // Unix seconds
 };
 
 export type ScheduledTransactionRun = {
   id: string;
   rule_id: string;
-  scheduled_for_date: string;
+  scheduled_for_date: number; // Unix seconds
   transaction_id: string;
-  created_at: string;
+  created_at: number; // Unix seconds
 };
 
 export type ScheduledTransactionFormData = Pick<
@@ -58,7 +58,7 @@ export type ScheduledTransactionWithDetails = ScheduledTransaction & {
 };
 
 export type ScheduledRunPlan = {
-  dueDates: string[];
+  dueDates: number[]; // Unix seconds
   isActive: boolean;
-  nextDueDate: string;
+  nextDueDate: number; // Unix seconds
 };

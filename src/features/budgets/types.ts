@@ -5,9 +5,9 @@ export type Budget = {
   name: string;
   period: BudgetPeriod;
   amount: number;
-  start_date: string;
-  created_at: string;
-  updated_at: string;
+  start_date: number; // Unix seconds
+  created_at: number; // Unix seconds
+  updated_at: number; // Unix seconds
 };
 
 export type BudgetLine = {

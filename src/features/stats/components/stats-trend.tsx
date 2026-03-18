@@ -11,8 +11,8 @@ import { buildTrendSeries } from '../../insights/trend';
 
 export type StatsTrendProps = {
   period: PeriodMode;
-  startDate: string;
-  endDate: string;
+  startDate: number;
+  endDate: number;
 };
 
 const PAIR_GAP = 2;

@@ -8,7 +8,7 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { Input } from '@/components/ui/input';
 import { Modal, useModal } from '@/components/ui/modal';
-import { formatDate, todayISO } from '@/features/formatting/helpers';
+import { todayISO } from '@/features/formatting/helpers';
 import { IS_WEB } from '@/lib/base';
 import { tryFormatDate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
@@ -55,7 +55,7 @@ export function DateInput({ label, value, onChange, error, modalProps, ...rest }
       <Pressable onPress={present}>
         <Input
           label={label}
-          value={value ? formatDate(value, dateFormat) : ''}
+          value={value ? format(parseISO(value), dateFormat) : ''}
           placeholder={translate('common.select_date')}
           error={error}
           editable={false}

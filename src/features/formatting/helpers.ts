@@ -1,6 +1,6 @@
 import type { CurrencyKey } from '../currencies';
 import type { NumberFormat } from './constants';
-import { format, isToday, isYesterday, parseISO } from 'date-fns';
+import { format, isToday, isYesterday } from 'date-fns';
 import { translate } from '@/lib/i18n';
 import { DEFAULT_DATE_FORMAT } from '../../config';
 
@@ -84,37 +84,44 @@ export function formatCurrency(value: number | string, currency: CurrencyKey, nu
 }
 
 /**
- * Format an ISO date string for display.
+ * Format a Unix seconds timestamp for display.
  * Shows "Today", "Yesterday", or the formatted date using the
  * user's preferred date format from the store, unless an
  * explicit format override is provided.
  */
-export function formatDate(isoDate: string, displayFormat?: string): string {
-  const date = parseISO(isoDate);
+export function formatDate(unix: number, displayFormat?: string): string {
+  const date = new Date(unix * 1000);
   if (isToday(date)) return translate('common.today');
   if (isYesterday(date)) return translate('common.yesterday');
   return format(date, displayFormat || DEFAULT_DATE_FORMAT);
 }
 
 /**
- * Format an ISO date string as a short date.
+ * Format a Unix seconds timestamp as a short date.
  * e.g., "Mar 9"
  */
-export function formatShortDate(isoDate: string): string {
-  return format(parseISO(isoDate), 'MMM d');
+export function formatShortDate(unix: number): string {
+  return format(new Date(unix * 1000), 'MMM d');
 }
 
 /**
- * Format an ISO date string as month and year.
+ * Format a Unix seconds timestamp as month and year.
  * e.g., "March 2026"
  */
-export function formatMonthYear(isoDate: string): string {
-  return format(parseISO(isoDate), 'MMMM yyyy');
+export function formatMonthYear(unix: number): string {
+  return format(new Date(unix * 1000), 'MMMM yyyy');
 }
 
 /**
- * Get today's date as an ISO string (date only).
+ * Get today's date as an ISO string (date only). Used internally by scheduler.
  */
 export function todayISO(): string {
   return format(new Date(), 'yyyy-MM-dd');
+}
+
+/**
+ * Get today as Unix seconds (local midnight).
+ */
+export function todayUnix(): number {
+  return Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
 }

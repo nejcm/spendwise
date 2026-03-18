@@ -4,7 +4,7 @@ export interface Category {
   icon: string | null;
   color: string;
   sort_order: number;
-  created_at: string;
+  created_at: number; // Unix seconds
 }
 
 export type CategoryFormData = {

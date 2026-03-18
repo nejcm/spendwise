@@ -8,6 +8,7 @@ import { FocusAwareStatusBar, FormattedDate, SolidButton, Text } from '@/compone
 import Alert from '@/components/ui/alert';
 import { OutlineButton } from '@/components/ui/outline-button';
 import { formatCurrency, formatDate } from '@/features/formatting/helpers';
+import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { GhostButton } from '../../components/ui/ghost-button';
 import { useAccounts, useDeleteTransaction, useTransaction } from './api';
@@ -34,7 +35,7 @@ export function TransactionDetailScreen() {
     return (
       <View className="flex-1 p-4">
         <TransactionForm
-          initialValues={transaction}
+          initialValues={{ ...transaction, date: unixToISODate(transaction.date) }}
           onSuccess={() => setIsEditing(false)}
           onCancel={() => setIsEditing(false)}
         />

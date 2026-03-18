@@ -5,7 +5,7 @@ import { queryKeys } from '@/lib/data/query-keys';
 
 import * as queries from './queries';
 
-export function useSummaryByRange(startDate: string, endDate: string) {
+export function useSummaryByRange(startDate: number, endDate: number) {
   const db = useSQLiteContext();
   return useQuery({
     queryKey: queryKeys.insights.summaryRange(startDate, endDate),
@@ -13,7 +13,7 @@ export function useSummaryByRange(startDate: string, endDate: string) {
   });
 }
 
-export function useCategorySpendByRange(startDate: string, endDate: string) {
+export function useCategorySpendByRange(startDate: number, endDate: number) {
   const db = useSQLiteContext();
   return useQuery({
     queryKey: queryKeys.insights.categorySpendRange(startDate, endDate),
@@ -21,7 +21,7 @@ export function useCategorySpendByRange(startDate: string, endDate: string) {
   });
 }
 
-export function useTrendByRange(startDate: string, endDate: string) {
+export function useTrendByRange(startDate: number, endDate: number) {
   const db = useSQLiteContext();
   return useQuery({
     queryKey: queryKeys.insights.trendRange(startDate, endDate),

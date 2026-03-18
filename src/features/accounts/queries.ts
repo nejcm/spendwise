@@ -36,7 +36,7 @@ export async function getAccountsWithBalanceForMonth(
   db: SQLiteDatabase,
   yearMonth: string,
 ): Promise<AccountWithBalance[]> {
-  const [startDate, endDate] = getCurrentMonthRange(yearMonth);
+  const [startDate, endDate] = getCurrentMonthRange(yearMonth); // returns [number, number]
 
   return db.getAllAsync<AccountWithBalance>(
     `SELECT a.*,
@@ -57,8 +57,8 @@ export async function getAccountsWithBalanceForMonth(
 
 export async function getAccountsWithBalanceForRange(
   db: SQLiteDatabase,
-  startDate: string,
-  endDate: string,
+  startDate: number,
+  endDate: number,
 ): Promise<AccountWithBalance[]> {
   return db.getAllAsync<AccountWithBalance>(
     `SELECT a.*,
@@ -81,8 +81,8 @@ export async function getTotalBalance(
   db: SQLiteDatabase,
   yearMonth?: string,
 ): Promise<number> {
-  let startDate: string | undefined;
-  let endDate: string | undefined;
+  let startDate: number | undefined;
+  let endDate: number | undefined;
 
   if (yearMonth) {
     [startDate, endDate] = getCurrentMonthRange(yearMonth);
@@ -101,14 +101,14 @@ export async function getTotalBalance(
         AS account_balance
       FROM accounts a
       LEFT JOIN transactions t ON t.account_id = a.id
-      ${startDate && endDate ? 'AND t.date >= ? AND t.date < ?' : ''}
+      ${startDate != null && endDate != null ? 'AND t.date >= ? AND t.date < ?' : ''}
       WHERE a.is_archived = 0
       GROUP BY a.id
     ) AS balances
   `;
 
-  const params: (string | number)[] = [];
-  if (startDate && endDate) {
+  const params: number[] = [];
+  if (startDate != null && endDate != null) {
     params.push(startDate, endDate);
   }
 
@@ -142,7 +142,7 @@ export async function updateAccount(
   const budgetCents = parseToCents(data.budget);
 
   await db.runAsync(
-    `UPDATE accounts SET name = ?, description = ?, type = ?, currency = ?, budget = ?, icon = ?, color = ?, updated_at = datetime('now')
+    `UPDATE accounts SET name = ?, description = ?, type = ?, currency = ?, budget = ?, icon = ?, color = ?, updated_at = strftime('%s','now')
      WHERE id = ?`,
     [data.name, data.description ?? null, data.type, data.currency, budgetCents, data.icon, data.color, id],
   );
@@ -153,7 +153,7 @@ export async function archiveAccount(
   id: string,
 ): Promise<void> {
   await db.runAsync(
-    'UPDATE accounts SET is_archived = 1, updated_at = datetime(\'now\') WHERE id = ?',
+    `UPDATE accounts SET is_archived = 1, updated_at = strftime('%s','now') WHERE id = ?`,
     [id],
   );
 }

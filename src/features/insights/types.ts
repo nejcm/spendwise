@@ -23,7 +23,7 @@ export type WeeklyTotals = {
 };
 
 export type DailyTrendTotal = {
-  date: string;
+  date: number; // Unix seconds
   income: number;
   expense: number;
 };

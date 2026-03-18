@@ -15,8 +15,8 @@ export type Account = {
   color: string | null;
   is_archived: number;
   sort_order: number;
-  created_at: string;
-  updated_at: string;
+  created_at: number; // Unix seconds
+  updated_at: number; // Unix seconds
 };
 
 export type AccountWithBalance = Account & {

@@ -10,7 +10,7 @@ type BaseProps = Omit<TextProps, 'children'> & {
   className?: string;
 };
 export type DateProps = BaseProps & {
-  value: string;
+  value: number; // Unix seconds
   format?: string;
 };
 export type NumberProps = BaseProps & {

@@ -9,6 +9,7 @@ import {
   parseISO,
   startOfMonth,
 } from 'date-fns';
+import { unixToISODate } from '@/lib/date/helpers';
 
 type TrendBucket = {
   label: string;
@@ -107,13 +108,15 @@ function buildBuckets(period: PeriodMode, startDate: string, endDate: string): T
 
 export function buildTrendSeries(
   period: PeriodMode,
-  startDate: string,
-  endDate: string,
+  startDate: number,
+  endDate: number,
   dailyTotals: DailyTrendTotal[],
 ): TrendPoint[] {
-  const totalsByDate = new Map(dailyTotals.map((entry) => [entry.date, entry]));
+  const startDateStr = unixToISODate(startDate);
+  const endDateStr = unixToISODate(endDate);
+  const totalsByDate = new Map(dailyTotals.map((entry) => [unixToISODate(entry.date), entry]));
 
-  return buildBuckets(period, startDate, endDate).map((bucket) => {
+  return buildBuckets(period, startDateStr, endDateStr).map((bucket) => {
     let income = 0;
     let expense = 0;
 

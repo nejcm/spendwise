@@ -133,11 +133,11 @@ App startup happens in `src/app/_layout.tsx`, where the app initializes SQLite, 
 
 ## Documentation
 
-- `docs/setup.md`
-- `docs/architecture.md`
-- `docs/features.md`
-- `docs/testing.md`
-- `docs/release.md`
+- `.docs/setup.md`
+- `.docs/architecture.md`
+- `.docs/features.md`
+- `.docs/testing.md`
+- `.docs/release.md`
 - `AGENTS.md`
 
 ## Inspiration

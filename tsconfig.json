@@ -15,7 +15,7 @@
     "node_modules",
     "babel.config.js",
     "metro.config.js",
-    "docs",
+    ".docs",
     "cli",
     "android",
     "ios",

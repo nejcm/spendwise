@@ -1,6 +1,8 @@
 /* eslint-disable ts/ban-ts-comment */
 /* eslint-disable no-restricted-globals */
 
+import './src/global.css';
+
 // Mock react-native-worklets first
 jest.mock('react-native-worklets', () => ({
   __esModule: true,
@@ -17,6 +19,8 @@ jest.mock('react-native-reanimated', () => {
       View,
       ScrollView: View,
       createAnimatedComponent: (component: any) => component,
+      // Some libraries (e.g. @gorhom/bottom-sheet) expect this helper
+      addWhitelistedUIProps: jest.fn(),
     },
     useSharedValue: jest.fn(() => ({ value: 0 })),
     useAnimatedStyle: jest.fn((fn) => fn()),

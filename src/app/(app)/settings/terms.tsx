@@ -7,7 +7,7 @@ import { translate } from '@/lib/i18n';
 export default function TermsRoute() {
   return (
     <>
-      <Stack.Screen options={{ title: translate('settings.terms') }} />
+      <Stack.Screen options={{ title: translate('settings.terms'), headerShown: true }} />
       <TermsScreen />
     </>
   );

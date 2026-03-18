@@ -7,7 +7,7 @@ import { translate } from '@/lib/i18n';
 export default function FormattingRoute() {
   return (
     <>
-      <Stack.Screen options={{ title: translate('settings.formatting') }} />
+      <Stack.Screen options={{ title: translate('settings.formatting'), headerShown: true }} />
       <FormattingSettingsScreen />
     </>
   );

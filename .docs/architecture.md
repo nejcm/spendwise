@@ -43,7 +43,37 @@ Schema and migrations live in `src/lib/sqlite`.
 
 ### React Query
 
-Feature `api.ts` files typically wrap SQLite access in `useQuery` / `useMutation`, then invalidate related queries after writes. Use this pattern for async UI state that depends on persistent data.
+Feature data modules expose `useQuery` / `useMutation` hooks backed by SQLite. Each feature is split into three files:
+
+- **`queries.ts`** — exported pure `async function(db, ...)` functions. No React imports. Testable directly with in-memory SQLite.
+- **`hooks.ts`** — thin React Query wrappers that call `useSQLiteContext()`, reference `queryKeys`, call `invalidateFor()`, and delegate to `queries.ts`.
+- **`api.ts`** — re-exports everything from `hooks.ts` and `queries.ts` for backward compatibility.
+
+#### Centralized Data Utilities (`src/lib/data/`)
+
+| File | Purpose |
+|------|---------|
+| `query-keys.ts` | Single source of truth for all React Query cache keys. Import `queryKeys` instead of defining local key objects. |
+| `invalidation.ts` | Entity-based invalidation rules. Call `invalidateFor(queryClient, 'transaction')` instead of manually listing query key arrays. |
+| `money.ts` | Unified money module: `amountToCents`, `centsToAmount`, `formatCurrency`, `convertAmount`, `parseToCents`. Single import path for all money operations. |
+| `index.ts` | Barrel re-export of the above three modules. |
+
+Example mutation using the new patterns:
+
+```typescript
+// Before
+onSuccess: () => {
+  queryClient.invalidateQueries({ queryKey: ['transactions'] });
+  queryClient.invalidateQueries({ queryKey: ['accounts', 'balance'] });
+  queryClient.invalidateQueries({ queryKey: ['insights'] });
+  // ...3 more
+}
+
+// After
+onSuccess: () => {
+  invalidateFor(queryClient, 'transaction');
+}
+```
 
 ### Zustand + MMKV
 
@@ -71,11 +101,15 @@ The codebase is feature-first. Typical feature folders contain:
 
 - screen components
 - shared feature components
-- `api.ts` query/mutation hooks
+- `queries.ts` — pure SQLite query functions (testable without React)
+- `hooks.ts` — React Query hooks wrapping `queries.ts`
+- `api.ts` — backward-compat barrel re-exporting `hooks.ts` + `queries.ts`
 - `types.ts`
 - focused helpers
 
 Keep feature logic close to the feature unless it is broadly reusable.
+
+For new data access code: add query functions to `queries.ts`, add hooks to `hooks.ts`, use `queryKeys` from `@/lib/data/query-keys`, and call `invalidateFor` from `@/lib/data/invalidation`.
 
 ## Styling
 

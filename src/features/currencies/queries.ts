@@ -8,11 +8,16 @@ import { fetchRates } from './service';
 // ─── Types ───
 
 export type CurrencyRate = {
+  /** Base currency code used as the left side of the FX pair (e.g. `"EUR"`). */
   base: string;
+  /** Quote currency code used as the right side of the FX pair (e.g. `"USD"`). */
   quote: string;
+  /** Exchange rate from `base` to `quote` (multiply `base` amount by this rate). */
   rate: number;
+  /** Source identifier for where the rate was fetched from (e.g. provider name). */
   source: string;
-  fetched_at: number; // Unix seconds
+  /** Unix timestamp (seconds) when the rate was fetched and stored. */
+  fetched_at: number;
 };
 
 export type RatesMap = Record<string, number>;

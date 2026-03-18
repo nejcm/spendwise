@@ -73,7 +73,7 @@ export function StatsTrend({ period, startDate, endDate }: StatsTrendProps) {
     };
   }, [period, trendData, labelColor, screenWidth]);
 
-  if (barData.length === 0) return null;
+  if (data === undefined || barData.length === 0) return null;
 
   return (
     <View className="mb-6 overflow-hidden rounded-2xl bg-card p-4">

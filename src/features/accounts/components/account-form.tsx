@@ -11,9 +11,10 @@ import { getFieldError } from '@/components/ui/form-utils';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { OutlineButton } from '@/components/ui/outline-button';
 import { CURRENCY_OPTIONS, CURRENCY_VALUES } from '@/features/currencies';
+import { mergeCurrencyArrays } from '@/features/currencies/helpers';
 import { translate } from '@/lib/i18n';
 import { addLastUsedCurrency, selectAccountFormPrefs, selectLastUsedCurrencies, setAccountFormPrefs, useAppStore } from '@/lib/store';
-import { mergeCurrencyArrays } from '../../currencies/helpers';
+import { getRandomColor } from '@/lib/theme/colors';
 import { useArchiveAccount, useCreateAccount, useUpdateAccount } from '../api';
 import { ACCOUNT_TYPE_LABELS, ACCOUNT_TYPES } from '../types';
 
@@ -56,6 +57,7 @@ export function AccountForm({ initialData, accountId, onSuccess, onCancel }: Acc
   const form = useForm({
     defaultValues: {
       ...defaultValues,
+      color: getRandomColor(),
       type: accountFormPrefs?.type || defaultValues.type,
       currency: accountFormPrefs?.currency || defaultValues.currency,
       ...initialData,

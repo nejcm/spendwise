@@ -13,6 +13,7 @@ import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { AppErrorBoundary } from '@/components/app-error-boundary';
+import { GlobalSheet } from '@/components/global-sheet';
 import { CustomTabBar } from '@/components/ui/custom-tab-bar';
 import { useCurrencyRates } from '@/features/currencies/api';
 import { todayISO } from '@/features/formatting/helpers';
@@ -96,6 +97,7 @@ export default function RootLayout() {
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       </Stack>
       <PersistentTabBar />
+      <GlobalSheet />
       <SecurityLock />
     </Providers>
   );

@@ -4,14 +4,15 @@ import * as React from 'react';
 import { View } from 'react-native';
 import * as z from 'zod';
 
+import ColorSelector from '@/components/color-selector';
 import { Input, SolidButton } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { getFieldError } from '@/components/ui/form-utils';
 import { GhostButton } from '@/components/ui/ghost-button';
+import { OutlineButton } from '@/components/ui/outline-button';
 import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
-import ColorSelector from '../../components/color-selector';
-import { OutlineButton } from '../../components/ui/outline-button';
+import { getRandomColor } from '@/lib/theme/colors';
 
 const schema = z.object({
   name: z.string().min(1, translate('categories.name_required')),
@@ -42,6 +43,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
   const form = useForm({
     defaultValues: {
       ...defaultValues,
+      color: getRandomColor(),
       ...initialValues,
     } as CategoryFormData,
     validators: { onChange: schema },

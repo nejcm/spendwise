@@ -10,7 +10,7 @@ export function getBgColor(color: string | undefined) {
 function renderItem(item: OptionType) {
   return (
     <View className="flex-1 flex-row items-center justify-center">
-      <View className={`size-full min-h-12 max-w-12 flex-1 rounded-full ${getBgColor(String(item.value))}`} />
+      <View className={`size-full min-h-12 max-w-12 flex-1 rounded-full border border-border ${getBgColor(String(item.value))}`} />
     </View>
   );
 }
@@ -18,7 +18,7 @@ function renderItem(item: OptionType) {
 function renderSelectedItem(item?: OptionType | null) {
   return (
     <View className="flex-1 flex-row items-center justify-center">
-      <View className={`size-full min-h-14 max-w-14 flex-1 rounded-full ${getBgColor(String(item?.value || 'bg-sky-600'))}`} />
+      <View className={`size-full min-h-14 max-w-14 flex-1 rounded-full border border-border ${getBgColor(String(item?.value || 'bg-sky-600'))}`} />
     </View>
   );
 }

@@ -1,76 +1,47 @@
-import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { AccountFormData, AccountWithBalance } from './types';
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { Plus } from 'lucide-react-native';
 import * as React from 'react';
 
-import { useMemo, useRef, useState } from 'react';
+import { useMemo } from 'react';
 import { View } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
-import { FocusAwareStatusBar, Modal, ScrollView, SolidButton, Text } from '@/components/ui';
+import { FocusAwareStatusBar, ScrollView, SolidButton, Text } from '@/components/ui';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { useAccountsWithBalanceForRange } from '@/features/transactions/api';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
+import { openSheet } from '@/lib/local-store';
 import { setPeriodSelection, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import NoData from '../../components/no-data';
 import { formatCurrency } from '../formatting/helpers';
 import { AccountCard } from './components/account-card';
-import { AccountForm } from './components/account-form';
-
-type AccountFormMode = 'create' | 'edit';
 
 export function AccountsScreen() {
   const currency = useAppStore.use.currency();
   const selection = useAppStore.use.periodSelection();
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
 
-  const [accountFormMode, setAccountFormMode] = useState<AccountFormMode>('create');
-  const [selectedAccount, setSelectedAccount] = useState<AccountWithBalance | null>(null);
-  const accountFormRef = useRef<BottomSheetModal>(null);
-
   const { data: accounts = [] } = useAccountsWithBalanceForRange(startDate, endDate);
 
   const totalBalance = accounts.reduce((sum, a) => sum + a.balance, 0);
 
-  const closeAccountForm = React.useCallback(() => {
-    accountFormRef.current?.dismiss();
-  }, []);
-
-  const handleAccountFormDismiss = React.useCallback(() => {
-    setAccountFormMode('create');
-    setSelectedAccount(null);
-  }, []);
-
   const openCreateAccountForm = React.useCallback(() => {
-    setAccountFormMode('create');
-    setSelectedAccount(null);
-    accountFormRef.current?.present();
+    openSheet({ type: 'add-account' });
   }, []);
 
   const openEditAccountForm = React.useCallback((account: AccountWithBalance) => {
-    setAccountFormMode('edit');
-    setSelectedAccount(account);
-    accountFormRef.current?.present();
-  }, []);
-
-  const initialAccountValues = useMemo<AccountFormData | undefined>(() => {
-    if (!selectedAccount) return undefined;
-
-    return {
-      name: selectedAccount.name,
-      type: selectedAccount.type,
-      currency: selectedAccount.currency,
-      description: selectedAccount.description,
-      budget:
-        selectedAccount.budget != null
-          ? String(centsToAmount(selectedAccount.budget))
-          : null,
-      icon: selectedAccount.icon,
-      color: selectedAccount.color,
+    const initialData: AccountFormData = {
+      name: account.name,
+      type: account.type,
+      currency: account.currency,
+      description: account.description,
+      budget: account.budget != null ? String(centsToAmount(account.budget)) : null,
+      icon: account.icon,
+      color: account.color,
     };
-  }, [selectedAccount]);
+    openSheet({ type: 'edit-account', accountId: account.id, initialData });
+  }, []);
 
   return (
     <View className="flex-1">
@@ -109,23 +80,6 @@ export function AccountsScreen() {
         </View>
 
       </ScrollView>
-
-      <Modal
-        ref={accountFormRef}
-        snapPoints={['80%']}
-        title={translate(accountFormMode === 'edit' ? 'accounts.edit' : 'accounts.add')}
-        onDismiss={handleAccountFormDismiss}
-      >
-        <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}>
-          <AccountForm
-            key={selectedAccount?.id ?? 'new-account'}
-            accountId={selectedAccount?.id}
-            initialData={initialAccountValues}
-            onSuccess={closeAccountForm}
-            onCancel={closeAccountForm}
-          />
-        </BottomSheetScrollView>
-      </Modal>
     </View>
   );
 }

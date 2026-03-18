@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
 import { IS_WEB } from '../base';
+import { translate } from '../i18n';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const OPFS_CLEAR_FLAG = 'spendwise_clearOpfs';
@@ -37,7 +38,7 @@ export function OpfsCleaner({ children }: { children: React.ReactNode }) {
   if (!done) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ color: '#666' }}>Clearing database storage…</Text>
+        <Text style={{ color: '#666' }}>{translate('common.clearing_database_storage')}</Text>
       </View>
     );
   }

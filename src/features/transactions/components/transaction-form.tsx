@@ -27,15 +27,15 @@ const schema = z.object({
     const n = toNumber(v);
     return n != null && n > 0;
   }, translate('transactions.amount_required')),
-  category_id: z.string().min(1, 'Category is required'),
-  account_id: z.string().min(1, 'Account is required'),
-  date: z.string().min(1, 'Date is required'),
+  category_id: z.string().min(1, translate('transactions.category_required')),
+  account_id: z.string().min(1, translate('transactions.account_required')),
+  date: z.string().min(1, translate('transactions.date_required')),
   note: z.string().nullable(),
 });
 
 const TYPE_OPTIONS: { label: string; value: 'expense' | 'income' }[] = [
-  { label: 'Expense', value: 'expense' },
-  { label: 'Income', value: 'income' },
+  { label: translate('common.expense'), value: 'expense' },
+  { label: translate('common.income'), value: 'income' },
 ];
 
 type TransactionFormData = z.infer<typeof schema>;

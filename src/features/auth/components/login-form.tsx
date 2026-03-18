@@ -6,17 +6,18 @@ import * as z from 'zod';
 
 import { Input, SolidButton, Text, View } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
+import { translate } from '@/lib/i18n';
 
 const schema = z.object({
   name: z.string().optional(),
   email: z
-    .email('Email is required'),
+    .email(translate('auth.email_required')),
   password: z
     .string({
-      message: 'Password is required',
+      message: translate('auth.password_required'),
     })
-    .min(1, 'Password is required')
-    .min(6, 'Password must be at least 6 characters'),
+    .min(1, translate('auth.password_required'))
+    .min(6, translate('auth.password_min_length')),
 });
 
 export type FormType = z.infer<typeof schema>;
@@ -46,11 +47,11 @@ export function LoginForm({ onSubmit = () => {} }: LoginFormProps) {
       <View className="flex-1 justify-center p-4">
         <View className="items-center justify-center">
           <Text testID="form-title" className="pb-6 text-center text-4xl font-bold">
-            Sign In
+            {translate('auth.sign_in')}
           </Text>
 
           <Text className="mb-6 max-w-xs text-center text-gray-500">
-            Welcome! 👋 This is a demo login screen! Feel free to use any email and password to sign in and try it out.
+            {translate('auth.welcome_demo')}
           </Text>
         </View>
 
@@ -59,7 +60,7 @@ export function LoginForm({ onSubmit = () => {} }: LoginFormProps) {
           children={(field) => (
             <Input
               testID="name"
-              label="Name"
+              label={translate('auth.name')}
               value={field.state.value}
               onBlur={field.handleBlur}
               onChangeText={field.handleChange}
@@ -73,7 +74,7 @@ export function LoginForm({ onSubmit = () => {} }: LoginFormProps) {
           children={(field) => (
             <Input
               testID="email-input"
-              label="Email"
+              label={translate('auth.email')}
               value={field.state.value}
               onBlur={field.handleBlur}
               onChangeText={field.handleChange}
@@ -87,8 +88,8 @@ export function LoginForm({ onSubmit = () => {} }: LoginFormProps) {
           children={(field) => (
             <Input
               testID="password-input"
-              label="Password"
-              placeholder="***"
+              label={translate('auth.password')}
+              placeholder={translate('auth.password_placeholder')}
               secureTextEntry={true}
               value={field.state.value}
               onBlur={field.handleBlur}
@@ -101,7 +102,7 @@ export function LoginForm({ onSubmit = () => {} }: LoginFormProps) {
         <form.Subscribe
           selector={(state) => [state.isSubmitting]}
           children={([isSubmitting]) => (
-            <SolidButton testID="login-button" label="Login" onPress={form.handleSubmit} loading={isSubmitting} />
+            <SolidButton testID="login-button" label={translate('auth.login')} onPress={form.handleSubmit} loading={isSubmitting} />
           )}
         />
       </View>

@@ -49,8 +49,8 @@ const schema = z
         const amount = toNumber(value);
         return amount != null && amount > 0;
       }, translate('transactions.amount_required')),
-    category_id: z.string().min(1, 'Category is required'),
-    account_id: z.string().min(1, 'Account is required'),
+    category_id: z.string().min(1, translate('transactions.category_required')),
+    account_id: z.string().min(1, translate('transactions.account_required')),
     note: z.string().nullable(),
     frequency: z.enum([
       'daily',
@@ -59,7 +59,7 @@ const schema = z
       'monthly',
       'yearly',
     ] as const),
-    start_date: z.string().min(1, 'Start date is required'),
+    start_date: z.string().min(1, translate('scheduled.start_date_required')),
     end_date: z.string().nullable(),
     is_active: z.boolean(),
   })

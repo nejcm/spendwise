@@ -7,7 +7,7 @@ import { translate } from '@/lib/i18n';
 export default function ProfileRoute() {
   return (
     <>
-      <Stack.Screen options={{ title: translate('settings.profile') }} />
+      <Stack.Screen options={{ title: translate('settings.profile'), headerShown: true }} />
       <ProfileSettingsScreen />
     </>
   );

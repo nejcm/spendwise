@@ -31,6 +31,22 @@ export default function AppLayout() {
       <Stack.Screen name="stats" />
       <Stack.Screen name="settings" />
       <Stack.Screen name="transactions" />
+      <Stack.Screen name="transactions/[id]" />
+      <Stack.Screen name="accounts" />
+      <Stack.Screen name="ai" />
+      <Stack.Screen name="budgets/create" />
+      <Stack.Screen name="budgets/[id]" />
+      <Stack.Screen name="insights/index" />
+      <Stack.Screen name="scheduled/index" />
+      <Stack.Screen name="scheduled/[id]" />
+      <Stack.Screen name="settings/profile" />
+      <Stack.Screen name="settings/ai" />
+      <Stack.Screen name="settings/notifications" />
+      <Stack.Screen name="settings/security" />
+      <Stack.Screen name="settings/formatting" />
+      <Stack.Screen name="settings/import-export" />
+      <Stack.Screen name="settings/privacy" />
+      <Stack.Screen name="settings/terms" />
     </Stack>
   );
 }

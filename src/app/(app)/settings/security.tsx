@@ -7,7 +7,7 @@ import { translate } from '@/lib/i18n';
 export default function SecurityRoute() {
   return (
     <>
-      <Stack.Screen options={{ title: translate('security.title') }} />
+      <Stack.Screen options={{ title: translate('security.title'), headerShown: true }} />
       <SecuritySettingsScreen />
     </>
   );

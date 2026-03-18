@@ -1,8 +1,6 @@
 /* eslint-disable ts/ban-ts-comment */
 /* eslint-disable no-restricted-globals */
 
-import './src/global.css';
-
 // Mock react-native-worklets first
 jest.mock('react-native-worklets', () => ({
   __esModule: true,

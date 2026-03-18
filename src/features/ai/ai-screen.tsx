@@ -30,6 +30,7 @@ export function AiScreen() {
 
   const hasOpenAI = Boolean(openaiApiKey);
   const hasAnthropic = Boolean(anthropicApiKey);
+  const hasKey = hasOpenAI || hasAnthropic;
 
   const handleSend = React.useCallback(async (presetQuestion?: string) => {
     const sourceQuestion = presetQuestion ?? question;
@@ -77,10 +78,10 @@ export function AiScreen() {
       <View className="flex-1">
         <ScrollView
           className="flex-1 px-4 pt-4"
-          contentContainerClassName="pb-4"
+          contentContainerClassName="pb-8"
           style={defaultStyles.transparentBg}
         >
-          {(!hasOpenAI && !hasAnthropic)
+          {(!hasKey)
             ? (
                 <View className="mb-4 rounded-xl bg-card p-4">
                   <Text className="text-muted-foreground">
@@ -141,24 +142,26 @@ export function AiScreen() {
           ))}
         </ScrollView>
 
-        <View className="border-t border-border bg-background px-4 pt-2 pb-safe-offset-2">
+        <View className="bg-background px-4 pb-safe-offset-2">
           <View className="relative">
             <Input
+              variant="textarea"
               value={question}
               onChangeText={setQuestion}
               placeholder="Ask the AI about your spending or budgets..."
               autoCapitalize="sentences"
               autoCorrect
               multiline
-              className="pr-12"
+              disabled={!hasKey}
+              className="min-h-[80] py-2 pr-12"
             />
             <IconButton
               size="sm"
               onPress={() => {
                 void handleSend();
               }}
-              disabled={loading || !question.trim()}
-              className="absolute right-2 bottom-3 rounded-full"
+              disabled={loading || !question.trim() || !hasKey}
+              className="absolute right-2 bottom-2 rounded-full"
             >
               <SendHorizonal className="size-5 text-background disabled:text-foreground" />
             </IconButton>

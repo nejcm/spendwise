@@ -54,7 +54,7 @@ export const inputTv = tv({
         input: '',
       },
       textarea: {
-        input: 'h-auto min-h-[100]',
+        input: 'h-auto min-h-[100] py-2',
       },
     },
     focused: {
@@ -69,7 +69,7 @@ export const inputTv = tv({
     },
     disabled: {
       true: {
-        input: 'bg-gray-100 dark:bg-gray-950',
+        input: 'opacity-50',
       },
     },
   },
@@ -91,7 +91,7 @@ export type InputProps = {
 } & Omit<VariantProps<typeof inputTv>, 'error'> & Omit<TextInputProps, 'size'>;
 
 export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInput | null> }) {
-  const { label, error, size = 'md', value = '', color = 'default', testID, onBlur: onBlurProp, onFocus: onFocusProp, containerClassName, rightSection, className, ...inputProps } = props;
+  const { label, error, size = 'md', value = '', color = 'default', testID, onBlur: onBlurProp, onFocus: onFocusProp, containerClassName, rightSection, className, variant, ...inputProps } = props;
   const [isFocussed, setIsFocussed] = React.useState(false);
 
   const onBlur = React.useCallback(
@@ -114,6 +114,7 @@ export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInp
     error: Boolean(error),
     focused: isFocussed,
     disabled: Boolean(props.disabled),
+    variant,
     size,
     color,
   });

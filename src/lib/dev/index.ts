@@ -10,7 +10,7 @@ import { clearAppStore } from '../store';
 export async function clearData(db: SQLiteDatabase, queryClient: QueryClient) {
   try {
     await clearDbData(db);
-    console.log('Database cleared successfully');
+    console.info('Database cleared successfully');
   }
   catch (err) {
     console.error('Failed to clear database', err);
@@ -23,7 +23,7 @@ export async function clearData(db: SQLiteDatabase, queryClient: QueryClient) {
 export async function resetData(db: SQLiteDatabase, queryClient: QueryClient) {
   try {
     await clearDbData(db);
-    console.log('Database cleared successfully');
+    console.info('Database cleared successfully');
   }
   catch (err) {
     console.error('Failed to clear database', err);
@@ -37,7 +37,7 @@ export async function seedMockData(db: SQLiteDatabase, queryClient: QueryClient)
   try {
     await seedDefaults(db);
     await mockData(db);
-    console.log('Mock data import successfully');
+    console.info('Mock data import successfully');
   }
   catch (err) {
     console.error('Failed to import mock data', err);
@@ -53,7 +53,7 @@ export async function dumpDbTables(db: SQLiteDatabase) {
     );
 
     const tableNames = tables.map((t) => t.name);
-    console.log('[db] tables', tableNames);
+    console.info('[db] tables', tableNames);
   }
   catch (err) {
     console.error('Failed to dump DB tables', err);

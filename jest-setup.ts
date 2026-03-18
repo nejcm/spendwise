@@ -17,6 +17,8 @@ jest.mock('react-native-reanimated', () => {
       View,
       ScrollView: View,
       createAnimatedComponent: (component: any) => component,
+      // Some libraries (e.g. @gorhom/bottom-sheet) expect this helper
+      addWhitelistedUIProps: jest.fn(),
     },
     useSharedValue: jest.fn(() => ({ value: 0 })),
     useAnimatedStyle: jest.fn((fn) => fn()),

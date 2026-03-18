@@ -13,8 +13,8 @@ export function DetailsRow({ label, labelClassName, description, value, classNam
   return (
     <View className="flex-row items-center justify-between gap-2">
       <View className="flex-1">
-        <Text className={cn('text-muted-foreground', labelClassName)}>{label}</Text>
-        {!!description && <Text className="mt-0.5 text-sm/snug text-muted-foreground">{description}</Text>}
+        <Text className={cn(description ? 'text-foreground' : 'text-muted-foreground', labelClassName)}>{label}</Text>
+        {!!description && <Text className="text-sm/snug text-muted-foreground">{description}</Text>}
       </View>
       {typeof value === 'string' ? <Text className={cn('text-foreground', className)}>{value}</Text> : value}
     </View>

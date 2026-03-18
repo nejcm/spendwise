@@ -133,11 +133,11 @@ App startup happens in `src/app/_layout.tsx`, where the app initializes SQLite, 
 
 ## Documentation
 
-- `docs/setup.md`
-- `docs/architecture.md`
-- `docs/features.md`
-- `docs/testing.md`
-- `docs/release.md`
+- `.docs/setup.md`
+- `.docs/architecture.md`
+- `.docs/features.md`
+- `.docs/testing.md`
+- `.docs/release.md`
 - `AGENTS.md`
 
 ## Inspiration
@@ -147,6 +147,10 @@ App startup happens in `src/app/_layout.tsx`, where the app initializes SQLite, 
 - [PocketGuard](https://pocketguard.com/)
 - [Wallet / BudgetBakers](https://budgetbakers.com/en/)
 
+
+## Resources
+
+- Avatars: https://www.figma.com/design/LcTCGVae3fI72lJASdNtHn/Playful-Avatar-Creator---DrawKit--Community-?node-id=3-3&p=f&t=FrbHnCBsjZzFhIHh-0
 
 ## TODO
 

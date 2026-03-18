@@ -1799,7 +1799,7 @@ When styles aren't working, check in this order:
 | Fonts not loading | Font name mismatch | CSS font name must match file name exactly (no extension) |
 | `rem` values too large/small | Wrong base rem | Set `polyfills: { rem: 14 }` for NativeWind compat |
 | Unsupported CSS warning | Web-specific CSS used | Enable `debug: true` to identify; remove unsupported properties |
-| `Failed to serialize javascript object` | Complex CSS, circular refs, or stale cache | Clear caches: `watchman watch-del-all; rm -rf node_modules/.cache; npx expo start --clear`. Also check if docs/markdown files containing CSS classes are in the scan path (see below) |
+| `Failed to serialize javascript object` | Complex CSS, circular refs, or stale cache | Clear caches: `watchman watch-del-all; rm -rf node_modules/.cache; npx expo start --clear`. Also check if .docs/markdown files containing CSS classes are in the scan path (see below) |
 | `Failed to serialize javascript object` from llms-full.txt or docs | Docs/markdown files with CSS classes in project dir get scanned by Tailwind | Move `.md` files with CSS examples outside the project root, or add to `.gitignore` so Tailwind's scanner skips them |
 | `unstable_enablePackageExports` conflict | App disables package exports | Use selective resolver for Uniwind and culori |
 | Classes from monorepo package missing | Not included in Tailwind scan | Add `@source '../../packages/ui'` in global.css |

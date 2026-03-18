@@ -33,11 +33,12 @@ export type AccountFormData = {
   color: string | null;
 };
 
+const baseNs = 'accounts.typeOptions';
 export const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
-  cash: translate('accounts.typeOptions.cash'),
-  checking: translate('accounts.typeOptions.checking'),
-  savings: translate('accounts.typeOptions.savings'),
-  credit_card: translate('accounts.typeOptions.credit_card'),
-  investment: translate('accounts.typeOptions.investment'),
-  other: translate('accounts.typeOptions.other'),
+  cash: translate(`${baseNs}.cash`),
+  checking: translate(`${baseNs}.checking`),
+  savings: translate(`${baseNs}.savings`),
+  credit_card: translate(`${baseNs}.credit_card`),
+  investment: translate(`${baseNs}.investment`),
+  other: translate(`${baseNs}.other`),
 };

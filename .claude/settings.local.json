@@ -12,7 +12,10 @@
       "Bash(pnpm install --frozen-lockfile)",
       "Bash(npx tsc --noEmit)",
       "Bash(npx tsc:*)",
-      "Bash(xargs grep:*)"
+      "Bash(xargs grep:*)",
+      "Bash(ls -la *)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm exec:*)"
     ]
   }
 }

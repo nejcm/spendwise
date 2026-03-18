@@ -1,10 +1,10 @@
-import type { BottomSheetModal } from '@gorhom/bottom-sheet';
+import type { SheetConfig } from '@/lib/sheet';
 import { usePathname, useRouter } from 'expo-router';
 import { Home, LayoutGrid, PieChart, PlusIcon, UserIcon } from 'lucide-react-native';
 
 import * as React from 'react';
 import { Platform, Pressable, View } from 'react-native';
-import { QuickAddSheet } from '../quick-add-sheet';
+import { openSheet } from '@/lib/local-store';
 
 type TabConfig = {
   name: string;
@@ -45,10 +45,16 @@ const TABS: TabConfig[] = [
   },
 ];
 
+function sheetConfigForPathname(pathname: string): SheetConfig {
+  if (pathname.startsWith('/accounts')) return { type: 'add-account' };
+  if (pathname.startsWith('/scheduled')) return { type: 'add-scheduled' };
+  if (pathname.startsWith('/categories')) return { type: 'add-category' };
+  return { type: 'add-transaction' };
+}
+
 export function CustomTabBar() {
   const router = useRouter();
   const pathname = usePathname() || '';
-  const addSheetRef = React.useRef<BottomSheetModal>(null);
 
   const getIsActive = (tab: TabConfig): boolean => {
     if (tab.name === 'index') return pathname === '/' || pathname === '';
@@ -56,59 +62,52 @@ export function CustomTabBar() {
   };
 
   return (
-    <>
-      <View
-        className="flex-row border-t border-gray-200 bg-white px-2 pt-2"
-        style={{
-          paddingBottom: Platform.OS === 'ios' ? 28 : 12,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: 0.06,
-          shadowRadius: 12,
-          elevation: 8,
-        }}
-      >
-        {TABS.map((tab) => {
-          const isAddButton = tab.name === '__add__';
+    <View
+      className="flex-row border-t border-gray-200 bg-white px-2 pt-2"
+      style={{
+        paddingBottom: Platform.OS === 'ios' ? 28 : 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.06,
+        shadowRadius: 12,
+        elevation: 8,
+      }}
+    >
+      {TABS.map((tab) => {
+        const isAddButton = tab.name === '__add__';
 
-          if (isAddButton) {
-            return (
-              <View key="add" className="flex-1 items-center justify-center">
-                <Pressable
-                  onPress={() => {
-                    addSheetRef.current?.present({
-                      pathname,
-                    });
-                  }}
-                  className="size-12 items-center justify-center rounded-full bg-gray-950"
-                  style={({ pressed }) => ({
-                    opacity: pressed ? 0.85 : 1,
-                  })}
-                >
-                  {tab.icon('#ffffff')}
-                </Pressable>
-              </View>
-            );
-          }
-
-          const isActive = getIsActive(tab);
-          const iconColor = isActive ? '#000000' : '#A3A3A3';
-
+        if (isAddButton) {
           return (
-            <Pressable
-              key={tab.name}
-              onPress={() => router.replace(tab.path as never)}
-              className="flex-1 items-center justify-center gap-1"
-            >
-              {tab.icon(iconColor)}
-              {isActive && (
-                <View className="size-1 rounded-full bg-black" />
-              )}
-            </Pressable>
+            <View key="add" className="flex-1 items-center justify-center">
+              <Pressable
+                onPress={() => openSheet(sheetConfigForPathname(pathname))}
+                className="size-12 items-center justify-center rounded-full bg-gray-950"
+                style={({ pressed }) => ({
+                  opacity: pressed ? 0.85 : 1,
+                })}
+              >
+                {tab.icon('#ffffff')}
+              </Pressable>
+            </View>
           );
-        })}
-      </View>
-      <QuickAddSheet sheetRef={addSheetRef} pathname={pathname} />
-    </>
+        }
+
+        const isActive = getIsActive(tab);
+        const iconColor = isActive ? '#000000' : '#A3A3A3';
+
+        return (
+          <Pressable
+            key={tab.name}
+            onPress={() => router.replace(tab.path as never)}
+            className="flex-1 items-center justify-center gap-1"
+          >
+            {tab.icon(iconColor)}
+            {isActive && (
+              <View className="size-1 rounded-full bg-black" />
+            )}
+          </Pressable>
+        );
+      })}
+    </View>
   );
 }

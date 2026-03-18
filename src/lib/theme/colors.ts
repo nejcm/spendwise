@@ -139,3 +139,7 @@ export const COLORS = [
   'bg-pink-900',
 ];
 export const COLOR_OPTIONS = COLORS.map((color) => ({ label: color, value: color } satisfies OptionType));
+
+export function getRandomColor() {
+  return COLORS[Math.floor(Math.random() * COLORS.length)];
+}

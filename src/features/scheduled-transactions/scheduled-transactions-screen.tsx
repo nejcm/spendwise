@@ -1,24 +1,18 @@
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useRouter } from 'expo-router';
 import { Plus } from 'lucide-react-native';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import NoData from '@/components/no-data';
-import { FocusAwareStatusBar, Modal, ScrollView, SolidButton, Text, useModal } from '@/components/ui';
+import { FocusAwareStatusBar, ScrollView, SolidButton, Text } from '@/components/ui';
 import { formatCurrency, formatDate } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
+import { openSheet } from '@/lib/local-store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { useScheduledTransactions } from './api';
-import { ScheduledTransactionForm } from './components/scheduled-transaction-form';
 
 export function ScheduledTransactionsScreen() {
   const router = useRouter();
-  const { ref: bottomSheetRef } = useModal();
   const { data: rules = [] } = useScheduledTransactions();
-
-  const closeTransactionSheet = () => {
-    bottomSheetRef.current?.dismiss();
-  };
 
   const [activeRules, inactiveRules] = React.useMemo(() => {
     return [rules.filter((rule) => rule.is_active), rules.filter((rule) => !rule.is_active)];
@@ -38,7 +32,7 @@ export function ScheduledTransactionsScreen() {
                 <SolidButton
                   color="primary"
                   label={translate('common.add')}
-                  onPress={() => bottomSheetRef.current?.present()}
+                  onPress={() => openSheet({ type: 'add-scheduled' })}
                   className="mt-4 min-w-24"
                   iconLeft={<Plus className="mr-2 size-4 text-background" />}
                 />
@@ -123,17 +117,6 @@ export function ScheduledTransactionsScreen() {
               )}
             </ScrollView>
           )}
-      <Modal ref={bottomSheetRef} snapPoints={['85%']} onDismiss={closeTransactionSheet} title={translate('scheduled.add')}>
-        {(data) => (
-          <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32 }}>
-            <ScheduledTransactionForm
-              initialValues={data?.data}
-              onSuccess={closeTransactionSheet}
-              onCancel={closeTransactionSheet}
-            />
-          </BottomSheetScrollView>
-        )}
-      </Modal>
     </View>
   );
 }

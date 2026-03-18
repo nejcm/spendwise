@@ -23,13 +23,13 @@ export function PeriodSelector({ selection, onSelect }: PeriodSelectorProps) {
     <>
       <View className="flex-row items-center justify-between p-4">
         <IconButton size="sm" color="none" onPress={() => handleNavigate(-1)} hitSlop={12}>
-          <ArrowLeftIcon className="size-5 text-muted-foreground" />
+          <ArrowLeftIcon className="text-muted-foreground size-5" />
         </IconButton>
         <Pressable onPress={present} hitSlop={12}>
           <Text className="text-lg font-medium">{getPeriodLabel(selection)}</Text>
         </Pressable>
         <IconButton size="sm" color="none" onPress={() => handleNavigate(1)} hitSlop={12}>
-          <ArrowRightIcon className="size-5 text-muted-foreground" />
+          <ArrowRightIcon className="text-muted-foreground size-5" />
         </IconButton>
       </View>
       <PeriodSelectorModal ref={ref} selection={selection} onSelect={onSelect} />

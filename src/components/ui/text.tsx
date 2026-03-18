@@ -13,7 +13,7 @@ type Props = {
 
 export function Text({ className = '', style, tx, children, ...props }: Props) {
   const textStyle = React.useMemo(
-    () => cn('font-family-sans text-base font-normal text-foreground', className),
+    () => cn('text-foreground font-family-sans text-base font-normal', className),
     [className],
   );
 

@@ -16,8 +16,8 @@ export default function NoData({ icon = true, title, description, className, hor
   return (
     <View className={cn('items-center justify-center', horizontal ? 'flex-row gap-3' : 'flex-col gap-2', className)}>
       {icon && <DatabaseSearch size={horizontal ? 50 : 100} className={`text-muted-foreground ${horizontal ? '' : 'mx-auto mb-2'}`} />}
-      <Text className={`font-medium text-muted-foreground ${textAlign} ${horizontal ? '' : 'text-lg'}`}>{title}</Text>
-      {!!description && <Text className={`text-sm text-muted-foreground ${textAlign}`}>{description}</Text>}
+      <Text className={`text-muted-foreground font-medium ${textAlign} ${horizontal ? '' : 'text-lg'}`}>{title}</Text>
+      {!!description && <Text className={`text-muted-foreground text-sm ${textAlign}`}>{description}</Text>}
       {children}
     </View>
   );

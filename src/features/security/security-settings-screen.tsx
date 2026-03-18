@@ -48,7 +48,7 @@ export function SecuritySettingsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-background">
+    <View className="bg-background flex-1">
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         <DetailsSection data={[{

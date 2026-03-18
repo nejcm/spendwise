@@ -76,15 +76,15 @@ export function StatsTrend({ period, startDate, endDate }: StatsTrendProps) {
   if (barData.length === 0) return null;
 
   return (
-    <View className="mb-6 overflow-hidden rounded-2xl bg-card p-4">
+    <View className="bg-card mb-6 overflow-hidden rounded-2xl p-4">
       <View className="mb-4 flex-row items-center justify-center gap-4">
         <View className="flex-row items-center gap-1.5">
           <View className="size-2.5 rounded-full" style={{ backgroundColor: incomeColor }} />
-          <Text className="text-xs text-muted-foreground">{translate('common.income')}</Text>
+          <Text className="text-muted-foreground text-xs">{translate('common.income')}</Text>
         </View>
         <View className="flex-row items-center gap-1.5">
           <View className="size-2.5 rounded-full" style={{ backgroundColor: expenseColor }} />
-          <Text className="text-xs text-muted-foreground">{translate('common.expenses')}</Text>
+          <Text className="text-muted-foreground text-xs">{translate('common.expenses')}</Text>
         </View>
       </View>
       <BarChart

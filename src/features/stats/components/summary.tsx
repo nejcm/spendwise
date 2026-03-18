@@ -21,11 +21,11 @@ export function Summary({ startDate, endDate, currency }: SummaryProps) {
   return (
     <>
       <Text className="pb-6 text-center text-3xl font-medium">{formatCurrency(summary.balance, currency)}</Text>
-      <View className="mb-6 flex-row gap-2 rounded-xl bg-card p-4">
+      <View className="bg-card mb-6 flex-row gap-2 rounded-xl p-4">
         <View className="flex-1">
           <View className="mb-1 flex-row items-center justify-center gap-2">
-            <TrendingUp className="size-4 text-muted-foreground" />
-            <Text className="text-center text-sm text-muted-foreground">{translate('common.income')}</Text>
+            <TrendingUp className="text-muted-foreground size-4" />
+            <Text className="text-muted-foreground text-center text-sm">{translate('common.income')}</Text>
           </View>
           <Text className="text-center text-lg font-medium" numberOfLines={1}>
             {formatCurrency(summary.income, currency)}
@@ -33,8 +33,8 @@ export function Summary({ startDate, endDate, currency }: SummaryProps) {
         </View>
         <View className="flex-1">
           <View className="mb-1 flex-row items-center justify-center gap-2">
-            <TrendingDown className="size-4 text-muted-foreground" />
-            <Text className="text-center text-sm text-muted-foreground">{translate('common.expenses')}</Text>
+            <TrendingDown className="text-muted-foreground size-4" />
+            <Text className="text-muted-foreground text-center text-sm">{translate('common.expenses')}</Text>
           </View>
           <Text className="text-center text-lg font-medium" numberOfLines={1}>
             -

@@ -24,13 +24,13 @@ export function NoDataCard({ children, onPress, label, description, icon: Icon =
     >
       <View className="flex-1 justify-center gap-2">
         <View className="flex-row items-center justify-center gap-2">
-          <Icon className="size-5 text-muted-foreground" />
-          <Text className="font-medium text-muted-foreground">
+          <Icon className="text-muted-foreground size-5" />
+          <Text className="text-muted-foreground font-medium">
             {label}
           </Text>
         </View>
         {!!description && (
-          <Text className="text-center text-sm/snug text-muted-foreground/75">
+          <Text className="text-muted-foreground/75 text-center text-sm/snug">
             {description}
           </Text>
         )}

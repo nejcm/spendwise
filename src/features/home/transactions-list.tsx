@@ -21,7 +21,7 @@ export default function TransactionsList() {
         <Text className="text-lg font-medium">{translate('home.recent_transactions')}</Text>
         {hasTransactions && (
           <GhostButton size="sm" className="px-0" onPress={() => router.push('/(app)/transactions')}>
-            <Text className="text-sm font-medium text-muted-foreground">{translate('home.see_all')}</Text>
+            <Text className="text-muted-foreground text-sm font-medium">{translate('home.see_all')}</Text>
           </GhostButton>
         )}
       </View>

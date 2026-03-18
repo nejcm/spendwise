@@ -36,7 +36,7 @@ export const TransactionCard = React.memo(({ transaction, onPress, className }: 
         <Text className="text-base font-medium" numberOfLines={1}>
           {displayName}
         </Text>
-        <Text className="text-sm text-muted-foreground" numberOfLines={1}>
+        <Text className="text-muted-foreground text-sm" numberOfLines={1}>
           {formatShortDate(transaction.date)}
           {transaction.note ? ` · ${transaction.note}` : ''}
         </Text>

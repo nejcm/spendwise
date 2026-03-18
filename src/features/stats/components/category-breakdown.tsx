@@ -38,11 +38,11 @@ export function CategoryBreakdown({
   if (filtered.length === 0) {
     return (
       <View className="mb-6">
-        <Text className="mb-2 font-medium text-foreground">
+        <Text className="text-foreground mb-2 font-medium">
           {title}
         </Text>
-        <View className="rounded-xl bg-card p-4">
-          <Text className="text-sm text-muted-foreground">{translate('stats.no_category_data')}</Text>
+        <View className="bg-card rounded-xl p-4">
+          <Text className="text-muted-foreground text-sm">{translate('stats.no_category_data')}</Text>
         </View>
       </View>
     );
@@ -50,10 +50,10 @@ export function CategoryBreakdown({
 
   return (
     <View className="mb-6">
-      <Text className="mb-2 font-medium text-foreground">
+      <Text className="text-foreground mb-2 font-medium">
         {title}
       </Text>
-      <View className="rounded-xl bg-card p-4">
+      <View className="bg-card rounded-xl p-4">
         <View className="gap-3">
           {filtered.map((category) => {
             const barWidth = maxTotal > 0 ? (category.total / maxTotal) * 100 : 0;
@@ -62,15 +62,15 @@ export function CategoryBreakdown({
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center gap-2">
                     <Text className="text-lg">{category.category_icon}</Text>
-                    <Text className="text-sm text-foreground" numberOfLines={1}>
+                    <Text className="text-foreground text-sm" numberOfLines={1}>
                       {category.category_name}
                     </Text>
                   </View>
-                  <Text className="text-sm font-medium text-foreground">
+                  <Text className="text-foreground text-sm font-medium">
                     {formatCurrency(category.total, currency)}
                   </Text>
                 </View>
-                <View className="h-1.5 rounded-full bg-muted">
+                <View className="bg-muted h-1.5 rounded-full">
                   <View
                     className="h-1.5 rounded-full"
                     style={{

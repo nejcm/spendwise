@@ -5,17 +5,18 @@ import { SendHorizonal } from 'lucide-react-native';
 import * as React from 'react';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 import { FocusAwareStatusBar, Input, ScrollView, SolidButton, Text, View } from '@/components/ui';
+import { IconButton } from '@/components/ui/icon-button';
 import { askAnthropic, askOpenAI } from '@/features/ai/service';
+import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
-import { IconButton } from '../../components/ui/icon-button';
 
 const PRESET_QUESTIONS = [
-  'Give me an overview of my spending this month.',
-  'How much did I spend on groceries last month?',
-  'Where am I overspending compared to my budget?',
-  'Help me create a monthly budget based on my recent transactions.',
-  'What subscriptions could I cancel to save money?',
+  translate('ai.preset_overview'),
+  translate('ai.preset_groceries'),
+  translate('ai.preset_overspending'),
+  translate('ai.preset_monthly_budget'),
+  translate('ai.preset_subscriptions'),
 ];
 
 export function AiScreen() {
@@ -62,7 +63,7 @@ export function AiScreen() {
       setMessages([...currentMessages, assistantMessage]);
     }
     catch (e: any) {
-      setError(e?.message ?? 'Something went wrong while contacting the AI provider.');
+      setError(e?.message ?? translate('ai.contact_error'));
     }
     finally {
       setLoading(false);
@@ -85,11 +86,13 @@ export function AiScreen() {
             ? (
                 <View className="mb-4 rounded-xl bg-card p-4">
                   <Text className="text-muted-foreground">
-                    Add an API key in
+                    {translate('ai.add_api_key_in')}
+                    {' '}
                     <Link href="/settings/ai" className="mx-1 font-medium text-foreground underline">
-                      AI Setting
+                      {translate('ai.ai_setting')}
                     </Link>
-                    to start chatting with the assistant.
+                    {' '}
+                    {translate('ai.to_start_chatting')}
                   </Text>
                 </View>
               )
@@ -97,7 +100,7 @@ export function AiScreen() {
                 ? (
                     <View className="my-4">
                       <Text className="mb-2 text-muted-foreground">
-                        Ask the AI about your spending or budgeting...
+                        {translate('ai.ask_prompt')}
                       </Text>
                       <View className="mt-3 flex flex-col space-y-2">
                         {PRESET_QUESTIONS.map((q) => (
@@ -148,7 +151,7 @@ export function AiScreen() {
               variant="textarea"
               value={question}
               onChangeText={setQuestion}
-              placeholder="Ask the AI about your spending or budgets..."
+              placeholder={translate('ai.input_placeholder')}
               autoCapitalize="sentences"
               autoCorrect
               multiline

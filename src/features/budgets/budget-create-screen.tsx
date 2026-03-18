@@ -14,16 +14,16 @@ import { defaultStyles } from '@/lib/theme/styles';
 import { useCreateBudget } from './api';
 
 const schema = z.object({
-  name: z.string().min(1, 'Budget name is required'),
+  name: z.string().min(1, translate('budgets.budget_name_required')),
   amount: z.string(),
   period: z.enum(['monthly', 'weekly', 'yearly']),
   lines: z.record(z.string(), z.string()),
 });
 
 const PERIODS: { value: BudgetPeriod; label: string }[] = [
-  { value: 'monthly', label: 'Monthly' },
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'yearly', label: 'Yearly' },
+  { value: 'monthly', label: translate('scheduled.frequencyOptions.monthly') },
+  { value: 'weekly', label: translate('scheduled.frequencyOptions.weekly') },
+  { value: 'yearly', label: translate('scheduled.frequencyOptions.yearly') },
 ];
 
 const defaultValues = {

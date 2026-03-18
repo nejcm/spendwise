@@ -27,24 +27,10 @@ describe('invalidateFor', () => {
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.insights.all]);
   });
 
-  it('invalidates all goalContribution-related query prefixes (includes month-summary and insights)', () => {
-    const qc = createMockQueryClient();
-    invalidateFor(qc, 'goalContribution');
-
-    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.goals.all]);
-    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.transactions.all]);
-    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.withBalance]);
-    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.totalBalance]);
-    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.monthSummary.all]);
-    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.insights.all]);
-  });
-
   it('deduplicates overlapping prefixes when multiple entities are passed', () => {
     const qc = createMockQueryClient();
-    // 'transaction' and 'goalContribution' both invalidate transactions.all, accounts.withBalance, etc.
-    invalidateFor(qc, 'transaction', 'goalContribution');
+    invalidateFor(qc, 'transaction', 'account');
 
-    // Should not double-invalidate shared keys
     const keyStrings = qc.invalidatedKeys.map((k) => JSON.stringify(k));
     const unique = new Set(keyStrings);
     expect(keyStrings.length).toBe(unique.size);

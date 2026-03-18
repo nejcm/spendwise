@@ -50,12 +50,6 @@ export const queryKeys = {
     overview: (month: string) => ['budgets', 'overview', month] as const,
   },
 
-  // ─── Goals ───
-  goals: {
-    all: ['goals'] as const,
-    detail: (id: string) => ['goals', id] as const,
-  },
-
   // ─── Insights ───
   insights: {
     all: ['insights'] as const,

@@ -18,9 +18,6 @@
 - `src/app/import-export/index.tsx`
 - `src/app/insights/index.tsx`
 - `src/app/transactions/[id].tsx`
-- `src/app/goals/index.tsx`
-- `src/app/goals/create.tsx`
-- `src/app/goals/[id].tsx`
 - `src/app/budgets/create.tsx`
 - `src/app/budgets/[id].tsx`
 - `src/app/settings/profile.tsx`
@@ -44,7 +41,6 @@
 - `stats`: high-level summaries, trends, category breakdowns
 - `insights`: deeper trend and monthly analytics
 - `budgets`: budget create/detail logic and progress UI
-- `goals`: savings goal list, create, and detail flows
 
 ### Utility Flows
 

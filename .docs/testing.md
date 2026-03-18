@@ -43,4 +43,4 @@ pnpm verify
 ## Suggested Priorities
 
 - Refresh Maestro journeys to match current Spendwise screens
-- Add tests around budgets/goals/import/security flows as those areas mature
+- Add tests around budgets/import/security flows as those areas mature

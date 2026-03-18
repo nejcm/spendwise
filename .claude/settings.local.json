@@ -16,7 +16,8 @@
       "Bash(ls*)",
       "Bash(la*)",
       "Bash(pnpm test:*)",
-      "Bash(pnpm exec:*)"
+      "Bash(pnpm exec:*)",
+      "Bash(find *)"
     ]
   }
 }

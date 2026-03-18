@@ -36,17 +36,6 @@ const INVALIDATION_RULES = {
   budget: [
     queryKeys.budgets.all,
   ],
-  goal: [
-    queryKeys.goals.all,
-  ],
-  goalContribution: [
-    queryKeys.goals.all,
-    queryKeys.transactions.all,
-    queryKeys.accounts.withBalance,
-    queryKeys.accounts.totalBalance,
-    queryKeys.monthSummary.all,
-    queryKeys.insights.all,
-  ],
   scheduledTransaction: [
     queryKeys.scheduledTransactions.all,
   ],
@@ -60,7 +49,6 @@ const INVALIDATION_RULES = {
  * Deduplicates overlapping prefixes when multiple entities are passed.
  *
  * @example invalidateFor(queryClient, 'transaction')
- * @example invalidateFor(queryClient, 'goalContribution')
  * @example invalidateFor(queryClient, 'scheduledTransaction', 'transaction')
  */
 export function invalidateFor(

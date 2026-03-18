@@ -1,7 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { seedDefaults } from './seed';
 
-const DATABASE_VERSION = 1;
+const DATABASE_VERSION = 2;
 
 /**
  * Clears all data from the database.
@@ -16,7 +16,6 @@ export async function clearDbData(db: SQLiteDatabase): Promise<void> {
     DELETE FROM transactions;
     DELETE FROM accounts;
     DELETE FROM categories;
-    DELETE FROM goals;
     DELETE FROM currency_rates;
     PRAGMA foreign_keys = ON;
   `);
@@ -35,7 +34,6 @@ export async function dropDb(db: SQLiteDatabase): Promise<void> {
     DROP TABLE IF EXISTS budget_lines;
     DROP TABLE IF EXISTS recurring_rules;
     DROP TABLE IF EXISTS recurring_rule_runs;
-    DROP TABLE IF EXISTS goals;
     DROP TABLE IF EXISTS currency_rates;
   `);
   await db.execAsync(`PRAGMA user_version = 0`);
@@ -120,19 +118,6 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           category_id TEXT NOT NULL REFERENCES categories(id),
           amount INTEGER NOT NULL,
           UNIQUE(budget_id, category_id)
-        );
-
-        CREATE TABLE IF NOT EXISTS goals (
-          id TEXT PRIMARY KEY NOT NULL,
-          name TEXT NOT NULL,
-          target_amount INTEGER NOT NULL,
-          current_amount INTEGER NOT NULL DEFAULT 0,
-          deadline TEXT,
-          icon TEXT,
-          color TEXT NOT NULL DEFAULT '#4ECDC4',
-          is_completed INTEGER NOT NULL DEFAULT 0,
-          created_at TEXT NOT NULL DEFAULT (datetime('now')),
-          updated_at TEXT NOT NULL DEFAULT (datetime('now'))
         );
 
          CREATE TABLE IF NOT EXISTS currency_rates (

@@ -136,23 +136,6 @@
     "description": "Please restart the app or contact support if the problem persists.",
     "title": "An unexpected error occurred"
   },
-  "goals": {
-    "add_contribution": "Add Contribution",
-    "contribute": "Save to Goal",
-    "create": "New Goal",
-    "deadline": "Deadline",
-    "deadline_placeholder": "YYYY-MM-DD (optional)",
-    "delete_confirm": "Are you sure you want to delete this goal?",
-    "detail": "Goal Detail",
-    "goal_name": "Goal Name",
-    "goal_reached": "Goal reached! Congratulations!",
-    "name_placeholder": "e.g. Emergency Fund",
-    "no_goals": "No goals yet",
-    "of": "of",
-    "remaining": "remaining",
-    "target_amount": "Target Amount",
-    "title": "Goals"
-  },
   "home": {
     "add_category": "Add Category",
     "add_category_description": "Create categories to track your spending by where it goes.",

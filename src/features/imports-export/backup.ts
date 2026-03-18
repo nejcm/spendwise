@@ -2,7 +2,6 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import type { Account } from '../accounts/types';
 import type { Budget, BudgetLine } from '../budgets/types';
 import type { Category } from '../categories/types';
-import type { Goal } from '../goals/types';
 import type { ScheduledTransaction, ScheduledTransactionRun } from '../scheduled-transactions/types';
 import type { Transaction } from '../transactions/types';
 import { clearDbData } from '@/lib/sqlite/migrations';
@@ -15,7 +14,6 @@ export type BackupData = {
   transactions: Transaction[];
   budgets: Budget[];
   budget_lines: BudgetLine[];
-  goals: Goal[];
   recurring_rules: ScheduledTransaction[];
   recurring_rule_runs: ScheduledTransactionRun[];
 };
@@ -27,7 +25,6 @@ export async function exportBackup(db: SQLiteDatabase): Promise<BackupData> {
     transactions,
     budgets,
     budget_lines,
-    goals,
     recurring_rules,
     recurring_rule_runs,
   ] = await Promise.all([
@@ -36,7 +33,6 @@ export async function exportBackup(db: SQLiteDatabase): Promise<BackupData> {
     db.getAllAsync<Transaction>('SELECT * FROM transactions ORDER BY date DESC'),
     db.getAllAsync<Budget>('SELECT * FROM budgets'),
     db.getAllAsync<BudgetLine>('SELECT * FROM budget_lines'),
-    db.getAllAsync<Goal>('SELECT * FROM goals'),
     db.getAllAsync<ScheduledTransaction>('SELECT * FROM recurring_rules'),
     db.getAllAsync<ScheduledTransactionRun>('SELECT * FROM recurring_rule_runs'),
   ]);
@@ -49,7 +45,6 @@ export async function exportBackup(db: SQLiteDatabase): Promise<BackupData> {
     transactions,
     budgets,
     budget_lines,
-    goals,
     recurring_rules,
     recurring_rule_runs,
   };
@@ -72,7 +67,6 @@ export function validateBackup(parsed: unknown): BackupData {
     'transactions',
     'budgets',
     'budget_lines',
-    'goals',
     'recurring_rules',
     'recurring_rule_runs',
   ];
@@ -152,25 +146,6 @@ export async function importBackup(db: SQLiteDatabase, backup: BackupData): Prom
         `INSERT INTO budget_lines (id, budget_id, category_id, amount)
          VALUES (?, ?, ?, ?)`,
         [row.id, row.budget_id, row.category_id, row.amount],
-      );
-    }
-
-    for (const row of backup.goals) {
-      await db.runAsync(
-        `INSERT INTO goals (id, name, target_amount, current_amount, deadline, icon, color, is_completed, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          row.id,
-          row.name,
-          row.target_amount,
-          row.current_amount ?? 0,
-          row.deadline ?? null,
-          row.icon ?? null,
-          row.color ?? '#4ECDC4',
-          row.is_completed ?? 0,
-          row.created_at,
-          row.updated_at,
-        ],
       );
     }
 

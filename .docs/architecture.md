@@ -36,7 +36,6 @@ SQLite is the source of truth for core finance entities:
 - `budgets`
 - `budget_lines`
 - `recurring_rules`
-- `goals`
 - `currency_rates`
 
 Schema and migrations live in `src/lib/sqlite`.
@@ -93,7 +92,7 @@ Do not move transactional finance records into Zustand.
 - Route files live in `src/app`
 - Most route files should stay thin and delegate to feature screens
 - Primary visible tabs are home, categories, stats, and settings
-- Additional routed flows include accounts, transactions, goals, budgets, import, insights, onboarding, and settings subpages
+- Additional routed flows include accounts, transactions, budgets, import, insights, onboarding, and settings subpages
 
 ## Feature Layout
 

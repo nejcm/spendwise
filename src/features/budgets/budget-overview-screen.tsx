@@ -1,11 +1,9 @@
 import { useRouter } from 'expo-router';
 import * as React from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 
 import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
 import { formatCurrency } from '@/features/formatting/helpers';
-import { useGoals } from '@/features/goals/api';
-import { GoalCard } from '@/features/goals/components/goal-card';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -17,8 +15,6 @@ export function BudgetOverviewScreen() {
   const router = useRouter();
   const currency = useAppStore.use.currency();
   const { data: budgets = [] } = useBudgetsOverview();
-  const { data: goals = [] } = useGoals();
-  const activeGoals = goals.filter((g) => !g.is_completed);
 
   const totalBudgeted = budgets.reduce((s, b) => s + b.amount, 0);
   const totalSpent = budgets.reduce((s, b) => s + b.total_spent, 0);
@@ -48,31 +44,6 @@ export function BudgetOverviewScreen() {
         {budgets.length === 0 && (
           <View className="items-center py-8">
             <Text className="text-gray-500">{translate('budgets.no_budgets')}</Text>
-          </View>
-        )}
-
-        {/* Goals section */}
-        <View className="mt-4 mb-2 flex-row items-center justify-between">
-          <Text className="text-base font-medium">{translate('goals.title')}</Text>
-          <Pressable onPress={() => router.push('/goals' as any)}>
-            <Text className="text-sm text-primary-500">{translate('home.see_all')}</Text>
-          </Pressable>
-        </View>
-
-        {activeGoals.map((goal) => (
-          <GoalCard
-            key={goal.id}
-            goal={goal}
-            onPress={() => router.push(`/goals/${goal.id}` as any)}
-          />
-        ))}
-
-        {activeGoals.length === 0 && (
-          <View className="mb-8 items-center py-6">
-            <Text className="text-gray-500">{translate('goals.no_goals')}</Text>
-            <Pressable className="mt-2" onPress={() => router.push('/goals/create' as any)}>
-              <Text className="text-sm text-primary-500">{translate('goals.create')}</Text>
-            </Pressable>
           </View>
         )}
       </ScrollView>

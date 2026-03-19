@@ -24,7 +24,7 @@ const schema = z.object({
   color: z.string().nullable(),
   currency: z.enum(CURRENCY_VALUES as CurrencyKey[]),
   description: z.string().nullable(),
-  icon: z.string().max(2).nullable(),
+  icon: z.emoji().nullable(),
   budget: z.string().nullable(),
 });
 

@@ -53,12 +53,7 @@ function SheetContent({ config, onClose }: { config: SheetConfig; onClose: () =>
     case 'edit-category':
       return (
         <CategoryForm
-          initialValues={{
-            id: config.categoryId,
-            name: config.name,
-            color: config.color,
-            icon: config.icon,
-          }}
+          initialValues={config.initialValues}
           onSuccess={onClose}
           onCancel={onClose}
         />

@@ -41,15 +41,6 @@ export const queryKeys = {
     byMonth: (month: string) => ['month-summary', month] as const,
   },
 
-  // ─── Budgets ───
-  budgets: {
-    all: ['budgets'] as const,
-    detail: (id: string) => ['budgets', 'detail', id] as const,
-    progress: (id: string, month: string) =>
-      ['budgets', 'progress', id, month] as const,
-    overview: (month: string) => ['budgets', 'overview', month] as const,
-  },
-
   // ─── Insights ───
   insights: {
     all: ['insights'] as const,

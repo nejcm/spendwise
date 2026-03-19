@@ -12,10 +12,10 @@ export async function mockData(db: SQLiteDatabase): Promise<void> {
 
   // Basic accounts
   await db.execAsync(`
-    INSERT INTO accounts (id, name, type, icon, color, currency)
+    INSERT INTO accounts (id, name, type, icon, color, currency, budget)
     VALUES
-      ('acc_cash_wallet', 'Cash Wallet', 'cash', '💵', '#66BB6A', 'EUR'),
-      ('acc_savings', 'Emergency Savings', 'savings', '💰', '#45B7D1', 'EUR');
+      ('acc_cash_wallet', 'Cash Wallet', 'cash', '💵', '#66BB6A', 'EUR', NULL),
+      ('acc_savings', 'Emergency Savings', 'savings', '💰', '#45B7D1', 'EUR', 100000);
   `);
 
   // Sample transactions (amounts are in cents)

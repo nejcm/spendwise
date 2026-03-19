@@ -34,8 +34,6 @@ export default function AppLayout() {
       <Stack.Screen name="transactions/[id]" />
       <Stack.Screen name="accounts" />
       <Stack.Screen name="ai" />
-      <Stack.Screen name="budgets/create" />
-      <Stack.Screen name="budgets/[id]" />
       <Stack.Screen name="insights/index" />
       <Stack.Screen name="scheduled/index" />
       <Stack.Screen name="scheduled/[id]" />

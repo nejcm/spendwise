@@ -12,15 +12,18 @@ import { GhostButton } from '@/components/ui/ghost-button';
 import { OutlineButton } from '@/components/ui/outline-button';
 import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
+import { closeSheet } from '@/lib/local-store';
 import { getRandomColor } from '@/lib/theme/colors';
+import { refinePositiveNumber } from '@/lib/validation/helpers';
 
 const schema = z.object({
   name: z.string().min(1, translate('categories.name_required')),
-  icon: z.string().max(2).nullable(),
+  icon: z.emoji().nullable(),
   color: z.string(),
+  budget: z.string().nullable().refine(refinePositiveNumber, translate('categories.budget_invalid')),
 });
 
-type CategoryInitialValues = (Partial<CategoryFormData> & { id: undefined }) | (CategoryFormData & { id: Category['id'] });
+export type CategoryInitialValues = (Partial<CategoryFormData> & { id: undefined }) | (CategoryFormData & { id: Category['id'] });
 
 export type CategoryManageModalProps = {
   initialValues?: CategoryInitialValues;
@@ -32,13 +35,14 @@ const defaultValues: CategoryFormData = {
   name: '',
   icon: null,
   color: 'bg-sky-600',
+  budget: null,
 };
 
 export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryManageModalProps) {
   const id = initialValues?.id;
   const { data: categories = [] } = useCategories();
-  const createCategory = useCreateCategory();
-  const updateCategory = useUpdateCategory();
+  const createCategory = useCreateCategory(() => closeSheet());
+  const updateCategory = useUpdateCategory(() => closeSheet());
 
   const form = useForm({
     defaultValues: {
@@ -69,21 +73,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
 
   return (
     <View className="gap-4">
-      <form.Field
-        name="name"
-        children={(field) => (
-          <Input
-            label={translate('common.name')}
-            value={field.state.value}
-            onBlur={field.handleBlur}
-            placeholder={translate('categories.name_placeholder')}
-            onChangeText={field.handleChange}
-            error={getFieldError(field)}
-          />
-        )}
-      />
-
-      <View className="mb-6 flex-row items-center gap-3">
+      <View className="flex-row items-center gap-3">
         <form.Field
           name="color"
           children={(field) => (
@@ -110,6 +100,36 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
           )}
         />
       </View>
+
+      <form.Field
+        name="name"
+        children={(field) => (
+          <Input
+            label={translate('common.name')}
+            value={field.state.value}
+            onBlur={field.handleBlur}
+            placeholder={translate('categories.name_placeholder')}
+            onChangeText={field.handleChange}
+            error={getFieldError(field)}
+          />
+        )}
+      />
+
+      <form.Field
+        name="budget"
+        children={(field) => (
+          <Input
+            label={translate('categories.budget')}
+            value={field.state.value ?? ''}
+            onBlur={field.handleBlur}
+            onChangeText={field.handleChange}
+            placeholder="0"
+            keyboardType="decimal-pad"
+            className="mb-6"
+            error={getFieldError(field)}
+          />
+        )}
+      />
 
       {!!id && (
         <View className="mb-2 flex-row justify-center">

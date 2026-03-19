@@ -3,6 +3,7 @@ import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
 import { FormattedCurrency, Text } from '@/components/ui';
+import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
 
 import { useAppStore } from '@/lib/store';
 import { ACCOUNT_TYPE_LABELS } from '../types';
@@ -38,6 +39,9 @@ export function AccountCard({ account, onPress }: Props) {
           )}
         </View>
       </View>
+      {account.budget != null && account.budget > 0 && account.monthlyExpense != null && (
+        <BudgetProgressBar spent={account.monthlyExpense} budget={account.budget} className="mt-2" />
+      )}
     </Pressable>
   );
 }

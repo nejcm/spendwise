@@ -8,7 +8,7 @@ import { ALargeSmall, Banknote, Bell, Bot, Database, DatabaseBackupIcon, Databas
 import { FocusAwareStatusBar, Image, ScrollView, Text, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { config } from '@/config';
-import { clearData, dumpDbTables, resetData, seedMockData } from '@/lib/dev';
+import { clearData, dumpDbTables, resetDb, seedMockData } from '@/lib/dev';
 import { selectProfile, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { getAvatar } from '../profile';
@@ -124,7 +124,7 @@ export function SettingsScreen() {
           {Env.EXPO_PUBLIC_APP_ENV === 'development' && (
             <SettingsContainer title="settings.dev">
               <SettingsItem text="settings.clear" icon={<DatabaseZap className={iconColor} size={20} />} onPress={() => clearData(db, queryClient)} />
-              <SettingsItem text="settings.reset" icon={<DatabaseBackupIcon className={iconColor} size={20} />} onPress={() => resetData(db, queryClient)} />
+              <SettingsItem text="settings.reset" icon={<DatabaseBackupIcon className={iconColor} size={20} />} onPress={() => resetDb(db, queryClient)} />
               <SettingsItem
                 text="settings.mock_data"
                 icon={<Database className={iconColor} size={20} />}

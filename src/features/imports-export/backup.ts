@@ -1,6 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import type { Account } from '../accounts/types';
-import type { Budget, BudgetLine } from '../budgets/types';
 import type { Category } from '../categories/types';
 import type { ScheduledTransaction, ScheduledTransactionRun } from '../scheduled-transactions/types';
 import type { Transaction } from '../transactions/types';
@@ -12,8 +11,6 @@ export type BackupData = {
   accounts: Account[];
   categories: Category[];
   transactions: Transaction[];
-  budgets: Budget[];
-  budget_lines: BudgetLine[];
   recurring_rules: ScheduledTransaction[];
   recurring_rule_runs: ScheduledTransactionRun[];
 };
@@ -23,16 +20,12 @@ export async function exportBackup(db: SQLiteDatabase): Promise<BackupData> {
     accounts,
     categories,
     transactions,
-    budgets,
-    budget_lines,
     recurring_rules,
     recurring_rule_runs,
   ] = await Promise.all([
     db.getAllAsync<Account>('SELECT * FROM accounts'),
     db.getAllAsync<Category>('SELECT * FROM categories'),
     db.getAllAsync<Transaction>('SELECT * FROM transactions ORDER BY date DESC'),
-    db.getAllAsync<Budget>('SELECT * FROM budgets'),
-    db.getAllAsync<BudgetLine>('SELECT * FROM budget_lines'),
     db.getAllAsync<ScheduledTransaction>('SELECT * FROM recurring_rules'),
     db.getAllAsync<ScheduledTransactionRun>('SELECT * FROM recurring_rule_runs'),
   ]);
@@ -43,8 +36,6 @@ export async function exportBackup(db: SQLiteDatabase): Promise<BackupData> {
     accounts,
     categories,
     transactions,
-    budgets,
-    budget_lines,
     recurring_rules,
     recurring_rule_runs,
   };
@@ -65,8 +56,6 @@ export function validateBackup(parsed: unknown): BackupData {
     'accounts',
     'categories',
     'transactions',
-    'budgets',
-    'budget_lines',
     'recurring_rules',
     'recurring_rule_runs',
   ];
@@ -87,9 +76,9 @@ export async function importBackup(db: SQLiteDatabase, backup: BackupData): Prom
   await db.withTransactionAsync(async () => {
     for (const row of backup.categories) {
       await db.runAsync(
-        `INSERT INTO categories (id, name, icon, color, sort_order, created_at)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [row.id, row.name, row.icon ?? null, row.color, row.sort_order ?? 999999, row.created_at],
+        `INSERT INTO categories (id, name, icon, color, budget, sort_order, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [row.id, row.name, row.icon ?? null, row.color, row.budget ?? null, row.sort_order ?? 999999, row.created_at],
       );
     }
 
@@ -130,22 +119,6 @@ export async function importBackup(db: SQLiteDatabase, backup: BackupData): Prom
           row.created_at,
           row.updated_at,
         ],
-      );
-    }
-
-    for (const row of backup.budgets) {
-      await db.runAsync(
-        `INSERT INTO budgets (id, name, period, amount, start_date, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [row.id, row.name, row.period, row.amount, row.start_date, row.created_at, row.updated_at],
-      );
-    }
-
-    for (const row of backup.budget_lines) {
-      await db.runAsync(
-        `INSERT INTO budget_lines (id, budget_id, category_id, amount)
-         VALUES (?, ?, ?, ?)`,
-        [row.id, row.budget_id, row.category_id, row.amount],
       );
     }
 

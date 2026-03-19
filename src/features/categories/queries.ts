@@ -2,6 +2,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { Category, CategoryFormData } from './types';
 
+import { amountToCents } from '@/features/formatting/helpers';
 import { generateId } from '@/lib/sqlite';
 
 export async function getCategories(db: SQLiteDatabase): Promise<Category[]> {
@@ -13,9 +14,10 @@ export async function createCategory(
   data: CategoryFormData,
 ): Promise<string> {
   const id = generateId();
+  const budgetCents = data.budget?.trim() ? amountToCents(Number(data.budget)) : null;
   await db.runAsync(
-    'INSERT INTO categories (id, name, icon, color, sort_order) VALUES (?, ?, ?, ?, ?)',
-    [id, data.name.trim(), data.icon?.trim() || null, data.color, data.sort_order ?? 999999],
+    'INSERT INTO categories (id, name, icon, color, budget, sort_order) VALUES (?, ?, ?, ?, ?, ?)',
+    [id, data.name.trim(), data.icon?.trim() || null, data.color, budgetCents, data.sort_order ?? 999999],
   );
   return id;
 }
@@ -23,11 +25,12 @@ export async function createCategory(
 export async function updateCategory(
   db: SQLiteDatabase,
   id: string,
-  data: Pick<CategoryFormData, 'name' | 'icon' | 'color' | 'sort_order'>,
+  data: Pick<CategoryFormData, 'name' | 'icon' | 'color' | 'budget' | 'sort_order'>,
 ): Promise<void> {
+  const budgetCents = data.budget?.trim() ? amountToCents(Number(data.budget)) : null;
   await db.runAsync(
-    'UPDATE categories SET name = ?, icon = ?, color = ?, sort_order = ? WHERE id = ?',
-    [data.name.trim(), data.icon?.trim() || null, data.color, data.sort_order ?? 999999, id],
+    'UPDATE categories SET name = ?, icon = ?, color = ?, budget = ? WHERE id = ?',
+    [data.name.trim(), data.icon?.trim() || null, data.color, budgetCents, id],
   );
 }
 

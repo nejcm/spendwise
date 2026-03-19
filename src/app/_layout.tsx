@@ -18,7 +18,6 @@ import { CustomTabBar } from '@/components/ui/custom-tab-bar';
 import { useCurrencyRates } from '@/features/currencies/api';
 import { todayUnix } from '@/features/formatting/helpers';
 import {
-  checkBudgetAlerts,
   checkUpcomingBills,
   setupNotifications,
 } from '@/features/notifications/notifications';
@@ -38,7 +37,6 @@ async function initDb(db: SQLiteDatabase) {
   await migrateDb(db);
   await setupNotifications();
   await processDueScheduledTransactions(db, todayUnix());
-  await checkBudgetAlerts(db);
   await checkUpcomingBills(db);
 }
 

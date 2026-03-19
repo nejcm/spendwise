@@ -3,6 +3,7 @@ export type CategorySpend = {
   category_name: string;
   category_color: string;
   category_icon: string;
+  category_budget: number | null;
   category_type: 'expense' | 'income';
   sort_order: number;
   total: number;

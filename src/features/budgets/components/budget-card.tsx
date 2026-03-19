@@ -2,8 +2,7 @@ import type { BudgetWithProgress } from '../types';
 import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
-import { Text } from '@/components/ui';
-import { formatCurrency } from '@/features/formatting/helpers';
+import { FormattedCurrency, Text } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 
@@ -26,7 +25,13 @@ export function BudgetCard({ budget, onPress }: Props) {
         <Text className={`text-sm font-medium ${isOver ? 'text-danger-500' : 'text-success-600'}`}>
           {isOver
             ? translate('budgets.over_budget')
-            : `${formatCurrency(remaining, currency)} ${translate('budgets.left')}`}
+            : (
+                <>
+                  <FormattedCurrency value={remaining} currency={currency} />
+                  {' '}
+                  {translate('budgets.left')}
+                </>
+              )}
         </Text>
       </View>
 
@@ -34,12 +39,12 @@ export function BudgetCard({ budget, onPress }: Props) {
 
       <View className="mt-2 flex-row justify-between">
         <Text className="text-xs text-gray-500">
-          {formatCurrency(budget.total_spent, currency)}
+          <FormattedCurrency value={budget.total_spent} currency={currency} />
           {' '}
           {translate('budgets.spent')}
         </Text>
         <Text className="text-xs text-gray-500">
-          {formatCurrency(budget.amount, currency)}
+          <FormattedCurrency value={budget.amount} currency={currency} />
           {' '}
           {translate('budgets.budgeted')}
         </Text>

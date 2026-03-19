@@ -5,7 +5,7 @@ import * as React from 'react';
 import { useMemo } from 'react';
 import { View } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
-import { FocusAwareStatusBar, ScrollView, SolidButton, Text } from '@/components/ui';
+import { FocusAwareStatusBar, FormattedCurrency, ScrollView, SolidButton, Text } from '@/components/ui';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { useAccountsWithBalanceForRange } from '@/features/transactions/api';
 import { getPeriodRange } from '@/lib/date/helpers';
@@ -14,7 +14,6 @@ import { openSheet } from '@/lib/local-store';
 import { setPeriodSelection, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import NoData from '../../components/no-data';
-import { formatCurrency } from '../formatting/helpers';
 import { AccountCard } from './components/account-card';
 
 export function AccountsScreen() {
@@ -52,7 +51,7 @@ export function AccountsScreen() {
       <ScrollView className="flex-1 px-4" style={defaultStyles.transparentBg}>
         <View className="flex-col items-center justify-between gap-2 px-4 pt-4 pb-6">
           <Text className="text-sm text-muted-foreground">{translate('accounts.total_balance')}</Text>
-          <Text className="text-3xl font-bold">{formatCurrency(totalBalance, currency)}</Text>
+          <FormattedCurrency value={totalBalance} currency={currency} className="text-3xl font-bold" />
         </View>
 
         {accounts.length === 0

@@ -3,9 +3,8 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 
 import { ScrollView, View } from 'react-native';
-import { Text } from '@/components/ui';
+import { FormattedCurrency, Text } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
-import { formatCurrency } from '@/features/formatting/helpers';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
@@ -49,9 +48,7 @@ export function CategoriesOverview() {
                   >
                     <Text className="text-2xl">{item.category_icon || '?'}</Text>
                     <Text className="mt-2 text-xs font-medium text-muted-foreground" numberOfLines={1}>{item.category_name}</Text>
-                    <Text className="mt-1 text-base font-medium">
-                      {formatCurrency(item.total, currency)}
-                    </Text>
+                    <FormattedCurrency value={item.total} currency={currency} className="mt-1 text-base font-medium" />
                   </View>
                 ))}
               </View>

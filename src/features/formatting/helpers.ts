@@ -3,6 +3,7 @@ import type { CurrencyFormat, NumberFormat } from './constants';
 import { format, isToday, isYesterday } from 'date-fns';
 import { translate } from '@/lib/i18n';
 import { DEFAULT_DATE_FORMAT } from '../../config';
+import { CURRENCIES_MAP } from '../currencies';
 
 /**
  * Convert cents integer to display string.
@@ -21,10 +22,10 @@ export function amountToCents(amount: number): number {
 }
 
 const NUMBER_FORMAT_MAP: Record<NumberFormat, [string, Intl.NumberFormatOptions]> = {
-  'stop': ['de-DE', { useGrouping: false }],
-  'stop-space': ['de-DE', { useGrouping: true }],
-  'comma': ['en-US', { useGrouping: false }],
-  'comma-space': ['en-US', { useGrouping: true }],
+  'stop': ['en-US', { useGrouping: false }],
+  'stop-space': ['en-US', { useGrouping: true }],
+  'comma': ['de-DE', { useGrouping: false }],
+  'comma-space': ['de-DE', { useGrouping: true }],
 } as const;
 export function formatNumber(value: number | string, numberFormat: NumberFormat): string {
   const number = typeof value === 'number' ? value : Number(value);
@@ -39,29 +40,22 @@ export function formatNumber(value: number | string, numberFormat: NumberFormat)
 }
 
 /**
- * Format cents as a currency string.
- * e.g., 1234, 'EUR' -> "€12.34"
- *
- * This currently relies on Intl and does not use user currency/number
- * formatting preferences. Those preferences are applied by higher-level
- * components when rendering textual values.
+ * Format cents as a currency string using the given number and currency format.
+ * e.g., 123456, 'EUR', 'comma-space', 'symbol-before' -> "€\u00a01.234,56"
  */
 export function formatCurrency(value: number | string, currency: CurrencyKey, numberFormat: NumberFormat = 'comma', currencyFormat: CurrencyFormat = 'symbol-before'): string {
   const number = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(number)) return String(value);
-  const isCode = currencyFormat === 'code-before' || currencyFormat === 'code-after';
 
-  const [locale, opts] = NUMBER_FORMAT_MAP[numberFormat];
-  const formatted = new Intl.NumberFormat(locale, {
-    useGrouping: true,
-    maximumFractionDigits: 20,
-    style: 'currency',
-    currencyDisplay: isCode ? 'code' : 'symbol',
-    currency,
-    unitDisplay: 'narrow',
-    ...opts,
-  }).format(centsToAmount(number));
-  return formatted;
+  const formattedNumber = formatNumber(centsToAmount(number), numberFormat);
+  const isCode = currencyFormat === 'code-before' || currencyFormat === 'code-after';
+  const currencyTxt = isCode ? currency : CURRENCIES_MAP[currency].symbol;
+  const space = isCode ? ' ' : '';
+
+  if (currencyFormat === 'symbol-before' || currencyFormat === 'code-before') {
+    return `${currencyTxt}${space}${formattedNumber}`;
+  }
+  return `${formattedNumber}${space}${currencyTxt}`;
 }
 
 /**

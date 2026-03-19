@@ -2,8 +2,7 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { View } from 'react-native';
 
-import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
-import { formatCurrency } from '@/features/formatting/helpers';
+import { FocusAwareStatusBar, FormattedCurrency, ScrollView, Text } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -27,9 +26,7 @@ export function BudgetOverviewScreen() {
         {budgets.length > 0 && (
           <View className="mb-4 items-center rounded-xl bg-primary-50 p-4 dark:bg-primary-900/20">
             <Text className="text-sm text-gray-500">{translate('budgets.left_to_spend')}</Text>
-            <Text className={`mt-1 text-2xl font-bold ${leftToSpend < 0 ? 'text-danger-500' : ''}`}>
-              {formatCurrency(leftToSpend, currency)}
-            </Text>
+            <FormattedCurrency value={leftToSpend} currency={currency} className={`mt-1 text-2xl font-bold ${leftToSpend < 0 ? 'text-danger-500' : ''}`} />
           </View>
         )}
 

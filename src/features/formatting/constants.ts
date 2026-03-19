@@ -7,10 +7,10 @@ export const CURRENCY_FORMAT_OPTIONS = [
 export type CurrencyFormat = (typeof CURRENCY_FORMAT_OPTIONS)[number];
 
 export const NUMBER_FORMAT_OPTIONS = [
-  'stop', // 1,234.56
-  'stop-space', // 1 234.56
-  'comma', // 1.234,56
-  'comma-space', // 1 234,56
+  'stop', // 1234.56
+  'stop-space', // 1,234.56
+  'comma', // 1234,56
+  'comma-space', // 1.234,56
 ] as const;
 export type NumberFormat = (typeof NUMBER_FORMAT_OPTIONS)[number];
 

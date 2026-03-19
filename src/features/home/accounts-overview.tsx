@@ -3,9 +3,8 @@ import { useRouter } from 'expo-router';
 
 import * as React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { Text } from '@/components/ui';
+import { FormattedCurrency, Text } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
-import { formatCurrency } from '@/features/formatting/helpers';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -57,9 +56,7 @@ export function AccountsOverview() {
                       >
                         {account.name}
                       </Text>
-                      <Text className="my-1 text-base font-medium">
-                        {formatCurrency(account.baseBalance, account.baseCurrency)}
-                      </Text>
+                      <FormattedCurrency value={account.baseBalance} currency={account.baseCurrency} className="my-1 text-base font-medium" />
                     </Pressable>
                   );
                 })}

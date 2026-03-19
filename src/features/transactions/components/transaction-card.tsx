@@ -3,8 +3,8 @@ import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
 import { cn } from 'tailwind-variants';
-import { Text } from '@/components/ui';
-import { formatCurrency, formatShortDate } from '@/features/formatting/helpers';
+import { FormattedCurrency, Text } from '@/components/ui';
+import { formatShortDate } from '@/features/formatting/helpers';
 import { useAppStore } from '@/lib/store';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 
@@ -43,15 +43,15 @@ export const TransactionCard = React.memo(({ transaction, onPress, className }: 
         </Text>
       </View>
       <View className="items-end">
-        <Text
+        <FormattedCurrency
+          value={transaction.baseAmount}
+          currency={transaction.baseCurrency}
+          prefix={isIncome ? '+' : '-'}
           className={`text-base font-medium ${isIncome ? 'text-success-600' : ''}`}
-        >
-          {isIncome ? '+' : '-'}
-          {formatCurrency(transaction.baseAmount, transaction.baseCurrency)}
-        </Text>
-        <Text className="text-sm text-muted-foreground">
-          {showConverted && formatCurrency(transaction.amount, transaction.currency)}
-        </Text>
+        />
+        {showConverted && (
+          <FormattedCurrency value={transaction.amount} currency={transaction.currency} className="text-sm text-muted-foreground" />
+        )}
       </View>
     </Pressable>
   );

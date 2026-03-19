@@ -4,8 +4,8 @@ import { Skeleton } from 'moti/skeleton';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import NoData from '@/components/no-data';
-import { FocusAwareStatusBar, ScrollView, SolidButton, Text } from '@/components/ui';
-import { formatCurrency, formatDate } from '@/features/formatting/helpers';
+import { FocusAwareStatusBar, FormattedCurrency, ScrollView, SolidButton, Text } from '@/components/ui';
+import { formatDate } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/local-store';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -76,10 +76,12 @@ export function ScheduledTransactionsScreen() {
                         {rule.category_icon ? `${rule.category_icon} ${rule.category_name}` : translate('common.none')}
                       </Text>
                     </View>
-                    <Text className={`font-semibold ${rule.type === 'income' ? 'text-success-600' : 'text-danger-600'}`}>
-                      {rule.type === 'income' ? '+' : '-'}
-                      {formatCurrency(rule.amount, rule.currency)}
-                    </Text>
+                    <FormattedCurrency
+                      value={rule.amount}
+                      currency={rule.currency}
+                      prefix={rule.type === 'income' ? '+' : '-'}
+                      className={`font-semibold ${rule.type === 'income' ? 'text-success-600' : 'text-danger-600'}`}
+                    />
                   </View>
                   <Text className="text-sm text-muted-foreground">
                     {rule.account_icon}
@@ -125,9 +127,7 @@ export function ScheduledTransactionsScreen() {
                             {formatDate(rule.next_due_date)}
                           </Text>
                         </View>
-                        <Text className="font-semibold text-muted-foreground">
-                          {formatCurrency(rule.amount, rule.currency)}
-                        </Text>
+                        <FormattedCurrency value={rule.amount} currency={rule.currency} className="font-semibold text-muted-foreground" />
                       </View>
                     </Pressable>
                   ))}

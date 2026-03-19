@@ -336,10 +336,10 @@
         "yyyy-MM-dd": "2026-02-15"
       },
       "numberFormat": {
-        "comma": "1.234,56",
-        "comma-space": "1 234,56",
-        "stop": "1,234.56",
-        "stop-space": "1 234.56"
+        "comma": "1234,56",
+        "comma-space": "1.234,56",
+        "stop": "1234.56",
+        "stop-space": "1,234.56"
       }
     },
     "generale": "General",

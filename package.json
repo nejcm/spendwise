@@ -51,6 +51,9 @@
     "knip": "knip"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.58",
+    "@ai-sdk/openai": "^3.0.41",
+    "@ai-sdk/react": "^3.0.118",
     "@expo-google-fonts/inter": "~0.4.2",
     "@expo/metro-runtime": "~6.1.2",
     "@gorhom/bottom-sheet": "~5.2.8",
@@ -60,6 +63,7 @@
     "@tanstack/react-form": "~1.28.4",
     "@tanstack/react-query": "~5.90.21",
     "@tanstack/zod-form-adapter": "~0.42.1",
+    "ai": "~6.0.116",
     "app-icon-badge": "~0.1.2",
     "date-fns": "~4.1.0",
     "es-toolkit": "~1.45.1",

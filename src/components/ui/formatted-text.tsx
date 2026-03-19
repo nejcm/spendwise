@@ -37,10 +37,11 @@ export function FormattedNumber({ value, format, prefix = '', ...textProps }: Nu
 
 export function FormattedCurrency({ value, format, currency, prefix = '', ...textProps }: CurrencyProps) {
   const effectiveFormat = useAppStore.use.numberFormat();
+  const effectiveCurrencyFormat = useAppStore.use.currencyFormat();
   return (
     <Text {...textProps}>
       {prefix}
-      {formatCurrency(value, currency, format ?? effectiveFormat)}
+      {formatCurrency(value, currency, format ?? effectiveFormat, effectiveCurrencyFormat)}
     </Text>
   );
 }

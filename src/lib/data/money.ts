@@ -3,7 +3,7 @@
  *
  * Single import path for all money-related operations:
  * - Cents conversion (amountToCents, centsToAmount)
- * - Currency formatting (formatCurrency, formatSignedCurrency, formatNumber)
+ * - Currency formatting (formatCurrency, formatNumber)
  * - Multi-currency conversion (convertAmount)
  * - String-to-cents parsing (parseToCents)
  */
@@ -15,7 +15,6 @@ export {
   centsToAmount,
   formatCurrency,
   formatNumber,
-  formatSignedCurrency,
 } from '@/features/formatting/helpers';
 
 /**

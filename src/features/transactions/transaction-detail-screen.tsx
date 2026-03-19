@@ -10,6 +10,7 @@ import { OutlineButton } from '@/components/ui/outline-button';
 import { formatCurrency, formatDate } from '@/features/formatting/helpers';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
+import { openSheet } from '@/lib/local-store';
 import { GhostButton } from '../../components/ui/ghost-button';
 import { useAccounts, useDeleteTransaction, useTransaction } from './api';
 import { TransactionForm } from './components/transaction-form';
@@ -62,6 +63,23 @@ export function TransactionDetailScreen() {
     ]);
   };
 
+  const handleMakeRecurring = () => {
+    if (transaction.type === 'transfer') return;
+    openSheet({
+      type: 'add-scheduled',
+      initialValues: {
+        type: transaction.type,
+        currency: transaction.currency,
+        amount: transaction.amount,
+        category_id: transaction.category_id,
+        account_id: transaction.account_id,
+        note: transaction.note,
+        start_date: unixToISODate(transaction.date),
+      },
+    });
+    router.replace('/scheduled');
+  };
+
   return (
     <View className="flex-1 px-4 pt-4">
       <FocusAwareStatusBar />
@@ -92,6 +110,17 @@ export function TransactionDetailScreen() {
       <View className="mb-6 justify-center">
         <OutlineButton label={translate('common.delete')} color="danger" onPress={handleDelete} className="rounded-3xl px-6" size="sm" />
       </View>
+
+      {transaction.type !== 'transfer' && (
+        <View className="mb-6 justify-center">
+          <OutlineButton
+            label={translate('transactions.make_recurring')}
+            onPress={handleMakeRecurring}
+            className="rounded-3xl px-6"
+            size="sm"
+          />
+        </View>
+      )}
 
       <View className="flex-row gap-2">
         <GhostButton color="secondary" label={translate('common.back')} onPress={() => router.back()} />

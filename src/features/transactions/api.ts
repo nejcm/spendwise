@@ -7,7 +7,6 @@ export * from './queries';
 export {
   useAccounts,
   useAccountsWithBalance,
-  useAccountsWithBalanceForMonth,
   useAccountsWithBalanceForRange,
   useTotalBalance,
 } from '@/features/accounts/hooks';

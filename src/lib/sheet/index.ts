@@ -1,4 +1,5 @@
 import type { AccountFormData } from '@/features/accounts/types';
+import type { CurrencyKey } from '@/features/currencies';
 
 // ---------------------------------------------------------------------------
 // Sheet config – discriminated union so each sheet carries exactly the data
@@ -11,7 +12,18 @@ export type SheetConfig
     | { type: 'edit-account'; accountId: string; initialData: AccountFormData }
     | { type: 'add-category' }
     | { type: 'edit-category'; categoryId: string; name: string; color: string; icon: string | null }
-    | { type: 'add-scheduled' };
+    | {
+      type: 'add-scheduled';
+      initialValues?: {
+        type?: 'income' | 'expense';
+        currency?: CurrencyKey;
+        amount?: number | string;
+        category_id?: string;
+        account_id?: string;
+        note?: string | null;
+        start_date?: string;
+      };
+    };
 
 export type SheetType = SheetConfig['type'];
 

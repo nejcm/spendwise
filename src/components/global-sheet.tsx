@@ -64,7 +64,13 @@ function SheetContent({ config, onClose }: { config: SheetConfig; onClose: () =>
         />
       );
     case 'add-scheduled':
-      return <ScheduledTransactionForm onSuccess={onClose} onCancel={onClose} />;
+      return (
+        <ScheduledTransactionForm
+          initialValues={config.initialValues}
+          onSuccess={onClose}
+          onCancel={onClose}
+        />
+      );
     default:
       return null;
   }

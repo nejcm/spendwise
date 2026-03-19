@@ -1,5 +1,5 @@
 import type { CurrencyKey } from '../currencies';
-import type { NumberFormat } from './constants';
+import type { CurrencyFormat, NumberFormat } from './constants';
 import { format, isToday, isYesterday } from 'date-fns';
 import { translate } from '@/lib/i18n';
 import { DEFAULT_DATE_FORMAT } from '../../config';
@@ -18,28 +18,6 @@ export function centsToAmount(cents: number): number {
  */
 export function amountToCents(amount: number): number {
   return Math.round(amount * 100);
-}
-
-/**
- * Format cents as a signed currency string for display.
- * Income shows +, expenses show -.
- */
-type SignedCurrencyOptions = {
-  cents: number;
-  type: 'income' | 'expense' | 'transfer';
-  currency?: string;
-  locale?: string;
-};
-
-export function formatSignedCurrency(options: SignedCurrencyOptions): string {
-  const { cents, type, currency = 'EUR', locale = 'en-US' } = options;
-  const amount = centsToAmount(cents);
-  const sign = type === 'income' ? '+' : '-';
-  const formatted = new Intl.NumberFormat(locale, {
-    style: 'currency',
-    currency,
-  }).format(amount);
-  return `${sign}${formatted}`;
 }
 
 const NUMBER_FORMAT_MAP: Record<NumberFormat, [string, Intl.NumberFormatOptions]> = {
@@ -68,19 +46,22 @@ export function formatNumber(value: number | string, numberFormat: NumberFormat)
  * formatting preferences. Those preferences are applied by higher-level
  * components when rendering textual values.
  */
-export function formatCurrency(value: number | string, currency: CurrencyKey, numberFormat: NumberFormat = 'comma'): string {
+export function formatCurrency(value: number | string, currency: CurrencyKey, numberFormat: NumberFormat = 'comma', currencyFormat: CurrencyFormat = 'symbol-before'): string {
   const number = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(number)) return String(value);
+  const isCode = currencyFormat === 'code-before' || currencyFormat === 'code-after';
 
   const [locale, opts] = NUMBER_FORMAT_MAP[numberFormat];
-  return new Intl.NumberFormat(locale, {
+  const formatted = new Intl.NumberFormat(locale, {
     useGrouping: true,
     maximumFractionDigits: 20,
     style: 'currency',
+    currencyDisplay: isCode ? 'code' : 'symbol',
     currency,
     unitDisplay: 'narrow',
     ...opts,
   }).format(centsToAmount(number));
+  return formatted;
 }
 
 /**
@@ -102,14 +83,6 @@ export function formatDate(unix: number, displayFormat?: string): string {
  */
 export function formatShortDate(unix: number): string {
   return format(new Date(unix * 1000), 'MMM d');
-}
-
-/**
- * Format a Unix seconds timestamp as month and year.
- * e.g., "March 2026"
- */
-export function formatMonthYear(unix: number): string {
-  return format(new Date(unix * 1000), 'MMMM yyyy');
 }
 
 /**

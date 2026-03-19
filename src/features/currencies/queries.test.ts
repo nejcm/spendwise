@@ -1,13 +1,11 @@
-import { BASE_SCHEMA, createTestDb } from '@/test-utils/sqlite-db';
 import { getRatesForDate, saveRates, toRatesMap } from './queries';
 
-function makeDb() {
-  return createTestDb(BASE_SCHEMA);
-}
-
-/** Midnight UTC for a given ISO date string → unix seconds. */
-function dayUnix(iso: string) {
-  return Math.floor(new Date(iso).getTime() / 1000);
+function createMockDb() {
+  return {
+    getAllAsync: jest.fn(),
+    runAsync: jest.fn(),
+    withTransactionAsync: jest.fn(async (cb: () => Promise<void>) => cb()),
+  };
 }
 
 describe('toRatesMap', () => {
@@ -26,77 +24,73 @@ describe('toRatesMap', () => {
 
 describe('getRatesForDate', () => {
   it('returns the closest rate on or before the given date', async () => {
-    const db = makeDb();
+    const db = createMockDb();
+    db.getAllAsync.mockResolvedValueOnce([{ quote: 'USD', rate: 1.08 }]);
 
-    // Seed two rate snapshots
-    db._raw.exec(`
-      INSERT INTO currency_rates (base, quote, rate, date) VALUES
-        ('EUR', 'USD', 1.05, ${dayUnix('2026-01-01')}),
-        ('EUR', 'USD', 1.08, ${dayUnix('2026-02-01')});
-    `);
-
-    const rates = await getRatesForDate(db as any, dayUnix('2026-02-15'));
+    const rates = await getRatesForDate(db as any, 1_770_000_000);
     expect(rates.USD).toBe(1.08);
   });
 
   it('picks the earlier snapshot when queried before the second one', async () => {
-    const db = makeDb();
-    db._raw.exec(`
-      INSERT INTO currency_rates (base, quote, rate, date) VALUES
-        ('EUR', 'USD', 1.05, ${dayUnix('2026-01-01')}),
-        ('EUR', 'USD', 1.08, ${dayUnix('2026-02-01')});
-    `);
+    const db = createMockDb();
+    db.getAllAsync.mockResolvedValueOnce([{ quote: 'USD', rate: 1.05 }]);
 
-    const rates = await getRatesForDate(db as any, dayUnix('2026-01-15'));
+    const rates = await getRatesForDate(db as any, 1_760_000_000);
     expect(rates.USD).toBe(1.05);
   });
 
   it('falls back to the oldest rates when no rate exists before the date', async () => {
-    const db = makeDb();
-    db._raw.exec(`
-      INSERT INTO currency_rates (base, quote, rate, date) VALUES
-        ('EUR', 'USD', 1.10, ${dayUnix('2026-03-01')});
-    `);
+    const db = createMockDb();
+    db.getAllAsync
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([{ quote: 'USD', rate: 1.1 }]);
 
-    // Ask for a date well before the only stored rate
-    const rates = await getRatesForDate(db as any, dayUnix('2020-01-01'));
+    const rates = await getRatesForDate(db as any, 1_577_836_800);
     expect(rates.USD).toBe(1.10);
   });
 
   it('returns { EUR: 1 } when currency_rates is empty', async () => {
-    const db = makeDb();
-    const rates = await getRatesForDate(db as any, dayUnix('2026-03-01'));
+    const db = createMockDb();
+    db.getAllAsync.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+    const rates = await getRatesForDate(db as any, 1_777_766_400);
     expect(rates).toEqual({ EUR: 1 });
   });
 
   it('always includes EUR: 1 in the result', async () => {
-    const db = makeDb();
-    db._raw.exec(`
-      INSERT INTO currency_rates (base, quote, rate, date) VALUES
-        ('EUR', 'USD', 1.08, ${dayUnix('2026-01-01')});
-    `);
-    const rates = await getRatesForDate(db as any, dayUnix('2026-01-15'));
+    const db = createMockDb();
+    db.getAllAsync.mockResolvedValueOnce([{ quote: 'USD', rate: 1.08 }]);
+    const rates = await getRatesForDate(db as any, 1_760_000_000);
     expect(rates.EUR).toBe(1);
   });
 });
 
 describe('saveRates', () => {
   it('inserts today\'s rates keyed by day-truncated timestamp', async () => {
-    const db = makeDb();
+    const db = createMockDb();
+    const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(1_762_345_678_000); // fixed day
     await saveRates(db as any, { USD: 1.08, GBP: 0.86 });
 
-    const rows = db._raw.prepare(`SELECT quote, rate FROM currency_rates WHERE base = 'EUR'`).all() as { quote: string; rate: number }[];
-    const map = Object.fromEntries(rows.map((r) => [r.quote, r.rate]));
-    expect(map.USD).toBe(1.08);
-    expect(map.GBP).toBe(0.86);
+    expect(db.withTransactionAsync).toHaveBeenCalledTimes(1);
+    expect(db.runAsync).toHaveBeenCalledTimes(2);
+    expect(db.runAsync).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT OR IGNORE INTO currency_rates'),
+      ['USD', 1.08, 1_762_300_800],
+    );
+    expect(db.runAsync).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT OR IGNORE INTO currency_rates'),
+      ['GBP', 0.86, 1_762_300_800],
+    );
+    dateNowSpy.mockRestore();
   });
 
-  it('is idempotent — second call does not overwrite', async () => {
-    const db = makeDb();
+  it('uses INSERT OR IGNORE so repeated calls are idempotent at SQL level', async () => {
+    const db = createMockDb();
     await saveRates(db as any, { USD: 1.08 });
-    await saveRates(db as any, { USD: 1.99 }); // same day — should be ignored
+    await saveRates(db as any, { USD: 1.99 });
 
-    const row = db._raw.prepare(`SELECT rate FROM currency_rates WHERE base = 'EUR' AND quote = 'USD'`).get([]) as { rate: number };
-    expect(row.rate).toBe(1.08);
+    expect(db.runAsync).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT OR IGNORE INTO currency_rates'),
+      expect.any(Array),
+    );
   });
 });

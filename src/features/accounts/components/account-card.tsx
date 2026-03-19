@@ -2,8 +2,7 @@ import type { AccountWithBalance } from '@/features/accounts/types';
 import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
-import { Text } from '@/components/ui';
-import { formatCurrency } from '@/features/formatting/helpers';
+import { FormattedCurrency, Text } from '@/components/ui';
 
 import { useAppStore } from '@/lib/store';
 import { ACCOUNT_TYPE_LABELS } from '../types';
@@ -33,12 +32,10 @@ export function AccountCard({ account, onPress }: Props) {
           </Text>
         </View>
         <View className="items-end">
-          <Text className="text-lg font-bold">
-            {formatCurrency(account.balance, account.currency)}
-          </Text>
-          <Text className="text-sm text-muted-foreground">
-            {showConverted && formatCurrency(account.baseBalance, userCurrency)}
-          </Text>
+          <FormattedCurrency value={account.balance} currency={account.currency} className="text-lg font-bold" />
+          {showConverted && (
+            <FormattedCurrency value={account.baseBalance} currency={userCurrency} className="text-sm text-muted-foreground" />
+          )}
         </View>
       </View>
     </Pressable>

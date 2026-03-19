@@ -3,10 +3,10 @@ import * as React from 'react';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import DetailsSection from '@/components/details';
-import { FocusAwareStatusBar, FormattedDate, SolidButton, Text } from '@/components/ui';
+import { FocusAwareStatusBar, FormattedCurrency, FormattedDate, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { OutlineButton } from '@/components/ui/outline-button';
-import { formatCurrency, formatDate } from '@/features/formatting/helpers';
+import { formatDate } from '@/features/formatting/helpers';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { GhostButton } from '../../components/ui/ghost-button';
@@ -90,10 +90,12 @@ export function ScheduledTransactionDetailScreen() {
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 py-8">
         <View className="items-center pb-6">
-          <Text className={`text-4xl font-bold ${rule.type === 'income' ? 'text-success-600' : ''}`}>
-            {rule.type === 'income' ? '+' : '-'}
-            {formatCurrency(rule.amount, rule.currency)}
-          </Text>
+          <FormattedCurrency
+            value={rule.amount}
+            currency={rule.currency}
+            prefix={rule.type === 'income' ? '+' : '-'}
+            className={`text-4xl font-bold ${rule.type === 'income' ? 'text-success-600' : ''}`}
+          />
           <Text className="mt-1 text-gray-500">
             {translate(`scheduled.frequencyOptions.${rule.frequency}`)}
             {' '}

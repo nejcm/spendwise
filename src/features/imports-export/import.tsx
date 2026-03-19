@@ -7,9 +7,8 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 
 import { ScrollView, View } from 'react-native';
-import { Select, SolidButton, Text } from '@/components/ui';
+import { FormattedCurrency, Select, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
-import { formatCurrency } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { OutlineButton } from '../../components/ui/outline-button';
 import { useAccounts } from '../accounts/api';
@@ -126,11 +125,11 @@ function PreviewStep({
             <Text className="text-sm font-medium">{row.note || '—'}</Text>
             <Text className="text-xs text-gray-500">{row.date}</Text>
           </View>
-          <Text
+          <FormattedCurrency
+            value={Math.abs(row.amount)}
+            currency={currency}
             className="text-sm font-medium"
-          >
-            {formatCurrency(Math.abs(row.amount), currency)}
-          </Text>
+          />
         </View>
       ))}
       {preview.length > 10 && (

@@ -3,8 +3,7 @@ import { FileWarning, Pencil, PencilOff } from 'lucide-react-native';
 import * as React from 'react';
 import { Pressable } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
-import { FocusAwareStatusBar, Text, View } from '@/components/ui';
-import { formatCurrency } from '@/features/formatting/helpers';
+import { FocusAwareStatusBar, FormattedCurrency, Text, View } from '@/components/ui';
 import { useCategorySpendByRange } from '@/features/insights/api';
 import { useUpdateCategoryOrder } from '@/features/transactions/api';
 import { getPeriodRange } from '@/lib/date/helpers';
@@ -42,7 +41,7 @@ export function CategoriesScreen() {
           className="items-center justify-center"
           hitSlop={10}
         >
-          <Text className="text-xl font-medium">{formatCurrency(total, currency)}</Text>
+          <FormattedCurrency value={total} currency={currency} className="text-xl font-medium" />
         </Pressable>
         <IconButton
           size="sm"

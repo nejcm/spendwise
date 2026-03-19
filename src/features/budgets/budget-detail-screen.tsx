@@ -3,14 +3,13 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 
 import { View } from 'react-native';
-import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
+import { FocusAwareStatusBar, FormattedCurrency, ScrollView, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { OutlineButton } from '@/components/ui/outline-button';
 import { translate } from '@/lib/i18n';
 
 import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
-import { formatCurrency } from '../formatting/helpers';
 import { useBudgetWithProgress, useDeleteBudget } from './api';
 import { BudgetProgressBar } from './components/budget-progress-bar';
 
@@ -52,12 +51,12 @@ export function BudgetDetailScreen() {
           </View>
           <View className="mt-2 w-full flex-row justify-between">
             <Text className="text-sm text-gray-500">
-              {formatCurrency(budget.total_spent, currency)}
+              <FormattedCurrency value={budget.total_spent} currency={currency} />
               {' '}
               {translate('budgets.spent')}
             </Text>
             <Text className={`text-sm font-medium ${remaining < 0 ? 'text-danger-500' : 'text-success-600'}`}>
-              {formatCurrency(Math.abs(remaining), currency)}
+              <FormattedCurrency value={Math.abs(remaining)} currency={currency} />
               {' '}
               {remaining < 0 ? translate('budgets.over') : translate('budgets.left')}
             </Text>
@@ -93,16 +92,15 @@ function CategoryBudgetRow({ line, currency }: { line: any; currency: CurrencyKe
           <Text className="text-sm font-medium">{line.category_name}</Text>
         </View>
         <Text className="text-sm text-gray-500">
-          {formatCurrency(line.spent, currency)}
-          {' '}
-          /
-          {formatCurrency(line.amount, currency)}
+          <FormattedCurrency value={line.spent} currency={currency} />
+          {' / '}
+          <FormattedCurrency value={line.amount} currency={currency} />
         </Text>
       </View>
       <BudgetProgressBar spent={line.spent} total={line.amount} height={6} />
       {ratio > 1 && (
         <Text className="mt-1 text-xs text-danger-500">
-          {formatCurrency(line.spent - line.amount, currency)}
+          <FormattedCurrency value={line.spent - line.amount} currency={currency} />
           {' '}
           {translate('budgets.over')}
         </Text>

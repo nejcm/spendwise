@@ -1,10 +1,9 @@
 import type { CurrencyKey } from '../../currencies';
 
 import * as React from 'react';
-import { Text, View } from '@/components/ui';
+import { FormattedCurrency, Text, View } from '@/components/ui';
 import { useCategorySpendByRange } from '@/features/insights/api';
 import { translate } from '@/lib/i18n';
-import { formatCurrency } from '../../formatting/helpers';
 
 export type CategoryBreakdownProps = {
   startDate: number;
@@ -66,9 +65,7 @@ export function CategoryBreakdown({
                       {category.category_name}
                     </Text>
                   </View>
-                  <Text className="text-sm font-medium text-foreground">
-                    {formatCurrency(category.total, currency)}
-                  </Text>
+                  <FormattedCurrency value={category.total} currency={currency} className="text-sm font-medium text-foreground" />
                 </View>
                 <View className="h-1.5 rounded-full bg-muted">
                   <View

@@ -61,7 +61,7 @@ export async function getBudgetLinesWithSpent(
        c.color as category_color,
        c.icon as category_icon,
        COALESCE(
-         (SELECT SUM(t.amount) FROM transactions t
+         (SELECT SUM(t.baseAmount) FROM transactions t
           WHERE t.category_id = bl.category_id
           AND t.type = 'expense'
           AND t.date >= ? AND t.date < ?),

@@ -19,6 +19,7 @@ export const TransactionCard = React.memo(({ transaction, onPress, className }: 
   const currency = useAppStore.use.currency();
   const isIncome = transaction.type === 'income';
   const displayName = transaction.category_name || 'Unknown';
+  const showConverted = transaction.currency !== currency;
 
   return (
     <Pressable className={cn('flex-row items-center gap-3 p-3', className)} onPress={onPress}>
@@ -41,12 +42,17 @@ export const TransactionCard = React.memo(({ transaction, onPress, className }: 
           {transaction.note ? ` · ${transaction.note}` : ''}
         </Text>
       </View>
-      <Text
-        className={`text-base font-medium ${isIncome ? 'text-success-600' : 'text-gray-900 dark:text-gray-100'}`}
-      >
-        {isIncome ? '+' : '-'}
-        {formatCurrency(transaction.amount, currency)}
-      </Text>
+      <View className="items-end">
+        <Text
+          className={`text-base font-medium ${isIncome ? 'text-success-600' : ''}`}
+        >
+          {isIncome ? '+' : '-'}
+          {formatCurrency(transaction.baseAmount, transaction.baseCurrency)}
+        </Text>
+        <Text className="text-sm text-muted-foreground">
+          {showConverted && formatCurrency(transaction.amount, transaction.currency)}
+        </Text>
+      </View>
     </Pressable>
   );
 });

@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 import { Plus } from 'lucide-react-native';
+import { Skeleton } from 'moti/skeleton';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import NoData from '@/components/no-data';
@@ -8,16 +9,33 @@ import { formatCurrency, formatDate } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/local-store';
 import { defaultStyles } from '@/lib/theme/styles';
+import SkeletonContainer from '../../components/ui/skeleton';
 import { useScheduledTransactions } from './api';
 
 export function ScheduledTransactionsScreen() {
   const router = useRouter();
-  const { data: rules = [] } = useScheduledTransactions();
+  const { data: rules = [], isLoading } = useScheduledTransactions();
 
   const [activeRules, inactiveRules] = React.useMemo(() => {
     return [rules.filter((rule) => rule.is_active), rules.filter((rule) => !rule.is_active)];
   }, [rules]);
 
+  if (isLoading) {
+    return (
+      <View className="flex-1 px-4 py-10">
+
+        <SkeletonContainer className="flex-col gap-2">
+          {(props) => (
+            <>
+              <Skeleton {...props} height={44} />
+              <Skeleton {...props} height={44} width="60%" />
+              <Skeleton {...props} height={44} width="80%" />
+            </>
+          )}
+        </SkeletonContainer>
+      </View>
+    );
+  }
   return (
     <View className="flex-1">
       <FocusAwareStatusBar />

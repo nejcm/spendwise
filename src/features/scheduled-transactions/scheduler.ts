@@ -6,8 +6,11 @@ import type {
   ScheduledTransactionFrequency,
 } from './types';
 import { addDays, addMonths, addWeeks, addYears, format, parseISO } from 'date-fns';
+import { computeBaseAmount } from '@/features/currencies/conversion';
+import { getRatesForDate } from '@/features/currencies/queries';
 import { unixToISODate } from '@/lib/date/helpers';
 import { generateId } from '@/lib/sqlite';
+import { getAppState } from '@/lib/store';
 
 export { unixToISODate };
 
@@ -144,6 +147,9 @@ export async function processDueScheduledTransactions(
       for (const dueDateUnix of plan.dueDates) {
         const transactionId = generateId();
         const transactionNote = buildGeneratedTransactionNote(rule.note);
+        const preferredCurrency = getAppState().currency;
+        const rates = await getRatesForDate(db, dueDateUnix);
+        const baseAmount = computeBaseAmount(rule.amount, rule.currency, preferredCurrency, rates);
 
         await db.runAsync(
           `INSERT INTO transactions (
@@ -153,10 +159,12 @@ export async function processDueScheduledTransactions(
             type,
             amount,
             currency,
+            baseAmount,
+            baseCurrency,
             date,
             note
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             transactionId,
             rule.account_id,
@@ -164,6 +172,8 @@ export async function processDueScheduledTransactions(
             rule.type,
             rule.amount,
             rule.currency,
+            baseAmount,
+            preferredCurrency,
             dueDateUnix,
             transactionNote,
           ],

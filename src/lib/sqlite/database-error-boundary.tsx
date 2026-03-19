@@ -1,19 +1,14 @@
 import * as React from 'react';
 import { Text, View } from 'react-native';
+import { SolidButton } from '@/components/ui/button';
+import { translate } from '@/lib/i18n';
 import { OPFS_CLEAR_FLAG } from './opfs-cleaner';
 
-export class DatabaseErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  { error: Error | null; clearing: boolean }
-> {
-  state = { error: null, clearing: false };
+function ErrorBody() {
+  const [loading, setLoading] = React.useState(false);
 
-  static getDerivedStateFromError(error: Error) {
-    return { error };
-  }
-
-  handleClear = () => {
-    this.setState({ clearing: true });
+  const handleClear = () => {
+    setLoading(true);
     // Phase 1: flag + reload so the Worker terminates and releases OPFS handles.
     if (typeof sessionStorage !== 'undefined') {
       sessionStorage.setItem(OPFS_CLEAR_FLAG, '1');
@@ -21,29 +16,39 @@ export class DatabaseErrorBoundary extends React.Component<
     window.location.reload();
   };
 
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+      <Text className="mb-2 text-xl font-bold">
+        {translate('errors.database_unavailable')}
+      </Text>
+      <Text className="mb-6 text-center text-muted-foreground">
+        {translate('errors.database_unavailable_desc')}
+      </Text>
+      <View className="items-center justify-center gap-2">
+        <SolidButton
+          onPress={handleClear}
+          color="danger"
+          className="min-w-40"
+          label={translate('errors.db_clear_btn')}
+          loading={loading}
+        />
+      </View>
+    </View>
+  );
+}
+
+export class DatabaseErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { error: Error | null }
+> {
+  state = { error: null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+
   render() {
-    if (this.state.error) {
-      return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 8 }}>
-            Database unavailable
-          </Text>
-          <Text style={{ textAlign: 'center', color: '#666', marginBottom: 24 }}>
-            The database storage is in a broken state.
-          </Text>
-          <Text
-            onPress={this.state.clearing ? undefined : this.handleClear}
-            style={{
-              color: this.state.clearing ? '#999' : '#007AFF',
-              fontSize: 16,
-              fontWeight: '600',
-            }}
-          >
-            {this.state.clearing ? 'Restarting…' : 'Clear storage & restart'}
-          </Text>
-        </View>
-      );
-    }
+    if (this.state.error) return <ErrorBody />;
     return this.props.children;
   }
 }

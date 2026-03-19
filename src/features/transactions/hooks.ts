@@ -4,8 +4,12 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { useSQLiteContext } from 'expo-sqlite';
 
+import { computeBaseAmount } from '@/features/currencies/conversion';
+import { getRatesForDate } from '@/features/currencies/queries';
+import { amountToCents } from '@/features/formatting/helpers';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
+import { getAppState } from '@/lib/store';
 
 import * as queries from './queries';
 
@@ -51,7 +55,13 @@ export function useCreateTransaction() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: TransactionFormData) => queries.createTransaction(db, data),
+    mutationFn: async (data: TransactionFormData) => {
+      const preferredCurrency = getAppState().currency;
+      const rates = await getRatesForDate(db, data.date);
+      const amountCents = amountToCents(data.amount || 0);
+      const baseAmount = computeBaseAmount(amountCents, data.currency, preferredCurrency, rates);
+      return queries.createTransaction(db, data, baseAmount, preferredCurrency);
+    },
     onSuccess: () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       invalidateFor(queryClient, 'transaction');
@@ -64,8 +74,13 @@ export function useUpdateTransaction() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (params: { id: string; data: TransactionFormData }) =>
-      queries.updateTransaction(db, params.id, params.data),
+    mutationFn: async (params: { id: string; data: TransactionFormData }) => {
+      const preferredCurrency = getAppState().currency;
+      const rates = await getRatesForDate(db, params.data.date);
+      const amountCents = amountToCents(params.data.amount || 0);
+      const baseAmount = computeBaseAmount(amountCents, params.data.currency, preferredCurrency, rates);
+      return queries.updateTransaction(db, params.id, params.data, baseAmount, preferredCurrency);
+    },
     onSuccess: () => {
       invalidateFor(queryClient, 'transaction');
     },

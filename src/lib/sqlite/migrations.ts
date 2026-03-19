@@ -1,7 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import { seedDefaults } from './seed';
+import { seedBundledRates, seedDefaults } from './seed';
 
-const DATABASE_VERSION = 1;
+const DATABASE_VERSION = 2;
 
 /**
  * Clears all data from the database.
@@ -92,7 +92,8 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           type TEXT NOT NULL CHECK(type IN ('income','expense','transfer')),
           amount INTEGER NOT NULL,
           currency TEXT NOT NULL DEFAULT 'EUR',
-          baseAmount INTEGER NOT NULL,
+          baseAmount INTEGER NOT NULL DEFAULT 0,
+          baseCurrency TEXT NOT NULL DEFAULT 'EUR',
           date INTEGER NOT NULL,
           note TEXT,
           created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
@@ -121,13 +122,12 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           UNIQUE(budget_id, category_id)
         );
 
-         CREATE TABLE IF NOT EXISTS currency_rates (
-          base       TEXT NOT NULL,
-          quote      TEXT NOT NULL,
-          rate       REAL NOT NULL,
-          source     TEXT NOT NULL,
-          fetched_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
-          PRIMARY KEY (base, quote)
+        CREATE TABLE IF NOT EXISTS currency_rates (
+          base TEXT NOT NULL,
+          quote TEXT NOT NULL,
+          rate REAL NOT NULL,
+          date INTEGER NOT NULL,
+          PRIMARY KEY (base, quote, date)
         );
 
         CREATE TABLE IF NOT EXISTS recurring_rules (
@@ -162,7 +162,35 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           ON recurring_rule_runs(rule_id, scheduled_for_date);
       `);
 
+    await seedBundledRates(db);
     await seedDefaults(db);
     await db.execAsync(`PRAGMA user_version = 1`);
+  }
+
+  // v2 — add multi-currency columns & backfill baseAmount for pre-existing transactions
+  if (currentDbVersion < 2) {
+    // Add columns only if missing (fresh v1 installs already have them).
+    const col = await db.getFirstAsync<{ count: number }>(
+      `SELECT COUNT(*) as count FROM pragma_table_info('transactions') WHERE name = 'baseAmount'`,
+    );
+    if (!col?.count) {
+      await db.execAsync(`ALTER TABLE transactions ADD COLUMN baseAmount INTEGER NOT NULL DEFAULT 0`);
+      await db.execAsync(`ALTER TABLE transactions ADD COLUMN baseCurrency TEXT NOT NULL DEFAULT 'EUR'`);
+    }
+
+    // Backfill: use the transaction's own amount as a same-currency approximation.
+    // For single-currency users this is exact; for multi-currency it is the best we
+    // can do without fetching historical rates at migration time.
+    await db.execAsync(
+      `UPDATE transactions SET baseAmount = amount, baseCurrency = currency WHERE baseAmount = 0 AND amount != 0`,
+    );
+
+    // Seed bundled rates if the table is empty (upgrading users who never had them).
+    const rateCount = await db.getFirstAsync<{ count: number }>(`SELECT COUNT(*) as count FROM currency_rates`);
+    if (!rateCount?.count) {
+      await seedBundledRates(db);
+    }
+
+    await db.execAsync(`PRAGMA user_version = 2`);
   }
 }

@@ -1,12 +1,13 @@
-import type { ThemeType } from '../../settings/theme';
-
 import type { OptionType } from '@/components/ui';
+import type { CurrencyKey } from '@/features/currencies';
+import type { Language } from '@/features/languages/types';
 import * as React from 'react';
-import { Options, SolidButton, Text, useModal } from '@/components/ui';
+import { Image, Options, SolidButton, Text, useModal, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
-import { translate } from '@/lib/i18n';
-import { useSelectedTheme } from '@/lib/theme/use-selected-theme';
-import { THEMES_OPTIONS } from '../../settings/theme';
+import { CURRENCIES_MAP, CURRENCY_OPTIONS } from '@/features/currencies';
+import { LANGUAGES_OPTIONS } from '@/features/languages';
+import { translate, useSelectedLanguage } from '@/lib/i18n';
+import { setCurrency, useAppStore } from '@/lib/store';
 import OnboardingLayout from '../layout';
 
 export type SettingsStepProps = {
@@ -16,18 +17,26 @@ export type SettingsStepProps = {
 };
 
 export default function SettingsStep({ onBack, onNext, currentStep }: SettingsStepProps) {
-  const { selectedTheme, setSelectedTheme } = useSelectedTheme();
-  const modal = useModal();
+  const { selected, setLanguage } = useSelectedLanguage();
+  const currency = useAppStore.use.currency();
+  const selectedCurrency = CURRENCIES_MAP[currency];
 
+  const modal = useModal();
+  const currencyModal = useModal();
   const onSelect = React.useCallback(
     (option: OptionType) => {
-      setSelectedTheme(option.value as ThemeType);
+      setLanguage(option.value as Language);
       modal.dismiss();
     },
-    [setSelectedTheme, modal],
+    [setLanguage, modal],
   );
-
-  const theme = React.useMemo(() => THEMES_OPTIONS.find((t) => t.value === selectedTheme), [selectedTheme]);
+  const onSelectCurrency = React.useCallback(
+    (option: OptionType) => {
+      setCurrency(option.value as CurrencyKey);
+      currencyModal.dismiss();
+    },
+    [currencyModal],
+  );
 
   return (
     <>
@@ -40,12 +49,10 @@ export default function SettingsStep({ onBack, onNext, currentStep }: SettingsSt
             <GhostButton
               label={translate('common.back')}
               size="lg"
-              fullWidth={false}
               onPress={onBack}
-              accessibilityLabel={translate('common.back')}
             />
             <SolidButton
-              label={translate('onboarding.finish_setup')}
+              label={translate('common.next')}
               onPress={onNext}
               className="flex-1"
               size="lg"
@@ -53,13 +60,33 @@ export default function SettingsStep({ onBack, onNext, currentStep }: SettingsSt
           </>
         )}
       >
-        <Text className="mb-4 text-center text-lg text-gray-400">
-          {translate('onboarding.select_theme')}
-        </Text>
-        <GhostButton size="xl" className="text-4xl" onPress={modal.present}>
-          <Text className="text-4xl">{theme?.label}</Text>
-        </GhostButton>
-        <Options ref={modal.ref} options={THEMES_OPTIONS} onSelect={onSelect} value={theme?.value} />
+        <View className="flex-col gap-10">
+          <View className="flex-col items-center gap-1">
+            <Text className="text-center text-lg text-muted-foreground">
+              {translate('onboarding.select_language')}
+            </Text>
+            <GhostButton size="xl" className="items-center gap-4" onPress={modal.present}>
+              <Image source={selected.image} className="size-10 rounded-full" />
+              <Text className="text-4xl text-foreground">{selected.name}</Text>
+            </GhostButton>
+            <Options ref={modal.ref} options={LANGUAGES_OPTIONS} onSelect={onSelect} value={selected?.value} />
+          </View>
+          <View className="flex-col items-center gap-1">
+            <Text className="text-center text-lg text-muted-foreground">
+              {translate('settings.default_currency')}
+            </Text>
+            <GhostButton size="xl" className="items-center gap-4" onPress={currencyModal.present}>
+              <Image source={selectedCurrency.image} className="size-10 rounded-full" />
+              <Text className="text-4xl text-foreground">{selectedCurrency.value}</Text>
+            </GhostButton>
+            <Options
+              ref={currencyModal.ref}
+              options={CURRENCY_OPTIONS}
+              onSelect={onSelectCurrency}
+              value={selectedCurrency.value}
+            />
+          </View>
+        </View>
       </OnboardingLayout>
     </>
   );

@@ -7,8 +7,10 @@ export type Transaction = {
   account_id: string;
   category_id: string;
   type: TransactionType;
-  amount: number; // cents
+  amount: number; // cents in transaction's own currency
   currency: CurrencyKey;
+  baseAmount: number; // cents in user's preferred currency at time of creation
+  baseCurrency: CurrencyKey; // the preferred currency at time of creation
   date: number; // Unix seconds
   note: string | null;
   created_at: number; // Unix seconds

@@ -17,7 +17,9 @@
       "Bash(la*)",
       "Bash(pnpm test:*)",
       "Bash(pnpm exec:*)",
-      "Bash(find *)"
+      "Bash(find *)",
+      "Bash(node -e *)",
+      "Bash(npx jest:*)"
     ]
   }
 }

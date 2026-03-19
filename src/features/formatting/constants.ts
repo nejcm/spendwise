@@ -22,5 +22,6 @@ export const DATE_FORMAT_OPTIONS = [
   'MM.dd.yyyy', // 03.12.2026
   'dd MMMM, yyyy', // 12 March, 2026
   'MMMM dd, yyyy', // March 12, 2026
+  'MMM d, yyyy', // Mar 12, 2026
 ] as const;
 export type DateFormat = (typeof DATE_FORMAT_OPTIONS)[number];

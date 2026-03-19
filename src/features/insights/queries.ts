@@ -15,8 +15,8 @@ export async function getSummaryByRange(
 ): Promise<MonthSummary> {
   const row = await db.getFirstAsync<{ income: number; expense: number }>(
     `SELECT
-       COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) as income,
-       COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) as expense
+       COALESCE(SUM(CASE WHEN type = 'income' THEN baseAmount ELSE 0 END), 0) as income,
+       COALESCE(SUM(CASE WHEN type = 'expense' THEN baseAmount ELSE 0 END), 0) as expense
      FROM transactions
      WHERE date >= ? AND date < ?`,
     [startDate, endDate],
@@ -37,15 +37,20 @@ export async function getCategorySpendByRange(
        c.name as category_name,
        c.color as category_color,
        c.icon as category_icon,
-       COALESCE(t.type, 'expense') as category_type,
        c.sort_order as sort_order,
-       COALESCE(SUM(t.amount), 0) as total,
-       COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0) as income_total,
-       COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END), 0) as expense_total
+       COALESCE(SUM(t.baseAmount), 0) as total,
+       COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0) as income_total,
+       COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0) as expense_total,
+       CASE
+         WHEN COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0) >
+              COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0)
+         THEN 'income'
+         ELSE 'expense'
+       END as category_type
      FROM categories c
      LEFT JOIN transactions t ON t.category_id = c.id
        AND t.type IN ('income','expense') AND t.date >= ? AND t.date < ?
-     GROUP BY c.id, c.name, c.color, c.icon, COALESCE(t.type, 'expense'), c.sort_order
+     GROUP BY c.id, c.name, c.color, c.icon, c.sort_order
      ORDER BY c.sort_order ASC`,
     [startDate, endDate],
   );
@@ -66,8 +71,8 @@ export async function getTrendByRange(
   return db.getAllAsync<DailyTrendTotal>(
     `SELECT
        date,
-       COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) as income,
-       COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) as expense
+       COALESCE(SUM(CASE WHEN type = 'income' THEN baseAmount ELSE 0 END), 0) as income,
+       COALESCE(SUM(CASE WHEN type = 'expense' THEN baseAmount ELSE 0 END), 0) as expense
      FROM transactions
      WHERE date >= ? AND date < ?
      GROUP BY date
@@ -85,8 +90,8 @@ export async function getYearlySummary(
 
   const row = await db.getFirstAsync<{ income: number; expense: number }>(
     `SELECT
-       COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) as income,
-       COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) as expense
+       COALESCE(SUM(CASE WHEN type = 'income' THEN baseAmount ELSE 0 END), 0) as income,
+       COALESCE(SUM(CASE WHEN type = 'expense' THEN baseAmount ELSE 0 END), 0) as expense
      FROM transactions
      WHERE date >= ? AND date < ?`,
     [startDate, endDate],
@@ -110,13 +115,20 @@ export async function getCategorySpendForYear(
        c.name as category_name,
        c.color as category_color,
        c.icon as category_icon,
-       COALESCE(t.type, 'expense') as category_type,
        c.sort_order as sort_order,
-       COALESCE(SUM(t.amount), 0) as total
+       COALESCE(SUM(t.baseAmount), 0) as total,
+       COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0) as income_total,
+       COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0) as expense_total,
+       CASE
+         WHEN COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0) >
+              COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0)
+         THEN 'income'
+         ELSE 'expense'
+       END as category_type
      FROM categories c
      LEFT JOIN transactions t ON t.category_id = c.id
        AND t.type IN ('income','expense') AND t.date >= ? AND t.date < ?
-     GROUP BY c.id, c.name, c.color, c.icon, COALESCE(t.type, 'expense'), c.sort_order
+     GROUP BY c.id, c.name, c.color, c.icon, c.sort_order
      ORDER BY c.sort_order ASC`,
     [startDate, endDate],
   );
@@ -146,8 +158,8 @@ export async function getMonthlyTrend(
 
     const row = await db.getFirstAsync<{ income: number; expense: number }>(
       `SELECT
-         COALESCE(SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END), 0) as income,
-         COALESCE(SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END), 0) as expense
+         COALESCE(SUM(CASE WHEN type = 'income' THEN baseAmount ELSE 0 END), 0) as income,
+         COALESCE(SUM(CASE WHEN type = 'expense' THEN baseAmount ELSE 0 END), 0) as expense
        FROM transactions
        WHERE date >= ? AND date < ?`,
       [startDate, endDate],

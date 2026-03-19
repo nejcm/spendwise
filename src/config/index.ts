@@ -1,3 +1,6 @@
+import type { CurrencyKey } from '../features/currencies';
+import type { DateFormat } from '../features/formatting/constants';
+
 export const config = {
   appName: 'Spendwise',
   links: {
@@ -7,5 +10,6 @@ export const config = {
   },
 };
 
-export const DEFAULT_DATE_FORMAT = 'MMM d, yyyy';
-export const DEFAULT_CURRENCY = 'EUR';
+export const DEFAULT_DATE_FORMAT = 'MMM d, yyyy' satisfies DateFormat;
+export const DEFAULT_CURRENCY = 'EUR' satisfies CurrencyKey;
+export const DEFAULT_USER_CURRENCY = 'USD' satisfies CurrencyKey;

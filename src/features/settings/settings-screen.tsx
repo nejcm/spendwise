@@ -125,12 +125,12 @@ export function SettingsScreen() {
             <SettingsContainer title="settings.dev">
               <SettingsItem text="settings.clear" icon={<DatabaseZap className={iconColor} size={20} />} onPress={() => clearData(db, queryClient)} />
               <SettingsItem text="settings.reset" icon={<DatabaseBackupIcon className={iconColor} size={20} />} onPress={() => resetData(db, queryClient)} />
-              <SettingsItem text="settings.dump_db" icon={<Printer className={iconColor} size={20} />} onPress={() => dumpDbTables(db)} />
               <SettingsItem
                 text="settings.mock_data"
                 icon={<Database className={iconColor} size={20} />}
                 onPress={() => seedMockData(db, queryClient)}
               />
+              <SettingsItem text="settings.dump_db" icon={<Printer className={iconColor} size={20} />} onPress={() => dumpDbTables(db)} />
             </SettingsContainer>
           )}
 

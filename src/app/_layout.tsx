@@ -28,7 +28,7 @@ import { SecurityLock } from '@/features/security/security-lock';
 import { APIProvider } from '@/lib/api';
 import { IS_WEB } from '@/lib/base';
 
-import { DatabaseErrorBoundary, migrateDb } from '@/lib/sqlite';
+import { DatabaseErrorBoundary, migrateDb, OpfsCleaner } from '@/lib/sqlite';
 import { loadSelectedTheme, useSelectedTheme } from '@/lib/theme/use-selected-theme';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 // Import  global CSS file
@@ -147,23 +147,25 @@ function Providers({ children }: { children: React.ReactNode }) {
     >
       <KeyboardProvider>
         <ThemeProvider value={theme}>
-          <DatabaseErrorBoundary>
-            <SQLiteProvider databaseName="spendwise.db" onInit={initDb}>
-              <AppErrorBoundary>
-                <APIProvider>
-                  <ScheduledTransactionsProcessor />
-                  <CurrencyRatesInitializer />
-                  <FontLoader>
-                    <BottomSheetModalProvider>
-                      {children}
-                      <FlashMessage position="top" />
-                      <DevThemeToggle />
-                    </BottomSheetModalProvider>
-                  </FontLoader>
-                </APIProvider>
-              </AppErrorBoundary>
-            </SQLiteProvider>
-          </DatabaseErrorBoundary>
+          <OpfsCleaner>
+            <DatabaseErrorBoundary>
+              <SQLiteProvider databaseName="spendwise.db" onInit={initDb}>
+                <AppErrorBoundary>
+                  <APIProvider>
+                    <ScheduledTransactionsProcessor />
+                    <CurrencyRatesInitializer />
+                    <FontLoader>
+                      <BottomSheetModalProvider>
+                        {children}
+                        <FlashMessage position="top" />
+                        <DevThemeToggle />
+                      </BottomSheetModalProvider>
+                    </FontLoader>
+                  </APIProvider>
+                </AppErrorBoundary>
+              </SQLiteProvider>
+            </DatabaseErrorBoundary>
+          </OpfsCleaner>
         </ThemeProvider>
       </KeyboardProvider>
     </GestureHandlerRootView>

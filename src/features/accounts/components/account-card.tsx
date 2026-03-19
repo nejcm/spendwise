@@ -14,7 +14,8 @@ type Props = {
 };
 
 export function AccountCard({ account, onPress }: Props) {
-  const currency = useAppStore.use.currency();
+  const userCurrency = useAppStore.use.currency();
+  const showConverted = account.currency !== userCurrency;
 
   return (
     <Pressable
@@ -31,9 +32,14 @@ export function AccountCard({ account, onPress }: Props) {
             {ACCOUNT_TYPE_LABELS[account.type as keyof typeof ACCOUNT_TYPE_LABELS] || account.type}
           </Text>
         </View>
-        <Text className="text-lg font-bold">
-          {formatCurrency(account.balance, currency)}
-        </Text>
+        <View className="items-end">
+          <Text className="text-lg font-bold">
+            {formatCurrency(account.balance, account.currency)}
+          </Text>
+          <Text className="text-sm text-muted-foreground">
+            {showConverted && formatCurrency(account.baseBalance, userCurrency)}
+          </Text>
+        </View>
       </View>
     </Pressable>
   );

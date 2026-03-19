@@ -102,6 +102,7 @@
     "clearing_database_storage": "Clearing database storage…",
     "complete": "Complete",
     "completed": "Completed",
+    "confirm": "Confirm",
     "delete": "Delete",
     "description": "Description",
     "description_placeholder": "Optional notes",
@@ -162,7 +163,11 @@
     }
   },
   "errors": {
+    "database_unavailable": "Database unavailable",
+    "database_unavailable_desc": "The database storage is in a broken state.",
+    "db_clear_btn": "Clear storage",
     "description": "Please restart the app or contact support if the problem persists.",
+    "reset_db_btn": "Reset database",
     "title": "An unexpected error occurred"
   },
   "home": {
@@ -299,6 +304,8 @@
     "app_name": "App Name",
     "categories": "Categories",
     "category_name": "Category Name",
+    "changeCurrencyTitle": "Change currency",
+    "changeCurrencyWarning": "Changing your display currency will recalculate all transaction totals using historical rates. This may take a moment.",
     "clear": "Clear",
     "currency_format": "Currency format",
     "date_format": "Date format",
@@ -320,6 +327,7 @@
       "dateFormat": {
         "MM.dd.yyyy": "02.15.2026",
         "MM/dd/yyyy": "02/15/2026",
+        "MMM d, yyyy": "Feb 15, 2026",
         "MMMM dd, yyyy": "February 15, 2026",
         "dd MMMM, yyyy": "15 February, 2026",
         "dd.MM.yyyy": "15.02.2026",

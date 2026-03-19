@@ -26,14 +26,6 @@ export function useAccountsWithBalance() {
   });
 }
 
-export function useAccountsWithBalanceForMonth(yearMonth: string) {
-  const db = useSQLiteContext();
-  return useQuery({
-    queryKey: queryKeys.accounts.withBalanceForMonth(yearMonth),
-    queryFn: () => queries.getAccountsWithBalanceForMonth(db, yearMonth),
-  });
-}
-
 export function useAccountsWithBalanceForRange(startDate: number, endDate: number) {
   const db = useSQLiteContext();
   return useQuery({

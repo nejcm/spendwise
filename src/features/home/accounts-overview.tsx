@@ -6,15 +6,17 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { Text } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { formatCurrency } from '@/features/formatting/helpers';
-import { useAccountsWithBalanceForMonth } from '@/features/transactions/api';
+import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { defaultStyles } from '@/lib/theme/styles';
 import { NoDataCard } from '../../components/no-data-card';
+import { useAccountsWithBalanceForRange } from '../accounts/hooks';
 
 export function AccountsOverview() {
   const router = useRouter();
   const currentMonth = React.useMemo(() => format(new Date(), 'yyyy-MM'), []);
-  const { data: accounts = [] } = useAccountsWithBalanceForMonth(currentMonth);
+  const [startDate, endDate] = React.useMemo(() => getCurrentMonthRange(currentMonth), [currentMonth]);
+  const { data: accounts = [] } = useAccountsWithBalanceForRange(startDate, endDate);
   const hasAccounts = accounts.length > 0;
 
   return (
@@ -55,8 +57,8 @@ export function AccountsOverview() {
                       >
                         {account.name}
                       </Text>
-                      <Text className="mt-1 text-base font-medium">
-                        {formatCurrency(account.balance, account.currency)}
+                      <Text className="my-1 text-base font-medium">
+                        {formatCurrency(account.baseBalance, account.baseCurrency)}
                       </Text>
                     </Pressable>
                   );

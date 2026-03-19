@@ -12,6 +12,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { currentPeriodSelection } from '@/lib/date/helpers';
 import { createSelectors } from '@/lib/utils';
+import { DEFAULT_DATE_FORMAT, DEFAULT_USER_CURRENCY } from '../config';
 
 export type TokenType = {
   access: string;
@@ -93,9 +94,9 @@ function getDefaultState(): AppState {
     },
     token: null,
     authStatus: 'idle',
-    currency: 'USD',
+    currency: DEFAULT_USER_CURRENCY,
     currencyFormat: 'symbol-after',
-    dateFormat: 'dd/MM/yyyy',
+    dateFormat: DEFAULT_DATE_FORMAT,
     numberFormat: 'stop',
     monthStartDay: 1,
     theme: 'system',
@@ -105,13 +106,15 @@ function getDefaultState(): AppState {
     lockEnabled: false,
     lockTimeoutMinutes: 1,
     isLocked: false,
+
     aiProvider: 'openai',
     openaiApiKey: undefined,
     anthropicApiKey: undefined,
+
     notifications: {
     },
     lastUsed: {
-      currencies: ['USD'],
+      currencies: [DEFAULT_USER_CURRENCY],
     },
     formPrefs: {
       transactionForm: {},

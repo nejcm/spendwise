@@ -8,13 +8,13 @@ import { defaultStyles } from '@/lib/theme/styles';
 import { AVATARS_LIST, getAvatar } from '../../profile';
 import OnboardingLayout from '../layout';
 
-export type SetupStepProps = {
+export type ProfileStepProps = {
   onBack: () => void;
   onNext: () => void;
   currentStep: number;
 };
 
-export default function SetupStep({ onBack, onNext, currentStep }: SetupStepProps) {
+export default function ProfileStep({ onBack, onNext, currentStep }: ProfileStepProps) {
   const { name, avatar } = useAppStore((state) => state.profile);
   const avatarModal = useModal();
 

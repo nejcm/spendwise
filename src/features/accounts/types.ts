@@ -20,7 +20,9 @@ export type Account = {
 };
 
 export type AccountWithBalance = Account & {
-  balance: number; // computed: income - expense
+  balance: number; // computed: income - expense in the account's own currency
+  baseBalance: number; // computed: income - expense in the user's preferred currency
+  baseCurrency: CurrencyKey;
 };
 
 export type AccountFormData = {

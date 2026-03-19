@@ -54,7 +54,7 @@ export const inputTv = tv({
         input: '',
       },
       textarea: {
-        input: 'h-auto min-h-[100] py-2',
+        input: 'h-auto min-h-[100] items-start justify-start py-2',
       },
     },
     focused: {

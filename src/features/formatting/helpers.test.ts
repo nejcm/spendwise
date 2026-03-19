@@ -2,7 +2,9 @@ import type { CurrencyFormat, NumberFormat } from './constants';
 import { formatCurrency, formatNumber } from './helpers';
 
 const number = 1234.56;
+const negativeNumber = -1234.56;
 const cents = 123_456;
+const negativeCents = -cents;
 
 describe('formatting helpers', () => {
   it('formats a number correctly', () => {
@@ -15,6 +17,20 @@ describe('formatting helpers', () => {
 
     for (const numberFormat of Object.keys(expectedNumbers) as NumberFormat[]) {
       const result = formatNumber(number, numberFormat);
+      expect(result).toBe(expectedNumbers[numberFormat]);
+    }
+  });
+
+  it('formats negative numbers correctly', () => {
+    const expectedNumbers: Record<NumberFormat, string> = {
+      'stop': '-1234.56',
+      'stop-space': '-1,234.56',
+      'comma': '-1234,56',
+      'comma-space': '-1.234,56',
+    };
+
+    for (const numberFormat of Object.keys(expectedNumbers) as NumberFormat[]) {
+      const result = formatNumber(negativeNumber, numberFormat);
       expect(result).toBe(expectedNumbers[numberFormat]);
     }
   });
@@ -49,6 +65,20 @@ describe('formatting helpers', () => {
 
     for (const numberFormat of Object.keys(expectedNumbers) as CurrencyFormat[]) {
       const result = formatCurrency(cents, 'USD', 'comma-space', numberFormat);
+      expect(result).toBe(expectedNumbers[numberFormat]);
+    }
+  });
+
+  it('applies number/currency formats for negative cents', () => {
+    const expectedNumbers: Record<CurrencyFormat, string> = {
+      'symbol-after': '-1.234,56$',
+      'symbol-before': '-$1.234,56',
+      'code-after': '-1.234,56 USD',
+      'code-before': '-USD 1.234,56',
+    };
+
+    for (const numberFormat of Object.keys(expectedNumbers) as CurrencyFormat[]) {
+      const result = formatCurrency(negativeCents, 'USD', 'comma-space', numberFormat);
       expect(result).toBe(expectedNumbers[numberFormat]);
     }
   });

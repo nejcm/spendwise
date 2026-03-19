@@ -67,7 +67,7 @@ export type AppState = {
   isLocked: boolean; // runtime only — not persisted
 
   // AI
-  aiProvider: 'openai' | 'anthropic';
+  aiProvider: 'none' | 'openai' | 'anthropic';
   openaiApiKey: string | undefined;
   anthropicApiKey: string | undefined;
 
@@ -216,6 +216,8 @@ export function setOpenaiApiKey(openaiApiKey: string) {
 export function setAnthropicApiKey(anthropicApiKey: string) {
   return _useAppStore.setState((prev) => ({ ...prev, anthropicApiKey }));
 }
+
+export const selectAiEnabled = (state: AppState) => state.aiProvider !== 'none' && Boolean(state.openaiApiKey || state.anthropicApiKey);
 
 // Security actions
 export function setLockEnabled(lockEnabled: boolean) {

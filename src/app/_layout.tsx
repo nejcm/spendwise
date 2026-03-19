@@ -33,6 +33,7 @@ import { loadSelectedTheme, useSelectedTheme } from '@/lib/theme/use-selected-th
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 // Import  global CSS file
 import '../global.css';
+import '../../polyfills';
 
 async function initDb(db: SQLiteDatabase) {
   await migrateDb(db);

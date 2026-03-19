@@ -1,4 +1,5 @@
 import type { GetNextPageParamFunction, GetPreviousPageParamFunction } from '@tanstack/react-query';
+import Constants from 'expo-constants';
 
 export type PaginateQuery<T> = {
   results: T[];
@@ -43,3 +44,21 @@ export const getPreviousPageParam: GetNextPageParamFunction<unknown, PaginateQue
 
 export const getNextPageParam: GetPreviousPageParamFunction<unknown, PaginateQuery<unknown>> = (page) =>
   getUrlParameters(page.next)?.offset ?? null;
+
+export function generateAPIUrl(relativePath: string) {
+  const origin = Constants.experienceUrl.replace('exp://', 'http://');
+
+  const path = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
+
+  if (process.env.NODE_ENV === 'development') {
+    return `${origin}${path}`;
+  }
+
+  if (!process.env.EXPO_PUBLIC_API_BASE_URL) {
+    throw new Error(
+      'EXPO_PUBLIC_API_BASE_URL environment variable is not defined',
+    );
+  }
+
+  return `${process.env.EXPO_PUBLIC_API_BASE_URL}${path}`;
+}

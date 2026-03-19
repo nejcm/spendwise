@@ -39,6 +39,7 @@ export default antfu(
       'expo-env.d.ts',
       'migration/*',
       'uniwind-types.d.ts',
+      'polyfills.js',
       '.docs',
       '.vscode',
       '.agents',

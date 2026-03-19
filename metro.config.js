@@ -18,6 +18,10 @@ config.server.enhanceMiddleware = (middleware) => {
 // which Hermes does not support.
 const ESM_CJS_OVERRIDES = {
   'zustand/middleware': path.resolve(__dirname, 'node_modules/zustand/middleware.js'),
+  // Expo/Metro can crash when it loads the ESM entry of `tslib` (via `tslib/modules/index.js`)
+  // due to incorrect default export interop in the bundler runtime.
+  // For `tslib`, the CJS build provides the same helper exports (__extends, etc).
+  'tslib': path.resolve(__dirname, 'node_modules/tslib/tslib.js'),
 };
 
 const originalResolveRequest = config.resolver.resolveRequest;

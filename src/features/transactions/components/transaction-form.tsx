@@ -12,21 +12,19 @@ import { getFieldError } from '@/components/ui/form-utils';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { CategoryPicker } from '@/features/categories/category-picker';
 import { CURRENCY_OPTIONS, CURRENCY_VALUES } from '@/features/currencies';
+import { mergeCurrencyArrays } from '@/features/currencies/helpers';
 import { todayISO } from '@/features/formatting/helpers';
 import { useAccounts, useCreateTransaction, useUpdateTransaction } from '@/features/transactions/api';
 import { dateToUnix } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { toNumber } from '@/lib/number';
 import { addLastUsedCurrency, selectLastUsedCurrencies, selectTransactionFormPrefs, setTransactionFormPrefs, useAppStore } from '@/lib/store';
-import { mergeCurrencyArrays } from '../../currencies/helpers';
+import { refinePositiveNumber } from '@/lib/validation/helpers';
 
 const schema = z.object({
   type: z.enum(['expense', 'income', 'transfer'] as TransactionType[]),
   currency: z.enum(CURRENCY_VALUES as CurrencyKey[]),
-  amount: z.string().min(1, translate('transactions.amount_required')).refine((v) => {
-    const n = toNumber(v);
-    return n != null && n > 0;
-  }, translate('transactions.amount_required')),
+  amount: z.string().min(1, translate('transactions.amount_required')).refine(refinePositiveNumber, translate('transactions.amount_required')),
   category_id: z.string().min(1, translate('transactions.category_required')),
   account_id: z.string().min(1, translate('transactions.account_required')),
   date: z.string().min(1, translate('transactions.date_required')),

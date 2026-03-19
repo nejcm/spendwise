@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Pressable } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
 import { FocusAwareStatusBar, FormattedCurrency, Text, View } from '@/components/ui';
+import { centsToAmount } from '@/features/formatting/helpers';
 import { useCategorySpendByRange } from '@/features/insights/api';
 import { useUpdateCategoryOrder } from '@/features/transactions/api';
 import { getPeriodRange } from '@/lib/date/helpers';
@@ -54,8 +55,8 @@ export function CategoriesScreen() {
       {isEditMode
         ? (
             <View className="flex-row items-center justify-center gap-2 py-4">
-              <FileWarning className="size-4 text-muted-foreground" />
-              <Text className="text-sm text-muted-foreground">
+              <FileWarning className="size-4 text-warning-500" />
+              <Text className="text-sm text-warning-500">
                 {translate('categories.edit_mode')}
               </Text>
             </View>
@@ -82,9 +83,13 @@ export function CategoriesScreen() {
             openSheet({
               type: 'edit-category',
               categoryId: category.category_id,
-              name: category.category_name,
-              color: category.category_color,
-              icon: category.category_icon || null,
+              initialValues: {
+                id: category.category_id,
+                name: category.category_name,
+                color: category.category_color,
+                icon: category.category_icon || null,
+                budget: category.category_budget ? String(centsToAmount(category.category_budget)) : null,
+              },
             });
             return;
           }

@@ -20,19 +20,6 @@ export async function clearData(db: SQLiteDatabase, queryClient: QueryClient) {
   queryClient.invalidateQueries();
 }
 
-export async function resetData(db: SQLiteDatabase, queryClient: QueryClient) {
-  try {
-    await clearDbData(db);
-    console.info('Database cleared successfully');
-  }
-  catch (err) {
-    console.error('Failed to clear database', err);
-  }
-  clearAppStore();
-  queryClient.clear();
-  queryClient.invalidateQueries();
-}
-
 export async function seedMockData(db: SQLiteDatabase, queryClient: QueryClient) {
   try {
     await seedDefaults(db);
@@ -67,9 +54,13 @@ export async function dumpDbTables(db: SQLiteDatabase) {
  * to the available pool, causing SQLITE_CANTOPEN (14) on the next open
  * within the same Worker session.
  */
-export async function resetDb(db: SQLiteDatabase): Promise<void> {
+export async function resetDb(db: SQLiteDatabase, queryClient?: QueryClient | null): Promise<void> {
   await dropDb(db);
   await migrateDb(db);
+  if (queryClient) {
+    queryClient.clear();
+    queryClient.invalidateQueries();
+  }
   if (IS_WEB) {
     // Reload the page so the Worker reinitialises its VFS state cleanly.
     window.location.reload();

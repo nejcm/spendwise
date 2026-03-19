@@ -37,6 +37,7 @@ export async function getCategorySpendByRange(
        c.name as category_name,
        c.color as category_color,
        c.icon as category_icon,
+       c.budget as category_budget,
        c.sort_order as sort_order,
        COALESCE(SUM(t.baseAmount), 0) as total,
        COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0) as income_total,
@@ -50,7 +51,7 @@ export async function getCategorySpendByRange(
      FROM categories c
      LEFT JOIN transactions t ON t.category_id = c.id
        AND t.type IN ('income','expense') AND t.date >= ? AND t.date < ?
-     GROUP BY c.id, c.name, c.color, c.icon, c.sort_order
+     GROUP BY c.id, c.name, c.color, c.icon, c.budget, c.sort_order
      ORDER BY c.sort_order ASC`,
     [startDate, endDate],
   );
@@ -115,6 +116,7 @@ export async function getCategorySpendForYear(
        c.name as category_name,
        c.color as category_color,
        c.icon as category_icon,
+       c.budget as category_budget,
        c.sort_order as sort_order,
        COALESCE(SUM(t.baseAmount), 0) as total,
        COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0) as income_total,
@@ -128,7 +130,7 @@ export async function getCategorySpendForYear(
      FROM categories c
      LEFT JOIN transactions t ON t.category_id = c.id
        AND t.type IN ('income','expense') AND t.date >= ? AND t.date < ?
-     GROUP BY c.id, c.name, c.color, c.icon, c.sort_order
+     GROUP BY c.id, c.name, c.color, c.icon, c.budget, c.sort_order
      ORDER BY c.sort_order ASC`,
     [startDate, endDate],
   );

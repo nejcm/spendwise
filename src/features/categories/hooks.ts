@@ -16,7 +16,7 @@ export function useCategories(_type?: 'income' | 'expense') {
   });
 }
 
-export function useCreateCategory() {
+export function useCreateCategory(onSuccess?: () => void) {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
 
@@ -24,11 +24,12 @@ export function useCreateCategory() {
     mutationFn: (data: CategoryFormData) => queries.createCategory(db, data),
     onSuccess: () => {
       invalidateFor(queryClient, 'category');
+      onSuccess?.();
     },
   });
 }
 
-export function useUpdateCategory() {
+export function useUpdateCategory(onSuccess?: () => void) {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
 
@@ -37,6 +38,7 @@ export function useUpdateCategory() {
       queries.updateCategory(db, params.id, params.data),
     onSuccess: () => {
       invalidateFor(queryClient, 'category');
+      onSuccess?.();
     },
   });
 }

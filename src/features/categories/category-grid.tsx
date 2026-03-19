@@ -7,6 +7,7 @@ import { Pressable, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import Sortable from 'react-native-sortables';
 import { FormattedCurrency, Text } from '@/components/ui';
+import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 import { NoDataCard } from '../../components/no-data-card';
@@ -90,6 +91,9 @@ function CategoryGridCell({ item, currency, onPress }: CategoryGridCellProps) {
       </View>
       {item.total !== undefined && (
         <FormattedCurrency value={item.total} currency={currency} className="font-medium" numberOfLines={1} />
+      )}
+      {item.category_budget != null && item.category_budget > 0 && (
+        <BudgetProgressBar spent={item.expense_total} budget={item.category_budget} className="mt-1" />
       )}
     </Pressable>
   );

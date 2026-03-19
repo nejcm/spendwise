@@ -47,13 +47,16 @@ export function formatCurrency(value: number | string, currency: CurrencyKey, nu
   const number = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(number)) return String(value);
 
-  const formattedNumber = formatNumber(centsToAmount(number), numberFormat);
+  const isNegative = number < 0;
+  const isCurrencyBeforeNumber = currencyFormat === 'symbol-before' || currencyFormat === 'code-before';
+  const numberForFormatting = isNegative && isCurrencyBeforeNumber ? Math.abs(number) : number;
+  const formattedNumber = formatNumber(centsToAmount(numberForFormatting), numberFormat);
   const isCode = currencyFormat === 'code-before' || currencyFormat === 'code-after';
   const currencyTxt = isCode ? currency : CURRENCIES_MAP[currency].symbol;
   const space = isCode ? ' ' : '';
 
-  if (currencyFormat === 'symbol-before' || currencyFormat === 'code-before') {
-    return `${currencyTxt}${space}${formattedNumber}`;
+  if (isCurrencyBeforeNumber) {
+    return isNegative ? `-${currencyTxt}${space}${formattedNumber}` : `${currencyTxt}${space}${formattedNumber}`;
   }
   return `${formattedNumber}${space}${currencyTxt}`;
 }

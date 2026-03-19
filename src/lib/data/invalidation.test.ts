@@ -57,9 +57,9 @@ describe('invalidateFor', () => {
 
   it('handles single-key entities', () => {
     const qc = createMockQueryClient();
-    invalidateFor(qc, 'budget');
+    invalidateFor(qc, 'scheduledTransaction');
 
     expect(qc.invalidateQueries).toHaveBeenCalledTimes(1);
-    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.budgets.all]);
+    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.scheduledTransactions.all]);
   });
 });

@@ -1,7 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { seedBundledRates, seedDefaults } from './seed';
 
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 1;
 
 /**
  * Clears all data from the database.
@@ -11,8 +11,6 @@ export async function clearDbData(db: SQLiteDatabase): Promise<void> {
     PRAGMA foreign_keys = OFF;
     DELETE FROM recurring_rule_runs;
     DELETE FROM recurring_rules;
-    DELETE FROM budget_lines;
-    DELETE FROM budgets;
     DELETE FROM transactions;
     DELETE FROM accounts;
     DELETE FROM categories;
@@ -30,8 +28,6 @@ export async function dropDb(db: SQLiteDatabase): Promise<void> {
     DROP TABLE IF EXISTS accounts;
     DROP TABLE IF EXISTS categories;
     DROP TABLE IF EXISTS transactions;
-    DROP TABLE IF EXISTS budgets;
-    DROP TABLE IF EXISTS budget_lines;
     DROP TABLE IF EXISTS recurring_rules;
     DROP TABLE IF EXISTS recurring_rule_runs;
     DROP TABLE IF EXISTS currency_rates;
@@ -81,6 +77,7 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           name TEXT NOT NULL,
           icon TEXT,
           color TEXT NOT NULL,
+          budget INTEGER,
           sort_order INTEGER NOT NULL DEFAULT 999999,
           created_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
         );
@@ -103,24 +100,6 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
         CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date DESC);
         CREATE INDEX IF NOT EXISTS idx_transactions_account ON transactions(account_id);
         CREATE INDEX IF NOT EXISTS idx_transactions_category ON transactions(category_id);
-
-        CREATE TABLE IF NOT EXISTS budgets (
-          id TEXT PRIMARY KEY NOT NULL,
-          name TEXT NOT NULL,
-          period TEXT NOT NULL CHECK(period IN ('monthly','weekly','yearly')),
-          amount INTEGER NOT NULL,
-          start_date INTEGER NOT NULL,
-          created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
-          updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
-        );
-
-        CREATE TABLE IF NOT EXISTS budget_lines (
-          id TEXT PRIMARY KEY NOT NULL,
-          budget_id TEXT NOT NULL REFERENCES budgets(id) ON DELETE CASCADE,
-          category_id TEXT NOT NULL REFERENCES categories(id),
-          amount INTEGER NOT NULL,
-          UNIQUE(budget_id, category_id)
-        );
 
         CREATE TABLE IF NOT EXISTS currency_rates (
           base TEXT NOT NULL,
@@ -165,32 +144,5 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
     await seedBundledRates(db);
     await seedDefaults(db);
     await db.execAsync(`PRAGMA user_version = 1`);
-  }
-
-  // v2 — add multi-currency columns & backfill baseAmount for pre-existing transactions
-  if (currentDbVersion < 2) {
-    // Add columns only if missing (fresh v1 installs already have them).
-    const col = await db.getFirstAsync<{ count: number }>(
-      `SELECT COUNT(*) as count FROM pragma_table_info('transactions') WHERE name = 'baseAmount'`,
-    );
-    if (!col?.count) {
-      await db.execAsync(`ALTER TABLE transactions ADD COLUMN baseAmount INTEGER NOT NULL DEFAULT 0`);
-      await db.execAsync(`ALTER TABLE transactions ADD COLUMN baseCurrency TEXT NOT NULL DEFAULT 'EUR'`);
-    }
-
-    // Backfill: use the transaction's own amount as a same-currency approximation.
-    // For single-currency users this is exact; for multi-currency it is the best we
-    // can do without fetching historical rates at migration time.
-    await db.execAsync(
-      `UPDATE transactions SET baseAmount = amount, baseCurrency = currency WHERE baseAmount = 0 AND amount != 0`,
-    );
-
-    // Seed bundled rates if the table is empty (upgrading users who never had them).
-    const rateCount = await db.getFirstAsync<{ count: number }>(`SELECT COUNT(*) as count FROM currency_rates`);
-    if (!rateCount?.count) {
-      await seedBundledRates(db);
-    }
-
-    await db.execAsync(`PRAGMA user_version = 2`);
   }
 }

@@ -22,6 +22,7 @@ export type Account = {
 export type AccountWithBalance = Account & {
   balance: number; // computed: income - expense in the account's own currency
   baseBalance: number; // computed: income - expense in the user's preferred currency
+  monthlyExpense?: number; // computed: total expenses (baseAmount) for the selected period
   baseCurrency: CurrencyKey;
 };
 

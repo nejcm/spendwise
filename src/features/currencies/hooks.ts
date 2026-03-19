@@ -50,7 +50,7 @@ export function useChangeCurrency() {
       setCurrency(newCurrency);
     },
     onSuccess: () => {
-      invalidateFor(queryClient, 'transaction', 'account', 'budget');
+      invalidateFor(queryClient, 'transaction', 'account');
       queryClient.invalidateQueries({ queryKey: queryKeys.insights.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.monthSummary.all });
     },

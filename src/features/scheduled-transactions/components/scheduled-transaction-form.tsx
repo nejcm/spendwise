@@ -78,7 +78,7 @@ const TYPE_OPTIONS = [
 ] as const;
 
 type FormValues = z.infer<typeof schema>;
-type InitialValues = Omit<Partial<FormValues>, 'amount'> & {
+export type ScheduledTransactionInitialValues = Omit<Partial<FormValues>, 'amount'> & {
   amount?: number | string;
   id?: string;
 };
@@ -97,7 +97,7 @@ const defaultValues = {
 } satisfies FormValues;
 
 export type ScheduledTransactionFormProps = {
-  initialValues?: InitialValues;
+  initialValues?: ScheduledTransactionInitialValues;
   onCancel?: () => void;
   onSuccess?: () => void;
 };

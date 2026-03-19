@@ -1,5 +1,6 @@
 import type { AccountFormData } from '@/features/accounts/types';
-import type { CurrencyKey } from '@/features/currencies';
+import type { CategoryInitialValues } from '@/features/categories/category-form';
+import type { ScheduledTransactionInitialValues } from '@/features/scheduled-transactions/components/scheduled-transaction-form';
 
 // ---------------------------------------------------------------------------
 // Sheet config – discriminated union so each sheet carries exactly the data
@@ -11,18 +12,10 @@ export type SheetConfig
     | { type: 'add-account' }
     | { type: 'edit-account'; accountId: string; initialData: AccountFormData }
     | { type: 'add-category' }
-    | { type: 'edit-category'; categoryId: string; name: string; color: string; icon: string | null }
+    | { type: 'edit-category'; categoryId: string; initialValues: CategoryInitialValues }
     | {
       type: 'add-scheduled';
-      initialValues?: {
-        type?: 'income' | 'expense';
-        currency?: CurrencyKey;
-        amount?: number | string;
-        category_id?: string;
-        account_id?: string;
-        note?: string | null;
-        start_date?: string;
-      };
+      initialValues?: ScheduledTransactionInitialValues;
     };
 
 export type SheetType = SheetConfig['type'];
@@ -35,7 +28,7 @@ export const SHEET_SNAP_POINTS: Record<SheetType, string[]> = {
   'add-transaction': ['82%'],
   'add-account': ['82%'],
   'edit-account': ['82%'],
-  'add-category': ['55%'],
-  'edit-category': ['55%'],
+  'add-category': ['60%'],
+  'edit-category': ['60%'],
   'add-scheduled': ['82%'],
 };

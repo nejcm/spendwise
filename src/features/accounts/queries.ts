@@ -84,6 +84,8 @@ export async function getAccountsWithBalanceForRange(
        + COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount > 0 THEN t.baseAmount ELSE 0 END), 0)
        - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN t.baseAmount ELSE 0 END), 0)
        as baseBalance,
+       COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0)
+       as monthlyExpense,
        t.baseCurrency as baseCurrency
      FROM accounts a
      LEFT JOIN transactions t ON t.account_id = a.id

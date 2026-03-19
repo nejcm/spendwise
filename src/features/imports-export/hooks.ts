@@ -96,7 +96,6 @@ export function useImportBackup() {
         'transaction',
         'account',
         'category',
-        'budget',
         'scheduledTransaction',
       );
 

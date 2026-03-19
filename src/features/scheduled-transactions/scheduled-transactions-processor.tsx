@@ -4,7 +4,6 @@ import * as React from 'react';
 import { AppState } from 'react-native';
 import { todayISO } from '@/features/formatting/helpers';
 import {
-  checkBudgetAlerts,
   checkUpcomingBills,
 } from '@/features/notifications/notifications';
 import { syncDueScheduledTransactions } from './api';
@@ -21,7 +20,6 @@ export function ScheduledTransactionsProcessor() {
     isProcessingRef.current = true;
     try {
       await syncDueScheduledTransactions(db, queryClient);
-      await checkBudgetAlerts(db);
       await checkUpcomingBills(db);
       lastProcessedDateRef.current = todayISO();
     }

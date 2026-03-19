@@ -33,9 +33,6 @@ const INVALIDATION_RULES = {
     queryKeys.categories.all,
     queryKeys.insights.all,
   ],
-  budget: [
-    queryKeys.budgets.all,
-  ],
   scheduledTransaction: [
     queryKeys.scheduledTransactions.all,
   ],

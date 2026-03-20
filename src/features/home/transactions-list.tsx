@@ -1,10 +1,10 @@
 import { useRouter } from 'expo-router';
-
 import * as React from 'react';
 import { View } from 'react-native';
 
 import { Text } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
+import { SkeletonRows } from '@/components/ui/skeleton';
 import { useRecentTransactions } from '@/features/transactions/api';
 import { TransactionCard } from '@/features/transactions/components/transaction-card';
 import { translate } from '@/lib/i18n';
@@ -12,7 +12,7 @@ import { NoDataCard } from '../../components/no-data-card';
 
 export default function TransactionsList() {
   const router = useRouter();
-  const { data = [] } = useRecentTransactions(15);
+  const { data = [], isLoading } = useRecentTransactions(15);
   const hasTransactions = data.length > 0;
 
   return (
@@ -25,11 +25,8 @@ export default function TransactionsList() {
           </GhostButton>
         )}
       </View>
-      {!hasTransactions
+      {hasTransactions
         ? (
-            <NoDataCard onPress={() => router.push('/transactions/add')} label={translate('home.add_transaction')} />
-          )
-        : (
             <View>
               {data.map((t) => (
                 <TransactionCard
@@ -40,7 +37,12 @@ export default function TransactionsList() {
                 />
               ))}
             </View>
-          )}
+          )
+        : isLoading
+          ? <SkeletonRows count={5} />
+          : (
+              <NoDataCard onPress={() => router.push('/transactions/add')} label={translate('home.add_transaction')} />
+            )}
     </View>
   );
 }

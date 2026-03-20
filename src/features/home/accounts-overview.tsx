@@ -1,10 +1,10 @@
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
-
 import * as React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { FormattedCurrency, Text } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
+import { SkeletonRows } from '@/components/ui/skeleton';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -15,7 +15,7 @@ export function AccountsOverview() {
   const router = useRouter();
   const currentMonth = React.useMemo(() => format(new Date(), 'yyyy-MM'), []);
   const [startDate, endDate] = React.useMemo(() => getCurrentMonthRange(currentMonth), [currentMonth]);
-  const { data: accounts = [] } = useAccountsWithBalanceForRange(startDate, endDate);
+  const { data: accounts = [], isLoading } = useAccountsWithBalanceForRange(startDate, endDate);
   const hasAccounts = accounts.length > 0;
 
   return (
@@ -28,17 +28,9 @@ export function AccountsOverview() {
           </GhostButton>
         )}
       </View>
-
-      {!hasAccounts
+      {hasAccounts
         ? (
-            <NoDataCard onPress={() => router.push('/accounts')} label={translate('accounts.add')} />
-          )
-        : (
-            <ScrollView
-              style={defaultStyles.transparentBg}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-            >
+            <ScrollView style={defaultStyles.transparentBg} horizontal showsHorizontalScrollIndicator={false}>
               <View className="flex-row gap-2">
                 {accounts.map((account) => {
                   return (
@@ -62,7 +54,10 @@ export function AccountsOverview() {
                 })}
               </View>
             </ScrollView>
-          )}
+          )
+        : isLoading
+          ? <SkeletonRows count={3} />
+          : <NoDataCard onPress={() => router.push('/accounts')} label={translate('accounts.add')} />}
     </View>
   );
 }

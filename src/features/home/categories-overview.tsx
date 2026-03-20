@@ -5,6 +5,7 @@ import * as React from 'react';
 import { ScrollView, View } from 'react-native';
 import { FormattedCurrency, Text } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
+import { SkeletonRows } from '@/components/ui/skeleton';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
@@ -15,7 +16,7 @@ import { useCategorySpendByRange } from '../insights/api';
 export function CategoriesOverview() {
   const router = useRouter();
   const [startDate, endDate] = React.useMemo(() => getCurrentMonthRange(format(new Date(), 'yyyy-MM')), []);
-  const { data = [] } = useCategorySpendByRange(startDate, endDate);
+  const { data = [], isLoading } = useCategorySpendByRange(startDate, endDate);
   const currency = useAppStore.use.currency();
   const visibleCategories = React.useMemo(() => data.filter((item) => item.total > 0), [data]);
   const hasCategories = visibleCategories.length > 0;
@@ -30,11 +31,8 @@ export function CategoriesOverview() {
           </GhostButton>
         )}
       </View>
-      {!hasCategories
+      {hasCategories
         ? (
-            <NoDataCard onPress={() => router.push('/categories')} label={translate('home.add_category')} description={translate('home.add_category_description')} />
-          )
-        : (
             <ScrollView
               style={defaultStyles.transparentBg}
               horizontal
@@ -53,7 +51,10 @@ export function CategoriesOverview() {
                 ))}
               </View>
             </ScrollView>
-          )}
+          )
+        : isLoading
+          ? <SkeletonRows count={3} />
+          : <NoDataCard onPress={() => router.push('/categories')} label={translate('home.add_category')} description={translate('home.add_category_description')} />}
     </View>
   );
 }

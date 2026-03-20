@@ -6,6 +6,7 @@ import {
   differenceInDays,
   endOfISOWeek,
   format,
+  getDaysInMonth,
   getISOWeek,
   getISOWeeksInYear,
   parse,
@@ -143,6 +144,38 @@ export function getWeeksInYear(year: number): { week: number; start: Date; end: 
 export function currentISOWeek(): { year: number; week: number } {
   const now = new Date();
   return { year: now.getFullYear(), week: getISOWeek(now) };
+}
+
+const AVERAGE_DAYS_PER_MONTH = 365.25 / 12;
+
+/**
+ * Scale a monthly budget amount to match the given period selection.
+ * Returns the prorated budget in the same unit (cents) as the input.
+ */
+export function scaleBudgetForPeriod(monthlyBudget: number, selection: PeriodSelection): number {
+  if (selection.mode === 'month') return monthlyBudget;
+
+  const [startUnix, endUnix] = getPeriodRange(selection);
+  const daysInPeriod = (endUnix - startUnix) / 86400;
+
+  let daysInMonth: number;
+  switch (selection.mode) {
+    case 'year':
+      daysInMonth = daysInPeriod / 12;
+      break;
+    case 'week':
+      daysInMonth = getDaysInMonth(unixToDate(startUnix));
+      break;
+    case 'custom': {
+      const s = new Date(selection.startDate);
+      const e = new Date(selection.endDate);
+      const sameMonth = s.getFullYear() === e.getFullYear() && s.getMonth() === e.getMonth();
+      daysInMonth = sameMonth ? getDaysInMonth(s) : AVERAGE_DAYS_PER_MONTH;
+      break;
+    }
+  }
+
+  return Math.round(monthlyBudget * daysInPeriod / daysInMonth);
 }
 
 export function tryFormatDate(date: string, dateFormat = 'yyyy-MM-dd') {

@@ -1,3 +1,7 @@
+import type { CurrencyKey } from '@/features/currencies';
+
+import { CURRENCY_VALUES } from '@/features/currencies';
+
 const RE_NON_NUMERIC = /[^\d.-]/g;
 const RE_ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const RE_SLASH_DATE = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/;
@@ -65,6 +69,7 @@ export type ParsedRow = {
   date: string;
   amount: number; // cents, positive = income, negative = expense
   note: string;
+  currency?: CurrencyKey;
   type?: 'income' | 'expense' | 'transfer';
   isDuplicate?: boolean;
 };
@@ -115,11 +120,19 @@ export function mapRows(rows: string[][], mapping: ColumnMapping, hasHeader: boo
       amountCents = -amountCents;
     }
 
+    const rawCurrency = mapping.currency !== null
+      ? (row[mapping.currency] ?? '').trim().toUpperCase()
+      : '';
+    const currency = (CURRENCY_VALUES as string[]).includes(rawCurrency)
+      ? (rawCurrency as CurrencyKey)
+      : undefined;
+
     parsed.push({
       date: normalizeDate(rawDate),
       amount: amountCents,
       note: rawNote,
       type,
+      currency,
     });
   }
 

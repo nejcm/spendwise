@@ -61,9 +61,10 @@ export function useCreateTransaction() {
 
   return useMutation({
     mutationFn: async (data: TransactionFormData) => {
-      const rates = await getRatesForDate(db, data.date);
+      // fetch rates only if baseAmount is not provided
+      const rates = data.baseAmount ? undefined : await getRatesForDate(db, data.date);
       data.amount = amountToCents(data.amount || 0);
-      data.baseAmount = data.baseAmount || computeBaseAmount(data.amount || 0, data.currency, data.baseCurrency, rates);
+      data.baseAmount = data.baseAmount || computeBaseAmount(data.amount || 0, data.currency, data.baseCurrency, rates ?? {});
       return queries.createTransaction(db, data);
     },
     onSuccess: () => {
@@ -80,9 +81,10 @@ export function useUpdateTransaction() {
 
   return useMutation({
     mutationFn: async (params: { id: string; data: TransactionFormData }) => {
-      const rates = await getRatesForDate(db, params.data.date);
+      // fetch rates only if baseAmount is not provided
+      const rates = params.data.baseAmount ? undefined : await getRatesForDate(db, params.data.date);
       params.data.amount = amountToCents(params.data.amount || 0);
-      params.data.baseAmount = params.data.baseAmount || computeBaseAmount(params.data.amount || 0, params.data.currency, params.data.baseCurrency, rates);
+      params.data.baseAmount = params.data.baseAmount || computeBaseAmount(params.data.amount || 0, params.data.currency, params.data.baseCurrency, rates ?? {});
       return queries.updateTransaction(db, params.id, params.data);
     },
     onSuccess: () => {

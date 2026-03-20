@@ -183,9 +183,9 @@ export default function Import({ state, setMapping, onClose }: ImportProps) {
       await createTransaction.mutateAsync({
         account_id: accountId,
         amount: (type === 'transfer' ? row.amount : Math.abs(row.amount)) / 100,
-        baseAmount: (type === 'transfer' ? row.amount : Math.abs(row.amount)) / 100,
+        baseAmount: 0,
         baseCurrency: preferredCurrency,
-        currency: (mapping.currency ?? 'USD') as CurrencyKey,
+        currency: row.currency ?? preferredCurrency,
         category_id: '_unknown',
         date: Math.floor(new Date(row.date).getTime() / 1000),
         note: row.note,

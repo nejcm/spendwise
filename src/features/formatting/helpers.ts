@@ -5,12 +5,22 @@ import { translate } from '@/lib/i18n';
 import { DEFAULT_DATE_FORMAT } from '../../config';
 import { CURRENCIES_MAP } from '../currencies';
 
+const TRAILING_DECIMAL_ZEROS = /\.?0+$/;
+
 /**
  * Convert cents integer to display string.
  * e.g., 1234 -> "12.34", -500 -> "-5.00"
  */
 export function centsToAmount(cents: number): number {
   return cents / 100;
+}
+
+/** String for amount inputs when loading cents from the database (e.g. transaction edit). */
+export function formatMajorUnitsInputFromCents(cents: number): string {
+  const n = centsToAmount(cents);
+  if (!Number.isFinite(n)) return '';
+  const s = n.toFixed(2);
+  return s.replace(TRAILING_DECIMAL_ZEROS, '');
 }
 
 /**
@@ -72,6 +82,9 @@ export function formatDate(unix: number, displayFormat?: string): string {
   if (isToday(date)) return translate('common.today');
   if (isYesterday(date)) return translate('common.yesterday');
   return format(date, displayFormat || DEFAULT_DATE_FORMAT);
+}
+export function formatDateFull(unix: number, displayFormat?: string): string {
+  return format(new Date(unix * 1000), displayFormat || DEFAULT_DATE_FORMAT);
 }
 
 /**

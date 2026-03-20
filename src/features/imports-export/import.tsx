@@ -11,6 +11,7 @@ import { FormattedCurrency, Select, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { translate } from '@/lib/i18n';
 import { OutlineButton } from '../../components/ui/outline-button';
+import { useAppStore } from '../../lib/store';
 import { useAccounts } from '../accounts/api';
 import { useCreateTransaction } from '../transactions/api';
 import { mapRows } from './csv-parser';
@@ -165,7 +166,7 @@ export type ImportProps = {
 export default function Import({ state, setMapping, onClose }: ImportProps) {
   const { headers, allRows, mapping } = state;
   const { data: accounts = [] } = useAccounts();
-  const [currency] = React.useState<CurrencyKey>('USD');
+  const preferredCurrency = useAppStore.use.currency();
   const router = useRouter();
   const [step, setStep] = React.useState<Step>('map');
   const [importing, setImporting] = React.useState(false);
@@ -182,6 +183,8 @@ export default function Import({ state, setMapping, onClose }: ImportProps) {
       await createTransaction.mutateAsync({
         account_id: accountId,
         amount: (type === 'transfer' ? row.amount : Math.abs(row.amount)) / 100,
+        baseAmount: (type === 'transfer' ? row.amount : Math.abs(row.amount)) / 100,
+        baseCurrency: preferredCurrency,
         currency: (mapping.currency ?? 'USD') as CurrencyKey,
         category_id: '_unknown',
         date: Math.floor(new Date(row.date).getTime() / 1000),
@@ -223,7 +226,7 @@ export default function Import({ state, setMapping, onClose }: ImportProps) {
         <PreviewStep
           accountId={accountId}
           accounts={accounts}
-          currency={currency}
+          currency={preferredCurrency}
           importing={importing}
           preview={preview}
           onAccountSelect={setAccountId}

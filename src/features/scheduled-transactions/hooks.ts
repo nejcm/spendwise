@@ -7,9 +7,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { useSQLiteContext } from 'expo-sqlite';
 
+import Alert from '@/components/ui/alert';
 import { todayUnix } from '@/features/formatting/helpers';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
+import { translate } from '@/lib/i18n';
 import * as queries from './queries';
 
 import { processDueScheduledTransactions } from './scheduler';
@@ -45,6 +47,10 @@ export function useScheduledTransaction(id: string) {
   });
 }
 
+function onError(error: unknown) {
+  Alert.alert(translate('common.error'), error instanceof Error ? error.message : translate('common.error_description'));
+}
+
 export function useCreateScheduledTransaction() {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
@@ -57,6 +63,7 @@ export function useCreateScheduledTransaction() {
       invalidateFor(queryClient, 'scheduledTransaction');
       await syncDueScheduledTransactions(db, queryClient);
     },
+    onError,
   });
 }
 
@@ -68,12 +75,14 @@ export function useUpdateScheduledTransaction() {
     mutationFn: (params: { id: string; data: ScheduledTransactionFormData }) =>
       queries.updateScheduledTransaction(db, params.id, params.data),
     onSuccess: async (_, variables) => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       queryClient.invalidateQueries({
         queryKey: queryKeys.scheduledTransactions.detail(variables.id),
       });
       invalidateFor(queryClient, 'scheduledTransaction');
       await syncDueScheduledTransactions(db, queryClient);
     },
+    onError,
   });
 }
 
@@ -86,5 +95,6 @@ export function useDeleteScheduledTransaction() {
     onSuccess: () => {
       invalidateFor(queryClient, 'scheduledTransaction');
     },
+    onError,
   });
 }

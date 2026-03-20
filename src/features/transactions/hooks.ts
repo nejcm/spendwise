@@ -4,13 +4,14 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { useSQLiteContext } from 'expo-sqlite';
 
+import Alert from '@/components/ui/alert';
 import { computeBaseAmount } from '@/features/currencies/conversion';
 import { getRatesForDate } from '@/features/currencies/queries';
-import { amountToCents } from '@/features/formatting/helpers';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
-import { getAppState } from '@/lib/store';
+import { translate } from '@/lib/i18n';
 
+import { amountToCents } from '../formatting/helpers';
 import * as queries from './queries';
 
 // ─── Read Hooks ───
@@ -50,22 +51,26 @@ export function useMonthSummary(yearMonth: string) {
 
 // ─── Write Hooks ───
 
+function onError(error: unknown) {
+  Alert.alert(translate('common.error'), error instanceof Error ? error.message : translate('common.error_description'));
+}
+
 export function useCreateTransaction() {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (data: TransactionFormData) => {
-      const preferredCurrency = getAppState().currency;
       const rates = await getRatesForDate(db, data.date);
-      const amountCents = amountToCents(data.amount || 0);
-      const baseAmount = computeBaseAmount(amountCents, data.currency, preferredCurrency, rates);
-      return queries.createTransaction(db, data, baseAmount, preferredCurrency);
+      data.amount = amountToCents(data.amount || 0);
+      data.baseAmount = data.baseAmount || computeBaseAmount(data.amount || 0, data.currency, data.baseCurrency, rates);
+      return queries.createTransaction(db, data);
     },
     onSuccess: () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       invalidateFor(queryClient, 'transaction');
     },
+    onError,
   });
 }
 
@@ -75,15 +80,16 @@ export function useUpdateTransaction() {
 
   return useMutation({
     mutationFn: async (params: { id: string; data: TransactionFormData }) => {
-      const preferredCurrency = getAppState().currency;
       const rates = await getRatesForDate(db, params.data.date);
-      const amountCents = amountToCents(params.data.amount || 0);
-      const baseAmount = computeBaseAmount(amountCents, params.data.currency, preferredCurrency, rates);
-      return queries.updateTransaction(db, params.id, params.data, baseAmount, preferredCurrency);
+      params.data.amount = amountToCents(params.data.amount || 0);
+      params.data.baseAmount = params.data.baseAmount || computeBaseAmount(params.data.amount || 0, params.data.currency, params.data.baseCurrency, rates);
+      return queries.updateTransaction(db, params.id, params.data);
     },
     onSuccess: () => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       invalidateFor(queryClient, 'transaction');
     },
+    onError,
   });
 }
 
@@ -96,5 +102,6 @@ export function useDeleteTransaction() {
     onSuccess: () => {
       invalidateFor(queryClient, 'transaction');
     },
+    onError,
   });
 }

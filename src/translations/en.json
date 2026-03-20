@@ -370,6 +370,8 @@
     "all": "All",
     "amount": "Amount",
     "amount_required": "Amount is required",
+    "base_amount": "In your currency",
+    "base_amount_required": "Base amount is required",
     "category": "Category",
     "category_required": "Category is required",
     "created_at": "Created at",

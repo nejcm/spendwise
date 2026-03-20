@@ -63,7 +63,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
     },
   });
 
-  const deleteCategory = useDeleteCategory();
+  const deleteCategory = useDeleteCategory(() => closeSheet());
   const onDeletePress = (categoryId: string, name: string) => {
     Alert.alert(translate('common.delete'), translate('categories.delete_confirm', { name }), [
       { text: translate('common.cancel'), style: 'cancel' },

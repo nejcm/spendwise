@@ -1,86 +1,78 @@
-import type { TransactionType } from '../types';
 import type { CurrencyKey } from '@/features/currencies';
-
+import type { TransactionFormInitialValues, TransactionFormValues } from '@/features/transactions/components/transaction-form-schema';
 import { useForm } from '@tanstack/react-form';
 import * as React from 'react';
-import { View } from 'react-native';
-import * as z from 'zod';
-import { Input, ScrollView, Select, SolidButton, Text } from '@/components/ui';
 
+import { View } from 'react-native';
+import { GhostButton, Image, Input, ScrollView, Select, SolidButton, Text } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
-import { GhostButton } from '@/components/ui/ghost-button';
 import { CategoryPicker } from '@/features/categories/category-picker';
-import { CURRENCY_OPTIONS, CURRENCY_VALUES } from '@/features/currencies';
+import { CURRENCIES_MAP, CURRENCY_OPTIONS } from '@/features/currencies';
 import { mergeCurrencyArrays } from '@/features/currencies/helpers';
-import { todayISO } from '@/features/formatting/helpers';
 import { useAccounts, useCreateTransaction, useUpdateTransaction } from '@/features/transactions/api';
+import { TransactionBaseAmountSync } from '@/features/transactions/components/transaction-base-amount-sync';
+import {
+  amountToString,
+  TRANSACTION_TYPE_OPTIONS,
+  transactionFormDefaultValues,
+  transactionFormSchema,
+} from '@/features/transactions/components/transaction-form-schema';
 import { dateToUnix } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { toNumber } from '@/lib/number';
-import { addLastUsedCurrency, selectLastUsedCurrencies, selectTransactionFormPrefs, setTransactionFormPrefs, useAppStore } from '@/lib/store';
-import { refinePositiveNumber } from '@/lib/validation/helpers';
-
-const schema = z.object({
-  type: z.enum(['expense', 'income', 'transfer'] as TransactionType[]),
-  currency: z.enum(CURRENCY_VALUES as CurrencyKey[]),
-  amount: z.string().min(1, translate('transactions.amount_required')).refine(refinePositiveNumber, translate('transactions.amount_required')),
-  category_id: z.string().min(1, translate('transactions.category_required')),
-  account_id: z.string().min(1, translate('transactions.account_required')),
-  date: z.string().min(1, translate('transactions.date_required')),
-  note: z.string().nullable(),
-});
-
-const TYPE_OPTIONS: { label: string; value: 'expense' | 'income' }[] = [
-  { label: translate('common.expense'), value: 'expense' },
-  { label: translate('common.income'), value: 'income' },
-];
-
-type TransactionFormData = z.infer<typeof schema>;
-
-type InitialValues = Omit<Partial<TransactionFormData>, 'amount'> & { amount?: number | string; id?: string };
+import {
+  addLastUsedCurrency,
+  selectLastUsedCurrencies,
+  selectTransactionFormPrefs,
+  setTransactionFormPrefs,
+  useAppStore,
+} from '@/lib/store';
 
 export type TransactionFormProps = {
-  initialValues?: InitialValues;
+  initialValues?: TransactionFormInitialValues;
   onSuccess?: () => void;
   onCancel?: () => void;
 };
 
-const defaultValues = {
-  type: 'expense',
-  currency: 'USD',
-  category_id: '',
-  account_id: '',
-  date: todayISO(),
-  amount: '',
-  note: null,
-} satisfies TransactionFormData;
-
+// eslint-disable-next-line max-lines-per-function
 export function TransactionForm({ initialValues, onSuccess, onCancel }: TransactionFormProps) {
   const { data: accounts = [] } = useAccounts();
   const id = initialValues?.id;
+  const preferredCurrency = useAppStore.use.currency();
   const createTransaction = useCreateTransaction();
   const updateTransaction = useUpdateTransaction();
   const lastUsedCurrencies = useAppStore(selectLastUsedCurrencies);
   const orderedCurrencies = React.useMemo(() => mergeCurrencyArrays(lastUsedCurrencies, CURRENCY_OPTIONS), [lastUsedCurrencies]);
   const transactionFormPrefs = useAppStore(selectTransactionFormPrefs);
+  const [baseAmountIsManual, setBaseAmountIsManual] = React.useState(false);
+  const onBaseDriversChanged = React.useCallback(() => {
+    setBaseAmountIsManual(false);
+  }, []);
 
   const form = useForm({
     defaultValues: {
-      ...defaultValues,
-      type: transactionFormPrefs?.type || defaultValues.type,
-      currency: transactionFormPrefs?.currency || defaultValues.currency,
+      ...transactionFormDefaultValues,
+      type: transactionFormPrefs?.type || transactionFormDefaultValues.type,
+      currency: transactionFormPrefs?.currency || transactionFormDefaultValues.currency,
       category_id: transactionFormPrefs?.category_id || '',
       account_id: transactionFormPrefs?.account_id || (accounts[0]?.id ?? ''),
       ...initialValues,
-      amount: initialValues?.amount?.toString() || '',
-    } as TransactionFormData,
+      amount: amountToString(initialValues?.amount),
+      baseAmount: amountToString(initialValues?.baseAmount),
+      baseCurrency: preferredCurrency,
+    } as TransactionFormValues,
     validators: {
-      onChange: schema,
+      onChange: transactionFormSchema,
     },
     onSubmit: async ({ value }) => {
       if (!value.account_id) return;
-      const data = { ...value, amount: toNumber(value.amount) ?? 0, date: dateToUnix(new Date(value.date)) };
+      const data = {
+        ...value,
+        amount: toNumber(value.amount) ?? 0,
+        baseAmount: toNumber(value.baseAmount) ?? 0,
+        date: dateToUnix(new Date(value.date)),
+      };
       if (id) {
         await updateTransaction.mutateAsync({ id, data });
       }
@@ -101,7 +93,25 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
 
   return (
     <View className="gap-4">
-      <View className="mb-4 flex-row gap-3">
+      <form.Subscribe
+        selector={(s) => ({
+          amount: s.values.amount,
+          currency: s.values.currency,
+          date: s.values.date,
+        })}
+        children={(v) => (
+          <TransactionBaseAmountSync
+            form={form}
+            amount={v.amount}
+            currency={v.currency}
+            date={v.date}
+            baseAmountIsManual={baseAmountIsManual}
+            onDriversChanged={onBaseDriversChanged}
+          />
+        )}
+      />
+
+      <View className="flex-row gap-2">
         <form.Field
           name="currency"
           children={(field) => (
@@ -115,7 +125,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
               }}
               size="lg"
               showChevron={false}
-              containerClassName="w-[100]"
+              containerClassName="w-[92]"
               inputClassName="px-2"
               stackBehavior="push"
             />
@@ -133,7 +143,34 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
               keyboardType="decimal-pad"
               testID="amount-input"
               error={getFieldError(field)}
-              containerClassName="flex-1"
+              containerClassName="min-w-[72] flex-1"
+            />
+          )}
+        />
+      </View>
+      <View className="flex-row items-center gap-2">
+        <View className="w-[92] flex-row items-center justify-center gap-2 px-4">
+          <Image source={CURRENCIES_MAP[preferredCurrency].image} className="size-6 rounded-full" />
+          <Text className="border-none bg-transparent">
+            {preferredCurrency}
+          </Text>
+        </View>
+        <form.Field
+          name="baseAmount"
+          children={(field) => (
+            <Input
+              value={field.state.value ?? ''}
+              onBlur={field.handleBlur}
+              onChangeText={(t) => {
+                setBaseAmountIsManual(true);
+                field.handleChange(t);
+              }}
+              placeholder="0.00"
+              size="lg"
+              keyboardType="decimal-pad"
+              testID="base-amount-input"
+              error={getFieldError(field)}
+              containerClassName="min-w-[72] flex-1"
             />
           )}
         />
@@ -143,11 +180,11 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
         name="type"
         children={(field) => (
           <View>
-            <Text className="mb-2 text-sm font-medium">
+            <Text className="mt-4 mb-2 text-sm font-medium">
               {translate('transactions.type')}
             </Text>
             <View className="flex-row gap-2">
-              {TYPE_OPTIONS.map((option) => (
+              {TRANSACTION_TYPE_OPTIONS.map((option) => (
                 <SolidButton
                   key={option.value}
                   size="sm"
@@ -246,7 +283,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
               label={translate('common.save')}
               onPress={form.handleSubmit}
               loading={(!!state.isSubmitting) || createTransaction.isPending || updateTransaction.isPending}
-              disabled={!schema.safeParse(state.values).success}
+              disabled={!transactionFormSchema.safeParse(state.values).success}
               className="flex-1"
             />
           </View>

@@ -3,8 +3,10 @@ import type { CategoryFormData } from './types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
 
+import Alert from '@/components/ui/alert';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
+import { translate } from '@/lib/i18n';
 
 import * as queries from './queries';
 
@@ -14,6 +16,10 @@ export function useCategories(_type?: 'income' | 'expense') {
     queryKey: queryKeys.categories.all,
     queryFn: () => queries.getCategories(db),
   });
+}
+
+function onError(error: unknown) {
+  Alert.alert(translate('common.error'), error instanceof Error ? error.message : translate('common.error_description'));
 }
 
 export function useCreateCategory(onSuccess?: () => void) {
@@ -26,6 +32,7 @@ export function useCreateCategory(onSuccess?: () => void) {
       invalidateFor(queryClient, 'category');
       onSuccess?.();
     },
+    onError,
   });
 }
 
@@ -40,6 +47,7 @@ export function useUpdateCategory(onSuccess?: () => void) {
       invalidateFor(queryClient, 'category');
       onSuccess?.();
     },
+    onError,
   });
 }
 
@@ -53,6 +61,7 @@ export function useDeleteCategory(onSuccess?: () => void) {
       onSuccess?.();
       invalidateFor(queryClient, 'category');
     },
+    onError,
   });
 }
 
@@ -66,5 +75,6 @@ export function useUpdateCategoryOrder() {
     onSuccess: () => {
       invalidateFor(queryClient, 'category');
     },
+    onError,
   });
 }

@@ -2,7 +2,7 @@ import type { TextProps } from 'react-native';
 import type { CurrencyKey } from '@/features/currencies';
 import type { NumberFormat } from '@/features/formatting/constants';
 import * as React from 'react';
-import { formatCurrency, formatDate, formatNumber } from '@/features/formatting/helpers';
+import { formatCurrency, formatDate, formatDateFull, formatNumber } from '@/features/formatting/helpers';
 import { useAppStore } from '@/lib/store';
 import { Text } from './text';
 
@@ -12,6 +12,7 @@ type BaseProps = Omit<TextProps, 'children'> & {
 export type DateProps = BaseProps & {
   value: number; // Unix seconds
   format?: string;
+  full?: boolean;
 };
 export type NumberProps = BaseProps & {
   value: number | string;
@@ -46,7 +47,7 @@ export function FormattedCurrency({ value, format, currency, prefix = '', ...tex
   );
 }
 
-export function FormattedDate({ value, format, ...textProps }: DateProps) {
+export function FormattedDate({ value, format, full = false, ...textProps }: DateProps) {
   const effectiveFormat = useAppStore.use.dateFormat();
-  return <Text {...textProps}>{value ? formatDate(value, format ?? effectiveFormat) : ''}</Text>;
+  return <Text {...textProps}>{value ? (full ? formatDateFull(value, format ?? effectiveFormat) : formatDate(value, format ?? effectiveFormat)) : ''}</Text>;
 }

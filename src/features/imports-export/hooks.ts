@@ -45,6 +45,9 @@ export function useExportBackup() {
         UTI: 'public.json',
       });
     },
+    onError: (error) => {
+      Alert.alert(translate('common.error'), error instanceof Error ? error.message : translate('common.error_description'));
+    },
   });
 }
 

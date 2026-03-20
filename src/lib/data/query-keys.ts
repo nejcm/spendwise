@@ -61,6 +61,8 @@ export const queryKeys = {
   // ─── Currency Rates ───
   currencyRates: {
     all: ['currency-rates'] as const,
+    forDate: (unixSeconds: number) =>
+      ['currency-rates', 'for-date', unixSeconds] as const,
   },
 
   // ─── Scheduled Transactions ───

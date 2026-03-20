@@ -3,8 +3,10 @@ import type { AccountFormData } from './types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
 
+import Alert from '@/components/ui/alert';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
+import { translate } from '@/lib/i18n';
 
 import * as queries from './queries';
 
@@ -46,6 +48,10 @@ export function useTotalBalance(yearMonth?: string) {
 
 // ─── Write Hooks ───
 
+function onError(error: unknown) {
+  Alert.alert(translate('common.error'), error instanceof Error ? error.message : translate('common.error_description'));
+}
+
 export function useCreateAccount() {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
@@ -55,6 +61,7 @@ export function useCreateAccount() {
     onSuccess: () => {
       invalidateFor(queryClient, 'account');
     },
+    onError,
   });
 }
 
@@ -68,6 +75,7 @@ export function useUpdateAccount() {
     onSuccess: () => {
       invalidateFor(queryClient, 'account');
     },
+    onError,
   });
 }
 
@@ -80,5 +88,6 @@ export function useArchiveAccount() {
     onSuccess: () => {
       invalidateFor(queryClient, 'account');
     },
+    onError,
   });
 }

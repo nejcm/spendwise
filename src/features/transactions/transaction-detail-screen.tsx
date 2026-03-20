@@ -2,12 +2,11 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 import { useState } from 'react';
 
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import DetailsSection from '@/components/details';
 import { FocusAwareStatusBar, FormattedCurrency, FormattedDate, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { OutlineButton } from '@/components/ui/outline-button';
-import { formatDate } from '@/features/formatting/helpers';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/local-store';
@@ -34,12 +33,15 @@ export function TransactionDetailScreen() {
 
   if (isEditing) {
     return (
-      <View className="flex-1 p-4">
-        <TransactionForm
-          initialValues={{ ...transaction, date: unixToISODate(transaction.date) }}
-          onSuccess={() => setIsEditing(false)}
-          onCancel={() => setIsEditing(false)}
-        />
+      <View className="flex-1">
+        <FocusAwareStatusBar />
+        <ScrollView className="flex-1 px-4 py-10">
+          <TransactionForm
+            initialValues={{ ...transaction, date: unixToISODate(transaction.date) }}
+            onSuccess={() => setIsEditing(false)}
+            onCancel={() => setIsEditing(false)}
+          />
+        </ScrollView>
       </View>
     );
   }
@@ -81,50 +83,58 @@ export function TransactionDetailScreen() {
   };
 
   return (
-    <View className="flex-1 px-4 pt-4">
+    <View className="flex-1">
       <FocusAwareStatusBar />
-      <View className="items-center py-6">
-        <FormattedCurrency
-          value={transaction.amount}
-          currency={transaction.currency}
-          prefix={isIncome ? '+' : '-'}
-          className={`text-4xl font-bold ${isIncome ? 'text-success-600' : ''}`}
-        />
-        <Text className="mt-1 text-gray-500">{formatDate(transaction.date)}</Text>
-      </View>
-
-      <DetailsSection
-        className="mb-4"
-        data={[
-          { label: translate('transactions.category'), value: transaction ? `${transaction.category_icon} ${transaction.category_name}` : '-' },
-          { label: translate('transactions.account'), value: account ? `${account.icon} ${account.name}` : '-' },
-          { label: translate('transactions.type'), value: transaction.type, className: 'capitalize' },
-          { label: translate('transactions.note'), value: transaction.note || '-' },
-        ]}
-      />
-      <DetailsSection
-        className="mb-8"
-        data={[
-          { label: translate('transactions.created_at'), value: <FormattedDate value={transaction.created_at} className="text-foreground" /> },
-          { label: translate('transactions.updated_at'), value: <FormattedDate value={transaction.updated_at} className="text-foreground" /> },
-        ]}
-      />
-      <View className="mb-6 flex-row items-center justify-center gap-2">
-        {transaction.type !== 'transfer' && (
-          <OutlineButton
-            label={translate('transactions.make_recurring')}
-            onPress={handleMakeRecurring}
-            className="rounded-3xl px-6"
-            size="sm"
+      <ScrollView className="flex-1 px-4 py-10">
+        <View className="items-center pb-6">
+          <FormattedCurrency
+            value={transaction.amount}
+            currency={transaction.currency}
+            prefix={isIncome ? '+' : '-'}
+            className={`text-4xl font-bold ${isIncome ? 'text-success-600' : ''}`}
           />
-        )}
-        <OutlineButton label={translate('common.delete')} color="danger" onPress={handleDelete} className="rounded-3xl px-6" size="sm" />
-      </View>
+          <FormattedCurrency
+            value={transaction.baseAmount}
+            currency={transaction.baseCurrency}
+            prefix={isIncome ? '+' : '-'}
+            className="text-lg text-muted-foreground"
+          />
+          <FormattedDate value={transaction.date} className="mt-2 text-muted-foreground" />
+        </View>
 
-      <View className="flex-row gap-2">
-        <GhostButton color="secondary" label={translate('common.back')} onPress={() => router.back()} />
-        <SolidButton className="flex-1" label={translate('common.edit')} onPress={() => setIsEditing(true)} />
-      </View>
+        <DetailsSection
+          className="mb-4"
+          data={[
+            { label: translate('transactions.category'), value: transaction ? `${transaction.category_icon} ${transaction.category_name}` : '-' },
+            { label: translate('transactions.account'), value: account ? `${account.icon} ${account.name}` : '-' },
+            { label: translate('transactions.type'), value: transaction.type, className: 'capitalize' },
+            { label: translate('transactions.note'), value: transaction.note || '-' },
+          ]}
+        />
+        <DetailsSection
+          className="mb-8"
+          data={[
+            { label: translate('transactions.created_at'), value: <FormattedDate value={transaction.created_at} className="text-foreground" /> },
+            { label: translate('transactions.updated_at'), value: <FormattedDate value={transaction.updated_at} className="text-foreground" /> },
+          ]}
+        />
+        <View className="mb-6 flex-row items-center justify-center gap-2">
+          {transaction.type !== 'transfer' && (
+            <OutlineButton
+              label={translate('transactions.make_recurring')}
+              onPress={handleMakeRecurring}
+              className="rounded-3xl px-6"
+              size="sm"
+            />
+          )}
+          <OutlineButton label={translate('common.delete')} color="danger" onPress={handleDelete} className="rounded-3xl px-6" size="sm" />
+        </View>
+
+        <View className="flex-row gap-2">
+          <GhostButton color="secondary" label={translate('common.back')} onPress={() => router.back()} />
+          <SolidButton className="flex-1" label={translate('common.edit')} onPress={() => setIsEditing(true)} />
+        </View>
+      </ScrollView>
     </View>
   );
 }

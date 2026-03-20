@@ -4,3 +4,8 @@ export function refinePositiveNumber(v: string | number | null | undefined): boo
   const n = toNumber(v);
   return n !== undefined && n !== null && n > 0;
 }
+
+export function refinePositiveNumberOrNull(v: string | number | null | undefined): boolean {
+  if (v == null || v === '') return true;
+  return refinePositiveNumber(v);
+}

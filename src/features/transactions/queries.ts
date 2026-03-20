@@ -1,9 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { MonthSummary, TransactionFormData, TransactionWithCategory } from './types';
-import type { CurrencyKey } from '@/features/currencies';
 
-import { amountToCents } from '@/features/formatting/helpers';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { generateId } from '@/lib/sqlite';
 
@@ -76,36 +74,28 @@ export async function getMonthSummary(
 export async function createTransaction(
   db: SQLiteDatabase,
   data: TransactionFormData,
-  baseAmount: number,
-  baseCurrency: CurrencyKey,
 ): Promise<string> {
   const id = generateId();
-  const amountCents = amountToCents(data.amount || 0);
 
   await db.runAsync(
     `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [id, data.account_id, data.category_id, data.type, amountCents, data.currency, baseAmount, baseCurrency, data.date, data.note || null],
+    [id, data.account_id, data.category_id, data.type, data.amount, data.currency, data.baseAmount, data.baseCurrency, data.date, data.note || null],
   );
 
   return id;
 }
 
-// eslint-disable-next-line max-params
 export async function updateTransaction(
   db: SQLiteDatabase,
   id: string,
   data: TransactionFormData,
-  baseAmount: number,
-  baseCurrency: CurrencyKey,
 ): Promise<void> {
-  const amountCents = amountToCents(data.amount || 0);
-
   await db.runAsync(
     `UPDATE transactions
      SET account_id = ?, category_id = ?, type = ?, amount = ?, currency = ?, baseAmount = ?, baseCurrency = ?, date = ?, note = ?, updated_at = strftime('%s','now')
      WHERE id = ?`,
-    [data.account_id, data.category_id, data.type, amountCents, data.currency, baseAmount, baseCurrency, data.date, data.note || null, id],
+    [data.account_id, data.category_id, data.type, data.amount, data.currency, data.baseAmount, data.baseCurrency, data.date, data.note || null, id],
   );
 }
 

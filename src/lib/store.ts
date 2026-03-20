@@ -23,11 +23,11 @@ export type ColorThemeType = 'red' | 'blue' | 'green' | 'purple' | 'orange' | 'b
 
 export type PeriodMode = 'year' | 'month' | 'week' | 'custom';
 
-export type PeriodSelection
-  = | { mode: 'year'; year: number }
-    | { mode: 'month'; year: number; month: number }
-    | { mode: 'week'; year: number; week: number }
-    | { mode: 'custom'; startDate: string; endDate: string };
+export type PeriodSelectionYear = { mode: 'year'; year: number };
+export type PeriodSelectionMonth = { mode: 'month'; year: number; month: number };
+export type PeriodSelectionWeek = { mode: 'week'; year: number; week: number };
+export type PeriodSelectionCustom = { mode: 'custom'; startDate: string; endDate: string };
+export type PeriodSelection = PeriodSelectionYear | PeriodSelectionMonth | PeriodSelectionWeek | PeriodSelectionCustom;
 
 const mmkv = createMMKV();
 const mmkvStorage: StateStorage = {

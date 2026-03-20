@@ -3,24 +3,22 @@
     "allow": [
       "Bash(pnpm lint*)",
       "Bash(pnpm add *)",
-      "Bash(npx eslint*)",
-      "Bash(node -e *)",
-      "Bash(ls src/*)",
-      "Bash(grep *)",
-      "Bash(echo \"Exit: $?\")",
-      "Bash(cat *)",
       "Bash(pnpm install --frozen-lockfile)",
-      "Bash(npx tsc --noEmit)",
-      "Bash(npx tsc:*)",
-      "Bash(xargs grep:*)",
-      "Bash(ls*)",
-      "Bash(la*)",
       "Bash(pnpm test:*)",
-      "Bash(pnpm exec:*)",
-      "Bash(find *)",
+      "Bash(pnpm exec *)",
+      "Bash(npx eslint*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx tsc *)",
+      "Bash(npx jest *)",
+      "Bash(npx tsx -e *)",
       "Bash(node -e *)",
-      "Bash(npx jest:*)",
-      "Bash(npx tsx -e \":*)"
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(cat:*)",
+      "Bash(echo \"Exit: $?\")",
+      "Skill(update-config)",
+      "Skill(update-config:*)"
     ]
   }
 }

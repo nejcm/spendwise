@@ -1,5 +1,6 @@
 import type { CurrencyKey } from '../currencies';
 import type { CategorySpend } from '@/features/insights/types';
+import type { PeriodSelection } from '@/lib/store';
 import { Lightbulb } from 'lucide-react-native';
 import * as React from 'react';
 
@@ -8,6 +9,7 @@ import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import Sortable from 'react-native-sortables';
 import { FormattedCurrency, Text } from '@/components/ui';
 import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
+import { scaleBudgetForPeriod } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 import { NoDataCard } from '../../components/no-data-card';
@@ -26,6 +28,7 @@ export const CategoryGrid = React.memo(({
   onPress,
 }: CategoryGridProps) => {
   const currency = useAppStore.use.currency();
+  const periodSelection = useAppStore.use.periodSelection();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
   function handleDragEnd(params: { data: CategorySpend[] }) {
@@ -51,9 +54,10 @@ export const CategoryGrid = React.memo(({
                 keyExtractor={(item) => item.category_id}
                 onDragEnd={handleDragEnd}
                 renderItem={({ item }) => (
-                  <CategoryGridCell
+                  <CategoryCard
                     item={item}
                     currency={currency}
+                    periodSelection={periodSelection}
                     onPress={onPress}
                   />
                 )}
@@ -73,14 +77,19 @@ export const CategoryGrid = React.memo(({
 export type CategoryGridCellProps = {
   item: CategorySpend;
   currency: CurrencyKey;
+  periodSelection: PeriodSelection;
   onPress: (category: CategorySpend) => void;
 };
 
-function CategoryGridCell({ item, currency, onPress }: CategoryGridCellProps) {
+function CategoryCard({ item, currency, periodSelection, onPress }: CategoryGridCellProps) {
   const emoji = item.category_icon && item.category_icon.trim() ? item.category_icon : item.category_name.charAt(0).toUpperCase();
+  const showBudget = item.category_budget != null && item.category_budget > 0;
+  const monthlyBudget = item.category_budget ?? 0;
+  const scaledBudget = showBudget ? scaleBudgetForPeriod(monthlyBudget, periodSelection) : 0;
+  const isMonthView = periodSelection.mode === 'month';
 
   return (
-    <Pressable onPress={() => onPress(item)} className="rounded-xl bg-card p-3">
+    <Pressable onPress={() => onPress(item)} className="min-h-[90] flex-1 justify-center rounded-xl bg-card px-3 py-2">
       <View
         className="mb-1 flex-row items-center justify-start gap-2"
       >
@@ -92,8 +101,14 @@ function CategoryGridCell({ item, currency, onPress }: CategoryGridCellProps) {
       {item.total !== undefined && (
         <FormattedCurrency value={item.total} currency={currency} className="font-medium" numberOfLines={1} />
       )}
-      {item.category_budget != null && item.category_budget > 0 && (
-        <BudgetProgressBar spent={item.expense_total} budget={item.category_budget} className="mt-1" />
+      {showBudget && (
+        <BudgetProgressBar
+          spent={item.expense_total}
+          budget={scaledBudget}
+          monthlyBudget={!isMonthView ? monthlyBudget : undefined}
+          currency={currency}
+          className="mt-0.5"
+        />
       )}
     </Pressable>
   );

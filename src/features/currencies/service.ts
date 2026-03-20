@@ -103,3 +103,64 @@ export async function fetchRates(): Promise<FetchRatesResult | undefined> {
 
   return result;
 }
+
+// ─── Historical rate fetching ─────────────────────────────────────────────────
+// Frankfurter and Fawazahmed0 both support historical dates; Open ER-API free
+// tier does not, so we only try the first two providers.
+
+async function fetchHistoricalFromFrankfurter(dateStr: string): Promise<FetchRatesResult | null> {
+  try {
+    const symbols = CURRENCY_VALUES.filter((c) => c !== 'EUR').join(',');
+    const response = await fetch(
+      `https://api.frankfurter.app/${dateStr}?from=EUR&to=${symbols}`,
+    );
+    if (!response.ok) return null;
+
+    const data = (await response.json()) as { rates?: Record<string, number> };
+    if (!data.rates) return null;
+
+    const rates = filterSupportedRates(data.rates);
+    rates.EUR = 1;
+    return { rates, source: 'frankfurter-historical' };
+  }
+  catch {
+    return null;
+  }
+}
+
+async function fetchHistoricalFromFawazahmed0(dateStr: string): Promise<FetchRatesResult | null> {
+  try {
+    const response = await fetch(
+      `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${dateStr}/v1/currencies/eur.json`,
+    );
+    if (!response.ok) return null;
+
+    const data = (await response.json()) as { eur?: Record<string, number> };
+    if (!data.eur) return null;
+
+    const rates = filterSupportedRates(data.eur);
+    rates.EUR = 1;
+    return { rates, source: 'fawazahmed0-historical' };
+  }
+  catch {
+    return null;
+  }
+}
+
+/**
+ * Fetches EUR-based exchange rates for a specific historical date.
+ * `dateStr` must be in `YYYY-MM-DD` format.
+ * Returns `undefined` if all providers fail.
+ */
+export async function fetchRatesForDate(dateStr: string): Promise<FetchRatesResult | undefined> {
+  const result
+    = (await fetchHistoricalFromFrankfurter(dateStr))
+      ?? (await fetchHistoricalFromFawazahmed0(dateStr));
+
+  if (!result) {
+    console.error(`Historical currency rate providers failed for date ${dateStr}`);
+    return undefined;
+  }
+
+  return result;
+}

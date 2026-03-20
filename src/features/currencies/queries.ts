@@ -3,7 +3,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import type { CurrencyKey } from './';
 import type { RateMap } from './service';
 
-import { fetchRates } from './service';
+import { fetchRates, fetchRatesForDate } from './service';
 
 // ─── Types ───
 
@@ -59,31 +59,48 @@ export async function getLastFetchedAt(db: SQLiteDatabase): Promise<number | nul
 
 /**
  * Returns the EUR-based rates for the closest date on or before `dateUnix`.
- * Falls back to the oldest available rates if nothing is found before that date.
+ * If no rates exist for that date range, fetches historical rates from the API
+ * and saves them before returning. Falls back to the oldest available rates only
+ * if the historical fetch also fails.
  */
 export async function getRatesForDate(db: SQLiteDatabase, dateUnix: number): Promise<RatesMap> {
   const rows = await db.getAllAsync<{ quote: string; rate: number }>(
     `SELECT quote, rate
      FROM currency_rates
      WHERE base = 'EUR' AND date = (
-       SELECT MAX(date) FROM currency_rates WHERE base = 'EUR' AND date <= ?
+       SELECT date FROM currency_rates WHERE base = 'EUR'
+       ORDER BY ABS(date - ?) LIMIT 1
      )`,
     [dateUnix],
   );
 
-  if (rows.length === 0) {
-    // Fallback: use oldest available rates
-    const fallback = await db.getAllAsync<{ quote: string; rate: number }>(
-      `SELECT quote, rate
-       FROM currency_rates
-       WHERE base = 'EUR' AND date = (
-         SELECT MIN(date) FROM currency_rates WHERE base = 'EUR'
-       )`,
+  if (rows.length > 0) return toRatesMap(rows);
+
+  // No local rates found — try fetching historical rates for that specific date
+  const dayTimestamp = dateUnix - (dateUnix % 86400);
+  const dateStr = new Date(dayTimestamp * 1000).toISOString().slice(0, 10);
+  const fetched = await fetchRatesForDate(dateStr);
+
+  if (fetched) {
+    await saveRatesForDate(db, fetched.rates, dayTimestamp);
+    return toRatesMap(
+      Object.entries(fetched.rates)
+        .filter(([, v]) => v != null)
+        .map(([quote, rate]) => ({ quote, rate: rate as number })),
     );
-    return toRatesMap(fallback);
   }
 
-  return toRatesMap(rows);
+  // Final fallback: use rates from the closest available date
+  const fallback = await db.getAllAsync<{ quote: string; rate: number }>(
+    `SELECT quote, rate
+     FROM currency_rates
+     WHERE base = 'EUR' AND date = (
+       SELECT date FROM currency_rates WHERE base = 'EUR'
+       ORDER BY ABS(date - ?) LIMIT 1
+     )`,
+    [dateUnix],
+  );
+  return toRatesMap(fallback);
 }
 
 // ─── Write Queries ───
@@ -95,7 +112,15 @@ export async function saveRates(
 ): Promise<void> {
   const today = Math.floor(Date.now() / 1000);
   const dayTimestamp = today - (today % 86400); // truncate to midnight UTC
+  await saveRatesForDate(db, rateMap, dayTimestamp);
+}
 
+/** Saves rates for a specific day-truncated Unix timestamp (INSERT OR IGNORE — idempotent per day). */
+export async function saveRatesForDate(
+  db: SQLiteDatabase,
+  rateMap: RateMap,
+  dayTimestamp: number,
+): Promise<void> {
   await db.withTransactionAsync(async () => {
     for (const [quote, rate] of Object.entries(rateMap)) {
       if (rate == null) continue;

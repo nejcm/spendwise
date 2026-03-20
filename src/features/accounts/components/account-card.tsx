@@ -5,6 +5,7 @@ import { Pressable, View } from 'react-native';
 import { FormattedCurrency, Text } from '@/components/ui';
 import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
 
+import { scaleBudgetForPeriod } from '@/lib/date/helpers';
 import { useAppStore } from '@/lib/store';
 import { ACCOUNT_TYPE_LABELS } from '../types';
 
@@ -15,7 +16,10 @@ type Props = {
 
 export function AccountCard({ account, onPress }: Props) {
   const userCurrency = useAppStore.use.currency();
+  const periodSelection = useAppStore.use.periodSelection();
   const showConverted = account.currency !== userCurrency;
+  const scaledBudget = account.budget != null ? scaleBudgetForPeriod(account.budget, periodSelection) : null;
+  const isMonthView = periodSelection.mode === 'month';
 
   return (
     <Pressable
@@ -40,7 +44,14 @@ export function AccountCard({ account, onPress }: Props) {
         </View>
       </View>
       {account.budget != null && account.budget > 0 && account.monthlyExpense != null && (
-        <BudgetProgressBar spent={account.monthlyExpense} budget={account.budget} className="mt-2" />
+        <BudgetProgressBar
+          spent={account.monthlyExpense}
+          budget={scaledBudget ?? 0}
+          monthlyBudget={!isMonthView ? account.budget : undefined}
+          currency={userCurrency}
+          className="mt-2"
+          showValues={false}
+        />
       )}
     </Pressable>
   );

@@ -6,6 +6,7 @@ import { useMemo } from 'react';
 import { View } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
 import { FocusAwareStatusBar, FormattedCurrency, ScrollView, SolidButton, Text } from '@/components/ui';
+import { SkeletonRows } from '@/components/ui/skeleton';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { useAccountsWithBalanceForRange } from '@/features/transactions/api';
 import { getPeriodRange } from '@/lib/date/helpers';
@@ -21,7 +22,7 @@ export function AccountsScreen() {
   const selection = useAppStore.use.periodSelection();
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
 
-  const { data: accounts = [] } = useAccountsWithBalanceForRange(startDate, endDate);
+  const { data: accounts = [], isLoading } = useAccountsWithBalanceForRange(startDate, endDate);
 
   const totalBalance = accounts.reduce((sum, a) => sum + a.balance, 0);
 
@@ -54,19 +55,21 @@ export function AccountsScreen() {
           <FormattedCurrency value={totalBalance} currency={currency} className="text-3xl font-bold" />
         </View>
 
-        {accounts.length === 0
-          ? (
-              <NoData title={translate('accounts.no_accounts')} className="mt-6" />
-            )
-          : (
-              accounts.map((account) => (
-                <AccountCard
-                  key={account.id}
-                  account={account}
-                  onPress={() => openEditAccountForm(account)}
-                />
-              ))
-            )}
+        {isLoading
+          ? <SkeletonRows count={3} />
+          : accounts.length === 0
+            ? (
+                <NoData title={translate('accounts.no_accounts')} className="mt-6" />
+              )
+            : (
+                accounts.map((account) => (
+                  <AccountCard
+                    key={account.id}
+                    account={account}
+                    onPress={() => openEditAccountForm(account)}
+                  />
+                ))
+              )}
 
         <View className="mt-4 flex-row items-center justify-center">
           <SolidButton

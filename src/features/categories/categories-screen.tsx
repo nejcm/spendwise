@@ -4,6 +4,8 @@ import * as React from 'react';
 import { Pressable } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
 import { FocusAwareStatusBar, FormattedCurrency, Text, View } from '@/components/ui';
+import { IconButton } from '@/components/ui/icon-button';
+import { SkeletonBox } from '@/components/ui/skeleton';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { useCategorySpendByRange } from '@/features/insights/api';
 import { useUpdateCategoryOrder } from '@/features/transactions/api';
@@ -11,7 +13,6 @@ import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/local-store';
 import { setPeriodSelection, useAppStore } from '@/lib/store';
-import { IconButton } from '../../components/ui/icon-button';
 import { CategoryGrid } from './category-grid';
 
 export function CategoriesScreen() {
@@ -23,7 +24,7 @@ export function CategoriesScreen() {
   const selection = useAppStore.use.periodSelection();
   const [startDate, endDate] = React.useMemo(() => getPeriodRange(selection), [selection]);
 
-  const { data = [] } = useCategorySpendByRange(startDate, endDate);
+  const { data = [], isLoading } = useCategorySpendByRange(startDate, endDate);
   const updateOrder = useUpdateCategoryOrder();
   const total = React.useMemo(
     () => data.reduce((sum, c) => sum + c.income_total - c.expense_total, 0),
@@ -70,32 +71,42 @@ export function CategoriesScreen() {
               }}
             />
           )}
-      <CategoryGrid
-        categories={data}
-        onReorder={(items) => updateOrder.mutate(items)}
-        onAddPress={() => openSheet({ type: 'add-category' })}
-        onPress={(category) => {
-          if (!category) {
-            openSheet({ type: 'add-category' });
-            return;
-          }
-          if (isEditMode) {
-            openSheet({
-              type: 'edit-category',
-              categoryId: category.category_id,
-              initialValues: {
-                id: category.category_id,
-                name: category.category_name,
-                color: category.category_color,
-                icon: category.category_icon || null,
-                budget: category.category_budget ? String(centsToAmount(category.category_budget)) : null,
-              },
-            });
-            return;
-          }
-          openSheet({ type: 'add-transaction', categoryId: category.category_id });
-        }}
-      />
+      {isLoading
+        ? (
+            <View className="flex-1 flex-row flex-wrap gap-2 px-4 pt-2">
+              {Array.from({ length: 6 }, (_, i) => (
+                <SkeletonBox key={i} height={88} width="47%" />
+              ))}
+            </View>
+          )
+        : (
+            <CategoryGrid
+              categories={data}
+              onReorder={(items) => updateOrder.mutate(items)}
+              onAddPress={() => openSheet({ type: 'add-category' })}
+              onPress={(category) => {
+                if (!category) {
+                  openSheet({ type: 'add-category' });
+                  return;
+                }
+                if (isEditMode) {
+                  openSheet({
+                    type: 'edit-category',
+                    categoryId: category.category_id,
+                    initialValues: {
+                      id: category.category_id,
+                      name: category.category_name,
+                      color: category.category_color,
+                      icon: category.category_icon || null,
+                      budget: category.category_budget ? String(centsToAmount(category.category_budget)) : null,
+                    },
+                  });
+                  return;
+                }
+                openSheet({ type: 'add-transaction', categoryId: category.category_id });
+              }}
+            />
+          )}
     </View>
   );
 }

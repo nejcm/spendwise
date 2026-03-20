@@ -4,6 +4,7 @@ import { useColorScheme, useWindowDimensions } from 'react-native';
 
 import { BarChart } from 'react-native-gifted-charts';
 import { Text, View } from '@/components/ui';
+import { SkeletonBox } from '@/components/ui/skeleton';
 import { useTrendByRange } from '@/features/insights/api';
 import { translate } from '@/lib/i18n';
 import { centsToAmount } from '../../formatting/helpers';
@@ -25,7 +26,7 @@ export function StatsTrend({ period, startDate, endDate }: StatsTrendProps) {
   const incomeColor = '#2ebe7e';
   const expenseColor = '#e12f30';
 
-  const { data } = useTrendByRange(startDate, endDate);
+  const { data, isLoading } = useTrendByRange(startDate, endDate);
 
   const trendData = React.useMemo(() =>
     buildTrendSeries(period, startDate, endDate, data ?? []), [period, startDate, endDate, data]);
@@ -73,6 +74,9 @@ export function StatsTrend({ period, startDate, endDate }: StatsTrendProps) {
     };
   }, [period, trendData, labelColor, screenWidth]);
 
+  if (isLoading) {
+    return <SkeletonBox height={160} className="mb-6" />;
+  }
   if (data === undefined || barData.length === 0) return null;
 
   return (

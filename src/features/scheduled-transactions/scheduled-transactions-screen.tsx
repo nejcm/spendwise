@@ -1,6 +1,5 @@
 import { useRouter } from 'expo-router';
 import { Plus } from 'lucide-react-native';
-import { Skeleton } from 'moti/skeleton';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import NoData from '@/components/no-data';
@@ -9,7 +8,7 @@ import { formatDate } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/local-store';
 import { defaultStyles } from '@/lib/theme/styles';
-import SkeletonContainer from '../../components/ui/skeleton';
+import { SkeletonRows } from '../../components/ui/skeleton';
 import { useScheduledTransactions } from './api';
 
 export function ScheduledTransactionsScreen() {
@@ -23,16 +22,7 @@ export function ScheduledTransactionsScreen() {
   if (isLoading) {
     return (
       <View className="flex-1 px-4 py-10">
-
-        <SkeletonContainer className="flex-col gap-2">
-          {(props) => (
-            <>
-              <Skeleton {...props} height={44} />
-              <Skeleton {...props} height={44} width="60%" />
-              <Skeleton {...props} height={44} width="80%" />
-            </>
-          )}
-        </SkeletonContainer>
+        <SkeletonRows count={3} />
       </View>
     );
   }

@@ -16,7 +16,6 @@
 
 - `src/app/onboarding.tsx`
 - `src/app/import-export/index.tsx`
-- `src/app/insights/index.tsx`
 - `src/app/transactions/[id].tsx`
 - `src/app/budgets/create.tsx`
 - `src/app/budgets/[id].tsx`

@@ -1,8 +1,10 @@
 import type { CurrencyKey } from '../../currencies';
 
+import type { LoaderDimensions } from '@/components/ui/skeleton';
 import { TrendingDown, TrendingUp } from 'lucide-react-native';
 import * as React from 'react';
 import { FormattedCurrency, Text, View } from '@/components/ui';
+import { SkeletonRows } from '@/components/ui/skeleton';
 import { useSummaryByRange } from '@/features/insights/api';
 import { translate } from '@/lib/i18n';
 
@@ -12,11 +14,17 @@ export type SummaryProps = {
   currency: CurrencyKey;
 };
 
+const loaderDimensions: LoaderDimensions = [['50%', 60], ['100%', 75]];
 export function Summary({ startDate, endDate, currency }: SummaryProps) {
-  const { data: summary } = useSummaryByRange(startDate, endDate);
+  const { data: summary, isLoading } = useSummaryByRange(startDate, endDate);
+
+  if (isLoading) {
+    return (
+      <SkeletonRows count={2} dimensions={loaderDimensions} className="mb-6 items-center justify-center" />
+    );
+  }
 
   if (!summary) return null;
-
   return (
     <>
       <FormattedCurrency value={summary.balance} currency={currency} className="pb-6 text-center text-3xl font-medium" />

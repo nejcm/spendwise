@@ -1,10 +1,9 @@
 import type { Category } from './types';
-import { Skeleton } from 'moti/skeleton';
 import * as React from 'react';
 
 import { Select } from '@/components/ui';
+import { SkeletonBox } from '@/components/ui/skeleton';
 import { translate } from '@/lib/i18n';
-import SkeletonContainer from '../../components/ui/skeleton';
 import { useCategories } from '../transactions/api';
 
 export type CategoryPickerProps = {
@@ -31,13 +30,7 @@ export function CategoryPicker({ selectedId, onSelect, label, error }: CategoryP
   );
 
   if (isLoading) {
-    return (
-      <SkeletonContainer>
-        {(props) => (
-          <Skeleton {...props} height={44} />
-        )}
-      </SkeletonContainer>
-    );
+    return <SkeletonBox height={44} />;
   }
   return (
     <Select

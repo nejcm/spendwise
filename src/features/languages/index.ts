@@ -7,7 +7,7 @@ export type LanguageOption = {
 };
 
 export const LANGUAGES: LanguageOption[] = [
-  { name: 'English', value: 'en', image: require('../../../assets/flags/us.svg') },
+  { name: 'English', value: 'en', image: require('../../../assets/flags/us.jpg') },
 ];
 
 export const DEFAULT_LANGUAGE = LANGUAGES[0];

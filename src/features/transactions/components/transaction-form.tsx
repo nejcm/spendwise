@@ -1,10 +1,11 @@
 import type { CurrencyKey } from '@/features/currencies';
 import type { TransactionFormInitialValues, TransactionFormValues } from '@/features/transactions/components/transaction-form-schema';
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useForm } from '@tanstack/react-form';
-import * as React from 'react';
 
-import { View } from 'react-native';
-import { GhostButton, Image, Input, ScrollView, Select, SolidButton, Text } from '@/components/ui';
+import * as React from 'react';
+import { ScrollView, View } from 'react-native';
+import { GhostButton, Image, Input, Select, SolidButton, Text } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
 import { CategoryPicker } from '@/features/categories/category-picker';
@@ -33,10 +34,11 @@ export type TransactionFormProps = {
   initialValues?: TransactionFormInitialValues;
   onSuccess?: () => void;
   onCancel?: () => void;
+  isSheet?: boolean;
 };
 
 // eslint-disable-next-line max-lines-per-function
-export function TransactionForm({ initialValues, onSuccess, onCancel }: TransactionFormProps) {
+export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }: TransactionFormProps) {
   const { data: accounts = [] } = useAccounts();
   const id = initialValues?.id;
   const preferredCurrency = useAppStore.use.currency();
@@ -91,6 +93,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
     },
   });
 
+  const HScrollView = isSheet ? BottomSheetScrollView : ScrollView;
   return (
     <View className="gap-4">
       <form.Subscribe
@@ -216,22 +219,20 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
             <Text className="mb-2 text-sm font-medium">
               {translate('transactions.account')}
             </Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerClassName="flex-row gap-2"
-            >
-              {accounts.map((a) => (
-                <SolidButton
-                  key={a.id}
-                  size="sm"
-                  className="items-center rounded-3xl"
-                  color={field.state.value === a.id ? 'primary' : 'secondary'}
-                  label={`${a.icon} ${a.name}`}
-                  onPress={() => field.handleChange(a.id)}
-                />
-              ))}
-            </ScrollView>
+            <HScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View className="flex-row gap-2">
+                {accounts.map((a) => (
+                  <SolidButton
+                    key={a.id}
+                    size="sm"
+                    className="items-center rounded-3xl"
+                    color={field.state.value === a.id ? 'primary' : 'secondary'}
+                    label={`${a.icon} ${a.name}`}
+                    onPress={() => field.handleChange(a.id)}
+                  />
+                ))}
+              </View>
+            </HScrollView>
           </View>
         )}
       />

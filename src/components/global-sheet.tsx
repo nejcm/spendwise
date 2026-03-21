@@ -28,6 +28,7 @@ function SheetContent({ config, onClose }: { config: SheetConfig; onClose: () =>
           initialValues={config.categoryId ? { category_id: config.categoryId } : undefined}
           onSuccess={onClose}
           onCancel={onClose}
+          isSheet
         />
       );
     case 'add-account':
@@ -64,6 +65,7 @@ function SheetContent({ config, onClose }: { config: SheetConfig; onClose: () =>
           initialValues={config.initialValues}
           onSuccess={onClose}
           onCancel={onClose}
+          isSheet
         />
       );
     default:

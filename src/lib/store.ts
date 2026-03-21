@@ -173,7 +173,7 @@ export function hydrateAuth() {
 
 // Preference actions
 export function setCurrency(currency: CurrencyKey) {
-  return _useAppStore.setState((prev) => ({ ...prev, currency }));
+  return _useAppStore.setState((prev) => ({ ...prev, currency: currency.length > 0 ? currency : DEFAULT_USER_CURRENCY }));
 }
 
 export function setCurrencyFormat(currencyFormat: AppState['currencyFormat']) {

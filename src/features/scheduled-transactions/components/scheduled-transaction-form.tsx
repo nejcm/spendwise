@@ -1,18 +1,18 @@
 import type { ScheduledTransactionFormData } from '../types';
 
 import type { CurrencyKey } from '@/features/currencies';
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useForm } from '@tanstack/react-form';
 import * as React from 'react';
-import { View } from 'react-native';
+import { ScrollView } from 'react-native';
 import * as z from 'zod';
 import {
   Input,
-
-  ScrollView,
   Select,
   SolidButton,
   Switch,
   Text,
+  View,
 } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
@@ -100,6 +100,7 @@ export type ScheduledTransactionFormProps = {
   initialValues?: ScheduledTransactionInitialValues;
   onCancel?: () => void;
   onSuccess?: () => void;
+  isSheet?: boolean;
 };
 
 // eslint-disable-next-line max-lines-per-function
@@ -107,6 +108,7 @@ export function ScheduledTransactionForm({
   initialValues,
   onCancel,
   onSuccess,
+  isSheet,
 }: ScheduledTransactionFormProps) {
   const { data: accounts = [] } = useAccounts();
   const createScheduledTransaction = useCreateScheduledTransaction();
@@ -161,6 +163,7 @@ export function ScheduledTransactionForm({
     },
   });
 
+  const HScrollView = isSheet ? BottomSheetScrollView : ScrollView;
   return (
     <View className="gap-4">
       <View className="mb-4 flex-row gap-3">
@@ -233,22 +236,20 @@ export function ScheduledTransactionForm({
             <Text className="mb-2 text-sm font-medium">
               {translate('transactions.account')}
             </Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerClassName="flex-row gap-2"
-            >
-              {accounts.map((account) => (
-                <SolidButton
-                  key={account.id}
-                  size="sm"
-                  className="items-center rounded-3xl"
-                  color={field.state.value === account.id ? 'primary' : 'secondary'}
-                  label={`${account.icon} ${account.name}`}
-                  onPress={() => field.handleChange(account.id)}
-                />
-              ))}
-            </ScrollView>
+            <HScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View className="flex-row gap-2">
+                {accounts.map((account) => (
+                  <SolidButton
+                    key={account.id}
+                    size="sm"
+                    className="items-center rounded-3xl"
+                    color={field.state.value === account.id ? 'primary' : 'secondary'}
+                    label={`${account.icon} ${account.name}`}
+                    onPress={() => field.handleChange(account.id)}
+                  />
+                ))}
+              </View>
+            </HScrollView>
           </View>
         )}
       />

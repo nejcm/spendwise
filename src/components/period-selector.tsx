@@ -1,9 +1,9 @@
 import type { PeriodSelection } from '@/lib/store';
-import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react-native';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { cn } from 'tailwind-variants';
 import { Text, useModal } from '@/components/ui';
+import { ArrowLeftIcon, ArrowRightIcon } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { getPeriodLabel, navigatePeriod } from '@/lib/date/helpers';
 import { PeriodSelectorModal } from './period-selector-modal';

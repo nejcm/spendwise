@@ -2,13 +2,12 @@ import type { ImportProps } from '@/features/imports-export/import';
 import { useMutation } from '@tanstack/react-query';
 import * as DocumentPicker from 'expo-document-picker';
 
-import { ArrowDown, ArrowUp } from 'lucide-react-native';
 import * as React from 'react';
 import { useState } from 'react';
-import { View } from 'react-native';
 import DetailsSection from '@/components/details';
-import { FocusAwareStatusBar, ScrollView, SolidButton, Text } from '@/components/ui';
+import { FocusAwareStatusBar, SafeAreaView, ScrollView, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
+import { ArrowDown, ArrowUp } from '@/components/ui/icon';
 import { autoDetectColumnMapping, parseCSV } from '@/features/imports-export/csv-parser';
 import { useExportBackup, useImportBackup } from '@/features/imports-export/hooks';
 import Import from '@/features/imports-export/import';
@@ -101,7 +100,7 @@ export function ImportScreen() {
   });
 
   return (
-    <View className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background">
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         {!screen && (
@@ -139,6 +138,6 @@ export function ImportScreen() {
           />
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

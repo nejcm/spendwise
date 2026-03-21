@@ -1,11 +1,11 @@
 import type { AccountFormData, AccountWithBalance } from './types';
-import { Plus } from 'lucide-react-native';
 import * as React from 'react';
-
 import { useMemo } from 'react';
+
 import { View } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
-import { FocusAwareStatusBar, FormattedCurrency, ScrollView, SolidButton, Text } from '@/components/ui';
+import { FocusAwareStatusBar, FormattedCurrency, SafeAreaView, ScrollView, SolidButton, Text } from '@/components/ui';
+import { Plus } from '@/components/ui/icon';
 import { SkeletonRows } from '@/components/ui/skeleton';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { useAccountsWithBalanceForRange } from '@/features/transactions/api';
@@ -44,7 +44,7 @@ export function AccountsScreen() {
   }, []);
 
   return (
-    <View className="flex-1">
+    <SafeAreaView className="flex-1 bg-background">
       <FocusAwareStatusBar />
 
       <PeriodSelector selection={selection} onSelect={setPeriodSelection} />
@@ -82,6 +82,6 @@ export function AccountsScreen() {
         </View>
 
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

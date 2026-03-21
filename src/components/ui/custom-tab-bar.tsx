@@ -1,9 +1,9 @@
 import type { SheetConfig } from '@/lib/sheet';
 import { usePathname, useRouter } from 'expo-router';
-import { Home, LayoutGrid, PieChart, PlusIcon, UserIcon } from 'lucide-react-native';
-
 import * as React from 'react';
+
 import { Platform, Pressable, View } from 'react-native';
+import { Home, LayoutGrid, PieChart, PlusIcon, UserIcon } from '@/components/ui/icon';
 import { openSheet } from '@/lib/local-store';
 
 type TabConfig = {

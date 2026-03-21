@@ -8,6 +8,7 @@ export * from './checkbox';
 export * from './focus-aware-status-bar';
 export * from './formatted-text';
 export * from './ghost-button';
+export * from './icon';
 export * from './icon-button';
 export * from './image';
 export * from './input';

@@ -1,10 +1,10 @@
 import { format } from 'date-fns';
 
 import { useRouter } from 'expo-router';
-import { BotIcon } from 'lucide-react-native';
 import * as React from 'react';
 import { View } from 'react-native';
 import { FormattedCurrency, Image, SafeAreaView, ScrollView, Text } from '@/components/ui';
+import { BotIcon } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { SkeletonBox, SkeletonGrid } from '@/components/ui/skeleton';
 import { AccountsOverview } from '@/features/home/accounts-overview';

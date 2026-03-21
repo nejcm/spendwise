@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { useState } from 'react';
 
-import { FocusAwareStatusBar, View } from '@/components/ui';
+import { FocusAwareStatusBar, SafeAreaView } from '@/components/ui';
 import { setIsFirstTime } from '@/lib/store';
 import ProfileStep from './Profile';
 import SettingsStep from './Settings';
@@ -19,12 +19,12 @@ export function OnboardingScreen() {
   };
 
   return (
-    <View className="flex h-full bg-background">
+    <SafeAreaView className="flex-1 bg-background">
       <FocusAwareStatusBar />
       {step === 0 && <WelcomeStep onNext={() => setStep(1)} currentStep={0} />}
       {step === 1 && <SettingsStep onBack={() => setStep(0)} onNext={() => setStep(2)} currentStep={1} />}
       {step === 2 && <ProfileStep onBack={() => setStep(1)} onNext={() => setStep(3)} currentStep={2} />}
       {step === 3 && <ThemeStep onBack={() => setStep(2)} onNext={onFinish} currentStep={3} />}
-    </View>
+    </SafeAreaView>
   );
 }

@@ -1,14 +1,14 @@
 import type { CurrencyKey } from '../currencies';
 import type { CategorySpend } from '@/features/insights/types';
 import type { PeriodSelection } from '@/lib/store';
-import { Lightbulb } from 'lucide-react-native';
 import * as React from 'react';
-
 import { Pressable, View } from 'react-native';
+
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import Sortable from 'react-native-sortables';
 import { FormattedCurrency, Text } from '@/components/ui';
 import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
+import { Lightbulb } from '@/components/ui/icon';
 import { scaleBudgetForPeriod } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';

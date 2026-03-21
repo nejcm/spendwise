@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Image, SafeAreaView, SolidButton, Text, View } from '@/components/ui';
+import { Image, SolidButton, Text, View } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import IntroNav from '../Nav';
 
@@ -11,8 +11,8 @@ export type WelcomeStepProps = {
 
 export default function WelcomeStep({ onNext, currentStep }: WelcomeStepProps) {
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-[1.15] bg-gray-200 px-6 pt-8 pb-12 dark:bg-gray-50">
+    <>
+      <View className="flex-2 bg-gray-200 px-6 pt-12 pb-16 dark:bg-gray-50">
         <View className="mb-10 flex-row items-center justify-center gap-3">
           <Text className="text-3xl font-bold tracking-tight text-gray-900">{translate('onboarding.title')}</Text>
         </View>
@@ -45,6 +45,6 @@ export default function WelcomeStep({ onNext, currentStep }: WelcomeStepProps) {
           size="lg"
         />
       </View>
-    </SafeAreaView>
+    </>
   );
 }

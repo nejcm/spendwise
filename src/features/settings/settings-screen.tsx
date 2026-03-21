@@ -4,9 +4,9 @@ import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 
-import { ALargeSmall, Banknote, Bell, Bot, Database, DatabaseBackupIcon, DatabaseZap, HelpCircle, Import, LayoutGrid, Link, ListChecks, Printer, RefreshCcw, Share, Shield, User } from 'lucide-react-native';
-import { FocusAwareStatusBar, Image, ScrollView, Text, View } from '@/components/ui';
+import { FocusAwareStatusBar, Image, SafeAreaView, ScrollView, Text, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
+import { ALargeSmall, Banknote, Bell, Bot, Database, DatabaseBackupIcon, DatabaseZap, HelpCircle, Import, LayoutGrid, Link, ListChecks, Printer, RefreshCcw, Share, Shield, User } from '@/components/ui/icon';
 import { config } from '@/config';
 import { clearData, dumpDbTables, resetDb, seedMockData } from '@/lib/dev';
 import { selectProfile, useAppStore } from '@/lib/store';
@@ -26,7 +26,7 @@ export function SettingsScreen() {
   const queryClient = useQueryClient();
 
   return (
-    <>
+    <SafeAreaView className="flex-1 bg-background">
       <FocusAwareStatusBar />
       <ScrollView className="pb-12" style={defaultStyles.transparentBg}>
         <View className="flex-1 px-4 pt-16">
@@ -136,6 +136,6 @@ export function SettingsScreen() {
 
         </View>
       </ScrollView>
-    </>
+    </SafeAreaView>
   );
 }

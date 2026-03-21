@@ -1,10 +1,10 @@
 import type { Language } from '../../languages/types';
 
 import type { OptionType } from '@/components/ui';
-import { Languages } from 'lucide-react-native';
 import * as React from 'react';
-
 import { Options, useModal } from '@/components/ui';
+
+import { Languages } from '@/components/ui/icon';
 import { useSelectedLanguage } from '@/lib/i18n';
 import { LANGUAGES_OPTIONS } from '../../languages';
 import { SettingsItem } from './settings-item';

@@ -1,10 +1,10 @@
 import type { ThemeType } from '../theme';
 
 import type { OptionType } from '@/components/ui';
-import { Sun } from 'lucide-react-native';
 import * as React from 'react';
-
 import { Options, useModal } from '@/components/ui';
+
+import { Sun } from '@/components/ui/icon';
 import { useSelectedTheme } from '@/lib/theme/use-selected-theme';
 import { THEMES_OPTIONS } from '../theme';
 import { SettingsItem } from './settings-item';

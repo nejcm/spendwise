@@ -152,21 +152,21 @@ App startup happens in `src/app/_layout.tsx`, where the app initializes SQLite, 
 
 - Avatars: https://www.figma.com/design/LcTCGVae3fI72lJASdNtHn/Playful-Avatar-Creator---DrawKit--Community-?node-id=3-3&p=f&t=FrbHnCBsjZzFhIHh-0
 
+## Known issues
+
+- https://github.com/facebook/react-native/issues/51490
+
+---
+
 ## Roadmap
 
 High-level roadmap (subject to change):
 
-### Money & currency
-
-- [ ] Improve currency support (rates + consistent formatting, including default currency)
 
 ### Budgets
 
 - [ ] Support global budgets and per-category budgets (monthly and yearly)
 
-### Recurring transactions
-
-- [ ] Allow making existing transactions repeatable (recurring rules)
 
 ### AI features
 
@@ -176,10 +176,5 @@ High-level roadmap (subject to change):
 ### Product polish
 
 - [ ] Improve overall UI/UX across the app
-  - [ ] Clear feedback for actions (toasts, errors, confirmations, etc.)
 - [ ] Add richer transaction details (e.g. merchant)
 
-### Quality & release
-
-- [ ] Expand test coverage (including Android)
-- [ ] Prepare and publish store app releases

@@ -139,6 +139,8 @@ export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInp
           style={StyleSheet.flatten([
             { writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr' },
             { textAlign: I18nManager.isRTL ? 'right' : 'left' },
+            { outlineStyle: 'solid' as const },
+            { outlineWidth: 0 },
             inputProps.style,
           ])}
         />

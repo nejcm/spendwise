@@ -18,6 +18,7 @@
     "xcode": "xed -b ios",
     "doctor": "npx expo-doctor@latest",
     "rates:update": "tsx scripts/generate-bundled-rates.ts",
+    "assets:jpg": "tsx scripts/svg-to-jpg.ts",
     "preinstall": "npx only-allow pnpm",
     "start:preview": "cross-env EXPO_PUBLIC_APP_ENV=preview pnpm run start",
     "prebuild:preview": "cross-env EXPO_PUBLIC_APP_ENV=preview STRICT_ENV_VALIDATION=1 pnpm run prebuild",
@@ -152,6 +153,7 @@
     "np": "~11.0.2",
     "prettier": "~3.8.1",
     "prettier-plugin-tailwindcss": "~0.7.2",
+    "sharp": "^0.34.5",
     "tailwindcss": "4.2.1",
     "tsx": "~4.21.0",
     "typescript": "~5.9.3"

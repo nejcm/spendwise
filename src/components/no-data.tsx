@@ -1,5 +1,5 @@
-import { DatabaseSearch } from 'lucide-react-native';
 import { cn } from 'tailwind-variants';
+import { DatabaseSearch } from '@/components/ui/icon';
 import { Text, View } from './ui';
 
 export interface NoDataProps {

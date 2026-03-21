@@ -12,6 +12,7 @@ import { Platform, StyleSheet } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppErrorBoundary } from '@/components/app-error-boundary';
 import { GlobalSheet } from '@/components/global-sheet';
 import { CustomTabBar } from '@/components/ui/custom-tab-bar';
@@ -143,29 +144,31 @@ function Providers({ children }: { children: React.ReactNode }) {
       // eslint-disable-next-line better-tailwindcss/no-unknown-classes
       className={theme.dark ? `dark` : undefined}
     >
-      <KeyboardProvider>
-        <ThemeProvider value={theme}>
-          <OpfsCleaner>
-            <DatabaseErrorBoundary>
-              <SQLiteProvider databaseName="spendwise.db" onInit={initDb}>
-                <AppErrorBoundary>
-                  <APIProvider>
-                    <ScheduledTransactionsProcessor />
-                    <CurrencyRatesInitializer />
-                    <FontLoader>
-                      <BottomSheetModalProvider>
-                        {children}
-                        <FlashMessage position="top" />
-                        <DevThemeToggle />
-                      </BottomSheetModalProvider>
-                    </FontLoader>
-                  </APIProvider>
-                </AppErrorBoundary>
-              </SQLiteProvider>
-            </DatabaseErrorBoundary>
-          </OpfsCleaner>
-        </ThemeProvider>
-      </KeyboardProvider>
+      <SafeAreaProvider>
+        <KeyboardProvider>
+          <ThemeProvider value={theme}>
+            <OpfsCleaner>
+              <DatabaseErrorBoundary>
+                <SQLiteProvider databaseName="spendwise.db" onInit={initDb}>
+                  <AppErrorBoundary>
+                    <APIProvider>
+                      <ScheduledTransactionsProcessor />
+                      <CurrencyRatesInitializer />
+                      <FontLoader>
+                        <BottomSheetModalProvider>
+                          {children}
+                          <FlashMessage position="top" />
+                          <DevThemeToggle />
+                        </BottomSheetModalProvider>
+                      </FontLoader>
+                    </APIProvider>
+                  </AppErrorBoundary>
+                </SQLiteProvider>
+              </DatabaseErrorBoundary>
+            </OpfsCleaner>
+          </ThemeProvider>
+        </KeyboardProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

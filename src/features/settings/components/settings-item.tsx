@@ -1,10 +1,10 @@
 import type { TxKeyPath } from '@/lib/i18n';
 
-import { ArrowRight } from 'lucide-react-native';
 import * as React from 'react';
-
 import { useUniwind } from 'uniwind';
+
 import { Pressable, Text, View } from '@/components/ui';
+import { ArrowRight } from '@/components/ui/icon';
 
 type ItemProps = {
   text: TxKeyPath;

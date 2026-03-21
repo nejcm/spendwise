@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useMemo } from 'react';
 import { PeriodSelector } from '@/components/period-selector';
-import { FocusAwareStatusBar, ScrollView, Text, View } from '@/components/ui';
+import { FocusAwareStatusBar, SafeAreaView, ScrollView, Text } from '@/components/ui';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { setPeriodSelection, useAppStore } from '@/lib/store';
@@ -16,7 +16,7 @@ export function StatsScreen() {
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
 
   return (
-    <View className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background">
       <FocusAwareStatusBar />
 
       <PeriodSelector selection={selection} onSelect={setPeriodSelection} />
@@ -48,6 +48,6 @@ export function StatsScreen() {
           limit={8}
         />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

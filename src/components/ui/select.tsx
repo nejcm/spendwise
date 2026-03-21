@@ -5,8 +5,6 @@ import type { VariantProps } from 'tailwind-variants';
 import type { ModalProps } from './modal';
 import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { FlashList } from '@shopify/flash-list';
-import { Check, ChevronDown } from 'lucide-react-native';
-
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { cn, tv } from 'tailwind-variants';
@@ -14,6 +12,7 @@ import { useUniwind } from 'uniwind';
 import { IS_WEB } from '@/lib/base';
 import { translate } from '@/lib/i18n';
 import { defaultStyles } from '@/lib/theme/styles';
+import { Check, ChevronDown } from './icon';
 import { Image } from './image';
 import { Input } from './input';
 import { Modal, useModal } from './modal';

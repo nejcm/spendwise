@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import DetailsSection from '@/components/details';
-import { FocusAwareStatusBar, FormattedCurrency, FormattedDate, SolidButton, Text } from '@/components/ui';
+import { FocusAwareStatusBar, FormattedCurrency, FormattedDate, SafeAreaView, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { OutlineButton } from '@/components/ui/outline-button';
 import { formatDate } from '@/features/formatting/helpers';
@@ -26,15 +26,15 @@ export function ScheduledTransactionDetailScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 items-center justify-center">
+      <SafeAreaView className="flex-1 items-center justify-center bg-background">
         <Text>{translate('common.loading')}</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (!rule) {
     return (
-      <View className="flex-1 items-center justify-center gap-4 px-4">
+      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-4">
         <Text className="text-center text-muted-foreground">
           {translate('scheduled.rule_not_found')}
         </Text>
@@ -43,25 +43,27 @@ export function ScheduledTransactionDetailScreen() {
           label={translate('common.back')}
           onPress={() => router.replace('/scheduled/index')}
         />
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (isEditing) {
     return (
-      <ScrollView className="flex-1 px-4 py-8">
-        <ScheduledTransactionForm
-          initialValues={{
-            ...rule,
-            amount: rule.amount / 100,
-            is_active: Boolean(rule.is_active),
-            start_date: unixToISODate(rule.start_date),
-            end_date: rule.end_date ? unixToISODate(rule.end_date) : null,
-          }}
-          onSuccess={() => setIsEditing(false)}
-          onCancel={() => setIsEditing(false)}
-        />
-      </ScrollView>
+      <SafeAreaView className="flex-1 bg-background">
+        <ScrollView className="flex-1 px-4 py-8">
+          <ScheduledTransactionForm
+            initialValues={{
+              ...rule,
+              amount: rule.amount / 100,
+              is_active: Boolean(rule.is_active),
+              start_date: unixToISODate(rule.start_date),
+              end_date: rule.end_date ? unixToISODate(rule.end_date) : null,
+            }}
+            onSuccess={() => setIsEditing(false)}
+            onCancel={() => setIsEditing(false)}
+          />
+        </ScrollView>
+      </SafeAreaView>
     );
   }
 
@@ -86,7 +88,7 @@ export function ScheduledTransactionDetailScreen() {
   };
 
   return (
-    <View className="flex-1">
+    <SafeAreaView className="flex-1 bg-background">
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 py-8">
         <View className="items-center pb-6">
@@ -154,8 +156,6 @@ export function ScheduledTransactionDetailScreen() {
           />
         </View>
       </ScrollView>
-      {' '}
-
-    </View>
+    </SafeAreaView>
   );
 }

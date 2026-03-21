@@ -1,9 +1,9 @@
 import type { CurrencyKey } from '../../currencies';
 
 import type { LoaderDimensions } from '@/components/ui/skeleton';
-import { TrendingDown, TrendingUp } from 'lucide-react-native';
 import * as React from 'react';
 import { FormattedCurrency, Text, View } from '@/components/ui';
+import { TrendingDown, TrendingUp } from '@/components/ui/icon';
 import { SkeletonRows } from '@/components/ui/skeleton';
 import { useSummaryByRange } from '@/features/insights/api';
 import { translate } from '@/lib/i18n';

@@ -1,11 +1,11 @@
 import * as React from 'react';
 
-import { FocusAwareStatusBar, ScrollView, Text, View } from '@/components/ui';
+import { FocusAwareStatusBar, SafeAreaView, ScrollView, Text, View } from '@/components/ui';
 import { defaultStyles } from '@/lib/theme/styles';
 
 export function PrivacyScreen() {
   return (
-    <View className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background">
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-8 pb-12" style={defaultStyles.transparentBg}>
         <Text className="mb-4 text-2xl font-bold text-foreground">
@@ -168,6 +168,6 @@ export function PrivacyScreen() {
           This privacy policy is effective as of 2026-03-13
         </Text>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

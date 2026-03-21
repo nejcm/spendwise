@@ -2,7 +2,7 @@ import * as LocalAuthentication from 'expo-local-authentication';
 import * as React from 'react';
 import { Pressable } from 'react-native';
 
-import { FocusAwareStatusBar, ScrollView, Switch, Text, View } from '@/components/ui';
+import { FocusAwareStatusBar, SafeAreaView, ScrollView, Switch, Text, View } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { translate } from '@/lib/i18n';
 import { setIsLocked, setLockEnabled, setLockTimeoutMinutes, useAppStore } from '@/lib/store';
@@ -57,7 +57,7 @@ export function SecuritySettingsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background">
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         <DetailsSection data={[{
@@ -102,6 +102,6 @@ export function SecuritySettingsScreen() {
           </View>
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

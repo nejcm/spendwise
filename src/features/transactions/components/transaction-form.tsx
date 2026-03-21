@@ -148,33 +148,40 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
           )}
         />
       </View>
-      <View className="flex-row items-center gap-2">
-        <View className="w-[92] flex-row items-center justify-center gap-2 px-4">
-          <Image source={CURRENCIES_MAP[preferredCurrency].image} className="size-6 rounded-full" />
-          <Text className="border-none bg-transparent">
-            {preferredCurrency}
-          </Text>
-        </View>
-        <form.Field
-          name="baseAmount"
-          children={(field) => (
-            <Input
-              value={field.state.value ?? ''}
-              onBlur={field.handleBlur}
-              onChangeText={(t) => {
-                setBaseAmountIsManual(true);
-                field.handleChange(t);
-              }}
-              placeholder="0.00"
-              size="lg"
-              keyboardType="decimal-pad"
-              testID="base-amount-input"
-              error={getFieldError(field)}
-              containerClassName="min-w-[72] flex-1"
+      <form.Subscribe
+        selector={(s) => [s.values.currency]}
+        children={([selectedCurrency]) => (
+          <View className="flex-row items-center gap-2">
+            <View className="w-[92] flex-row items-center justify-center gap-2 px-4">
+              <Image source={CURRENCIES_MAP[preferredCurrency].image} className="size-6 rounded-full" />
+              <Text className="border-none bg-transparent">
+                {preferredCurrency}
+              </Text>
+            </View>
+            <form.Field
+              name="baseAmount"
+              children={(field) => (
+                <Input
+                  value={field.state.value ?? ''}
+                  onBlur={field.handleBlur}
+                  onChangeText={(t) => {
+                    setBaseAmountIsManual(true);
+                    field.handleChange(t);
+                  }}
+                  placeholder="0.00"
+                  readOnly={selectedCurrency === preferredCurrency}
+                  className={selectedCurrency === preferredCurrency ? 'border-0' : ''}
+                  size="lg"
+                  keyboardType="decimal-pad"
+                  testID="base-amount-input"
+                  error={getFieldError(field)}
+                  containerClassName="min-w-[72] flex-1"
+                />
+              )}
             />
-          )}
-        />
-      </View>
+          </View>
+        )}
+      />
 
       <form.Field
         name="type"

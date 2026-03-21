@@ -1,10 +1,10 @@
-import type { PressableProps, View } from 'react-native';
+/* eslint-disable react-refresh/only-export-components */
+import type { PressableProps, PressableStateCallbackType, StyleProp, View, ViewStyle } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
 import * as React from 'react';
 import { ActivityIndicator, Pressable, Text } from 'react-native';
 import { tv } from 'tailwind-variants';
 
-// eslint-disable-next-line react-refresh/only-export-components
 export const solidButton = tv({
   slots: {
     container: 'flex flex-row items-center justify-center rounded-lg px-4',
@@ -99,6 +99,13 @@ export const solidButton = tv({
   },
 });
 
+export function pressedStyle(state: PressableStateCallbackType, style: StyleProp<ViewStyle> | ((state: PressableStateCallbackType) => StyleProp<ViewStyle>), disabled: boolean, loading: boolean): StyleProp<ViewStyle> {
+  return [
+    typeof style === 'function' ? style(state) : style,
+    state.pressed && !(disabled || loading) && { opacity: 0.8 },
+  ];
+}
+
 type ButtonVariants = VariantProps<typeof solidButton>;
 export type SolidButtonProps = {
   label?: string;
@@ -123,6 +130,7 @@ export function SolidButton({
   testID,
   textClassName = '',
   color = 'primary',
+  style,
   ...props
 }: SolidButtonProps & { ref?: React.RefObject<View | null> }) {
   const styles = React.useMemo(() => solidButton({ disabled, size, color, fullWidth }), [disabled, size, color, fullWidth]);
@@ -131,6 +139,7 @@ export function SolidButton({
     <Pressable
       disabled={disabled || loading}
       className={styles.container({ className })}
+      style={(state) => pressedStyle(state, style, disabled, loading)}
       {...props}
       ref={ref}
       testID={testID}

@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { BotIcon } from 'lucide-react-native';
 import * as React from 'react';
 import { View } from 'react-native';
-import { FormattedCurrency, Image, ScrollView, Text } from '@/components/ui';
+import { FormattedCurrency, Image, SafeAreaView, ScrollView, Text } from '@/components/ui';
 import { IconButton } from '@/components/ui/icon-button';
 import { SkeletonBox, SkeletonGrid } from '@/components/ui/skeleton';
 import { AccountsOverview } from '@/features/home/accounts-overview';
@@ -25,9 +25,9 @@ export function HomeScreen() {
   const { data, isLoading } = useMonthSummary(format(new Date(), 'yyyy-MM'));
 
   return (
-    <>
+    <SafeAreaView className="flex-1 bg-background">
       <ScrollView className="flex-1" style={defaultStyles.transparentBg}>
-        <View className="flex-col gap-8 px-4 py-6">
+        <View className="flex-col gap-8 p-4">
           <View className="flex-row items-center justify-between gap-2">
             <Image
               source={theme.dark ? require('../../../assets/spendwise-white.svg') : require('../../../assets/spendwise.svg')}
@@ -73,6 +73,6 @@ export function HomeScreen() {
           <TransactionsList />
         </View>
       </ScrollView>
-    </>
+    </SafeAreaView>
   );
 }

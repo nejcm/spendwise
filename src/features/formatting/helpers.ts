@@ -2,7 +2,7 @@ import type { CurrencyKey } from '../currencies';
 import type { CurrencyFormat, NumberFormat } from './constants';
 import { format, isToday, isYesterday } from 'date-fns';
 import { translate } from '@/lib/i18n';
-import { DEFAULT_DATE_FORMAT } from '../../config';
+import { DEFAULT_DATE_FORMAT, DEFAULT_USER_CURRENCY } from '../../config';
 import { CURRENCIES_MAP } from '../currencies';
 
 const TRAILING_DECIMAL_ZEROS = /\.?0+$/;
@@ -56,13 +56,14 @@ export function formatNumber(value: number | string, numberFormat: NumberFormat)
 export function formatCurrency(value: number | string, currency: CurrencyKey, numberFormat: NumberFormat = 'comma', currencyFormat: CurrencyFormat = 'symbol-before'): string {
   const number = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(number)) return String(value);
+  const curr = currency?.length ? currency : DEFAULT_USER_CURRENCY;
 
   const isNegative = number < 0;
   const isCurrencyBeforeNumber = currencyFormat === 'symbol-before' || currencyFormat === 'code-before';
   const numberForFormatting = isNegative && isCurrencyBeforeNumber ? Math.abs(number) : number;
   const formattedNumber = formatNumber(centsToAmount(numberForFormatting), numberFormat);
   const isCode = currencyFormat === 'code-before' || currencyFormat === 'code-after';
-  const currencyTxt = isCode ? currency : CURRENCIES_MAP[currency].symbol;
+  const currencyTxt = isCode ? curr : CURRENCIES_MAP[curr]?.symbol ?? DEFAULT_USER_CURRENCY;
   const space = isCode ? ' ' : '';
 
   if (isCurrencyBeforeNumber) {

@@ -39,7 +39,7 @@ function BackupSection() {
               <SolidButton
                 size="sm"
                 className="min-w-16"
-                iconLeft={<ArrowUp className="mr-1 size-4 text-background" />}
+                iconLeft={<ArrowUp className="mr-1 text-background" size={16} />}
                 label={translate('common.export')}
                 loading={exportBackup.isPending}
                 onPress={() => void exportBackup.mutate()}
@@ -53,7 +53,7 @@ function BackupSection() {
               <SolidButton
                 size="sm"
                 className="min-w-16"
-                iconLeft={<ArrowDown className="mr-1 size-4 text-background" />}
+                iconLeft={<ArrowDown className="mr-1 text-background" size={16} />}
                 label={translate('common.import')}
                 loading={importBackup.isPending}
                 onPress={() => importBackup.mutate()}
@@ -116,7 +116,7 @@ export function ImportScreen() {
                   <SolidButton
                     size="sm"
                     className="min-w-16"
-                    iconLeft={<ArrowDown className="mr-1 size-4 text-background" />}
+                    iconLeft={<ArrowDown className="mr-1 text-background" size={16} />}
                     label={translate('common.import')}
                     loading={pickFileMutation.isPending}
                     onPress={() => pickFileMutation.mutate()}

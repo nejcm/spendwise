@@ -50,13 +50,13 @@ export function CategoriesScreen() {
           color="none"
           onPress={() => router.navigate({ pathname: '/categories', params: isEditMode ? undefined : { edit: 'true' } })}
         >
-          <EditIcon className="size-4 text-muted-foreground" />
+          <EditIcon className="text-muted-foreground" size={16} />
         </IconButton>
       </View>
       {isEditMode
         ? (
             <View className="flex-row items-center justify-center gap-2 py-3.5">
-              <FileWarning className="size-4 text-warning-500" />
+              <FileWarning className="text-warning-500" size={16} />
               <Text className="text-sm text-warning-500">
                 {translate('categories.edit_mode')}
               </Text>

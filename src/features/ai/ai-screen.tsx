@@ -1,18 +1,22 @@
+import type { MarkdownStyle } from 'react-native-enriched-markdown';
 import type { ChatMessage } from '@/features/ai/service';
 import { useMutation } from '@tanstack/react-query';
 import { Link } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import * as React from 'react';
 
+import * as React from 'react';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 import { FocusAwareStatusBar, Input, ScrollView, SolidButton, Text, View } from '@/components/ui';
 import { Plus, SendHorizonal } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
+import { AssistantMessage } from '@/features/ai/components/assistant-message';
 import { buildAiPromptContext } from '@/features/ai/context';
 import { ask } from '@/features/ai/service';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
+import { useThemeConfig } from '@/lib/theme/use-theme-config';
+import { getMarkdownStyle } from './helpers';
 
 type AskVariables = {
   messages: ChatMessage[];
@@ -28,6 +32,7 @@ const PRESET_QUESTIONS = [
 
 export function AiScreen() {
   const db = useSQLiteContext();
+  const theme = useThemeConfig();
   const openaiApiKey = useAppStore.use.openaiApiKey();
   const anthropicApiKey = useAppStore.use.anthropicApiKey();
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
@@ -83,6 +88,11 @@ export function AiScreen() {
         ? askMutation.error.message
         : translate('ai.contact_error'))
     : null;
+
+  const markdownStyle = React.useMemo<MarkdownStyle>(
+    () => getMarkdownStyle(theme.dark),
+    [theme.dark],
+  );
 
   return (
     <>
@@ -147,7 +157,7 @@ export function AiScreen() {
                     )
                   : null}
 
-            {messages.map((m) => (
+            {messages.map((m, index) => (
               <View
                 key={m.id}
                 className={`mb-2 max-w-[85%] rounded-lg px-3 py-2 ${
@@ -156,11 +166,19 @@ export function AiScreen() {
                     : 'self-start bg-card'
                 }`}
               >
-                <Text
-                  className={m.role === 'user' ? 'text-sm text-white' : 'text-sm text-foreground'}
-                >
-                  {m.content}
-                </Text>
+                {m.role === 'user'
+                  ? (
+                      <Text className="text-sm text-white">
+                        {m.content}
+                      </Text>
+                    )
+                  : (
+                      <AssistantMessage
+                        content={m.content}
+                        streaming={isPending && index === messages.length - 1}
+                        markdownStyle={markdownStyle}
+                      />
+                    )}
               </View>
             ))}
 

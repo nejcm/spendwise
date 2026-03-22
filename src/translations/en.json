@@ -36,6 +36,7 @@
     "ask_prompt": "Ask the AI about your spending or budgeting...",
     "contact_error": "Something went wrong while contacting the AI provider.",
     "input_placeholder": "Ask the AI about your spending or budgets...",
+    "new_chat": "New chat",
     "preset_groceries": "How much did I spend on groceries last month?",
     "preset_monthly_budget": "Help me create a monthly budget based on my recent transactions.",
     "preset_overspending": "Where am I overspending compared to my budget?",

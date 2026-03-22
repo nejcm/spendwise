@@ -8,6 +8,7 @@ import {
   getRecentTransactions,
   getTransactionById,
   getTransactions,
+  getTransactionsSample,
   updateTransaction,
 } from './queries';
 
@@ -165,6 +166,31 @@ describe('getRecentTransactions', () => {
     const result = await getRecentTransactions(db as any, 10);
     expect(result[0].id).toBe('txn_2');
     expect(result[1].id).toBe('txn_1');
+  });
+});
+
+describe('getTransactionsSample', () => {
+  it('returns rows within the requested date range up to the limit', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    await seedTransaction(db, { id: 'txn_1', date: MAR_MID });
+    await seedTransaction(db, { id: 'txn_2', date: MAR_MID + 1 });
+    await seedTransaction(db, { id: 'txn_3', date: APR_MID });
+
+    const result = await getTransactionsSample(db as any, MAR_START, APR_START, 1);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe('txn_2');
+  });
+
+  it('excludes rows outside the requested range', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    await seedTransaction(db, { id: 'txn_1', date: APR_MID });
+
+    const result = await getTransactionsSample(db as any, MAR_START, APR_START, 5);
+
+    expect(result).toHaveLength(0);
   });
 });
 

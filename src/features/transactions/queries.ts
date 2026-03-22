@@ -49,6 +49,23 @@ export async function getRecentTransactions(
   );
 }
 
+export async function getTransactionsSample(
+  db: SQLiteDatabase,
+  startDate: number,
+  endDate: number,
+  limit: number,
+): Promise<TransactionWithCategory[]> {
+  return db.getAllAsync<TransactionWithCategory>(
+    `SELECT t.*, c.name as category_name, c.icon as category_icon, c.color as category_color
+     FROM transactions t
+     LEFT JOIN categories c ON t.category_id = c.id
+     WHERE t.date >= ? AND t.date < ?
+     ORDER BY t.date DESC, t.created_at DESC
+     LIMIT ?`,
+    [startDate, endDate, limit],
+  );
+}
+
 export async function getMonthSummary(
   db: SQLiteDatabase,
   yearMonth: string,

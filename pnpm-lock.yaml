@@ -131,6 +131,9 @@ importers:
       react-native-edge-to-edge:
         specifier: ~1.8.1
         version: 1.8.1(react-native@0.81.5(@babel/core@7.29.0)(@react-native-community/cli@20.1.2(typescript@5.9.3))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      react-native-enriched-markdown:
+        specifier: ~0.4.1
+        version: 0.4.1(@expo/config-plugins@54.0.4)(react-native@0.81.5(@babel/core@7.29.0)(@react-native-community/cli@20.1.2(typescript@5.9.3))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       react-native-flash-message:
         specifier: ~0.4.2
         version: 0.4.2(prop-types@15.8.1)(react-native@0.81.5(@babel/core@7.29.0)(@react-native-community/cli@20.1.2(typescript@5.9.3))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -7669,6 +7672,16 @@ packages:
     peerDependencies:
       react: '*'
       react-native: '*'
+
+  react-native-enriched-markdown@0.4.1:
+    resolution: {integrity: sha512-KjtQEJPigVoPCQpk6uDf0bnb1th7VSIYFjyPJgjbzMtTDbXRKiOSNx6l/A3GOfxPqENgywhwpH5sLxtMqB4r4A==}
+    peerDependencies:
+      '@expo/config-plugins': '>=50.0.0'
+      react: '*'
+      react-native: '*'
+    peerDependenciesMeta:
+      '@expo/config-plugins':
+        optional: true
 
   react-native-flash-message@0.4.2:
     resolution: {integrity: sha512-YvdXRW9AGMTI99S3DJZhLO0mbk/ehKv/UQf4/Df+3dtGi8DlkidRbyqCQZk1WMtZ7rN85PMTGr/xEI9CF9z0YA==}
@@ -17852,6 +17865,13 @@ snapshots:
     dependencies:
       react: 19.1.0
       react-native: 0.81.5(@babel/core@7.29.0)(@react-native-community/cli@20.1.2(typescript@5.9.3))(@types/react@19.1.17)(react@19.1.0)
+
+  react-native-enriched-markdown@0.4.1(@expo/config-plugins@54.0.4)(react-native@0.81.5(@babel/core@7.29.0)(@react-native-community/cli@20.1.2(typescript@5.9.3))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0):
+    dependencies:
+      react: 19.1.0
+      react-native: 0.81.5(@babel/core@7.29.0)(@react-native-community/cli@20.1.2(typescript@5.9.3))(@types/react@19.1.17)(react@19.1.0)
+    optionalDependencies:
+      '@expo/config-plugins': 54.0.4
 
   react-native-flash-message@0.4.2(prop-types@15.8.1)(react-native@0.81.5(@babel/core@7.29.0)(@react-native-community/cli@20.1.2(typescript@5.9.3))(@types/react@19.1.17)(react@19.1.0))(react@19.1.0):
     dependencies:

@@ -17,8 +17,9 @@
       "Bash(grep:*)",
       "Bash(cat:*)",
       "Bash(echo \"Exit: $?\")",
-      "Skill(update-config)",
-      "Skill(update-config:*)"
+      "Skill(update-config:*)",
+      "Bash(gh api:*)",
+      "Bash(pnpm run:*)"
     ]
   }
 }

@@ -1,12 +1,12 @@
-import { Stack } from 'expo-router';
 import * as React from 'react';
 
 import { AiSettingsScreen } from '@/features/ai/ai-settings-screen';
+import ScreenHeader from '../../../components/screen-header';
 
 export default function AiSettingsRoute() {
   return (
     <>
-      <Stack.Screen options={{ title: 'AI', headerShown: true }} />
+      <ScreenHeader title="AI" />
       <AiSettingsScreen />
     </>
   );

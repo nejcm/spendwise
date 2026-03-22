@@ -2,13 +2,13 @@ import { useQuery } from '@tanstack/react-query';
 import * as React from 'react';
 
 import { Platform } from 'react-native';
-import { FocusAwareStatusBar, SafeAreaView, ScrollView, Switch } from '@/components/ui';
-import Alert from '@/components/ui/alert';
+import DetailsSection from '@/components/details';
+import { FocusAwareStatusBar, ScrollView, Switch } from '@/components/ui';
 
+import Alert from '@/components/ui/alert';
 import { translate } from '@/lib/i18n';
+import { updateNotifications, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
-import DetailsSection from '../../components/details';
-import { updateNotifications, useAppStore } from '../../lib/store';
 import { notificationsQuery, setupNotifications } from './notifications';
 
 export function NotificationSettingsScreen() {
@@ -35,7 +35,7 @@ export function NotificationSettingsScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <>
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         <DetailsSection data={[{
@@ -53,6 +53,6 @@ export function NotificationSettingsScreen() {
         }]}
         />
       </ScrollView>
-    </SafeAreaView>
+    </>
   );
 }

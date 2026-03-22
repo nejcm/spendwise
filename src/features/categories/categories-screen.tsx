@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
-import { FocusAwareStatusBar, FormattedCurrency, SafeAreaView, Text, View } from '@/components/ui';
+import { FocusAwareStatusBar, FormattedCurrency, Text, View } from '@/components/ui';
 import { FileWarning, Pencil, PencilOff } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { SkeletonBox } from '@/components/ui/skeleton';
@@ -34,7 +34,7 @@ export function CategoriesScreen() {
   const EditIcon = isEditMode ? PencilOff : Pencil;
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <>
       <FocusAwareStatusBar />
       <View className="flex-row items-center justify-between px-4 pt-2">
         <View className="w-8"></View>
@@ -107,6 +107,6 @@ export function CategoriesScreen() {
               }}
             />
           )}
-    </SafeAreaView>
+    </>
   );
 }

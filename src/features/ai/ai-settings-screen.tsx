@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { View } from 'react-native';
 
-import { FocusAwareStatusBar, Input, SafeAreaView, ScrollView, SolidButton, Text } from '@/components/ui';
+import { FocusAwareStatusBar, Input, ScrollView, SolidButton, Text } from '@/components/ui';
 import { setAiProvider, setAnthropicApiKey, setOpenaiApiKey, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { translate } from '../../lib/i18n';
@@ -26,7 +26,7 @@ export function AiSettingsScreen() {
   }, [openaiKey, anthropicKey]);
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <>
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
 
@@ -70,6 +70,6 @@ export function AiSettingsScreen() {
           />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </>
   );
 }

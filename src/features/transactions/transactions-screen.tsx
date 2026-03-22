@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { cn } from 'tailwind-variants';
 import { PeriodSelector } from '@/components/period-selector';
-import { FocusAwareStatusBar, Input, inputDefaultDefaults, inputDefaults, SafeAreaView } from '@/components/ui';
+import { FocusAwareStatusBar, Input, inputDefaultDefaults, inputDefaults } from '@/components/ui';
 import { X } from '@/components/ui/icon';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
@@ -39,7 +39,7 @@ export function TransactionsScreen() {
   }, [transactions, search, categoryFilter]);
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <>
       <FocusAwareStatusBar />
 
       <PeriodSelector selection={selection} onSelect={setPeriodSelection} />
@@ -73,6 +73,6 @@ export function TransactionsScreen() {
       <View className="flex-1">
         <TransactionList transactions={filtered} isLoading={isLoading} onRefresh={() => void refetch()} />
       </View>
-    </SafeAreaView>
+    </>
   );
 }

@@ -2,7 +2,7 @@ import type { SheetConfig } from '@/lib/sheet';
 import { usePathname, useRouter } from 'expo-router';
 import * as React from 'react';
 
-import { Platform, Pressable, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { Home, LayoutGrid, PieChart, PlusIcon, UserIcon } from '@/components/ui/icon';
 import { openSheet } from '@/lib/local-store';
 
@@ -63,9 +63,8 @@ export function CustomTabBar() {
 
   return (
     <View
-      className="flex-row border-t border-gray-200 bg-white px-2 pt-2"
+      className="flex-row border-t border-gray-200 bg-white p-2"
       style={{
-        paddingBottom: Platform.OS === 'ios' ? 28 : 12,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: -4 },
         shadowOpacity: 0.06,

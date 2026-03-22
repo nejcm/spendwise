@@ -28,7 +28,6 @@ export default function AppLayout() {
     <Stack screenOptions={{
       headerShown: false,
       contentStyle: theme.dark ? defaultStyles.backgroundDark : defaultStyles.background,
-      navigationBarColor: theme.dark ? defaultStyles.backgroundDark.backgroundColor : defaultStyles.background.backgroundColor,
     }}
     >
       <Stack.Screen name="index" />

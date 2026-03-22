@@ -6,6 +6,10 @@ import { Pressable, View } from 'react-native';
 import { Home, LayoutGrid, PieChart, PlusIcon, UserIcon } from '@/components/ui/icon';
 import { openSheet } from '@/lib/local-store';
 
+// eslint-disable-next-line react-refresh/only-export-components
+export const TAB_BAR_COLOR = '#aaaaaa' as const;
+const bgColor = `bg-white`;
+
 type TabConfig = {
   name: string;
   path: string;
@@ -63,14 +67,8 @@ export function CustomTabBar() {
 
   return (
     <View
-      className="flex-row border-t border-gray-200 bg-white p-2"
-      style={{
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: -4 },
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-        elevation: 8,
-      }}
+      className={`flex-row border-t border-gray-200 ${bgColor} p-2`}
+      style={{ elevation: 0 }}
     >
       {TABS.map((tab) => {
         const isAddButton = tab.name === '__add__';

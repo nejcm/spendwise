@@ -130,7 +130,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     ['app-icon-badge', appIconBadgeConfig],
-    ['react-native-edge-to-edge'],
+    [
+      'react-native-edge-to-edge',
+      {
+        android: {
+          // Required for Stack `navigationBarColor` / window nav color to show under edge-to-edge.
+          // Without this, Android may apply a contrast scrim so the bar color looks unchanged.
+          enforceNavigationBarContrast: false,
+        },
+      },
+    ],
   ],
   extra: {
     eas: {

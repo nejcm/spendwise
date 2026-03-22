@@ -113,7 +113,7 @@ const Option = React.memo(
   }) => {
     return (
       <Pressable
-        className={cn('flex-1 flex-row items-center border-b border-gray-200 p-3 dark:border-gray-700', className)}
+        className={cn('w-full flex-row items-center border-b border-gray-200 p-3 dark:border-gray-700', className)}
         {...props}
       >
         {children
@@ -227,6 +227,7 @@ export function Options<T extends string | number>({
         ListHeaderComponent={listHeader}
         testID={testID ? `${testID}-modal` : undefined}
         estimatedItemSize={52}
+        style={{ flex: 1 }}
         {...listProps}
       />
     </Modal>

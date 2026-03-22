@@ -24,14 +24,16 @@ export function DetailsRow({ label, labelClassName, description, value, classNam
 export type DetailsSectionProps = {
   className?: string;
   data: DetailsRowProps[];
+  children?: React.ReactNode;
 };
 
-export default function DetailsSection({ className, data }: DetailsSectionProps) {
+export default function DetailsSection({ className, data, children }: DetailsSectionProps) {
   return (
     <View className={cn('gap-4 rounded-xl bg-card p-4', className)}>
       {data.map((row, index) => (
         <DetailsRow key={index} {...row} />
-      )) }
+      ))}
+      {children}
     </View>
   );
 }

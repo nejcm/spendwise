@@ -55,8 +55,8 @@
     "@expo-google-fonts/inter": "~0.4.2",
     "@expo/metro-runtime": "~6.1.2",
     "@gorhom/bottom-sheet": "~5.2.8",
-    "@react-native-community/datetimepicker": "^8.6.0",
-    "@react-native-picker/picker": "^2.11.4",
+    "@react-native-community/datetimepicker": "~8.4.4",
+    "@react-native-picker/picker": "~2.11.1",
     "@shopify/flash-list": "2.0.2",
     "@tanstack/react-form": "~1.28.4",
     "@tanstack/react-query": "~5.90.21",
@@ -126,12 +126,12 @@
     "@react-native-community/cli": "~20.1.2",
     "@tailwindcss/cli": "~4.2.1",
     "@testing-library/react-native": "~13.3.3",
-    "@types/better-sqlite3": "^7.6.13",
+    "@types/better-sqlite3": "~7.6.13",
     "@types/invariant": "~2.2.37",
     "@types/jest": "~29.5.14",
     "@types/react": "~19.1.17",
     "babel-plugin-module-resolver": "~5.0.2",
-    "better-sqlite3": "^12.8.0",
+    "better-sqlite3": "~12.8.0",
     "cross-env": "~10.1.0",
     "dotenv": "~17.3.1",
     "eslint": "~9.39.4",
@@ -153,7 +153,7 @@
     "np": "~11.0.2",
     "prettier": "~3.8.1",
     "prettier-plugin-tailwindcss": "~0.7.2",
-    "sharp": "^0.34.5",
+    "sharp": "~0.34.5",
     "tailwindcss": "4.2.1",
     "tsx": "~4.21.0",
     "typescript": "~5.9.3"
@@ -173,6 +173,11 @@
         "react-native-worklets"
       ]
     }
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3"
+    ]
   },
   "osMetadata": {
     "initVersion": "9.0.0"

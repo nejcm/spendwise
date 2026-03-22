@@ -15,7 +15,7 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppErrorBoundary } from '@/components/app-error-boundary';
 import { GlobalSheet } from '@/components/global-sheet';
-import { CustomTabBar } from '@/components/ui/custom-tab-bar';
+import { CustomTabBar, TAB_BAR_COLOR } from '@/components/ui/custom-tab-bar';
 import { useCurrencyRates } from '@/features/currencies/api';
 import { todayUnix } from '@/features/formatting/helpers';
 import {
@@ -31,7 +31,7 @@ import { IS_WEB } from '@/lib/base';
 import { DatabaseErrorBoundary, migrateDb, OpfsCleaner } from '@/lib/sqlite';
 import { loadSelectedTheme, useSelectedTheme } from '@/lib/theme/use-selected-theme';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
-import { SafeAreaView } from '../components/ui';
+import { SafeAreaView, View } from '../components/ui';
 import { DB_NAME } from '../config';
 // Import  global CSS file
 import '../global.css';
@@ -93,7 +93,7 @@ function DevThemeToggle() {
 export default function RootLayout() {
   return (
     <Providers>
-      <Stack>
+      <Stack screenOptions={{ navigationBarColor: TAB_BAR_COLOR }}>
         <Stack.Screen name="(app)" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       </Stack>
@@ -158,9 +158,11 @@ function Providers({ children }: { children: React.ReactNode }) {
                       <CurrencyRatesInitializer />
                       <FontLoader>
                         <BottomSheetModalProvider>
-                          <SafeAreaView className="flex-1 bg-background">
-                            {children}
-                          </SafeAreaView>
+                          <View className="flex-1 bg-white">
+                            <SafeAreaView className="flex-1 bg-background">
+                              {children}
+                            </SafeAreaView>
+                          </View>
                           <FlashMessage position="top" />
                           <DevThemeToggle />
                         </BottomSheetModalProvider>

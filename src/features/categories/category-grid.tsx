@@ -64,7 +64,7 @@ export const CategoryGrid = React.memo(({
               />
             )}
         <View className="mt-6 flex-row items-center justify-center gap-2">
-          <Lightbulb className="size-3 text-muted-foreground" />
+          <Lightbulb className="text-muted-foreground" size={14} />
           <Text className="text-sm text-muted-foreground">
             {translate('categories.sorting_tips')}
           </Text>

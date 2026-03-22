@@ -192,11 +192,11 @@ function YearNavRow({ year, onChangeYear }: { year: number; onChangeYear: (y: nu
   return (
     <View className="flex-row items-center justify-between py-2">
       <IconButton size="sm" color="none" onPress={() => onChangeYear(year - 1)} hitSlop={12}>
-        <ArrowLeftIcon className="size-5 text-muted-foreground" />
+        <ArrowLeftIcon className="text-muted-foreground" size={20} />
       </IconButton>
       <Text className="text-base font-semibold">{year}</Text>
       <IconButton size="sm" color="none" onPress={() => onChangeYear(year + 1)} hitSlop={12}>
-        <ArrowRightIcon className="size-5 text-muted-foreground" />
+        <ArrowRightIcon className="text-muted-foreground" size={20} />
       </IconButton>
     </View>
   );

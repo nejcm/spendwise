@@ -167,7 +167,7 @@ export function AiScreen() {
                 disabled={loading || !question.trim() || !hasKey}
                 className="absolute right-2 bottom-2 rounded-full"
               >
-                <SendHorizonal className="size-5 text-background disabled:text-foreground" />
+                <SendHorizonal className="text-background disabled:text-foreground" size={20} />
               </IconButton>
             </View>
           </View>

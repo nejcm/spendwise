@@ -321,7 +321,7 @@ export function Select<T extends string | number>({
                     {selectedOption?.label ?? placeholder ?? ''}
                   </Text>
                 </View>
-                {showChevron && <ChevronDown className="size-5 text-muted-foreground" />}
+                {showChevron && <ChevronDown className="text-muted-foreground" size={20} />}
               </>
             )}
         </Pressable>

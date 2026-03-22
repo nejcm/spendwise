@@ -1,15 +1,22 @@
 import type { ChatMessage } from '@/features/ai/service';
+import { useMutation } from '@tanstack/react-query';
 import { Link } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
 
 import { KeyboardAvoidingView, Platform } from 'react-native';
 import { FocusAwareStatusBar, Input, ScrollView, SolidButton, Text, View } from '@/components/ui';
-import { SendHorizonal } from '@/components/ui/icon';
+import { Plus, SendHorizonal } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
-import { askAnthropic, askOpenAI } from '@/features/ai/service';
+import { buildAiPromptContext } from '@/features/ai/context';
+import { ask } from '@/features/ai/service';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
+
+type AskVariables = {
+  messages: ChatMessage[];
+};
 
 const PRESET_QUESTIONS = [
   translate('ai.preset_overview'),
@@ -20,24 +27,44 @@ const PRESET_QUESTIONS = [
 ];
 
 export function AiScreen() {
-  const provider = useAppStore.use.aiProvider();
+  const db = useSQLiteContext();
   const openaiApiKey = useAppStore.use.openaiApiKey();
   const anthropicApiKey = useAppStore.use.anthropicApiKey();
-
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
   const [question, setQuestion] = React.useState('');
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const hasKey = Boolean(openaiApiKey) || Boolean(anthropicApiKey);
 
-  const hasOpenAI = Boolean(openaiApiKey);
-  const hasAnthropic = Boolean(anthropicApiKey);
-  const hasKey = hasOpenAI || hasAnthropic;
+  const askMutation = useMutation({
+    mutationFn: async (vars: AskVariables) => {
+      const latestMessage = vars.messages.at(-1);
+      const context = latestMessage?.role === 'user'
+        ? await buildAiPromptContext(db, latestMessage.content)
+        : undefined;
 
-  const handleSend = React.useCallback(async (presetQuestion?: string) => {
+      return ask({ messages: vars.messages, context });
+    },
+    onSuccess: (answer, vars) => {
+      const assistantMessage: ChatMessage = {
+        id: `${Date.now()}-assistant`,
+        role: 'assistant',
+        content: answer,
+      };
+      setMessages([...vars.messages, assistantMessage]);
+    },
+  });
+  const { isPending, mutate, reset: resetAskMutation } = askMutation;
+
+  const handleNewChat = React.useCallback(() => {
+    if (isPending) return;
+    setMessages([]);
+    setQuestion('');
+    resetAskMutation();
+  }, [isPending, resetAskMutation]);
+
+  const handleSend = React.useCallback((presetQuestion?: string) => {
     const sourceQuestion = presetQuestion ?? question;
     const trimmed = sourceQuestion.trim();
-    if (!trimmed || loading) return;
-    setError(null);
+    if (!trimmed || isPending) return;
 
     const userMessage: ChatMessage = {
       id: `${Date.now()}-user`,
@@ -48,27 +75,14 @@ export function AiScreen() {
     const currentMessages = [...messages, userMessage];
     setMessages(currentMessages);
     setQuestion('');
-    setLoading(true);
+    mutate({ messages: currentMessages });
+  }, [isPending, messages, mutate, question]);
 
-    try {
-      const answer = provider === 'openai'
-        ? await askOpenAI(openaiApiKey as string, currentMessages, trimmed)
-        : await askAnthropic(anthropicApiKey as string, currentMessages, trimmed);
-
-      const assistantMessage: ChatMessage = {
-        id: `${Date.now()}-assistant`,
-        role: 'assistant',
-        content: answer,
-      };
-      setMessages([...currentMessages, assistantMessage]);
-    }
-    catch (e: any) {
-      setError(e?.message ?? translate('ai.contact_error'));
-    }
-    finally {
-      setLoading(false);
-    }
-  }, [provider, anthropicApiKey, messages, openaiApiKey, question, loading]);
+  const errorMessage = askMutation.isError
+    ? (askMutation.error instanceof Error
+        ? askMutation.error.message
+        : translate('ai.contact_error'))
+    : null;
 
   return (
     <>
@@ -78,6 +92,17 @@ export function AiScreen() {
       >
         <FocusAwareStatusBar />
         <View className="flex-1">
+          {hasKey && messages.length > 0 && (
+            <View className="flex-row items-center justify-end border-b border-border px-4 py-2">
+              <SolidButton
+                size="xs"
+                label={translate('ai.new_chat')}
+                iconLeft={<Plus className="text-background" size={15} />}
+                onPress={handleNewChat}
+                disabled={isPending || !messages.length}
+              />
+            </View>
+          )}
           <ScrollView
             className="flex-1 px-4 pt-4"
             contentContainerClassName="pb-8"
@@ -99,8 +124,8 @@ export function AiScreen() {
                 )
               : !messages.length
                   ? (
-                      <View className="my-4">
-                        <Text className="mb-2 text-muted-foreground">
+                      <View className="py-6">
+                        <Text className="mb-2 text-center">
                           {translate('ai.ask_prompt')}
                         </Text>
                         <View className="mt-3 flex flex-col gap-y-2">
@@ -111,7 +136,7 @@ export function AiScreen() {
                               size="sm"
                               label={q}
                               className="h-auto rounded-3xl px-4 py-2"
-                              textClassName="text-left text-muted-foreground leading-tight"
+                              textClassName="text-left leading-tight text-foreground"
                               onPress={() => {
                                 void handleSend(q);
                               }}
@@ -122,16 +147,10 @@ export function AiScreen() {
                     )
                   : null}
 
-            {error && (
-              <View className="mb-4 rounded-md bg-danger-500/10 p-3">
-                <Text className="text-sm text-danger-500">{error}</Text>
-              </View>
-            )}
-
             {messages.map((m) => (
               <View
                 key={m.id}
-                className={`mb-2 max-w-[85%] rounded-2xl px-3 py-2 ${
+                className={`mb-2 max-w-[85%] rounded-lg px-3 py-2 ${
                   m.role === 'user'
                     ? 'self-end bg-black'
                     : 'self-start bg-card'
@@ -144,6 +163,12 @@ export function AiScreen() {
                 </Text>
               </View>
             ))}
+
+            {errorMessage && (
+              <View className="my-4 rounded-lg bg-danger-500/10 px-3 py-2">
+                <Text className="text-sm text-danger-500">{errorMessage}</Text>
+              </View>
+            )}
           </ScrollView>
 
           <View className="bg-background px-4 pb-safe-offset-2">
@@ -156,15 +181,16 @@ export function AiScreen() {
                 autoCapitalize="sentences"
                 autoCorrect
                 multiline
+                numberOfLines={2}
                 disabled={!hasKey}
-                className="min-h-[80] py-2 pr-12"
+                className="min-h-[80] pr-12"
               />
               <IconButton
                 size="sm"
                 onPress={() => {
                   void handleSend();
                 }}
-                disabled={loading || !question.trim() || !hasKey}
+                disabled={isPending || !question.trim() || !hasKey}
                 className="absolute right-2 bottom-2 rounded-full"
               >
                 <SendHorizonal className="text-background disabled:text-foreground" size={20} />

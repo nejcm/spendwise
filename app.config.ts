@@ -57,7 +57,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     adaptiveIcon: {
-      foregroundImage: './assets/logo/spendwise.png',
+      foregroundImage: './assets/logo/spendwise-app-logo.png',
       backgroundColor: '#ffffff',
     },
     package: Env.EXPO_PUBLIC_PACKAGE,

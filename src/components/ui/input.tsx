@@ -54,7 +54,7 @@ export const inputTv = tv({
         input: '',
       },
       textarea: {
-        input: 'h-auto min-h-[100] py-2',
+        input: 'h-auto min-h-[100] items-start justify-start py-2',
       },
     },
     focused: {
@@ -141,6 +141,7 @@ export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInp
             { textAlign: I18nManager.isRTL ? 'right' : 'left' },
             { outlineStyle: 'solid' as const },
             { outlineWidth: 0 },
+            { textAlignVertical: variant === 'textarea' ? 'top' : undefined },
             inputProps.style,
           ])}
         />

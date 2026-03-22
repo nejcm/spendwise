@@ -3,7 +3,7 @@ import { Pressable } from 'react-native';
 
 import { cn } from 'tailwind-variants';
 import { Plus } from '@/components/ui/icon';
-import { Text, View } from './ui';
+import { getPressedStyle, Text, View } from './ui';
 
 export interface NoDataCardProps {
   onPress: () => void;
@@ -22,6 +22,7 @@ export function NoDataCard({ children, onPress, label, description, icon: Icon =
     <Pressable
       onPress={onPress}
       className={cn(cardClassName, className)}
+      style={getPressedStyle}
     >
       <View className="flex-1 justify-center gap-2">
         <View className="flex-row items-center justify-center gap-2">

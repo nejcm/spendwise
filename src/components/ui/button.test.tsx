@@ -3,7 +3,7 @@ import { Text } from 'react-native';
 
 import { cleanup, render, screen, setup } from '@/lib/test-utils';
 
-import { SolidButton } from './button';
+import { SolidButton } from './solid-button';
 
 afterEach(cleanup);
 

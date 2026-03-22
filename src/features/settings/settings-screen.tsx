@@ -6,7 +6,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 
 import { FocusAwareStatusBar, Image, SafeAreaView, ScrollView, Text, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
-import { ALargeSmall, Banknote, Bell, Bot, Database, DatabaseBackupIcon, DatabaseZap, HelpCircle, Import, LayoutGrid, Link, ListChecks, Printer, RefreshCcw, Share, Shield, User } from '@/components/ui/icon';
+import { ALargeSmall, Banknote, Bell, Bot, Database, DatabaseBackupIcon, DatabaseZap, HelpCircle, Import, LayoutGrid, Link, ListChecks, PieChart, Printer, RefreshCcw, Share, Shield, User } from '@/components/ui/icon';
 import { config } from '@/config';
 import { clearData, dumpDbTables, resetDb, seedMockData } from '@/lib/dev';
 import { selectProfile, useAppStore } from '@/lib/store';
@@ -46,6 +46,11 @@ export function SettingsScreen() {
               icon={<LayoutGrid className={iconColor} size={20} />}
               text="settings.categories"
               onPress={() => router.push({ pathname: '/categories' })}
+            />
+            <SettingsItem
+              icon={<PieChart className={iconColor} size={20} />}
+              text="settings.stats"
+              onPress={() => router.push({ pathname: '/stats' })}
             />
             <SettingsItem
               icon={<ListChecks className={iconColor} size={20} />}

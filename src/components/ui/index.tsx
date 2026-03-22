@@ -17,6 +17,7 @@ export * from './modal';
 export * from './outline-button';
 export * from './progress-bar';
 export * from './select';
+export * from './solid-button';
 export * from './text';
 export * from './utils';
 

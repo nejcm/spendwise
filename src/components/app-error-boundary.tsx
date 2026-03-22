@@ -2,7 +2,7 @@ import * as React from 'react';
 import { NativeModules, View } from 'react-native';
 import RNRestart from 'react-native-restart';
 
-import { SolidButton } from '@/components/ui/button';
+import { SolidButton } from '@/components/ui/solid-button';
 import { Text } from '@/components/ui/text';
 import { IS_WEB } from '@/lib/base';
 import { translate } from '@/lib/i18n';

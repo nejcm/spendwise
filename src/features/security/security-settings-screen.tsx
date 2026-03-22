@@ -1,8 +1,7 @@
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as React from 'react';
-import { Pressable } from 'react-native';
 
-import { FocusAwareStatusBar, ScrollView, Switch, Text, View } from '@/components/ui';
+import { FocusAwareStatusBar, ScrollView, Select, Switch, Text, View } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { translate } from '@/lib/i18n';
 import { setIsLocked, setLockEnabled, setLockTimeoutMinutes, useAppStore } from '@/lib/store';
@@ -44,8 +43,8 @@ export function SecuritySettingsScreen() {
         );
         return;
       }
-      const enrolled = await LocalAuthentication.isEnrolledAsync();
-      if (!enrolled) {
+      const level = await LocalAuthentication.getEnrolledLevelAsync();
+      if (level === LocalAuthentication.SecurityLevel.NONE) {
         Alert.alert(
           translate('security.no_device_lock_title'),
           translate('security.no_device_lock_desc'),
@@ -73,34 +72,25 @@ export function SecuritySettingsScreen() {
             />
           ),
         }]}
-        />
-
-        {lockEnabled && (
-          <View className="mb-6">
-            <Text className="mb-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-              {translate('security.lock_after')}
-            </Text>
-            <View className="flex-row flex-wrap gap-2">
-              {TIMEOUT_OPTIONS.map((opt) => (
-                <Pressable
-                  key={opt.value}
-                  className={`rounded-full px-4 py-2 ${
-                    timeoutVal === opt.value ? 'bg-primary-400' : 'bg-gray-100 dark:bg-gray-700'
-                  }`}
-                  onPress={() => {
-                    setLockTimeoutMinutes(opt.value);
+        >
+          {lockEnabled && (
+            <View className="flex-row items-center justify-between gap-2">
+              <Text className="flex-1 text-foreground">
+                {translate('security.lock_after')}
+              </Text>
+              <View>
+                <Select
+                  options={TIMEOUT_OPTIONS}
+                  value={timeoutVal}
+                  containerClassName="min-w-32"
+                  onSelect={(option) => {
+                    setLockTimeoutMinutes(option);
                   }}
-                >
-                  <Text
-                    className={`text-sm font-medium ${timeoutVal === opt.value ? 'text-white' : ''}`}
-                  >
-                    {opt.label}
-                  </Text>
-                </Pressable>
-              ))}
+                />
+              </View>
             </View>
-          </View>
-        )}
+          )}
+        </DetailsSection>
       </ScrollView>
     </>
   );

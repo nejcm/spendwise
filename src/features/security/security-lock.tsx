@@ -44,6 +44,5 @@ export function SecurityLock() {
   }, []);
 
   if (!lockEnabled) return null;
-
   return <LockScreen visible={isLocked} onUnlock={handleUnlock} />;
 }

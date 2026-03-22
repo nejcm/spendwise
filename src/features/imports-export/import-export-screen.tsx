@@ -5,7 +5,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as React from 'react';
 import { useState } from 'react';
 import DetailsSection from '@/components/details';
-import { FocusAwareStatusBar, SafeAreaView, ScrollView, SolidButton, Text } from '@/components/ui';
+import { FocusAwareStatusBar, ScrollView, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { ArrowDown, ArrowUp } from '@/components/ui/icon';
 import { autoDetectColumnMapping, parseCSV } from '@/features/imports-export/csv-parser';
@@ -100,7 +100,7 @@ export function ImportScreen() {
   });
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <>
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
         {!screen && (
@@ -138,6 +138,6 @@ export function ImportScreen() {
           />
         )}
       </ScrollView>
-    </SafeAreaView>
+    </>
   );
 }

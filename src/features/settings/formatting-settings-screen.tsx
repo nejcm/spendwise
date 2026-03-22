@@ -4,7 +4,7 @@ import type { OptionType } from '@/components/ui';
 import type { CurrencyKey } from '@/features/currencies';
 import * as React from 'react';
 import { ActivityIndicator, Alert, View } from 'react-native';
-import { FocusAwareStatusBar, Options, SafeAreaView, ScrollView, useModal } from '@/components/ui';
+import { FocusAwareStatusBar, Options, ScrollView, useModal } from '@/components/ui';
 import { Calendar, CircleDollarSign, DecimalsArrowRight, Euro } from '@/components/ui/icon';
 import { CURRENCY_OPTIONS } from '@/features/currencies';
 import { useChangeCurrency } from '@/features/currencies/hooks';
@@ -122,7 +122,7 @@ export function FormattingSettingsScreen() {
   }, [modalType, OptionsProps, dismiss]);
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <>
       <FocusAwareStatusBar />
       {changeCurrency.isPending && (
         <View className="absolute inset-0 z-50 items-center justify-center bg-background/80">
@@ -176,6 +176,6 @@ export function FormattingSettingsScreen() {
           {...modalOptions}
         />
       </ScrollView>
-    </SafeAreaView>
+    </>
   );
 }

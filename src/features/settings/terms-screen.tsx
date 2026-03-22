@@ -1,11 +1,11 @@
 import * as React from 'react';
 
-import { FocusAwareStatusBar, SafeAreaView, ScrollView, Text } from '@/components/ui';
+import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
 import { defaultStyles } from '@/lib/theme/styles';
 
 export function TermsScreen() {
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <>
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 pt-8 pb-12" style={defaultStyles.transparentBg}>
         <Text className="mb-4 text-2xl font-bold text-foreground">
@@ -145,6 +145,6 @@ export function TermsScreen() {
           These terms and conditions are effective as of 2026-03-13.
         </Text>
       </ScrollView>
-    </SafeAreaView>
+    </>
   );
 }

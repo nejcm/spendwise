@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 
-import { FocusAwareStatusBar, Image, Input, Modal, SafeAreaView, ScrollView, Text, useModal } from '@/components/ui';
+import { FocusAwareStatusBar, Image, Input, Modal, ScrollView, Text, useModal } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import { updateProfile, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -13,7 +13,7 @@ export function ProfileSettingsScreen() {
   const avatarModal = useModal();
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <>
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 p-12" style={defaultStyles.transparentBg}>
         <Pressable
@@ -67,6 +67,6 @@ export function ProfileSettingsScreen() {
           </View>
         </ScrollView>
       </Modal>
-    </SafeAreaView>
+    </>
   );
 }

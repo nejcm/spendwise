@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { View } from 'react-native';
-import { FormattedCurrency, Image, SafeAreaView, ScrollView, Text } from '@/components/ui';
+import { FormattedCurrency, Image, ScrollView, Text } from '@/components/ui';
 import { BotIcon } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { SkeletonBox, SkeletonGrid } from '@/components/ui/skeleton';
@@ -25,7 +25,7 @@ export function HomeScreen() {
   const { data, isLoading } = useMonthSummary(format(new Date(), 'yyyy-MM'));
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <>
       <ScrollView className="flex-1" style={defaultStyles.transparentBg}>
         <View className="flex-col gap-8 p-4">
           <View className="flex-row items-center justify-between gap-2">
@@ -73,6 +73,6 @@ export function HomeScreen() {
           <TransactionsList />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </>
   );
 }

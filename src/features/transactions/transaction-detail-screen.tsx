@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { ScrollView, View } from 'react-native';
 import DetailsSection from '@/components/details';
-import { FocusAwareStatusBar, FormattedCurrency, FormattedDate, SafeAreaView, SolidButton, Text } from '@/components/ui';
+import { FocusAwareStatusBar, FormattedCurrency, FormattedDate, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { OutlineButton } from '@/components/ui/outline-button';
 import { unixToISODate } from '@/lib/date/helpers';
@@ -25,15 +25,15 @@ export function TransactionDetailScreen() {
 
   if (isLoading || !transaction) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center bg-background">
+      <View className="flex-1 items-center justify-center bg-background">
         <Text>{translate('common.loading')}</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (isEditing) {
     return (
-      <SafeAreaView className="flex-1 bg-background">
+      <>
         <FocusAwareStatusBar />
         <ScrollView className="flex-1 px-4 py-10">
           <TransactionForm
@@ -42,7 +42,7 @@ export function TransactionDetailScreen() {
             onCancel={() => setIsEditing(false)}
           />
         </ScrollView>
-      </SafeAreaView>
+      </>
     );
   }
 
@@ -83,7 +83,7 @@ export function TransactionDetailScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <>
       <FocusAwareStatusBar />
       <ScrollView className="flex-1 px-4 py-10">
         <View className="items-center pb-6">
@@ -135,6 +135,6 @@ export function TransactionDetailScreen() {
           <SolidButton className="flex-1" label={translate('common.edit')} onPress={() => setIsEditing(true)} />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </>
   );
 }

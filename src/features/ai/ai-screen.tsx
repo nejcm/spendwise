@@ -3,7 +3,7 @@ import { Link } from 'expo-router';
 import * as React from 'react';
 
 import { KeyboardAvoidingView, Platform } from 'react-native';
-import { FocusAwareStatusBar, Input, SafeAreaView, ScrollView, SolidButton, Text, View } from '@/components/ui';
+import { FocusAwareStatusBar, Input, ScrollView, SolidButton, Text, View } from '@/components/ui';
 import { SendHorizonal } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { askAnthropic, askOpenAI } from '@/features/ai/service';
@@ -71,7 +71,7 @@ export function AiScreen() {
   }, [provider, anthropicApiKey, messages, openaiApiKey, question, loading]);
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <>
       <KeyboardAvoidingView
         className="flex-1 bg-background"
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -103,7 +103,7 @@ export function AiScreen() {
                         <Text className="mb-2 text-muted-foreground">
                           {translate('ai.ask_prompt')}
                         </Text>
-                        <View className="mt-3 flex flex-col space-y-2">
+                        <View className="mt-3 flex flex-col gap-y-2">
                           {PRESET_QUESTIONS.map((q) => (
                             <SolidButton
                               key={q}
@@ -173,6 +173,6 @@ export function AiScreen() {
           </View>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </>
   );
 }

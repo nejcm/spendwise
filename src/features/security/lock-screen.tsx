@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { Modal } from 'react-native';
 
-import { SafeAreaView, SolidButton, Text } from '@/components/ui';
+import { SolidButton, Text, View } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import { config } from '../../config';
 
@@ -40,14 +40,14 @@ export function LockScreen({ visible, onUnlock }: Props) {
 
   return (
     <Modal animationType="fade" statusBarTranslucent transparent visible={visible}>
-      <SafeAreaView className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
+      <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
         <Text className="mb-2 text-3xl font-bold">{config.appName}</Text>
         <Text className="mb-12 text-gray-500">{translate('security.locked')}</Text>
         {hint !== null && (
           <Text className="mb-4 text-sm text-gray-400">{hint}</Text>
         )}
         <SolidButton label={translate('security.unlock')} onPress={authenticate} />
-      </SafeAreaView>
+      </View>
     </Modal>
   );
 }

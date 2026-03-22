@@ -2,13 +2,13 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import NoData from '@/components/no-data';
-import { FocusAwareStatusBar, FormattedCurrency, SafeAreaView, ScrollView, SolidButton, Text } from '@/components/ui';
+import { FocusAwareStatusBar, FormattedCurrency, ScrollView, SolidButton, Text } from '@/components/ui';
 import { Plus } from '@/components/ui/icon';
+import { SkeletonRows } from '@/components/ui/skeleton';
 import { formatDate } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/local-store';
 import { defaultStyles } from '@/lib/theme/styles';
-import { SkeletonRows } from '../../components/ui/skeleton';
 import { useScheduledTransactions } from './api';
 
 export function ScheduledTransactionsScreen() {
@@ -21,13 +21,13 @@ export function ScheduledTransactionsScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-background px-4 py-10">
+      <View className="flex-1 px-4 py-10">
         <SkeletonRows count={3} />
-      </SafeAreaView>
+      </View>
     );
   }
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <>
       <FocusAwareStatusBar />
       {activeRules.length === 0 && inactiveRules.length === 0
         ? (
@@ -125,6 +125,6 @@ export function ScheduledTransactionsScreen() {
               )}
             </ScrollView>
           )}
-    </SafeAreaView>
+    </>
   );
 }

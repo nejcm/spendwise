@@ -26,11 +26,13 @@ import { ScheduledTransactionsProcessor } from '@/features/scheduled-transaction
 import { processDueScheduledTransactions } from '@/features/scheduled-transactions/scheduler';
 import { SecurityLock } from '@/features/security/security-lock';
 import { APIProvider } from '@/lib/api';
-import { IS_WEB } from '@/lib/base';
 
+import { IS_WEB } from '@/lib/base';
 import { DatabaseErrorBoundary, migrateDb, OpfsCleaner } from '@/lib/sqlite';
 import { loadSelectedTheme, useSelectedTheme } from '@/lib/theme/use-selected-theme';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
+import { SafeAreaView } from '../components/ui';
+import { DB_NAME } from '../config';
 // Import  global CSS file
 import '../global.css';
 
@@ -149,14 +151,16 @@ function Providers({ children }: { children: React.ReactNode }) {
           <ThemeProvider value={theme}>
             <OpfsCleaner>
               <DatabaseErrorBoundary>
-                <SQLiteProvider databaseName="spendwise.db" onInit={initDb}>
+                <SQLiteProvider databaseName={DB_NAME} onInit={initDb}>
                   <AppErrorBoundary>
                     <APIProvider>
                       <ScheduledTransactionsProcessor />
                       <CurrencyRatesInitializer />
                       <FontLoader>
                         <BottomSheetModalProvider>
-                          {children}
+                          <SafeAreaView className="flex-1 bg-background">
+                            {children}
+                          </SafeAreaView>
                           <FlashMessage position="top" />
                           <DevThemeToggle />
                         </BottomSheetModalProvider>

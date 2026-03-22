@@ -5,7 +5,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { format, parseISO } from 'date-fns';
 import * as React from 'react';
 
-import { Pressable, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
 import { Input } from '@/components/ui/input';
 import { Modal, useModal } from '@/components/ui/modal';
 import { todayISO } from '@/features/formatting/helpers';
@@ -63,7 +63,7 @@ export function DateInput({ label, value, onChange, error, modalProps, ...rest }
           {...rest}
         />
       </Pressable>
-      <Modal ref={ref} snapPoints={['45%']} {...modalProps}>
+      <Modal ref={ref} snapPoints={Platform.OS === 'android' ? ['1%'] : ['45%']} {...modalProps}>
         <View className="items-center px-4 pb-6">
           <DateTimePicker
             value={dateValue}

@@ -3,7 +3,8 @@ import type { VariantProps } from 'tailwind-variants';
 import * as React from 'react';
 import { Pressable } from 'react-native';
 import { tv } from 'tailwind-variants';
-import { solidButton } from './button';
+import { getPressedStyle } from './button';
+import { solidButton } from './solid-button';
 
 const iconButton = tv({
   extend: solidButton,
@@ -56,14 +57,16 @@ export function IconButton({
   color = 'primary',
   className = '',
   testID,
+  style,
   ...props
 }: IconButtonProps & { ref?: React.RefObject<View | null> }) {
   const styles = React.useMemo(() => iconButton({ disabled, size, color }), [disabled, size, color]);
 
   return (
     <Pressable
-      disabled={disabled}
       className={styles.container({ className })}
+      style={(state) => getPressedStyle(state, style, !disabled)}
+      disabled={disabled}
       {...props}
       ref={ref}
       testID={testID}

@@ -173,7 +173,6 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
                   }}
                   placeholder="0.00"
                   readOnly={selectedCurrency === preferredCurrency}
-                  className={selectedCurrency === preferredCurrency ? 'border-0' : ''}
                   size="lg"
                   keyboardType="decimal-pad"
                   testID="base-amount-input"

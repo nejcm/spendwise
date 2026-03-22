@@ -1,9 +1,9 @@
 import type { PressableProps, View } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
 import * as React from 'react';
-import { ActivityIndicator, Pressable, Text } from 'react-native';
 import { tv } from 'tailwind-variants';
-import { solidButton } from './button';
+import { Button } from './button';
+import { solidButton } from './solid-button';
 
 const outlineButton = tv({
   extend: solidButton,
@@ -76,52 +76,27 @@ export type GhostButtonProps = {
 
 export function GhostButton({
   ref,
-  iconLeft,
-  iconRight,
-  label: text,
-  loading = false,
-  disabled = false,
-  size = 'md',
-  color = 'primary',
   className = '',
-  testID,
+  color = 'primary',
+  disabled = false,
+  fullWidth = false,
+  loading = false,
+  size = 'md',
   textClassName = '',
   ...props
 }: GhostButtonProps & { ref?: React.RefObject<View | null> }) {
-  const styles = React.useMemo(() => outlineButton({ disabled, size, color }), [disabled, size, color]);
+  const styles = React.useMemo(() => outlineButton({ disabled, size, color, fullWidth }), [disabled, size, color, fullWidth]);
 
   return (
-    <Pressable
+    <Button
       disabled={disabled || loading}
+      loading={loading}
       className={styles.container({ className })}
+      indicatorClassName={styles.indicator()}
+      indicatorSize={size === 'xs' || size === 'sm' || size === 'md' ? 'small' : 'large'}
+      textClassName={styles.label({ className: textClassName })}
       {...props}
       ref={ref}
-      testID={testID}
-    >
-      {props.children || (
-        <>
-          {loading
-            ? (
-                <ActivityIndicator
-                  size="small"
-                  className={styles.indicator()}
-                  testID={testID ? `${testID}-activity-indicator` : undefined}
-                />
-              )
-            : (
-                <>
-                  {iconLeft}
-                  <Text
-                    testID={testID ? `${testID}-label` : undefined}
-                    className={styles.label({ className: textClassName })}
-                  >
-                    {text}
-                  </Text>
-                  {iconRight}
-                </>
-              )}
-        </>
-      )}
-    </Pressable>
+    />
   );
 }

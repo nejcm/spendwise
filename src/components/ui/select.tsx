@@ -171,16 +171,9 @@ export function Options<T extends string | number>({
 
   const filteredOptions = React.useMemo(() => {
     if (!searchEnabled) return options;
-
     const query = deferredSearchQuery.trim().toLowerCase();
     if (!query) return options;
-
-    return options.filter((option) => {
-      const labelMatch = option.label.toLowerCase().includes(query);
-      const subtextMatch = option.subtext?.toLowerCase().includes(query);
-
-      return labelMatch || subtextMatch;
-    });
+    return options.filter((option) => option.label.toLowerCase().includes(query) || option.subtext?.toLowerCase().includes(query));
   }, [options, searchEnabled, deferredSearchQuery]);
 
   const renderSelectItem = React.useCallback(

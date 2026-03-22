@@ -105,7 +105,7 @@ export function SettingsScreen() {
           </SettingsContainer>
 
           <SettingsContainer title="settings.support_us">
-            <SettingsItem text="settings.share" icon={<Share className={iconColor} size={20} />} onPress={() => {}} />
+            <SettingsItem text="settings.share" icon={<Share className={iconColor} size={20} />} onPress={() => Linking.openURL(config.links.support)} />
             <SettingsItem
               text="settings.support"
               icon={<HelpCircle className={iconColor} size={20} />}

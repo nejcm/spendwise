@@ -1,5 +1,3 @@
-import type { StateStorage } from 'zustand/middleware';
-
 import type { CurrencyKey } from '../features/currencies';
 import type { Account } from '@/features/accounts/types';
 import type { CurrencyFormat, DateFormat, NumberFormat } from '@/features/formatting/constants';
@@ -7,12 +5,12 @@ import type { Language } from '@/features/languages/types';
 import type { ThemeType } from '@/features/settings/theme';
 import type { Transaction } from '@/features/transactions/types';
 
-import { createMMKV } from 'react-native-mmkv';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { currentPeriodSelection } from '@/lib/date/helpers';
 import { createSelectors } from '@/lib/utils';
 import { DEFAULT_DATE_FORMAT, DEFAULT_USER_CURRENCY } from '../config';
+import { mmkvStorage } from './storage';
 
 export type TokenType = {
   access: string;
@@ -28,13 +26,6 @@ export type PeriodSelectionMonth = { mode: 'month'; year: number; month: number 
 export type PeriodSelectionWeek = { mode: 'week'; year: number; week: number };
 export type PeriodSelectionCustom = { mode: 'custom'; startDate: string; endDate: string };
 export type PeriodSelection = PeriodSelectionYear | PeriodSelectionMonth | PeriodSelectionWeek | PeriodSelectionCustom;
-
-const mmkv = createMMKV();
-const mmkvStorage: StateStorage = {
-  getItem: (name) => mmkv.getString(name) ?? null,
-  setItem: (name, value) => mmkv.set(name, value),
-  removeItem: (name) => mmkv.remove(name),
-};
 
 export type AppState = {
 // Profile

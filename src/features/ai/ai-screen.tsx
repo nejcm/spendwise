@@ -1,4 +1,3 @@
-import type { ScrollView as RNScrollView } from 'react-native';
 import { Link } from 'expo-router';
 import * as React from 'react';
 import { KeyboardAvoidingView, Platform } from 'react-native';
@@ -21,6 +20,7 @@ const PRESET_QUESTIONS = [
   translate('ai.preset_subscriptions'),
 ];
 
+// markdown library not supported on web
 const MessageComponent = IS_WEB ? AssistantMessageWeb : AssistantMessage;
 
 type EmptyProps = {
@@ -78,11 +78,15 @@ export function AiScreen() {
     streamingAssistantId,
     streamedAssistantContent,
     errorMessage,
+    scrollViewRef,
+    handleScrollViewportLayout,
+    handleMessageLayout,
+    shouldShowBottomFiller,
+    bottomFillerHeight,
     handleNewChat,
     handleSend,
     markdownStyle,
   } = useChat();
-  const scrollViewRef = React.useRef<RNScrollView>(null);
 
   return (
     <>
@@ -99,12 +103,13 @@ export function AiScreen() {
                 label={translate('ai.new_chat')}
                 iconLeft={<Plus className="text-background" size={15} />}
                 onPress={handleNewChat}
-                disabled={isStreaming || !messages.length}
+                disabled={!messages.length}
               />
             </View>
           )}
           <ScrollView
             ref={scrollViewRef}
+            onLayout={handleScrollViewportLayout}
             className="flex-1 px-4 pt-4"
             contentContainerClassName="pb-8"
             style={defaultStyles.transparentBg}
@@ -113,6 +118,9 @@ export function AiScreen() {
             {messages.map((m) => (
               <View
                 key={m.id}
+                onLayout={(event) => {
+                  handleMessageLayout(m.id, event);
+                }}
                 className={`mb-2 max-w-[85%] rounded-lg px-3 py-2 ${
                   m.role === 'user'
                     ? 'self-end bg-foreground dark:bg-foreground/40'
@@ -140,6 +148,7 @@ export function AiScreen() {
                 <Text className="text-sm text-danger-500">{errorMessage}</Text>
               </View>
             )}
+            {shouldShowBottomFiller && <View style={{ height: bottomFillerHeight }} />}
           </ScrollView>
 
           <View className="bg-background px-4 pb-safe-offset-2">

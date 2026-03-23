@@ -1,8 +1,4 @@
-import type { MarkdownStyle } from 'react-native-enriched-markdown';
-import type { ChatMessage } from '@/features/ai/service';
-import { useMutation } from '@tanstack/react-query';
 import { Link } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
 
 import * as React from 'react';
 import { KeyboardAvoidingView, Platform } from 'react-native';
@@ -10,19 +6,10 @@ import { FocusAwareStatusBar, Input, ScrollView, SolidButton, Text, View } from 
 import { Plus, SendHorizonal } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { AssistantMessage } from '@/features/ai/components/assistant-message';
-import { buildAiPromptContext } from '@/features/ai/context';
-import { ask } from '@/features/ai/service';
-import { appendAiMessage, clearAiChat, setAiDraftQuestion, setAiMessages, useAiChatStore } from '@/features/ai/store';
+import { setAiDraftQuestion } from '@/features/ai/store';
 import { translate } from '@/lib/i18n';
-import { generateId } from '@/lib/sqlite';
-import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
-import { useThemeConfig } from '@/lib/theme/use-theme-config';
-import { getMarkdownStyle } from './helpers';
-
-type AskVariables = {
-  messages: ChatMessage[];
-};
+import { useChat } from './use-chat';
 
 const PRESET_QUESTIONS = [
   translate('ai.preset_overview'),
@@ -33,70 +20,18 @@ const PRESET_QUESTIONS = [
 ];
 
 export function AiScreen() {
-  const db = useSQLiteContext();
-  const theme = useThemeConfig();
-  const openaiApiKey = useAppStore.use.openaiApiKey();
-  const anthropicApiKey = useAppStore.use.anthropicApiKey();
-  const messages = useAiChatStore.use.messages();
-  const question = useAiChatStore.use.draftQuestion();
-  const hasKey = Boolean(openaiApiKey) || Boolean(anthropicApiKey);
-  const inFlightRequestRef = React.useRef(false);
-
-  const askMutation = useMutation({
-    mutationFn: async (vars: AskVariables) => {
-      const latestMessage = vars.messages.at(-1);
-      const context = latestMessage?.role === 'user'
-        ? await buildAiPromptContext(db, latestMessage.content)
-        : undefined;
-
-      return ask({ messages: vars.messages, context });
-    },
-    onSuccess: (answer) => {
-      appendAiMessage({
-        id: generateId(),
-        role: 'assistant',
-        content: answer,
-      });
-    },
-    onSettled: () => {
-      inFlightRequestRef.current = false;
-    },
-  });
-  const { isPending, mutate, reset: resetAskMutation } = askMutation;
-
-  const handleNewChat = React.useCallback(() => {
-    if (isPending) return;
-    clearAiChat();
-    resetAskMutation();
-  }, [isPending, resetAskMutation]);
-
-  const handleSend = React.useCallback((presetQuestion?: string) => {
-    const sourceQuestion = presetQuestion ?? question;
-    const trimmed = sourceQuestion.trim();
-    if (!trimmed || isPending || inFlightRequestRef.current) return;
-
-    const currentMessages = [...useAiChatStore.getState().messages, {
-      id: generateId(),
-      role: 'user',
-      content: trimmed,
-    } as const];
-    inFlightRequestRef.current = true;
-    setAiMessages(currentMessages);
-    setAiDraftQuestion('');
-    mutate({ messages: currentMessages });
-  }, [isPending, mutate, question]);
-
-  const errorMessage = askMutation.isError
-    ? (askMutation.error instanceof Error
-        ? askMutation.error.message
-        : translate('ai.contact_error'))
-    : null;
-
-  const markdownStyle = React.useMemo<MarkdownStyle>(
-    () => getMarkdownStyle(theme.dark),
-    [theme.dark],
-  );
-
+  const {
+    hasKey,
+    messages,
+    question,
+    isStreaming,
+    streamingAssistantId,
+    streamedAssistantContent,
+    errorMessage,
+    handleNewChat,
+    handleSend,
+    markdownStyle,
+  } = useChat();
   return (
     <>
       <KeyboardAvoidingView
@@ -112,7 +47,7 @@ export function AiScreen() {
                 label={translate('ai.new_chat')}
                 iconLeft={<Plus className="text-background" size={15} />}
                 onPress={handleNewChat}
-                disabled={isPending || !messages.length}
+                disabled={isStreaming || !messages.length}
               />
             </View>
           )}
@@ -160,7 +95,7 @@ export function AiScreen() {
                     )
                   : null}
 
-            {messages.map((m, index) => (
+            {messages.map((m) => (
               <View
                 key={m.id}
                 className={`mb-2 max-w-[85%] rounded-lg px-3 py-2 ${
@@ -177,8 +112,8 @@ export function AiScreen() {
                     )
                   : (
                       <AssistantMessage
-                        content={m.content}
-                        streaming={isPending && index === messages.length - 1}
+                        content={m.id === streamingAssistantId ? streamedAssistantContent : m.content}
+                        streaming={isStreaming && m.id === streamingAssistantId}
                         markdownStyle={markdownStyle}
                       />
                     )}
@@ -211,7 +146,7 @@ export function AiScreen() {
                 onPress={() => {
                   void handleSend();
                 }}
-                disabled={isPending || !question.trim() || !hasKey}
+                disabled={isStreaming || !question.trim() || !hasKey}
                 className="absolute right-2 bottom-2 rounded-full"
               >
                 <SendHorizonal className="text-background disabled:text-foreground" size={20} />

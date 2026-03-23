@@ -1,7 +1,7 @@
 import type { AskInput, ChatMessage, ProviderChatMessage } from './types';
 import { useAppStore } from '@/lib/store';
-import { askAnthropic } from './anthropic';
-import { askOpenAI } from './openai';
+import { askAnthropic, streamAskAnthropic } from './anthropic';
+import { askOpenAI, streamAskOpenAI } from './openai';
 
 function buildContextAwareUserMessage(message: ChatMessage, context?: AskInput['context']) {
   if (!context) return message.content;
@@ -47,4 +47,20 @@ export async function ask({ messages, context }: AskInput) {
   return aiProvider === 'openai'
     ? await askOpenAI(openaiApiKey, providerMessages)
     : await askAnthropic(anthropicApiKey, providerMessages);
+}
+
+type StreamAskInput = {
+  messages: ChatMessage[];
+  context?: AskInput['context'];
+  onToken: (token: string) => void;
+  signal?: AbortSignal;
+};
+
+export async function streamAsk({ messages, context, onToken, signal }: StreamAskInput) {
+  const { aiProvider, openaiApiKey, anthropicApiKey } = useAppStore.getState();
+  const providerMessages = buildProviderMessages(messages, context);
+
+  return aiProvider === 'openai'
+    ? await streamAskOpenAI(openaiApiKey, providerMessages, onToken, signal)
+    : await streamAskAnthropic(anthropicApiKey, providerMessages, onToken, signal);
 }

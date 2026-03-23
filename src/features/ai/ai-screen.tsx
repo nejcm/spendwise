@@ -12,7 +12,9 @@ import { IconButton } from '@/components/ui/icon-button';
 import { AssistantMessage } from '@/features/ai/components/assistant-message';
 import { buildAiPromptContext } from '@/features/ai/context';
 import { ask } from '@/features/ai/service';
+import { appendAiMessage, clearAiChat, setAiDraftQuestion, setAiMessages, useAiChatStore } from '@/features/ai/store';
 import { translate } from '@/lib/i18n';
+import { generateId } from '@/lib/sqlite';
 import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
@@ -35,9 +37,10 @@ export function AiScreen() {
   const theme = useThemeConfig();
   const openaiApiKey = useAppStore.use.openaiApiKey();
   const anthropicApiKey = useAppStore.use.anthropicApiKey();
-  const [messages, setMessages] = React.useState<ChatMessage[]>([]);
-  const [question, setQuestion] = React.useState('');
+  const messages = useAiChatStore.use.messages();
+  const question = useAiChatStore.use.draftQuestion();
   const hasKey = Boolean(openaiApiKey) || Boolean(anthropicApiKey);
+  const inFlightRequestRef = React.useRef(false);
 
   const askMutation = useMutation({
     mutationFn: async (vars: AskVariables) => {
@@ -48,40 +51,40 @@ export function AiScreen() {
 
       return ask({ messages: vars.messages, context });
     },
-    onSuccess: (answer, vars) => {
-      const assistantMessage: ChatMessage = {
-        id: `${Date.now()}-assistant`,
+    onSuccess: (answer) => {
+      appendAiMessage({
+        id: generateId(),
         role: 'assistant',
         content: answer,
-      };
-      setMessages([...vars.messages, assistantMessage]);
+      });
+    },
+    onSettled: () => {
+      inFlightRequestRef.current = false;
     },
   });
   const { isPending, mutate, reset: resetAskMutation } = askMutation;
 
   const handleNewChat = React.useCallback(() => {
     if (isPending) return;
-    setMessages([]);
-    setQuestion('');
+    clearAiChat();
     resetAskMutation();
   }, [isPending, resetAskMutation]);
 
   const handleSend = React.useCallback((presetQuestion?: string) => {
     const sourceQuestion = presetQuestion ?? question;
     const trimmed = sourceQuestion.trim();
-    if (!trimmed || isPending) return;
+    if (!trimmed || isPending || inFlightRequestRef.current) return;
 
-    const userMessage: ChatMessage = {
-      id: `${Date.now()}-user`,
+    const currentMessages = [...useAiChatStore.getState().messages, {
+      id: generateId(),
       role: 'user',
       content: trimmed,
-    };
-
-    const currentMessages = [...messages, userMessage];
-    setMessages(currentMessages);
-    setQuestion('');
+    } as const];
+    inFlightRequestRef.current = true;
+    setAiMessages(currentMessages);
+    setAiDraftQuestion('');
     mutate({ messages: currentMessages });
-  }, [isPending, messages, mutate, question]);
+  }, [isPending, mutate, question]);
 
   const errorMessage = askMutation.isError
     ? (askMutation.error instanceof Error
@@ -194,7 +197,7 @@ export function AiScreen() {
               <Input
                 variant="textarea"
                 value={question}
-                onChangeText={setQuestion}
+                onChangeText={setAiDraftQuestion}
                 placeholder={translate('ai.input_placeholder')}
                 autoCapitalize="sentences"
                 autoCorrect

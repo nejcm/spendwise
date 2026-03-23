@@ -1,12 +1,14 @@
+import type { ScrollView as RNScrollView } from 'react-native';
 import { Link } from 'expo-router';
-
 import * as React from 'react';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 import { FocusAwareStatusBar, Input, ScrollView, SolidButton, Text, View } from '@/components/ui';
 import { Plus, SendHorizonal } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
-import { AssistantMessage } from '@/features/ai/components/assistant-message';
+import AssistantMessage from '@/features/ai/components/assistant-message';
+import AssistantMessageWeb from '@/features/ai/components/assistant-message.web';
 import { setAiDraftQuestion } from '@/features/ai/store';
+import { IS_WEB } from '@/lib/base';
 import { translate } from '@/lib/i18n';
 import { defaultStyles } from '@/lib/theme/styles';
 import { useChat } from './use-chat';
@@ -18,6 +20,54 @@ const PRESET_QUESTIONS = [
   translate('ai.preset_monthly_budget'),
   translate('ai.preset_subscriptions'),
 ];
+
+const MessageComponent = IS_WEB ? AssistantMessageWeb : AssistantMessage;
+
+type EmptyProps = {
+  hasKey: boolean;
+  hasMessages: boolean;
+  handleSend: (question: string) => void;
+};
+function Empty({ hasKey, hasMessages, handleSend }: EmptyProps) {
+  if (!hasKey) {
+    return (
+      <View className="mb-4 rounded-xl bg-card p-4">
+        <Text className="text-muted-foreground">
+          {translate('ai.add_api_key_in')}
+          {' '}
+          <Link href="/settings/ai" className="mx-1 font-medium text-foreground underline">
+            {translate('ai.ai_setting')}
+          </Link>
+          {' '}
+          {translate('ai.to_start_chatting')}
+        </Text>
+      </View>
+    );
+  }
+  if (hasMessages) return null;
+  return (
+    <View className="py-6">
+      <Text className="mb-2 text-center">
+        {translate('ai.ask_prompt')}
+      </Text>
+      <View className="mt-3 flex flex-col gap-y-2">
+        {PRESET_QUESTIONS.map((q) => (
+          <SolidButton
+            key={q}
+            color="secondary"
+            size="sm"
+            label={q}
+            className="h-auto rounded-3xl px-4 py-2"
+            textClassName="text-left leading-tight font-normal text-foreground text-center"
+            onPress={() => {
+              void handleSend(q);
+            }}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
 
 export function AiScreen() {
   const {
@@ -32,6 +82,8 @@ export function AiScreen() {
     handleSend,
     markdownStyle,
   } = useChat();
+  const scrollViewRef = React.useRef<RNScrollView>(null);
+
   return (
     <>
       <KeyboardAvoidingView
@@ -52,55 +104,18 @@ export function AiScreen() {
             </View>
           )}
           <ScrollView
+            ref={scrollViewRef}
             className="flex-1 px-4 pt-4"
             contentContainerClassName="pb-8"
             style={defaultStyles.transparentBg}
           >
-            {(!hasKey)
-              ? (
-                  <View className="mb-4 rounded-xl bg-card p-4">
-                    <Text className="text-muted-foreground">
-                      {translate('ai.add_api_key_in')}
-                      {' '}
-                      <Link href="/settings/ai" className="mx-1 font-medium text-foreground underline">
-                        {translate('ai.ai_setting')}
-                      </Link>
-                      {' '}
-                      {translate('ai.to_start_chatting')}
-                    </Text>
-                  </View>
-                )
-              : !messages.length
-                  ? (
-                      <View className="py-6">
-                        <Text className="mb-2 text-center">
-                          {translate('ai.ask_prompt')}
-                        </Text>
-                        <View className="mt-3 flex flex-col gap-y-2">
-                          {PRESET_QUESTIONS.map((q) => (
-                            <SolidButton
-                              key={q}
-                              color="secondary"
-                              size="sm"
-                              label={q}
-                              className="h-auto rounded-3xl px-4 py-2"
-                              textClassName="text-left leading-tight text-foreground"
-                              onPress={() => {
-                                void handleSend(q);
-                              }}
-                            />
-                          ))}
-                        </View>
-                      </View>
-                    )
-                  : null}
-
+            <Empty hasKey={hasKey} hasMessages={messages.length > 0} handleSend={handleSend} />
             {messages.map((m) => (
               <View
                 key={m.id}
                 className={`mb-2 max-w-[85%] rounded-lg px-3 py-2 ${
                   m.role === 'user'
-                    ? 'self-end bg-black'
+                    ? 'self-end bg-foreground dark:bg-foreground/40'
                     : 'self-start bg-card'
                 }`}
               >
@@ -111,7 +126,7 @@ export function AiScreen() {
                       </Text>
                     )
                   : (
-                      <AssistantMessage
+                      <MessageComponent
                         content={m.id === streamingAssistantId ? streamedAssistantContent : m.content}
                         streaming={isStreaming && m.id === streamingAssistantId}
                         markdownStyle={markdownStyle}

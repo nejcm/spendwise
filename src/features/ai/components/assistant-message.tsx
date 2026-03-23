@@ -1,14 +1,15 @@
 import type { MarkdownStyle } from 'react-native-enriched-markdown';
+import * as React from 'react';
 import { Linking } from 'react-native';
 import { EnrichedMarkdownText } from 'react-native-enriched-markdown';
 
-export type MessageProps = {
+export type AssistantMessageProps = {
   content: string;
   streaming?: boolean;
   markdownStyle?: MarkdownStyle;
 };
 
-export function AssistantMessage({ content, streaming = false, markdownStyle }: MessageProps) {
+export default function AssistantMessage({ content, streaming, markdownStyle }: AssistantMessageProps) {
   return (
     <EnrichedMarkdownText
       markdown={content}

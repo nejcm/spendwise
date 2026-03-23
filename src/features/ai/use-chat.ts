@@ -1,3 +1,4 @@
+import type { LayoutChangeEvent, ScrollView as RNScrollView } from 'react-native';
 import type { MarkdownStyle } from 'react-native-enriched-markdown';
 import type { ChatMessage } from '@/features/ai/service';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -11,6 +12,9 @@ import { generateId } from '@/lib/sqlite';
 import { useAppStore } from '@/lib/store';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import { getMarkdownStyle } from './helpers';
+
+const TOP_OFFSET = 8;
+const FALLBACK_FILLER_RATIO = 0.7;
 
 export function useChat() {
   const db = useSQLiteContext();
@@ -28,6 +32,11 @@ export function useChat() {
   const [streamingAssistantId, setStreamingAssistantId] = React.useState<string | null>(null);
   const [streamedAssistantContent, setStreamedAssistantContent] = React.useState('');
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [lastSubmittedUserMessageId, setLastSubmittedUserMessageId] = React.useState<string | null>(null);
+  const scrollViewRef = React.useRef<RNScrollView>(null);
+  const messageLayoutsRef = React.useRef<Record<string, { y: number; height: number }>>({});
+  const pendingScrollUserMessageIdRef = React.useRef<string | null>(null);
+  const [viewportHeight, setViewportHeight] = React.useState(0);
 
   const handleNewChat = React.useCallback(() => {
     abortControllerRef.current?.abort();
@@ -38,6 +47,7 @@ export function useChat() {
     setStreamingAssistantId(null);
     setStreamedAssistantContent('');
     setErrorMessage(null);
+    setLastSubmittedUserMessageId(null);
     clearAiChat();
   }, []);
 
@@ -76,6 +86,7 @@ export function useChat() {
 
     setAiMessages(currentMessages);
     setAiDraftQuestion('');
+    setLastSubmittedUserMessageId(userMessage.id);
 
     setStreamingAssistantId(assistantPlaceholder.id);
     setStreamedAssistantContent('');
@@ -137,6 +148,52 @@ export function useChat() {
     [theme.dark],
   );
 
+  const lastMessage = messages.at(-1);
+  const lastAssistant = lastMessage?.role === 'assistant' ? lastMessage : null;
+  const shouldShowBottomFiller
+    = lastMessage?.role === 'user'
+      || (Boolean(lastAssistant) && isStreaming && lastAssistant?.id === streamingAssistantId);
+  const fillerAnchorMessageId = shouldShowBottomFiller ? lastMessage?.id : null;
+  const measuredAnchorHeight = fillerAnchorMessageId
+    ? messageLayoutsRef.current[fillerAnchorMessageId]?.height
+    : undefined;
+  const fallbackBottomFillerHeight = viewportHeight > 0 ? viewportHeight * FALLBACK_FILLER_RATIO : 0;
+  const bottomFillerHeight = shouldShowBottomFiller
+    ? Math.max(0, measuredAnchorHeight !== undefined
+        ? viewportHeight - measuredAnchorHeight - TOP_OFFSET
+        : fallbackBottomFillerHeight)
+    : 0;
+
+  const scrollUserMessageToTop = React.useCallback((messageId: string) => {
+    const targetY = messageLayoutsRef.current[messageId]?.y;
+    if (targetY === undefined) return;
+    scrollViewRef.current?.scrollTo({
+      y: Math.max(0, targetY - TOP_OFFSET),
+      animated: true,
+    });
+    pendingScrollUserMessageIdRef.current = null;
+  }, []);
+
+  React.useEffect(() => {
+    if (!lastSubmittedUserMessageId) return;
+    pendingScrollUserMessageIdRef.current = lastSubmittedUserMessageId;
+    scrollUserMessageToTop(lastSubmittedUserMessageId);
+  }, [lastSubmittedUserMessageId, scrollUserMessageToTop]);
+
+  const handleScrollViewportLayout = React.useCallback((event: LayoutChangeEvent) => {
+    setViewportHeight(event.nativeEvent.layout.height);
+  }, []);
+
+  const handleMessageLayout = React.useCallback((messageId: string, event: LayoutChangeEvent) => {
+    messageLayoutsRef.current[messageId] = {
+      y: event.nativeEvent.layout.y,
+      height: event.nativeEvent.layout.height,
+    };
+    if (pendingScrollUserMessageIdRef.current === messageId) {
+      scrollUserMessageToTop(messageId);
+    }
+  }, [scrollUserMessageToTop]);
+
   return {
     hasKey,
     messages,
@@ -145,6 +202,11 @@ export function useChat() {
     streamingAssistantId,
     streamedAssistantContent,
     errorMessage,
+    scrollViewRef,
+    handleScrollViewportLayout,
+    handleMessageLayout,
+    shouldShowBottomFiller,
+    bottomFillerHeight,
     handleNewChat,
     handleSend,
     markdownStyle,

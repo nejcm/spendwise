@@ -22,6 +22,29 @@ export type RatesMap = Record<string, number>;
 
 const STALE_SECONDS = 24 * 60 * 60; // 24 hours
 
+/**
+ * Picks the stored rate snapshot date nearest to `?` using sargable MAX/MIN on
+ * `date` (same bind repeated 6×). Tie → earlier snapshot (`d_before`).
+ */
+const CLOSEST_EUR_RATE_DATE_SQL = `
+  SELECT CASE
+    WHEN bx.d_before IS NULL THEN bx.d_after
+    WHEN bx.d_after IS NULL THEN bx.d_before
+    WHEN (? - bx.d_before) < (bx.d_after - ?) THEN bx.d_before
+    WHEN (? - bx.d_before) > (bx.d_after - ?) THEN bx.d_after
+    ELSE bx.d_before
+  END
+  FROM (
+    SELECT
+      (SELECT MAX(date) FROM currency_rates WHERE base = 'EUR' AND date <= ?) AS d_before,
+      (SELECT MIN(date) FROM currency_rates WHERE base = 'EUR' AND date >= ?) AS d_after
+  ) bx
+`;
+
+function closestRateDateParams(dateUnix: number) {
+  return [dateUnix, dateUnix, dateUnix, dateUnix, dateUnix, dateUnix] as const;
+}
+
 // ─── Pure Conversion Helper ───
 
 export function convertAmount(
@@ -67,11 +90,8 @@ export async function getRatesForDate(db: SQLiteDatabase, dateUnix: number): Pro
   const rows = await db.getAllAsync<{ quote: string; rate: number }>(
     `SELECT quote, rate
      FROM currency_rates
-     WHERE base = 'EUR' AND date = (
-       SELECT date FROM currency_rates WHERE base = 'EUR'
-       ORDER BY ABS(date - ?) LIMIT 1
-     )`,
-    [dateUnix],
+     WHERE base = 'EUR' AND date = (${CLOSEST_EUR_RATE_DATE_SQL})`,
+    [...closestRateDateParams(dateUnix)],
   );
 
   if (rows.length > 0) return toRatesMap(rows);
@@ -94,11 +114,8 @@ export async function getRatesForDate(db: SQLiteDatabase, dateUnix: number): Pro
   const fallback = await db.getAllAsync<{ quote: string; rate: number }>(
     `SELECT quote, rate
      FROM currency_rates
-     WHERE base = 'EUR' AND date = (
-       SELECT date FROM currency_rates WHERE base = 'EUR'
-       ORDER BY ABS(date - ?) LIMIT 1
-     )`,
-    [dateUnix],
+     WHERE base = 'EUR' AND date = (${CLOSEST_EUR_RATE_DATE_SQL})`,
+    [...closestRateDateParams(dateUnix)],
   );
   return toRatesMap(fallback);
 }

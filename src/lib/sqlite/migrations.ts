@@ -72,6 +72,9 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
         );
 
+        CREATE INDEX IF NOT EXISTS idx_accounts_active_sort
+          ON accounts(is_archived, sort_order, id);
+
         CREATE TABLE IF NOT EXISTS categories (
           id TEXT PRIMARY KEY NOT NULL,
           name TEXT NOT NULL,
@@ -97,9 +100,15 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           updated_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
         );
 
-        CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date DESC);
-        CREATE INDEX IF NOT EXISTS idx_transactions_account ON transactions(account_id);
-        CREATE INDEX IF NOT EXISTS idx_transactions_category ON transactions(category_id);
+        CREATE INDEX IF NOT EXISTS idx_transactions_feed
+          ON transactions(date DESC, created_at DESC, id DESC);
+        CREATE INDEX IF NOT EXISTS idx_transactions_category_feed
+          ON transactions(category_id, date DESC, created_at DESC, id DESC);
+        CREATE INDEX IF NOT EXISTS idx_transactions_date_account_type_cover
+          ON transactions(date, account_id, type, amount, baseAmount, baseCurrency);
+        CREATE INDEX IF NOT EXISTS idx_transactions_date_category_ie_cover
+          ON transactions(date, category_id, type, baseAmount)
+          WHERE type IN ('income','expense');
 
         CREATE TABLE IF NOT EXISTS currency_rates (
           base TEXT NOT NULL,
@@ -108,6 +117,9 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           date INTEGER NOT NULL,
           PRIMARY KEY (base, quote, date)
         );
+
+        CREATE INDEX IF NOT EXISTS idx_currency_rates_base_date_desc_cover
+          ON currency_rates(base, date DESC, quote, rate);
 
         CREATE TABLE IF NOT EXISTS recurring_rules (
           id TEXT PRIMARY KEY NOT NULL,
@@ -134,8 +146,10 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
           UNIQUE(rule_id, scheduled_for_date)
         );
-        CREATE INDEX IF NOT EXISTS idx_recurring_rules_next_due_date
-          ON recurring_rules(next_due_date);
+        CREATE INDEX IF NOT EXISTS idx_recurring_rules_active_due_created
+          ON recurring_rules(is_active, next_due_date, created_at);
+        CREATE INDEX IF NOT EXISTS idx_recurring_rules_active_type_due
+          ON recurring_rules(is_active, type, next_due_date);
 
         CREATE INDEX IF NOT EXISTS idx_recurring_rule_runs_rule_date
           ON recurring_rule_runs(rule_id, scheduled_for_date);

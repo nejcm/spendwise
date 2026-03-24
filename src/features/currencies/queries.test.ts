@@ -55,9 +55,16 @@ describe('getRatesForDate', () => {
   it('returns the closest rate on or before the given date', async () => {
     const db = await createTestDb();
     await seedRate(db, 'USD', 1.08, 1_770_000_000);
+    await seedRate(db, 'USD', 1.09, 1_780_000_000);
+    await seedRate(db, 'USD', 1.10, 1_790_000_000);
+    await seedRate(db, 'USD', 1.11, 1_800_000_000);
+    await seedRate(db, 'USD', 1.12, 1_810_000_000);
 
-    const rates = await getRatesForDate(db as any, 1_770_000_000);
-    expect(rates.USD).toBe(1.08);
+    const rates = await getRatesForDate(db as any, 1_786_000_000);
+    expect(rates.USD).toBe(1.10);
+
+    const rates2 = await getRatesForDate(db as any, 1_784_000_000);
+    expect(rates2.USD).toBe(1.09);
   });
 
   it('picks the earlier snapshot when queried before the second one', async () => {

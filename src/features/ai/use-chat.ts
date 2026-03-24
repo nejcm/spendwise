@@ -1,6 +1,6 @@
 import type { LayoutChangeEvent, ScrollView as RNScrollView } from 'react-native';
 import type { MarkdownStyle } from 'react-native-enriched-markdown';
-import type { ChatMessage } from '@/features/ai/service';
+import type { ChatMessage, UseChatReturn } from '@/features/ai/types';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import * as React from 'react';
@@ -16,13 +16,13 @@ import { getMarkdownStyle } from './helpers';
 const TOP_OFFSET = 8;
 const FALLBACK_FILLER_RATIO = 0.7;
 
-export function useChat() {
+export function useChat(): UseChatReturn {
   const db = useSQLiteContext();
   const theme = useThemeConfig();
   const openaiApiKey = useAppStore.use.openaiApiKey();
   const anthropicApiKey = useAppStore.use.anthropicApiKey();
   const messages = useAiChatStore.use.messages();
-  const question = useAiChatStore.use.draftQuestion();
+  const draftQuestion = useAiChatStore.use.draftQuestion();
   const hasKey = Boolean(openaiApiKey) || Boolean(anthropicApiKey);
   const inFlightRequestRef = React.useRef(false);
   const abortControllerRef = React.useRef<AbortController | null>(null);
@@ -38,7 +38,7 @@ export function useChat() {
   const pendingScrollUserMessageIdRef = React.useRef<string | null>(null);
   const [viewportHeight, setViewportHeight] = React.useState(0);
 
-  const handleNewChat = React.useCallback(() => {
+  const reset = React.useCallback(() => {
     abortControllerRef.current?.abort();
     abortControllerRef.current = null;
 
@@ -58,8 +58,8 @@ export function useChat() {
     };
   }, []);
 
-  const handleSend = React.useCallback((presetQuestion?: string) => {
-    const sourceQuestion = presetQuestion ?? question;
+  const send = React.useCallback((presetQuestion?: string) => {
+    const sourceQuestion = presetQuestion ?? draftQuestion;
     const trimmed = sourceQuestion.trim();
     if (!trimmed || isStreaming || inFlightRequestRef.current) return;
 
@@ -141,12 +141,26 @@ export function useChat() {
         }
       }
     })();
-  }, [db, isStreaming, question]);
+  }, [db, isStreaming, draftQuestion]);
 
   const markdownStyle = React.useMemo<MarkdownStyle>(
     () => getMarkdownStyle(theme.dark),
     [theme.dark],
   );
+
+  // --- Streaming content resolution ---
+
+  const getMessageRenderInfo = React.useCallback(
+    (message: ChatMessage) => ({
+      displayContent: message.id === streamingAssistantId
+        ? streamedAssistantContent
+        : message.content,
+      isLiveStreaming: isStreaming && message.id === streamingAssistantId,
+    }),
+    [streamingAssistantId, streamedAssistantContent, isStreaming],
+  );
+
+  // --- Scroll management ---
 
   const lastMessage = messages.at(-1);
   const lastAssistant = lastMessage?.role === 'assistant' ? lastMessage : null;
@@ -180,11 +194,11 @@ export function useChat() {
     scrollUserMessageToTop(lastSubmittedUserMessageId);
   }, [lastSubmittedUserMessageId, scrollUserMessageToTop]);
 
-  const handleScrollViewportLayout = React.useCallback((event: LayoutChangeEvent) => {
+  const onScrollViewLayout = React.useCallback((event: LayoutChangeEvent) => {
     setViewportHeight(event.nativeEvent.layout.height);
   }, []);
 
-  const handleMessageLayout = React.useCallback((messageId: string, event: LayoutChangeEvent) => {
+  const onMessageLayout = React.useCallback((messageId: string, event: LayoutChangeEvent) => {
     messageLayoutsRef.current[messageId] = {
       y: event.nativeEvent.layout.y,
       height: event.nativeEvent.layout.height,
@@ -197,18 +211,22 @@ export function useChat() {
   return {
     hasKey,
     messages,
-    question,
+    draftQuestion,
     isStreaming,
-    streamingAssistantId,
-    streamedAssistantContent,
     errorMessage,
-    scrollViewRef,
-    handleScrollViewportLayout,
-    handleMessageLayout,
-    shouldShowBottomFiller,
-    bottomFillerHeight,
-    handleNewChat,
-    handleSend,
+    actions: {
+      send,
+      setDraft: setAiDraftQuestion,
+      reset,
+    },
+    scroll: {
+      scrollViewRef,
+      onScrollViewLayout,
+      onMessageLayout,
+      shouldShowBottomFiller,
+      bottomFillerHeight,
+    },
+    getMessageRenderInfo,
     markdownStyle,
   };
 }

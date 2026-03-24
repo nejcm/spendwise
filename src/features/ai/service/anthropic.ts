@@ -1,4 +1,4 @@
-import type { ProviderChatMessage } from './types';
+import type { ProviderChatMessage } from '../types';
 import { ANTHROPIC_MODEL } from '@/config';
 import { BASE_PROMPT } from './constants';
 import { streamSseEventsFromResponse } from './streaming';

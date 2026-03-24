@@ -58,7 +58,7 @@
 
 ### Optional / Starter-Carried Areas
 
-- `ai`: AI chat and provider settings using client-side provider calls
+- `ai`: AI chat and provider settings using client-side provider calls. Exports a single `useChat` hook from `index.ts`; internals (context assembly, provider adapters, streaming, message persistence) are private.
 - `auth`: starter-era auth module still exists but is not part of the current routed app shell
 
 ## Contributor Notes

@@ -19,7 +19,9 @@
       "Bash(echo \"Exit: $?\")",
       "Skill(update-config:*)",
       "Bash(gh api:*)",
-      "Bash(pnpm run:*)"
+      "Bash(pnpm run:*)",
+      "Bash(gh repo:*)",
+      "Bash(gh issue:*)"
     ]
   }
 }

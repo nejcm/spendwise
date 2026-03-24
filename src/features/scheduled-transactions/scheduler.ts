@@ -144,10 +144,10 @@ export async function processDueScheduledTransactions(
         new Set(existingRuns.map((run) => run.scheduled_for_date)),
       );
 
+      const preferredCurrency = getAppState().currency;
       for (const dueDateUnix of plan.dueDates) {
         const transactionId = generateId();
         const transactionNote = buildGeneratedTransactionNote(rule.note);
-        const preferredCurrency = getAppState().currency;
         const rates = await getRatesForDate(db, dueDateUnix);
         const baseAmount = computeBaseAmount(rule.amount, rule.currency, preferredCurrency, rates);
 

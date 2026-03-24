@@ -7,10 +7,11 @@ import DetailsSection from '@/components/details';
 import { FocusAwareStatusBar, FormattedCurrency, FormattedDate, GhostButton, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { OutlineButton } from '@/components/ui/outline-button';
+import { useAccounts } from '@/features/accounts/api';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/local-store';
-import { useAccounts, useDeleteTransaction, useTransaction } from './api';
+import { useDeleteTransaction, useTransaction } from './api';
 import { TransactionForm } from './components/transaction-form';
 
 export function TransactionDetailScreen() {

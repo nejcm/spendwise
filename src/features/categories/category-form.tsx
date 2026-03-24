@@ -9,7 +9,7 @@ import { GhostButton, Image, Input, InputLabel, SolidButton, Text } from '@/comp
 import Alert from '@/components/ui/alert';
 import { getFieldError } from '@/components/ui/form-utils';
 import { OutlineButton } from '@/components/ui/outline-button';
-import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/features/transactions/api';
+import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/features/categories/api';
 import { translate } from '@/lib/i18n';
 import { closeSheet } from '@/lib/local-store';
 import { useAppStore } from '@/lib/store';

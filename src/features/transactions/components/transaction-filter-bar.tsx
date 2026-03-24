@@ -2,10 +2,10 @@ import * as React from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { SolidButton } from '@/components/ui';
+import { useCategories } from '@/features/categories/api';
 import { translate } from '@/lib/i18n';
-import { defaultStyles } from '@/lib/theme/styles';
 
-import { useCategories } from '../api';
+import { defaultStyles } from '@/lib/theme/styles';
 
 type Props = {
   selectedCategoryId: string | null;

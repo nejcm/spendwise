@@ -9,13 +9,13 @@
  */
 import { readdirSync } from 'node:fs';
 import { readFile, unlink } from 'node:fs/promises';
-import { basename, dirname, join, relative } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
-const ASSETS = join(ROOT, 'assets');
+const ASSETS = join(ROOT, 'assets/flags');
 
 const SVG_TO_JPEG_REGEXP = /\.svg$/i;
 const PATH_REGEXP = /\\/g;
@@ -23,13 +23,8 @@ const PATH_REGEXP = /\\/g;
 /** Max width for raster output (height scales, fit inside). */
 function targetWidth(absPath: string): number {
   const rel = relative(ROOT, absPath).replace(PATH_REGEXP, '/');
-  if (rel.includes('flags/')) {
-    return 512;
-  }
-  if (basename(absPath).startsWith('intro')) {
-    return 1024;
-  }
-  return 800;
+  console.log(rel);
+  return 512;
 }
 
 function walkSvg(dir: string): string[] {
@@ -46,10 +41,7 @@ function walkSvg(dir: string): string[] {
   return out;
 }
 
-function jpegBackground(svgPath: string): { r: number; g: number; b: number } {
-  if (basename(svgPath) === 'spendwise-white.svg') {
-    return { r: 0, g: 0, b: 0 };
-  }
+function jpegBackground(_svgPath: string): { r: number; g: number; b: number } {
   return { r: 255, g: 255, b: 255 };
 }
 

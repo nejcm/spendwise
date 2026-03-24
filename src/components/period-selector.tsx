@@ -22,19 +22,15 @@ export function PeriodSelector({ selection, className }: PeriodSelectorProps) {
   return (
     <>
       <View className={cn('flex-row items-center justify-between px-4 py-3', className)}>
-        {!isAll && (
-          <IconButton size="sm" color="none" onPress={() => setPeriodSelection(navigatePeriod(selection, -1))} hitSlop={12}>
-            <ArrowLeftIcon className="text-muted-foreground" size={20} />
-          </IconButton>
-        )}
+        <IconButton size="sm" color="none" disabled={isAll} onPress={() => setPeriodSelection(navigatePeriod(selection, -1))} hitSlop={12}>
+          <ArrowLeftIcon className="text-muted-foreground" size={20} />
+        </IconButton>
         <Pressable onPress={present} hitSlop={12}>
           <Text className="text-lg font-medium">{getPeriodLabel(selection)}</Text>
         </Pressable>
-        {!isAll && (
-          <IconButton size="sm" color="none" onPress={() => setPeriodSelection(navigatePeriod(selection, 1))} hitSlop={12}>
-            <ArrowRightIcon className="text-muted-foreground" size={20} />
-          </IconButton>
-        )}
+        <IconButton size="sm" color="none" disabled={isAll} onPress={() => setPeriodSelection(navigatePeriod(selection, 1))} hitSlop={12}>
+          <ArrowRightIcon className="text-muted-foreground" size={20} />
+        </IconButton>
       </View>
       <PeriodSelectorModal ref={ref} selection={selection} />
     </>

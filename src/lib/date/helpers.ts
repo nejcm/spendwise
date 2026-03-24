@@ -110,7 +110,6 @@ export function navigatePeriod(selection: PeriodSelection, dir: -1 | 1): PeriodS
   }
 }
 
-
 export function getWeeksInYear(year: number): { week: number; start: Date; end: Date }[] {
   const count = getISOWeeksInYear(new Date(year, 6, 1));
   return Array.from({ length: count }, (_, i) => {

@@ -50,7 +50,9 @@ export function useSelectedLanguage() {
     [],
   );
 
-  const selected = useMemo(() => ((language ? LANGUAGES_OPTIONS.find((lang) => lang.value === language) : undefined) || DEFAULT_LANGUAGE), [language]);
+  const selected = useMemo(() => (
+    (language ? LANGUAGES_OPTIONS.find((lang) => lang.value === language) : undefined) || DEFAULT_LANGUAGE
+  ), [language]);
 
   return { language: language as Language, selected, setLanguage: setLang };
 }

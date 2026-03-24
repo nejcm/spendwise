@@ -1,9 +1,11 @@
 import type { QueryOptions } from '@tanstack/react-query';
 import type { SQLiteDatabase } from 'expo-sqlite';
-import { addDays, format } from 'date-fns';
+import { addDays } from 'date-fns';
 import * as Notifications from 'expo-notifications';
 
 import { Platform } from 'react-native';
+import { todayISO, todayUnix } from '@/features/formatting/helpers';
+import { unixToISODate } from '@/lib/date/helpers';
 import { storage } from '@/lib/storage';
 
 export const NOTIFICATIONS_QUERY_KEY = ['notifications', 'canNotify'];
@@ -61,7 +63,7 @@ async function send(title: string, body: string): Promise<void> {
 
 type RuleRow = {
   id: string;
-  next_due_date: string;
+  next_due_date: number;
   category_name: string | null;
 };
 
@@ -70,8 +72,11 @@ export async function checkUpcomingBills(db: SQLiteDatabase): Promise<void> {
     return;
   }
 
-  const today = format(new Date(), 'yyyy-MM-dd');
-  const inThreeDays = format(addDays(new Date(), 3), 'yyyy-MM-dd');
+  const todayStart = todayUnix();
+  const windowEndUnix = Math.floor(
+    addDays(new Date(todayStart * 1000), 3).getTime() / 1000,
+  );
+  const todayStr = todayISO();
 
   const rules = await db.getAllAsync<RuleRow>(
     `SELECT r.id, r.next_due_date, c.name AS category_name
@@ -81,15 +86,16 @@ export async function checkUpcomingBills(db: SQLiteDatabase): Promise<void> {
        AND r.type = 'expense'
        AND r.next_due_date >= ?
        AND r.next_due_date <= ?`,
-    [today, inThreeDays],
+    [todayStart, windowEndUnix],
   );
 
   for (const rule of rules) {
-    const key = ruleAlertKey(rule.id, rule.next_due_date);
+    const dueStr = unixToISODate(rule.next_due_date);
+    const key = ruleAlertKey(rule.id, dueStr);
     if (!wasNotified(key)) {
       const name = rule.category_name ?? 'Bill';
-      const isToday = rule.next_due_date === today;
-      const body = isToday ? `${name} is due today.` : `${name} is due on ${rule.next_due_date}.`;
+      const isToday = dueStr === todayStr;
+      const body = isToday ? `${name} is due today.` : `${name} is due on ${dueStr}.`;
       await send('Upcoming Bill', body);
       markNotified(key);
     }

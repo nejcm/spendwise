@@ -9,16 +9,17 @@ import { generateId } from '@/lib/sqlite';
 
 export async function getTransactions(
   db: SQLiteDatabase,
-  startDate: number,
-  endDate: number,
+  startDate: number | undefined,
+  endDate: number | undefined,
 ): Promise<TransactionWithCategory[]> {
+  const hasRange = !!startDate && !!endDate;
   return db.getAllAsync<TransactionWithCategory>(
     `SELECT t.*, c.name as category_name, c.icon as category_icon, c.color as category_color
      FROM transactions t
      LEFT JOIN categories c ON t.category_id = c.id
-     WHERE t.date >= ? AND t.date < ?
+     ${hasRange ? 'WHERE t.date >= ? AND t.date < ?' : ''}
      ORDER BY t.date DESC, t.created_at DESC`,
-    [startDate, endDate],
+    hasRange ? [startDate, endDate] : [],
   );
 }
 

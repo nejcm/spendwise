@@ -19,16 +19,17 @@ export type TokenType = {
 
 export type ColorThemeType = 'red' | 'blue' | 'green' | 'purple' | 'orange' | 'black' | 'white';
 
-export type PeriodMode = 'year' | 'month' | 'week' | 'custom';
+export type PeriodMode = 'year' | 'month' | 'week' | 'custom' | 'all';
 
 export type PeriodSelectionYear = { mode: 'year'; year: number };
 export type PeriodSelectionMonth = { mode: 'month'; year: number; month: number };
 export type PeriodSelectionWeek = { mode: 'week'; year: number; week: number };
 export type PeriodSelectionCustom = { mode: 'custom'; startDate: string; endDate: string };
-export type PeriodSelection = PeriodSelectionYear | PeriodSelectionMonth | PeriodSelectionWeek | PeriodSelectionCustom;
+export type PeriodSelectionAll = { mode: 'all' };
+export type PeriodSelection = PeriodSelectionYear | PeriodSelectionMonth | PeriodSelectionWeek | PeriodSelectionCustom | PeriodSelectionAll;
 
 export type AppState = {
-// Profile
+  // Profile
   profile: {
     name: string;
     avatar: number;

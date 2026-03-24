@@ -2,7 +2,7 @@ import type { AccountWithBalance } from '@/features/accounts/types';
 import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
-import { FormattedCurrency, Text } from '@/components/ui';
+import { FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
 import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
 
 import { scaleBudgetForPeriod } from '@/lib/date/helpers';
@@ -25,10 +25,11 @@ export function AccountCard({ account, onPress }: Props) {
     <Pressable
       onPress={onPress}
       className="mb-3 rounded-xl bg-card p-4"
+      style={getPressedStyle}
     >
       <View className="flex-row items-center justify-between gap-3">
         {account.icon && (
-          <Text className="text-2xl">{account.icon}</Text>
+          <Text className="text-3xl">{account.icon}</Text>
         )}
         <View className="flex-1">
           <Text className="text-base/snug">{account.name}</Text>
@@ -43,14 +44,15 @@ export function AccountCard({ account, onPress }: Props) {
           )}
         </View>
       </View>
-      {account.budget != null && account.budget > 0 && account.monthlyExpense != null && (
+      {account.budget != null && account.budget > 0 && account.monthlyExpense != null && periodSelection.mode !== 'all' && (
         <BudgetProgressBar
           spent={account.monthlyExpense}
           budget={scaledBudget ?? 0}
           monthlyBudget={!isMonthView ? account.budget : undefined}
           currency={userCurrency}
           className="mt-2"
-          showValues={false}
+          showValues={true}
+          bg="bg-muted-foreground/30"
         />
       )}
     </Pressable>

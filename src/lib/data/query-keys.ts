@@ -23,7 +23,7 @@ export const queryKeys = {
     withBalance: ['accounts', 'balance'] as const,
     withBalanceForMonth: (yearMonth: string) =>
       ['accounts', 'balance', yearMonth] as const,
-    withBalanceForRange: (startDate: number, endDate: number) =>
+    withBalanceForRange: (startDate: number | undefined, endDate: number | undefined) =>
       ['accounts', 'balance', startDate, endDate] as const,
     totalBalance: ['total-balance'] as const,
     totalBalanceForMonth: (yearMonth: string) =>
@@ -44,17 +44,17 @@ export const queryKeys = {
   // ─── Insights ───
   insights: {
     all: ['insights'] as const,
-    categorySpendRange: (startDate: number, endDate: number) =>
+    categorySpendRange: (startDate: number | undefined, endDate: number | undefined) =>
       ['insights', 'category-spend-range', startDate, endDate] as const,
     monthlyTrend: (months: number) =>
       ['insights', 'monthly-trend', months] as const,
-    trendRange: (startDate: number, endDate: number) =>
+    trendRange: (startDate: number | undefined, endDate: number | undefined) =>
       ['insights', 'trend-range', startDate, endDate] as const,
     yearlySummary: (year: number) =>
       ['insights', 'yearly-summary', year] as const,
     categorySpendYear: (year: number) =>
       ['insights', 'category-spend-year', year] as const,
-    summaryRange: (startDate: number, endDate: number) =>
+    summaryRange: (startDate: number | undefined, endDate: number | undefined) =>
       ['insights', 'summary-range', startDate, endDate] as const,
   },
 

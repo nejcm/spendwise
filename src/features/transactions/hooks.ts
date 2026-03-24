@@ -16,7 +16,7 @@ import * as queries from './queries';
 
 // ─── Read Hooks ───
 
-export function useTransactions(startDate: number, endDate: number) {
+export function useTransactions(startDate: number | undefined, endDate: number | undefined) {
   const db = useSQLiteContext();
   return useQuery({
     queryKey: queryKeys.transactions.list(`${startDate}/${endDate}`),

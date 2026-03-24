@@ -69,9 +69,10 @@ export async function getAccountsWithBalanceForMonth(
 
 export async function getAccountsWithBalanceForRange(
   db: SQLiteDatabase,
-  startDate: number,
-  endDate: number,
+  startDate: number | undefined,
+  endDate: number | undefined,
 ): Promise<AccountWithBalance[]> {
+  const hasRange = !!startDate && !!endDate;
   return db.getAllAsync<AccountWithBalance>(
     `SELECT a.*,
        COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0)
@@ -89,11 +90,11 @@ export async function getAccountsWithBalanceForRange(
        t.baseCurrency as baseCurrency
      FROM accounts a
      LEFT JOIN transactions t ON t.account_id = a.id
-       AND t.date >= ? AND t.date < ?
+       ${hasRange ? 'AND t.date >= ? AND t.date < ?' : ''}
      WHERE a.is_archived = 0
      GROUP BY a.id
      ORDER BY a.sort_order ASC`,
-    [startDate, endDate],
+    hasRange ? [startDate, endDate] : [],
   );
 }
 

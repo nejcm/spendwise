@@ -62,22 +62,22 @@ describe('unixToISODate', () => {
 
 describe('getPeriodRange', () => {
   it('year mode: spans full calendar year', () => {
-    const [start, end] = getPeriodRange({ mode: 'year', year: 2026 });
+    const [start, end] = getPeriodRange({ mode: 'year', year: 2026 }) as [number, number];
     expect(end - start).toBe(365 * 86400); // 2026 is not a leap year
   });
 
   it('month mode: end > start', () => {
-    const [start, end] = getPeriodRange({ mode: 'month', year: 2026, month: 3 });
+    const [start, end] = getPeriodRange({ mode: 'month', year: 2026, month: 3 }) as [number, number];
     expect(end).toBeGreaterThan(start);
   });
 
   it('month mode: spans March (31 days)', () => {
-    const [start, end] = getPeriodRange({ mode: 'month', year: 2026, month: 3 });
+    const [start, end] = getPeriodRange({ mode: 'month', year: 2026, month: 3 }) as [number, number];
     expect((end - start) / 86400).toBe(31);
   });
 
   it('week mode: spans approximately 7 days', () => {
-    const [start, end] = getPeriodRange({ mode: 'week', year: 2026, week: 10 });
+    const [start, end] = getPeriodRange({ mode: 'week', year: 2026, week: 10 }) as [number, number];
     const days = (end - start) / 86400;
     // Implementation uses endOfISOWeek (23:59:59) + addDays(1), yielding ~8 days - 1s
     expect(days).toBeGreaterThan(7);
@@ -89,8 +89,14 @@ describe('getPeriodRange', () => {
       mode: 'custom',
       startDate: '2026-03-01',
       endDate: '2026-03-15',
-    });
+    }) as [number, number];
     expect((end - start) / 86400).toBe(15);
+  });
+
+  it('all mode: returns undefined bounds', () => {
+    const [start, end] = getPeriodRange({ mode: 'all' });
+    expect(start).toBeUndefined();
+    expect(end).toBeUndefined();
   });
 });
 

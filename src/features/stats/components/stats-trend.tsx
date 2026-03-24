@@ -5,26 +5,27 @@ import { useColorScheme, useWindowDimensions } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
 import { Text, View } from '@/components/ui';
 import { SkeletonBox } from '@/components/ui/skeleton';
+import { centsToAmount } from '@/features/formatting/helpers';
 import { useTrendByRange } from '@/features/insights/api';
+import { buildTrendSeries } from '@/features/insights/trend';
 import { translate } from '@/lib/i18n';
-import { centsToAmount } from '../../formatting/helpers';
-import { buildTrendSeries } from '../../insights/trend';
 
 export type StatsTrendProps = {
   period: PeriodMode;
-  startDate: number;
-  endDate: number;
+  startDate: number | undefined;
+  endDate: number | undefined;
 };
 
 const PAIR_GAP = 2;
+// TODO: move to theme vars
+const incomeColor = '#2ebe7e';
+const expenseColor = '#e12f30';
 
 export function StatsTrend({ period, startDate, endDate }: StatsTrendProps) {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const { width: screenWidth } = useWindowDimensions();
   const labelColor = isDark ? '#9ca3af' : '#6b7280';
-  const incomeColor = '#2ebe7e';
-  const expenseColor = '#e12f30';
 
   const { data, isLoading } = useTrendByRange(startDate, endDate);
 

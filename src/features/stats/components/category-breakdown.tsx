@@ -6,8 +6,8 @@ import { useCategorySpendByRange } from '@/features/insights/api';
 import { translate } from '@/lib/i18n';
 
 export type CategoryBreakdownProps = {
-  startDate: number;
-  endDate: number;
+  startDate: number | undefined;
+  endDate: number | undefined;
   currency: CurrencyKey;
   type: 'expense' | 'income';
   limit?: number;

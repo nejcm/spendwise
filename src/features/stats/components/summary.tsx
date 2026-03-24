@@ -9,8 +9,8 @@ import { useSummaryByRange } from '@/features/insights/api';
 import { translate } from '@/lib/i18n';
 
 export type SummaryProps = {
-  startDate: number;
-  endDate: number;
+  startDate: number | undefined;
+  endDate: number | undefined;
   currency: CurrencyKey;
 };
 

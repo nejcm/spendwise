@@ -75,6 +75,8 @@
   },
   "common": {
     "add": "Add",
+    "all-time": "All Time",
+    "all-transactions-shown": "All transactions will be shown",
     "amount": "Amount",
     "apply": "Apply",
     "back": "Back",

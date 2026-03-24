@@ -12,7 +12,7 @@ import { useAccountsWithBalanceForRange } from '@/features/transactions/api';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/local-store';
-import { setPeriodSelection, useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import NoData from '../../components/no-data';
 import { AccountCard } from './components/account-card';
@@ -47,7 +47,7 @@ export function AccountsScreen() {
     <>
       <FocusAwareStatusBar />
 
-      <PeriodSelector selection={selection} onSelect={setPeriodSelection} />
+      <PeriodSelector selection={selection} />
 
       <ScrollView className="flex-1 px-4" style={defaultStyles.transparentBg}>
         <View className="flex-col items-center justify-between gap-2 px-4 pt-4 pb-6">

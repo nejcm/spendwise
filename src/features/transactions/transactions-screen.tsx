@@ -7,7 +7,7 @@ import { FocusAwareStatusBar, Input, inputDefaultDefaults, inputDefaults } from 
 import { X } from '@/components/ui/icon';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
-import { setPeriodSelection, useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store';
 import { useTransactions } from './api';
 import { TransactionFilterBar } from './components/transaction-filter-bar';
 import { TransactionList } from './components/transaction-list';
@@ -42,7 +42,7 @@ export function TransactionsScreen() {
     <>
       <FocusAwareStatusBar />
 
-      <PeriodSelector selection={selection} onSelect={setPeriodSelection} />
+      <PeriodSelector selection={selection} />
 
       <View className="flex-row items-center gap-2 px-4 pb-2">
         <View className={inputClassNames}>

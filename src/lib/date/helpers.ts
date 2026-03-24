@@ -15,7 +15,6 @@ import {
   startOfMonth,
   startOfYear,
 } from 'date-fns';
-
 /** Convert a Date or yyyy-MM-dd string to Unix seconds (UTC). */
 export function dateToUnix(date: Date | string): number {
   if (typeof date === 'string') return Math.floor(new Date(date).getTime() / 1000);
@@ -50,7 +49,7 @@ export function currentPeriodSelection(): PeriodSelection {
   return { mode: 'month', year: now.getFullYear(), month: now.getMonth() + 1 };
 }
 
-export function getPeriodRange(selection: PeriodSelection): [number, number] {
+export function getPeriodRange(selection: PeriodSelection): [number | undefined, number | undefined] {
   switch (selection.mode) {
     case 'year': {
       const start = startOfYear(new Date(selection.year, 0, 1));
@@ -71,6 +70,8 @@ export function getPeriodRange(selection: PeriodSelection): [number, number] {
       const end = addDays(new Date(selection.endDate), 1);
       return [dateToUnix(new Date(selection.startDate)), dateToUnix(end)];
     }
+    case 'all':
+      return [undefined, undefined];
   }
 }
 
@@ -104,32 +105,11 @@ export function navigatePeriod(selection: PeriodSelection, dir: -1 | 1): PeriodS
         endDate: format(newEnd, 'yyyy-MM-dd'),
       };
     }
+    case 'all':
+      return selection;
   }
 }
 
-export function getPeriodLabel(selection: PeriodSelection): string {
-  switch (selection.mode) {
-    case 'year':
-      return String(selection.year);
-    case 'month': {
-      const d = new Date(selection.year, selection.month - 1, 1);
-      return format(d, 'MMMM yyyy');
-    }
-    case 'week': {
-      const weekStart = startOfISOWeek(setISOWeek(startOfYear(new Date(selection.year, 0, 4)), selection.week));
-      const weekEnd = endOfISOWeek(weekStart);
-      return `${format(weekStart, 'MMM d')} – ${format(weekEnd, 'MMM d')}`;
-    }
-    case 'custom': {
-      const start = new Date(selection.startDate);
-      const end = new Date(selection.endDate);
-      if (start.getFullYear() === end.getFullYear()) {
-        return `${format(start, 'MMM d')} – ${format(end, 'MMM d')}`;
-      }
-      return `${format(start, 'MMM d, yyyy')} – ${format(end, 'MMM d, yyyy')}`;
-    }
-  }
-}
 
 export function getWeeksInYear(year: number): { week: number; start: Date; end: Date }[] {
   const count = getISOWeeksInYear(new Date(year, 6, 1));
@@ -152,10 +132,11 @@ const AVERAGE_DAYS_PER_MONTH = 365.25 / 12;
  * Scale a monthly budget amount to match the given period selection.
  * Returns the prorated budget in the same unit (cents) as the input.
  */
-export function scaleBudgetForPeriod(monthlyBudget: number, selection: PeriodSelection): number {
+export function scaleBudgetForPeriod(monthlyBudget: number, selection: PeriodSelection): number | undefined {
+  if (selection.mode === 'all') return undefined;
   if (selection.mode === 'month') return monthlyBudget;
 
-  const [startUnix, endUnix] = getPeriodRange(selection);
+  const [startUnix, endUnix] = getPeriodRange(selection) as [number, number];
   const daysInPeriod = (endUnix - startUnix) / 86400;
 
   let daysInMonth: number;

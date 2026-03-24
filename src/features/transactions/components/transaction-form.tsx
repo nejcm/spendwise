@@ -8,10 +8,11 @@ import { ScrollView, View } from 'react-native';
 import { Image, Input, OutlineButton, Select, SolidButton, Text } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
+import { useAccounts } from '@/features/accounts/api';
 import { CategoryPicker } from '@/features/categories/category-picker';
 import { CURRENCIES_MAP, CURRENCY_OPTIONS } from '@/features/currencies';
 import { mergeCurrencyArrays } from '@/features/currencies/helpers';
-import { useAccounts, useCreateTransaction, useUpdateTransaction } from '@/features/transactions/api';
+import { useCreateTransaction, useUpdateTransaction } from '@/features/transactions/api';
 import { TransactionBaseAmountSync } from '@/features/transactions/components/transaction-base-amount-sync';
 import {
   amountToString,

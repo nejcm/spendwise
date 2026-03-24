@@ -3,8 +3,8 @@ import * as React from 'react';
 
 import { Select } from '@/components/ui';
 import { SkeletonBox } from '@/components/ui/skeleton';
+import { useCategories } from '@/features/categories/api';
 import { translate } from '@/lib/i18n';
-import { useCategories } from '../transactions/api';
 
 export type CategoryPickerProps = {
   selectedId: string | null;

@@ -6,9 +6,9 @@ import { FocusAwareStatusBar, FormattedCurrency, Text, View } from '@/components
 import { FileWarning, Pencil, PencilOff } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { SkeletonBox } from '@/components/ui/skeleton';
+import { useUpdateCategoryOrder } from '@/features/categories/api';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { useCategorySpendByRange } from '@/features/insights/api';
-import { useUpdateCategoryOrder } from '@/features/transactions/api';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/local-store';

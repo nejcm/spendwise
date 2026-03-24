@@ -110,11 +110,11 @@ export function PeriodSelectorModal({
   return (
     <Modal ref={modal.ref} title="Select Period" snapPoints={['75%']}>
       <View className="flex-1 px-4 pt-2">
-        <View className="mb-4 flex-row gap-2">
+        <View className="mb-4 flex-row gap-1">
           {MODES.map(({ key, label }) => (
             <SolidButton
               key={key}
-              className="flex-1 items-center rounded-3xl"
+              className="flex-1 items-center rounded-3xl px-2"
               color={draft.mode === key ? 'secondary' : 'primary-alt'}
               textClassName={draft.mode === key ? 'text-foreground' : 'text-muted-foreground'}
               size="sm"
@@ -161,7 +161,7 @@ export function PeriodSelectorModal({
           )}
           {draft.mode === 'all' && (
             <View className="flex-1 items-center justify-center">
-              <Text className="text-muted-foreground">{translate('common.all-transactions-shown')}</Text>
+              <Text className="text-muted-foreground">{translate('common.all-data-shown')}</Text>
             </View>
           )}
         </View>

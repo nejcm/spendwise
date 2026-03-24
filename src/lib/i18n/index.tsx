@@ -13,6 +13,8 @@ i18n.use(initReactI18next).init({
   resources,
   lng: getLanguage() || getLocales()[0]?.languageTag, // TODO: if you are not supporting multiple languages or languages with multiple directions you can set the default value to `en`
   fallbackLng: 'en',
+  supportedLngs: Object.keys(resources),
+  nonExplicitSupportedLngs: true,
   compatibilityJSON: 'v4', // Updated to v4 for i18next compatibility
 
   // allows integrating dynamic values into translations.

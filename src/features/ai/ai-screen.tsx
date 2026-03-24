@@ -6,7 +6,6 @@ import { Plus, SendHorizonal } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import AssistantMessage from '@/features/ai/components/assistant-message';
 import AssistantMessageWeb from '@/features/ai/components/assistant-message.web';
-import { setAiDraftQuestion } from '@/features/ai/store';
 import { IS_WEB } from '@/lib/base';
 import { translate } from '@/lib/i18n';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -26,9 +25,9 @@ const MessageComponent = IS_WEB ? AssistantMessageWeb : AssistantMessage;
 type EmptyProps = {
   hasKey: boolean;
   hasMessages: boolean;
-  handleSend: (question: string) => void;
+  onSend: (question: string) => void;
 };
-function Empty({ hasKey, hasMessages, handleSend }: EmptyProps) {
+function Empty({ hasKey, hasMessages, onSend }: EmptyProps) {
   if (!hasKey) {
     return (
       <View className="mb-4 rounded-xl bg-card p-4">
@@ -60,7 +59,7 @@ function Empty({ hasKey, hasMessages, handleSend }: EmptyProps) {
             className="h-auto rounded-3xl px-4 py-2"
             textClassName="text-left leading-tight font-normal text-foreground text-center"
             onPress={() => {
-              void handleSend(q);
+              void onSend(q);
             }}
           />
         ))}
@@ -73,18 +72,12 @@ export function AiScreen() {
   const {
     hasKey,
     messages,
-    question,
+    draftQuestion,
     isStreaming,
-    streamingAssistantId,
-    streamedAssistantContent,
     errorMessage,
-    scrollViewRef,
-    handleScrollViewportLayout,
-    handleMessageLayout,
-    shouldShowBottomFiller,
-    bottomFillerHeight,
-    handleNewChat,
-    handleSend,
+    actions,
+    scroll,
+    getMessageRenderInfo,
     markdownStyle,
   } = useChat();
 
@@ -102,61 +95,64 @@ export function AiScreen() {
                 size="xs"
                 label={translate('ai.new_chat')}
                 iconLeft={<Plus className="text-background" size={15} />}
-                onPress={handleNewChat}
+                onPress={actions.reset}
                 disabled={!messages.length}
               />
             </View>
           )}
           <ScrollView
-            ref={scrollViewRef}
-            onLayout={handleScrollViewportLayout}
+            ref={scroll.scrollViewRef}
+            onLayout={scroll.onScrollViewLayout}
             className="flex-1 px-4 pt-4"
             contentContainerClassName="pb-8"
             style={defaultStyles.transparentBg}
           >
-            <Empty hasKey={hasKey} hasMessages={messages.length > 0} handleSend={handleSend} />
-            {messages.map((m) => (
-              <View
-                key={m.id}
-                onLayout={(event) => {
-                  handleMessageLayout(m.id, event);
-                }}
-                className={`mb-2 max-w-[85%] rounded-lg px-3 py-2 ${
-                  m.role === 'user'
-                    ? 'self-end bg-foreground dark:bg-foreground/40'
-                    : 'self-start bg-card'
-                }`}
-              >
-                {m.role === 'user'
-                  ? (
-                      <Text className="text-sm text-white">
-                        {m.content}
-                      </Text>
-                    )
-                  : (
-                      <MessageComponent
-                        content={m.id === streamingAssistantId ? streamedAssistantContent : m.content}
-                        streaming={isStreaming && m.id === streamingAssistantId}
-                        markdownStyle={markdownStyle}
-                      />
-                    )}
-              </View>
-            ))}
+            <Empty hasKey={hasKey} hasMessages={messages.length > 0} onSend={actions.send} />
+            {messages.map((m) => {
+              const { displayContent, isLiveStreaming } = getMessageRenderInfo(m);
+              return (
+                <View
+                  key={m.id}
+                  onLayout={(event) => {
+                    scroll.onMessageLayout(m.id, event);
+                  }}
+                  className={`mb-2 max-w-[85%] rounded-lg px-3 py-2 ${
+                    m.role === 'user'
+                      ? 'self-end bg-foreground dark:bg-foreground/40'
+                      : 'self-start bg-card'
+                  }`}
+                >
+                  {m.role === 'user'
+                    ? (
+                        <Text className="text-sm text-white">
+                          {m.content}
+                        </Text>
+                      )
+                    : (
+                        <MessageComponent
+                          content={displayContent}
+                          streaming={isLiveStreaming}
+                          markdownStyle={markdownStyle}
+                        />
+                      )}
+                </View>
+              );
+            })}
 
             {errorMessage && (
               <View className="my-4 rounded-lg bg-danger-500/10 px-3 py-2">
                 <Text className="text-sm text-danger-500">{errorMessage}</Text>
               </View>
             )}
-            {shouldShowBottomFiller && <View style={{ height: bottomFillerHeight }} />}
+            {scroll.shouldShowBottomFiller && <View style={{ height: scroll.bottomFillerHeight }} />}
           </ScrollView>
 
           <View className="bg-background px-4 pb-safe-offset-2">
             <View className="relative">
               <Input
                 variant="textarea"
-                value={question}
-                onChangeText={setAiDraftQuestion}
+                value={draftQuestion}
+                onChangeText={actions.setDraft}
                 placeholder={translate('ai.input_placeholder')}
                 autoCapitalize="sentences"
                 autoCorrect
@@ -168,9 +164,9 @@ export function AiScreen() {
               <IconButton
                 size="sm"
                 onPress={() => {
-                  void handleSend();
+                  void actions.send();
                 }}
-                disabled={isStreaming || !question.trim() || !hasKey}
+                disabled={isStreaming || !draftQuestion.trim() || !hasKey}
                 className="absolute right-2 bottom-2 rounded-full"
               >
                 <SendHorizonal className="text-background disabled:text-foreground" size={20} />

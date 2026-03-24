@@ -1,4 +1,4 @@
-import type { AskInput, ChatMessage, ProviderChatMessage } from './types';
+import type { AskInput, ChatMessage, ProviderChatMessage } from '../types';
 import { useAppStore } from '@/lib/store';
 import { askAnthropic, streamAskAnthropic } from './anthropic';
 import { askOpenAI, streamAskOpenAI } from './openai';

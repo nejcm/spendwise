@@ -1,4 +1,4 @@
-import type { ChatMessage } from '@/features/ai/service';
+import type { ChatMessage } from '@/features/ai/types';
 
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';

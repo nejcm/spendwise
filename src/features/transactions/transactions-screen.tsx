@@ -1,4 +1,4 @@
-import { useDebouncedState } from '@tanstack/react-pacer';
+import { useDebouncedValue } from '@tanstack/react-pacer';
 import * as React from 'react';
 import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
@@ -17,7 +17,8 @@ const inputClassNames = cn(inputDefaults, inputDefaultDefaults, 'min-w-0 flex-1 
 
 export function TransactionsScreen() {
   const selection = useAppStore.use.periodSelection();
-  const [search, setSearch] = useDebouncedState('', {
+  const [search, setSearch] = useState('');
+  const [debouncedSearch] = useDebouncedValue(search, {
     wait: 500,
   });
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
@@ -26,7 +27,7 @@ export function TransactionsScreen() {
 
   const filtered = useMemo(() => {
     let result = transactions;
-    const q = search?.trim().toLowerCase();
+    const q = debouncedSearch?.trim().toLowerCase();
     const hasQuery = q.length > 0;
     if (hasQuery || categoryFilter) {
       result = result.filter(
@@ -39,7 +40,7 @@ export function TransactionsScreen() {
     }
 
     return result;
-  }, [transactions, search, categoryFilter]);
+  }, [transactions, debouncedSearch, categoryFilter]);
 
   return (
     <>

@@ -1,5 +1,3 @@
-import type { SQLiteDatabase } from 'expo-sqlite';
-
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
@@ -17,31 +15,19 @@ import { AppErrorBoundary } from '@/components/app-error-boundary';
 import { GlobalSheet } from '@/components/global-sheet';
 import { CustomTabBar, TAB_BAR_COLOR } from '@/components/ui/custom-tab-bar';
 import { useCurrencyRates } from '@/features/currencies/api';
-import { todayUnix } from '@/features/formatting/helpers';
-import {
-  checkUpcomingBills,
-  setupNotifications,
-} from '@/features/notifications/notifications';
 import { ScheduledTransactionsProcessor } from '@/features/scheduled-transactions/scheduled-transactions-processor';
-import { processDueScheduledTransactions } from '@/features/scheduled-transactions/scheduler';
 import { SecurityLock } from '@/features/security/security-lock';
 import { APIProvider } from '@/lib/api';
+import { useAppBootstrapOnInit } from '@/lib/app-bootstrap';
 
 import { IS_WEB } from '@/lib/base';
-import { DatabaseErrorBoundary, migrateDb, OpfsCleaner } from '@/lib/sqlite';
+import { DatabaseErrorBoundary, OpfsCleaner } from '@/lib/sqlite';
 import { loadSelectedTheme, useSelectedTheme } from '@/lib/theme/use-selected-theme';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import { SafeAreaView, View } from '../components/ui';
 import { DB_NAME } from '../config';
 // Import  global CSS file
 import '../global.css';
-
-async function initDb(db: SQLiteDatabase) {
-  await migrateDb(db);
-  await setupNotifications();
-  await processDueScheduledTransactions(db, todayUnix());
-  await checkUpcomingBills(db);
-}
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -68,6 +54,15 @@ function PersistentTabBar() {
 function CurrencyRatesInitializer() {
   useCurrencyRates();
   return null;
+}
+
+function BootstrappedSQLite({ children }: { children: React.ReactNode }) {
+  const onInit = useAppBootstrapOnInit();
+  return (
+    <SQLiteProvider databaseName={DB_NAME} onInit={onInit}>
+      {children}
+    </SQLiteProvider>
+  );
 }
 
 function DevThemeToggle() {
@@ -151,9 +146,10 @@ function Providers({ children }: { children: React.ReactNode }) {
           <ThemeProvider value={theme}>
             <OpfsCleaner>
               <DatabaseErrorBoundary>
-                <SQLiteProvider databaseName={DB_NAME} onInit={initDb}>
-                  <AppErrorBoundary>
-                    <APIProvider>
+
+                <APIProvider>
+                  <BootstrappedSQLite>
+                    <AppErrorBoundary>
                       <ScheduledTransactionsProcessor />
                       <CurrencyRatesInitializer />
                       <FontLoader>
@@ -167,9 +163,9 @@ function Providers({ children }: { children: React.ReactNode }) {
                           <DevThemeToggle />
                         </BottomSheetModalProvider>
                       </FontLoader>
-                    </APIProvider>
-                  </AppErrorBoundary>
-                </SQLiteProvider>
+                    </AppErrorBoundary>
+                  </BootstrappedSQLite>
+                </APIProvider>
               </DatabaseErrorBoundary>
             </OpfsCleaner>
           </ThemeProvider>

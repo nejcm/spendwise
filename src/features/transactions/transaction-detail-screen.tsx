@@ -4,13 +4,12 @@ import { useState } from 'react';
 
 import { ScrollView, View } from 'react-native';
 import DetailsSection from '@/components/details';
-import { FocusAwareStatusBar, FormattedCurrency, FormattedDate, SolidButton, Text } from '@/components/ui';
+import { FocusAwareStatusBar, FormattedCurrency, FormattedDate, GhostButton, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { OutlineButton } from '@/components/ui/outline-button';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/local-store';
-import { GhostButton } from '../../components/ui/ghost-button';
 import { useAccounts, useDeleteTransaction, useTransaction } from './api';
 import { TransactionForm } from './components/transaction-form';
 
@@ -85,7 +84,7 @@ export function TransactionDetailScreen() {
   return (
     <>
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 py-10">
+      <ScrollView className="flex-1 px-4 py-10" contentContainerStyle={{ flex: 1 }}>
         <View className="items-center pb-6">
           <FormattedCurrency
             value={transaction.amount}
@@ -120,18 +119,18 @@ export function TransactionDetailScreen() {
         />
         <View className="mb-6 flex-row items-center justify-center gap-2">
           {transaction.type !== 'transfer' && (
-            <OutlineButton
+            <GhostButton
               label={translate('transactions.make_recurring')}
               onPress={handleMakeRecurring}
-              className="rounded-3xl px-6"
-              size="sm"
+              className="flex-1"
+              textClassName="underline"
             />
           )}
-          <OutlineButton label={translate('common.delete')} color="danger" onPress={handleDelete} className="rounded-3xl px-6" size="sm" />
+          <GhostButton label={translate('common.delete')} color="danger" onPress={handleDelete} className="flex-1" textClassName="underline" />
         </View>
 
-        <View className="flex-row gap-2">
-          <GhostButton color="secondary" label={translate('common.back')} onPress={() => router.back()} />
+        <View className="mt-auto flex-row gap-2">
+          <OutlineButton color="secondary" label={translate('common.back')} onPress={() => router.back()} />
           <SolidButton className="flex-1" label={translate('common.edit')} onPress={() => setIsEditing(true)} />
         </View>
       </ScrollView>

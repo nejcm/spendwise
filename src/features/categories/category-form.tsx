@@ -5,16 +5,17 @@ import { View } from 'react-native';
 import * as z from 'zod';
 
 import ColorSelector from '@/components/color-selector';
-import { Input, SolidButton } from '@/components/ui';
+import { GhostButton, Image, Input, InputLabel, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { getFieldError } from '@/components/ui/form-utils';
-import { GhostButton } from '@/components/ui/ghost-button';
 import { OutlineButton } from '@/components/ui/outline-button';
 import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
 import { closeSheet } from '@/lib/local-store';
+import { useAppStore } from '@/lib/store';
 import { getRandomColor } from '@/lib/theme/colors';
 import { refinePositiveNumber } from '@/lib/validation/helpers';
+import { CURRENCIES_MAP } from '../currencies';
 
 const schema = z.object({
   name: z.string().min(1, translate('categories.name_required')),
@@ -41,6 +42,7 @@ const defaultValues: CategoryFormData = {
 export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryManageModalProps) {
   const id = initialValues?.id;
   const { data: categories = [] } = useCategories();
+  const preferredCurrency = useAppStore.use.currency();
   const createCategory = useCreateCategory(() => closeSheet());
   const updateCategory = useUpdateCategory(() => closeSheet());
 
@@ -72,7 +74,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
   };
 
   return (
-    <View className="gap-4">
+    <View className="flex-1 gap-4">
       <View className="flex-row items-center gap-3">
         <form.Field
           name="color"
@@ -115,40 +117,37 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
         )}
       />
 
-      <form.Field
-        name="budget"
-        children={(field) => (
-          <Input
-            label={translate('categories.budget')}
-            value={field.state.value ?? ''}
-            onBlur={field.handleBlur}
-            onChangeText={field.handleChange}
-            placeholder="0"
-            keyboardType="decimal-pad"
-            className="mb-6"
-            error={getFieldError(field)}
-          />
-        )}
-      />
-
-      {!!id && (
-        <View className="mb-2 flex-row justify-center">
-          <OutlineButton
-            label={translate('common.delete')}
-            color="danger"
-            onPress={() => onDeletePress(id, initialValues?.name ?? '')}
-            className="min-w-24 rounded-full"
-            size="sm"
+      <View className="mb-6">
+        <InputLabel label={translate('categories.budget')} />
+        <View className="flex-row gap-2">
+          <View className="w-[92] flex-row items-center justify-center gap-2 px-4">
+            <Image source={CURRENCIES_MAP[preferredCurrency].image} className="size-6 rounded-full" />
+            <Text className="border-none bg-transparent">
+              {preferredCurrency}
+            </Text>
+          </View>
+          <form.Field
+            name="budget"
+            children={(field) => (
+              <Input
+                value={field.state.value ?? ''}
+                onBlur={field.handleBlur}
+                onChangeText={field.handleChange}
+                placeholder="0"
+                keyboardType="decimal-pad"
+                error={getFieldError(field)}
+              />
+            )}
           />
         </View>
-      )}
+      </View>
 
       <form.Subscribe
         selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
         children={(state) => (
-          <View className="flex-row items-center gap-3">
+          <View className="mt-auto flex-row items-center gap-3">
             {onCancel && (
-              <GhostButton
+              <OutlineButton
                 label={translate('common.cancel')}
                 onPress={onCancel}
                 color="secondary"
@@ -164,6 +163,17 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
           </View>
         )}
       />
+
+      {!!id && (
+        <View className="flex-row justify-center">
+          <GhostButton
+            label={translate('common.delete')}
+            color="danger"
+            onPress={() => onDeletePress(id, initialValues?.name ?? '')}
+            fullWidth
+          />
+        </View>
+      )}
     </View>
   );
 }

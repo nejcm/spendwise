@@ -8,6 +8,7 @@ import { ScrollView } from 'react-native';
 import * as z from 'zod';
 import {
   Input,
+  OutlineButton,
   Select,
   SolidButton,
   Switch,
@@ -352,7 +353,7 @@ export function ScheduledTransactionForm({
         children={(state) => (
           <View className="mt-6 flex-row gap-3">
             {onCancel && (
-              <GhostButton
+              <OutlineButton
                 label={translate('common.cancel')}
                 onPress={onCancel}
                 color="secondary"

@@ -1,7 +1,7 @@
 {
   "accounts": {
     "add": "Add Account",
-    "budget": "Budget / Credit limit",
+    "budget": "Monthly budget",
     "color": "Color",
     "delete_confirm": "Are you sure you want to delete {{name}}?",
     "description_placeholder": "Description...",

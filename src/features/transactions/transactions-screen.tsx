@@ -1,3 +1,4 @@
+import { useDebouncedState } from '@tanstack/react-pacer';
 import * as React from 'react';
 import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
@@ -16,25 +17,27 @@ const inputClassNames = cn(inputDefaults, inputDefaultDefaults, 'min-w-0 flex-1 
 
 export function TransactionsScreen() {
   const selection = useAppStore.use.periodSelection();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useDebouncedState('', {
+    wait: 500,
+  });
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
-
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
   const { data: transactions = [], isLoading, refetch } = useTransactions(startDate, endDate);
 
   const filtered = useMemo(() => {
     let result = transactions;
-    if (search.trim()) {
-      const q = search.toLowerCase();
+    const q = search?.trim().toLowerCase();
+    const hasQuery = q.length > 0;
+    if (hasQuery || categoryFilter) {
       result = result.filter(
-        (t) =>
-          t.note?.toLowerCase().includes(q)
-          || t.category_name?.toLowerCase().includes(q),
+        (t) => {
+          if (categoryFilter && t.category_id !== categoryFilter) return false;
+          if (hasQuery) return t.note?.toLowerCase().includes(q) || t.category_name?.toLowerCase().includes(q);
+          return true;
+        },
       );
     }
-    if (categoryFilter) {
-      result = result.filter((t) => t.category_id === categoryFilter);
-    }
+
     return result;
   }, [transactions, search, categoryFilter]);
 

@@ -10,6 +10,7 @@ import { ArrowLeftIcon, ArrowRightIcon } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { currentISOWeek, getWeeksInYear } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
+import { setPeriodSelection } from '@/lib/store';
 import { todayISO } from '../features/formatting/helpers';
 import { GhostButton } from './ui/ghost-button';
 
@@ -36,11 +37,11 @@ const MODES: { key: PeriodMode; label: string }[] = [
   { key: 'month', label: 'Month' },
   { key: 'week', label: 'Week' },
   { key: 'custom', label: 'Custom' },
+  { key: 'all', label: 'All' },
 ];
 
 export type PeriodSelectorModalProps = {
   selection: PeriodSelection;
-  onSelect: (s: PeriodSelection) => void;
 };
 
 function defaultDraftFor(selection: PeriodSelection): PeriodSelection {
@@ -50,7 +51,6 @@ function defaultDraftFor(selection: PeriodSelection): PeriodSelection {
 export function PeriodSelectorModal({
   ref,
   selection,
-  onSelect,
 }: PeriodSelectorModalProps & { ref?: React.RefObject<BottomSheetModal | null> }) {
   const modal = useModal();
 
@@ -71,14 +71,14 @@ export function PeriodSelectorModal({
   } as BottomSheetModal));
 
   const handleApply = React.useCallback(() => {
-    onSelect(draft);
+    setPeriodSelection(draft);
     modal.dismiss();
-  }, [draft, onSelect, modal]);
+  }, [draft, modal]);
 
   const handleClear = React.useCallback(() => {
-    onSelect({ mode: 'month', year: new Date().getFullYear(), month: new Date().getMonth() + 1 });
+    setPeriodSelection({ mode: 'month', year: new Date().getFullYear(), month: new Date().getMonth() + 1 });
     modal.dismiss();
-  }, [onSelect, modal]);
+  }, [modal]);
 
   const switchMode = React.useCallback((mode: PeriodMode) => {
     const now = new Date();
@@ -100,6 +100,9 @@ export function PeriodSelectorModal({
       }
       case 'custom':
         setDraft({ mode: 'custom', startDate: todayISO(), endDate: todayISO() });
+        break;
+      case 'all':
+        setDraft({ mode: 'all' });
         break;
     }
   }, [draft]);
@@ -155,6 +158,11 @@ export function PeriodSelectorModal({
               onChangeStart={(startDate) => setDraft({ ...draft, startDate })}
               onChangeEnd={(endDate) => setDraft({ ...draft, endDate })}
             />
+          )}
+          {draft.mode === 'all' && (
+            <View className="flex-1 items-center justify-center">
+              <Text className="text-muted-foreground">{translate('common.all-transactions-shown')}</Text>
+            </View>
           )}
         </View>
 

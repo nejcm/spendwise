@@ -101,10 +101,10 @@ function CategoryCard({ item, currency, periodSelection, onPress }: CategoryGrid
       {item.total !== undefined && (
         <FormattedCurrency value={item.total} currency={currency} className="font-medium" numberOfLines={1} />
       )}
-      {showBudget && (
+      {showBudget && periodSelection.mode !== 'all' && (
         <BudgetProgressBar
           spent={item.expense_total}
-          budget={scaledBudget}
+          budget={scaledBudget ?? 0}
           monthlyBudget={!isMonthView ? monthlyBudget : undefined}
           currency={currency}
           className="mt-0.5"

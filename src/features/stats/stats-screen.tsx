@@ -4,7 +4,7 @@ import { PeriodSelector } from '@/components/period-selector';
 import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
-import { setPeriodSelection, useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { CategoryBreakdown } from './components/category-breakdown';
 import { StatsTrend } from './components/stats-trend';
@@ -19,7 +19,7 @@ export function StatsScreen() {
     <>
       <FocusAwareStatusBar />
 
-      <PeriodSelector selection={selection} onSelect={setPeriodSelection} />
+      <PeriodSelector selection={selection} />
 
       <ScrollView className="flex-1 px-4 pt-2 pb-6" style={defaultStyles.transparentBg}>
         <Text className="pb-4 text-center text-2xl font-medium">{translate('stats.title')}</Text>

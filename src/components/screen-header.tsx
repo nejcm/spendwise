@@ -9,9 +9,9 @@ export type ScreenHeaderProps = {
 export default function ScreenHeader({ title, back = true }: ScreenHeaderProps) {
   const router = useRouter();
   return (
-    <View className="w-full flex-row items-center justify-start gap-2 border-b border-border bg-muted px-4">
-      {back && <IconButton color="none" onPress={() => router.back()}><ArrowLeftIcon className="text-muted-foreground" /></IconButton>}
-      <Text className="py-3 text-center text-xl font-medium text-foreground">{title}</Text>
+    <View className="w-full flex-row items-center justify-start gap-1 border-b border-border bg-muted px-4">
+      {back && <IconButton color="none" onPress={() => router.back()}><ArrowLeftIcon className="text-muted-foreground" size={20} /></IconButton>}
+      <Text className="py-3 text-center text-lg font-medium text-foreground">{title}</Text>
     </View>
   );
 }

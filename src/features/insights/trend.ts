@@ -4,10 +4,13 @@ import type { PeriodMode } from '@/lib/store';
 import {
   addDays,
   addMonths,
+  addYears,
   differenceInCalendarDays,
   format,
   parseISO,
   startOfMonth,
+  startOfYear,
+  subYears,
 } from 'date-fns';
 import { unixToISODate } from '@/lib/date/helpers';
 
@@ -70,13 +73,30 @@ function buildMonthlyBuckets(startDate: string, endDate: string): TrendBucket[] 
     const nextMonth = startOfMonth(addMonths(cursor, 1));
     const bucketStart = cursor.getTime() < rangeStart.getTime() ? rangeStart : cursor;
     const bucketEnd = nextMonth.getTime() > rangeEnd.getTime() ? rangeEnd : nextMonth;
-
-    if (bucketStart.getTime() >= bucketEnd.getTime()) {
-      continue;
-    }
+    if (bucketStart.getTime() >= bucketEnd.getTime()) continue;
 
     buckets.push({
       label: format(cursor, labelFormat),
+      startDate: toIsoDate(bucketStart),
+      endDate: toIsoDate(bucketEnd),
+    });
+  }
+  return buckets;
+}
+
+function buildYearlyBuckets(startDate: string, endDate: string): TrendBucket[] {
+  const buckets: TrendBucket[] = [];
+  const rangeStart = parseISO(startDate);
+  const rangeEnd = parseISO(endDate);
+
+  for (let cursor = startOfYear(rangeStart); cursor < rangeEnd; cursor = addYears(cursor, 1)) {
+    const nextYear = startOfYear(addYears(cursor, 1));
+    const bucketStart = cursor.getTime() < rangeStart.getTime() ? rangeStart : cursor;
+    const bucketEnd = nextYear.getTime() > rangeEnd.getTime() ? rangeEnd : nextYear;
+    if (bucketStart.getTime() >= bucketEnd.getTime()) continue;
+
+    buckets.push({
+      label: format(cursor, 'yyyy'),
       startDate: toIsoDate(bucketStart),
       endDate: toIsoDate(bucketEnd),
     });
@@ -89,6 +109,8 @@ function buildBuckets(period: PeriodMode, startDate: string, endDate: string): T
   const rangeDays = differenceInCalendarDays(parseISO(endDate), parseISO(startDate));
 
   switch (period) {
+    case 'all':
+      return buildYearlyBuckets(startDate, endDate);
     case 'year':
       return buildMonthlyBuckets(startDate, endDate);
     case 'week':
@@ -96,24 +118,44 @@ function buildBuckets(period: PeriodMode, startDate: string, endDate: string): T
     case 'month':
       return buildWeeklyBuckets(startDate, endDate, true);
     case 'custom':
-      if (rangeDays <= 7) {
-        return buildDailyBuckets(startDate, endDate, false);
-      }
-      if (rangeDays <= 31) {
-        return buildWeeklyBuckets(startDate, endDate, false);
-      }
+      if (rangeDays <= 7) return buildDailyBuckets(startDate, endDate, false);
+      if (rangeDays <= 31) return buildWeeklyBuckets(startDate, endDate, false);
       return buildMonthlyBuckets(startDate, endDate);
   }
 }
 
 export function buildTrendSeries(
   period: PeriodMode,
-  startDate: number,
-  endDate: number,
+  startDate: number | undefined,
+  endDate: number | undefined,
   dailyTotals: DailyTrendTotal[],
 ): TrendPoint[] {
-  const startDateStr = unixToISODate(startDate);
-  const endDateStr = unixToISODate(endDate);
+  let startDateStr = '';
+  let endDateStr = '';
+  if (!startDate || !endDate) {
+    // fallback to last 3 years
+    if (dailyTotals.length === 0) {
+      const now = new Date();
+      startDateStr = subYears(now, 3).toISOString();
+      endDateStr = now.toISOString();
+    }
+    // find min and max date
+    else {
+      let minDate = Infinity;
+      let maxDate = -Infinity;
+      for (const total of dailyTotals) {
+        if (total.date < minDate) minDate = total.date;
+        if (total.date > maxDate) maxDate = total.date;
+      }
+      startDateStr = unixToISODate(minDate);
+      endDateStr = unixToISODate(maxDate + 86400);
+    }
+  }
+  else {
+    startDateStr = unixToISODate(startDate);
+    endDateStr = unixToISODate(endDate);
+  }
+
   const totalsByDate = new Map(dailyTotals.map((entry) => [unixToISODate(entry.date), entry]));
 
   return buildBuckets(period, startDateStr, endDateStr).map((bucket) => {

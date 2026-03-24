@@ -28,7 +28,7 @@ export function useAccountsWithBalance() {
   });
 }
 
-export function useAccountsWithBalanceForRange(startDate: number, endDate: number) {
+export function useAccountsWithBalanceForRange(startDate: number | undefined, endDate: number | undefined) {
   const db = useSQLiteContext();
   return useQuery({
     queryKey: queryKeys.accounts.withBalanceForRange(startDate, endDate),

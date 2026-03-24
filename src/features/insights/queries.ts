@@ -10,16 +10,17 @@ import { dateToUnix } from '@/lib/date/helpers';
 
 export async function getSummaryByRange(
   db: SQLiteDatabase,
-  startDate: number,
-  endDate: number,
+  startDate: number | undefined,
+  endDate: number | undefined,
 ): Promise<MonthSummary> {
+  const hasRange = !!startDate && !!endDate;
   const row = await db.getFirstAsync<{ income: number; expense: number }>(
     `SELECT
        COALESCE(SUM(CASE WHEN type = 'income' THEN baseAmount ELSE 0 END), 0) as income,
        COALESCE(SUM(CASE WHEN type = 'expense' THEN baseAmount ELSE 0 END), 0) as expense
      FROM transactions
-     WHERE date >= ? AND date < ?`,
-    [startDate, endDate],
+     ${hasRange ? 'WHERE date >= ? AND date < ?' : ''}`,
+    hasRange ? [startDate, endDate] : [],
   );
   const income = row?.income ?? 0;
   const expense = row?.expense ?? 0;
@@ -28,9 +29,10 @@ export async function getSummaryByRange(
 
 export async function getCategorySpendByRange(
   db: SQLiteDatabase,
-  startDate: number,
-  endDate: number,
+  startDate: number | undefined,
+  endDate: number | undefined,
 ): Promise<CategorySpend[]> {
+  const hasRange = !!startDate && !!endDate;
   const rows = await db.getAllAsync<Omit<CategorySpend, 'percentage'>>(
     `SELECT
        c.id as category_id,
@@ -50,10 +52,10 @@ export async function getCategorySpendByRange(
        END as category_type
      FROM categories c
      LEFT JOIN transactions t ON t.category_id = c.id
-       AND t.type IN ('income','expense') AND t.date >= ? AND t.date < ?
+       AND t.type IN ('income','expense') ${hasRange ? 'AND t.date >= ? AND t.date < ?' : ''}
      GROUP BY c.id, c.name, c.color, c.icon, c.budget, c.sort_order
      ORDER BY c.sort_order ASC`,
-    [startDate, endDate],
+    hasRange ? [startDate, endDate] : [],
   );
 
   const grandTotal = rows.reduce((s, r) => s + r.total, 0);
@@ -66,19 +68,20 @@ export async function getCategorySpendByRange(
 
 export async function getTrendByRange(
   db: SQLiteDatabase,
-  startDate: number,
-  endDate: number,
+  startDate: number | undefined,
+  endDate: number | undefined,
 ): Promise<DailyTrendTotal[]> {
+  const hasRange = !!startDate && !!endDate;
   return db.getAllAsync<DailyTrendTotal>(
     `SELECT
        date,
        COALESCE(SUM(CASE WHEN type = 'income' THEN baseAmount ELSE 0 END), 0) as income,
        COALESCE(SUM(CASE WHEN type = 'expense' THEN baseAmount ELSE 0 END), 0) as expense
      FROM transactions
-     WHERE date >= ? AND date < ?
+     ${hasRange ? 'WHERE date >= ? AND date < ?' : ''}
      GROUP BY date
      ORDER BY date ASC`,
-    [startDate, endDate],
+    hasRange ? [startDate, endDate] : [],
   );
 }
 

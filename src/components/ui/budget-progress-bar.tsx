@@ -1,7 +1,7 @@
 import type { CurrencyKey } from '@/features/currencies';
 import * as React from 'react';
 import { View } from 'react-native';
-import { twMerge } from 'tailwind-merge';
+import { cn } from 'tailwind-variants';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { useAppStore } from '@/lib/store';
 import { Text } from './text';
@@ -13,9 +13,10 @@ export type BudgetProgressBarProps = {
   currency?: CurrencyKey; // required when monthlyBudget is set
   className?: string;
   showValues?: boolean;
+  bg?: string;
 };
 
-export function BudgetProgressBar({ spent, budget, monthlyBudget, currency, className, showValues = true }: BudgetProgressBarProps) {
+export function BudgetProgressBar({ spent, budget, monthlyBudget, currency, className, showValues = true, bg = 'bg-foreground' }: BudgetProgressBarProps) {
   const numberFormat = useAppStore.use.numberFormat();
   const currencyFormat = useAppStore.use.currencyFormat();
 
@@ -25,13 +26,13 @@ export function BudgetProgressBar({ spent, budget, monthlyBudget, currency, clas
   const isDanger = ratio >= 0.8;
   const monthlyHint = showValues && monthlyBudget != null && currency != null
     ? ` (${formatCurrency(monthlyBudget, currency, numberFormat, currencyFormat)}/m)`
-    : '';
+    : null;
 
   return (
-    <View className={twMerge('flex-row items-center gap-1', className)}>
-      <View className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+    <View className={cn('flex-row items-center gap-1', className)}>
+      <View className={cn('h-1.5 flex-1 overflow-hidden rounded-full', bg)}>
         <View
-          className={twMerge(
+          className={cn(
             'h-full rounded-full',
             isOver ? 'bg-danger-500' : isDanger ? 'bg-warning-500' : 'bg-foreground',
           )}

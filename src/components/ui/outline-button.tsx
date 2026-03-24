@@ -13,22 +13,22 @@ const outlineButton = tv({
   variants: {
     color: {
       'primary': {
-        container: 'border-foreground bg-transparent',
+        container: 'border-foreground/80 bg-transparent',
         label: 'text-foreground',
         indicator: 'text-foreground',
       },
       'secondary': {
-        container: 'border-muted-foreground bg-transparent',
+        container: 'border-muted-foreground/80 bg-transparent',
         label: 'text-muted-foreground',
         indicator: 'text-muted-foreground',
       },
       'primary-alt': {
-        container: 'border-background bg-transparent',
+        container: 'border-background/80 bg-transparent',
         label: 'text-background',
         indicator: 'text-background',
       },
       'secondary-alt': {
-        container: 'border-muted bg-transparent',
+        container: 'border-muted/80 bg-transparent',
         label: 'text-muted',
         indicator: 'text-muted',
       },

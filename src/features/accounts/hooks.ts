@@ -3,11 +3,12 @@ import type { AccountFormData } from './types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
 
+import { useCallback } from 'react';
 import Alert from '@/components/ui/alert';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
-import { translate } from '@/lib/i18n';
 
+import { translate } from '@/lib/i18n';
 import * as queries from './queries';
 
 // ─── Read Hooks ───
@@ -79,7 +80,7 @@ export function useUpdateAccount() {
   });
 }
 
-export function useArchiveAccount() {
+export function useArchiveAccount(onSuccess?: () => void) {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
 
@@ -87,7 +88,31 @@ export function useArchiveAccount() {
     mutationFn: (id: string) => queries.archiveAccount(db, id),
     onSuccess: () => {
       invalidateFor(queryClient, 'account');
+      onSuccess?.();
     },
     onError,
   });
+}
+
+export function useArchiveAccountConfirmation(onSuccess?: () => void) {
+  const mutation = useArchiveAccount(onSuccess);
+  const submit = useCallback((id: string, name?: string) => {
+    if (!id) return;
+    Alert.alert(
+      translate('common.delete'),
+      translate('accounts.delete_confirm', { name: name ?? '' }),
+      [
+        { text: translate('common.cancel'), style: 'cancel' },
+        {
+          text: translate('common.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            mutation.mutate(id);
+          },
+        },
+      ],
+    );
+  }, [mutation]);
+
+  return { mutation, submit };
 }

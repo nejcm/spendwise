@@ -1,7 +1,7 @@
 {
   "accounts": {
     "add": "Konto hinzufügen",
-    "budget": "Budget / Kreditlimit",
+    "budget": "Monatsbudget",
     "color": "Farbe",
     "delete_confirm": "Möchtest du {{name}} wirklich löschen?",
     "description_placeholder": "Beschreibung...",

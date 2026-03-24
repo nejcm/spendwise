@@ -5,7 +5,7 @@ import { useForm } from '@tanstack/react-form';
 
 import * as React from 'react';
 import { ScrollView, View } from 'react-native';
-import { GhostButton, Image, Input, Select, SolidButton, Text } from '@/components/ui';
+import { Image, Input, OutlineButton, Select, SolidButton, Text } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
 import { CategoryPicker } from '@/features/categories/category-picker';
@@ -151,6 +151,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
           )}
         />
       </View>
+
       <form.Subscribe
         selector={(s) => [s.values.currency]}
         children={([selectedCurrency]) => (
@@ -280,7 +281,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
         children={(state) => (
           <View className="mt-6 flex-row gap-3">
             {onCancel && (
-              <GhostButton
+              <OutlineButton
                 label={translate('common.cancel')}
                 onPress={onCancel}
                 color="secondary"

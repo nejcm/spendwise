@@ -41,13 +41,13 @@ import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import { Text } from './text';
 
 export type ModalProps = BottomSheetModalProps & {
-  title?: string;
+  title?: React.ReactNode;
 };
 
 type ModalRef<T> = React.ForwardedRef<BottomSheetModal<T>>;
 
 type ModalHeaderProps = {
-  title?: string;
+  title?: React.ReactNode;
   dismiss: () => void;
 };
 
@@ -154,7 +154,7 @@ const ModalHeader = React.memo(({ title, dismiss }: ModalHeaderProps) => {
         <View className="flex-row px-2 py-4">
           <View className="size-6" />
           <View className="flex-1">
-            <Text className="text-center text-base font-bold text-[#26313D] dark:text-white">{title}</Text>
+            {typeof title === 'string' ? <Text className="text-center text-lg font-bold text-foreground">{title}</Text> : title}
           </View>
         </View>
       )}

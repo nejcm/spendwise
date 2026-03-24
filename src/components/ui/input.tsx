@@ -1,15 +1,15 @@
 /* eslint-disable react-refresh/only-export-components */
 
-import type { TextInputProps } from 'react-native';
+import type { BlurEvent, FocusEvent, TextInputProps } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
 import * as React from 'react';
 import { I18nManager, TextInput as NTextInput, StyleSheet, View } from 'react-native';
 import { cn, tv } from 'tailwind-variants';
+import { InputLabel, labelDefaults } from './input-label';
 import { Text } from './text';
 
 export const inputDefaults = 'rounded-lg border font-family-sans focus:outline-none';
 export const inputDefaultDefaults = 'border-border bg-input text-foreground focus:border-gray-800 focus:dark:border-gray-300';
-export const labelDefaults = 'text-foreground mb-1 text-sm/snug';
 
 export const inputTv = tv({
   slots: {
@@ -95,7 +95,7 @@ export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInp
   const [isFocussed, setIsFocussed] = React.useState(false);
 
   const onBlur = React.useCallback(
-    (e: any) => {
+    (e: BlurEvent) => {
       setIsFocussed(false);
       onBlurProp?.(e);
     },
@@ -103,7 +103,7 @@ export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInp
   );
 
   const onFocus = React.useCallback(
-    (e: any) => {
+    (e: FocusEvent) => {
       setIsFocussed(true);
       onFocusProp?.(e);
     },
@@ -122,9 +122,7 @@ export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInp
   return (
     <View className={cn(styles.container(), containerClassName)}>
       {label && (
-        <Text testID={testID ? `${testID}-label` : undefined} className={styles.label()}>
-          {label}
-        </Text>
+        <InputLabel label={label} testID={testID ? `${testID}-label` : undefined} className={styles.label()} />
       )}
       <View className="relative">
         <NTextInput

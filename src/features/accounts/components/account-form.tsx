@@ -5,17 +5,15 @@ import * as React from 'react';
 import { View } from 'react-native';
 import * as z from 'zod';
 import ColorSelector from '@/components/color-selector';
-import { Input, Select, SolidButton, Text } from '@/components/ui';
-import Alert from '@/components/ui/alert';
+import { Input, OutlineButton, Select, SolidButton, Text } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import { GhostButton } from '@/components/ui/ghost-button';
-import { OutlineButton } from '@/components/ui/outline-button';
 import { CURRENCY_OPTIONS, CURRENCY_VALUES } from '@/features/currencies';
 import { mergeCurrencyArrays } from '@/features/currencies/helpers';
 import { translate } from '@/lib/i18n';
 import { addLastUsedCurrency, selectAccountFormPrefs, selectLastUsedCurrencies, setAccountFormPrefs, useAppStore } from '@/lib/store';
 import { getRandomColor } from '@/lib/theme/colors';
-import { useArchiveAccount, useCreateAccount, useUpdateAccount } from '../api';
+import { useArchiveAccountConfirmation, useCreateAccount, useUpdateAccount } from '../api';
 import { ACCOUNT_TYPE_LABELS, ACCOUNT_TYPES } from '../types';
 
 const schema = z.object({
@@ -32,6 +30,7 @@ export type AccountFormProps = {
   initialData?: AccountFormData;
   accountId?: string;
   onSuccess?: () => void;
+  onDeleteSuccess?: () => void;
   onCancel?: () => void;
 };
 
@@ -45,11 +44,10 @@ const defaultValues: AccountFormData = {
   budget: null,
 };
 
-export function AccountForm({ initialData, accountId, onSuccess, onCancel }: AccountFormProps) {
+export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess, onCancel }: AccountFormProps) {
   const createAccount = useCreateAccount();
   const updateAccount = useUpdateAccount();
-  const archiveAccount = useArchiveAccount();
-  const isEditMode = Boolean(accountId);
+  const archiveAccount = useArchiveAccountConfirmation(onDeleteSuccess);
   const accountFormPrefs = useAppStore(selectAccountFormPrefs);
   const lastUsedCurrencies = useAppStore(selectLastUsedCurrencies);
   const orderedCurrencies = React.useMemo(() => mergeCurrencyArrays(lastUsedCurrencies, CURRENCY_OPTIONS), [lastUsedCurrencies]);
@@ -88,25 +86,6 @@ export function AccountForm({ initialData, accountId, onSuccess, onCancel }: Acc
     },
   });
 
-  const handleDelete = React.useCallback(() => {
-    if (!accountId) return;
-    Alert.alert(
-      translate('common.delete'),
-      translate('accounts.delete_confirm', { name: initialData?.name ?? '' }),
-      [
-        { text: translate('common.cancel'), style: 'cancel' },
-        {
-          text: translate('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            await archiveAccount.mutateAsync(accountId);
-            onSuccess?.();
-          },
-        },
-      ],
-    );
-  }, [accountId, archiveAccount, initialData?.name, onSuccess]);
-
   return (
     <View className="gap-4">
       <View className="mb-2 flex-row items-center gap-3">
@@ -121,6 +100,7 @@ export function AccountForm({ initialData, accountId, onSuccess, onCancel }: Acc
             />
           )}
         />
+
         <form.Field
           name="icon"
           children={(field) => (
@@ -150,6 +130,7 @@ export function AccountForm({ initialData, accountId, onSuccess, onCancel }: Acc
           />
         )}
       />
+
       <form.Field
         name="description"
         children={(field) => (
@@ -163,6 +144,7 @@ export function AccountForm({ initialData, accountId, onSuccess, onCancel }: Acc
           />
         )}
       />
+
       <form.Field
         name="type"
         children={(field) => (
@@ -183,6 +165,7 @@ export function AccountForm({ initialData, accountId, onSuccess, onCancel }: Acc
           </View>
         )}
       />
+
       <form.Field
         name="currency"
         children={(field) => (
@@ -202,47 +185,50 @@ export function AccountForm({ initialData, accountId, onSuccess, onCancel }: Acc
           </View>
         )}
       />
-      <form.Field
-        name="budget"
-        children={(field) => (
-          <Input
-            label={translate('accounts.budget')}
-            value={field.state.value ?? ''}
-            onBlur={field.handleBlur}
-            onChangeText={field.handleChange}
-            placeholder="0"
-            keyboardType="decimal-pad"
-            className="mb-6"
-            error={getFieldError(field)}
-          />
-        )}
-      />
-      {isEditMode && (
-        <View className="mb-2 flex-row justify-center">
-          <OutlineButton
-            label={translate('common.delete')}
-            color="danger"
-            onPress={handleDelete}
-            className="min-w-24 rounded-full"
-            size="sm"
-          />
-        </View>
-      )}
+
+      <View className="flex-row gap-2">
+        <form.Field
+          name="budget"
+          children={(field) => (
+            <Input
+              label={translate('accounts.budget')}
+              value={field.state.value ?? ''}
+              onBlur={field.handleBlur}
+              onChangeText={field.handleChange}
+              placeholder="0"
+              keyboardType="decimal-pad"
+              className="mb-6"
+              error={getFieldError(field)}
+            />
+          )}
+        />
+      </View>
+
       <form.Subscribe
         selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
         children={(state) => (
           <View className="flex-row items-center gap-3">
-            {onCancel && <GhostButton label={translate('common.cancel')} onPress={onCancel} color="secondary" />}
+            {onCancel && <OutlineButton label={translate('common.cancel')} onPress={onCancel} color="secondary" />}
             <SolidButton
               label={translate('common.save')}
               onPress={form.handleSubmit}
-              loading={(!!state.isSubmitting) || createAccount.isPending || updateAccount.isPending || archiveAccount.isPending}
+              loading={(!!state.isSubmitting) || createAccount.isPending || updateAccount.isPending || archiveAccount.mutation.isPending}
               disabled={!schema.safeParse(state.values).success}
               className="flex-1"
             />
           </View>
         )}
       />
+      {!!accountId && (
+        <View className="mb-2 flex-row justify-center">
+          <GhostButton
+            label={translate('common.delete')}
+            color="danger"
+            fullWidth
+            onPress={() => archiveAccount.submit(accountId, initialData?.name)}
+          />
+        </View>
+      )}
     </View>
   );
 }

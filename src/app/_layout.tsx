@@ -4,7 +4,6 @@ import { useFonts } from 'expo-font';
 import { Stack, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteProvider } from 'expo-sqlite';
-import { PostHogProvider } from 'posthog-react-native';
 import * as React from 'react';
 import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
@@ -14,20 +13,20 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppErrorBoundary } from '@/components/app-error-boundary';
 import { GlobalSheet } from '@/components/global-sheet';
+import { SafeAreaView, View } from '@/components/ui';
 import { CustomTabBar, TAB_BAR_COLOR } from '@/components/ui/custom-tab-bar';
+import { DB_NAME } from '@/config';
 import { useCurrencyRates } from '@/features/currencies/api';
 import { ScheduledTransactionsProcessor } from '@/features/scheduled-transactions/scheduled-transactions-processor';
 import { SecurityLock } from '@/features/security/security-lock';
-import { posthogClient } from '@/lib/analytics';
+
+import { PosthogProviderWrapper } from '@/lib/analytics/posthog';
 import { APIProvider } from '@/lib/api';
 import { useAppBootstrapOnInit } from '@/lib/app-bootstrap';
-
 import { IS_WEB } from '@/lib/base';
 import { DatabaseErrorBoundary, OpfsCleaner } from '@/lib/sqlite';
 import { loadSelectedTheme, useSelectedTheme } from '@/lib/theme/use-selected-theme';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
-import { SafeAreaView, View } from '../components/ui';
-import { DB_NAME } from '../config';
 // Import  global CSS file
 import '../global.css';
 
@@ -126,7 +125,7 @@ function Providers({ children }: { children: React.ReactNode }) {
       // eslint-disable-next-line better-tailwindcss/no-unknown-classes
       className={theme.dark ? `dark` : undefined}
     >
-      <PostHogProvider client={posthogClient} autocapture={false}>
+      <PosthogProviderWrapper>
         <SafeAreaProvider>
           <KeyboardProvider>
             <ThemeProvider value={theme}>
@@ -157,7 +156,7 @@ function Providers({ children }: { children: React.ReactNode }) {
             </ThemeProvider>
           </KeyboardProvider>
         </SafeAreaProvider>
-      </PostHogProvider>
+      </PosthogProviderWrapper>
     </GestureHandlerRootView>
   );
 }

@@ -5,8 +5,8 @@ import { Stack, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteProvider } from 'expo-sqlite';
 import * as React from 'react';
-import { useEffect, useState } from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { useEffect } from 'react';
+import { StyleSheet } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
@@ -69,8 +69,6 @@ function DevThemeToggle() {
   const { selectedTheme, setSelectedTheme } = useSelectedTheme();
 
   useEffect(() => {
-    if (!__DEV__ || Platform.OS !== 'web') return;
-
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === '0') {
         e.preventDefault();
@@ -99,27 +97,8 @@ export default function RootLayout() {
   );
 }
 
-function WebFontsLoader({
-  children,
-  fallback,
-}: {
-  children?: React.ReactNode;
-  fallback?: React.ReactNode;
-}) {
-  const hasFallback = !!fallback;
-  const [forceFallback, setForceFallback] = useState(hasFallback);
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setForceFallback(false);
-    }, 500);
-
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, []);
-
-  const [loaded, error] = useFonts({
+function WebFontsLoader({ children }: { children?: React.ReactNode }) {
+  const [_loader, error] = useFonts({
     'Inter': require('node_modules/@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf'),
     'Inter-Medium': require('node_modules/@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf'),
     'Inter-SemiBold': require('node_modules/@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf'),
@@ -127,7 +106,11 @@ function WebFontsLoader({
     'Inter-Black': require('node_modules/@expo-google-fonts/inter/900Black/Inter_900Black.ttf'),
   });
 
-  return (loaded || error) && !forceFallback ? children : fallback;
+  useEffect(() => {
+    if (error) console.error(error);
+  }, [error]);
+
+  return children;
 }
 
 function Providers({ children }: { children: React.ReactNode }) {
@@ -148,10 +131,10 @@ function Providers({ children }: { children: React.ReactNode }) {
               <DatabaseErrorBoundary>
 
                 <APIProvider>
+                  <CurrencyRatesInitializer />
                   <BootstrappedSQLite>
                     <AppErrorBoundary>
                       <ScheduledTransactionsProcessor />
-                      <CurrencyRatesInitializer />
                       <FontLoader>
                         <BottomSheetModalProvider>
                           <View className="flex-1 bg-white">
@@ -160,7 +143,7 @@ function Providers({ children }: { children: React.ReactNode }) {
                             </SafeAreaView>
                           </View>
                           <FlashMessage position="top" />
-                          <DevThemeToggle />
+                          {__DEV__ && IS_WEB && <DevThemeToggle />}
                         </BottomSheetModalProvider>
                       </FontLoader>
                     </AppErrorBoundary>

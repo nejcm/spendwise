@@ -16,8 +16,10 @@ export async function bootstrapApp(
   queryClient: QueryClient,
 ): Promise<void> {
   await migrateDb(db);
-  await ensureAndroidChannel();
-  await syncDueScheduledTransactions(db, queryClient);
+  await Promise.all([
+    ensureAndroidChannel(),
+    syncDueScheduledTransactions(db, queryClient),
+  ]);
 }
 
 /**

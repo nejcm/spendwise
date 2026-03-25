@@ -1,6 +1,6 @@
 # Spendwise
 
-> ⚠️ Work in progress!
+> ## ⚠️ Work in progress!
 
 Spendwise is a personal finance app built with Expo and React Native. The app is local-first: core financial data lives in on-device SQLite and user preferences live in MMKV.
 
@@ -162,16 +162,9 @@ App startup happens in `src/app/_layout.tsx`, where the app initializes SQLite, 
 
 High-level roadmap (subject to change):
 
-
-### Budgets
-
-- [ ] Support global budgets and per-category budgets (monthly and yearly)
-
-
 ### AI features
 
-- [ ] Recommendations and chat
-- [ ] Insights
+- [ ] Recommendations and Insights
 
 ### Product polish
 

@@ -1,7 +1,6 @@
 import type { RefObject } from 'react';
 import type { LayoutChangeEvent, ScrollView as RNScrollView } from 'react-native';
 import type { MarkdownStyle } from 'react-native-enriched-markdown';
-import type { AiPromptContext } from './context';
 
 export type ChatMessage = {
   readonly id: string;
@@ -34,15 +33,32 @@ export type UseChatReturn = {
   readonly draftQuestion: string;
   readonly isStreaming: boolean;
   readonly errorMessage: string | null;
+  readonly toolStatus: string | null;
   readonly actions: ChatActions;
   readonly scroll: ChatScrollHandlers;
   readonly getMessageRenderInfo: (message: ChatMessage) => MessageRenderInfo;
   readonly markdownStyle: MarkdownStyle;
 };
 
-export type ProviderChatMessage = Pick<ChatMessage, 'role' | 'content'>;
+// ─── Provider Message Types ───
+
+export type ProviderChatMessage = {
+  readonly role: 'user' | 'assistant';
+  readonly content: string;
+};
 
 export type AskInput = {
-  messages: ChatMessage[];
-  context?: AiPromptContext;
+  readonly messages: readonly ChatMessage[];
 };
+
+// ─── Tool Calling Types ───
+
+export type ToolCall = {
+  readonly id: string;
+  readonly name: string;
+  readonly arguments: Record<string, unknown>;
+};
+
+export type StreamResponse
+  = { readonly type: 'text'; readonly content: string }
+    | { readonly type: 'tool_calls'; readonly content: string; readonly calls: readonly ToolCall[] };

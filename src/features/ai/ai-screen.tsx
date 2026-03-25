@@ -2,7 +2,7 @@ import { Link } from 'expo-router';
 import * as React from 'react';
 import { KeyboardAvoidingView, Platform } from 'react-native';
 import { FocusAwareStatusBar, Input, ScrollView, SolidButton, Text, View } from '@/components/ui';
-import { Plus, SendHorizonal } from '@/components/ui/icon';
+import { Brain, Plus, SendHorizonal } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import AssistantMessage from '@/features/ai/components/assistant-message';
 import AssistantMessageWeb from '@/features/ai/components/assistant-message.web';
@@ -75,6 +75,7 @@ export function AiScreen() {
     draftQuestion,
     isStreaming,
     errorMessage,
+    toolStatus,
     actions,
     scroll,
     getMessageRenderInfo,
@@ -139,6 +140,12 @@ export function AiScreen() {
               );
             })}
 
+            {toolStatus && (
+              <View className="my-1 flex-row items-center gap-1 px-1">
+                <Brain size={15} className="text-muted-foreground" />
+                <Text className="text-xs text-muted-foreground italic">{toolStatus}</Text>
+              </View>
+            )}
             {errorMessage && (
               <View className="my-4 rounded-lg bg-danger-500/10 px-3 py-2">
                 <Text className="text-sm text-danger-500">{errorMessage}</Text>

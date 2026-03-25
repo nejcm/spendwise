@@ -15,6 +15,7 @@ export const DB_NAME = 'spendwise.db';
 
 export const OPEN_AI_MODEL = 'gpt-5.4-mini';
 export const ANTHROPIC_MODEL = 'claude-haiku-4-5';
+export const AI_MAX_TOOL_ROUNDS = 3;
 
 export const DEFAULT_DATE_FORMAT = 'MMM d, yyyy' satisfies DateFormat;
 export const DEFAULT_CURRENCY = 'EUR' satisfies CurrencyKey;

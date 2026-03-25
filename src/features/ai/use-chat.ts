@@ -4,8 +4,7 @@ import type { ChatMessage, UseChatReturn } from '@/features/ai/types';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import * as React from 'react';
-import { buildAiPromptContext } from '@/features/ai/context';
-import { streamAsk } from '@/features/ai/service';
+import { streamAskWithTools } from '@/features/ai/service';
 import { clearAiChat, setAiDraftQuestion, setAiMessages, useAiChatStore } from '@/features/ai/store';
 import { translate } from '@/lib/i18n';
 import { generateId } from '@/lib/sqlite';
@@ -15,6 +14,28 @@ import { getMarkdownStyle } from './helpers';
 
 const TOP_OFFSET = 8;
 const FALLBACK_FILLER_RATIO = 0.7;
+
+export type ChatState = {
+  isStreaming: boolean;
+  streamingAssistantId: string | null;
+  streamedAssistantContent: string;
+  errorMessage: string | null;
+  toolStatus: string | null;
+  lastSubmittedUserMessageId: string | null;
+  viewportHeight: number;
+};
+
+function initialState(): ChatState {
+  return {
+    isStreaming: false,
+    streamingAssistantId: null,
+    streamedAssistantContent: '',
+    errorMessage: null,
+    toolStatus: null,
+    lastSubmittedUserMessageId: null,
+    viewportHeight: 0,
+  };
+}
 
 export function useChat(): UseChatReturn {
   const db = useSQLiteContext();
@@ -27,27 +48,20 @@ export function useChat(): UseChatReturn {
   const inFlightRequestRef = React.useRef(false);
   const abortControllerRef = React.useRef<AbortController | null>(null);
   const isMountedRef = React.useRef(true);
-
-  const [isStreaming, setIsStreaming] = React.useState(false);
-  const [streamingAssistantId, setStreamingAssistantId] = React.useState<string | null>(null);
-  const [streamedAssistantContent, setStreamedAssistantContent] = React.useState('');
-  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
-  const [lastSubmittedUserMessageId, setLastSubmittedUserMessageId] = React.useState<string | null>(null);
+  const [chatState, setChatState] = React.useState<ChatState>(initialState);
   const scrollViewRef = React.useRef<RNScrollView>(null);
   const messageLayoutsRef = React.useRef<Record<string, { y: number; height: number }>>({});
   const pendingScrollUserMessageIdRef = React.useRef<string | null>(null);
-  const [viewportHeight, setViewportHeight] = React.useState(0);
 
   const reset = React.useCallback(() => {
     abortControllerRef.current?.abort();
     abortControllerRef.current = null;
 
     inFlightRequestRef.current = false;
-    setIsStreaming(false);
-    setStreamingAssistantId(null);
-    setStreamedAssistantContent('');
-    setErrorMessage(null);
-    setLastSubmittedUserMessageId(null);
+    setChatState((prev) => ({
+      ...initialState(),
+      viewportHeight: prev.viewportHeight,
+    }));
     clearAiChat();
   }, []);
 
@@ -61,7 +75,7 @@ export function useChat(): UseChatReturn {
   const send = React.useCallback((presetQuestion?: string) => {
     const sourceQuestion = presetQuestion ?? draftQuestion;
     const trimmed = sourceQuestion.trim();
-    if (!trimmed || isStreaming || inFlightRequestRef.current) return;
+    if (!trimmed || chatState.isStreaming || inFlightRequestRef.current) return;
 
     const existingMessages = useAiChatStore.getState().messages;
     const userMessage: ChatMessage = {
@@ -82,25 +96,35 @@ export function useChat(): UseChatReturn {
     abortControllerRef.current = controller;
 
     inFlightRequestRef.current = true;
-    setErrorMessage(null);
+    setChatState((prev) => ({
+      ...prev,
+      errorMessage: null,
+      toolStatus: null,
+      lastSubmittedUserMessageId: userMessage.id,
+      streamingAssistantId: assistantPlaceholder.id,
+      streamedAssistantContent: '',
+      isStreaming: true,
+    }));
 
     setAiMessages(currentMessages);
     setAiDraftQuestion('');
-    setLastSubmittedUserMessageId(userMessage.id);
-
-    setStreamingAssistantId(assistantPlaceholder.id);
-    setStreamedAssistantContent('');
-    setIsStreaming(true);
 
     void (async () => {
       try {
-        const context = await buildAiPromptContext(db, userMessage.content);
-        const finalContent = await streamAsk({
+        const finalContent = await streamAskWithTools({
           messages: [...existingMessages, userMessage],
-          context,
+          db,
           onToken: (token) => {
             if (!isMountedRef.current) return;
-            setStreamedAssistantContent((prev) => prev + token);
+            setChatState((prev) => ({
+              ...prev,
+              toolStatus: null,
+              streamedAssistantContent: prev.streamedAssistantContent + token,
+            }));
+          },
+          onToolStatus: (status) => {
+            if (!isMountedRef.current) return;
+            setChatState((prev) => ({ ...prev, toolStatus: status }));
           },
           signal: controller.signal,
         });
@@ -122,7 +146,7 @@ export function useChat(): UseChatReturn {
         const message = err instanceof Error
           ? err.message
           : translate('ai.contact_error');
-        setErrorMessage(message);
+        setChatState((prev) => ({ ...prev, errorMessage: message }));
 
         // Remove the placeholder assistant message; keep the user's question.
         setAiMessages([...existingMessages, userMessage]);
@@ -134,47 +158,53 @@ export function useChat(): UseChatReturn {
           abortControllerRef.current = null;
 
           if (isMountedRef.current) {
-            setIsStreaming(false);
-            setStreamingAssistantId(null);
-            setStreamedAssistantContent('');
+            setChatState((prev) => ({
+              ...prev,
+              isStreaming: false,
+              streamingAssistantId: null,
+              streamedAssistantContent: '',
+              toolStatus: null,
+            }));
           }
         }
       }
     })();
-  }, [db, isStreaming, draftQuestion]);
+  }, [db, chatState.isStreaming, draftQuestion]);
 
   const markdownStyle = React.useMemo<MarkdownStyle>(
     () => getMarkdownStyle(theme.dark),
     [theme.dark],
   );
 
-  // --- Streaming content resolution ---
-
+  // Streaming content resolution
   const getMessageRenderInfo = React.useCallback(
     (message: ChatMessage) => ({
-      displayContent: message.id === streamingAssistantId
-        ? streamedAssistantContent
+      displayContent: message.id === chatState.streamingAssistantId
+        ? chatState.streamedAssistantContent
         : message.content,
-      isLiveStreaming: isStreaming && message.id === streamingAssistantId,
+      isLiveStreaming: chatState.isStreaming && message.id === chatState.streamingAssistantId,
     }),
-    [streamingAssistantId, streamedAssistantContent, isStreaming],
+    [
+      chatState.streamingAssistantId,
+      chatState.streamedAssistantContent,
+      chatState.isStreaming,
+    ],
   );
 
-  // --- Scroll management ---
-
+  // Scroll management
   const lastMessage = messages.at(-1);
   const lastAssistant = lastMessage?.role === 'assistant' ? lastMessage : null;
   const shouldShowBottomFiller
     = lastMessage?.role === 'user'
-      || (Boolean(lastAssistant) && isStreaming && lastAssistant?.id === streamingAssistantId);
+      || (Boolean(lastAssistant) && chatState.isStreaming && lastAssistant?.id === chatState.streamingAssistantId);
   const fillerAnchorMessageId = shouldShowBottomFiller ? lastMessage?.id : null;
   const measuredAnchorHeight = fillerAnchorMessageId
     ? messageLayoutsRef.current[fillerAnchorMessageId]?.height
     : undefined;
-  const fallbackBottomFillerHeight = viewportHeight > 0 ? viewportHeight * FALLBACK_FILLER_RATIO : 0;
+  const fallbackBottomFillerHeight = chatState.viewportHeight > 0 ? chatState.viewportHeight * FALLBACK_FILLER_RATIO : 0;
   const bottomFillerHeight = shouldShowBottomFiller
     ? Math.max(0, measuredAnchorHeight !== undefined
-        ? viewportHeight - measuredAnchorHeight - TOP_OFFSET
+        ? chatState.viewportHeight - measuredAnchorHeight - TOP_OFFSET
         : fallbackBottomFillerHeight)
     : 0;
 
@@ -189,13 +219,14 @@ export function useChat(): UseChatReturn {
   }, []);
 
   React.useEffect(() => {
-    if (!lastSubmittedUserMessageId) return;
-    pendingScrollUserMessageIdRef.current = lastSubmittedUserMessageId;
-    scrollUserMessageToTop(lastSubmittedUserMessageId);
-  }, [lastSubmittedUserMessageId, scrollUserMessageToTop]);
+    if (!chatState.lastSubmittedUserMessageId) return;
+    pendingScrollUserMessageIdRef.current = chatState.lastSubmittedUserMessageId;
+    scrollUserMessageToTop(chatState.lastSubmittedUserMessageId);
+  }, [chatState.lastSubmittedUserMessageId, scrollUserMessageToTop]);
 
   const onScrollViewLayout = React.useCallback((event: LayoutChangeEvent) => {
-    setViewportHeight(event.nativeEvent.layout.height);
+    const height = event.nativeEvent.layout.height;
+    setChatState((prev) => (prev.viewportHeight === height ? prev : { ...prev, viewportHeight: height }));
   }, []);
 
   const onMessageLayout = React.useCallback((messageId: string, event: LayoutChangeEvent) => {
@@ -212,8 +243,7 @@ export function useChat(): UseChatReturn {
     hasKey,
     messages,
     draftQuestion,
-    isStreaming,
-    errorMessage,
+    ...chatState,
     actions: {
       send,
       setDraft: setAiDraftQuestion,

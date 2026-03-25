@@ -142,106 +142,104 @@ export function clearAppStore() {
 // Selectors
 export const getAppState = () => _useAppStore.getState();
 
+export function updateState(state: Partial<AppState> | ((prev: AppState) => Partial<AppState>)) {
+  return _useAppStore.setState((prev) => ({ ...prev, ...(typeof state === 'function' ? state(prev) : state) }));
+};
+
 // Profile actions
 export function setProfile(profile: AppState['profile']) {
-  return _useAppStore.setState((prev) => ({ ...prev, profile }));
+  return updateState({ profile });
 }
 export function updateProfile(profile: Partial<AppState['profile']>) {
-  return _useAppStore.setState((prev) => ({
-    ...prev,
-    profile: { ...prev.profile, ...profile },
-  }));
+  return updateState((prev) => ({ profile: { ...prev.profile, ...profile } }));
 }
 export const selectProfile = (state: AppState) => state.profile;
 
 // Auth actions
 export function signIn(token: TokenType) {
-  return _useAppStore.setState((prev) => ({ ...prev, token, authStatus: 'signIn' }));
+  return updateState({ token, authStatus: 'signIn' });
 }
 
 export function signOut() {
-  return _useAppStore.setState((prev) => ({ ...prev, token: null, authStatus: 'signOut' }));
+  return updateState({ token: null, authStatus: 'signOut' });
 }
 
 export function hydrateAuth() {
-  const { token } = _useAppStore.getState();
+  const { token } = getAppState();
   if (token !== null) signIn(token);
   else signOut();
 }
 
 // Preference actions
 export function setCurrency(currency: CurrencyKey) {
-  return _useAppStore.setState((prev) => ({ ...prev, currency: currency.length > 0 ? currency : DEFAULT_USER_CURRENCY }));
+  return updateState({ currency: currency.length > 0 ? currency : DEFAULT_USER_CURRENCY });
 }
 
 export function setCurrencyFormat(currencyFormat: AppState['currencyFormat']) {
-  return _useAppStore.setState((prev) => ({ ...prev, currencyFormat }));
+  return updateState({ currencyFormat });
 }
 
 export function setDateFormat(dateFormat: AppState['dateFormat']) {
-  return _useAppStore.setState((prev) => ({ ...prev, dateFormat }));
+  return updateState({ dateFormat });
 }
 
 export function setNumberFormat(numberFormat: AppState['numberFormat']) {
-  return _useAppStore.setState((prev) => ({ ...prev, numberFormat }));
+  return updateState({ numberFormat });
 }
 
 export function setMonthStartDay(monthStartDay: number) {
-  return _useAppStore.setState((prev) => ({ ...prev, monthStartDay }));
+  return updateState({ monthStartDay });
 }
 
 export function setTheme(theme: ThemeType) {
-  return _useAppStore.setState((prev) => ({ ...prev, theme }));
+  return updateState({ theme });
 }
 
 export function setIsFirstTime(isFirstTime: boolean) {
-  return _useAppStore.setState((prev) => ({ ...prev, isFirstTime }));
+  return updateState({ isFirstTime });
 }
 
 export function setLanguage(language: Language) {
-  return _useAppStore.setState((prev) => ({ ...prev, language }));
+  return updateState({ language });
 }
 
 // AI actions
 export function setAiProvider(aiProvider: AppState['aiProvider']) {
-  return _useAppStore.setState((prev) => ({ ...prev, aiProvider }));
+  return updateState({ aiProvider });
 }
 
 export function setOpenaiApiKey(openaiApiKey: string | undefined) {
-  return _useAppStore.setState((prev) => ({ ...prev, openaiApiKey }));
+  return updateState({ openaiApiKey });
 }
 
 export function setAnthropicApiKey(anthropicApiKey: string | undefined) {
-  return _useAppStore.setState((prev) => ({ ...prev, anthropicApiKey }));
+  return updateState({ anthropicApiKey });
 }
 
 // Security actions
 export function setLockEnabled(lockEnabled: boolean) {
-  return _useAppStore.setState((prev) => ({ ...prev, lockEnabled }));
+  return updateState({ lockEnabled });
 }
 
 export function setIsLocked(isLocked: boolean) {
-  return _useAppStore.setState((prev) => ({ ...prev, isLocked }));
+  return updateState({ isLocked });
 }
 
 export function setLockTimeoutMinutes(lockTimeoutMinutes: number) {
-  return _useAppStore.setState((prev) => ({ ...prev, lockTimeoutMinutes }));
+  return updateState({ lockTimeoutMinutes });
 }
 
 // Period selection actions
 export function setPeriodSelection(periodSelection: PeriodSelection) {
-  return _useAppStore.setState((prev) => ({ ...prev, periodSelection }));
+  return updateState({ periodSelection });
 }
 
 // Other actions
 export function setLastUsed(lastUsed: AppState['lastUsed']) {
-  return _useAppStore.setState((prev) => ({ ...prev, lastUsed }));
+  return updateState({ lastUsed });
 }
 export function updateLastUsed(lastUsed: Partial<AppState['lastUsed']>) {
-  return _useAppStore.setState((state) => ({
-    ...state,
-    lastUsed: { ...state.lastUsed, ...lastUsed },
-  }));
+  return updateState((prev) => ({ lastUsed: { ...prev.lastUsed, ...lastUsed } }));
 }
 export const selectLastUsed = (state: AppState) => state.lastUsed;
 
@@ -266,13 +264,7 @@ export function selectLastUsedCurrencies(state: AppState) {
 
 // Form preference actions
 function updateFormPrefs(prefs: Partial<AppState['formPrefs']>) {
-  return _useAppStore.setState((prev) => ({
-    ...prev,
-    formPrefs: {
-      ...prev.formPrefs,
-      ...prefs,
-    },
-  }));
+  return updateState((prev) => ({ formPrefs: { ...prev.formPrefs, ...prefs } }));
 }
 export function setTransactionFormPrefs(prefs: AppState['formPrefs']['transactionForm']) {
   return updateFormPrefs({ transactionForm: prefs });
@@ -286,7 +278,7 @@ export const selectAccountFormPrefs = (state: AppState) => state.formPrefs.accou
 
 // Notifications actions
 export function updateNotifications(notifications: Partial<AppState['notifications']>) {
-  return _useAppStore.setState((prev) => ({ ...prev, notifications: { ...prev.notifications, ...notifications } }));
+  return updateState((prev) => ({ notifications: { ...prev.notifications, ...notifications } }));
 }
 export const selectNotifications = (state: AppState) => state.notifications;
 export const selectNotificationSettings = (state: AppState) => state.notifications;

@@ -32,7 +32,6 @@ export default function TransactionsList() {
                 <TransactionCard
                   key={t.id}
                   transaction={t}
-                  onPress={() => router.push(`/transactions/${t.id}`)}
                   className="px-0"
                 />
               ))}

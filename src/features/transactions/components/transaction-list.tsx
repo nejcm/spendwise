@@ -1,6 +1,5 @@
 import type { DateGroup, TransactionWithCategory } from '../types';
 import { FlashList } from '@shopify/flash-list';
-import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, RefreshControl, View } from 'react-native';
@@ -18,14 +17,13 @@ export type TransactionListProps = {
 };
 
 export function TransactionList({ transactions, isLoading, onRefresh }: TransactionListProps) {
-  const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
 
-  const handleRefresh = async () => {
+  const handleRefresh = React.useCallback(async () => {
     setRefreshing(true);
     await onRefresh?.();
     setRefreshing(false);
-  };
+  }, [onRefresh]);
 
   const sections = useMemo(() => groupByDate(transactions), [transactions]);
 
@@ -50,9 +48,9 @@ export function TransactionList({ transactions, isLoading, onRefresh }: Transact
           </View>
         );
       }
-      return <TransactionCard transaction={item} onPress={() => router.push(`/transactions/${item.id}` as any)} />;
+      return <TransactionCard transaction={item} />;
     },
-    [router],
+    [],
   );
 
   if (!isLoading && transactions.length === 0) {
@@ -64,6 +62,7 @@ export function TransactionList({ transactions, isLoading, onRefresh }: Transact
       className="pb-6"
       data={flatData}
       renderItem={renderItem}
+      keyExtractor={(item) => (typeof item === 'number' ? `header-${item}` : `tx-${item.id}`)}
       getItemType={(item) => (typeof item === 'number' ? 'header' : 'row')}
       ListEmptyComponent={isLoading ? <ActivityIndicator /> : <NoData className="py-16" title={translate('transactions.no_transactions')} />}
       refreshControl={
@@ -82,12 +81,7 @@ function groupByDate(transactions: TransactionWithCategory[]): DateGroup[] {
     // Normalize to day-start Unix seconds (floor to day boundary using 86400s/day)
     const dayKey = Math.floor(t.date / 86400) * 86400;
     const existing = groups.get(dayKey);
-    if (existing) {
-      existing.push(t);
-    }
-    else {
-      groups.set(dayKey, [t]);
-    }
+    groups.set(dayKey, existing ? [...existing, t] : [t]);
   }
 
   return Array.from(groups.entries(), ([date, txns]) => ({

@@ -11,7 +11,7 @@ import { defaultStyles } from '@/lib/theme/styles';
 import { NoDataCard } from '../../components/no-data-card';
 import { useAccountsWithBalanceForRange } from '../accounts/hooks';
 
-export function AccountsOverview() {
+export const AccountsOverview = React.memo(() => {
   const router = useRouter();
   const currentMonth = React.useMemo(() => format(new Date(), 'yyyy-MM'), []);
   const [startDate, endDate] = React.useMemo(() => getCurrentMonthRange(currentMonth), [currentMonth]);
@@ -60,4 +60,4 @@ export function AccountsOverview() {
           : <NoDataCard onPress={() => router.push('/accounts')} label={translate('accounts.add')} />}
     </View>
   );
-}
+});

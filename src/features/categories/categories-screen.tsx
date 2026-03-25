@@ -5,7 +5,7 @@ import { PeriodSelector } from '@/components/period-selector';
 import { FocusAwareStatusBar, FormattedCurrency, Text, View } from '@/components/ui';
 import { FileWarning, Pencil, PencilOff } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
-import { SkeletonBox } from '@/components/ui/skeleton';
+import { SkeletonGrid } from '@/components/ui/skeleton';
 import { useUpdateCategoryOrder } from '@/features/categories/api';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { useCategorySpendByRange } from '@/features/insights/api';
@@ -70,15 +70,12 @@ export function CategoriesScreen() {
           )}
       {isLoading
         ? (
-            <View className="flex-1 flex-row flex-wrap gap-2 px-4 pt-2">
-              {Array.from({ length: 6 }, (_, i) => (
-                <SkeletonBox key={i} height={88} width="47%" />
-              ))}
-            </View>
+            <SkeletonGrid className="px-4 pt-2" cols={2} rows={3} />
           )
         : (
             <CategoryGrid
               categories={data}
+              editMode={isEditMode}
               onReorder={(items) => updateOrder.mutate(items)}
               onAddPress={() => openSheet({ type: 'add-category' })}
               onPress={(category) => {

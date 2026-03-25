@@ -134,8 +134,8 @@ function Providers({ children }: { children: React.ReactNode }) {
                 <DatabaseErrorBoundary>
 
                   <APIProvider>
-                    <CurrencyRatesInitializer />
                     <BootstrappedSQLite>
+                      <CurrencyRatesInitializer />
                       <AppErrorBoundary>
                         <ScheduledTransactionsProcessor />
                         <FontLoader>

@@ -182,6 +182,7 @@ export function SwitchIcon({ checked = false }: IconProps) {
 
   const checkedColor = useCSSVariable('--color-foreground');
   const uncheckedColor = useCSSVariable('--color-gray-400');
+  const thumbColor = useCSSVariable('--color-surface');
   const backgroundColor = checked ? String(checkedColor) : String(uncheckedColor);
 
   return (
@@ -200,7 +201,7 @@ export function SwitchIcon({ checked = false }: IconProps) {
           height: THUMB_HEIGHT,
           width: THUMB_WIDTH,
           position: 'absolute',
-          backgroundColor: 'white',
+          backgroundColor: String(thumbColor),
           borderRadius: 13,
           right: 0,
         }}

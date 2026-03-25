@@ -3,9 +3,8 @@ import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
 import { AppState } from 'react-native';
 import { todayISO } from '@/features/formatting/helpers';
-import {
-  checkUpcomingBills,
-} from '@/features/notifications/notifications';
+import { runAllNotificationChecks } from '@/features/notifications/notifications';
+import { getAppState } from '@/lib/store';
 import { syncDueScheduledTransactions } from './api';
 
 export function ScheduledTransactionsProcessor() {
@@ -20,7 +19,7 @@ export function ScheduledTransactionsProcessor() {
     isProcessingRef.current = true;
     try {
       await syncDueScheduledTransactions(db, queryClient);
-      await checkUpcomingBills(db);
+      await runAllNotificationChecks(db, getAppState().notifications);
       lastProcessedDateRef.current = todayISO();
     }
     finally {
@@ -34,7 +33,7 @@ export function ScheduledTransactionsProcessor() {
 
   React.useEffect(() => {
     const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active') {
+      if (state === 'active' && lastProcessedDateRef.current !== todayISO()) {
         void processSchedules();
       }
     });

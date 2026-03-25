@@ -3,10 +3,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import {
-  checkUpcomingBills,
-  setupNotifications,
-} from '@/features/notifications/notifications';
+import { ensureAndroidChannel } from '@/features/notifications/notifications';
 import { syncDueScheduledTransactions } from '@/features/scheduled-transactions/api';
 import { migrateDb } from '@/lib/sqlite';
 
@@ -19,9 +16,8 @@ export async function bootstrapApp(
   queryClient: QueryClient,
 ): Promise<void> {
   await migrateDb(db);
-  await setupNotifications();
+  await ensureAndroidChannel();
   await syncDueScheduledTransactions(db, queryClient);
-  await checkUpcomingBills(db);
 }
 
 /**

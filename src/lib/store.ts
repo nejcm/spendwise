@@ -1,10 +1,11 @@
-import type { CurrencyKey } from '../features/currencies';
 import type { Account } from '@/features/accounts/types';
+import type { AiProviderType } from '@/features/ai/types';
+import type { CurrencyKey } from '@/features/currencies';
 import type { CurrencyFormat, DateFormat, NumberFormat } from '@/features/formatting/constants';
 import type { Language } from '@/features/languages/types';
 import type { ThemeType } from '@/features/settings/theme';
-import type { Transaction } from '@/features/transactions/types';
 
+import type { Transaction } from '@/features/transactions/types';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { currentPeriodSelection } from '@/lib/date/helpers';
@@ -59,7 +60,7 @@ export type AppState = {
   isLocked: boolean; // runtime only — not persisted
 
   // AI
-  aiProvider: 'openai' | 'anthropic';
+  aiProvider: AiProviderType;
   openaiApiKey: string | undefined;
   anthropicApiKey: string | undefined;
 
@@ -201,11 +202,11 @@ export function setAiProvider(aiProvider: AppState['aiProvider']) {
   return _useAppStore.setState((prev) => ({ ...prev, aiProvider }));
 }
 
-export function setOpenaiApiKey(openaiApiKey: string) {
+export function setOpenaiApiKey(openaiApiKey: string | undefined) {
   return _useAppStore.setState((prev) => ({ ...prev, openaiApiKey }));
 }
 
-export function setAnthropicApiKey(anthropicApiKey: string) {
+export function setAnthropicApiKey(anthropicApiKey: string | undefined) {
   return _useAppStore.setState((prev) => ({ ...prev, anthropicApiKey }));
 }
 

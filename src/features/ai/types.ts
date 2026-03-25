@@ -2,6 +2,8 @@ import type { RefObject } from 'react';
 import type { LayoutChangeEvent, ScrollView as RNScrollView } from 'react-native';
 import type { MarkdownStyle } from 'react-native-enriched-markdown';
 
+export type AiProviderType = 'openai' | 'anthropic';
+
 export type ChatMessage = {
   readonly id: string;
   readonly role: 'user' | 'assistant';

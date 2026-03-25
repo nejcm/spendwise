@@ -91,7 +91,7 @@ export type InputProps = {
 } & Omit<VariantProps<typeof inputTv>, 'error'> & Omit<TextInputProps, 'size'>;
 
 export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInput | null> }) {
-  const { label, error, size = 'md', value = '', color = 'default', testID, onBlur: onBlurProp, onFocus: onFocusProp, containerClassName, rightSection, className, variant, ...inputProps } = props;
+  const { label, error, size = 'md', value, color = 'default', testID, onBlur: onBlurProp, onFocus: onFocusProp, containerClassName, rightSection, className, variant, ...inputProps } = props;
   const [isFocussed, setIsFocussed] = React.useState(false);
 
   const onBlur = React.useCallback(
@@ -131,8 +131,8 @@ export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInp
           placeholderTextColor="#6b7280"
           onBlur={onBlur}
           onFocus={onFocus}
-          value={value}
           {...inputProps}
+          {...(value !== undefined ? { value } : {})}
           className={cn(styles.input(), rightSection && 'pr-10', className)}
           style={StyleSheet.flatten([
             { writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr' },

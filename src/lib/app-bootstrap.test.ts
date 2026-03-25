@@ -1,7 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query';
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import { checkUpcomingBills, setupNotifications } from '@/features/notifications/notifications';
+import { ensureAndroidChannel } from '@/features/notifications/notifications';
 
 import { syncDueScheduledTransactions } from '@/features/scheduled-transactions/api';
 import { migrateDb } from '@/lib/sqlite';
@@ -12,8 +12,7 @@ jest.mock('@/lib/sqlite', () => ({
 }));
 
 jest.mock('@/features/notifications/notifications', () => ({
-  setupNotifications: jest.fn().mockResolvedValue(undefined),
-  checkUpcomingBills: jest.fn().mockResolvedValue(undefined),
+  ensureAndroidChannel: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('@/features/scheduled-transactions/api', () => ({
@@ -34,22 +33,18 @@ describe('bootstrapApp', () => {
     (migrateDb as jest.Mock).mockImplementation(async () => {
       order.push('migrate');
     });
-    (setupNotifications as jest.Mock).mockImplementation(async () => {
-      order.push('notifications');
+    (ensureAndroidChannel as jest.Mock).mockImplementation(async () => {
+      order.push('channel');
     });
     (syncDueScheduledTransactions as jest.Mock).mockImplementation(async () => {
       order.push('sync');
     });
-    (checkUpcomingBills as jest.Mock).mockImplementation(async () => {
-      order.push('bills');
-    });
 
     await bootstrapApp(db, qc);
 
-    expect(order).toEqual(['migrate', 'notifications', 'sync', 'bills']);
+    expect(order).toEqual(['migrate', 'channel', 'sync']);
     expect(migrateDb).toHaveBeenCalledWith(db);
-    expect(setupNotifications).toHaveBeenCalledWith();
+    expect(ensureAndroidChannel).toHaveBeenCalledWith();
     expect(syncDueScheduledTransactions).toHaveBeenCalledWith(db, qc);
-    expect(checkUpcomingBills).toHaveBeenCalledWith(db);
   });
 });

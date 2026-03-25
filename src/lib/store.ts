@@ -3,6 +3,7 @@ import type { AiProviderType } from '@/features/ai/types';
 import type { CurrencyKey } from '@/features/currencies';
 import type { CurrencyFormat, DateFormat, NumberFormat } from '@/features/formatting/constants';
 import type { Language } from '@/features/languages/types';
+import type { NotificationSettings } from '@/features/notifications/types';
 import type { ThemeType } from '@/features/settings/theme';
 
 import type { Transaction } from '@/features/transactions/types';
@@ -50,9 +51,7 @@ export type AppState = {
   colorTheme: ColorThemeType;
   isFirstTime: boolean;
   language: Language | undefined;
-  notifications: {
-    global?: boolean;
-  };
+  notifications: NotificationSettings;
 
   // Security
   lockEnabled: boolean;
@@ -105,6 +104,12 @@ function getDefaultState(): AppState {
     anthropicApiKey: undefined,
 
     notifications: {
+      budgetAlerts: true,
+      upcomingBills: true,
+      upcomingBillsDays: 7,
+      lowBalance: false,
+      lowBalanceThresholdCents: 5000,
+      weeklyDigest: false,
     },
     lastUsed: {
       currencies: [DEFAULT_USER_CURRENCY],
@@ -284,3 +289,4 @@ export function updateNotifications(notifications: Partial<AppState['notificatio
   return _useAppStore.setState((prev) => ({ ...prev, notifications: { ...prev.notifications, ...notifications } }));
 }
 export const selectNotifications = (state: AppState) => state.notifications;
+export const selectNotificationSettings = (state: AppState) => state.notifications;

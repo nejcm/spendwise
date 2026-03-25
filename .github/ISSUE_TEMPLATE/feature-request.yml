@@ -1,0 +1,55 @@
+name: Feature request
+description: Suggest an improvement or new capability
+title: '[Feature]: '
+labels: [feature-request]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a feature request.
+
+        Please fill out the sections below as clearly as you can.
+
+  - type: checkboxes
+    attributes:
+      label: Pre-flight checks
+      options:
+        - label: I searched existing issues to avoid duplicates.
+          required: true
+        - label: This is not a bug report (or I can also include reproduction steps).
+          required: true
+
+  - type: textarea
+    attributes:
+      label: Problem / motivation
+      description: What problem are you trying to solve? Who does it affect?
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Proposed solution
+      description: What would you like to happen? Include screenshots or mockups if helpful.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Alternatives considered
+      description: What other approaches did you consider?
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Acceptance criteria
+      description: How do we know this is done? List observable outcomes or constraints.
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Additional context
+      description: 'Links, related discussions, edge cases, or any other useful notes.'
+    validations:
+      required: false

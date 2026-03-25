@@ -13,7 +13,7 @@ import { defaultStyles } from '@/lib/theme/styles';
 import { NoDataCard } from '../../components/no-data-card';
 import { useCategorySpendByRange } from '../insights/api';
 
-export function CategoriesOverview() {
+export const CategoriesOverview = React.memo(() => {
   const router = useRouter();
   const [startDate, endDate] = React.useMemo(() => getCurrentMonthRange(format(new Date(), 'yyyy-MM')), []);
   const { data = [], isLoading } = useCategorySpendByRange(startDate, endDate);
@@ -57,4 +57,4 @@ export function CategoriesOverview() {
           : <NoDataCard onPress={() => router.push('/categories')} label={translate('home.add_category')} description={translate('home.add_category_description')} />}
     </View>
   );
-}
+});

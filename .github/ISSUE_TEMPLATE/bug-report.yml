@@ -1,0 +1,100 @@
+name: Bug report
+description: Report a bug or regression
+title: '[Bug]: '
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug report.
+
+        Please fill out the sections below as clearly as you can. If you can include a minimal reproduction, it helps a lot.
+
+  - type: checkboxes
+    attributes:
+      label: Pre-flight checks
+      options:
+        - label: I searched existing issues to avoid duplicates.
+          required: true
+        - label: I can reproduce this on the latest `main` (or I can't easily test and explained why).
+          required: true
+        - label: I included reproduction steps and expected vs actual behavior.
+          required: true
+
+  - type: textarea
+    attributes:
+      label: What happened?
+      description: Describe the bug and its impact. Include screenshots/screen recordings if relevant.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      description: Provide a clear, numbered list of steps.
+      placeholder: |
+        1. Go to …
+        2. Tap …
+        3. Observe …
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Actual behavior
+      description: What actually happened? Include any error messages.
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Reproducibility
+      description: How often does it happen? Any patterns you noticed?
+      placeholder: |
+        - Frequency: always / sometimes / once
+        - Started after: (version/commit/date) if known
+        - Workaround: if any
+    validations:
+      required: false
+
+  - type: input
+    attributes:
+      label: App version
+      description: The app version/build you're using (if visible in the app).
+      placeholder: e.g. 0.0.1-beta.1 (build 123)
+    validations:
+      required: false
+
+  - type: dropdown
+    attributes:
+      label: Platform
+      description: Where does the bug occur?
+      options:
+        - iOS
+        - Android
+        - Web
+        - Other / Not sure
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Device / OS version
+      description: Device model and OS version.
+      placeholder: e.g. iPhone 15 Pro (iOS 18.3) / Pixel 8 (Android 15)
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Additional context/information
+      description: Anything else that might help (links, related PRs, regression range, etc.).
+    validations:
+      required: false

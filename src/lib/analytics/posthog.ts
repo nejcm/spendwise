@@ -9,13 +9,15 @@ const host = process.env.EXPO_PUBLIC_POSTHOG_HOST ?? 'https://us.i.posthog.com';
  * Pass this instance to <PostHogProvider client={posthogClient}> to avoid
  * creating a second client inside the provider.
  */
-export const posthogClient = new PostHog(apiKey, {
-  host,
-  disabled: !apiKey,
-});
+export const posthogClient = apiKey
+  ? new PostHog(apiKey, {
+      host,
+      disabled: !apiKey,
+    })
+  : undefined;
 
 export function captureError(error: Error, context?: Record<string, unknown>) {
-  posthogClient.capture('$exception', {
+  posthogClient?.capture('$exception', {
     $exception_message: error.message,
     $exception_type: error.name,
     $exception_stack: error.stack ?? '',
@@ -23,6 +25,6 @@ export function captureError(error: Error, context?: Record<string, unknown>) {
   });
 }
 
-export function captureEvent(...args: Parameters<typeof posthogClient['capture']>) {
-  posthogClient.capture(...args);
+export function captureEvent(...args: Parameters<PostHog['capture']>) {
+  posthogClient?.capture(...args);
 }

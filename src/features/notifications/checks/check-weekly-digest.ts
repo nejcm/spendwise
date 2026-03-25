@@ -5,8 +5,8 @@ import { addDays, getISOWeek, startOfISOWeek } from 'date-fns';
 import { dateToUnix } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { storage } from '@/lib/storage';
-import { send } from '../notifications';
 import { getWeeklySpendSummary } from '../queries';
+import { send } from '../send';
 
 function digestKey(yearWeek: string) {
   return `notif.digest.${yearWeek}`;

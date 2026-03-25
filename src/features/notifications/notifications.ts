@@ -9,6 +9,8 @@ import { checkLowBalance } from './checks/check-low-balance';
 import { checkUpcomingBills } from './checks/check-upcoming-bills';
 import { checkWeeklyDigest } from './checks/check-weekly-digest';
 
+export { send } from './send';
+
 export const NOTIFICATIONS_QUERY_KEY = ['notifications', 'canNotify'];
 
 export const notificationsQuery = {
@@ -51,13 +53,6 @@ export async function setupNotifications(): Promise<void> {
 export async function canNotify(): Promise<boolean> {
   const { status } = await Notifications.getPermissionsAsync();
   return status === 'granted';
-}
-
-export async function send(title: string, body: string): Promise<void> {
-  await Notifications.scheduleNotificationAsync({
-    content: { body, title },
-    trigger: null,
-  });
 }
 
 /**

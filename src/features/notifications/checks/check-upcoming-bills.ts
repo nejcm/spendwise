@@ -6,7 +6,7 @@ import { todayISO, todayUnix } from '@/features/formatting/helpers';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { storage } from '@/lib/storage';
-import { send } from '../notifications';
+import { send } from '../send';
 
 type RuleRow = {
   id: string;

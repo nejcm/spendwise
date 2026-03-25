@@ -2,23 +2,24 @@ import type { CurrencyKey } from '../currencies';
 import type { CategorySpend } from '@/features/insights/types';
 import type { PeriodSelection } from '@/lib/store';
 import * as React from 'react';
-import { Pressable, View } from 'react-native';
-
+import { Pressable } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
+
 import Sortable from 'react-native-sortables';
-import { FormattedCurrency, Text } from '@/components/ui';
+import { NoDataCard } from '@/components/no-data-card';
+import { FormattedCurrency, Text, View } from '@/components/ui';
 import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
 import { Lightbulb } from '@/components/ui/icon';
 import { scaleBudgetForPeriod } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
-import { NoDataCard } from '../../components/no-data-card';
 
 export type CategoryGridProps = {
   categories: CategorySpend[];
   onReorder: (items: Array<{ id: string; sort_order: number }>) => void;
   onAddPress: () => void;
   onPress: (category?: CategorySpend) => void;
+  editMode: boolean;
 };
 
 export const CategoryGrid = React.memo(({
@@ -26,6 +27,7 @@ export const CategoryGrid = React.memo(({
   onReorder,
   onAddPress,
   onPress,
+  editMode,
 }: CategoryGridProps) => {
   const currency = useAppStore.use.currency();
   const periodSelection = useAppStore.use.periodSelection();
@@ -50,6 +52,7 @@ export const CategoryGrid = React.memo(({
                 columnGap={10}
                 rowGap={10}
                 hapticsEnabled
+                sortEnabled={editMode}
                 scrollableRef={scrollRef}
                 keyExtractor={(item) => item.category_id}
                 onDragEnd={handleDragEnd}
@@ -63,12 +66,14 @@ export const CategoryGrid = React.memo(({
                 )}
               />
             )}
-        <View className="mt-6 flex-row items-center justify-center gap-2">
-          <Lightbulb className="text-muted-foreground" size={14} />
-          <Text className="text-sm text-muted-foreground">
-            {translate('categories.sorting_tips')}
-          </Text>
-        </View>
+        {editMode && (
+          <View className="mt-6 flex-row items-center justify-center gap-2">
+            <Lightbulb className="text-muted-foreground" size={14} />
+            <Text className="text-sm text-muted-foreground">
+              {translate('categories.sorting_tips')}
+            </Text>
+          </View>
+        )}
       </View>
     </Animated.ScrollView>
   );

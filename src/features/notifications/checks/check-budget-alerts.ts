@@ -4,8 +4,8 @@ import type { NotificationSettings } from '../types';
 import { format } from 'date-fns';
 import { translate } from '@/lib/i18n';
 import { storage } from '@/lib/storage';
-import { send } from '../notifications';
 import { currentMonthRange, getBudgetSpendForMonth } from '../queries';
+import { send } from '../send';
 
 function budgetAlertKey(categoryId: string, yearMonth: string, threshold: 80 | 100) {
   return `notif.budget.${categoryId}.${yearMonth}.${threshold}`;

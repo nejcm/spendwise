@@ -16,7 +16,7 @@ export type BudgetProgressBarProps = {
   bg?: string;
 };
 
-export function BudgetProgressBar({ spent, budget, monthlyBudget, currency, className, showValues = true, bg = 'bg-foreground' }: BudgetProgressBarProps) {
+export function BudgetProgressBar({ spent, budget, monthlyBudget, currency, className, showValues = true, bg = 'bg-gray-300 dark:bg-gray-700' }: BudgetProgressBarProps) {
   const numberFormat = useAppStore.use.numberFormat();
   const currencyFormat = useAppStore.use.currencyFormat();
 

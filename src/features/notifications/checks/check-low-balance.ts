@@ -4,8 +4,8 @@ import type { NotificationSettings } from '../types';
 import { todayISO } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { storage } from '@/lib/storage';
-import { send } from '../notifications';
 import { getAccountBalances } from '../queries';
+import { send } from '../send';
 
 function lowBalanceKey(accountId: string, date: string) {
   return `notif.balance.${accountId}.${date}`;

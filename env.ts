@@ -25,15 +25,15 @@ const envSchema = z.object({
 const EXPO_PUBLIC_APP_ENV = resolveAppEnv();
 
 const BUNDLE_IDS = {
-  development: 'com.spendwise.development',
-  preview: 'com.spendwise.preview',
-  production: 'com.spendwise',
+  development: 'com.nejcm.spendwise.development',
+  preview: 'com.nejcm.spendwise.preview',
+  production: 'com.nejcm.spendwise',
 } as const;
 
 const PACKAGES = {
-  development: 'com.spendwise.development',
-  preview: 'com.spendwise.preview',
-  production: 'com.spendwise',
+  development: 'com.nejcm.spendwise.development',
+  preview: 'com.nejcm.spendwise.preview',
+  production: 'com.nejcm.spendwise',
 } as const;
 
 const SCHEMES = {

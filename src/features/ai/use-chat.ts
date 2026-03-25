@@ -6,6 +6,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
 import { streamAskWithTools } from '@/features/ai/service';
 import { clearAiChat, setAiDraftQuestion, setAiMessages, useAiChatStore } from '@/features/ai/store';
+import { captureError } from '@/lib/analytics';
 import { translate } from '@/lib/i18n';
 import { generateId } from '@/lib/sqlite';
 import { useAppStore } from '@/lib/store';
@@ -142,6 +143,10 @@ export function useChat(): UseChatReturn {
         if (controller.signal.aborted) return;
 
         if (!isMountedRef.current) return;
+
+        if (err instanceof Error) {
+          captureError(err, { context: 'ai-chat' });
+        }
 
         const message = err instanceof Error
           ? err.message

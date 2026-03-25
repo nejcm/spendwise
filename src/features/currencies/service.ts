@@ -1,3 +1,4 @@
+import { captureError } from '@/lib/analytics';
 import { CURRENCY_VALUES } from './index';
 
 export type RateMap = Partial<Record<string, number>>;
@@ -97,7 +98,9 @@ export async function fetchRates(): Promise<FetchRatesResult | undefined> {
       ?? (await fetchFromOpenErApi());
 
   if (!result) {
-    console.error('All currency rate providers failed');
+    const err = new Error('All currency rate providers failed');
+    console.error(err.message);
+    captureError(err);
     return undefined;
   }
 
@@ -158,7 +161,9 @@ export async function fetchRatesForDate(dateStr: string): Promise<FetchRatesResu
       ?? (await fetchHistoricalFromFawazahmed0(dateStr));
 
   if (!result) {
-    console.error(`Historical currency rate providers failed for date ${dateStr}`);
+    const err = new Error(`Historical currency rate providers failed for date ${dateStr}`);
+    console.error(err.message);
+    captureError(err, { date: dateStr });
     return undefined;
   }
 

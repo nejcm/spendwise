@@ -21,7 +21,8 @@
       "Bash(gh api:*)",
       "Bash(pnpm run:*)",
       "Bash(gh repo:*)",
-      "Bash(gh issue:*)"
+      "Bash(gh issue:*)",
+      "Bash(pnpm expo:*)"
     ]
   }
 }

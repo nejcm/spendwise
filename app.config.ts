@@ -1,5 +1,4 @@
 import type { ConfigContext, ExpoConfig } from '@expo/config';
-
 import type { AppIconBadgeConfig } from 'app-icon-badge/types';
 
 import 'tsx/cjs';
@@ -8,8 +7,8 @@ import 'tsx/cjs';
 // eslint-disable-next-line perfectionist/sort-imports
 import Env from './env';
 
-const EXPO_ACCOUNT_OWNER = 'obytes';
-const EAS_PROJECT_ID = 'c3e1075b-6fe7-4686-aa49-35b46a229044';
+const EXPO_ACCOUNT_OWNER = 'ncncm';
+const EAS_PROJECT_ID = 'c19931e0-c086-4d69-9a71-c64aea5c6f5a';
 const IS_CI = process.env.CI === 'true';
 
 const appIconBadgeConfig: AppIconBadgeConfig = {
@@ -35,7 +34,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   description: `${Env.EXPO_PUBLIC_NAME} Mobile App`,
   owner: EXPO_ACCOUNT_OWNER,
   scheme: Env.EXPO_PUBLIC_SCHEME,
-  slug: 'obytesapp',
+  slug: 'spendwise',
   version: Env.EXPO_PUBLIC_VERSION.toString(),
   orientation: 'portrait',
   icon: './assets/icon.png',

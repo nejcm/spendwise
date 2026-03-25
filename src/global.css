@@ -9,6 +9,19 @@
   --font-family-medium: 'Inter-Medium', ui-sans-serif, system-ui, sans-serif;
   --font-family-bold: 'Inter-Bold', ui-sans-serif, system-ui, sans-serif;
 
+  /* Gray palette — ramp from #1a1c20 @ 900 (mix toward white / black, same hue family) */
+  --color-gray-50: #f6f6f7;
+  --color-gray-100: #ebebec;
+  --color-gray-200: #dadbdc;
+  --color-gray-300: #c3c4c4;
+  --color-gray-400: #a8a9aa;
+  --color-gray-500: #8c8e90;
+  --color-gray-600: #717375;
+  --color-gray-700: #434548;
+  --color-gray-800: #2a2c30;
+  --color-gray-900: #1a1c20;
+  --color-gray-950: #101114;
+
   /* Primary palette */
   --color-primary-50: #ffe2cc;
   --color-primary-100: #ffc499;

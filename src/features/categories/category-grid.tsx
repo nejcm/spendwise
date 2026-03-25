@@ -54,6 +54,10 @@ export const CategoryGrid = React.memo(({
                 hapticsEnabled
                 sortEnabled={editMode}
                 scrollableRef={scrollRef}
+                dimensionsAnimationType="none"
+                itemEntering={null}
+                itemExiting={null}
+                itemsLayoutTransitionMode="reorder"
                 keyExtractor={(item) => item.category_id}
                 onDragEnd={handleDragEnd}
                 renderItem={({ item }) => (

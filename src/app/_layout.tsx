@@ -4,6 +4,7 @@ import { useFonts } from 'expo-font';
 import { Stack, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteProvider } from 'expo-sqlite';
+import { PostHogProvider } from 'posthog-react-native';
 import * as React from 'react';
 import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
@@ -17,6 +18,7 @@ import { CustomTabBar, TAB_BAR_COLOR } from '@/components/ui/custom-tab-bar';
 import { useCurrencyRates } from '@/features/currencies/api';
 import { ScheduledTransactionsProcessor } from '@/features/scheduled-transactions/scheduled-transactions-processor';
 import { SecurityLock } from '@/features/security/security-lock';
+import { posthogClient } from '@/lib/analytics';
 import { APIProvider } from '@/lib/api';
 import { useAppBootstrapOnInit } from '@/lib/app-bootstrap';
 
@@ -124,36 +126,38 @@ function Providers({ children }: { children: React.ReactNode }) {
       // eslint-disable-next-line better-tailwindcss/no-unknown-classes
       className={theme.dark ? `dark` : undefined}
     >
-      <SafeAreaProvider>
-        <KeyboardProvider>
-          <ThemeProvider value={theme}>
-            <OpfsCleaner>
-              <DatabaseErrorBoundary>
+      <PostHogProvider client={posthogClient} autocapture={false}>
+        <SafeAreaProvider>
+          <KeyboardProvider>
+            <ThemeProvider value={theme}>
+              <OpfsCleaner>
+                <DatabaseErrorBoundary>
 
-                <APIProvider>
-                  <CurrencyRatesInitializer />
-                  <BootstrappedSQLite>
-                    <AppErrorBoundary>
-                      <ScheduledTransactionsProcessor />
-                      <FontLoader>
-                        <BottomSheetModalProvider>
-                          <View className="flex-1 bg-white">
-                            <SafeAreaView className="flex-1 bg-background">
-                              {children}
-                            </SafeAreaView>
-                          </View>
-                          <FlashMessage position="top" />
-                          {__DEV__ && IS_WEB && <DevThemeToggle />}
-                        </BottomSheetModalProvider>
-                      </FontLoader>
-                    </AppErrorBoundary>
-                  </BootstrappedSQLite>
-                </APIProvider>
-              </DatabaseErrorBoundary>
-            </OpfsCleaner>
-          </ThemeProvider>
-        </KeyboardProvider>
-      </SafeAreaProvider>
+                  <APIProvider>
+                    <CurrencyRatesInitializer />
+                    <BootstrappedSQLite>
+                      <AppErrorBoundary>
+                        <ScheduledTransactionsProcessor />
+                        <FontLoader>
+                          <BottomSheetModalProvider>
+                            <View className="flex-1 bg-white">
+                              <SafeAreaView className="flex-1 bg-background">
+                                {children}
+                              </SafeAreaView>
+                            </View>
+                            <FlashMessage position="top" />
+                            {__DEV__ && IS_WEB && <DevThemeToggle />}
+                          </BottomSheetModalProvider>
+                        </FontLoader>
+                      </AppErrorBoundary>
+                    </BootstrappedSQLite>
+                  </APIProvider>
+                </DatabaseErrorBoundary>
+              </OpfsCleaner>
+            </ThemeProvider>
+          </KeyboardProvider>
+        </SafeAreaProvider>
+      </PostHogProvider>
     </GestureHandlerRootView>
   );
 }

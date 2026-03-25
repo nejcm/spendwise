@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Text, View } from 'react-native';
 import { SolidButton } from '@/components/ui/solid-button';
+import { captureError } from '@/lib/analytics';
 import { translate } from '@/lib/i18n';
 import { OPFS_CLEAR_FLAG } from './opfs-cleaner';
 
@@ -45,6 +46,10 @@ export class DatabaseErrorBoundary extends React.Component<
 
   static getDerivedStateFromError(error: Error) {
     return { error };
+  }
+
+  componentDidCatch(error: Error) {
+    captureError(error, { boundary: 'DatabaseErrorBoundary' });
   }
 
   render() {

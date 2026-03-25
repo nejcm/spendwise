@@ -4,6 +4,7 @@ import RNRestart from 'react-native-restart';
 
 import { SolidButton } from '@/components/ui/solid-button';
 import { Text } from '@/components/ui/text';
+import { captureError } from '@/lib/analytics';
 import { IS_WEB } from '@/lib/base';
 import { translate } from '@/lib/i18n';
 
@@ -32,6 +33,7 @@ export class AppErrorBoundary extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('[AppErrorBoundary]', error, errorInfo.componentStack);
+    captureError(error, { componentStack: errorInfo.componentStack });
   }
 
   handleRestart = () => {

@@ -9,6 +9,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 
 import Alert from '@/components/ui/alert';
 import { todayUnix } from '@/features/formatting/helpers';
+import { captureError } from '@/lib/analytics';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
 import { translate } from '@/lib/i18n';
@@ -48,6 +49,7 @@ export function useScheduledTransaction(id: string) {
 }
 
 function onError(error: unknown) {
+  if (error instanceof Error) captureError(error, { context: 'scheduled-transactions' });
   Alert.alert(translate('common.error'), error instanceof Error ? error.message : translate('common.error_description'));
 }
 

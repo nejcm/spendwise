@@ -37,7 +37,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   slug: 'spendwise',
   version: Env.EXPO_PUBLIC_VERSION.toString(),
   orientation: 'portrait',
-  icon: './assets/icon.png',
+  icon: './assets/logo/spendwise-app-logo.png',
   userInterfaceStyle: 'automatic',
   newArchEnabled: true,
   updates: {

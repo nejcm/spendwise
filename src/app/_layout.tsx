@@ -45,6 +45,11 @@ SplashScreen.setOptions({
   duration: 500,
   fade: true,
 });
+// Safety net: force-hide splash after 10s in case initialization hangs in production.
+// hideAsync() is idempotent — the normal 1s hide in (app)/_layout still works as expected.
+setTimeout(() => {
+  SplashScreen.hideAsync().catch(() => {});
+}, 10_000);
 
 function PersistentTabBar() {
   const pathname = usePathname();

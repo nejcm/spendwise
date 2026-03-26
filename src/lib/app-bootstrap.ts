@@ -7,11 +7,31 @@ import { ensureAndroidChannel } from '@/features/notifications/notifications';
 import { syncDueScheduledTransactions } from '@/features/scheduled-transactions/api';
 import { migrateDb } from '@/lib/sqlite';
 
+const BOOTSTRAP_TIMEOUT_MS = 15_000;
+
 /**
  * Sequenced app startup after SQLite opens. Pass a `QueryClient` so cache
  * invalidation after scheduled sync is testable and explicit.
+ *
+ * Races against a timeout so a hanging migration or network call
+ * surfaces as a catchable error instead of freezing the splash screen.
  */
 export async function bootstrapApp(
+  db: SQLiteDatabase,
+  queryClient: QueryClient,
+): Promise<void> {
+  await Promise.race([
+    bootstrapAppInternal(db, queryClient),
+    new Promise<never>((_, reject) =>
+      setTimeout(
+        () => reject(new Error('[bootstrap] timed out after 15 s')),
+        BOOTSTRAP_TIMEOUT_MS,
+      ),
+    ),
+  ]);
+}
+
+async function bootstrapAppInternal(
   db: SQLiteDatabase,
   queryClient: QueryClient,
 ): Promise<void> {

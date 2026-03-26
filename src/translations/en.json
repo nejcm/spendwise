@@ -372,6 +372,7 @@
     "provider_openai": "OpenAI",
     "reset": "Reset",
     "reset_db": "Reset Database",
+    "saved": "AI settings saved",
     "scheduled": "Recurring Rules",
     "security": "Security",
     "share": "Share",

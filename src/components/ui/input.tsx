@@ -33,15 +33,15 @@ export const inputTv = tv({
         label: 'text-xs/snug',
       },
       sm: {
-        input: 'h-9 px-3 text-sm/snug',
+        input: 'h-10 px-3 text-sm/snug',
         label: 'text-xs/snug',
       },
       md: {
-        input: 'h-11 px-3 text-base/snug',
+        input: 'h-12 px-3 text-base/snug',
         label: 'text-sm/snug',
       },
       lg: {
-        input: 'h-13 px-4 text-lg/snug',
+        input: 'h-14 px-4 text-lg/snug',
         label: 'text-base/snug',
       },
       xl: {

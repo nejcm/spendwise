@@ -46,19 +46,19 @@ const selectTv = tv({
         image: 'size-4',
       },
       sm: {
-        input: 'h-9 px-3',
+        input: 'h-10 px-3',
         label: 'text-xs/snug',
         inputValue: 'text-sm/snug',
         image: 'size-5',
       },
       md: {
-        input: 'h-11 px-3',
+        input: 'h-12 px-3',
         label: 'text-sm/snug',
         inputValue: 'text-base/snug',
         image: 'size-6',
       },
       lg: {
-        input: 'h-13 px-4',
+        input: 'h-14 px-4',
         label: 'text-base/snug',
         inputValue: 'text-lg/snug',
         image: 'size-7',

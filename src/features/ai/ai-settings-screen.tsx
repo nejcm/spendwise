@@ -2,6 +2,7 @@ import type { AiProviderType } from './types';
 import type { AppState } from '@/lib/store';
 import * as React from 'react';
 import { Linking, Pressable, View } from 'react-native';
+import { showMessage } from 'react-native-flash-message';
 import { FocusAwareStatusBar, Input, ScrollView, Select, SolidButton, Text } from '@/components/ui';
 import { setAiProvider, setAnthropicApiKey, setOpenaiApiKey, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -21,6 +22,7 @@ export function AiSettingsScreen() {
   const aiProvider = useAppStore.use.aiProvider();
   const openaiApiKey = useAppStore.use.openaiApiKey();
   const anthropicApiKey = useAppStore.use.anthropicApiKey();
+  const [dirty, setDirty] = React.useState(false);
 
   const openaiInputRef = React.useRef<string | undefined>(openaiApiKey);
   const anthropicInputRef = React.useRef<string | undefined>(anthropicApiKey);
@@ -28,6 +30,13 @@ export function AiSettingsScreen() {
   const onSave = React.useCallback(() => {
     setOpenaiApiKey(openaiInputRef.current);
     setAnthropicApiKey(anthropicInputRef.current);
+    setDirty(false);
+    showMessage({
+      message: translate('settings.saved'),
+      type: 'success',
+      duration: 2500,
+      icon: 'success',
+    });
   }, []);
 
   return (
@@ -62,6 +71,7 @@ export function AiSettingsScreen() {
             className="text-lg"
             onChangeText={(text) => {
               openaiInputRef.current = text;
+              setDirty(true);
             }}
           />
           <Text className="mt-3 text-xs text-muted-foreground">
@@ -92,6 +102,7 @@ export function AiSettingsScreen() {
             className="text-lg"
             onChangeText={(text) => {
               anthropicInputRef.current = text;
+              setDirty(true);
             }}
           />
           <Text className="mt-3 text-xs text-muted-foreground">
@@ -113,6 +124,7 @@ export function AiSettingsScreen() {
             fullWidth
             label={translate('common.save')}
             onPress={onSave}
+            disabled={!dirty}
           />
         </View>
       </ScrollView>

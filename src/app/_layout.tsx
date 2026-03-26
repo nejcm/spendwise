@@ -114,6 +114,8 @@ function WebFontsLoader({ children }: { children?: React.ReactNode }) {
   return children;
 }
 
+const flashListStyle = IS_WEB ? undefined : { paddingTop: 32 };
+
 function Providers({ children }: { children: React.ReactNode }) {
   const theme = useThemeConfig();
   // fix for web fonts loading
@@ -131,7 +133,6 @@ function Providers({ children }: { children: React.ReactNode }) {
             <ThemeProvider value={theme}>
               <OpfsCleaner>
                 <DatabaseErrorBoundary>
-
                   <APIProvider>
                     <BootstrappedSQLite>
                       <CurrencyRatesInitializer />
@@ -144,7 +145,7 @@ function Providers({ children }: { children: React.ReactNode }) {
                                 {children}
                               </SafeAreaView>
                             </View>
-                            <FlashMessage position="top" />
+                            <FlashMessage position="top" style={flashListStyle} />
                             {__DEV__ && IS_WEB && <DevThemeToggle />}
                           </BottomSheetModalProvider>
                         </FontLoader>

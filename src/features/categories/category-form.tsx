@@ -75,7 +75,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
 
   return (
     <View className="flex-1 gap-4">
-      <View className="flex-row items-center gap-3">
+      <View className="flex-row items-center gap-2">
         <form.Field
           name="color"
           children={(field) => (

@@ -1,4 +1,4 @@
-import { mapRows, parseCSV } from '@/features/imports-export/csv-parser';
+import { autoDetectColumnMapping, mapRows, parseCSV } from '@/features/imports-export/csv-parser';
 
 describe('parseCSV', () => {
   it('keeps quoted multiline fields in the same row', () => {
@@ -18,7 +18,7 @@ describe('mapRows', () => {
         ['date', 'amount', 'type', 'note'],
         ['2026-03-18', '50.00', 'transfer', 'Move to savings'],
       ],
-      { date: 0, amount: 1, type: 2, note: 3, currency: null },
+      { date: 0, amount: 1, type: 2, note: 3, currency: null, baseAmount: null, baseCurrency: null, category: null },
       true,
     );
 
@@ -31,4 +31,58 @@ describe('mapRows', () => {
       },
     ]);
   });
+
+  it('maps dual-currency and category columns', () => {
+    const rows = mapRows(
+      [
+        ['DATE', 'TYPE', 'FROM ACCOUNT', 'TO ACCOUNT/TO CATEGORY', 'AMOUNT', 'CURRENCY', 'AMOUNT 2', 'CURRENCY 2', 'TAGS', 'NOTES'],
+        ['3/18/26', 'Expense', 'USD', 'Bills', '4.7', 'USD', '21', 'MYR', '', 'Youtube'],
+      ],
+      { date: 0, type: 1, amount: 4, currency: 5, baseAmount: 6, baseCurrency: 7, note: 9, category: 3 },
+      true,
+    );
+
+    expect(rows).toEqual([
+      {
+        date: '2026-03-18',
+        amount: -470,
+        note: 'Youtube',
+        type: 'expense',
+        currency: 'USD',
+        baseAmount: -2100,
+        baseCurrency: 'MYR',
+        categoryName: 'Bills',
+      },
+    ]);
+  });
 });
+
+describe('autoDetectColumnMapping', () => {
+  it('detects dual-currency and category columns', () => {
+    const rows = [
+      ['DATE', 'TYPE', 'FROM ACCOUNT', 'TO ACCOUNT/TO CATEGORY', 'AMOUNT', 'CURRENCY', 'AMOUNT 2', 'CURRENCY 2', 'TAGS', 'NOTES'],
+      ['3/18/26', 'Expense', 'USD', 'Bills', '4.7', 'USD', '21', 'MYR', '', 'Youtube'],
+    ];
+
+    const mapping = autoDetectColumnMapping(rows);
+
+    expect(mapping.date).toBe(0);
+    expect(mapping.type).toBe(1);
+    expect(mapping.category).toBe(3);
+    expect(mapping.amount).toBe(4);
+    expect(mapping.currency).toBe(5);
+    expect(mapping.baseAmount).toBe(6);
+    expect(mapping.baseCurrency).toBe(7);
+    expect(mapping.note).toBe(9);
+  });
+});
+
+/***
+ * Example CSV:
+
+"DATE","TYPE","FROM ACCOUNT","TO ACCOUNT/TO CATEGORY","AMOUNT","CURRENCY","AMOUNT 2","CURRENCY 2","TAGS","NOTES"
+"3/19/26","Expense","USD","Other","7","USD","7","USD","","Spotify"
+"3/18/26","Expense","USD","Bills","4.7","USD","21","MYR","","Youtube"
+"2/16/26","Expense","USD","Rent","933.75","USD","4200","MYR","","Rent"
+
+ */

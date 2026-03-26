@@ -19,7 +19,7 @@ type Screen = 'import' | 'export';
 const initialCsvState: ImportProps['state'] = {
   headers: [],
   allRows: [],
-  mapping: { amount: null, date: null, currency: null, note: null, type: null },
+  mapping: { amount: null, date: null, currency: null, note: null, type: null, baseAmount: null, baseCurrency: null, category: null },
 };
 
 function BackupSection() {

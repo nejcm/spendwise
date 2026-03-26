@@ -1,3 +1,4 @@
+import * as SplashScreen from 'expo-splash-screen';
 import * as React from 'react';
 import { NativeModules, View } from 'react-native';
 import RNRestart from 'react-native-restart';
@@ -36,6 +37,8 @@ export class AppErrorBoundary extends React.Component<Props, State> {
     captureError(error, {
       componentStack: errorInfo.componentStack ?? '',
     });
+    // Ensure the splash screen is dismissed so the error UI is visible.
+    SplashScreen.hideAsync().catch(() => {});
   }
 
   handleRestart = () => {

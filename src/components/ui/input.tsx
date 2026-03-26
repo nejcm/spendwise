@@ -9,7 +9,7 @@ import { InputLabel, labelDefaults } from './input-label';
 import { Text } from './text';
 
 export const inputDefaults = 'rounded-lg border font-family-sans focus:outline-none';
-export const inputDefaultDefaults = 'border-border bg-input text-foreground focus:border-gray-800 focus:dark:border-gray-300';
+export const inputDefaultDefaults = 'border-border bg-input text-foreground';
 
 export const inputTv = tv({
   slots: {
@@ -24,7 +24,7 @@ export const inputTv = tv({
         input: inputDefaultDefaults,
       },
       secondary: {
-        input: 'border-gray-300 bg-gray-200 focus:border-gray-800 dark:border-border dark:bg-input dark:text-foreground focus:dark:border-gray-300',
+        input: 'border-gray-300 bg-gray-200 dark:border-border dark:bg-input dark:text-foreground',
       },
     },
     size: {
@@ -59,7 +59,7 @@ export const inputTv = tv({
     },
     focused: {
       true: {
-        input: '',
+        input: 'focus:border-gray-800 focus:dark:border-gray-300',
       },
     },
     error: {

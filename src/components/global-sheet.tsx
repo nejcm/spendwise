@@ -1,8 +1,8 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { SheetConfig, SheetType } from '@/lib/sheet';
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useEffect, useMemo, useRef } from 'react';
 import { Modal, Text, View } from '@/components/ui';
+import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { AccountForm } from '@/features/accounts/components/account-form';
 import { CategoryForm } from '@/features/categories/category-form';
 import { ScheduledTransactionForm } from '@/features/scheduled-transactions/components/scheduled-transaction-form';
@@ -169,11 +169,15 @@ export function GlobalSheet() {
       snapPoints={snapPoints}
       title={<SheetTitle config={config} />}
       onDismiss={closeSheet}
+      android_keyboardInputMode="adjustPan"
     >
       {() => (
-        <BottomSheetScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32, flex: 1 }}>
+        <BottomSheetKeyboardAwareScrollView
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32, minHeight: '80%' }}
+          keyboardShouldPersistTaps="handled"
+        >
           {config && <SheetContent config={config} onClose={closeSheet} />}
-        </BottomSheetScrollView>
+        </BottomSheetKeyboardAwareScrollView>
       )}
     </Modal>
   );

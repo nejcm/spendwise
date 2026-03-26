@@ -2,6 +2,8 @@ import type { OptionType, SelectProps } from './ui';
 import { COLOR_OPTIONS } from '../lib/theme/colors';
 import { Select, View } from './ui';
 
+const DEFAULT_COLOR = 'bg-sky-600';
+
 // eslint-disable-next-line react-refresh/only-export-components
 export function getBgColor(color: string | undefined) {
   return color?.startsWith('#') ? `bg-[${color}]` : color;
@@ -18,7 +20,7 @@ function renderItem(item: OptionType) {
 function renderSelectedItem(item?: OptionType | null) {
   return (
     <View className="flex-1 flex-row items-center justify-center">
-      <View className={`size-full min-h-14 max-w-14 flex-1 rounded-full border border-border ${getBgColor(String(item?.value || 'bg-sky-600'))}`} />
+      <View className={`size-full min-h-14 max-w-14 flex-1 rounded-full border border-border ${getBgColor(String(item?.value || DEFAULT_COLOR))}`} />
     </View>
   );
 }

@@ -33,7 +33,9 @@ export class AppErrorBoundary extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('[AppErrorBoundary]', error, errorInfo.componentStack);
-    captureError(error, { componentStack: errorInfo.componentStack });
+    captureError(error, {
+      componentStack: errorInfo.componentStack ?? '',
+    });
   }
 
   handleRestart = () => {

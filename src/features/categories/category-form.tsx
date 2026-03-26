@@ -96,7 +96,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
               onChangeText={(v) => field.handleChange(v.trim() || null)}
               placeholder={translate('categories.icon_placeholder')}
               containerClassName="flex-1"
-              className="text-3xl"
+              className="border-0 bg-transparent text-3xl"
               size="xl"
             />
           )}
@@ -135,6 +135,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
                 onChangeText={field.handleChange}
                 placeholder="0"
                 keyboardType="decimal-pad"
+                containerClassName="flex-1"
                 error={getFieldError(field)}
               />
             )}

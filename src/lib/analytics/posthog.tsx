@@ -12,7 +12,7 @@ const host = process.env.EXPO_PUBLIC_POSTHOG_HOST ?? 'https://us.i.posthog.com';
  * Pass this instance to <PostHogProvider client={posthogClient}> to avoid
  * creating a second client inside the provider.
  */
-export const posthogClient = apiKey && !IS_WEB
+export const posthogClient = apiKey.length > 5 && !IS_WEB
   ? new PostHog(apiKey, {
       host,
       disabled: !apiKey,

@@ -56,17 +56,17 @@ export const solidButton = tv({
         indicator: 'size-2',
       },
       sm: {
-        container: 'h-9 px-3',
+        container: 'h-10 px-3',
         label: 'text-sm/snug',
         indicator: 'size-3',
       },
       md: {
-        container: 'h-11 px-4',
+        container: 'h-12 px-4',
         label: 'text-base/snug',
         indicator: 'size-4',
       },
       lg: {
-        container: 'h-13 px-5',
+        container: 'h-14 px-5',
         label: 'text-lg/snug',
         indicator: 'size-5',
       },

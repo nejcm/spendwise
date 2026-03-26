@@ -372,6 +372,7 @@
     "provider_openai": "OpenAI",
     "reset": "Zurücksetzen",
     "reset_db": "Datenbank zurücksetzen",
+    "saved": "KI-Einstellungen gespeichert",
     "scheduled": "Wiederkehrende Regeln",
     "security": "Sicherheit",
     "share": "Teilen",

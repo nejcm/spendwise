@@ -79,8 +79,6 @@ export const solidButton = tv({
     disabled: {
       true: {
         container: 'opacity-40',
-        label: 'text-gray-600 dark:text-gray-600',
-        indicator: 'text-gray-400 dark:text-gray-400',
       },
     },
     fullWidth: {

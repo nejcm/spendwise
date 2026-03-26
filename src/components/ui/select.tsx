@@ -97,6 +97,7 @@ export type OptionType<T extends string | number = string | number> = {
   value: T;
   image?: string | ImageSource;
   className?: string;
+  grid?: boolean;
 };
 
 const Option = React.memo(
@@ -107,13 +108,18 @@ const Option = React.memo(
     subtext,
     className,
     children,
+    grid,
     ...props
   }: PressableProps & Omit<OptionType, 'value'> & {
     selected?: boolean;
   }) => {
+    const baseClassName = grid
+      ? 'flex-1 items-center justify-center'
+      : 'w-full flex-row items-center';
+
     return (
       <Pressable
-        className={cn('w-full flex-row items-center border-b border-gray-200 p-3 dark:border-gray-700', className)}
+        className={cn(`${baseClassName} border-b border-gray-200 p-3 dark:border-gray-700`, className)}
         {...props}
       >
         {children
@@ -168,6 +174,7 @@ export function Options<T extends string | number>({
 
   const [searchQuery, setSearchQuery] = React.useState('');
   const deferredSearchQuery = React.useDeferredValue(searchQuery);
+  const isGrid = (listProps?.numColumns ?? 1) > 1;
 
   const filteredOptions = React.useMemo(() => {
     if (!searchEnabled) return options;
@@ -186,11 +193,12 @@ export function Options<T extends string | number>({
         subtext={item.subtext}
         children={renderItem?.(item)}
         onPress={() => onSelect(item)}
+        grid={isGrid}
         className={cn(className, item.className)}
         testID={testID ? `${testID}-item-${item.value}` : undefined}
       />
     ),
-    [onSelect, value, testID, className, renderItem],
+    [onSelect, value, testID, className, renderItem, isGrid],
   );
 
   const listHeader = React.useMemo(
@@ -251,6 +259,7 @@ export type SelectProps<T extends string | number = string | number> = {
   renderSelectedItem?: (item: OptionType<T> | null) => React.ReactNode;
   searchEnabled?: OptionsProps<T>['searchEnabled'];
   searchPlaceholder?: OptionsProps<T>['searchPlaceholder'];
+  itemClassName?: string;
 } & Omit<VariantProps<typeof selectTv>, 'error'> & Omit<ModalProps, 'children'>;
 
 export function Select<T extends string | number>({
@@ -270,6 +279,7 @@ export function Select<T extends string | number>({
   renderSelectedItem,
   searchEnabled,
   searchPlaceholder,
+  itemClassName,
   ...rest
 }: SelectProps<T>) {
   const modal = useModal();
@@ -340,6 +350,7 @@ export function Select<T extends string | number>({
         onSelect={onSelectOption}
         searchEnabled={searchEnabled}
         searchPlaceholder={searchPlaceholder}
+        className={itemClassName}
         {...rest}
       />
     </>

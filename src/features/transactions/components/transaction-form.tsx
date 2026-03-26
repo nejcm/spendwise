@@ -148,6 +148,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
               testID="amount-input"
               error={getFieldError(field)}
               containerClassName="min-w-[72] flex-1"
+              autoFocus
             />
           )}
         />
@@ -155,7 +156,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
 
       <form.Subscribe
         selector={(s) => [s.values.currency]}
-        children={([selectedCurrency]) => (
+        children={([selectedCurrency]) => selectedCurrency !== preferredCurrency && (
           <View className="flex-row items-center gap-2">
             <View className="w-[92] flex-row items-center justify-center gap-2 px-4">
               <Image source={CURRENCIES_MAP[preferredCurrency].image} className="size-6 rounded-full" />

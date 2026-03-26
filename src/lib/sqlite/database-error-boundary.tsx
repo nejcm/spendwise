@@ -1,3 +1,4 @@
+import * as SplashScreen from 'expo-splash-screen';
 import * as React from 'react';
 import { Text, View } from 'react-native';
 import { SolidButton } from '@/components/ui/solid-button';
@@ -49,7 +50,10 @@ export class DatabaseErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error) {
+    console.error('[DatabaseErrorBoundary]', error);
     captureError(error, { boundary: 'DatabaseErrorBoundary' });
+    // Ensure the splash screen is dismissed so the error UI is visible.
+    SplashScreen.hideAsync().catch(() => {});
   }
 
   render() {

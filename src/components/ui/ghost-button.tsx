@@ -51,8 +51,6 @@ const outlineButton = tv({
     disabled: {
       true: {
         container: 'opacity-40',
-        label: 'text-gray-300 dark:text-gray-400',
-        indicator: 'text-gray-300 dark:text-gray-400',
       },
     },
   },

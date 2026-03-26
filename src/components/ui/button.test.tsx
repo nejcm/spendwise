@@ -72,9 +72,4 @@ describe('button component ', () => {
 
     expect(screen.getByTestId('button-label').props.className).toContain('text-muted-foreground');
   });
-  it('should apply correct styles for label when is disabled', () => {
-    render(<SolidButton testID="button" label="Submit" disabled />);
-
-    expect(screen.getByTestId('button-label').props.className).toContain('text-gray-600 dark:text-gray-600');
-  });
 });

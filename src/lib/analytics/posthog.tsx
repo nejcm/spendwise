@@ -12,12 +12,18 @@ const host = process.env.EXPO_PUBLIC_POSTHOG_HOST ?? 'https://us.i.posthog.com';
  * Pass this instance to <PostHogProvider client={posthogClient}> to avoid
  * creating a second client inside the provider.
  */
-export const posthogClient = apiKey.length > 5 && !IS_WEB
-  ? new PostHog(apiKey, {
-      host,
-      disabled: !apiKey,
-    })
-  : undefined;
+function createPostHogClient(): PostHog | undefined {
+  if (apiKey.length <= 5 || IS_WEB) return undefined;
+  try {
+    return new PostHog(apiKey, { host, disabled: !apiKey });
+  }
+  catch (e) {
+    console.error('[PostHog] Failed to initialize', e);
+    return undefined;
+  }
+}
+
+export const posthogClient = createPostHogClient();
 
 export function captureError(
   error: Error,

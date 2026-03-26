@@ -19,13 +19,11 @@ export const posthogClient = apiKey && !IS_WEB
     })
   : undefined;
 
-export function captureError(error: Error, context?: Record<string, unknown>) {
-  posthogClient?.capture('$exception', {
-    $exception_message: error.message,
-    $exception_type: error.name,
-    $exception_stack: error.stack ?? '',
-    ...context,
-  });
+export function captureError(
+  error: Error,
+  context?: Parameters<PostHog['captureException']>[1],
+) {
+  posthogClient?.captureException(error, context);
 }
 
 export function captureEvent(...args: Parameters<PostHog['capture']>) {

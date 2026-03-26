@@ -110,7 +110,7 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
               onChangeText={(v) => field.handleChange(v.trim() || null)}
               placeholder={translate('accounts.icon_placeholder')}
               containerClassName="flex-1"
-              className="text-3xl"
+              className="border-0 bg-transparent text-3xl"
               size="xl"
             />
           )}

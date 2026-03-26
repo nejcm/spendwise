@@ -13,12 +13,13 @@ import { translate } from '@/lib/i18n';
 import { OutlineButton } from '../../components/ui/outline-button';
 import { useAppStore } from '../../lib/store';
 import { useAccounts } from '../accounts/api';
+import { useCategories } from '../categories/api';
 import { useCreateTransaction } from '../transactions/api';
 import { mapRows } from './csv-parser';
 
 type Step = 'map' | 'preview';
 
-const COLUMN_FIELDS: (keyof ColumnMapping)[] = ['date', 'amount', 'note', 'type'];
+const COLUMN_FIELDS: (keyof ColumnMapping)[] = ['date', 'amount', 'currency', 'note', 'type', 'baseAmount', 'baseCurrency', 'category'];
 
 type MapStepProps = {
   headers: string[];
@@ -166,6 +167,7 @@ export type ImportProps = {
 export default function Import({ state, setMapping, onClose }: ImportProps) {
   const { headers, allRows, mapping } = state;
   const { data: accounts = [] } = useAccounts();
+  const { data: categories = [] } = useCategories();
   const preferredCurrency = useAppStore.use.currency();
   const router = useRouter();
   const [step, setStep] = React.useState<Step>('map');
@@ -174,19 +176,31 @@ export default function Import({ state, setMapping, onClose }: ImportProps) {
   const [accountId, setAccountId] = React.useState<string>(accounts[0]?.id ?? '');
   const createTransaction = useCreateTransaction();
 
+  const resolveCategoryId = (name?: string): string => {
+    if (!name) return '_unknown';
+    const match = categories.find(
+      (c) => c.name.toLowerCase() === name.toLowerCase(),
+    );
+    return match?.id ?? '_unknown';
+  };
+
   const runImport = async () => {
     if (!accountId) return;
     setImporting(true);
     let count = 0;
     for (const row of preview) {
       const type = row.type ?? (row.amount >= 0 ? ('income' as const) : ('expense' as const));
+      const rowBaseAmount = row.baseAmount !== undefined
+        ? (type === 'transfer' ? row.baseAmount : Math.abs(row.baseAmount)) / 100
+        : 0;
+      const rowBaseCurrency = row.baseCurrency ?? preferredCurrency;
       await createTransaction.mutateAsync({
         account_id: accountId,
         amount: (type === 'transfer' ? row.amount : Math.abs(row.amount)) / 100,
-        baseAmount: 0,
-        baseCurrency: preferredCurrency,
+        baseAmount: rowBaseAmount,
+        baseCurrency: rowBaseCurrency,
         currency: row.currency ?? preferredCurrency,
-        category_id: '_unknown',
+        category_id: resolveCategoryId(row.categoryName),
         date: Math.floor(new Date(row.date).getTime() / 1000),
         note: row.note,
         type,

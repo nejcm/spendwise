@@ -212,6 +212,7 @@
     "preview": "Vorschau",
     "preview_title": "Vorschau",
     "rows": "Zeilen",
+    "select_account": "Konto auswählen",
     "skip_column": "Spalte überspringen",
     "title": "Import/Export"
   },
@@ -379,6 +380,7 @@
     "saved": "KI-Einstellungen gespeichert",
     "scheduled": "Wiederkehrende Regeln",
     "security": "Sicherheit",
+    "seed": "Seed",
     "share": "Teilen",
     "stats": "Statistiken",
     "support": "Support",

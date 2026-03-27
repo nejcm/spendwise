@@ -18,7 +18,8 @@ export const CategoriesOverview = React.memo(() => {
   const [startDate, endDate] = React.useMemo(() => getCurrentMonthRange(format(new Date(), 'yyyy-MM')), []);
   const { data = [], isLoading } = useCategorySpendByRange(startDate, endDate);
   const currency = useAppStore.use.currency();
-  const visibleCategories = React.useMemo(() => data.filter((item) => item.total > 0), [data]);
+  const filtered = React.useMemo(() => data.filter((item) => item.total > 0), [data]);
+  const visibleCategories = filtered.length ? filtered : data.slice(0, 5);
   const hasCategories = visibleCategories.length > 0;
 
   return (

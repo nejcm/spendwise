@@ -14,8 +14,6 @@ import Import from '@/features/imports-export/import';
 import { translate } from '@/lib/i18n';
 import { defaultStyles } from '@/lib/theme/styles';
 
-type Screen = 'import' | 'export';
-
 const initialCsvState: ImportProps['state'] = {
   headers: [],
   allRows: [],
@@ -67,7 +65,7 @@ function BackupSection() {
 }
 
 export function ImportScreen() {
-  const [screen, setScreen] = useState<Screen | undefined>();
+  const [inProgress, setInProgress] = useState<boolean>(false);
   const [csvState, setCsvState] = useState<ImportProps['state']>(() => initialCsvState);
 
   const pickFileMutation = useMutation({
@@ -92,7 +90,7 @@ export function ImportScreen() {
     onSuccess: (state) => {
       if (!state) return;
       setCsvState(state);
-      setScreen('import');
+      setInProgress(true);
     },
     onError: (error) => {
       Alert.alert(translate('common.error'), error.message);
@@ -102,8 +100,8 @@ export function ImportScreen() {
   return (
     <>
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
-        {!screen && (
+      <ScrollView className="flex-1 px-4 py-8" style={defaultStyles.transparentBg}>
+        {!inProgress && (
           <>
             <BackupSection />
             <Text className="mb-2 font-bold dark:text-muted-foreground" tx="import-export.external_section_title" />
@@ -126,7 +124,7 @@ export function ImportScreen() {
             />
           </>
         )}
-        {screen === 'import' && (
+        {inProgress && (
           <Import
             state={csvState}
             setMapping={(mapping) =>
@@ -134,7 +132,7 @@ export function ImportScreen() {
                 ...prev,
                 mapping,
               }))}
-            onClose={() => setScreen(undefined)}
+            onClose={() => setInProgress(false)}
           />
         )}
       </ScrollView>

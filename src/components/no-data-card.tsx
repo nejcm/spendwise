@@ -15,7 +15,7 @@ export interface NoDataCardProps {
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const cardClassName = 'rounded-xl border-2 border-dashed border-gray-300 p-4 dark:border-gray-500';
+export const cardClassName = 'rounded-xl border-2 border-dashed border-gray-300 p-4 dark:border-gray-500 w-full justify-center gap-2';
 
 export function NoDataCard({ children, onPress, label, description, icon: Icon = Plus, className }: NoDataCardProps) {
   return (
@@ -24,7 +24,7 @@ export function NoDataCard({ children, onPress, label, description, icon: Icon =
       className={cn(cardClassName, className)}
       style={getPressedStyle}
     >
-      <View className="flex-1 justify-center gap-2">
+      <>
         <View className="flex-row items-center justify-center gap-2">
           <Icon className="text-muted-foreground" size={20} />
           <Text className="font-medium text-muted-foreground">
@@ -37,7 +37,7 @@ export function NoDataCard({ children, onPress, label, description, icon: Icon =
           </Text>
         )}
         {children}
-      </View>
+      </>
     </Pressable>
   );
 }

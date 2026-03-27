@@ -99,25 +99,29 @@ function PreviewStep({
       <Text className="mb-4 text-xl font-medium">
         {`${translate('import-export.preview_title')} (${preview.length} ${translate('import-export.rows')})`}
       </Text>
-      <Text className="font-medium text-muted-foreground">
-        {translate('transactions.account')}
-      </Text>
-      <ScrollView horizontal className="mb-4 py-2">
-        <View className="flex-row gap-2">
-          {accounts.map((a) => (
-            <SolidButton
-              key={a.id}
-              size="sm"
-              className="items-center rounded-3xl"
-              color={accountId === a.id ? 'primary' : 'secondary'}
-              label={`${a.icon} ${a.name}`}
-              onPress={() => {
-                onAccountSelect(a.id);
-              }}
-            />
-          ))}
-        </View>
-      </ScrollView>
+      {accounts.length > 0 && (
+        <>
+          <Text className="font-medium text-muted-foreground">
+            {translate('import-export.select_account')}
+          </Text>
+          <ScrollView horizontal className="mb-4 py-2">
+            <View className="flex-row gap-2">
+              {accounts.map((a) => (
+                <SolidButton
+                  key={a.id}
+                  size="sm"
+                  className="items-center rounded-3xl"
+                  color={accountId === a.id ? 'primary' : 'secondary'}
+                  label={`${a.icon} ${a.name}`}
+                  onPress={() => {
+                    onAccountSelect(a.id);
+                  }}
+                />
+              ))}
+            </View>
+          </ScrollView>
+        </>
+      )}
       {preview.slice(0, 10).map((row) => (
         <View
           key={`${row.date}-${row.amount}`}
@@ -191,12 +195,12 @@ export default function Import({ state, setMapping, onClose }: ImportProps) {
     for (const row of preview) {
       const type = row.type ?? (row.amount >= 0 ? ('income' as const) : ('expense' as const));
       const rowBaseAmount = row.baseAmount !== undefined
-        ? (type === 'transfer' ? row.baseAmount : Math.abs(row.baseAmount)) / 100
+        ? (type === 'transfer' ? row.baseAmount : Math.abs(row.baseAmount))
         : 0;
       const rowBaseCurrency = row.baseCurrency ?? preferredCurrency;
       await createTransaction.mutateAsync({
         account_id: accountId,
-        amount: (type === 'transfer' ? row.amount : Math.abs(row.amount)) / 100,
+        amount: (type === 'transfer' ? row.amount : Math.abs(row.amount)),
         baseAmount: rowBaseAmount,
         baseCurrency: rowBaseCurrency,
         currency: row.currency ?? preferredCurrency,

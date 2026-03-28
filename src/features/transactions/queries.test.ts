@@ -3,6 +3,7 @@ import { createTestDb } from '@/test-utils/sqlite-db';
 
 import {
   createTransaction,
+  createTransactions,
   deleteTransaction,
   getMonthSummary,
   getRecentTransactions,
@@ -304,6 +305,74 @@ describe('createTransaction', () => {
 
     const row = await getTransactionById(db as any, id);
     expect(row!.note).toBeNull();
+  });
+});
+
+// ─── createTransactions (multi-row INSERT) ────────────────────────────────────
+
+describe('createTransactions', () => {
+  const { randomUUID } = jest.requireMock<{ randomUUID: jest.Mock }>('expo-crypto');
+
+  beforeEach(() => {
+    let n = 0;
+    randomUUID.mockImplementation(() => `batch-uuid-${n++}`);
+  });
+
+  afterEach(() => {
+    randomUUID.mockImplementation(() => 'test-uuid-1234');
+  });
+
+  const baseRow = {
+    account_id: 'acc_1',
+    category_id: 'cat_1',
+    type: 'expense' as const,
+    amount: 1000,
+    currency: 'EUR' as const,
+    baseAmount: 1000,
+    baseCurrency: 'EUR' as const,
+    date: MAR_MID,
+    note: 'x',
+  };
+
+  it('inserts multiple rows in one multi-value statement', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+
+    const ids = await createTransactions(db as any, [
+      { ...baseRow, note: 'a', date: MAR_MID },
+      { ...baseRow, note: 'b', date: MAR_MID + 1 },
+    ]);
+
+    expect(ids).toHaveLength(2);
+    expect(new Set(ids).size).toBe(2);
+
+    const all = await getTransactions(db as any, MAR_START, APR_START);
+    expect(all).toHaveLength(2);
+  });
+
+  it('chunks large imports across multiple INSERT statements', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+
+    const rows = Array.from({ length: 95 }, (_, i) => ({
+      ...baseRow,
+      note: `n${i}`,
+      date: MAR_MID + i,
+    }));
+
+    const ids = await createTransactions(db as any, rows);
+    expect(ids).toHaveLength(95);
+
+    const all = await getTransactions(db as any, MAR_START, APR_START);
+    expect(all).toHaveLength(95);
+  });
+
+  it('returns an empty array when the list is empty', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+
+    const ids = await createTransactions(db as any, []);
+    expect(ids).toEqual([]);
   });
 });
 

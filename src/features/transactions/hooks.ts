@@ -1,9 +1,12 @@
+import type { SQLiteDatabase } from 'expo-sqlite';
+
 import type { TransactionFormData } from './types';
 
+import type { RatesMap } from '@/features/currencies/queries';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
-import { useSQLiteContext } from 'expo-sqlite';
 
+import { useSQLiteContext } from 'expo-sqlite';
 import Alert from '@/components/ui/alert';
 import { computeBaseAmount } from '@/features/currencies/conversion';
 import { getRatesForDate } from '@/features/currencies/queries';
@@ -57,6 +60,38 @@ function onError(error: unknown) {
   Alert.alert(translate('common.error'), error instanceof Error ? error.message : translate('common.error_description'));
 }
 
+function prepareTransactionData(
+  item: TransactionFormData,
+  rates: RatesMap | undefined,
+): TransactionFormData {
+  const amount = item.amount || 0;
+  return {
+    ...item,
+    amount: amountToCents(amount),
+    baseAmount: amountToCents(item.baseAmount || computeBaseAmount(amount, item.currency, item.baseCurrency, rates ?? {})),
+  };
+}
+
+async function prepareTransactionsForInsert(
+  db: SQLiteDatabase,
+  items: TransactionFormData[],
+): Promise<TransactionFormData[]> {
+  const datesNeedingRates = new Set<number>();
+  for (const item of items) {
+    if (!item.baseAmount) datesNeedingRates.add(item.date);
+  }
+  const ratesByDate = new Map<number, Awaited<ReturnType<typeof getRatesForDate>>>();
+  await Promise.all(
+    Array.from(datesNeedingRates, async (date) => {
+      ratesByDate.set(date, await getRatesForDate(db, date));
+    }),
+  );
+  return items.map((item) => {
+    const rates = item.baseAmount ? undefined : ratesByDate.get(item.date);
+    return prepareTransactionData(item, rates);
+  });
+}
+
 export function useCreateTransaction() {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
@@ -65,9 +100,24 @@ export function useCreateTransaction() {
     mutationFn: async (data: TransactionFormData) => {
       // fetch rates only if baseAmount is not provided
       const rates = data.baseAmount ? undefined : await getRatesForDate(db, data.date);
-      data.amount = amountToCents(data.amount || 0);
-      data.baseAmount = data.baseAmount || computeBaseAmount(data.amount || 0, data.currency, data.baseCurrency, rates ?? {});
-      return queries.createTransaction(db, data);
+      return queries.createTransaction(db, prepareTransactionData(data, rates));
+    },
+    onSuccess: () => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      invalidateFor(queryClient, 'transaction');
+    },
+    onError,
+  });
+}
+
+export function useCreateTransactions() {
+  const db = useSQLiteContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (items: TransactionFormData[]) => {
+      const prepared = await prepareTransactionsForInsert(db, items);
+      return queries.createTransactions(db, prepared);
     },
     onSuccess: () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -85,8 +135,9 @@ export function useUpdateTransaction() {
     mutationFn: async (params: { id: string; data: TransactionFormData }) => {
       // fetch rates only if baseAmount is not provided
       const rates = params.data.baseAmount ? undefined : await getRatesForDate(db, params.data.date);
-      params.data.amount = amountToCents(params.data.amount || 0);
-      params.data.baseAmount = params.data.baseAmount || computeBaseAmount(params.data.amount || 0, params.data.currency, params.data.baseCurrency, rates ?? {});
+      const amount = params.data.amount || 0;
+      params.data.amount = amountToCents(amount);
+      params.data.baseAmount = amountToCents(params.data.baseAmount || computeBaseAmount(amount, params.data.currency, params.data.baseCurrency, rates ?? {}));
       return queries.updateTransaction(db, params.id, params.data);
     },
     onSuccess: () => {

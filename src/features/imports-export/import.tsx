@@ -1,21 +1,23 @@
 import type { Account } from '../accounts/types';
 import type { CurrencyKey } from '../currencies';
 
+import type { TransactionFormData } from '../transactions/types';
 import type { ColumnMapping, ParsedRow } from './csv-parser';
+
 import { useRouter } from 'expo-router';
 
 import * as React from 'react';
-
 import { ScrollView, View } from 'react-native';
-import { FormattedCurrency, Select, SolidButton, Text } from '@/components/ui';
+import { FormattedCurrency, FormattedDate, Select, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { translate } from '@/lib/i18n';
 import { OutlineButton } from '../../components/ui/outline-button';
 import { useAppStore } from '../../lib/store';
 import { useAccounts } from '../accounts/api';
 import { useCategories } from '../categories/api';
-import { useCreateTransaction } from '../transactions/api';
+import { useCreateTransactions } from '../transactions/api';
 import { mapRows } from './csv-parser';
+import { mapCategoryNameToId } from './helpers';
 
 type Step = 'map' | 'preview';
 
@@ -79,7 +81,7 @@ export type PreviewStepProps = {
   accounts: Account[];
   accountId: string;
   currency: CurrencyKey;
-  importing: boolean;
+  importing: number | undefined;
   onAccountSelect: (id: string) => void;
   onImport: () => void;
   preview: ParsedRow[];
@@ -128,8 +130,17 @@ function PreviewStep({
           className="mb-1 flex-row items-center justify-between rounded-lg bg-card p-2"
         >
           <View className="flex-1">
-            <Text className="text-sm font-medium">{row.note || '—'}</Text>
-            <Text className="text-xs text-gray-500">{row.date}</Text>
+            <Text className="text-sm font-medium">
+              {row.note || '?'}
+            </Text>
+            <View className="flex-row items-baseline gap-1">
+              <Text className="text-xs text-gray-500">
+                {row.categoryName || '?'}
+                {' '}
+                -
+              </Text>
+              <FormattedDate className="text-xs text-gray-500" value={new Date(row.date).getTime() / 1000} />
+            </View>
           </View>
           <FormattedCurrency
             value={Math.abs(row.amount)}
@@ -146,10 +157,10 @@ function PreviewStep({
       <SolidButton
         className="mt-8"
         fullWidth
-        disabled={!accountId || importing}
+        disabled={!accountId || importing !== undefined}
         label={
           importing
-            ? translate('common.loading')
+            ? `${translate('common.loading')} (${importing} / ${preview.length})`
             : `${translate('import-export.import')} ${preview.length} ${translate('import-export.rows')}`
         }
         onPress={onImport}
@@ -175,22 +186,15 @@ export default function Import({ state, setMapping, onClose }: ImportProps) {
   const preferredCurrency = useAppStore.use.currency();
   const router = useRouter();
   const [step, setStep] = React.useState<Step>('map');
-  const [importing, setImporting] = React.useState(false);
+  const [importing, setImporting] = React.useState<number | undefined>(undefined);
   const [preview, setPreview] = React.useState<ParsedRow[]>([]);
   const [accountId, setAccountId] = React.useState<string>(accounts[0]?.id ?? '');
-  const createTransaction = useCreateTransaction();
-
-  const resolveCategoryId = (name?: string): string => {
-    if (!name) return '_unknown';
-    const match = categories.find(
-      (c) => c.name.toLowerCase() === name.toLowerCase(),
-    );
-    return match?.id ?? '_unknown';
-  };
+  const createTransactions = useCreateTransactions();
 
   const runImport = async () => {
-    if (!accountId) return;
-    setImporting(true);
+    if (!accountId || preview.length === 0) return;
+    setImporting(0);
+    const transactions: TransactionFormData[] = [];
     let count = 0;
     for (const row of preview) {
       const type = row.type ?? (row.amount >= 0 ? ('income' as const) : ('expense' as const));
@@ -198,23 +202,25 @@ export default function Import({ state, setMapping, onClose }: ImportProps) {
         ? (type === 'transfer' ? row.baseAmount : Math.abs(row.baseAmount))
         : 0;
       const rowBaseCurrency = row.baseCurrency ?? preferredCurrency;
-      await createTransaction.mutateAsync({
+      transactions.push({
         account_id: accountId,
         amount: (type === 'transfer' ? row.amount : Math.abs(row.amount)),
         baseAmount: rowBaseAmount,
         baseCurrency: rowBaseCurrency,
         currency: row.currency ?? preferredCurrency,
-        category_id: resolveCategoryId(row.categoryName),
+        category_id: mapCategoryNameToId(row.categoryName, categories),
         date: Math.floor(new Date(row.date).getTime() / 1000),
         note: row.note,
         type,
       });
       count++;
+      setImporting(count);
     }
-    setImporting(false);
+    await createTransactions.mutateAsync(transactions);
+    setImporting(undefined);
     Alert.alert(
       translate('import-export.complete_title'),
-      translate('import-export.complete_message', { count }),
+      translate('import-export.complete_message', { count: transactions.length }),
       [
         { onPress: () => router.back(), text: translate('common.ok') },
       ],

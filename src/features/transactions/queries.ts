@@ -89,6 +89,36 @@ export async function getMonthSummary(
 
 // ─── Write Queries ───
 
+/** SQLite SQLITE_MAX_VARIABLE_NUMBER is often 999; stay safely under for multi-row INSERTs. */
+const MAX_TRANSACTION_ROWS_PER_BATCH = 50;
+
+function buildTransactionsBatchInsert(
+  chunk: TransactionFormData[],
+  ids: string[],
+): { sql: string; params: (string | number | null)[] } {
+  const rowPlaceholders = chunk.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ');
+  const sql = `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note)
+    VALUES ${rowPlaceholders}`;
+  const params: (string | number | null)[] = [];
+  for (let i = 0; i < chunk.length; i++) {
+    const data = chunk[i]!;
+    const id = ids[i]!;
+    params.push(
+      id,
+      data.account_id,
+      data.category_id,
+      data.type,
+      data.amount,
+      data.currency,
+      data.baseAmount,
+      data.baseCurrency,
+      data.date,
+      data.note || null,
+    );
+  }
+  return { sql, params };
+}
+
 export async function createTransaction(
   db: SQLiteDatabase,
   data: TransactionFormData,
@@ -102,6 +132,29 @@ export async function createTransaction(
   );
 
   return id;
+}
+
+/**
+ * Batch insert using multi-row INSERT statements (chunked to respect SQLite bind limits).
+ */
+export async function createTransactions(
+  db: SQLiteDatabase,
+  dataList: TransactionFormData[],
+): Promise<string[]> {
+  if (dataList.length === 0) {
+    return [];
+  }
+  const allIds: string[] = [];
+  await db.withTransactionAsync(async () => {
+    for (let offset = 0; offset < dataList.length; offset += MAX_TRANSACTION_ROWS_PER_BATCH) {
+      const chunk = dataList.slice(offset, offset + MAX_TRANSACTION_ROWS_PER_BATCH);
+      const ids = chunk.map(() => generateId());
+      const { sql, params } = buildTransactionsBatchInsert(chunk, ids);
+      await db.runAsync(sql, params);
+      allIds.push(...ids);
+    }
+  });
+  return allIds;
 }
 
 export async function updateTransaction(

@@ -10,12 +10,12 @@ import Alert from '@/components/ui/alert';
 import { getFieldError } from '@/components/ui/form-utils';
 import { OutlineButton } from '@/components/ui/outline-button';
 import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/features/categories/api';
+import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { translate } from '@/lib/i18n';
 import { closeSheet } from '@/lib/local-store';
 import { useAppStore } from '@/lib/store';
 import { getRandomColor } from '@/lib/theme/colors';
 import { refinePositiveNumber } from '@/lib/validation/helpers';
-import { CURRENCIES_MAP } from '../currencies';
 
 const schema = z.object({
   name: z.string().min(1, translate('categories.name_required')),
@@ -121,7 +121,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
         <InputLabel label={translate('categories.budget')} />
         <View className="flex-row gap-2">
           <View className="w-[92] flex-row items-center justify-center gap-2 px-4">
-            <Image source={CURRENCIES_MAP[preferredCurrency].image} className="size-6 rounded-full" />
+            <Image source={CURRENCY_IMAGES[preferredCurrency]} className="size-6 rounded-full" />
             <Text className="border-none bg-transparent">
               {preferredCurrency}
             </Text>

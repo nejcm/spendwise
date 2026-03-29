@@ -5,6 +5,7 @@ import {
   getPeriodRange,
   navigatePeriod,
   scaleBudgetForPeriod,
+  splitByYear,
   unixToDate,
   unixToISODate,
 } from '@/lib/date/helpers';
@@ -55,6 +56,19 @@ describe('unixToISODate', () => {
   it('returns a yyyy-MM-dd formatted string', () => {
     const unix = dateToUnix(new Date('2026-03-15T00:00:00.000Z'));
     expect(unixToISODate(unix)).toMatch(isoDateRegex);
+  });
+});
+
+describe('splitByYear', () => {
+  it('returns one segment when range is within a year', () => {
+    expect(splitByYear('2026-03-01', '2026-06-15')).toEqual([{ start: '2026-03-01', end: '2026-06-15' }]);
+  });
+
+  it('splits across calendar years', () => {
+    expect(splitByYear('2025-11-01', '2026-02-28')).toEqual([
+      { start: '2025-11-01', end: '2025-12-31' },
+      { start: '2026-01-01', end: '2026-02-28' },
+    ]);
   });
 });
 

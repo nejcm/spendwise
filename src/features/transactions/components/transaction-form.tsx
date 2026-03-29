@@ -10,9 +10,8 @@ import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
 import { useAccounts } from '@/features/accounts/api';
 import { CategoryPicker } from '@/features/categories/category-picker';
-import { CURRENCY_OPTIONS } from '@/features/currencies';
 import { mergeCurrencyArrays } from '@/features/currencies/helpers';
-import { CURRENCY_IMAGES } from '@/features/currencies/images';
+import { CURRENCY_IMAGES, CURRENCY_OPTIONS } from '@/features/currencies/images';
 import { useCreateTransaction, useUpdateTransaction } from '@/features/transactions/api';
 import { TransactionBaseAmountSync } from '@/features/transactions/components/transaction-base-amount-sync';
 import {
@@ -97,7 +96,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
 
   const HScrollView = isSheet ? BottomSheetScrollView : ScrollView;
   return (
-    <View className="gap-4">
+    <View className="flex-1 gap-4">
       <form.Subscribe
         selector={(s) => ({
           amount: s.values.amount,
@@ -130,7 +129,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
               }}
               size="lg"
               showChevron={false}
-              containerClassName="w-[92]"
+              containerClassName="w-[100]"
               inputClassName="px-2"
               stackBehavior="push"
             />
@@ -158,8 +157,8 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
       <form.Subscribe
         selector={(s) => [s.values.currency]}
         children={([selectedCurrency]) => selectedCurrency !== preferredCurrency && (
-          <View className="flex-row items-center gap-2">
-            <View className="w-[92] flex-row items-center justify-center gap-2 px-4">
+          <View className="mb-2 flex-row items-center gap-2">
+            <View className="w-[100] flex-row items-center justify-center gap-2 px-4">
               <Image source={CURRENCY_IMAGES[preferredCurrency]} className="size-6 rounded-full" />
               <Text className="border-none bg-transparent">
                 {preferredCurrency}
@@ -177,7 +176,6 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
                   }}
                   placeholder="0.00"
                   readOnly={selectedCurrency === preferredCurrency}
-                  size="lg"
                   keyboardType="decimal-pad"
                   testID="base-amount-input"
                   error={getFieldError(field)}
@@ -190,10 +188,33 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
       />
 
       <form.Field
+        name="date"
+        children={(field) => (
+          <DateInput
+            value={field.state.value}
+            onChange={field.handleChange}
+            error={getFieldError(field)}
+            modalProps={{ stackBehavior: 'push' }}
+          />
+        )}
+      />
+
+      <form.Field
+        name="category_id"
+        children={(field) => (
+          <CategoryPicker
+            selectedId={field.state.value}
+            onSelect={(cat) => field.handleChange(cat.id)}
+            error={getFieldError(field)}
+          />
+        )}
+      />
+
+      <form.Field
         name="type"
         children={(field) => (
           <View>
-            <Text className="mt-4 mb-2 text-sm font-medium">
+            <Text className="mb-2 text-sm font-medium">
               {translate('transactions.type')}
             </Text>
             <View className="flex-row gap-2">
@@ -218,7 +239,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
       <form.Field
         name="account_id"
         children={(field) => (
-          <View>
+          <View className="mb-2">
             <Text className="mb-2 text-sm font-medium">
               {translate('transactions.account')}
             </Text>
@@ -241,35 +262,9 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
       />
 
       <form.Field
-        name="date"
-        children={(field) => (
-          <DateInput
-            label={translate('transactions.date')}
-            value={field.state.value}
-            onChange={field.handleChange}
-            error={getFieldError(field)}
-            modalProps={{ stackBehavior: 'push' }}
-          />
-        )}
-      />
-
-      <form.Field
-        name="category_id"
-        children={(field) => (
-          <CategoryPicker
-            selectedId={field.state.value}
-            onSelect={(cat) => field.handleChange(cat.id)}
-            label={translate('transactions.category')}
-            error={getFieldError(field)}
-          />
-        )}
-      />
-
-      <form.Field
         name="note"
         children={(field) => (
           <Input
-            label={translate('transactions.note')}
             value={field.state.value || ''}
             onBlur={field.handleBlur}
             onChangeText={field.handleChange}
@@ -282,7 +277,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
       <form.Subscribe
         selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
         children={(state) => (
-          <View className="mt-6 flex-row gap-3">
+          <View className="mt-auto flex-row gap-3 pt-4">
             {onCancel && (
               <OutlineButton
                 label={translate('common.cancel')}

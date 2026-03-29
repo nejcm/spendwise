@@ -5,7 +5,7 @@ import { View } from 'react-native';
 import * as z from 'zod';
 
 import ColorSelector from '@/components/color-selector';
-import { GhostButton, Image, Input, InputLabel, SolidButton, Text } from '@/components/ui';
+import { GhostButton, Image, Input, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
 import { getFieldError } from '@/components/ui/form-utils';
 import { OutlineButton } from '@/components/ui/outline-button';
@@ -75,7 +75,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
 
   return (
     <View className="flex-1 gap-4">
-      <View className="flex-row items-center gap-2">
+      <View className="mb-2 flex-row items-center justify-center gap-3">
         <form.Field
           name="color"
           children={(field) => (
@@ -95,8 +95,8 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
               onBlur={field.handleBlur}
               onChangeText={(v) => field.handleChange(v.trim() || null)}
               placeholder={translate('categories.icon_placeholder')}
-              containerClassName="flex-1"
-              className="border-0 bg-transparent text-3xl"
+              containerClassName="w-[130]"
+              className="border-0 text-3xl"
               size="xl"
             />
           )}
@@ -107,7 +107,6 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
         name="name"
         children={(field) => (
           <Input
-            label={translate('common.name')}
             value={field.state.value}
             onBlur={field.handleBlur}
             placeholder={translate('categories.name_placeholder')}
@@ -118,9 +117,8 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
       />
 
       <View className="mb-6">
-        <InputLabel label={translate('categories.budget')} />
         <View className="flex-row gap-2">
-          <View className="w-[92] flex-row items-center justify-center gap-2 px-4">
+          <View className="w-[100] flex-row items-center justify-center gap-2 px-4">
             <Image source={CURRENCY_IMAGES[preferredCurrency]} className="size-6 rounded-full" />
             <Text className="border-none bg-transparent">
               {preferredCurrency}
@@ -133,7 +131,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
                 value={field.state.value ?? ''}
                 onBlur={field.handleBlur}
                 onChangeText={field.handleChange}
-                placeholder="0"
+                placeholder={translate('categories.budget_placeholder')}
                 keyboardType="decimal-pad"
                 containerClassName="flex-1"
                 error={getFieldError(field)}
@@ -170,6 +168,8 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
           <GhostButton
             label={translate('common.delete')}
             color="danger"
+            size="sm"
+            textClassName="text-base/snug"
             onPress={() => onDeletePress(id, initialValues?.name ?? '')}
             fullWidth
           />

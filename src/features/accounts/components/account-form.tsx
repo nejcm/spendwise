@@ -8,8 +8,9 @@ import ColorSelector from '@/components/color-selector';
 import { Input, OutlineButton, Select, SolidButton, Text } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import { GhostButton } from '@/components/ui/ghost-button';
-import { CURRENCY_OPTIONS, CURRENCY_VALUES } from '@/features/currencies';
+import { CURRENCY_VALUES } from '@/features/currencies';
 import { mergeCurrencyArrays } from '@/features/currencies/helpers';
+import { CURRENCY_OPTIONS } from '@/features/currencies/images';
 import { translate } from '@/lib/i18n';
 import { addLastUsedCurrency, selectAccountFormPrefs, selectLastUsedCurrencies, setAccountFormPrefs, useAppStore } from '@/lib/store';
 import { getRandomColor } from '@/lib/theme/colors';
@@ -87,8 +88,8 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
   });
 
   return (
-    <View className="gap-4">
-      <View className="mb-2 flex-row items-center gap-3">
+    <View className="flex-1 gap-4">
+      <View className="mb-2 flex-row items-center justify-center gap-3">
         <form.Field
           name="color"
           children={(field) => (
@@ -109,8 +110,8 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
               onBlur={field.handleBlur}
               onChangeText={(v) => field.handleChange(v.trim() || null)}
               placeholder={translate('accounts.icon_placeholder')}
-              containerClassName="flex-1"
-              className="border-0 bg-transparent text-3xl"
+              containerClassName="w-[130]"
+              className="border-0 text-3xl"
               size="xl"
             />
           )}
@@ -121,7 +122,6 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
         name="name"
         children={(field) => (
           <Input
-            label={translate('accounts.name')}
             value={field.state.value}
             onBlur={field.handleBlur}
             onChangeText={field.handleChange}
@@ -135,7 +135,6 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
         name="description"
         children={(field) => (
           <Input
-            label={translate('common.description')}
             value={field.state.value ?? ''}
             onBlur={field.handleBlur}
             onChangeText={(v) => field.handleChange(v.trim() || null)}
@@ -166,11 +165,10 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
         )}
       />
 
-      <form.Field
-        name="currency"
-        children={(field) => (
-          <View>
-            <Text className="mb-2 text-sm font-medium">{translate('settings.default_currency')}</Text>
+      <View className="mb-6 flex-row gap-2">
+        <form.Field
+          name="currency"
+          children={(field) => (
             <Select
               value={field.state.value}
               options={orderedCurrencies}
@@ -181,23 +179,20 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
               }}
               showChevron
               stackBehavior="push"
+              containerClassName="w-[100]"
             />
-          </View>
-        )}
-      />
-
-      <View className="flex-row gap-2">
+          )}
+        />
         <form.Field
           name="budget"
           children={(field) => (
             <Input
-              label={translate('accounts.budget')}
               value={field.state.value ?? ''}
               onBlur={field.handleBlur}
               onChangeText={field.handleChange}
-              placeholder="0"
+              placeholder={translate('accounts.budget_placeholder')}
               keyboardType="decimal-pad"
-              className="mb-6"
+              containerClassName="flex-1"
               error={getFieldError(field)}
             />
           )}
@@ -207,7 +202,7 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
       <form.Subscribe
         selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
         children={(state) => (
-          <View className="flex-row items-center gap-3">
+          <View className="mt-auto flex-row items-center gap-3">
             {onCancel && <OutlineButton label={translate('common.cancel')} onPress={onCancel} color="secondary" />}
             <SolidButton
               label={translate('common.save')}

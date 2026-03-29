@@ -1,4 +1,5 @@
 import type { CurrencyKey } from '.';
+import { CURRENCIES } from '.';
 
 export const CURRENCY_IMAGES: Record<CurrencyKey, string> = {
   AUD: require('../../../assets/flags/au.jpg'),
@@ -16,3 +17,10 @@ export const CURRENCY_IMAGES: Record<CurrencyKey, string> = {
   USD: require('../../../assets/flags/us.jpg'),
   ZAR: require('../../../assets/flags/za.jpg'),
 };
+
+export const CURRENCY_OPTIONS = CURRENCIES.map((currency) => ({
+  ...currency,
+  label: currency.value,
+  subtext: currency.name,
+  image: CURRENCY_IMAGES[currency.value as CurrencyKey],
+}));

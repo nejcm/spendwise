@@ -5,7 +5,7 @@ import * as React from 'react';
 import { tv } from 'tailwind-variants';
 import { Button } from './button';
 
-export const solidButton = tv({
+export const buttonTv = tv({
   slots: {
     container: 'flex flex-row items-center justify-center rounded-lg px-4',
     label: 'items-center font-family-sans text-base/snug font-medium',
@@ -51,7 +51,7 @@ export const solidButton = tv({
     },
     size: {
       xs: {
-        container: 'h-6 px-2',
+        container: 'h-8 px-2',
         label: 'text-xs/snug font-normal',
         indicator: 'size-2',
       },
@@ -61,17 +61,17 @@ export const solidButton = tv({
         indicator: 'size-3',
       },
       md: {
-        container: 'h-12 px-4',
+        container: 'h-14 px-4',
         label: 'text-base/snug',
         indicator: 'size-4',
       },
       lg: {
-        container: 'h-14 px-5',
+        container: 'h-16 px-5',
         label: 'text-lg/snug',
         indicator: 'size-5',
       },
       xl: {
-        container: 'h-16 px-6',
+        container: 'h-18 px-6',
         label: 'text-xl/snug',
         indicator: 'size-6',
       },
@@ -97,7 +97,7 @@ export const solidButton = tv({
   },
 });
 
-type ButtonVariants = VariantProps<typeof solidButton>;
+type ButtonVariants = VariantProps<typeof buttonTv>;
 export type SolidButtonProps = {
   label?: string;
   loading?: boolean;
@@ -119,7 +119,7 @@ export function SolidButton({
   textClassName = '',
   ...props
 }: SolidButtonProps & { ref?: React.RefObject<View | null> }) {
-  const styles = React.useMemo(() => solidButton({ disabled, size, color, fullWidth }), [disabled, size, color, fullWidth]);
+  const styles = React.useMemo(() => buttonTv({ disabled, size, color, fullWidth }), [disabled, size, color, fullWidth]);
 
   return (
     <Button

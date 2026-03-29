@@ -3,7 +3,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import type { CurrencyKey } from './';
 
 import { computeBaseAmount } from './conversion';
-import { getRatesForDate } from './queries';
+import { getRatesForDates } from './queries';
 
 /**
  * Recalculates baseAmount and baseCurrency for every transaction using the
@@ -32,10 +32,11 @@ export async function recalculateAllBaseAmounts(
     byDate.set(tx.date, bucket);
   }
 
-  const updates: Array<{ id: string; baseAmount: number }> = [];
+  const ratesByDate = await getRatesForDates(db, [...byDate.keys()]);
 
+  const updates: Array<{ id: string; baseAmount: number }> = [];
   for (const [date, txs] of byDate) {
-    const rates = await getRatesForDate(db, date);
+    const rates = ratesByDate.get(date) ?? { EUR: 1 };
     for (const tx of txs) {
       const baseAmount = computeBaseAmount(tx.amount, tx.currency as CurrencyKey, newCurrency, rates);
       updates.push({ id: tx.id, baseAmount });

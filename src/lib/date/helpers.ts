@@ -193,3 +193,34 @@ export function tryFormatDate(date: string, dateFormat = 'yyyy-MM-dd') {
     return undefined;
   }
 }
+
+/**
+ * Binary-searches a sorted array of Unix timestamps to find the closest one
+ * to `target`. Returns `undefined` if the closest is beyond `toleranceSec`.
+ * Ties resolve to the earlier date.
+ */
+export function findClosestDateBinary(
+  sortedDates: number[],
+  target: number,
+  toleranceSec: number,
+): number | undefined {
+  if (sortedDates.length === 0) return undefined;
+
+  let lo = 0;
+  let hi = sortedDates.length - 1;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (sortedDates[mid] < target) lo = mid + 1;
+    else hi = mid;
+  }
+
+  // lo is the first date >= target. Compare with lo and lo-1 to find nearest.
+  const after = sortedDates[lo];
+  const before = lo > 0 ? sortedDates[lo - 1] : undefined;
+
+  const best = before === undefined
+    ? after
+    : (target - before) <= (after - target) ? before : after;
+
+  return Math.abs(best - target) <= toleranceSec ? best : undefined;
+}

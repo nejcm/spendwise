@@ -5,6 +5,7 @@ import * as React from 'react';
 import { Image, Options, SolidButton, Text, useModal, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { CURRENCIES_MAP, CURRENCY_OPTIONS } from '@/features/currencies';
+import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { LANGUAGES_OPTIONS } from '@/features/languages';
 import { translate, useSelectedLanguage } from '@/lib/i18n';
 import { setCurrency, useAppStore } from '@/lib/store';
@@ -76,7 +77,7 @@ export default function SettingsStep({ onBack, onNext, currentStep }: SettingsSt
               {translate('settings.default_currency')}
             </Text>
             <GhostButton size="xl" className="items-center gap-4" onPress={currencyModal.present}>
-              <Image source={selectedCurrency.image} className="size-10 rounded-full" />
+              <Image source={CURRENCY_IMAGES[selectedCurrency.value]} className="size-10 rounded-full" />
               <Text className="text-4xl text-foreground">{selectedCurrency.value}</Text>
             </GhostButton>
             <Options

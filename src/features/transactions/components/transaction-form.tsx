@@ -10,8 +10,9 @@ import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
 import { useAccounts } from '@/features/accounts/api';
 import { CategoryPicker } from '@/features/categories/category-picker';
-import { CURRENCIES_MAP, CURRENCY_OPTIONS } from '@/features/currencies';
+import { CURRENCY_OPTIONS } from '@/features/currencies';
 import { mergeCurrencyArrays } from '@/features/currencies/helpers';
+import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { useCreateTransaction, useUpdateTransaction } from '@/features/transactions/api';
 import { TransactionBaseAmountSync } from '@/features/transactions/components/transaction-base-amount-sync';
 import {
@@ -159,7 +160,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
         children={([selectedCurrency]) => selectedCurrency !== preferredCurrency && (
           <View className="flex-row items-center gap-2">
             <View className="w-[92] flex-row items-center justify-center gap-2 px-4">
-              <Image source={CURRENCIES_MAP[preferredCurrency].image} className="size-6 rounded-full" />
+              <Image source={CURRENCY_IMAGES[preferredCurrency]} className="size-6 rounded-full" />
               <Text className="border-none bg-transparent">
                 {preferredCurrency}
               </Text>

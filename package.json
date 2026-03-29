@@ -17,7 +17,6 @@
     "web": "expo start --web",
     "xcode": "xed -b ios",
     "doctor": "npx expo-doctor@latest",
-    "rates:update": "tsx scripts/generate-bundled-rates.ts",
     "assets:jpg": "tsx scripts/svg-to-jpg.ts",
     "preinstall": "npx only-allow pnpm",
     "start:preview": "cross-env EXPO_PUBLIC_APP_ENV=preview pnpm run start",

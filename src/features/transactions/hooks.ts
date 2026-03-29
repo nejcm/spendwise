@@ -9,7 +9,7 @@ import * as Haptics from 'expo-haptics';
 import { useSQLiteContext } from 'expo-sqlite';
 import Alert from '@/components/ui/alert';
 import { computeBaseAmount } from '@/features/currencies/conversion';
-import { getRatesForDate } from '@/features/currencies/queries';
+import { getRatesForDate, getRatesForDates } from '@/features/currencies/queries';
 import { captureError } from '@/lib/analytics';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
@@ -78,14 +78,10 @@ async function prepareTransactionsForInsert(
 ): Promise<TransactionFormData[]> {
   const datesNeedingRates = new Set<number>();
   for (const item of items) {
+    // add only dates that need rates (without baseAmount)
     if (!item.baseAmount) datesNeedingRates.add(item.date);
   }
-  const ratesByDate = new Map<number, Awaited<ReturnType<typeof getRatesForDate>>>();
-  await Promise.all(
-    Array.from(datesNeedingRates, async (date) => {
-      ratesByDate.set(date, await getRatesForDate(db, date));
-    }),
-  );
+  const ratesByDate = await getRatesForDates(db, Array.from(datesNeedingRates));
   return items.map((item) => {
     const rates = item.baseAmount ? undefined : ratesByDate.get(item.date);
     return prepareTransactionData(item, rates);

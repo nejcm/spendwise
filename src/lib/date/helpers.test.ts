@@ -1,6 +1,7 @@
 import type { PeriodSelectionWeek } from '../store';
 import {
   dateToUnix,
+  findClosestDateBinary,
   getCurrentMonthRange,
   getPeriodRange,
   navigatePeriod,
@@ -225,5 +226,72 @@ describe('scaleBudgetForPeriod', () => {
     // 15/31 ≈ 48% of monthly budget
     expect(result).toBeGreaterThan(40_000);
     expect(result).toBeLessThan(60_000);
+  });
+});
+
+// ─── findClosestDateBinary ───────────────────────────────────────────────────
+
+const DAY = 86400;
+
+describe('findClosestDateBinary', () => {
+  const tolerance = 7 * DAY;
+
+  it('returns undefined for empty array', () => {
+    expect(findClosestDateBinary([], 100, tolerance)).toBeUndefined();
+  });
+
+  it('finds exact match', () => {
+    const dates = [10 * DAY, 20 * DAY, 30 * DAY];
+    expect(findClosestDateBinary(dates, 20 * DAY, tolerance)).toBe(20 * DAY);
+  });
+
+  it('finds closest date before target', () => {
+    const dates = [10 * DAY, 20 * DAY, 30 * DAY];
+    expect(findClosestDateBinary(dates, 21 * DAY, tolerance)).toBe(20 * DAY);
+  });
+
+  it('finds closest date after target', () => {
+    const dates = [10 * DAY, 20 * DAY, 30 * DAY];
+    expect(findClosestDateBinary(dates, 19 * DAY, tolerance)).toBe(20 * DAY);
+  });
+
+  it('ties resolve to earlier date', () => {
+    const dates = [10 * DAY, 20 * DAY];
+    expect(findClosestDateBinary(dates, 15 * DAY, tolerance)).toBe(10 * DAY);
+  });
+
+  it('returns undefined when closest exceeds tolerance', () => {
+    const dates = [10 * DAY];
+    expect(findClosestDateBinary(dates, 20 * DAY, 3 * DAY)).toBeUndefined();
+  });
+
+  it('returns match at exact tolerance boundary', () => {
+    const dates = [10 * DAY];
+    expect(findClosestDateBinary(dates, 17 * DAY, 7 * DAY)).toBe(10 * DAY);
+  });
+
+  it('returns undefined one second past tolerance', () => {
+    const dates = [10 * DAY];
+    expect(findClosestDateBinary(dates, 17 * DAY + 1, 7 * DAY)).toBeUndefined();
+  });
+
+  it('single element array — target before', () => {
+    const dates = [20 * DAY];
+    expect(findClosestDateBinary(dates, 18 * DAY, tolerance)).toBe(20 * DAY);
+  });
+
+  it('single element array — target after', () => {
+    const dates = [20 * DAY];
+    expect(findClosestDateBinary(dates, 22 * DAY, tolerance)).toBe(20 * DAY);
+  });
+
+  it('target before all dates — picks first', () => {
+    const dates = [10 * DAY, 20 * DAY, 30 * DAY];
+    expect(findClosestDateBinary(dates, 8 * DAY, tolerance)).toBe(10 * DAY);
+  });
+
+  it('target after all dates — picks last', () => {
+    const dates = [10 * DAY, 20 * DAY, 30 * DAY];
+    expect(findClosestDateBinary(dates, 32 * DAY, tolerance)).toBe(30 * DAY);
   });
 });

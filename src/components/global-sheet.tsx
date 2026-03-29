@@ -154,7 +154,7 @@ export function GlobalSheet() {
   const modalRef = useRef<BottomSheetModal>(null);
 
   const snapPoints = useMemo(
-    () => (config ? SHEET_SNAP_POINTS[config.type] : ['80%']),
+    () => (config ? SHEET_SNAP_POINTS[config.type] : ['72%']),
     [config],
   );
 
@@ -173,7 +173,7 @@ export function GlobalSheet() {
     >
       {() => (
         <BottomSheetKeyboardAwareScrollView
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 32, minHeight: '80%' }}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, minHeight: '100%' }}
           keyboardShouldPersistTaps="handled"
         >
           {config && <SheetContent config={config} onClose={closeSheet} />}

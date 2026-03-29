@@ -3,10 +3,10 @@ import type { VariantProps } from 'tailwind-variants';
 import * as React from 'react';
 import { tv } from 'tailwind-variants';
 import { Button } from './button';
-import { solidButton } from './solid-button';
+import { buttonTv } from './solid-button';
 
 const outlineButton = tv({
-  extend: solidButton,
+  extend: buttonTv,
   slots: {
     container: 'flex flex-row items-center justify-center rounded-lg border-0 px-4',
   },

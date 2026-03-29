@@ -4,10 +4,10 @@ import * as React from 'react';
 import { Pressable } from 'react-native';
 import { tv } from 'tailwind-variants';
 import { getPressedStyle } from './button';
-import { solidButton } from './solid-button';
+import { buttonTv } from './solid-button';
 
 const iconButton = tv({
-  extend: solidButton,
+  extend: buttonTv,
   slots: {
     container: 'flex flex-row items-center justify-center rounded-full p-0',
   },

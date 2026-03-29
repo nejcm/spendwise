@@ -29,7 +29,7 @@ export const inputTv = tv({
     },
     size: {
       xs: {
-        input: 'h-6 px-2 text-xs/snug',
+        input: 'h-8 px-2 text-xs/snug',
         label: 'text-xs/snug',
       },
       sm: {
@@ -37,15 +37,15 @@ export const inputTv = tv({
         label: 'text-xs/snug',
       },
       md: {
-        input: 'h-12 px-3 text-base/snug',
-        label: 'text-sm/snug',
-      },
-      lg: {
-        input: 'h-14 px-4 text-lg/snug',
+        input: 'h-14 px-3 text-base/snug',
         label: 'text-base/snug',
       },
+      lg: {
+        input: 'h-16 px-4 text-lg/snug',
+        label: 'text-lg/snug',
+      },
       xl: {
-        input: 'h-16 px-5 text-xl/snug',
+        input: 'h-18 px-5 text-xl/snug',
         label: 'text-lg/snug',
       },
     },
@@ -88,9 +88,10 @@ export type InputProps = {
   error?: string;
   containerClassName?: string;
   rightSection?: React.ReactNode;
+  showErrorMessage?: boolean;
 } & Omit<VariantProps<typeof inputTv>, 'error'> & Omit<TextInputProps, 'size'>;
 
-export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInput | null> }) {
+export function Input({ ref, showErrorMessage = true, ...props }: InputProps & { ref?: React.Ref<NTextInput | null> }) {
   const { label, error, size = 'md', value, color = 'default', testID, onBlur: onBlurProp, onFocus: onFocusProp, containerClassName, rightSection, className, variant, ...inputProps } = props;
   const [isFocussed, setIsFocussed] = React.useState(false);
 
@@ -149,9 +150,9 @@ export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInp
           </View>
         )}
       </View>
-      {error && (
-        <View className="absolute top-full left-0 mt-0.5">
-          <Text testID={testID ? `${testID}-error` : undefined} className="text-xs text-danger-500">
+      {error && !!showErrorMessage && (
+        <View className="absolute top-full left-0 mt-0.25">
+          <Text testID={testID ? `${testID}-error` : undefined} className="text-[9px] text-danger-500">
             {error}
           </Text>
         </View>

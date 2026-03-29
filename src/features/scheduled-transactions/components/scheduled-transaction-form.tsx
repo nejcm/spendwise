@@ -20,7 +20,8 @@ import { getFieldError } from '@/components/ui/form-utils';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { useAccounts } from '@/features/accounts/api';
 import { CategoryPicker } from '@/features/categories/category-picker';
-import { CURRENCY_OPTIONS, CURRENCY_VALUES } from '@/features/currencies';
+import { CURRENCY_VALUES } from '@/features/currencies';
+import { CURRENCY_OPTIONS } from '@/features/currencies/images';
 import { todayISO } from '@/features/formatting/helpers';
 import { dateToUnix } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
@@ -233,7 +234,7 @@ export function ScheduledTransactionForm({
       <form.Field
         name="account_id"
         children={(field) => (
-          <View>
+          <View className="mb-2">
             <Text className="mb-2 text-sm font-medium">
               {translate('transactions.account')}
             </Text>
@@ -261,21 +262,6 @@ export function ScheduledTransactionForm({
           <CategoryPicker
             selectedId={field.state.value}
             onSelect={(category) => field.handleChange(category.id)}
-            label={translate('transactions.category')}
-            error={getFieldError(field)}
-          />
-        )}
-      />
-
-      <form.Field
-        name="note"
-        children={(field) => (
-          <Input
-            label={translate('transactions.note')}
-            value={field.state.value || ''}
-            onBlur={field.handleBlur}
-            onChangeText={field.handleChange}
-            placeholder={translate('common.note')}
             error={getFieldError(field)}
           />
         )}
@@ -285,7 +271,6 @@ export function ScheduledTransactionForm({
         name="frequency"
         children={(field) => (
           <Select
-            label={translate('scheduled.frequency')}
             value={field.state.value}
             options={FREQUENCY_OPTIONS}
             onSelect={(value) => field.handleChange(String(value) as FormValues['frequency'])}
@@ -294,31 +279,31 @@ export function ScheduledTransactionForm({
         )}
       />
 
-      <View className="flex-row gap-3">
+      <View className="flex-row items-center gap-2">
         <form.Field
           name="start_date"
           children={(field) => (
             <View className="flex-1">
               <DateInput
-                label={translate('common.start_date')}
                 value={field.state.value}
                 onChange={field.handleChange}
                 error={getFieldError(field)}
+                placeholder={translate('common.start_date')}
                 modalProps={{ stackBehavior: 'push' }}
               />
             </View>
           )}
         />
-
+        <Text>-</Text>
         <form.Field
           name="end_date"
           children={(field) => (
             <View className="flex-1 gap-2">
               <DateInput
-                label={translate('common.end_date')}
                 value={field.state.value || ''}
                 onChange={field.handleChange}
                 error={getFieldError(field)}
+                placeholder={translate('common.end_date')}
                 modalProps={{ stackBehavior: 'push' }}
               />
               {field.state.value && (
@@ -333,6 +318,19 @@ export function ScheduledTransactionForm({
           )}
         />
       </View>
+
+      <form.Field
+        name="note"
+        children={(field) => (
+          <Input
+            value={field.state.value || ''}
+            onBlur={field.handleBlur}
+            onChangeText={field.handleChange}
+            placeholder={translate('common.note')}
+            error={getFieldError(field)}
+          />
+        )}
+      />
 
       <form.Field
         name="is_active"

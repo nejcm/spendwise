@@ -24,10 +24,4 @@ export type CurrencyKey = keyof typeof CURRENCIES_MAP;
 
 export const CURRENCIES = Object.values(CURRENCIES_MAP);
 
-export const CURRENCY_OPTIONS = CURRENCIES.map((currency) => ({
-  ...currency,
-  label: currency.value,
-  subtext: currency.name,
-}));
-
 export const CURRENCY_VALUES = Object.keys(CURRENCIES_MAP) as CurrencyKey[];

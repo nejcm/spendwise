@@ -1,5 +1,4 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import BUNDLED_RATES from './bundled-rates.json';
 
 export async function seedDefaults(db: SQLiteDatabase): Promise<void> {
   await db.execAsync(`
@@ -29,17 +28,4 @@ export async function seedDefaults(db: SQLiteDatabase): Promise<void> {
     VALUES
       ('acc_main_checking', 'Main Checking', 'checking', '💳', '#4ECDC4', 'EUR');
   `);
-}
-
-export async function seedBundledRates(db: SQLiteDatabase): Promise<void> {
-  if (BUNDLED_RATES.length === 0) return;
-
-  await db.withTransactionAsync(async () => {
-    for (const { quote, rate, date } of BUNDLED_RATES) {
-      await db.runAsync(
-        `INSERT OR IGNORE INTO currency_rates (base, quote, rate, date) VALUES ('EUR', ?, ?, ?)`,
-        [quote, rate, date],
-      );
-    }
-  });
 }

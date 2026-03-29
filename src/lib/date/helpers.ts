@@ -31,6 +31,28 @@ export function unixToISODate(seconds: number): string {
   return format(new Date(seconds * 1000), 'yyyy-MM-dd');
 }
 
+export function splitByYear(
+  startDate: string,
+  endDate: string,
+): Array<{ start: string; end: string }> {
+  const segments: Array<{ start: string; end: string }> = [];
+  const start = new Date(`${startDate}T00:00:00Z`);
+  const end = new Date(`${endDate}T00:00:00Z`);
+  let segStart = new Date(start);
+
+  while (segStart <= end) {
+    const yearEnd = new Date(Date.UTC(segStart.getUTCFullYear(), 11, 31));
+    const segEnd = yearEnd < end ? yearEnd : end;
+    segments.push({
+      start: segStart.toISOString().slice(0, 10),
+      end: segEnd.toISOString().slice(0, 10),
+    });
+    segStart = new Date(Date.UTC(segStart.getUTCFullYear() + 1, 0, 1));
+  }
+
+  return segments;
+}
+
 /**
  * Get the start and end of a month as Unix seconds (UTC).
  * @param yearMonth - The year and month in the format "YYYY-MM".

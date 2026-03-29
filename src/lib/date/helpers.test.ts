@@ -5,7 +5,7 @@ import {
   getPeriodRange,
   navigatePeriod,
   scaleBudgetForPeriod,
-  splitByYear,
+  splitBy,
   unixToDate,
   unixToISODate,
 } from '@/lib/date/helpers';
@@ -59,15 +59,51 @@ describe('unixToISODate', () => {
   });
 });
 
-describe('splitByYear', () => {
-  it('returns one segment when range is within a year', () => {
-    expect(splitByYear('2026-03-01', '2026-06-15')).toEqual([{ start: '2026-03-01', end: '2026-06-15' }]);
+describe('splitBy', () => {
+  it('default chunkSize (1y): one segment when range is within a year', () => {
+    expect(splitBy('2026-03-01', '2026-06-15')).toEqual([{ start: '2026-03-01', end: '2026-06-15' }]);
   });
 
-  it('splits across calendar years', () => {
-    expect(splitByYear('2025-11-01', '2026-02-28')).toEqual([
-      { start: '2025-11-01', end: '2025-12-31' },
-      { start: '2026-01-01', end: '2026-02-28' },
+  it('default chunkSize (1y): one segment when crossing calendar year but inside first 1y window', () => {
+    expect(splitBy('2025-11-01', '2026-02-28')).toEqual([{ start: '2025-11-01', end: '2026-02-28' }]);
+  });
+
+  it('chunkSize 2: boundaries follow start-date anniversaries (mid-year anchor)', () => {
+    expect(splitBy('2020-11-20', '2025-03-15', 2)).toEqual([
+      { start: '2020-11-20', end: '2022-11-20' },
+      { start: '2022-11-21', end: '2024-11-20' },
+      { start: '2024-11-21', end: '2025-03-15' },
+    ]);
+  });
+
+  it('chunkSize 1: one segment when end before first anniversary', () => {
+    expect(splitBy('2025-11-01', '2026-02-28', 1)).toEqual([{ start: '2025-11-01', end: '2026-02-28' }]);
+  });
+
+  it('chunkSize 1: splits at yearly anniversaries from anchor', () => {
+    expect(splitBy('2025-11-01', '2027-01-15', 1)).toEqual([
+      { start: '2025-11-01', end: '2026-11-01' },
+      { start: '2026-11-02', end: '2027-01-15' },
+    ]);
+  });
+
+  it('chunkSize 2: Jan 1 anchor uses anniversary boundaries', () => {
+    expect(splitBy('2020-01-01', '2025-06-15', 2)).toEqual([
+      { start: '2020-01-01', end: '2022-01-01' },
+      { start: '2022-01-02', end: '2024-01-01' },
+      { start: '2024-01-02', end: '2025-06-15' },
+    ]);
+  });
+
+  it('chunkSize 3: three-year chunks from anchor', () => {
+    expect(splitBy('2020-01-01', '2024-06-01', 3)).toEqual([
+      { start: '2020-01-01', end: '2023-01-01' },
+      { start: '2023-01-02', end: '2024-06-01' },
+    ]);
+  });
+  it('chunkSize 5: three-year chunks from anchor', () => {
+    expect(splitBy('2020-01-01', '2024-06-01', 5)).toEqual([
+      { start: '2020-01-01', end: '2024-06-01' },
     ]);
   });
 });

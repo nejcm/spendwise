@@ -51,6 +51,7 @@
     "knip": "knip"
   },
   "dependencies": {
+    "@date-fns/utc": "~2.1.1",
     "@expo-google-fonts/inter": "~0.4.2",
     "@expo/metro-runtime": "~6.1.2",
     "@gorhom/bottom-sheet": "~5.2.8",

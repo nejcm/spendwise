@@ -1,4 +1,5 @@
 import type { PeriodSelection } from '@/lib/store';
+import { UTCDate } from '@date-fns/utc';
 import {
   addDays,
   addMonths,
@@ -31,23 +32,26 @@ export function unixToISODate(seconds: number): string {
   return format(new Date(seconds * 1000), 'yyyy-MM-dd');
 }
 
-export function splitByYear(
+export function splitBy(
   startDate: string,
   endDate: string,
+  chunkSize = 1,
 ): Array<{ start: string; end: string }> {
   const segments: Array<{ start: string; end: string }> = [];
-  const start = new Date(`${startDate}T00:00:00Z`);
-  const end = new Date(`${endDate}T00:00:00Z`);
-  let segStart = new Date(start);
+  const anchor = new UTCDate(`${startDate}T00:00:00Z`);
+  const end = new UTCDate(`${endDate}T00:00:00Z`);
+  if (anchor > end) return segments;
 
-  while (segStart <= end) {
-    const yearEnd = new Date(Date.UTC(segStart.getUTCFullYear(), 11, 31));
-    const segEnd = yearEnd < end ? yearEnd : end;
+  for (let i = 0; ; i += 1) {
+    const segStart = i === 0 ? anchor : addDays(addYears(anchor, i * chunkSize), 1);
+    if (segStart > end) break;
+    const chunkEnd = addYears(anchor, (i + 1) * chunkSize);
+    const segEnd = chunkEnd <= end ? chunkEnd : end;
     segments.push({
       start: segStart.toISOString().slice(0, 10),
       end: segEnd.toISOString().slice(0, 10),
     });
-    segStart = new Date(Date.UTC(segStart.getUTCFullYear() + 1, 0, 1));
+    if (segEnd.getTime() >= end.getTime()) break;
   }
 
   return segments;

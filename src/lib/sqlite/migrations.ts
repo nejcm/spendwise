@@ -1,5 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import { seedBundledRates, seedDefaults } from './seed';
+import { seedDefaults } from './seed';
 
 const DATABASE_VERSION = 1;
 
@@ -155,7 +155,6 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           ON recurring_rule_runs(rule_id, scheduled_for_date);
       `);
 
-    await seedBundledRates(db);
     await seedDefaults(db);
     await db.execAsync(`PRAGMA user_version = 1`);
   }

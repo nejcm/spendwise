@@ -4,7 +4,7 @@ import { IS_WEB } from '../base';
 import { dropDb, migrateDb } from '../sqlite';
 import { clearDbData } from '../sqlite/migrations';
 import { mockData } from '../sqlite/mock-data';
-import { seedBundledRates, seedDefaults } from '../sqlite/seed';
+import { seedDefaults } from '../sqlite/seed';
 import { clearAppStore } from '../store';
 
 export async function clearData(db: SQLiteDatabase, queryClient: QueryClient) {
@@ -22,7 +22,6 @@ export async function clearData(db: SQLiteDatabase, queryClient: QueryClient) {
 
 export async function seedData(db: SQLiteDatabase, queryClient: QueryClient) {
   try {
-    await seedBundledRates(db);
     await seedDefaults(db);
     queryClient.clear();
     queryClient.invalidateQueries();

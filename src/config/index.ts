@@ -20,3 +20,10 @@ export const AI_MAX_TOOL_ROUNDS = 3;
 export const DEFAULT_DATE_FORMAT = 'MMM d, yyyy' satisfies DateFormat;
 export const DEFAULT_CURRENCY = 'EUR' satisfies CurrencyKey;
 export const DEFAULT_USER_CURRENCY = 'USD' satisfies CurrencyKey;
+
+// AI
+
+export const OPEN_AI_API_URL = 'https://api.openai.com/v1/chat/completions';
+
+export const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
+export const ANTHROPIC_MAX_TOKENS = 1024;

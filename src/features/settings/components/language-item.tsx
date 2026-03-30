@@ -2,7 +2,7 @@ import type { Language } from '../../languages/types';
 
 import type { OptionType } from '@/components/ui';
 import * as React from 'react';
-import { Options, useModal } from '@/components/ui';
+import { Options, useModalSheet } from '@/components/ui';
 
 import { Languages } from '@/components/ui/icon';
 import { useSelectedLanguage } from '@/lib/i18n';
@@ -10,7 +10,7 @@ import { LANGUAGES_OPTIONS } from '../../languages';
 import { SettingsItem } from './settings-item';
 
 export function LanguageItem() {
-  const modal = useModal();
+  const modal = useModalSheet();
   const { selected, setLanguage } = useSelectedLanguage();
 
   const onSelect = React.useCallback(

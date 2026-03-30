@@ -1,23 +1,24 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { SheetConfig, SheetType } from '@/lib/sheet';
 import { useEffect, useMemo, useRef } from 'react';
-import { Modal, Text, View } from '@/components/ui';
+import { ModalSheet, Text, View } from '@/components/ui';
 import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { AccountForm } from '@/features/accounts/components/account-form';
 import { CategoryForm } from '@/features/categories/category-form';
 import { ScheduledTransactionForm } from '@/features/scheduled-transactions/components/scheduled-transaction-form';
+import { ScanFab } from '@/features/transactions/components/scan-fab';
 import { TransactionForm } from '@/features/transactions/components/transaction-form';
 import { translate } from '@/lib/i18n';
 import { closeSheet, useLocalStore } from '@/lib/local-store';
 import { SHEET_SNAP_POINTS } from '@/lib/sheet';
 
-const SHEET_TITLES: Record<SheetType, string> = {
-  'add-transaction': translate('transactions.add'),
-  'add-account': translate('accounts.add'),
-  'edit-account': translate('accounts.edit'),
-  'add-category': translate('categories.add'),
-  'edit-category': translate('categories.edit'),
-  'add-scheduled': translate('scheduled.add'),
+const SHEET_DATA: Record<SheetType, { title: string; content?: React.ReactNode }> = {
+  'add-transaction': { title: translate('transactions.add'), content: <ScanFab /> },
+  'add-account': { title: translate('accounts.add') },
+  'edit-account': { title: translate('accounts.edit') },
+  'add-category': { title: translate('categories.add') },
+  'edit-category': { title: translate('categories.edit') },
+  'add-scheduled': { title: translate('scheduled.add') },
 };
 
 /* function DeleteAccountAction({ id, name }: { id: string; name: string }) {
@@ -89,8 +90,9 @@ function SheetTitle({ config }: { config: SheetConfig | undefined }) {
   } */
   return (
     <View className="flex-row items-center justify-center gap-3">
-      <Text className="text-lg font-bold">{SHEET_TITLES[config.type]}</Text>
+      <Text className="text-lg font-bold">{SHEET_DATA[config.type].title}</Text>
       {/* {actions} */}
+      {SHEET_DATA[config.type].content || null}
     </View>
   );
 }
@@ -100,7 +102,7 @@ function SheetContent({ config, onClose }: { config: SheetConfig; onClose: () =>
     case 'add-transaction':
       return (
         <TransactionForm
-          initialValues={config.categoryId ? { category_id: config.categoryId } : undefined}
+          initialValues={config.initialValues}
           onSuccess={onClose}
           onCancel={onClose}
           isSheet
@@ -164,21 +166,19 @@ export function GlobalSheet() {
   }, [config]);
 
   return (
-    <Modal
+    <ModalSheet
       ref={modalRef}
       snapPoints={snapPoints}
       title={<SheetTitle config={config} />}
       onDismiss={closeSheet}
       android_keyboardInputMode="adjustPan"
     >
-      {() => (
-        <BottomSheetKeyboardAwareScrollView
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, minHeight: '100%' }}
-          keyboardShouldPersistTaps="handled"
-        >
-          {config && <SheetContent config={config} onClose={closeSheet} />}
-        </BottomSheetKeyboardAwareScrollView>
-      )}
-    </Modal>
+      <BottomSheetKeyboardAwareScrollView
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, minHeight: '100%' }}
+        keyboardShouldPersistTaps="handled"
+      >
+        {config && <SheetContent config={config} onClose={closeSheet} />}
+      </BottomSheetKeyboardAwareScrollView>
+    </ModalSheet>
   );
 }

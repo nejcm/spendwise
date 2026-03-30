@@ -9,7 +9,7 @@ import { clearAiChat, setAiDraftQuestion, setAiMessages, useAiChatStore } from '
 import { captureError } from '@/lib/analytics';
 import { translate } from '@/lib/i18n';
 import { generateId } from '@/lib/sqlite';
-import { useAppStore } from '@/lib/store';
+import { selectIsAiEnabled, useAppStore } from '@/lib/store';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import { getMarkdownStyle } from './helpers';
 
@@ -41,11 +41,9 @@ function initialState(): ChatState {
 export function useChat(): UseChatReturn {
   const db = useSQLiteContext();
   const theme = useThemeConfig();
-  const openaiApiKey = useAppStore.use.openaiApiKey();
-  const anthropicApiKey = useAppStore.use.anthropicApiKey();
   const messages = useAiChatStore.use.messages();
   const draftQuestion = useAiChatStore.use.draftQuestion();
-  const hasKey = Boolean(openaiApiKey) || Boolean(anthropicApiKey);
+  const isAiEnabled = useAppStore(selectIsAiEnabled);
   const inFlightRequestRef = React.useRef(false);
   const abortControllerRef = React.useRef<AbortController | null>(null);
   const isMountedRef = React.useRef(true);
@@ -245,7 +243,7 @@ export function useChat(): UseChatReturn {
   }, [scrollUserMessageToTop]);
 
   return {
-    hasKey,
+    hasKey: isAiEnabled,
     messages,
     draftQuestion,
     ...chatState,

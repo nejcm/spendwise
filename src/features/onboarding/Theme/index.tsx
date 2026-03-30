@@ -2,7 +2,7 @@ import type { ThemeType } from '../../settings/theme';
 
 import type { OptionType } from '@/components/ui';
 import * as React from 'react';
-import { Options, SolidButton, Text, useModal } from '@/components/ui';
+import { Options, SolidButton, Text, useModalSheet } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { translate } from '@/lib/i18n';
 import { useSelectedTheme } from '@/lib/theme/use-selected-theme';
@@ -17,7 +17,7 @@ export type ThemeStepProps = {
 
 export default function ThemeStep({ onBack, onNext, currentStep }: ThemeStepProps) {
   const { selectedTheme, setSelectedTheme } = useSelectedTheme();
-  const modal = useModal();
+  const modal = useModalSheet();
 
   const onSelect = React.useCallback(
     (option: OptionType) => {

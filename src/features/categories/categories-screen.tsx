@@ -102,7 +102,7 @@ export function CategoriesScreen() {
                   });
                   return;
                 }
-                openSheet({ type: 'add-transaction', categoryId: category.category_id });
+                openSheet({ type: 'add-transaction', initialValues: { category_id: category.category_id } });
               }}
             />
           )}

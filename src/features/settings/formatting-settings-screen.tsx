@@ -4,7 +4,7 @@ import type { OptionType } from '@/components/ui';
 import type { CurrencyKey } from '@/features/currencies';
 import * as React from 'react';
 import { ActivityIndicator, Alert, View } from 'react-native';
-import { FocusAwareStatusBar, Options, ScrollView, useModal } from '@/components/ui';
+import { FocusAwareStatusBar, Options, ScrollView, useModalSheet } from '@/components/ui';
 import { Calendar, CircleDollarSign, DecimalsArrowRight, Euro } from '@/components/ui/icon';
 import { useChangeCurrency } from '@/features/currencies/hooks';
 import { CURRENCY_OPTIONS } from '@/features/currencies/images';
@@ -25,7 +25,7 @@ export function FormattingSettingsScreen() {
   const currencyFormat = useAppStore.use.currencyFormat();
   const dateFormat = useAppStore.use.dateFormat();
   const numberFormat = useAppStore.use.numberFormat();
-  const modal = useModal();
+  const modal = useModalSheet();
   const { dismiss } = modal;
   const [modalType, setModalType] = React.useState<ModalType | undefined>();
   const changeCurrency = useChangeCurrency();

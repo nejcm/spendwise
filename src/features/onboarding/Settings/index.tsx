@@ -2,7 +2,7 @@ import type { OptionType } from '@/components/ui';
 import type { CurrencyKey } from '@/features/currencies';
 import type { Language } from '@/features/languages/types';
 import * as React from 'react';
-import { Image, Options, SolidButton, Text, useModal, View } from '@/components/ui';
+import { Image, Options, SolidButton, Text, useModalSheet, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { CURRENCIES_MAP } from '@/features/currencies';
 import { CURRENCY_IMAGES, CURRENCY_OPTIONS } from '@/features/currencies/images';
@@ -22,8 +22,8 @@ export default function SettingsStep({ onBack, onNext, currentStep }: SettingsSt
   const currency = useAppStore.use.currency();
   const selectedCurrency = CURRENCIES_MAP[currency];
 
-  const modal = useModal();
-  const currencyModal = useModal();
+  const modal = useModalSheet();
+  const currencyModal = useModalSheet();
   const onSelect = React.useCallback(
     (option: OptionType) => {
       setLanguage(option.value as Language);

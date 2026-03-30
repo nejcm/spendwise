@@ -1,11 +1,9 @@
 import type { ProviderChatMessage, StreamResponse, ToolCall } from '../types';
-import { ANTHROPIC_MODEL } from '@/config';
+import { ANTHROPIC_API_URL, ANTHROPIC_MAX_TOKENS, ANTHROPIC_MODEL } from '@/config';
 import { streamSseEventsFromResponse } from './streaming';
 import { TOOL_DEFINITIONS_ANTHROPIC } from './tools';
 
 const MAX_PROVIDER_ERROR_LENGTH = 240;
-const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
-const ANTHROPIC_MAX_TOKENS = 1024;
 
 function trimErrorMessage(message: string) {
   const trimmed = message.trim();
@@ -280,4 +278,47 @@ export async function streamAskAnthropic({
   }
 
   return { type: 'text', content: fullContent };
+}
+
+// ─── Receipt Scanning ───
+
+export async function scanReceiptAnthropic(
+  base64Image: string,
+  mimeType: 'image/jpeg' | 'image/png',
+  prompt: string,
+  apiKey: string,
+): Promise<string> {
+  const body = {
+    model: ANTHROPIC_MODEL,
+    max_tokens: ANTHROPIC_MAX_TOKENS,
+    messages: [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'image',
+            source: { type: 'base64', media_type: mimeType, data: base64Image },
+          },
+          { type: 'text', text: prompt },
+        ],
+      },
+    ],
+  };
+
+  const res = await fetch(ANTHROPIC_API_URL, {
+    method: 'POST',
+    headers: buildHeaders(apiKey),
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw await buildAnthropicError(res);
+  }
+
+  const json = await res.json();
+  const content = (json.content as Array<{ type: string; text?: string }> | undefined)
+    ?.find((b) => b.type === 'text')
+    ?.text;
+  if (!content) throw new Error('Empty response from Anthropic');
+  return content;
 }

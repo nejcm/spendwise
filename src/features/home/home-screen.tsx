@@ -14,6 +14,7 @@ import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
+import { ScanFab } from '../transactions/components/scan-fab';
 import TransactionsList from './transactions-list';
 
 export function HomeScreen() {
@@ -33,9 +34,12 @@ export function HomeScreen() {
               source={theme.dark ? require('../../../assets/spendwise-white.svg') : require('../../../assets/spendwise.svg')}
               className="h-[24] w-[120]"
             />
-            <IconButton size="sm" color="secondary" onPress={() => router.push('/ai')}>
-              <BotIcon size={22} className="text-muted-foreground" />
-            </IconButton>
+            <View className="flex-row items-center gap-2">
+              <IconButton size="sm" color="secondary" onPress={() => router.push('/ai')}>
+                <BotIcon size={22} className="text-muted-foreground" />
+              </IconButton>
+              <ScanFab />
+            </View>
           </View>
           <View>
             <View className="flex-row items-center justify-between gap-2">

@@ -1,4 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
 import { Pressable } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
@@ -8,7 +9,8 @@ import { IconButton } from '@/components/ui/icon-button';
 import { SkeletonGrid } from '@/components/ui/skeleton';
 import { useUpdateCategoryOrder } from '@/features/categories/api';
 import { centsToAmount } from '@/features/formatting/helpers';
-import { useCategorySpendByRange } from '@/features/insights/api';
+import { categorySpendByRangeQueryOptions, useCategorySpendByRange } from '@/features/insights/api';
+import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/local-store';
@@ -26,6 +28,9 @@ export function CategoriesScreen() {
 
   const { data = [], isLoading } = useCategorySpendByRange(startDate, endDate);
   const updateOrder = useUpdateCategoryOrder();
+
+  const db = useSQLiteContext();
+  usePrefetchAdjacentPeriods(selection, (start, end) => categorySpendByRangeQueryOptions(db, start, end));
   const total = React.useMemo(
     () => data.reduce((sum, c) => sum + c.income_total - c.expense_total, 0),
     [data],

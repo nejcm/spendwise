@@ -1,3 +1,4 @@
+import type { SQLiteDatabase } from 'expo-sqlite';
 import { useQuery } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
 
@@ -13,12 +14,15 @@ export function useSummaryByRange(startDate: number | undefined, endDate: number
   });
 }
 
-export function useCategorySpendByRange(startDate: number | undefined, endDate: number | undefined) {
-  const db = useSQLiteContext();
-  return useQuery({
+export function categorySpendByRangeQueryOptions(db: SQLiteDatabase, startDate: number | undefined, endDate: number | undefined) {
+  return {
     queryKey: queryKeys.insights.categorySpendRange(startDate, endDate),
     queryFn: () => queries.getCategorySpendByRange(db, startDate, endDate),
-  });
+  };
+}
+export function useCategorySpendByRange(startDate: number | undefined, endDate: number | undefined) {
+  const db = useSQLiteContext();
+  return useQuery(categorySpendByRangeQueryOptions(db, startDate, endDate));
 }
 
 export function useTrendByRange(startDate: number | undefined, endDate: number | undefined) {

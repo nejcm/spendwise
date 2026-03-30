@@ -1,5 +1,6 @@
-import type { AccountFormData } from './types';
+import type { SQLiteDatabase } from 'expo-sqlite';
 
+import type { AccountFormData } from './types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
 
@@ -30,12 +31,15 @@ export function useAccountsWithBalance() {
   });
 }
 
-export function useAccountsWithBalanceForRange(startDate: number | undefined, endDate: number | undefined) {
-  const db = useSQLiteContext();
-  return useQuery({
+export function accountsWithBalanceForRangeQueryOptions(db: SQLiteDatabase, startDate: number | undefined, endDate: number | undefined) {
+  return {
     queryKey: queryKeys.accounts.withBalanceForRange(startDate, endDate),
     queryFn: () => queries.getAccountsWithBalanceForRange(db, startDate, endDate),
-  });
+  };
+}
+export function useAccountsWithBalanceForRange(startDate: number | undefined, endDate: number | undefined) {
+  const db = useSQLiteContext();
+  return useQuery(accountsWithBalanceForRangeQueryOptions(db, startDate, endDate));
 }
 
 export function useTotalBalance(yearMonth?: string) {

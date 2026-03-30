@@ -1,6 +1,7 @@
 import type { AccountFormData } from '@/features/accounts/types';
 import type { CategoryInitialValues } from '@/features/categories/category-form';
 import type { ScheduledTransactionInitialValues } from '@/features/scheduled-transactions/components/scheduled-transaction-form';
+import type { TransactionFormInitialValues } from '@/features/transactions/components/transaction-form-schema';
 
 // ---------------------------------------------------------------------------
 // Sheet config – discriminated union so each sheet carries exactly the data
@@ -8,7 +9,7 @@ import type { ScheduledTransactionInitialValues } from '@/features/scheduled-tra
 // ---------------------------------------------------------------------------
 
 export type SheetConfig
-  = | { type: 'add-transaction'; categoryId?: string }
+  = | { type: 'add-transaction'; initialValues?: TransactionFormInitialValues }
     | { type: 'add-account' }
     | { type: 'edit-account'; accountId: string; initialData: AccountFormData }
     | { type: 'add-category' }

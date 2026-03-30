@@ -1,9 +1,7 @@
 import type { ProviderChatMessage, StreamResponse, ToolCall } from '../types';
-import { OPEN_AI_MODEL } from '@/config';
+import { OPEN_AI_API_URL, OPEN_AI_MODEL } from '@/config';
 import { streamSseEventsFromResponse } from './streaming';
 import { TOOL_DEFINITIONS_OPENAI } from './tools';
-
-const OPEN_AI_API_URL = 'https://api.openai.com/v1/chat/completions';
 
 export type OpenAiRequestMessage
   = { role: 'system' | 'user' | 'assistant'; content: string }
@@ -198,4 +196,49 @@ export async function streamAskOpenAI(
   }
 
   return { type: 'text', content: fullContent };
+}
+
+// ─── Receipt Scanning ───
+
+export async function scanReceiptOpenAI(
+  base64Image: string,
+  mimeType: 'image/jpeg' | 'image/png',
+  prompt: string,
+  apiKey: string,
+): Promise<string> {
+  const body = {
+    model: OPEN_AI_MODEL,
+    response_format: { type: 'json_object' },
+    messages: [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'image_url',
+            image_url: { url: `data:${mimeType};base64,${base64Image}`, detail: 'auto' },
+          },
+          { type: 'text', text: prompt },
+        ],
+      },
+    ],
+  };
+
+  const res = await fetch(OPEN_AI_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text().catch(() => '');
+    throw new Error(`OpenAI error: ${errorText || res.status}`);
+  }
+
+  const json = await res.json();
+  const content = json.choices?.[0]?.message?.content;
+  if (!content) throw new Error('Empty response from OpenAI');
+  return content as string;
 }

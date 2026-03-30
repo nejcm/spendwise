@@ -120,6 +120,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         },
       },
     ],
+    [
+      'expo-image-picker',
+      {
+        cameraPermission: 'Allow Spendwise to take photos of receipts.',
+        photosPermission: 'Allow Spendwise to access your photos to scan receipts.',
+      },
+    ],
     'expo-localization',
     [
       'expo-router',

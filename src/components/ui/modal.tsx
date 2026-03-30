@@ -36,6 +36,7 @@ import { Pressable, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { Path, Svg } from 'react-native-svg';
 
+import { IS_WEB } from '@/lib/base';
 import { defaultStyles } from '@/lib/theme/styles';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import { Text } from './text';
@@ -97,6 +98,7 @@ export function Modal<T>({
       backdropComponent={props.backdropComponent || renderBackdrop}
       enableDynamicSizing={false}
       handleComponent={renderHandleComponent}
+      overDragResistanceFactor={IS_WEB ? 0.5 : props.overDragResistanceFactor}
     />
   );
 }

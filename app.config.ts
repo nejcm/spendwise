@@ -68,6 +68,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     'expo-sqlite',
+    '@react-native-community/datetimepicker',
     [
       'expo-splash-screen',
       {

@@ -89,7 +89,7 @@ pnpm verify
 pnpm install-maestro
 pnpm e2e-test
 pnpm doctor
-pnpm knip
+pnpm knip:check
 ```
 
 `pnpm e2e-test` currently targets the development app id and assumes Maestro is installed.

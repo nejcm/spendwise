@@ -91,7 +91,7 @@ pnpm lint:all
 pnpm test
 pnpm verify
 pnpm doctor
-pnpm knip
+pnpm knip:check
 ```
 
 ## Notes

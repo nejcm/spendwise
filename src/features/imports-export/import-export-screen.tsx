@@ -7,7 +7,7 @@ import { useState } from 'react';
 import DetailsSection from '@/components/details';
 import { FocusAwareStatusBar, ScrollView, SolidButton, Text } from '@/components/ui';
 import Alert from '@/components/ui/alert';
-import { ArrowDown, ArrowUp } from '@/components/ui/icon';
+import { ArrowUp, Download, Upload } from '@/components/ui/icon';
 import { autoDetectColumnMapping, parseCSV } from '@/features/imports-export/csv-parser';
 import { useExportBackup, useImportBackup } from '@/features/imports-export/hooks';
 import Import from '@/features/imports-export/import';
@@ -17,7 +17,7 @@ import { defaultStyles } from '@/lib/theme/styles';
 const initialCsvState: ImportProps['state'] = {
   headers: [],
   allRows: [],
-  mapping: { amount: null, date: null, currency: null, note: null, type: null, baseAmount: null, baseCurrency: null, category: null },
+  mapping: { amount: null, date: null, currency: null, note: null, type: null, category: null },
 };
 
 function BackupSection() {
@@ -37,8 +37,8 @@ function BackupSection() {
               <SolidButton
                 size="sm"
                 className="min-w-16"
-                iconLeft={<ArrowUp className="mr-1 text-background" size={16} />}
-                label={translate('common.export')}
+                iconLeft={<Download className="mr-1 text-background" size={16} />}
+                label={translate('common.download')}
                 loading={exportBackup.isPending}
                 onPress={() => void exportBackup.mutate()}
               />
@@ -51,8 +51,8 @@ function BackupSection() {
               <SolidButton
                 size="sm"
                 className="min-w-16"
-                iconLeft={<ArrowDown className="mr-1 text-background" size={16} />}
-                label={translate('common.import')}
+                iconLeft={<Upload className="mr-1 text-background" size={16} />}
+                label={translate('common.restore')}
                 loading={importBackup.isPending}
                 onPress={() => importBackup.mutate()}
               />
@@ -114,7 +114,7 @@ export function ImportScreen() {
                   <SolidButton
                     size="sm"
                     className="min-w-16"
-                    iconLeft={<ArrowDown className="mr-1 text-background" size={16} />}
+                    iconLeft={<ArrowUp className="mr-1 text-background" size={16} />}
                     label={translate('common.import')}
                     loading={pickFileMutation.isPending}
                     onPress={() => pickFileMutation.mutate()}

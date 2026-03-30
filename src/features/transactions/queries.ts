@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import type { MonthSummary, TransactionFormData, TransactionWithCategory } from './types';
+import type { MonthSummary, TransactionInsertData, TransactionWithCategory } from './types';
 
 import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { generateId } from '@/lib/sqlite';
@@ -93,7 +93,7 @@ export async function getMonthSummary(
 const MAX_TRANSACTION_ROWS_PER_BATCH = 50;
 
 function buildTransactionsBatchInsert(
-  chunk: TransactionFormData[],
+  chunk: TransactionInsertData[],
   ids: string[],
 ): { sql: string; params: (string | number | null)[] } {
   const rowPlaceholders = chunk.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ');
@@ -121,7 +121,7 @@ function buildTransactionsBatchInsert(
 
 export async function createTransaction(
   db: SQLiteDatabase,
-  data: TransactionFormData,
+  data: TransactionInsertData,
 ): Promise<string> {
   const id = generateId();
 
@@ -139,7 +139,7 @@ export async function createTransaction(
  */
 export async function createTransactions(
   db: SQLiteDatabase,
-  dataList: TransactionFormData[],
+  dataList: TransactionInsertData[],
 ): Promise<string[]> {
   if (dataList.length === 0) {
     return [];
@@ -160,7 +160,7 @@ export async function createTransactions(
 export async function updateTransaction(
   db: SQLiteDatabase,
   id: string,
-  data: TransactionFormData,
+  data: TransactionInsertData,
 ): Promise<void> {
   await db.runAsync(
     `UPDATE transactions

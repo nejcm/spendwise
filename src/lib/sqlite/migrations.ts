@@ -20,6 +20,15 @@ export async function clearDbData(db: SQLiteDatabase): Promise<void> {
 };
 
 /**
+ * Clears all transactions from the database.
+ */
+export async function clearTransactionsDb(db: SQLiteDatabase): Promise<void> {
+  await db.execAsync(`
+    DELETE FROM transactions;
+  `);
+}
+
+/**
  * Drops all tables and sets the user version to 0.
  */
 export async function dropDb(db: SQLiteDatabase): Promise<void> {

@@ -1,6 +1,6 @@
 import type { CurrencyKey } from '@/features/currencies';
 
-import { CURRENCIES_MAP, CURRENCY_VALUES } from '@/features/currencies';
+import { CURRENCY_VALUES } from '@/features/currencies';
 
 const RE_NON_NUMERIC = /[^\d.-]/g;
 const RE_ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -63,8 +63,6 @@ export type ColumnMapping = {
   currency: number | null;
   note: number | null;
   type: number | null; // column with "income"/"expense" or positive/negative
-  baseAmount: number | null;
-  baseCurrency: number | null;
   category: number | null;
 };
 
@@ -74,8 +72,6 @@ export type ParsedRow = {
   note: string;
   currency?: CurrencyKey;
   type?: 'income' | 'expense' | 'transfer';
-  baseAmount?: number; // cents in base currency
-  baseCurrency?: CurrencyKey;
   categoryName?: string; // raw name from CSV, resolved to ID at import time
   isDuplicate?: boolean;
 };
@@ -133,26 +129,6 @@ export function mapRows(rows: string[][], mapping: ColumnMapping, hasHeader: boo
       ? (rawCurrency as CurrencyKey)
       : undefined;
 
-    // Base amount (second currency pair)
-    const rawBaseAmount = mapping.baseAmount !== null ? (row[mapping.baseAmount] ?? '') : '';
-    let baseAmount: number | undefined;
-    if (rawBaseAmount) {
-      const numericBase = Number.parseFloat(rawBaseAmount.replaceAll(RE_NON_NUMERIC, ''));
-      if (!Number.isNaN(numericBase)) {
-        baseAmount = Math.round(Math.abs(numericBase) * 100);
-        if (type === 'expense') {
-          baseAmount = -baseAmount;
-        }
-      }
-    }
-
-    const rawBaseCurrency = mapping.baseCurrency !== null
-      ? (row[mapping.baseCurrency] ?? '').trim().toUpperCase()
-      : '';
-    const baseCurrency = CURRENCIES_MAP[rawBaseCurrency as CurrencyKey]
-      ? (rawBaseCurrency as CurrencyKey)
-      : undefined;
-
     // Category name
     const rawCategory = mapping.category !== null ? (row[mapping.category] ?? '').trim() : '';
 
@@ -162,8 +138,6 @@ export function mapRows(rows: string[][], mapping: ColumnMapping, hasHeader: boo
       note: rawNote,
       type,
       currency,
-      ...(baseAmount !== undefined && { baseAmount }),
-      ...(baseCurrency && { baseCurrency }),
       ...(rawCategory && { categoryName: rawCategory }),
     });
   }
@@ -192,7 +166,7 @@ function normalizeDate(raw: string): string {
 
 export function autoDetectColumnMapping(rows: string[][]): ColumnMapping {
   const [headers, sampleRow] = rows;
-  const mapping: ColumnMapping = { amount: null, date: null, note: null, type: null, currency: null, baseAmount: null, baseCurrency: null, category: null };
+  const mapping: ColumnMapping = { amount: null, date: null, note: null, type: null, currency: null, category: null };
 
   if (!headers) return mapping;
 
@@ -201,15 +175,6 @@ export function autoDetectColumnMapping(rows: string[][]): ColumnMapping {
 
     if (mapping.date === null && (lower.includes('date') || lower.includes('datum'))) {
       mapping.date = index;
-      return;
-    }
-
-    // Detect "amount 2" / "base amount" before generic "amount"
-    if (
-      mapping.baseAmount === null
-      && (lower.includes('amount 2') || lower.includes('base amount'))
-    ) {
-      mapping.baseAmount = index;
       return;
     }
 
@@ -249,15 +214,6 @@ export function autoDetectColumnMapping(rows: string[][]): ColumnMapping {
       && lower.includes('category')
     ) {
       mapping.category = index;
-      return;
-    }
-
-    // Detect "currency 2" / "base currency" before generic "currency"
-    if (
-      mapping.baseCurrency === null
-      && (lower.includes('currency 2') || lower.includes('base currency'))
-    ) {
-      mapping.baseCurrency = index;
       return;
     }
 

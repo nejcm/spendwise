@@ -63,7 +63,6 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
       ...initialValues,
       amount: amountToString(initialValues?.amount),
       baseAmount: amountToString(initialValues?.baseAmount),
-      baseCurrency: preferredCurrency,
     } as TransactionFormValues,
     validators: {
       onChange: transactionFormSchema,

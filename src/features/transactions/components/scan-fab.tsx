@@ -1,23 +1,28 @@
+import type { Action } from 'expo-image-manipulator';
+import type { IconButtonProps } from '@/components/ui';
+import type { ScannedReceipt, ScanVariables } from '@/features/ai/use-scan-receipt';
+import { useMutation } from '@tanstack/react-query';
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
-import { ActivityIndicator, Alert, Modal, Pressable, View } from 'react-native';
-import { Text } from '@/components/ui';
+import { ActivityIndicator, getPressedStyle, IconButton, Modal, Text } from '@/components/ui';
+import Alert from '@/components/ui/alert';
 import { ScanLine } from '@/components/ui/icon';
 import { useScanReceipt } from '@/features/ai/use-scan-receipt';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/local-store';
-import { useAppStore } from '@/lib/store';
+import { selectIsAiEnabled, useAppStore } from '@/lib/store';
+import { useThemeConfig } from '@/lib/theme/use-theme-config';
 
-function ScanLoadingOverlay() {
+const MAX_IMAGE_DIMENSION = 1024;
+
+function ScanLoadingOverlay({ onClose }: { onClose: () => void }) {
+  const { dark } = useThemeConfig();
   return (
-    <Modal transparent animationType="fade" statusBarTranslucent>
-      <View className="flex-1 items-center justify-center bg-black/60">
-        <View className="items-center gap-3 rounded-2xl bg-white px-8 py-6">
-          <ActivityIndicator size="large" />
-          <Text className="text-base font-medium">{translate('scan.analyzing')}</Text>
-        </View>
-      </View>
+    <Modal visible={true} className="gap-4 py-10" onClose={onClose}>
+      <ActivityIndicator size="large" color={dark ? '#ffffff' : '#000000'} />
+      <Text className="text-base font-medium">{translate('scan.analyzing')}</Text>
     </Modal>
   );
 }
@@ -29,11 +34,7 @@ async function pickImage(source: 'camera' | 'gallery'): Promise<ImagePicker.Imag
       Alert.alert(translate('common.error'), translate('scan.camera_permission_denied'));
       return null;
     }
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
-      quality: 0.8,
-      base64: true,
-    });
+    const result = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1 });
     return result.canceled ? null : (result.assets[0] ?? null);
   }
 
@@ -42,28 +43,65 @@ async function pickImage(source: 'camera' | 'gallery'): Promise<ImagePicker.Imag
     Alert.alert(translate('common.error'), translate('scan.gallery_permission_denied'));
     return null;
   }
-  const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ['images'],
-    quality: 0.8,
-    base64: true,
-  });
+  const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1 });
   return result.canceled ? null : (result.assets[0] ?? null);
 }
 
-function getMimeType(asset: ImagePicker.ImagePickerAsset): 'image/jpeg' | 'image/png' {
-  const uri = asset.uri.toLowerCase();
-  return uri.endsWith('.png') ? 'image/png' : 'image/jpeg';
+async function resizeForAI(asset: ImagePicker.ImagePickerAsset): Promise<{ base64: string; mimeType: 'image/jpeg' }> {
+  const longerSide = Math.max(asset.width, asset.height);
+  const actions: Action[] = longerSide > MAX_IMAGE_DIMENSION
+    ? [{ resize: asset.width >= asset.height ? { width: MAX_IMAGE_DIMENSION } : { height: MAX_IMAGE_DIMENSION } }]
+    : [];
+
+  const context = ImageManipulator.manipulate(asset.uri);
+  for (const action of actions) {
+    if ('resize' in action) context.resize(action.resize);
+    else if ('rotate' in action) context.rotate(action.rotate);
+    else if ('flip' in action) context.flip(action.flip);
+    else if ('crop' in action) context.crop(action.crop);
+    else if ('extent' in action && context.extent) context.extent(action.extent);
+  }
+  const image = await context.renderAsync();
+  const result = await image.saveAsync({ compress: 0.85, format: SaveFormat.JPEG, base64: true });
+  context.release();
+  image.release();
+
+  return { base64: result.base64!, mimeType: 'image/jpeg' };
 }
 
-export function ScanFab() {
+export type ScanFabProps = Partial<IconButtonProps>;
+
+export function ScanFab(props: ScanFabProps) {
   const router = useRouter();
-  const openaiApiKey = useAppStore.use.openaiApiKey();
-  const anthropicApiKey = useAppStore.use.anthropicApiKey();
-  const hasKey = Boolean(openaiApiKey) || Boolean(anthropicApiKey);
-  const { isScanning, scan } = useScanReceipt();
+  const isAiEnabled = useAppStore(selectIsAiEnabled);
+
+  const onSuccess = (result: ScannedReceipt) => {
+    openSheet({
+      type: 'add-transaction',
+      initialValues: result,
+    });
+  };
+  const scanMutation = useScanReceipt(onSuccess);
+
+  const prepareMutation = useMutation({
+    mutationFn: async (source: 'camera' | 'gallery'): Promise<ScanVariables | null> => {
+      const asset = await pickImage(source);
+      if (!asset) return null;
+      const { base64, mimeType } = await resizeForAI(asset);
+      return { base64Image: base64, mimeType };
+    },
+    onSuccess: (variables) => {
+      if (!variables) return;
+      scanMutation.mutate(variables);
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : translate('scan.error_generic');
+      Alert.alert(translate('common.error'), message);
+    },
+  });
 
   const handlePress = () => {
-    if (!hasKey) {
+    if (!isAiEnabled) {
       Alert.alert(
         translate('scan.no_key_title'),
         translate('scan.no_key_message'),
@@ -74,55 +112,31 @@ export function ScanFab() {
       );
       return;
     }
-
     Alert.alert(
       translate('scan.source_title'),
       undefined,
       [
-        { text: translate('scan.source_camera'), onPress: () => void handleScan('camera') },
-        { text: translate('scan.source_gallery'), onPress: () => void handleScan('gallery') },
+        { text: translate('scan.source_camera'), onPress: () => void prepareMutation.mutate('camera') },
+        { text: translate('scan.source_gallery'), onPress: () => void prepareMutation.mutate('gallery') },
         { text: translate('common.cancel'), style: 'cancel' },
       ],
     );
   };
 
-  const handleScan = async (source: 'camera' | 'gallery') => {
-    const asset = await pickImage(source);
-    if (!asset || !asset.base64) return;
-
-    try {
-      const mimeType = getMimeType(asset);
-      const result = await scan(asset.base64, mimeType);
-      openSheet({
-        type: 'add-transaction',
-        initialValues: {
-          amount: result.amount,
-          currency: result.currency,
-          date: result.date,
-          note: result.note,
-          type: result.type,
-          category_id: result.category_id ?? undefined,
-        },
-      });
-    }
-    catch (error) {
-      const message = error instanceof Error ? error.message : translate('scan.error_generic');
-      Alert.alert(translate('common.error'), message);
-    }
-  };
-
   return (
     <>
-      {isScanning && <ScanLoadingOverlay />}
-      <Pressable
+      {scanMutation.isPending && <ScanLoadingOverlay onClose={() => scanMutation.reset()} />}
+      <IconButton
         onPress={handlePress}
         hitSlop={8}
-        className="rounded-full p-2"
-        style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+        size="sm"
+        color="secondary"
+        style={getPressedStyle}
         accessibilityLabel={translate('scan.button_label')}
+        {...props}
       >
-        <ScanLine className="size-5 text-foreground" />
-      </Pressable>
+        <ScanLine className="text-foreground" size={16} />
+      </IconButton>
     </>
   );
 }

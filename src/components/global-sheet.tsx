@@ -1,7 +1,7 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { SheetConfig, SheetType } from '@/lib/sheet';
 import { useEffect, useMemo, useRef } from 'react';
-import { Modal, Text, View } from '@/components/ui';
+import { ModalSheet, Text, View } from '@/components/ui';
 import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { AccountForm } from '@/features/accounts/components/account-form';
 import { CategoryForm } from '@/features/categories/category-form';
@@ -166,7 +166,7 @@ export function GlobalSheet() {
   }, [config]);
 
   return (
-    <Modal
+    <ModalSheet
       ref={modalRef}
       snapPoints={snapPoints}
       title={<SheetTitle config={config} />}
@@ -179,6 +179,6 @@ export function GlobalSheet() {
       >
         {config && <SheetContent config={config} onClose={closeSheet} />}
       </BottomSheetKeyboardAwareScrollView>
-    </Modal>
+    </ModalSheet>
   );
 }

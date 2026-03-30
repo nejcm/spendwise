@@ -2,7 +2,7 @@ import type { PeriodSelection } from '@/lib/store';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { cn } from 'tailwind-variants';
-import { Text, useModal } from '@/components/ui';
+import { Text, useModalSheet } from '@/components/ui';
 import { ArrowLeftIcon, ArrowRightIcon } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { navigatePeriod } from '@/lib/date/helpers';
@@ -16,7 +16,7 @@ export type PeriodSelectorProps = {
 };
 
 export function PeriodSelector({ selection, className }: PeriodSelectorProps) {
-  const { ref, present } = useModal();
+  const { ref, present } = useModalSheet();
   const isAll = selection.mode === 'all';
 
   return (

@@ -1,23 +1,27 @@
-import type { AiProviderType } from '../types';
 import type { Category } from '@/features/categories/types';
 import type { CurrencyKey } from '@/features/currencies';
+import * as z from 'zod';
+import { CURRENCY_VALUES } from '@/features/currencies';
+import { todayISO } from '@/features/formatting/helpers';
+import { useAppStore } from '@/lib/store';
 import { scanReceiptAnthropic } from './anthropic';
 import { scanReceiptOpenAI } from './openai';
 
-export type ScannedReceipt = {
-  /** Total amount in the smallest currency unit (cents/pence/etc.) */
-  amount: number;
-  currency: CurrencyKey;
-  /** ISO date string "YYYY-MM-DD" */
-  date: string;
-  /** Merchant name or short description */
-  note: string | null;
-  type: 'expense' | 'income';
-  /** Matched category id from the provided list, or null if no match */
-  category_id: string | null;
-};
+export const scannedReceiptSchema = z.object({
+  /** Total amount in smallest currency unit (cents). Required — no fallback. */
+  amount: z.number().positive().transform(Math.round),
+  currency: z.enum(CURRENCY_VALUES as [CurrencyKey, ...CurrencyKey[]]).optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).catch(() => todayISO()),
+  note: z.string().nullable().catch(null),
+  type: z.enum(['expense', 'income'] as const).catch('expense'),
+  /** Matched from provided category list, or null if no match. */
+  category_id: z.string().optional().catch(undefined),
+});
 
-function buildPrompt(categories: Pick<Category, 'id' | 'name'>[]): string {
+export type ScannedReceipt = z.infer<typeof scannedReceiptSchema>;
+
+// Prompt
+function buildPrompt(categories: Pick<Category, 'id' | 'name'>[], currency: CurrencyKey): string {
   const categoryList = categories
     .map((c) => `  - id: "${c.id}", name: "${c.name}"`)
     .join('\n');
@@ -26,7 +30,7 @@ function buildPrompt(categories: Pick<Category, 'id' | 'name'>[]): string {
 
 Required JSON fields:
 - "amount": integer, the total amount in cents (e.g. $12.50 → 1250)
-- "currency": string, ISO 4217 code (e.g. "EUR", "USD"). Default to "EUR" if unclear.
+- "currency": string, ISO 4217 code (e.g. "EUR", "USD"). Default to "${currency}" if unclear.
 - "date": string, ISO date "YYYY-MM-DD". Default to today if unclear.
 - "note": string or null, the merchant name or a short description of the purchase.
 - "type": "expense" or "income". Almost always "expense" for receipts.
@@ -38,47 +42,43 @@ ${categoryList || '  (none)'}
 Respond with ONLY the JSON object, nothing else.`;
 }
 
+// Parsing
 const MARKDOWN_FENCES = /^```[a-z]*\n?/i;
-const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-const CODE_REGEX = /\n?```$/;
+const CODE_FENCE_END = /\n?```$/;
 
-function parseScannedReceipt(raw: string): ScannedReceipt {
+function parseScannedReceipt(raw: string, currency: CurrencyKey): ScannedReceipt {
   let parsed: unknown;
   try {
-    const cleaned = raw.replace(MARKDOWN_FENCES, '').replace(CODE_REGEX, '').trim();
+    const cleaned = raw.replace(MARKDOWN_FENCES, '').replace(CODE_FENCE_END, '').trim();
     parsed = JSON.parse(cleaned);
   }
   catch {
     throw new Error('Could not parse AI response as JSON');
   }
 
-  const obj = parsed as Record<string, unknown>;
-
-  const amount = typeof obj.amount === 'number' ? Math.round(obj.amount) : null;
-  if (!amount || amount <= 0) throw new Error('No valid amount found in receipt');
-
-  const currency = typeof obj.currency === 'string' ? (obj.currency as CurrencyKey) : 'EUR';
-  const date = typeof obj.date === 'string' && DATE_REGEX.test(obj.date)
-    ? obj.date
-    : new Date().toISOString().slice(0, 10);
-  const note = typeof obj.note === 'string' ? obj.note : null;
-  const type = obj.type === 'income' ? ('income' as const) : ('expense' as const);
-  const category_id = typeof obj.category_id === 'string' ? obj.category_id : null;
-
-  return { amount, currency, date, note, type, category_id };
+  const result = scannedReceiptSchema.safeParse(parsed);
+  if (!result.success) {
+    throw new Error('No valid amount found in receipt');
+  }
+  // currency fallback
+  if (!result.data.currency) {
+    result.data.currency = currency;
+  }
+  return result.data;
 }
 
-// eslint-disable-next-line max-params
+// Public API
 export async function scanReceiptImage(
   base64Image: string,
   mimeType: 'image/jpeg' | 'image/png',
   categories: Pick<Category, 'id' | 'name'>[],
-  provider: AiProviderType,
-  apiKey: string,
 ): Promise<ScannedReceipt> {
-  const prompt = buildPrompt(categories);
-  const raw = provider === 'anthropic'
-    ? await scanReceiptAnthropic(base64Image, mimeType, prompt, apiKey)
-    : await scanReceiptOpenAI(base64Image, mimeType, prompt, apiKey);
-  return parseScannedReceipt(raw);
+  const { aiProvider, anthropicApiKey, openaiApiKey, currency } = useAppStore.getState();
+  const key = aiProvider === 'anthropic' ? anthropicApiKey : openaiApiKey;
+  if (!key) throw new Error('No API key configured');
+  const prompt = buildPrompt(categories, currency);
+  const raw = aiProvider === 'anthropic'
+    ? await scanReceiptAnthropic(base64Image, mimeType, prompt, key)
+    : await scanReceiptOpenAI(base64Image, mimeType, prompt, key);
+  return parseScannedReceipt(raw, currency);
 }

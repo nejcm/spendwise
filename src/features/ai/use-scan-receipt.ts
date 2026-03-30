@@ -1,36 +1,28 @@
 import type { ScannedReceipt } from './service/scan';
-import { useCallback, useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import Alert from '@/components/ui/alert';
 import { useCategories } from '@/features/categories/api';
-import { useAppStore } from '@/lib/store';
+import { translate } from '@/lib/i18n';
 import { scanReceiptImage } from './service/scan';
 
 export type { ScannedReceipt };
 
-export type UseScanReceiptReturn = {
-  readonly isScanning: boolean;
-  readonly scan: (base64Image: string, mimeType: 'image/jpeg' | 'image/png') => Promise<ScannedReceipt>;
+export type ScanVariables = {
+  base64Image: string;
+  mimeType: 'image/jpeg' | 'image/png';
 };
 
-export function useScanReceipt(): UseScanReceiptReturn {
-  const [isScanning, setIsScanning] = useState(false);
-  const aiProvider = useAppStore.use.aiProvider();
-  const openaiApiKey = useAppStore.use.openaiApiKey();
-  const anthropicApiKey = useAppStore.use.anthropicApiKey();
+export function useScanReceipt(onSuccess?: (result: ScannedReceipt) => void) {
   const { data: categories = [] } = useCategories();
-
-  const apiKey = aiProvider === 'anthropic' ? anthropicApiKey : openaiApiKey;
-
-  const scan = useCallback(async (base64Image: string, mimeType: 'image/jpeg' | 'image/png'): Promise<ScannedReceipt> => {
-    if (!apiKey) throw new Error('No API key configured');
-    setIsScanning(true);
-    try {
+  return useMutation({
+    mutationFn: ({ base64Image, mimeType }: ScanVariables): Promise<ScannedReceipt> => {
       const categorySlim = categories.map((c) => ({ id: c.id, name: c.name }));
-      return await scanReceiptImage(base64Image, mimeType, categorySlim, aiProvider, apiKey);
-    }
-    finally {
-      setIsScanning(false);
-    }
-  }, [apiKey, categories, aiProvider]);
-
-  return { isScanning, scan };
+      return scanReceiptImage(base64Image, mimeType, categorySlim);
+    },
+    onSuccess,
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : translate('scan.error_generic');
+      Alert.alert(translate('common.error'), message);
+    },
+  });
 }

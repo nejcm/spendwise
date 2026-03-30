@@ -4,7 +4,7 @@ import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { format } from 'date-fns';
 import * as React from 'react';
 import { View } from 'react-native';
-import { Modal, SolidButton, Text, useModal } from '@/components/ui';
+import { ModalSheet, SolidButton, Text, useModalSheet } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { ArrowLeftIcon, ArrowRightIcon } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
@@ -52,7 +52,7 @@ export function PeriodSelectorModal({
   ref,
   selection,
 }: PeriodSelectorModalProps & { ref?: React.RefObject<BottomSheetModal | null> }) {
-  const modal = useModal();
+  const modal = useModalSheet();
 
   const [draft, setDraft] = React.useState<PeriodSelection>(() => defaultDraftFor(selection));
 
@@ -108,7 +108,7 @@ export function PeriodSelectorModal({
   }, [draft]);
 
   return (
-    <Modal ref={modal.ref} title="Select Period" snapPoints={['75%']}>
+    <ModalSheet ref={modal.ref} title="Select Period" snapPoints={['75%']}>
       <View className="flex-1 px-4 pt-2">
         <View className="mb-4 flex-row gap-1">
           {MODES.map(({ key, label }) => (
@@ -174,7 +174,7 @@ export function PeriodSelectorModal({
           <SolidButton label={translate('common.apply')} className="flex-1" onPress={handleApply} />
         </View>
       </View>
-    </Modal>
+    </ModalSheet>
   );
 }
 

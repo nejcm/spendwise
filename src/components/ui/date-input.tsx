@@ -1,13 +1,13 @@
 import type { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import type { InputProps } from '@/components/ui/input';
-import type { ModalProps } from '@/components/ui/modal';
+import type { ModalSheetProps } from '@/components/ui/modal-sheet';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { format, parseISO } from 'date-fns';
 import * as React from 'react';
 
 import { Platform, Pressable, View } from 'react-native';
 import { Input } from '@/components/ui/input';
-import { Modal, useModal } from '@/components/ui/modal';
+import { ModalSheet, useModalSheet } from '@/components/ui/modal-sheet';
 import { todayISO } from '@/features/formatting/helpers';
 import { IS_WEB } from '@/lib/base';
 import { tryFormatDate } from '@/lib/date/helpers';
@@ -17,11 +17,11 @@ import { useAppStore } from '@/lib/store';
 export type DateInputProps = {
   value: string;
   onChange: (date: string) => void;
-  modalProps?: Partial<ModalProps>;
+  modalProps?: Partial<ModalSheetProps>;
 } & Omit<InputProps, 'value' | 'onChange'>;
 
 export function DateInput({ label, value, onChange, error, modalProps, ...rest }: DateInputProps) {
-  const { ref, present, dismiss } = useModal();
+  const { ref, present, dismiss } = useModalSheet();
   const dateFormat = useAppStore.use.dateFormat();
 
   const dateValue = React.useMemo(() => parseISO(value || todayISO()), [value]);
@@ -63,7 +63,7 @@ export function DateInput({ label, value, onChange, error, modalProps, ...rest }
           {...rest}
         />
       </Pressable>
-      <Modal ref={ref} snapPoints={Platform.OS === 'android' ? ['1%'] : ['45%']} {...modalProps}>
+      <ModalSheet ref={ref} snapPoints={Platform.OS === 'android' ? ['1%'] : ['45%']} {...modalProps}>
         <View className="items-center px-4 pb-6">
           <DateTimePicker
             value={dateValue}
@@ -72,7 +72,7 @@ export function DateInput({ label, value, onChange, error, modalProps, ...rest }
             onChange={handleChange}
           />
         </View>
-      </Modal>
+      </ModalSheet>
     </>
   );
 }

@@ -114,77 +114,80 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
         )}
       />
 
-      <View className="flex-row gap-2">
-        <form.Field
-          name="currency"
-          children={(field) => (
-            <Select
-              value={field.state.value}
-              options={orderedCurrencies}
-              searchEnabled
-              onSelect={(value) => {
-                if (!value) return;
-                field.handleChange(String(value) as CurrencyKey);
-              }}
-              size="lg"
-              showChevron={false}
-              containerClassName="w-[100]"
-              inputClassName="px-2"
-              stackBehavior="push"
-            />
-          )}
-        />
-        <form.Field
-          name="amount"
-          children={(field) => (
-            <Input
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChangeText={field.handleChange}
-              placeholder="0.00"
-              size="lg"
-              keyboardType="decimal-pad"
-              testID="amount-input"
-              error={getFieldError(field)}
-              containerClassName="min-w-[72] flex-1"
-              autoFocus
-            />
+      <View>
+        <View className="flex-row gap-2">
+          <form.Field
+            name="currency"
+            children={(field) => (
+              <Select
+                value={field.state.value}
+                options={orderedCurrencies}
+                searchEnabled
+                onSelect={(value) => {
+                  if (!value) return;
+                  field.handleChange(String(value) as CurrencyKey);
+                }}
+                size="lg"
+                showChevron={false}
+                containerClassName="w-[100]"
+                inputClassName="px-2"
+                stackBehavior="push"
+              />
+            )}
+          />
+          <form.Field
+            name="amount"
+            children={(field) => (
+              <Input
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChangeText={field.handleChange}
+                placeholder="0.00"
+                size="lg"
+                keyboardType="decimal-pad"
+                testID="amount-input"
+                error={getFieldError(field)}
+                containerClassName="min-w-[72] flex-1"
+                autoFocus
+              />
+            )}
+          />
+        </View>
+
+        <form.Subscribe
+          selector={(s) => [s.values.currency]}
+          children={([selectedCurrency]) => selectedCurrency !== preferredCurrency && (
+            <View className="mb-2 flex-row items-center gap-2">
+              <View className="w-[100] flex-row items-center justify-center gap-2 px-4">
+                <Image source={CURRENCY_IMAGES[preferredCurrency]} className="size-6 rounded-full" />
+                <Text className="border-none bg-transparent">
+                  {preferredCurrency}
+                </Text>
+              </View>
+              <form.Field
+                name="baseAmount"
+                children={(field) => (
+                  <Input
+                    value={field.state.value ?? ''}
+                    onBlur={field.handleBlur}
+                    onChangeText={(t) => {
+                      setBaseAmountIsManual(true);
+                      field.handleChange(t);
+                    }}
+                    placeholder="0.00"
+                    readOnly={selectedCurrency === preferredCurrency}
+                    keyboardType="decimal-pad"
+                    testID="base-amount-input"
+                    error={getFieldError(field)}
+                    containerClassName="min-w-[72] flex-1"
+                    className="border-none bg-transparent"
+                  />
+                )}
+              />
+            </View>
           )}
         />
       </View>
-
-      <form.Subscribe
-        selector={(s) => [s.values.currency]}
-        children={([selectedCurrency]) => selectedCurrency !== preferredCurrency && (
-          <View className="mb-2 flex-row items-center gap-2">
-            <View className="w-[100] flex-row items-center justify-center gap-2 px-4">
-              <Image source={CURRENCY_IMAGES[preferredCurrency]} className="size-6 rounded-full" />
-              <Text className="border-none bg-transparent">
-                {preferredCurrency}
-              </Text>
-            </View>
-            <form.Field
-              name="baseAmount"
-              children={(field) => (
-                <Input
-                  value={field.state.value ?? ''}
-                  onBlur={field.handleBlur}
-                  onChangeText={(t) => {
-                    setBaseAmountIsManual(true);
-                    field.handleChange(t);
-                  }}
-                  placeholder="0.00"
-                  readOnly={selectedCurrency === preferredCurrency}
-                  keyboardType="decimal-pad"
-                  testID="base-amount-input"
-                  error={getFieldError(field)}
-                  containerClassName="min-w-[72] flex-1"
-                />
-              )}
-            />
-          </View>
-        )}
-      />
 
       <form.Field
         name="date"

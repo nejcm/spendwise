@@ -1,14 +1,15 @@
 import type { AccountFormData, AccountWithBalance } from './types';
+import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
 import { useMemo } from 'react';
-
 import { View } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
 import { FocusAwareStatusBar, FormattedCurrency, ScrollView, SolidButton, Text } from '@/components/ui';
 import { Plus } from '@/components/ui/icon';
 import { SkeletonRows } from '@/components/ui/skeleton';
-import { useAccountsWithBalanceForRange } from '@/features/accounts/api';
+import { accountsWithBalanceForRangeQueryOptions, useAccountsWithBalanceForRange } from '@/features/accounts/api';
 import { centsToAmount } from '@/features/formatting/helpers';
+import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/local-store';
@@ -23,6 +24,9 @@ export function AccountsScreen() {
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
 
   const { data: accounts = [], isLoading } = useAccountsWithBalanceForRange(startDate, endDate);
+
+  const db = useSQLiteContext();
+  usePrefetchAdjacentPeriods(selection, (start, end) => accountsWithBalanceForRangeQueryOptions(db, start, end));
 
   const totalBalance = accounts.reduce((sum, a) => sum + a.balance, 0);
 

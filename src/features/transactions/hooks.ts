@@ -22,12 +22,15 @@ import * as queries from './queries';
 
 // ─── Read Hooks ───
 
-export function useTransactions(startDate: number | undefined, endDate: number | undefined) {
-  const db = useSQLiteContext();
-  return useQuery({
+export function transactionsQueryOptions(db: SQLiteDatabase, startDate: number | undefined, endDate: number | undefined) {
+  return {
     queryKey: queryKeys.transactions.list(`${startDate}/${endDate}`),
     queryFn: () => queries.getTransactions(db, startDate, endDate),
-  });
+  };
+}
+export function useTransactions(startDate: number | undefined, endDate: number | undefined) {
+  const db = useSQLiteContext();
+  return useQuery(transactionsQueryOptions(db, startDate, endDate));
 }
 
 export function useTransaction(id: string) {

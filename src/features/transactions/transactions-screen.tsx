@@ -1,4 +1,5 @@
 import { useDebouncedValue } from '@tanstack/react-pacer';
+import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
 import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
@@ -6,10 +7,11 @@ import { cn } from 'tailwind-variants';
 import { PeriodSelector } from '@/components/period-selector';
 import { FocusAwareStatusBar, Input, inputDefaultDefaults, inputDefaults } from '@/components/ui';
 import { X } from '@/components/ui/icon';
+import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
-import { useTransactions } from './api';
+import { transactionsQueryOptions, useTransactions } from './api';
 import { TransactionFilterBar } from './components/transaction-filter-bar';
 import { TransactionList } from './components/transaction-list';
 
@@ -24,6 +26,9 @@ export function TransactionsScreen() {
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
   const { data: transactions = [], isLoading, refetch } = useTransactions(startDate, endDate);
+
+  const db = useSQLiteContext();
+  usePrefetchAdjacentPeriods(selection, (start, end) => transactionsQueryOptions(db, start, end));
 
   const filtered = useMemo(() => {
     let result = transactions;

@@ -272,6 +272,19 @@
     "welcome_copy": "Verfolge Ausgaben, verwalte Budgets und entwickle bessere Geldgewohnheiten an einem Ort.",
     "welcome_headline": "Intelligentes Finanzmanagement"
   },
+  "scan": {
+    "analyzing": "Beleg wird analysiert…",
+    "button_label": "Beleg scannen",
+    "camera_permission_denied": "Kamerazugriff ist erforderlich, um ein Foto aufzunehmen.",
+    "error_generic": "Beleg konnte nicht gelesen werden. Bitte erneut versuchen.",
+    "gallery_permission_denied": "Zugriff auf Fotobibliothek ist erforderlich.",
+    "go_to_settings": "Zu den Einstellungen",
+    "no_key_message": "Füge in den Einstellungen einen KI-API-Schlüssel hinzu, um Belege zu scannen.",
+    "no_key_title": "KI-Schlüssel fehlt",
+    "source_camera": "Foto aufnehmen",
+    "source_gallery": "Aus Galerie wählen",
+    "source_title": "Beleg scannen"
+  },
   "scheduled": {
     "active": "Aktiv",
     "add": "Wiederkehrende Regel hinzufügen",

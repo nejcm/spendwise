@@ -2,7 +2,7 @@ import type { ThemeType } from '../theme';
 
 import type { OptionType } from '@/components/ui';
 import * as React from 'react';
-import { Options, useModal } from '@/components/ui';
+import { Options, useModalSheet } from '@/components/ui';
 
 import { Sun } from '@/components/ui/icon';
 import { useSelectedTheme } from '@/lib/theme/use-selected-theme';
@@ -11,7 +11,7 @@ import { SettingsItem } from './settings-item';
 
 export function ThemeItem() {
   const { selectedTheme, setSelectedTheme } = useSelectedTheme();
-  const modal = useModal();
+  const modal = useModalSheet();
 
   const onSelect = React.useCallback(
     (option: OptionType) => {

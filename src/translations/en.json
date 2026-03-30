@@ -272,6 +272,19 @@
     "welcome_copy": "Track spending, manage budgets, and build better money habits in one place.",
     "welcome_headline": "Smart money management"
   },
+  "scan": {
+    "analyzing": "Analyzing receipt…",
+    "button_label": "Scan receipt",
+    "camera_permission_denied": "Camera permission is required to take a photo.",
+    "error_generic": "Could not read receipt. Please try again.",
+    "gallery_permission_denied": "Photo library permission is required to pick an image.",
+    "go_to_settings": "Go to Settings",
+    "no_key_message": "Add an AI API key in Settings to use receipt scanning.",
+    "no_key_title": "AI key not set up",
+    "source_camera": "Take Photo",
+    "source_gallery": "Choose from Gallery",
+    "source_title": "Scan Receipt"
+  },
   "scheduled": {
     "active": "Active",
     "add": "Add Recurring Rule",

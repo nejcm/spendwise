@@ -1,13 +1,13 @@
 import type { OptionType } from '@/components/ui';
 import type { CurrencyKey } from '@/features/currencies';
 import * as React from 'react';
-import { Euro, Options, useModal } from '@/components/ui';
+import { Euro, Options, useModalSheet } from '@/components/ui';
 import { CURRENCY_OPTIONS } from '@/features/currencies/images';
 import { setCurrency, useAppStore } from '@/lib/store';
 import { SettingsItem } from './settings-item';
 
 export function CurrencyItem() {
-  const modal = useModal();
+  const modal = useModalSheet();
   const currency = useAppStore.use.currency();
 
   const onSelect = React.useCallback(

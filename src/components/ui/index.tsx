@@ -15,6 +15,7 @@ export * from './input';
 export * from './input-label';
 export * from './list';
 export * from './modal';
+export * from './modal-sheet';
 export * from './outline-button';
 export * from './progress-bar';
 export * from './select';

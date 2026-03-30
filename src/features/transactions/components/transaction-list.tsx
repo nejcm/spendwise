@@ -2,10 +2,10 @@ import type { DateGroup, TransactionWithCategory } from '../types';
 import { FlashList } from '@shopify/flash-list';
 import * as React from 'react';
 import { useMemo, useState } from 'react';
-import { ActivityIndicator, RefreshControl, View } from 'react-native';
+import { RefreshControl } from 'react-native';
 
 import NoData from '@/components/no-data';
-import { Text } from '@/components/ui';
+import { ActivityIndicator, Text, View } from '@/components/ui';
 import { formatDate } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { TransactionCard } from './transaction-card';

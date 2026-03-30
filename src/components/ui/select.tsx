@@ -2,7 +2,7 @@ import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { ImageSource } from 'expo-image';
 import type { FlatListProps, PressableProps } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
-import type { ModalProps } from './modal';
+import type { ModalSheetProps } from './modal-sheet';
 import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { FlashList } from '@shopify/flash-list';
 import * as React from 'react';
@@ -15,7 +15,7 @@ import { defaultStyles } from '@/lib/theme/styles';
 import { Check, ChevronDown } from './icon';
 import { Image } from './image';
 import { Input } from './input';
-import { Modal, useModal } from './modal';
+import { ModalSheet, useModalSheet } from './modal-sheet';
 import { Text } from './text';
 
 const selectTv = tv({
@@ -148,7 +148,7 @@ export type OptionsProps<T extends string | number> = {
   renderItem?: (item: OptionType) => React.ReactNode;
   searchEnabled?: boolean;
   searchPlaceholder?: string;
-} & Omit<ModalProps, 'children'>;
+} & Omit<ModalSheetProps, 'children'>;
 
 function keyExtractor(item: OptionType) {
   return `select-item-${item.value}`;
@@ -219,7 +219,7 @@ export function Options<T extends string | number>({
   );
 
   return (
-    <Modal
+    <ModalSheet
       ref={ref}
       index={0}
       enableDynamicSizing
@@ -238,7 +238,7 @@ export function Options<T extends string | number>({
         style={{ flex: 1 }}
         {...listProps}
       />
-    </Modal>
+    </ModalSheet>
   );
 }
 
@@ -260,7 +260,7 @@ export type SelectProps<T extends string | number = string | number> = {
   searchEnabled?: OptionsProps<T>['searchEnabled'];
   searchPlaceholder?: OptionsProps<T>['searchPlaceholder'];
   itemClassName?: string;
-} & Omit<VariantProps<typeof selectTv>, 'error'> & Omit<ModalProps, 'children'>;
+} & Omit<VariantProps<typeof selectTv>, 'error'> & Omit<ModalSheetProps, 'children'>;
 
 export function Select<T extends string | number>({
   label,
@@ -282,7 +282,7 @@ export function Select<T extends string | number>({
   itemClassName,
   ...rest
 }: SelectProps<T>) {
-  const modal = useModal();
+  const modal = useModalSheet();
   const [selectedOption, setSelectedOption] = React.useState<OptionType<T> | null>(() => options.find((t) => t.value === value) ?? null);
 
   const onSelectOption = React.useCallback(

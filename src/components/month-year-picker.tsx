@@ -3,7 +3,7 @@ import type { TxKeyPath } from '@/lib/i18n';
 
 import { Picker } from '@react-native-picker/picker';
 import * as React from 'react';
-import { Modal, useModal, View } from '@/components/ui';
+import { ModalSheet, useModalSheet, View } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 
@@ -25,13 +25,13 @@ const FROM_YEAR = 1990;
 const YEARS = Array.from({ length: CURRENT_YEAR + 10 - FROM_YEAR + 1 }, (_, i) => FROM_YEAR + i);
 
 export function MonthPicker({ ref, selectedMonth, onSelect }: MonthPickerProps & { ref?: React.RefObject<BottomSheetModal | null> }) {
-  const modal = useModal();
+  const modal = useModalSheet();
   const { colors } = useThemeConfig();
 
   React.useImperativeHandle(ref, () => modal.ref.current as BottomSheetModal);
 
   return (
-    <Modal ref={modal.ref} title={translate('common.select_month')} snapPoints={['45%']}>
+    <ModalSheet ref={modal.ref} title={translate('common.select_month')} snapPoints={['45%']}>
       <View className="p-4">
         <Picker
           selectedValue={selectedMonth}
@@ -49,18 +49,18 @@ export function MonthPicker({ ref, selectedMonth, onSelect }: MonthPickerProps &
           ))}
         </Picker>
       </View>
-    </Modal>
+    </ModalSheet>
   );
 }
 
 export function YearPicker({ ref, selectedYear, onSelect }: YearPickerProps & { ref?: React.RefObject<BottomSheetModal | null> }) {
-  const modal = useModal();
+  const modal = useModalSheet();
   const { colors } = useThemeConfig();
 
   React.useImperativeHandle(ref, () => modal.ref.current as BottomSheetModal);
 
   return (
-    <Modal ref={modal.ref} title={translate('common.select_year')} snapPoints={['45%']}>
+    <ModalSheet ref={modal.ref} title={translate('common.select_year')} snapPoints={['45%']}>
       <View className="p-4">
         <Picker
           selectedValue={selectedYear}
@@ -78,6 +78,6 @@ export function YearPicker({ ref, selectedYear, onSelect }: YearPickerProps & { 
           ))}
         </Picker>
       </View>
-    </Modal>
+    </ModalSheet>
   );
 }

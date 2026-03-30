@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Image, Input, Modal, Pressable, ScrollView, SolidButton, Text, useModal, View } from '@/components/ui';
+import { Image, Input, ModalSheet, Pressable, ScrollView, SolidButton, Text, useModalSheet, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { translate } from '@/lib/i18n';
 import { updateProfile, useAppStore } from '@/lib/store';
@@ -16,7 +16,7 @@ export type ProfileStepProps = {
 
 export default function ProfileStep({ onBack, onNext, currentStep }: ProfileStepProps) {
   const { name, avatar } = useAppStore((state) => state.profile);
-  const avatarModal = useModal();
+  const avatarModal = useModalSheet();
 
   return (
     <>
@@ -62,7 +62,7 @@ export default function ProfileStep({ onBack, onNext, currentStep }: ProfileStep
           />
         </>
       </OnboardingLayout>
-      <Modal
+      <ModalSheet
         ref={avatarModal.ref}
         title={translate('onboarding.choose_avatar')}
       >
@@ -94,7 +94,7 @@ export default function ProfileStep({ onBack, onNext, currentStep }: ProfileStep
             })}
           </View>
         </ScrollView>
-      </Modal>
+      </ModalSheet>
     </>
   );
 }

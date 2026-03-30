@@ -216,6 +216,10 @@ export function setAnthropicApiKey(anthropicApiKey: string | undefined) {
   return updateState({ anthropicApiKey });
 }
 
+export function selectIsAiEnabled(state: AppState) {
+  return Boolean(state.openaiApiKey) || Boolean(state.anthropicApiKey);
+}
+
 // Security actions
 export function setLockEnabled(lockEnabled: boolean) {
   return updateState({ lockEnabled });

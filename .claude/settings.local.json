@@ -24,7 +24,8 @@
       "Bash(gh issue:*)",
       "Bash(pnpm expo:*)",
       "Bash(grep *)",
-      "Bash(ls *)"
+      "Bash(ls *)",
+      "Bash(npx expo:*)"
     ]
   }
 }

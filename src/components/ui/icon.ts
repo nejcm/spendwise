@@ -4,7 +4,7 @@
  */
 import type { LucideProps } from 'lucide-react-native';
 import type { ComponentType } from 'react';
-import { ALargeSmall as LucideALargeSmall, ArrowDown as LucideArrowDown, ArrowLeftIcon as LucideArrowLeftIcon, ArrowRight as LucideArrowRight, ArrowRightIcon as LucideArrowRightIcon, ArrowUp as LucideArrowUp, Banknote as LucideBanknote, Bell as LucideBell, Bot as LucideBot, BotIcon as LucideBotIcon, Brain as LucideBrain, BrainCircuit as LucideBrainCircuit, Calendar as LucideCalendar, Check as LucideCheck, ChevronDown as LucideChevronDown, CircleDollarSign as LucideCircleDollarSign, Database as LucideDatabase, DatabaseBackupIcon as LucideDatabaseBackupIcon, DatabaseSearch as LucideDatabaseSearch, DatabaseZap as LucideDatabaseZap, DecimalsArrowRight as LucideDecimalsArrowRight, Download as LucideDownload, Euro as LucideEuro, FileWarning as LucideFileWarning, HelpCircle as LucideHelpCircle, Home as LucideHome, Import as LucideImport, Languages as LucideLanguages, LayoutGrid as LucideLayoutGrid, Lightbulb as LucideLightbulb, Link as LucideLink, ListChecks as LucideListChecks, Pencil as LucidePencil, PencilOff as LucidePencilOff, PieChart as LucidePieChart, Plus as LucidePlus, PlusIcon as LucidePlusIcon, Printer as LucidePrinter, RefreshCcw as LucideRefreshCcw, SendHorizonal as LucideSendHorizonal, Share as LucideShare, Shield as LucideShield, Sun as LucideSun, TrashIcon as LucideTrashIcon, TrendingDown as LucideTrendingDown, TrendingUp as LucideTrendingUp, Upload as LucideUpload, User as LucideUser, UserIcon as LucideUserIcon, X as LucideX } from 'lucide-react-native';
+import { ALargeSmall as LucideALargeSmall, ArrowDown as LucideArrowDown, ArrowLeftIcon as LucideArrowLeftIcon, ArrowRight as LucideArrowRight, ArrowRightIcon as LucideArrowRightIcon, ArrowUp as LucideArrowUp, Banknote as LucideBanknote, Bell as LucideBell, Bot as LucideBot, BotIcon as LucideBotIcon, Brain as LucideBrain, BrainCircuit as LucideBrainCircuit, Calendar as LucideCalendar, Camera as LucideCamera, Check as LucideCheck, ChevronDown as LucideChevronDown, CircleDollarSign as LucideCircleDollarSign, Database as LucideDatabase, DatabaseBackupIcon as LucideDatabaseBackupIcon, DatabaseSearch as LucideDatabaseSearch, DatabaseZap as LucideDatabaseZap, DecimalsArrowRight as LucideDecimalsArrowRight, Download as LucideDownload, Euro as LucideEuro, FileWarning as LucideFileWarning, HelpCircle as LucideHelpCircle, Home as LucideHome, Import as LucideImport, Languages as LucideLanguages, LayoutGrid as LucideLayoutGrid, Lightbulb as LucideLightbulb, Link as LucideLink, ListChecks as LucideListChecks, Pencil as LucidePencil, PencilOff as LucidePencilOff, PieChart as LucidePieChart, Plus as LucidePlus, PlusIcon as LucidePlusIcon, Printer as LucidePrinter, RefreshCcw as LucideRefreshCcw, ScanLine as LucideScanLine, SendHorizonal as LucideSendHorizonal, Share as LucideShare, Shield as LucideShield, Sun as LucideSun, TrashIcon as LucideTrashIcon, TrendingDown as LucideTrendingDown, TrendingUp as LucideTrendingUp, Upload as LucideUpload, User as LucideUser, UserIcon as LucideUserIcon, X as LucideX } from 'lucide-react-native';
 import { withUniwind } from 'uniwind';
 
 export type { LucideIcon, LucideProps } from 'lucide-react-native';
@@ -27,6 +27,7 @@ export const BotIcon = withUniwind(LucideBotIcon);
 export const Brain = withUniwind(LucideBrain);
 export const BrainCircuit = withUniwind(LucideBrainCircuit);
 export const Calendar = withUniwind(LucideCalendar);
+export const Camera = withUniwind(LucideCamera);
 export const Check = withUniwind(LucideCheck);
 export const ChevronDown = withUniwind(LucideChevronDown);
 export const CircleDollarSign = withUniwind(LucideCircleDollarSign);
@@ -53,6 +54,7 @@ export const Plus = withUniwind(LucidePlus);
 export const PlusIcon = withUniwind(LucidePlusIcon);
 export const Printer = withUniwind(LucidePrinter);
 export const RefreshCcw = withUniwind(LucideRefreshCcw);
+export const ScanLine = withUniwind(LucideScanLine);
 export const SendHorizonal = withUniwind(LucideSendHorizonal);
 export const Share = withUniwind(LucideShare);
 export const Shield = withUniwind(LucideShield);

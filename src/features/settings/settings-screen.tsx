@@ -30,7 +30,7 @@ export function SettingsScreen() {
     <>
       <FocusAwareStatusBar />
       <ScrollView className="pb-12" style={defaultStyles.transparentBg}>
-        <View className="flex-1 px-4 pt-16">
+        <View className="flex-1 px-4 pt-16 pb-8">
 
           <GhostButton className="mx-auto mb-2 h-auto flex-col justify-center" onPress={() => router.push('/settings/profile')}>
             <Image source={getAvatar(profile.avatar)} className="mb-3 size-18 rounded-full" />

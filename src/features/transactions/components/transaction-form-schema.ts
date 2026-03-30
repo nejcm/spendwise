@@ -6,7 +6,6 @@ import { DEFAULT_USER_CURRENCY } from '@/config';
 import { CURRENCY_VALUES } from '@/features/currencies';
 import { formatMajorUnitsInputFromCents, todayISO } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '@/lib/store';
 import { refinePositiveNumber, refinePositiveNumberOrNull } from '@/lib/validation/helpers';
 
 export const transactionFormSchema = z.object({
@@ -14,7 +13,6 @@ export const transactionFormSchema = z.object({
   currency: z.enum(CURRENCY_VALUES as CurrencyKey[]),
   amount: z.string().min(1, translate('transactions.amount_required')).refine(refinePositiveNumber, translate('transactions.amount_required')),
   baseAmount: z.string().nullable().refine(refinePositiveNumberOrNull, translate('transactions.base_amount_required')),
-  baseCurrency: z.enum(CURRENCY_VALUES as CurrencyKey[]),
   category_id: z.string().min(1, translate('transactions.category_required')),
   account_id: z.string().min(1, translate('transactions.account_required')),
   date: z.string().min(1, translate('transactions.date_required')),
@@ -43,7 +41,6 @@ export const transactionFormDefaultValues = {
   amount: '',
   currency: DEFAULT_USER_CURRENCY,
   baseAmount: '',
-  baseCurrency: useAppStore.getState().currency,
   note: null,
 } satisfies TransactionFormValues;
 

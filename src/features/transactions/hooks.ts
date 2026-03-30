@@ -1,11 +1,12 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import type { TransactionFormData } from './types';
+import type { CurrencyKey } from '../currencies';
 
+import type { TransactionFormData, TransactionInsertData } from './types';
 import type { RatesMap } from '@/features/currencies/queries';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import * as Haptics from 'expo-haptics';
 
+import * as Haptics from 'expo-haptics';
 import { useSQLiteContext } from 'expo-sqlite';
 import Alert from '@/components/ui/alert';
 import { computeBaseAmount } from '@/features/currencies/conversion';
@@ -13,8 +14,9 @@ import { getRatesForDate, getRatesForDates } from '@/features/currencies/queries
 import { captureError } from '@/lib/analytics';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
-import { translate } from '@/lib/i18n';
 
+import { translate } from '@/lib/i18n';
+import { useAppStore } from '../../lib/store';
 import { amountToCents } from '../formatting/helpers';
 import * as queries from './queries';
 
@@ -63,28 +65,31 @@ function onError(error: unknown) {
 function prepareTransactionData(
   item: TransactionFormData,
   rates: RatesMap | undefined,
-): TransactionFormData {
+  baseCurrency: CurrencyKey,
+): TransactionInsertData {
   const amount = item.amount || 0;
   return {
     ...item,
     amount: amountToCents(amount),
-    baseAmount: amountToCents(item.baseAmount || computeBaseAmount(amount, item.currency, item.baseCurrency, rates ?? {})),
+    baseAmount: amount === 0 ? 0 : (item.baseAmount ? amountToCents(item.baseAmount) : computeBaseAmount(amountToCents(amount), item.currency, baseCurrency, rates ?? {})),
+    baseCurrency,
   };
 }
 
 async function prepareTransactionsForInsert(
   db: SQLiteDatabase,
   items: TransactionFormData[],
-): Promise<TransactionFormData[]> {
+): Promise<TransactionInsertData[]> {
   const datesNeedingRates = new Set<number>();
   for (const item of items) {
     // add only dates that need rates (without baseAmount)
     if (!item.baseAmount) datesNeedingRates.add(item.date);
   }
   const ratesByDate = await getRatesForDates(db, Array.from(datesNeedingRates));
+  const baseCurrency = useAppStore.getState().currency;
   return items.map((item) => {
     const rates = item.baseAmount ? undefined : ratesByDate.get(item.date);
-    return prepareTransactionData(item, rates);
+    return prepareTransactionData(item, rates, baseCurrency);
   });
 }
 
@@ -94,9 +99,10 @@ export function useCreateTransaction() {
 
   return useMutation({
     mutationFn: async (data: TransactionFormData) => {
+      const baseCurrency = useAppStore.getState().currency;
       // fetch rates only if baseAmount is not provided
       const rates = data.baseAmount ? undefined : await getRatesForDate(db, data.date);
-      return queries.createTransaction(db, prepareTransactionData(data, rates));
+      return queries.createTransaction(db, prepareTransactionData(data, rates, baseCurrency));
     },
     onSuccess: () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -129,12 +135,11 @@ export function useUpdateTransaction() {
 
   return useMutation({
     mutationFn: async (params: { id: string; data: TransactionFormData }) => {
+      const baseCurrency = useAppStore.getState().currency;
       // fetch rates only if baseAmount is not provided
       const rates = params.data.baseAmount ? undefined : await getRatesForDate(db, params.data.date);
-      const amount = params.data.amount || 0;
-      params.data.amount = amountToCents(amount);
-      params.data.baseAmount = amountToCents(params.data.baseAmount || computeBaseAmount(amount, params.data.currency, params.data.baseCurrency, rates ?? {}));
-      return queries.updateTransaction(db, params.id, params.data);
+      const prepared = prepareTransactionData(params.data, rates, baseCurrency);
+      return queries.updateTransaction(db, params.id, prepared);
     },
     onSuccess: () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

@@ -17,7 +17,11 @@ export type Transaction = {
   updated_at: number; // Unix seconds
 };
 
-export type TransactionFormData = Pick<Transaction, 'account_id' | 'category_id' | 'amount' | 'baseAmount' | 'baseCurrency' | 'currency' | 'note' | 'type' | 'date'>;
+export type TransactionFormData = Pick<Transaction, 'account_id' | 'category_id' | 'amount' | 'currency' | 'note' | 'type' | 'date'> & {
+  baseAmount?: number;
+};
+
+export type TransactionInsertData = Omit<Transaction, 'id' | 'created_at' | 'updated_at'>;
 
 export type TransactionWithCategory = Transaction & {
   category_name: string | null;

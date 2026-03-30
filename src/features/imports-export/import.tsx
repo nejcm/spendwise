@@ -1,5 +1,4 @@
 import type { Account } from '../accounts/types';
-import type { CurrencyKey } from '../currencies';
 
 import type { TransactionFormData } from '../transactions/types';
 import type { ColumnMapping, ParsedRow } from './csv-parser';
@@ -12,6 +11,7 @@ import { FormattedCurrency, FormattedDate, Select, SolidButton, Text } from '@/c
 import Alert from '@/components/ui/alert';
 import { translate } from '@/lib/i18n';
 import { OutlineButton } from '../../components/ui/outline-button';
+import { DEFAULT_CURRENCY } from '../../config';
 import { useAppStore } from '../../lib/store';
 import { useAccounts } from '../accounts/api';
 import { useCategories } from '../categories/api';
@@ -21,7 +21,7 @@ import { mapCategoryNameToId } from './helpers';
 
 type Step = 'map' | 'preview';
 
-const COLUMN_FIELDS: (keyof ColumnMapping)[] = ['date', 'amount', 'currency', 'note', 'type', 'baseAmount', 'baseCurrency', 'category'];
+const COLUMN_FIELDS: (keyof ColumnMapping)[] = ['date', 'amount', 'currency', 'note', 'type', 'category'];
 
 type MapStepProps = {
   headers: string[];
@@ -80,7 +80,6 @@ function MapStep({ headers, mapping, onMapping, onNext }: MapStepProps) {
 export type PreviewStepProps = {
   accounts: Account[];
   accountId: string;
-  currency: CurrencyKey;
   importing: number | undefined;
   onAccountSelect: (id: string) => void;
   onImport: () => void;
@@ -94,7 +93,6 @@ function PreviewStep({
   onAccountSelect,
   onImport,
   importing,
-  currency,
 }: PreviewStepProps) {
   return (
     <View>
@@ -144,7 +142,7 @@ function PreviewStep({
           </View>
           <FormattedCurrency
             value={Math.abs(row.amount)}
-            currency={currency}
+            currency={row.currency ?? DEFAULT_CURRENCY}
             className="text-sm font-medium"
           />
         </View>
@@ -180,11 +178,11 @@ export type ImportProps = {
 };
 
 export default function Import({ state, setMapping, onClose }: ImportProps) {
+  const router = useRouter();
   const { headers, allRows, mapping } = state;
   const { data: accounts = [] } = useAccounts();
   const { data: categories = [] } = useCategories();
   const preferredCurrency = useAppStore.use.currency();
-  const router = useRouter();
   const [step, setStep] = React.useState<Step>('map');
   const [importing, setImporting] = React.useState<number | undefined>(undefined);
   const [preview, setPreview] = React.useState<ParsedRow[]>([]);
@@ -197,16 +195,10 @@ export default function Import({ state, setMapping, onClose }: ImportProps) {
     const transactions: TransactionFormData[] = [];
     let count = 0;
     for (const row of preview) {
-      const type = row.type ?? (row.amount >= 0 ? ('income' as const) : ('expense' as const));
-      const rowBaseAmount = row.baseAmount !== undefined
-        ? (type === 'transfer' ? row.baseAmount : Math.abs(row.baseAmount))
-        : 0;
-      const rowBaseCurrency = row.baseCurrency ?? preferredCurrency;
+      const type = row.type ?? (row.amount >= 0 ? 'income' : 'expense');
       transactions.push({
         account_id: accountId,
-        amount: (type === 'transfer' ? row.amount : Math.abs(row.amount)),
-        baseAmount: rowBaseAmount,
-        baseCurrency: rowBaseCurrency,
+        amount: Math.abs(row.amount) / 100,
         currency: row.currency ?? preferredCurrency,
         category_id: mapCategoryNameToId(row.categoryName, categories),
         date: Math.floor(new Date(row.date).getTime() / 1000),
@@ -250,7 +242,6 @@ export default function Import({ state, setMapping, onClose }: ImportProps) {
         <PreviewStep
           accountId={accountId}
           accounts={accounts}
-          currency={preferredCurrency}
           importing={importing}
           preview={preview}
           onAccountSelect={setAccountId}

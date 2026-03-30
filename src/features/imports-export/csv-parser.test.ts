@@ -18,7 +18,7 @@ describe('mapRows', () => {
         ['date', 'amount', 'type', 'note'],
         ['2026-03-18', '50.00', 'transfer', 'Move to savings'],
       ],
-      { date: 0, amount: 1, type: 2, note: 3, currency: null, baseAmount: null, baseCurrency: null, category: null },
+      { date: 0, amount: 1, type: 2, note: 3, currency: null, category: null },
       true,
     );
 
@@ -32,13 +32,13 @@ describe('mapRows', () => {
     ]);
   });
 
-  it('maps dual-currency and category columns', () => {
+  it('maps currency and category columns', () => {
     const rows = mapRows(
       [
         ['DATE', 'TYPE', 'FROM ACCOUNT', 'TO ACCOUNT/TO CATEGORY', 'AMOUNT', 'CURRENCY', 'AMOUNT 2', 'CURRENCY 2', 'TAGS', 'NOTES'],
         ['3/18/26', 'Expense', 'USD', 'Bills', '4.7', 'USD', '21', 'MYR', '', 'Youtube'],
       ],
-      { date: 0, type: 1, amount: 4, currency: 5, baseAmount: 6, baseCurrency: 7, note: 9, category: 3 },
+      { date: 0, type: 1, amount: 4, currency: 5, note: 9, category: 3 },
       true,
     );
 
@@ -49,8 +49,6 @@ describe('mapRows', () => {
         note: 'Youtube',
         type: 'expense',
         currency: 'USD',
-        baseAmount: -2100,
-        baseCurrency: 'MYR',
         categoryName: 'Bills',
       },
     ]);
@@ -58,7 +56,7 @@ describe('mapRows', () => {
 });
 
 describe('autoDetectColumnMapping', () => {
-  it('detects dual-currency and category columns', () => {
+  it('detects currency and category columns', () => {
     const rows = [
       ['DATE', 'TYPE', 'FROM ACCOUNT', 'TO ACCOUNT/TO CATEGORY', 'AMOUNT', 'CURRENCY', 'AMOUNT 2', 'CURRENCY 2', 'TAGS', 'NOTES'],
       ['3/18/26', 'Expense', 'USD', 'Bills', '4.7', 'USD', '21', 'MYR', '', 'Youtube'],
@@ -71,8 +69,6 @@ describe('autoDetectColumnMapping', () => {
     expect(mapping.category).toBe(3);
     expect(mapping.amount).toBe(4);
     expect(mapping.currency).toBe(5);
-    expect(mapping.baseAmount).toBe(6);
-    expect(mapping.baseCurrency).toBe(7);
     expect(mapping.note).toBe(9);
   });
 });

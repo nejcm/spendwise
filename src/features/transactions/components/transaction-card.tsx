@@ -47,13 +47,13 @@ export const TransactionCard = React.memo(({ transaction, className }: Transacti
       </View>
       <View className="items-end">
         <FormattedCurrency
-          value={transaction.baseAmount}
-          currency={transaction.baseCurrency}
+          value={transaction.amount}
+          currency={transaction.currency}
           prefix={isIncome ? '+' : '-'}
           className={`text-base font-medium ${isIncome ? 'text-success-600' : ''}`}
         />
         {showConverted && (
-          <FormattedCurrency value={transaction.amount} currency={transaction.currency} className="text-sm text-muted-foreground" />
+          <FormattedCurrency value={transaction.baseAmount} currency={transaction.baseCurrency} className="text-sm text-muted-foreground" />
         )}
       </View>
     </Pressable>

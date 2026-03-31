@@ -3,6 +3,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
 import { Pressable } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
+import { PeriodSwipeContainer } from '@/components/period-swipe-container';
 import { FocusAwareStatusBar, FormattedCurrency, Text, View } from '@/components/ui';
 import { FileWarning, Pencil, PencilOff } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
@@ -39,7 +40,7 @@ export function CategoriesScreen() {
   const EditIcon = isEditMode ? PencilOff : Pencil;
 
   return (
-    <>
+    <PeriodSwipeContainer selection={selection}>
       <FocusAwareStatusBar />
       <View className="flex-row items-center justify-between px-4 pt-2">
         <View className="w-8"></View>
@@ -106,6 +107,6 @@ export function CategoriesScreen() {
               }}
             />
           )}
-    </>
+    </PeriodSwipeContainer>
   );
 }

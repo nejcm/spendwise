@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 
 import { useRouter } from 'expo-router';
 import * as React from 'react';
-import { View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import { FormattedCurrency, Image, ScrollView, Text } from '@/components/ui';
 import { BotIcon } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
@@ -10,6 +10,7 @@ import { SkeletonBox, SkeletonGrid } from '@/components/ui/skeleton';
 import { AccountsOverview } from '@/features/home/accounts-overview';
 import { CategoriesOverview } from '@/features/home/categories-overview';
 import { useMonthSummary } from '@/features/transactions/api';
+import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -24,10 +25,11 @@ export function HomeScreen() {
   const profile = useAppStore.use.profile();
   const name = profile?.name?.trim() || translate('common.there');
   const { data, isLoading } = useMonthSummary(format(new Date(), 'yyyy-MM'));
+  const { refreshing, onRefresh } = useRefresh();
 
   return (
     <>
-      <ScrollView className="flex-1" style={defaultStyles.transparentBg}>
+      <ScrollView className="flex-1" style={defaultStyles.transparentBg} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <View className="flex-col gap-8 p-4">
           <View className="flex-row items-center justify-between gap-2">
             <Image

@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useMemo } from 'react';
 import { View } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
+import { PeriodSwipeContainer } from '@/components/period-swipe-container';
 import { FocusAwareStatusBar, FormattedCurrency, ScrollView, SolidButton, Text } from '@/components/ui';
 import { Plus } from '@/components/ui/icon';
 import { SkeletonRows } from '@/components/ui/skeleton';
@@ -48,7 +49,7 @@ export function AccountsScreen() {
   }, []);
 
   return (
-    <>
+    <PeriodSwipeContainer selection={selection}>
       <FocusAwareStatusBar />
 
       <PeriodSelector selection={selection} />
@@ -86,6 +87,6 @@ export function AccountsScreen() {
         </View>
 
       </ScrollView>
-    </>
+    </PeriodSwipeContainer>
   );
 }

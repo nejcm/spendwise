@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { cn } from 'tailwind-variants';
 import { PeriodSelector } from '@/components/period-selector';
+import { PeriodSwipeContainer } from '@/components/period-swipe-container';
 import { FocusAwareStatusBar, Input, inputDefaultDefaults, inputDefaults } from '@/components/ui';
 import { X } from '@/components/ui/icon';
 import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
@@ -48,7 +49,7 @@ export function TransactionsScreen() {
   }, [transactions, debouncedSearch, categoryFilter]);
 
   return (
-    <>
+    <PeriodSwipeContainer selection={selection}>
       <FocusAwareStatusBar />
 
       <PeriodSelector selection={selection} />
@@ -82,6 +83,6 @@ export function TransactionsScreen() {
       <View className="flex-1">
         <TransactionList transactions={filtered} isLoading={isLoading} onRefresh={() => void refetch()} />
       </View>
-    </>
+    </PeriodSwipeContainer>
   );
 }

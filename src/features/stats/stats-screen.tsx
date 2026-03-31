@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useMemo } from 'react';
 import { PeriodSelector } from '@/components/period-selector';
+import { PeriodSwipeContainer } from '@/components/period-swipe-container';
 import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
@@ -16,7 +17,7 @@ export function StatsScreen() {
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
 
   return (
-    <>
+    <PeriodSwipeContainer selection={selection}>
       <FocusAwareStatusBar />
 
       <PeriodSelector selection={selection} />
@@ -48,6 +49,6 @@ export function StatsScreen() {
           limit={8}
         />
       </ScrollView>
-    </>
+    </PeriodSwipeContainer>
   );
 }

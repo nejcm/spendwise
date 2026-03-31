@@ -5,7 +5,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { format, parseISO } from 'date-fns';
 import * as React from 'react';
 
-import { Platform, Pressable, View } from 'react-native';
+import { Keyboard, Platform, Pressable, View } from 'react-native';
 import { Input } from '@/components/ui/input';
 import { ModalSheet, useModalSheet } from '@/components/ui/modal-sheet';
 import { todayISO } from '@/features/formatting/helpers';
@@ -52,7 +52,11 @@ export function DateInput({ label, value, onChange, error, modalProps, ...rest }
   }
   return (
     <>
-      <Pressable onPress={present}>
+      <Pressable onPress={() => {
+        Keyboard.dismiss();
+        present();
+      }}
+      >
         <Input
           label={label}
           value={value ? format(parseISO(value), dateFormat) : ''}

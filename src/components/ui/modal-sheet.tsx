@@ -96,11 +96,6 @@ export function renderBackdrop(props: BottomSheetBackdropProps) {
 }
 
 /**
- *
- * @param detached
- * @returns
- *
- * @description
  * In case the modal is detached, we need to add some extra props to the modal to make it look like a detached modal.
  */
 function getDetachedProps(detached: boolean) {

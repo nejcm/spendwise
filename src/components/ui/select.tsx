@@ -6,7 +6,7 @@ import type { ModalSheetProps } from './modal-sheet';
 import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import { FlashList } from '@shopify/flash-list';
 import * as React from 'react';
-import { Pressable, View } from 'react-native';
+import { Keyboard, Pressable, View } from 'react-native';
 import { cn, tv } from 'tailwind-variants';
 import { useUniwind } from 'uniwind';
 import { IS_WEB } from '@/lib/base';
@@ -316,7 +316,10 @@ export function Select<T extends string | number>({
         <Pressable
           className={cn(styles.input(), inputClassName)}
           disabled={disabled}
-          onPress={modal.present}
+          onPress={() => {
+            Keyboard.dismiss();
+            modal.present();
+          }}
           testID={testID ? `${testID}-trigger` : undefined}
         >
           {renderSelectedItem?.(selectedOption)

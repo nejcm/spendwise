@@ -2,7 +2,8 @@ import type { CurrencyKey } from '../currencies';
 import type { CategorySpend } from '@/features/insights/types';
 import type { PeriodSelection } from '@/lib/store';
 import * as React from 'react';
-import { Pressable } from 'react-native';
+import { useState } from 'react';
+import { Pressable, RefreshControl } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 
 import Sortable from 'react-native-sortables';
@@ -19,6 +20,7 @@ export type CategoryGridProps = {
   onReorder: (items: Array<{ id: string; sort_order: number }>) => void;
   onAddPress: () => void;
   onPress: (category?: CategorySpend) => void;
+  onRefresh?: () => Promise<void> | void;
   editMode: boolean;
 };
 
@@ -27,11 +29,19 @@ export const CategoryGrid = React.memo(({
   onReorder,
   onAddPress,
   onPress,
+  onRefresh,
   editMode,
 }: CategoryGridProps) => {
   const currency = useAppStore.use.currency();
   const periodSelection = useAppStore.use.periodSelection();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    await onRefresh?.();
+    setRefreshing(false);
+  }, [onRefresh]);
 
   function handleDragEnd(params: { data: CategorySpend[] }) {
     const updates = params.data.map((item, idx) => ({ id: item.category_id, sort_order: idx }));
@@ -39,7 +49,7 @@ export const CategoryGrid = React.memo(({
   }
 
   return (
-    <Animated.ScrollView ref={scrollRef} className="flex-1 bg-background">
+    <Animated.ScrollView ref={scrollRef} className="flex-1 bg-background" refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}>
       <View className="px-4 pb-4">
         {categories.length === 0
           ? (

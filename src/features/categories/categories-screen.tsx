@@ -13,6 +13,7 @@ import { centsToAmount } from '@/features/formatting/helpers';
 import { categorySpendByRangeQueryOptions, useCategorySpendByRange } from '@/features/insights/api';
 import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
 import { getPeriodRange } from '@/lib/date/helpers';
+import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/local-store';
 import { useAppStore } from '@/lib/store';
@@ -29,6 +30,7 @@ export function CategoriesScreen() {
 
   const { data = [], isLoading } = useCategorySpendByRange(startDate, endDate);
   const updateOrder = useUpdateCategoryOrder();
+  const { onRefresh } = useRefresh();
 
   const db = useSQLiteContext();
   usePrefetchAdjacentPeriods(selection, (start, end) => categorySpendByRangeQueryOptions(db, start, end));
@@ -82,6 +84,7 @@ export function CategoriesScreen() {
             <CategoryGrid
               categories={data}
               editMode={isEditMode}
+              onRefresh={onRefresh}
               onReorder={(items) => updateOrder.mutate(items)}
               onAddPress={() => openSheet({ type: 'add-category' })}
               onPress={(category) => {

@@ -2,7 +2,8 @@ import type { AccountFormData, AccountWithBalance } from './types';
 import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
 import { useMemo } from 'react';
-import { View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
+import NoData from '@/components/no-data';
 import { PeriodSelector } from '@/components/period-selector';
 import { PeriodSwipeContainer } from '@/components/period-swipe-container';
 import { FocusAwareStatusBar, FormattedCurrency, ScrollView, SolidButton, Text } from '@/components/ui';
@@ -12,11 +13,11 @@ import { accountsWithBalanceForRangeQueryOptions, useAccountsWithBalanceForRange
 import { centsToAmount } from '@/features/formatting/helpers';
 import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
 import { getPeriodRange } from '@/lib/date/helpers';
+import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/local-store';
 import { useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
-import NoData from '../../components/no-data';
 import { AccountCard } from './components/account-card';
 
 export function AccountsScreen() {
@@ -30,6 +31,7 @@ export function AccountsScreen() {
   usePrefetchAdjacentPeriods(selection, (start, end) => accountsWithBalanceForRangeQueryOptions(db, start, end));
 
   const totalBalance = accounts.reduce((sum, a) => sum + a.balance, 0);
+  const { refreshing, onRefresh } = useRefresh();
 
   const openCreateAccountForm = React.useCallback(() => {
     openSheet({ type: 'add-account' });
@@ -54,7 +56,7 @@ export function AccountsScreen() {
 
       <PeriodSelector selection={selection} />
 
-      <ScrollView className="flex-1 px-4" style={defaultStyles.transparentBg}>
+      <ScrollView className="flex-1 px-4" style={defaultStyles.transparentBg} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <View className="flex-col items-center justify-between gap-2 px-4 pt-4 pb-6">
           <Text className="text-sm text-muted-foreground">{translate('accounts.total_balance')}</Text>
           <FormattedCurrency value={totalBalance} currency={currency} className="text-3xl font-bold" />

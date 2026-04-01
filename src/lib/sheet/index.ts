@@ -1,3 +1,4 @@
+import type { BottomSheetModalProps } from '@gorhom/bottom-sheet';
 import type { AccountFormData } from '@/features/accounts/types';
 import type { CategoryInitialValues } from '@/features/categories/category-form';
 import type { ScheduledTransactionInitialValues } from '@/features/scheduled-transactions/components/scheduled-transaction-form';
@@ -9,15 +10,16 @@ import type { TransactionFormInitialValues } from '@/features/transactions/compo
 // ---------------------------------------------------------------------------
 
 export type SheetConfig
-  = | { type: 'add-transaction'; initialValues?: TransactionFormInitialValues }
-    | { type: 'add-account' }
-    | { type: 'edit-account'; accountId: string; initialData: AccountFormData }
-    | { type: 'add-category' }
-    | { type: 'edit-category'; categoryId: string; initialValues: CategoryInitialValues }
-    | {
-      type: 'add-scheduled';
-      initialValues?: ScheduledTransactionInitialValues;
-    };
+  = { props?: Partial<BottomSheetModalProps> }
+    & ({ type: 'add-transaction'; initialValues?: TransactionFormInitialValues }
+      | { type: 'add-account' }
+      | { type: 'edit-account'; accountId: string; initialData: AccountFormData }
+      | { type: 'add-category' }
+      | { type: 'edit-category'; categoryId: string; initialValues: CategoryInitialValues }
+      | {
+        type: 'add-scheduled';
+        initialValues?: ScheduledTransactionInitialValues;
+      });
 
 export type SheetType = SheetConfig['type'];
 

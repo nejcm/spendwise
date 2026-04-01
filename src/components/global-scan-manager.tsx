@@ -1,5 +1,6 @@
 import type { Action } from 'expo-image-manipulator';
 import type { ScannedReceipt, ScanVariables } from '@/features/ai/use-scan-receipt';
+import type { ScanTriggeredType } from '@/lib/local-store';
 import { useMutation } from '@tanstack/react-query';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
@@ -73,7 +74,32 @@ export function GlobalScanManager() {
   });
   const { mutate: mutatePrepare } = prepareMutation;
 
-  const handleTrigger = useCallback(async () => {
+  const pickAndPrepare = useCallback(async (source: 'camera' | 'gallery') => {
+    if (source === 'camera') {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(translate('common.error'), translate('scan.camera_permission_denied'));
+        return;
+      }
+      const result = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1 });
+      if (result.canceled) return;
+      const asset = result.assets[0];
+      if (asset) mutatePrepare(asset);
+      return;
+    }
+
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(translate('common.error'), translate('scan.gallery_permission_denied'));
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1 });
+    if (result.canceled) return;
+    const asset = result.assets[0];
+    if (asset) mutatePrepare(asset);
+  }, [mutatePrepare]);
+
+  const handleTrigger = useCallback((type: ScanTriggeredType) => {
     if (!isAiEnabled) {
       Alert.alert(
         translate('scan.no_key_title'),
@@ -85,22 +111,25 @@ export function GlobalScanManager() {
       );
       return;
     }
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert(translate('common.error'), translate('scan.camera_permission_denied'));
+    if (type !== 'select') {
+      void pickAndPrepare(type);
       return;
     }
-    const result = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1 });
-    if (result.canceled) return;
-    const asset = result.assets[0];
-    if (!asset) return;
-    mutatePrepare(asset);
-  }, [isAiEnabled, router, mutatePrepare]);
+    Alert.alert(
+      translate('scan.source_title'),
+      undefined,
+      [
+        { text: translate('scan.source_camera'), onPress: () => void pickAndPrepare('camera') },
+        { text: translate('scan.source_gallery'), onPress: () => void pickAndPrepare('gallery') },
+        { text: translate('common.cancel'), style: 'cancel' },
+      ],
+    );
+  }, [isAiEnabled, router, pickAndPrepare]);
 
   React.useEffect(() => {
     if (!scanTriggered) return;
     closeScan();
-    void handleTrigger();
+    void handleTrigger(scanTriggered);
   }, [scanTriggered, handleTrigger]);
 
   if (!scanMutation.isPending) return null;

@@ -6,9 +6,10 @@ import { useSQLiteContext } from 'expo-sqlite';
 
 import { FocusAwareStatusBar, Image, ScrollView, Text, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
-import { ALargeSmall, Banknote, Bell, Bot, Database, DatabaseBackupIcon, DatabaseZap, HelpCircle, Import, LayoutGrid, Link, ListChecks, PieChart, Printer, RefreshCcw, Share, Shield, User } from '@/components/ui/icon';
+import { ALargeSmall, Banknote, Bell, Bot, BotMessageSquare, Database, DatabaseBackupIcon, DatabaseZap, HelpCircle, Import, LayoutGrid, Link, ListChecks, PieChart, Printer, RefreshCcw, ScanLine, Share, Shield, User } from '@/components/ui/icon';
 import { config } from '@/config';
 import { clearData, clearTransactionsData, dumpDbTables, resetDb, seedData, seedMockData } from '@/lib/dev';
+import { triggerScanPicker } from '@/lib/local-store';
 import { selectProfile, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { getAvatar } from '../profile';
@@ -62,6 +63,16 @@ export function SettingsScreen() {
               icon={<RefreshCcw className={iconColor} size={20} />}
               text="settings.scheduled"
               onPress={() => router.push('/scheduled' as never)}
+            />
+            <SettingsItem
+              icon={<BotMessageSquare className={iconColor} size={20} />}
+              text="settings.ai_chat"
+              onPress={() => router.push('/ai' as never)}
+            />
+            <SettingsItem
+              icon={<ScanLine className={iconColor} size={20} />}
+              text="settings.scan"
+              onPress={triggerScanPicker}
             />
           </SettingsContainer>
 

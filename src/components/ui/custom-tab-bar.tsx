@@ -77,7 +77,7 @@ export function CustomTabBar() {
             <View key="add" className="flex-1 items-center justify-center">
               <Pressable
                 onPress={() => openSheet(sheetConfigForPathname(pathname))}
-                onLongPress={triggerScan}
+                onLongPress={() => triggerScan('camera')}
                 delayLongPress={400}
                 className="size-12 items-center justify-center rounded-full bg-gray-950"
                 style={({ pressed }) => ({

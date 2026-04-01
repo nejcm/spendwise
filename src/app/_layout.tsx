@@ -90,21 +90,6 @@ function DevThemeToggle() {
   return null;
 }
 
-export default function RootLayout() {
-  return (
-    <Providers>
-      <Stack screenOptions={{ navigationBarColor: TAB_BAR_COLOR }}>
-        <Stack.Screen name="(app)" options={{ headerShown: false }} />
-        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-      </Stack>
-      <PersistentTabBar />
-      <GlobalSheet />
-      <GlobalScanManager />
-      <SecurityLock />
-    </Providers>
-  );
-}
-
 function WebFontsLoader({ children }: { children?: React.ReactNode }) {
   const [_loader, error] = useFonts({
     'Inter': require('node_modules/@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf'),
@@ -166,6 +151,21 @@ function Providers({ children }: { children: React.ReactNode }) {
         </SafeAreaProvider>
       </PosthogProviderWrapper>
     </GestureHandlerRootView>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <Providers>
+      <Stack screenOptions={{ navigationBarColor: TAB_BAR_COLOR }}>
+        <Stack.Screen name="(app)" options={{ headerShown: false }} />
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+      </Stack>
+      <PersistentTabBar />
+      <GlobalSheet />
+      <GlobalScanManager />
+      <SecurityLock />
+    </Providers>
   );
 }
 

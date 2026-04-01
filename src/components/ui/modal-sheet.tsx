@@ -4,6 +4,7 @@ import { BottomSheetModal, useBottomSheet } from '@gorhom/bottom-sheet';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IS_WEB } from '@/lib/base';
 
 import { defaultStyles } from '@/lib/theme/styles';
@@ -38,12 +39,15 @@ export function ModalSheet<T>({
   snapPoints: _snapPoints = ['60%'] as (string | number)[],
   title,
   detached = false,
+  bottomInset: providedBottomInset,
   ...props
 }: ModalSheetProps & { ref?: ModalSheetRef<T> }) {
   const theme = useThemeConfig();
+  const { bottom: bottomInset } = useSafeAreaInsets();
   const detachedProps = React.useMemo(() => getDetachedProps(detached), [detached]);
   const modal = useModalSheet<T>();
   const snapPoints = React.useMemo(() => _snapPoints, [_snapPoints]);
+  const sheetBottomInset = providedBottomInset ?? (detached ? Math.max(bottomInset + 12, 46) : bottomInset);
 
   React.useImperativeHandle(ref, () => (modal.ref.current as BottomSheetModal<T>) || null);
 
@@ -65,6 +69,7 @@ export function ModalSheet<T>({
       ref={modal.ref}
       index={0}
       snapPoints={snapPoints}
+      bottomInset={sheetBottomInset}
       backdropComponent={props.backdropComponent || renderBackdrop}
       enableDynamicSizing={false}
       handleComponent={renderHandleComponent}
@@ -102,7 +107,6 @@ function getDetachedProps(detached: boolean) {
   if (detached) {
     return {
       detached: true,
-      bottomInset: 46,
       style: { marginHorizontal: 16, overflow: 'hidden' },
     } as Partial<BottomSheetModalProps>;
   }

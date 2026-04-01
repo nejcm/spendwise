@@ -328,7 +328,8 @@
   "settings": {
     "about": "About",
     "accounts": "Accounts",
-    "ai": "AI",
+    "ai": "AI settings",
+    "ai_chat": "AI Chat",
     "ai_provider": "AI Provider",
     "ai_provider_active": "Active provider",
     "ai_provider_desc": "Choose which service to use and enter its API key. Keys stay on this device and are only used to call that provider.",
@@ -395,6 +396,7 @@
     "reset": "Reset",
     "reset_db": "Reset Database",
     "saved": "AI settings saved",
+    "scan": "Scan",
     "scheduled": "Recurring Rules",
     "security": "Security",
     "seed": "Seed",

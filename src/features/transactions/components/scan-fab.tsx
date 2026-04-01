@@ -3,14 +3,14 @@ import * as React from 'react';
 import { getPressedStyle, IconButton } from '@/components/ui';
 import { ScanLine } from '@/components/ui/icon';
 import { translate } from '@/lib/i18n';
-import { triggerScan } from '@/lib/local-store';
+import { triggerScanPicker } from '@/lib/local-store';
 
 export type ScanFabProps = Partial<IconButtonProps>;
 
 export function ScanFab(props: ScanFabProps) {
   return (
     <IconButton
-      onPress={triggerScan}
+      onPress={triggerScanPicker}
       hitSlop={8}
       size="sm"
       color="secondary"

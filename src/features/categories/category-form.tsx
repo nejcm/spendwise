@@ -5,8 +5,8 @@ import { View } from 'react-native';
 import * as z from 'zod';
 
 import ColorSelector from '@/components/color-selector';
-import { GhostButton, Image, Input, SolidButton, Text } from '@/components/ui';
-import Alert from '@/components/ui/alert';
+import { Alert, GhostButton, Image, Input, SolidButton, Text } from '@/components/ui';
+
 import { getFieldError } from '@/components/ui/form-utils';
 import { OutlineButton } from '@/components/ui/outline-button';
 import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/features/categories/api';

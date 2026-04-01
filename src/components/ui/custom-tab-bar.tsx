@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
 import { Home, LayoutGrid, PieChart, PlusIcon, UserIcon } from '@/components/ui/icon';
-import { openSheet } from '@/lib/local-store';
+import { openSheet, triggerScan } from '@/lib/local-store';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const TAB_BAR_COLOR = '#aaaaaa' as const;
@@ -59,11 +59,13 @@ function sheetConfigForPathname(pathname: string): SheetConfig {
 export function CustomTabBar() {
   const router = useRouter();
   const pathname = usePathname() || '';
-
   const getIsActive = (tab: TabConfig): boolean => {
     if (tab.name === 'index') return pathname === '/' || pathname === '';
     return pathname.startsWith(tab.path);
   };
+
+  const sheetConfig = sheetConfigForPathname(pathname);
+  const isTransactionContext = sheetConfig.type === 'add-transaction';
 
   return (
     <View
@@ -77,7 +79,9 @@ export function CustomTabBar() {
           return (
             <View key="add" className="flex-1 items-center justify-center">
               <Pressable
-                onPress={() => openSheet(sheetConfigForPathname(pathname))}
+                onPress={() => openSheet(sheetConfig)}
+                onLongPress={isTransactionContext ? triggerScan : undefined}
+                delayLongPress={400}
                 className="size-12 items-center justify-center rounded-full bg-gray-950"
                 style={({ pressed }) => ({
                   opacity: pressed ? 0.85 : 1,

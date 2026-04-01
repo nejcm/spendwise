@@ -2,16 +2,15 @@ import type { PeriodSelection } from '@/lib/store';
 import * as React from 'react';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
-import { View } from '@/components/ui';
 import { navigatePeriod } from '@/lib/date/helpers';
 import { setPeriodSelection } from '@/lib/store';
 
-type Props = {
+export type PeriodSwipeContainerProps = {
   selection: PeriodSelection;
   children: React.ReactNode;
 };
 
-export function PeriodSwipeContainer({ selection, children }: Props) {
+export function PeriodSwipeContainer({ selection, children }: PeriodSwipeContainerProps) {
   const isAll = selection.mode === 'all';
   const translateX = useSharedValue(0);
   const opacity = useSharedValue(1);
@@ -43,11 +42,9 @@ export function PeriodSwipeContainer({ selection, children }: Props) {
 
   return (
     <GestureDetector gesture={gesture}>
-      <View className="flex-1">
-        <Animated.View style={[{ flex: 1 }, animatedStyle]}>
-          {children}
-        </Animated.View>
-      </View>
+      <Animated.View style={[{ flex: 1 }, animatedStyle]}>
+        {children}
+      </Animated.View>
     </GestureDetector>
   );
 }

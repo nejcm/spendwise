@@ -1,6 +1,6 @@
 import type { ScannedReceipt } from './service/scan';
 import { useMutation } from '@tanstack/react-query';
-import Alert from '@/components/ui/alert';
+import { Alert } from '@/components/ui';
 import { useCategories } from '@/features/categories/api';
 import { translate } from '@/lib/i18n';
 import { scanReceiptImage } from './service/scan';

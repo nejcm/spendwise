@@ -4,7 +4,7 @@ import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { useSQLiteContext } from 'expo-sqlite';
 
-import Alert from '@/components/ui/alert';
+import { Alert } from '@/components/ui';
 import { exportBackup, importBackup, validateBackup } from '@/features/imports-export/backup';
 import { IS_WEB } from '@/lib/base';
 import { invalidateFor } from '@/lib/data/invalidation';

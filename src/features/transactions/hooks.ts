@@ -8,7 +8,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import * as Haptics from 'expo-haptics';
 import { useSQLiteContext } from 'expo-sqlite';
-import Alert from '@/components/ui/alert';
+import { Alert } from '@/components/ui';
 import { computeBaseAmount } from '@/features/currencies/conversion';
 import { getRatesForDate, getRatesForDates } from '@/features/currencies/queries';
 import { captureError } from '@/lib/analytics';

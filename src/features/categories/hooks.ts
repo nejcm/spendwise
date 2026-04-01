@@ -3,7 +3,7 @@ import type { CategoryFormData } from './types';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
 
-import Alert from '@/components/ui/alert';
+import { Alert } from '@/components/ui';
 import { captureError } from '@/lib/analytics';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';

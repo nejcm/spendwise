@@ -20,4 +20,4 @@ const alertPolyfill = {
 
 const Alert = IS_WEB ? alertPolyfill : AlertRN;
 
-export default Alert;
+export { Alert };

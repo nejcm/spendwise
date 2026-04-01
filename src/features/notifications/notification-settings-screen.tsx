@@ -3,8 +3,7 @@ import * as React from 'react';
 
 import { Platform } from 'react-native';
 import DetailsSection from '@/components/details';
-import { FocusAwareStatusBar, ScrollView, Select, Switch } from '@/components/ui';
-import Alert from '@/components/ui/alert';
+import { Alert, FocusAwareStatusBar, ScrollView, Select, Switch } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import { updateNotifications, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';

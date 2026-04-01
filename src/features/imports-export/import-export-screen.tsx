@@ -5,8 +5,8 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as React from 'react';
 import { useState } from 'react';
 import DetailsSection from '@/components/details';
-import { FocusAwareStatusBar, ScrollView, SolidButton, Text } from '@/components/ui';
-import Alert from '@/components/ui/alert';
+import { Alert, FocusAwareStatusBar, ScrollView, SolidButton, Text } from '@/components/ui';
+
 import { ArrowUp, Download, Upload } from '@/components/ui/icon';
 import { autoDetectColumnMapping, parseCSV } from '@/features/imports-export/csv-parser';
 import { useExportBackup, useImportBackup } from '@/features/imports-export/hooks';

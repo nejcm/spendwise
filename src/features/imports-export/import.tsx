@@ -7,8 +7,8 @@ import { useRouter } from 'expo-router';
 
 import * as React from 'react';
 import { ScrollView, View } from 'react-native';
-import { FormattedCurrency, FormattedDate, Select, SolidButton, Text } from '@/components/ui';
-import Alert from '@/components/ui/alert';
+import { Alert, FormattedCurrency, FormattedDate, Select, SolidButton, Text } from '@/components/ui';
+
 import { translate } from '@/lib/i18n';
 import { OutlineButton } from '../../components/ui/outline-button';
 import { DEFAULT_CURRENCY } from '../../config';

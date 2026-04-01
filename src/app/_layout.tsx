@@ -12,6 +12,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppErrorBoundary } from '@/components/app-error-boundary';
+import { GlobalScanManager } from '@/components/global-scan-manager';
 import { GlobalSheet } from '@/components/global-sheet';
 import { SafeAreaView, View } from '@/components/ui';
 import { CustomTabBar, TAB_BAR_COLOR } from '@/components/ui/custom-tab-bar';
@@ -98,6 +99,7 @@ export default function RootLayout() {
       </Stack>
       <PersistentTabBar />
       <GlobalSheet />
+      <GlobalScanManager />
       <SecurityLock />
     </Providers>
   );

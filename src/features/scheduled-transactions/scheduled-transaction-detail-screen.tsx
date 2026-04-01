@@ -3,8 +3,8 @@ import * as React from 'react';
 import { useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import DetailsSection from '@/components/details';
-import { FocusAwareStatusBar, FormattedCurrency, FormattedDate, SolidButton, Text } from '@/components/ui';
-import Alert from '@/components/ui/alert';
+import { Alert, FocusAwareStatusBar, FormattedCurrency, FormattedDate, SolidButton, Text } from '@/components/ui';
+
 import { GhostButton } from '@/components/ui/ghost-button';
 import { OutlineButton } from '@/components/ui/outline-button';
 import { formatDate } from '@/features/formatting/helpers';

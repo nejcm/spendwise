@@ -1,8 +1,8 @@
 import * as LocalAuthentication from 'expo-local-authentication';
 import * as React from 'react';
 
-import { FocusAwareStatusBar, ScrollView, Select, Switch, Text, View } from '@/components/ui';
-import Alert from '@/components/ui/alert';
+import { Alert, FocusAwareStatusBar, ScrollView, Select, Switch, Text, View } from '@/components/ui';
+
 import { translate } from '@/lib/i18n';
 import { setIsLocked, setLockEnabled, setLockTimeoutMinutes, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';

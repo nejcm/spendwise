@@ -5,36 +5,16 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
+import { useCallback } from 'react';
 import { Alert } from '@/components/ui';
 import { useScanReceipt } from '@/features/ai/use-scan-receipt';
 import { translate } from '@/lib/i18n';
 import { closeScan, openSheet, useLocalStore } from '@/lib/local-store';
 import { selectIsAiEnabled, useAppStore } from '@/lib/store';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
-import { IS_WEB } from '../lib/base';
 import { ActivityIndicator, Modal, Text } from './ui';
 
 const MAX_IMAGE_DIMENSION = 1024;
-
-async function pickImage(source: 'camera' | 'gallery'): Promise<ImagePicker.ImagePickerAsset | null> {
-  if (source === 'camera') {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert(translate('common.error'), translate('scan.camera_permission_denied'));
-      return null;
-    }
-    const result = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1 });
-    return result.canceled ? null : (result.assets[0] ?? null);
-  }
-
-  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (status !== 'granted') {
-    Alert.alert(translate('common.error'), translate('scan.gallery_permission_denied'));
-    return null;
-  }
-  const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1 });
-  return result.canceled ? null : (result.assets[0] ?? null);
-}
 
 async function resizeForAI(asset: ImagePicker.ImagePickerAsset): Promise<{ base64: string; mimeType: 'image/jpeg' }> {
   const longerSide = Math.max(asset.width, asset.height);
@@ -79,14 +59,11 @@ export function GlobalScanManager() {
   const scanMutation = useScanReceipt(onSuccess);
 
   const prepareMutation = useMutation({
-    mutationFn: async (source: 'camera' | 'gallery'): Promise<ScanVariables | null> => {
-      const asset = await pickImage(source);
-      if (!asset) return null;
+    mutationFn: async (asset: ImagePicker.ImagePickerAsset): Promise<ScanVariables> => {
       const { base64, mimeType } = await resizeForAI(asset);
       return { base64Image: base64, mimeType };
     },
     onSuccess: (variables) => {
-      if (!variables) return;
       scanMutation.mutate(variables);
     },
     onError: (error) => {
@@ -94,8 +71,9 @@ export function GlobalScanManager() {
       Alert.alert(translate('common.error'), message);
     },
   });
+  const { mutate: mutatePrepare } = prepareMutation;
 
-  const handleTrigger = React.useCallback(() => {
+  const handleTrigger = useCallback(async () => {
     if (!isAiEnabled) {
       Alert.alert(
         translate('scan.no_key_title'),
@@ -107,21 +85,22 @@ export function GlobalScanManager() {
       );
       return;
     }
-    Alert.alert(
-      translate('scan.source_title'),
-      undefined,
-      [
-        { text: translate('scan.source_camera'), onPress: () => void prepareMutation.mutate(IS_WEB ? 'gallery' : 'camera') },
-        { text: translate('scan.source_gallery'), onPress: () => void prepareMutation.mutate('gallery') },
-        { text: translate('common.cancel'), style: 'cancel' },
-      ],
-    );
-  }, [isAiEnabled, router, prepareMutation]);
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(translate('common.error'), translate('scan.camera_permission_denied'));
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1 });
+    if (result.canceled) return;
+    const asset = result.assets[0];
+    if (!asset) return;
+    mutatePrepare(asset);
+  }, [isAiEnabled, router, mutatePrepare]);
 
   React.useEffect(() => {
     if (!scanTriggered) return;
     closeScan();
-    handleTrigger();
+    void handleTrigger();
   }, [scanTriggered, handleTrigger]);
 
   if (!scanMutation.isPending) return null;

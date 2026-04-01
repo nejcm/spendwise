@@ -18,6 +18,7 @@ export function PeriodSwipeContainer({ selection, children }: PeriodSwipeContain
   const gesture = Gesture.Pan()
     .activeOffsetX([-20, 20])
     .failOffsetY([-10, 10])
+    .runOnJS(true)
     .onUpdate((event) => {
       if (isAll) return;
       translateX.value = Math.max(-12, Math.min(12, event.translationX * 0.2));

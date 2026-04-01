@@ -171,6 +171,7 @@ export function GlobalSheet() {
       snapPoints={snapPoints}
       title={<SheetTitle config={config} />}
       onDismiss={closeSheet}
+      enablePanDownToClose={false}
       android_keyboardInputMode="adjustPan"
     >
       <BottomSheetKeyboardAwareScrollView

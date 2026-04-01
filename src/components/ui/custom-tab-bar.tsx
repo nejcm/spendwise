@@ -64,9 +64,6 @@ export function CustomTabBar() {
     return pathname.startsWith(tab.path);
   };
 
-  const sheetConfig = sheetConfigForPathname(pathname);
-  const isTransactionContext = sheetConfig.type === 'add-transaction';
-
   return (
     <View
       className={`flex-row border-t border-gray-200 ${bgColor} p-2`}
@@ -79,8 +76,8 @@ export function CustomTabBar() {
           return (
             <View key="add" className="flex-1 items-center justify-center">
               <Pressable
-                onPress={() => openSheet(sheetConfig)}
-                onLongPress={isTransactionContext ? triggerScan : undefined}
+                onPress={() => openSheet(sheetConfigForPathname(pathname))}
+                onLongPress={triggerScan}
                 delayLongPress={400}
                 className="size-12 items-center justify-center rounded-full bg-gray-950"
                 style={({ pressed }) => ({

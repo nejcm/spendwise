@@ -168,10 +168,11 @@ export function GlobalSheet() {
   return (
     <ModalSheet
       ref={modalRef}
-      snapPoints={snapPoints}
-      title={<SheetTitle config={config} />}
       onDismiss={closeSheet}
+      title={<SheetTitle config={config} />}
+      snapPoints={snapPoints}
       enablePanDownToClose={false}
+      {...config?.props}
       android_keyboardInputMode="adjustPan"
     >
       <BottomSheetKeyboardAwareScrollView

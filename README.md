@@ -6,15 +6,29 @@ Spendwise is a personal finance app built with Expo and React Native. The app is
 
 ## What the app includes
 
-- Onboarding and profile/preferences setup
-- Accounts, categories, and transactions
-- Stats, insights, and trend views
-- Budgets and savings goals
-- CSV import flow
-- Currency rates and formatting preferences
-- Local notifications for finance reminders
-- Optional app lock / biometric protection
-- Optional AI assistant backed by user-provided API keys
+- Onboarding and profile setup (name + avatar)
+- Preferences: theme (system/light/dark) and language
+- Accounts: create/edit/delete, opening balance, monthly budget, balance overview
+- Categories: create/edit/delete, emoji icons, ordering/reorder UI, monthly budgets
+- Transactions: income/expense/transfer, search + filters, detail screen, per-account assignment
+- Recurring rules (scheduled transactions): create/edit/remove rules, next-due tracking, upcoming bill checks
+- Stats: totals, trends (weekly/monthly breakdown), category breakdowns, top income/expenses
+- Insights: monthly trend + spending by category analytics
+- Import/Export:
+  - CSV import (column mapping + preview) and CSV export
+  - Full JSON backup export and restore
+- Currencies and formatting:
+  - Display currency selection with historical rate recalculation
+  - Number/date/currency format preferences
+- Notifications:
+  - Budget alerts (approaching/exceeded)
+  - Upcoming bill reminders
+  - Low balance alerts
+  - Weekly spending digest
+- Security: optional app lock using device authentication (biometrics/PIN)
+- Optional:
+  - AI chat (OpenAI/Anthropic) using user-provided API keys stored on-device
+  - Receipt scanning (requires AI key)
 
 ## Stack
 
@@ -115,7 +129,7 @@ pnpm android:production
 ## Architecture At A Glance
 
 - `src/app`: Expo Router entry points and route files
-- `src/features`: feature-first modules such as accounts, transactions, stats, insights, budgets, goals, imports, settings, notifications, and security
+- `src/features`: feature-first modules such as home, accounts, categories, transactions, scheduled transactions, stats, insights, import/export, settings, notifications, security, and AI
 - `src/components`: shared app components and UI primitives
 - `src/lib`: infrastructure for SQLite, storage, theming, i18n, utilities, and app-wide providers
 - `src/translations`: translation resources

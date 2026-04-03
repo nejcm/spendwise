@@ -180,7 +180,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
                     testID="base-amount-input"
                     error={getFieldError(field)}
                     containerClassName="min-w-[72] flex-1"
-                    className="border-none bg-transparent"
+                    className="border-0 bg-transparent"
                   />
                 )}
               />

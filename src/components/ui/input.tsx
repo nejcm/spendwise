@@ -137,7 +137,6 @@ export function Input({ ref, showErrorMessage = true, ...props }: InputProps & {
           className={cn(styles.input(), rightSection && 'pr-10', className)}
           style={StyleSheet.flatten([
             { writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr' },
-            { textAlign: I18nManager.isRTL ? 'right' : 'left' },
             { outlineStyle: 'solid' as const },
             { outlineWidth: 0 },
             { textAlignVertical: variant === 'textarea' ? 'top' : undefined },

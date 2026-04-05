@@ -2,13 +2,14 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { View } from 'react-native';
 
+import { NoDataCard } from '@/components/no-data-card';
 import { Text } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { SkeletonRows } from '@/components/ui/skeleton';
 import { useRecentTransactions } from '@/features/transactions/api';
 import { TransactionCard } from '@/features/transactions/components/transaction-card';
 import { translate } from '@/lib/i18n';
-import { NoDataCard } from '../../components/no-data-card';
+import { openSheet } from '@/lib/local-store';
 
 export default function TransactionsList() {
   const router = useRouter();
@@ -40,7 +41,7 @@ export default function TransactionsList() {
         : isLoading
           ? <SkeletonRows count={5} />
           : (
-              <NoDataCard onPress={() => router.push('/transactions/add')} label={translate('home.add_transaction')} />
+              <NoDataCard onPress={() => openSheet({ type: 'add-transaction' })} label={translate('home.add_transaction')} />
             )}
     </View>
   );

@@ -1,17 +1,21 @@
+import type { AutoBackupInterval } from '@/features/imports-export/backup-file';
 import type { ImportProps } from '@/features/imports-export/import';
 import { useMutation } from '@tanstack/react-query';
-import * as DocumentPicker from 'expo-document-picker';
 
+import * as DocumentPicker from 'expo-document-picker';
 import * as React from 'react';
 import { useState } from 'react';
 import DetailsSection from '@/components/details';
-import { Alert, FocusAwareStatusBar, ScrollView, SolidButton, Text } from '@/components/ui';
 
+import { Alert, FocusAwareStatusBar, ScrollView, Select, SolidButton, Switch, Text } from '@/components/ui';
 import { ArrowUp, Download, Upload } from '@/components/ui/icon';
+import { formatDate } from '@/features/formatting/helpers';
+import { IS_AUTO_BACKUP_SUPPORTED } from '@/features/imports-export/backup-file';
 import { autoDetectColumnMapping, parseCSV } from '@/features/imports-export/csv-parser';
 import { useExportBackup, useImportBackup } from '@/features/imports-export/hooks';
 import Import from '@/features/imports-export/import';
 import { translate } from '@/lib/i18n';
+import { updateAutoBackup, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
 
 const initialCsvState: ImportProps['state'] = {
@@ -19,6 +23,79 @@ const initialCsvState: ImportProps['state'] = {
   allRows: [],
   mapping: { amount: null, date: null, currency: null, note: null, type: null, category: null },
 };
+
+function autoBackupIntervalOptions(): { label: string; value: AutoBackupInterval }[] {
+  return [
+    { label: translate('import-export.auto_backup_interval_daily'), value: 'daily' },
+    { label: translate('import-export.auto_backup_interval_weekly'), value: 'weekly' },
+    { label: translate('import-export.auto_backup_interval_monthly'), value: 'monthly' },
+  ];
+}
+
+function AutoBackupSection() {
+  const autoBackup = useAppStore.use.autoBackup();
+  const dateFormat = useAppStore.use.dateFormat();
+
+  if (!IS_AUTO_BACKUP_SUPPORTED) {
+    return (
+      <>
+        <Text className="mb-2 font-bold dark:text-muted-foreground" tx="import-export.auto_backup_section_title" />
+        <DetailsSection
+          className="mb-4"
+          data={[{
+            label: translate('import-export.auto_backup_web_unavailable_title'),
+            description: translate('import-export.auto_backup_web_unavailable_description'),
+            value: <Text className="text-muted-foreground">—</Text>,
+          }]}
+        />
+      </>
+    );
+  }
+
+  const lastDisplay = autoBackup.lastAutoBackupAt
+    ? formatDate(Math.floor(new Date(autoBackup.lastAutoBackupAt).getTime() / 1000), dateFormat)
+    : translate('import-export.auto_backup_never');
+
+  return (
+    <>
+      <Text className="mb-2 font-bold dark:text-muted-foreground" tx="import-export.auto_backup_section_title" />
+      <DetailsSection
+        className="mb-4"
+        data={[
+          {
+            label: translate('import-export.auto_backup_enable_label'),
+            description: translate('import-export.auto_backup_enable_description'),
+            value: (
+              <Switch
+                accessibilityLabel={translate('import-export.auto_backup_enable_label')}
+                checked={autoBackup.enabled}
+                onChange={(checked) => updateAutoBackup({ enabled: checked })}
+              />
+            ),
+          },
+          ...(autoBackup.enabled
+            ? [{
+                label: translate('import-export.auto_backup_interval_label'),
+                value: (
+                  <Select<AutoBackupInterval>
+                    containerClassName="min-w-36"
+                    size="sm"
+                    options={autoBackupIntervalOptions()}
+                    value={autoBackup.interval}
+                    onSelect={(interval) => updateAutoBackup({ interval })}
+                  />
+                ),
+              }]
+            : []),
+          {
+            label: translate('import-export.auto_backup_last_label'),
+            value: lastDisplay,
+          },
+        ]}
+      />
+    </>
+  );
+}
 
 function BackupSection() {
   const exportBackup = useExportBackup();
@@ -103,10 +180,9 @@ export function ImportScreen() {
       <ScrollView className="flex-1 px-4 py-8" style={defaultStyles.transparentBg}>
         {!inProgress && (
           <>
-            <BackupSection />
             <Text className="mb-2 font-bold dark:text-muted-foreground" tx="import-export.external_section_title" />
             <DetailsSection
-              className="mb-4"
+              className="mb-6"
               data={[{
                 label: translate('import-export.import_title'),
                 description: translate('import-export.pick_description'),
@@ -122,6 +198,8 @@ export function ImportScreen() {
                 ),
               }]}
             />
+            <AutoBackupSection />
+            <BackupSection />
           </>
         )}
         {inProgress && (

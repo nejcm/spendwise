@@ -2,10 +2,11 @@ import type { Account } from '@/features/accounts/types';
 import type { AiProviderType } from '@/features/ai/types';
 import type { CurrencyKey } from '@/features/currencies';
 import type { CurrencyFormat, DateFormat, NumberFormat } from '@/features/formatting/constants';
+import type { AutoBackupInterval } from '@/features/imports-export/backup-file';
 import type { Language } from '@/features/languages/types';
 import type { NotificationSettings } from '@/features/notifications/types';
-import type { ThemeType } from '@/features/settings/theme';
 
+import type { ThemeType } from '@/features/settings/theme';
 import type { Transaction } from '@/features/transactions/types';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
@@ -30,6 +31,12 @@ export type PeriodSelectionCustom = { mode: 'custom'; startDate: string; endDate
 export type PeriodSelectionAll = { mode: 'all' };
 export type PeriodSelection = PeriodSelectionYear | PeriodSelectionMonth | PeriodSelectionWeek | PeriodSelectionCustom | PeriodSelectionAll;
 
+export type AutoBackupSettings = {
+  enabled: boolean;
+  interval: AutoBackupInterval;
+  lastAutoBackupAt: string | null;
+};
+
 export type AppState = {
   // Profile
   profile: {
@@ -52,6 +59,7 @@ export type AppState = {
   isFirstTime: boolean;
   language: Language | undefined;
   notifications: NotificationSettings;
+  autoBackup: AutoBackupSettings;
   saveOnScan: boolean | undefined;
 
   // Security
@@ -112,6 +120,11 @@ function getDefaultState(): AppState {
       lowBalance: false,
       lowBalanceThresholdCents: 5000,
       weeklyDigest: false,
+    },
+    autoBackup: {
+      enabled: false,
+      interval: 'daily',
+      lastAutoBackupAt: null,
     },
     lastUsed: {
       currencies: [DEFAULT_USER_CURRENCY],
@@ -288,3 +301,8 @@ export function updateNotifications(notifications: Partial<AppState['notificatio
 }
 export const selectNotifications = (state: AppState) => state.notifications;
 export const selectNotificationSettings = (state: AppState) => state.notifications;
+
+export function updateAutoBackup(partial: Partial<AutoBackupSettings>) {
+  return updateAppState((prev) => ({ autoBackup: { ...prev.autoBackup, ...partial } }));
+}
+export const selectAutoBackup = (state: AppState) => state.autoBackup;

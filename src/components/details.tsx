@@ -11,7 +11,7 @@ export type DetailsRowProps = {
 
 export function DetailsRow({ label, labelClassName, description, value, className }: DetailsRowProps) {
   return (
-    <View className="flex-row items-center justify-between gap-2">
+    <View className="flex-row items-center justify-between gap-4">
       <View className="flex-1">
         <Text className={cn(description ? 'text-foreground' : 'text-muted-foreground', labelClassName)}>{label}</Text>
         {!!description && <Text className="text-sm/snug text-muted-foreground">{description}</Text>}

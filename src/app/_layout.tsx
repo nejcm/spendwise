@@ -18,6 +18,7 @@ import { SafeAreaView, View } from '@/components/ui';
 import { CustomTabBar, TAB_BAR_COLOR, TAB_BAR_DARK_COLOR } from '@/components/ui/custom-tab-bar';
 import { DB_NAME } from '@/config';
 import { useCurrencyRates } from '@/features/currencies/api';
+import { AutoBackupProcessor } from '@/features/imports-export/auto-backup-processor';
 import { ScheduledTransactionsProcessor } from '@/features/scheduled-transactions/scheduled-transactions-processor';
 import { SecurityLock } from '@/features/security/security-lock';
 
@@ -130,6 +131,7 @@ function Providers({ children }: { children: React.ReactNode }) {
                       <CurrencyRatesInitializer />
                       <AppErrorBoundary>
                         <ScheduledTransactionsProcessor />
+                        <AutoBackupProcessor />
                         <FontLoader>
                           <BottomSheetModalProvider>
                             <View className="flex-1 bg-white">

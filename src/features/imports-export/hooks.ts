@@ -6,11 +6,10 @@ import { useSQLiteContext } from 'expo-sqlite';
 
 import { Alert } from '@/components/ui';
 import { exportBackup, importBackup, validateBackup } from '@/features/imports-export/backup';
+import { buildManualBackupFileName } from '@/features/imports-export/backup-file';
 import { IS_WEB } from '@/lib/base';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { translate } from '@/lib/i18n';
-
-const BACKUP_FILE_NAME_PREFIX = 'spendwise-backup-';
 
 export function useExportBackup() {
   const db = useSQLiteContext();
@@ -19,7 +18,7 @@ export function useExportBackup() {
     mutationFn: async () => {
       const backup = await exportBackup(db);
       const json = JSON.stringify(backup, null, 2);
-      const fileName = `${BACKUP_FILE_NAME_PREFIX}${new Date().toISOString().slice(0, 10)}.json`;
+      const fileName = buildManualBackupFileName();
 
       if (IS_WEB) {
         const blob = new Blob([json], { type: 'application/json;charset=utf-8;' });

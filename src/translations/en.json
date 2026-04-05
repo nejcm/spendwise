@@ -177,6 +177,17 @@
     "total_balance": "Total Balance"
   },
   "import-export": {
+    "auto_backup_enable_description": "Saves a JSON backup in app storage when you open the app, based on the interval below.",
+    "auto_backup_enable_label": "Automatic backup",
+    "auto_backup_interval_daily": "Daily",
+    "auto_backup_interval_label": "Backup interval",
+    "auto_backup_interval_monthly": "Monthly",
+    "auto_backup_interval_weekly": "Weekly",
+    "auto_backup_last_label": "Last backup",
+    "auto_backup_never": "Never",
+    "auto_backup_section_title": "Automatic backup",
+    "auto_backup_web_unavailable_description": "Automatic on-device backup is only available in the mobile app.",
+    "auto_backup_web_unavailable_title": "Not available on web",
     "backup_complete_message": "Your data has been restored successfully",
     "backup_complete_title": "Restore Complete",
     "backup_download_description": "Export all data as a JSON backup file",

@@ -15,7 +15,7 @@ import { CURRENCY_FORMAT_OPTIONS, DATE_FORMAT_OPTIONS, NUMBER_FORMAT_OPTIONS } f
 import { SettingsContainer } from './components/settings-container';
 import { SettingsItem } from './components/settings-item';
 
-const iconColor = 'gray-foreground';
+const iconColor = 'accent-foreground';
 const baseNs = 'settings.formattingOptions' as const;
 
 type ModalType = 'currency' | 'currencyFormat' | 'dateFormat' | 'numberFormat' | 'monthStartDay';
@@ -132,7 +132,7 @@ export function FormattingSettingsScreen() {
       <ScrollView className="flex-1 px-4 pt-8" style={defaultStyles.transparentBg}>
         <SettingsContainer className="mb-2">
           <SettingsItem
-            icon={<CircleDollarSign className={iconColor} size={20} />}
+            icon={<CircleDollarSign colorClassName={iconColor} size={20} />}
             text="settings.default_currency"
             value={currency}
             onPress={() => openModal('currency')}
@@ -140,7 +140,7 @@ export function FormattingSettingsScreen() {
         </SettingsContainer>
         <SettingsContainer className="mb-2">
           <SettingsItem
-            icon={<Euro className={iconColor} size={20} />}
+            icon={<Euro colorClassName={iconColor} size={20} />}
             text="settings.currency_format"
             value={translate(`${baseNs}.currencyFormat.${currencyFormat}`)}
             onPress={() => openModal('currencyFormat')}
@@ -148,7 +148,7 @@ export function FormattingSettingsScreen() {
         </SettingsContainer>
         <SettingsContainer className="mb-2">
           <SettingsItem
-            icon={<DecimalsArrowRight className={iconColor} size={20} />}
+            icon={<DecimalsArrowRight colorClassName={iconColor} size={20} />}
             text="settings.number_format"
             value={translate(`${baseNs}.numberFormat.${numberFormat}`)}
             onPress={() => openModal('numberFormat')}
@@ -156,7 +156,7 @@ export function FormattingSettingsScreen() {
         </SettingsContainer>
         <SettingsContainer className="mb-2">
           <SettingsItem
-            icon={<Calendar className={iconColor} size={20} />}
+            icon={<Calendar colorClassName={iconColor} size={20} />}
             text="settings.date_format"
             value={translate(`${baseNs}.dateFormat.${dateFormat}`)}
             onPress={() => openModal('dateFormat')}
@@ -164,7 +164,7 @@ export function FormattingSettingsScreen() {
         </SettingsContainer>
         {/* <SettingsContainer>
           <SettingsItem
-            icon={<Calendar1 className={iconColor} size={20} />}
+            icon={<Calendar1 colorClassName={iconColor} size={20} />}
             text="settings.month_start"
             value={String(monthStartDay)}
             onPress={() => openModal('monthStartDay')}

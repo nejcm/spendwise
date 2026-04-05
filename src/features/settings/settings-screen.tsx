@@ -6,7 +6,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 
 import { FocusAwareStatusBar, Image, ScrollView, Text, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
-import { ALargeSmall, Banknote, Bell, Bot, BotMessageSquare, Database, DatabaseBackupIcon, DatabaseZap, HelpCircle, Import, LayoutGrid, Link, ListChecks, PieChart, Printer, RefreshCcw, ScanLine, Share, Shield, User } from '@/components/ui/icon';
+import { ALargeSmall, Banknote, Bell, Bot, BotMessageSquare, Database, DatabaseBackupIcon, DatabaseZap, HelpCircle, Import, LayoutGrid, Link, ListChecks, PieChart, Printer, RefreshCcw, ScanLine, Settings, Share, Shield, User } from '@/components/ui/icon';
 import { config } from '@/config';
 import { clearData, clearTransactionsData, dumpDbTables, resetDb, seedData, seedMockData } from '@/lib/dev';
 import { triggerScanPicker } from '@/lib/local-store';
@@ -76,11 +76,16 @@ export function SettingsScreen() {
             />
           </SettingsContainer>
 
-          <SettingsContainer title="settings.generale">
+          <SettingsContainer title="common.settings">
             <SettingsItem
               icon={<User className={iconColor} size={20} />}
               text="settings.profile"
               onPress={() => router.push('/settings/profile')}
+            />
+            <SettingsItem
+              icon={<Settings className={iconColor} size={20} />}
+              text="settings.general"
+              onPress={() => router.push('/settings/general')}
             />
             <SettingsItem
               icon={<Bot className={iconColor} size={20} />}

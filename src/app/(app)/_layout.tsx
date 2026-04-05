@@ -41,6 +41,7 @@ export default function AppLayout() {
       <Stack.Screen name="scheduled/index" />
       <Stack.Screen name="scheduled/[id]" />
       <Stack.Screen name="settings/profile" />
+      <Stack.Screen name="settings/general" />
       <Stack.Screen name="settings/ai" />
       <Stack.Screen name="settings/notifications" />
       <Stack.Screen name="settings/security" />

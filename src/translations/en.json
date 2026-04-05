@@ -127,6 +127,7 @@
     "select_month": "Select Month",
     "select_month_year": "Select Month and Year",
     "select_year": "Select Year",
+    "settings": "Settings",
     "start_date": "Start Date",
     "there": "there",
     "today": "Today",
@@ -376,6 +377,7 @@
         "stop-space": "1,234.56"
       }
     },
+    "general": "General",
     "generale": "General",
     "get_api_key": "How to get an API key",
     "import": "Import/Export",
@@ -395,6 +397,8 @@
     "provider_openai": "OpenAI",
     "reset": "Reset",
     "reset_db": "Reset Database",
+    "save_on_scan": "Save on scan",
+    "save_on_scan_description": "Save transactions automatically when scanning a receipt.",
     "saved": "AI settings saved",
     "scan": "Scan",
     "scheduled": "Recurring Rules",

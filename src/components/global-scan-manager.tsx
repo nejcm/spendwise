@@ -1,5 +1,6 @@
 import type { Action } from 'expo-image-manipulator';
 import type { ScannedReceipt, ScanVariables } from '@/features/ai/use-scan-receipt';
+import type { TransactionFormData } from '@/features/transactions/types';
 import type { ScanTriggeredType } from '@/lib/local-store';
 import { useMutation } from '@tanstack/react-query';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
@@ -8,10 +9,19 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { useCallback } from 'react';
 import { Alert } from '@/components/ui';
+import { useAccounts } from '@/features/accounts/api';
 import { useScanReceipt } from '@/features/ai/use-scan-receipt';
+import { useCategories } from '@/features/categories/api';
+import { centsToAmount } from '@/features/formatting/helpers';
+import { useCreateTransaction } from '@/features/transactions/api';
+import { dateToUnix } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { closeScan, openSheet, useLocalStore } from '@/lib/local-store';
-import { selectIsAiEnabled, useAppStore } from '@/lib/store';
+import {
+  selectIsAiEnabled,
+  selectTransactionFormPrefs,
+  useAppStore,
+} from '@/lib/store';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import { ActivityIndicator, Modal, Text } from './ui';
 
@@ -41,6 +51,7 @@ async function resizeForAI(asset: ImagePicker.ImagePickerAsset): Promise<{ base6
 
 function ScanLoadingOverlay({ onClose }: { onClose: () => void }) {
   const { dark } = useThemeConfig();
+
   return (
     <Modal visible={true} className="gap-4 py-10" onClose={onClose}>
       <ActivityIndicator size="large" color={dark ? '#ffffff' : '#000000'} />
@@ -53,11 +64,33 @@ export function GlobalScanManager() {
   const router = useRouter();
   const isAiEnabled = useAppStore(selectIsAiEnabled);
   const scanTriggered = useLocalStore.use.scanTriggered();
+  const saveOnScan = useAppStore.use.saveOnScan();
+  const preferredCurrency = useAppStore.use.currency();
+  const transactionFormPrefs = useAppStore(selectTransactionFormPrefs);
+  const { data: accounts = [] } = useAccounts();
+  const { data: categories = [] } = useCategories();
+  const createTransaction = useCreateTransaction();
 
-  const onSuccess = (result: ScannedReceipt) => {
-    openSheet({ type: 'add-transaction', initialValues: result });
+  const handleScanSuccess = async (result: ScannedReceipt) => {
+    const accountId = transactionFormPrefs.account_id || accounts[0]?.id;
+    const categoryId = result.category_id || transactionFormPrefs.category_id || categories[0]?.id;
+    if (!saveOnScan || !accountId || !categoryId) {
+      openSheet({ type: 'add-transaction', initialValues: result });
+      return;
+    }
+    const data: TransactionFormData = {
+      type: result.type,
+      currency: result.currency ?? preferredCurrency,
+      amount: centsToAmount(result.amount),
+      note: result.note,
+      account_id: accountId,
+      category_id: categoryId,
+      date: dateToUnix(result.date),
+    };
+    const id = await createTransaction.mutateAsync(data);
+    router.push(`/transactions/${id}`);
   };
-  const scanMutation = useScanReceipt(onSuccess);
+  const scanMutation = useScanReceipt(handleScanSuccess);
 
   const prepareMutation = useMutation({
     mutationFn: async (asset: ImagePicker.ImagePickerAsset): Promise<ScanVariables> => {

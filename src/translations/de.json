@@ -127,6 +127,7 @@
     "select_month": "Monat auswählen",
     "select_month_year": "Monat und Jahr auswählen",
     "select_year": "Jahr auswählen",
+    "settings": "Einstellungen",
     "start_date": "Startdatum",
     "there": "da",
     "today": "Heute",
@@ -376,6 +377,7 @@
         "stop-space": "1,234.56"
       }
     },
+    "general": "Allgemein",
     "generale": "Allgemein",
     "get_api_key": "So erhältst du einen API-Schlüssel",
     "import": "Import/Export",
@@ -395,6 +397,8 @@
     "provider_openai": "OpenAI",
     "reset": "Zurücksetzen",
     "reset_db": "Datenbank zurücksetzen",
+    "save_on_scan": "Transaktionen speichern",
+    "save_on_scan_description": "Transaktionen automatisch speichern, wenn ein Beleg gescannt wird.",
     "saved": "KI-Einstellungen gespeichert",
     "scan": "Beleg scannen",
     "scheduled": "Wiederkehrende Regeln",

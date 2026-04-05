@@ -52,6 +52,7 @@ export type AppState = {
   isFirstTime: boolean;
   language: Language | undefined;
   notifications: NotificationSettings;
+  saveOnScan: boolean | undefined;
 
   // Security
   lockEnabled: boolean;
@@ -95,6 +96,7 @@ function getDefaultState(): AppState {
     colorTheme: 'red',
     isFirstTime: true,
     language: undefined,
+    saveOnScan: undefined,
     lockEnabled: false,
     lockTimeoutMinutes: 1,
     isLocked: false,
@@ -142,26 +144,26 @@ export function clearAppStore() {
 // Selectors
 export const getAppState = () => _useAppStore.getState();
 
-export function updateState(state: Partial<AppState> | ((prev: AppState) => Partial<AppState>)) {
+export function updateAppState(state: Partial<AppState> | ((prev: AppState) => Partial<AppState>)) {
   return _useAppStore.setState((prev) => ({ ...prev, ...(typeof state === 'function' ? state(prev) : state) }));
 };
 
 // Profile actions
 export function setProfile(profile: AppState['profile']) {
-  return updateState({ profile });
+  return updateAppState({ profile });
 }
 export function updateProfile(profile: Partial<AppState['profile']>) {
-  return updateState((prev) => ({ profile: { ...prev.profile, ...profile } }));
+  return updateAppState((prev) => ({ profile: { ...prev.profile, ...profile } }));
 }
 export const selectProfile = (state: AppState) => state.profile;
 
 // Auth actions
 export function signIn(token: TokenType) {
-  return updateState({ token, authStatus: 'signIn' });
+  return updateAppState({ token, authStatus: 'signIn' });
 }
 
 export function signOut() {
-  return updateState({ token: null, authStatus: 'signOut' });
+  return updateAppState({ token: null, authStatus: 'signOut' });
 }
 
 export function hydrateAuth() {
@@ -172,48 +174,48 @@ export function hydrateAuth() {
 
 // Preference actions
 export function setCurrency(currency: CurrencyKey) {
-  return updateState({ currency: currency.length > 0 ? currency : DEFAULT_USER_CURRENCY });
+  return updateAppState({ currency: currency.length > 0 ? currency : DEFAULT_USER_CURRENCY });
 }
 
 export function setCurrencyFormat(currencyFormat: AppState['currencyFormat']) {
-  return updateState({ currencyFormat });
+  return updateAppState({ currencyFormat });
 }
 
 export function setDateFormat(dateFormat: AppState['dateFormat']) {
-  return updateState({ dateFormat });
+  return updateAppState({ dateFormat });
 }
 
 export function setNumberFormat(numberFormat: AppState['numberFormat']) {
-  return updateState({ numberFormat });
+  return updateAppState({ numberFormat });
 }
 
 export function setMonthStartDay(monthStartDay: number) {
-  return updateState({ monthStartDay });
+  return updateAppState({ monthStartDay });
 }
 
 export function setTheme(theme: ThemeType) {
-  return updateState({ theme });
+  return updateAppState({ theme });
 }
 
 export function setIsFirstTime(isFirstTime: boolean) {
-  return updateState({ isFirstTime });
+  return updateAppState({ isFirstTime });
 }
 
 export function setLanguage(language: Language) {
-  return updateState({ language });
+  return updateAppState({ language });
 }
 
 // AI actions
 export function setAiProvider(aiProvider: AppState['aiProvider']) {
-  return updateState({ aiProvider });
+  return updateAppState({ aiProvider });
 }
 
 export function setOpenaiApiKey(openaiApiKey: string | undefined) {
-  return updateState({ openaiApiKey });
+  return updateAppState({ openaiApiKey });
 }
 
 export function setAnthropicApiKey(anthropicApiKey: string | undefined) {
-  return updateState({ anthropicApiKey });
+  return updateAppState({ anthropicApiKey });
 }
 
 export function selectIsAiEnabled(state: AppState) {
@@ -222,28 +224,28 @@ export function selectIsAiEnabled(state: AppState) {
 
 // Security actions
 export function setLockEnabled(lockEnabled: boolean) {
-  return updateState({ lockEnabled });
+  return updateAppState({ lockEnabled });
 }
 
 export function setIsLocked(isLocked: boolean) {
-  return updateState({ isLocked });
+  return updateAppState({ isLocked });
 }
 
 export function setLockTimeoutMinutes(lockTimeoutMinutes: number) {
-  return updateState({ lockTimeoutMinutes });
+  return updateAppState({ lockTimeoutMinutes });
 }
 
 // Period selection actions
 export function setPeriodSelection(periodSelection: PeriodSelection) {
-  return updateState({ periodSelection });
+  return updateAppState({ periodSelection });
 }
 
 // Other actions
 export function setLastUsed(lastUsed: AppState['lastUsed']) {
-  return updateState({ lastUsed });
+  return updateAppState({ lastUsed });
 }
 export function updateLastUsed(lastUsed: Partial<AppState['lastUsed']>) {
-  return updateState((prev) => ({ lastUsed: { ...prev.lastUsed, ...lastUsed } }));
+  return updateAppState((prev) => ({ lastUsed: { ...prev.lastUsed, ...lastUsed } }));
 }
 export const selectLastUsed = (state: AppState) => state.lastUsed;
 
@@ -268,7 +270,7 @@ export function selectLastUsedCurrencies(state: AppState) {
 
 // Form preference actions
 function updateFormPrefs(prefs: Partial<AppState['formPrefs']>) {
-  return updateState((prev) => ({ formPrefs: { ...prev.formPrefs, ...prefs } }));
+  return updateAppState((prev) => ({ formPrefs: { ...prev.formPrefs, ...prefs } }));
 }
 export function setTransactionFormPrefs(prefs: AppState['formPrefs']['transactionForm']) {
   return updateFormPrefs({ transactionForm: prefs });
@@ -282,7 +284,7 @@ export const selectAccountFormPrefs = (state: AppState) => state.formPrefs.accou
 
 // Notifications actions
 export function updateNotifications(notifications: Partial<AppState['notifications']>) {
-  return updateState((prev) => ({ notifications: { ...prev.notifications, ...notifications } }));
+  return updateAppState((prev) => ({ notifications: { ...prev.notifications, ...notifications } }));
 }
 export const selectNotifications = (state: AppState) => state.notifications;
 export const selectNotificationSettings = (state: AppState) => state.notifications;

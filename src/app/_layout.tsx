@@ -15,7 +15,7 @@ import { AppErrorBoundary } from '@/components/app-error-boundary';
 import { GlobalScanManager } from '@/components/global-scan-manager';
 import { GlobalSheet } from '@/components/global-sheet';
 import { SafeAreaView, View } from '@/components/ui';
-import { CustomTabBar, TAB_BAR_COLOR } from '@/components/ui/custom-tab-bar';
+import { CustomTabBar, TAB_BAR_COLOR, TAB_BAR_DARK_COLOR } from '@/components/ui/custom-tab-bar';
 import { DB_NAME } from '@/config';
 import { useCurrencyRates } from '@/features/currencies/api';
 import { ScheduledTransactionsProcessor } from '@/features/scheduled-transactions/scheduled-transactions-processor';
@@ -155,9 +155,10 @@ function Providers({ children }: { children: React.ReactNode }) {
 }
 
 export default function RootLayout() {
+  const { dark } = useThemeConfig();
   return (
     <Providers>
-      <Stack screenOptions={{ navigationBarColor: TAB_BAR_COLOR }}>
+      <Stack screenOptions={{ navigationBarColor: dark ? TAB_BAR_DARK_COLOR : TAB_BAR_COLOR }}>
         <Stack.Screen name="(app)" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       </Stack>

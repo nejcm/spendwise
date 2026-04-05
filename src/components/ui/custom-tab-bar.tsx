@@ -1,51 +1,53 @@
+/* eslint-disable react-refresh/only-export-components */
 import type { SheetConfig } from '@/lib/sheet';
 import { usePathname, useRouter } from 'expo-router';
-import * as React from 'react';
 
+import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { Home, LayoutGrid, PieChart, PlusIcon, UserIcon } from '@/components/ui/icon';
 import { openSheet, triggerScan } from '@/lib/local-store';
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const TAB_BAR_COLOR = '#aaaaaa' as const;
-const bgColor = `bg-white`;
+export const TAB_BAR_COLOR = '#f6f6f6' as const;
+export const TAB_BAR_DARK_COLOR = '#17191C' as const;
+const bgColor = `bg-gray-50`;
+const darkBgColor = `dark:bg-[#17191C]`;
 
 type TabConfig = {
   name: string;
   path: string;
-  icon: (color: string) => React.ReactNode;
+  icon: typeof Home;
 };
 
 const TABS: TabConfig[] = [
   {
     name: 'index',
     path: '/',
-    icon: (color) => <Home color={color} size={24} strokeWidth={2} />,
+    icon: Home,
   },
   {
     name: 'categories',
     path: '/categories',
-    icon: (color) => <LayoutGrid color={color} size={24} strokeWidth={2} />,
+    icon: LayoutGrid,
   },
   {
     name: '__add__',
     path: '__add__',
-    icon: (color) => <PlusIcon color={color} size={24} strokeWidth={2} />,
+    icon: PlusIcon,
   },
   /* {
     name: 'transactions',
     path: '/transactions',
-    icon: (color) => <Receipt color={color} size={24} strokeWidth={2} />,
+    icon: Receipt,
   }, */
   {
     name: 'stats',
     path: '/stats',
-    icon: (color) => <PieChart color={color} size={24} strokeWidth={2} />,
+    icon: PieChart,
   },
   {
     name: 'settings',
     path: '/settings',
-    icon: (color) => <UserIcon color={color} size={24} strokeWidth={2} />,
+    icon: UserIcon,
   },
 ];
 
@@ -66,11 +68,12 @@ export function CustomTabBar() {
 
   return (
     <View
-      className={`flex-row border-t border-gray-200 ${bgColor} p-2`}
+      className={`flex-row border-t border-gray-200 p-2 dark:border-gray-800 ${bgColor} ${darkBgColor}`}
       style={{ elevation: 0 }}
     >
       {TABS.map((tab) => {
         const isAddButton = tab.name === '__add__';
+        const Icon = tab.icon;
 
         if (isAddButton) {
           return (
@@ -79,19 +82,18 @@ export function CustomTabBar() {
                 onPress={() => openSheet(sheetConfigForPathname(pathname))}
                 onLongPress={() => triggerScan('camera')}
                 delayLongPress={400}
-                className="size-12 items-center justify-center rounded-full bg-gray-950"
+                className="size-12 items-center justify-center rounded-full bg-gray-950 dark:bg-white"
                 style={({ pressed }) => ({
                   opacity: pressed ? 0.85 : 1,
                 })}
               >
-                {tab.icon('#ffffff')}
+                <Icon colorClassName="accent-background" size={24} strokeWidth={2} />
               </Pressable>
             </View>
           );
         }
 
         const isActive = getIsActive(tab);
-        const iconColor = isActive ? '#000000' : '#A3A3A3';
 
         return (
           <Pressable
@@ -99,9 +101,9 @@ export function CustomTabBar() {
             onPress={() => router.replace(tab.path as never)}
             className="flex-1 items-center justify-center gap-1"
           >
-            {tab.icon(iconColor)}
+            <Icon colorClassName={isActive ? 'accent-foreground' : 'accent-gray-500'} size={24} strokeWidth={2} />
             {isActive && (
-              <View className="size-1 rounded-full bg-black" />
+              <View className="size-1 rounded-full bg-black dark:bg-white" />
             )}
           </Pressable>
         );

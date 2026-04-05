@@ -113,13 +113,13 @@ export function TransactionDetailScreen() {
             ]}
           />
           <DetailsSection
-            className="mb-8"
+            className="mb-4"
             data={[
               { label: translate('transactions.created_at'), value: <FormattedDate value={transaction.created_at} className="text-foreground" /> },
               { label: translate('transactions.updated_at'), value: <FormattedDate value={transaction.updated_at} className="text-foreground" /> },
             ]}
           />
-          <View className="mb-6 flex-row items-center justify-center gap-2">
+          <View className="mb-4 flex-row items-center justify-center gap-2">
             {transaction.type !== 'transfer' && (
               <GhostButton
                 label={translate('transactions.make_recurring')}

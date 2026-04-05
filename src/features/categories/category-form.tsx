@@ -95,8 +95,8 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
               onBlur={field.handleBlur}
               onChangeText={(v) => field.handleChange(v.trim() || null)}
               placeholder={translate('categories.icon_placeholder')}
-              containerClassName="w-[130]"
-              className="border-0 text-3xl"
+              containerClassName="w-[100]"
+              className="border-0 text-center text-3xl"
               size="xl"
             />
           )}

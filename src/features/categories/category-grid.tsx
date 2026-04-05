@@ -108,7 +108,7 @@ function CategoryCard({ item, currency, periodSelection, onPress }: CategoryGrid
   const isMonthView = periodSelection.mode === 'month';
 
   return (
-    <Pressable onPress={() => onPress(item)} className="min-h-[90] flex-1 justify-center rounded-xl bg-card px-3 py-2">
+    <Pressable onPress={() => onPress(item)} className="min-h-[86] flex-1 justify-center rounded-xl bg-card px-3 py-1">
       <View
         className="mb-1 flex-row items-center justify-start gap-2"
       >

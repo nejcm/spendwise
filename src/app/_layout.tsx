@@ -97,7 +97,6 @@ function WebFontsLoader({ children }: { children?: React.ReactNode }) {
     'Inter-Medium': require('node_modules/@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf'),
     'Inter-SemiBold': require('node_modules/@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf'),
     'Inter-Bold': require('node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf'),
-    'Inter-Black': require('node_modules/@expo-google-fonts/inter/900Black/Inter_900Black.ttf'),
   });
 
   useEffect(() => {

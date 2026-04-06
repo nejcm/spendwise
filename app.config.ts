@@ -86,7 +86,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
             'node_modules/@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf',
             'node_modules/@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf',
             'node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf',
-            'node_modules/@expo-google-fonts/inter/900Black/Inter_900Black.ttf',
           ],
         },
         android: {
@@ -109,10 +108,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
                 {
                   path: 'node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf',
                   weight: 700,
-                },
-                {
-                  path: 'node_modules/@expo-google-fonts/inter/900Black/Inter_900Black.ttf',
-                  weight: 900,
                 },
               ],
             },

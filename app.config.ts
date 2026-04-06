@@ -37,7 +37,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   slug: 'spendwise',
   version: Env.EXPO_PUBLIC_VERSION.toString(),
   orientation: 'portrait',
-  icon: './assets/logo/spendwise-app-logo.png',
+  icon: './assets/icon/spendwise.png',
   userInterfaceStyle: 'automatic',
   newArchEnabled: true,
   updates: {
@@ -57,13 +57,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     adaptiveIcon: {
-      foregroundImage: './assets/logo/spendwise-app-logo.png',
+      foregroundImage: './assets/icon/spendwise.png',
       backgroundColor: '#ffffff',
     },
     package: Env.EXPO_PUBLIC_PACKAGE,
   },
   web: {
-    favicon: './assets/favicon.png',
+    favicon: './assets/icon/spendwise.png',
     bundler: 'metro',
   },
   plugins: [
@@ -73,7 +73,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       'expo-splash-screen',
       {
         backgroundColor: '#ffffff',
-        image: './assets/logo/spendwise.png',
+        image: './assets/spendwise.png',
         imageWidth: 150,
       },
     ],

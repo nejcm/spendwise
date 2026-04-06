@@ -109,7 +109,7 @@ export function TransactionDetailScreen() {
               { label: translate('transactions.category'), value: transaction ? `${transaction.category_icon} ${transaction.category_name}` : '-' },
               { label: translate('transactions.account'), value: account ? `${account.icon} ${account.name}` : '-' },
               { label: translate('transactions.type'), value: transaction.type, className: 'capitalize' },
-              { label: translate('transactions.note'), value: transaction.note || '-' },
+              { label: translate('transactions.note'), value: transaction.note || '-', sectionClassName: 'flex-col justify-start items-start gap-1' },
             ]}
           />
           <DetailsSection

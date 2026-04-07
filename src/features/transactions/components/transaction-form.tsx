@@ -127,7 +127,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
                   if (!value) return;
                   field.handleChange(String(value) as CurrencyKey);
                 }}
-                size="lg"
+                size="xl"
                 showChevron={false}
                 containerClassName="w-[100]"
                 inputClassName="px-2"
@@ -143,7 +143,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
                 onBlur={field.handleBlur}
                 onChangeText={field.handleChange}
                 placeholder="0.00"
-                size="lg"
+                size="xl"
                 keyboardType="decimal-pad"
                 testID="amount-input"
                 error={getFieldError(field)}
@@ -175,6 +175,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
                       field.handleChange(t);
                     }}
                     placeholder="0.00"
+                    size="lg"
                     readOnly={selectedCurrency === preferredCurrency}
                     keyboardType="decimal-pad"
                     testID="base-amount-input"
@@ -193,6 +194,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
         name="date"
         children={(field) => (
           <DateInput
+            size="lg"
             value={field.state.value}
             onChange={field.handleChange}
             error={getFieldError(field)}
@@ -205,6 +207,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
         name="category_id"
         children={(field) => (
           <CategoryPicker
+            size="lg"
             selectedId={field.state.value}
             onSelect={(cat) => field.handleChange(cat.id)}
             error={getFieldError(field)}
@@ -268,6 +271,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
         children={(field) => (
           <Input
             value={field.state.value || ''}
+            size="lg"
             onBlur={field.handleBlur}
             onChangeText={field.handleChange}
             placeholder={translate('common.note')}

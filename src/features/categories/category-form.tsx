@@ -83,7 +83,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
               value={field.state.value}
               onSelect={(value) => field.handleChange(String(value))}
               stackBehavior="push"
-              size="xl"
+              size="2xl"
             />
           )}
         />
@@ -96,8 +96,8 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
               onChangeText={(v) => field.handleChange(v.trim() || null)}
               placeholder={translate('categories.icon_placeholder')}
               containerClassName="w-[100]"
-              className="border-0 text-center text-3xl"
-              size="xl"
+              className="border-0 px-0.5 text-center text-3xl"
+              size="2xl"
             />
           )}
         />
@@ -112,6 +112,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
             placeholder={translate('categories.name_placeholder')}
             onChangeText={field.handleChange}
             error={getFieldError(field)}
+            size="lg"
           />
         )}
       />
@@ -134,6 +135,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
                 placeholder={translate('categories.budget_placeholder')}
                 keyboardType="decimal-pad"
                 containerClassName="flex-1"
+                size="lg"
                 error={getFieldError(field)}
               />
             )}

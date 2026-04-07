@@ -2,8 +2,7 @@ import type { PressableProps, View } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
 import * as React from 'react';
 import { tv } from 'tailwind-variants';
-import { Button } from './button';
-import { buttonTv } from './solid-button';
+import { Button, buttonTv } from './button';
 
 const outlineButton = tv({
   extend: buttonTv,

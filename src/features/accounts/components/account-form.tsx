@@ -97,7 +97,7 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
               value={field.state.value ?? 'bg-sky-600'}
               onSelect={(value) => field.handleChange(String(value))}
               stackBehavior="push"
-              size="xl"
+              size="2xl"
             />
           )}
         />
@@ -111,8 +111,8 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
               onChangeText={(v) => field.handleChange(v.trim() || null)}
               placeholder={translate('accounts.icon_placeholder')}
               containerClassName="w-[100]"
-              className="border-0 text-center text-3xl"
-              size="xl"
+              className="border-0 px-0.5 text-center text-3xl"
+              size="2xl"
             />
           )}
         />
@@ -122,6 +122,7 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
         name="name"
         children={(field) => (
           <Input
+            size="lg"
             value={field.state.value}
             onBlur={field.handleBlur}
             onChangeText={field.handleChange}
@@ -135,6 +136,7 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
         name="description"
         children={(field) => (
           <Input
+            size="lg"
             value={field.state.value ?? ''}
             onBlur={field.handleBlur}
             onChangeText={(v) => field.handleChange(v.trim() || null)}
@@ -173,11 +175,12 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
               value={field.state.value}
               options={orderedCurrencies}
               searchEnabled
+              size="lg"
               onSelect={(value) => {
                 if (!value) return;
                 field.handleChange(String(value) as CurrencyKey);
               }}
-              showChevron
+              showChevron={false}
               stackBehavior="push"
               containerClassName="w-[100]"
             />
@@ -189,6 +192,7 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
             <Input
               value={field.state.value ?? ''}
               onBlur={field.handleBlur}
+              size="lg"
               onChangeText={field.handleChange}
               placeholder={translate('accounts.budget_placeholder')}
               keyboardType="decimal-pad"

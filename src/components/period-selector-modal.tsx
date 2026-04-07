@@ -170,8 +170,9 @@ export function PeriodSelectorModal({
           <GhostButton
             label={translate('common.clear')}
             onPress={handleClear}
+            size="sm"
           />
-          <SolidButton label={translate('common.apply')} className="flex-1" onPress={handleApply} />
+          <SolidButton label={translate('common.apply')} className="flex-1" size="sm" onPress={handleApply} />
         </View>
       </View>
     </ModalSheet>

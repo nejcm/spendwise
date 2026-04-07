@@ -3,8 +3,7 @@ import type { VariantProps } from 'tailwind-variants';
 import * as React from 'react';
 import { Pressable } from 'react-native';
 import { tv } from 'tailwind-variants';
-import { getPressedStyle } from './button';
-import { buttonTv } from './solid-button';
+import { buttonTv, getPressedStyle } from './button';
 
 const iconButton = tv({
   extend: buttonTv,

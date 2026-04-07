@@ -1,19 +1,20 @@
 import type { Category } from './types';
-import * as React from 'react';
+import type { SelectProps } from '@/components/ui';
 
+import * as React from 'react';
 import { Select } from '@/components/ui';
 import { SkeletonBox } from '@/components/ui/skeleton';
 import { useCategories } from '@/features/categories/api';
 import { translate } from '@/lib/i18n';
 
-export type CategoryPickerProps = {
+export type CategoryPickerProps = Omit<SelectProps, 'value' | 'options' | 'onSelect'> & {
   selectedId: string | null;
   onSelect: (category: Category) => void;
   label?: string;
   error?: string;
 };
 
-export function CategoryPicker({ selectedId, onSelect, label, error }: CategoryPickerProps) {
+export function CategoryPicker({ selectedId, onSelect, label, error, ...props }: CategoryPickerProps) {
   const { data: categories = [], isLoading } = useCategories();
 
   const options = React.useMemo(() => categories.map((c) => ({
@@ -42,6 +43,7 @@ export function CategoryPicker({ selectedId, onSelect, label, error }: CategoryP
       error={error}
       title={translate('categories.select_category')}
       stackBehavior="push"
+      {...props}
     />
   );
 }

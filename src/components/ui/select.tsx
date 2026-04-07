@@ -23,7 +23,7 @@ const selectTv = tv({
     container: '',
     label: 'mb-1 text-sm/snug text-foreground',
     input:
-      'flex-row items-center justify-center rounded-lg border px-4 py-3',
+      'flex-row items-center justify-center rounded-lg border px-4',
     inputValue: '',
     image: 'size-6 rounded-full',
   },
@@ -39,35 +39,41 @@ const selectTv = tv({
       },
     },
     size: {
-      xs: {
+      'xs': {
         input: 'h-8 px-2',
         label: 'text-xs/snug',
         inputValue: 'text-xs/snug',
-        image: 'size-4',
+        image: 'size-2',
       },
-      sm: {
+      'sm': {
         input: 'h-10 px-3',
-        label: 'text-xs/snug',
+        label: 'text-sm/snug',
         inputValue: 'text-sm/snug',
-        image: 'size-5',
+        image: 'size-3',
       },
-      md: {
-        input: 'h-14 px-3',
+      'md': {
+        input: 'h-12 px-4',
         label: 'text-sm/snug',
         inputValue: 'text-base/snug',
-        image: 'size-6',
+        image: 'size-4',
       },
-      lg: {
-        input: 'h-16 px-4',
+      'lg': {
+        input: 'h-14 px-5',
         label: 'text-base/snug',
         inputValue: 'text-lg/snug',
-        image: 'size-7',
+        image: 'size-5',
       },
-      xl: {
-        input: 'h-18 px-5',
+      'xl': {
+        input: 'h-16 px-6',
         label: 'text-lg/snug',
         inputValue: 'text-xl/snug',
-        image: 'size-8',
+        image: 'size-6',
+      },
+      '2xl': {
+        input: 'h-18 px-7',
+        label: 'text-lg/snug',
+        inputValue: 'text-xl/snug',
+        image: 'size-7',
       },
     },
     error: {

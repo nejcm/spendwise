@@ -180,7 +180,7 @@ export function ScheduledTransactionForm({
                 if (!value) return;
                 field.handleChange(String(value) as CurrencyKey);
               }}
-              size="lg"
+              size="xl"
               showChevron={false}
               containerClassName="w-[100]"
               inputClassName="px-2"
@@ -196,7 +196,7 @@ export function ScheduledTransactionForm({
               onBlur={field.handleBlur}
               onChangeText={field.handleChange}
               placeholder="0.00"
-              size="lg"
+              size="xl"
               keyboardType="decimal-pad"
               error={getFieldError(field)}
               containerClassName="flex-1"
@@ -260,6 +260,7 @@ export function ScheduledTransactionForm({
         name="category_id"
         children={(field) => (
           <CategoryPicker
+            size="lg"
             selectedId={field.state.value}
             onSelect={(category) => field.handleChange(category.id)}
             error={getFieldError(field)}
@@ -275,6 +276,7 @@ export function ScheduledTransactionForm({
             options={FREQUENCY_OPTIONS}
             onSelect={(value) => field.handleChange(String(value) as FormValues['frequency'])}
             stackBehavior="push"
+            size="lg"
           />
         )}
       />
@@ -290,6 +292,7 @@ export function ScheduledTransactionForm({
                 error={getFieldError(field)}
                 placeholder={translate('common.start_date')}
                 modalProps={{ stackBehavior: 'push' }}
+                size="lg"
               />
             </View>
           )}
@@ -305,6 +308,7 @@ export function ScheduledTransactionForm({
                 error={getFieldError(field)}
                 placeholder={translate('common.end_date')}
                 modalProps={{ stackBehavior: 'push' }}
+                size="lg"
               />
               {field.state.value && (
                 <GhostButton
@@ -328,6 +332,7 @@ export function ScheduledTransactionForm({
             onChangeText={field.handleChange}
             placeholder={translate('common.note')}
             error={getFieldError(field)}
+            size="lg"
           />
         )}
       />

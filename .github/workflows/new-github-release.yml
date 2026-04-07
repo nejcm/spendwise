@@ -34,7 +34,7 @@ jobs:
 
       - name: 📦 Set Up JDK + Generate Release APK
         uses: ./.github/actions/setup-jdk-generate-apk
-        timeout-minutes: 20
+        timeout-minutes: 40
         with:
           APP_ENV: production
         env:

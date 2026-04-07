@@ -12,12 +12,13 @@ name: New GitHub Release
 
 on:
   push:
-    tags:
-      - '*'
+    branches:
+      - main
 
 jobs:
   release:
     name: New GitHub Release
+    if: ${{ startsWith(github.event.head_commit.message, 'chore(release):') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -36,12 +37,13 @@ jobs:
           APP_ENV: production
 
       - name: 🏷️ Read app version
-        run: echo "APK_VERSION=$(node -p \"require('./package.json').version\")" >> $GITHUB_ENV
+        id: version
+        run: echo "apk_version=$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
         shell: bash
 
       - name: 📦 Prepare APK asset
         run: |
-          cp ./android/app/build/outputs/apk/release/app-release.apk "./spendwise-${{ env.APK_VERSION }}.apk"
+          cp ./android/app/build/outputs/apk/release/app-release.apk "./spendwise-${{ steps.version.outputs.apk_version }}.apk"
         shell: bash
 
       - name: 🏃‍♂️ Create A Draft Github Release
@@ -49,4 +51,4 @@ jobs:
         with:
           generateReleaseNotes: true
           draft: false
-          artifacts: ./spendwise-${{ env.APK_VERSION }}.apk
+          artifacts: ./spendwise-${{ steps.version.outputs.apk_version }}.apk

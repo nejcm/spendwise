@@ -65,7 +65,7 @@ describe('button component ', () => {
   it('should apply correct styles based on size prop', () => {
     render(<SolidButton testID="button" size="lg" label="Submit" />);
 
-    expect(screen.getByTestId('button-label').props.className).toContain('text-lg/snug');
+    expect(screen.getByTestId('button-label').props.className).toContain('text-lg/normal');
   });
   it('should apply correct styles for label when variant is secondary', () => {
     render(<SolidButton testID="button" color="secondary" label="Submit" />);

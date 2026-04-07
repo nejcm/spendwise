@@ -42,6 +42,7 @@ export function ScheduledTransactionsScreen() {
                   label={translate('common.add')}
                   onPress={() => openSheet({ type: 'add-scheduled' })}
                   className="mt-4 min-w-24"
+                  size="sm"
                   iconLeft={<Plus className="mr-2 text-background" size={16} />}
                 />
               </NoData>

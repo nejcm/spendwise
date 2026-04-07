@@ -21,7 +21,7 @@ import { Text } from './text';
 const selectTv = tv({
   slots: {
     container: '',
-    label: 'mb-1 text-sm/snug text-foreground',
+    label: 'mb-1 text-sm/normal text-foreground',
     input:
       'flex-row items-center justify-center rounded-lg border px-4',
     inputValue: '',
@@ -41,38 +41,38 @@ const selectTv = tv({
     size: {
       'xs': {
         input: 'h-8 px-2',
-        label: 'text-xs/snug',
-        inputValue: 'text-xs/snug',
+        label: 'text-xs/normal',
+        inputValue: 'text-xs/normal',
         image: 'size-2',
       },
       'sm': {
         input: 'h-10 px-3',
-        label: 'text-sm/snug',
-        inputValue: 'text-sm/snug',
+        label: 'text-sm/normal',
+        inputValue: 'text-sm/normal',
         image: 'size-3',
       },
       'md': {
         input: 'h-12 px-4',
-        label: 'text-sm/snug',
-        inputValue: 'text-base/snug',
+        label: 'text-sm/normal',
+        inputValue: 'text-base/normal',
         image: 'size-4',
       },
       'lg': {
         input: 'h-14 px-5',
-        label: 'text-base/snug',
-        inputValue: 'text-lg/snug',
+        label: 'text-base/normal',
+        inputValue: 'text-lg/normal',
         image: 'size-5',
       },
       'xl': {
         input: 'h-16 px-6',
-        label: 'text-lg/snug',
-        inputValue: 'text-xl/snug',
+        label: 'text-lg/normal',
+        inputValue: 'text-xl/normal',
         image: 'size-6',
       },
       '2xl': {
         input: 'h-18 px-7',
-        label: 'text-lg/snug',
-        inputValue: 'text-xl/snug',
+        label: 'text-lg/normal',
+        inputValue: 'text-xl/normal',
         image: 'size-7',
       },
     },

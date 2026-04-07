@@ -7,7 +7,7 @@ import { tv } from 'tailwind-variants';
 export const buttonTv = tv({
   slots: {
     container: 'flex flex-row items-center justify-center rounded-lg px-4',
-    label: 'items-center font-family-sans text-base/snug font-medium',
+    label: 'items-center font-family-sans text-base/normal font-medium',
     indicator: 'accent-background',
   },
   variants: {
@@ -51,32 +51,32 @@ export const buttonTv = tv({
     size: {
       'xs': {
         container: 'h-8 px-2',
-        label: 'text-xs/snug font-normal',
+        label: 'text-xs/normal font-normal',
         indicator: 'size-2',
       },
       'sm': {
         container: 'h-10 px-3',
-        label: 'text-sm/snug',
+        label: 'text-sm/normal',
         indicator: 'size-3',
       },
       'md': {
         container: 'h-12 px-4',
-        label: 'text-base/snug',
+        label: 'text-base/normal',
         indicator: 'size-4',
       },
       'lg': {
         container: 'h-14 px-5',
-        label: 'text-lg/snug',
+        label: 'text-lg/normal',
         indicator: 'size-5',
       },
       'xl': {
         container: 'h-16 px-6',
-        label: 'text-xl/snug',
+        label: 'text-xl/normal',
         indicator: 'size-6',
       },
       '2xl': {
         container: 'h-18 px-7',
-        label: 'text-xl/snug',
+        label: 'text-xl/normal',
         indicator: 'size-7',
       },
     },

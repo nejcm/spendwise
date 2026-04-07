@@ -29,28 +29,28 @@ export const inputTv = tv({
     },
     size: {
       'xs': {
-        input: 'h-8 px-2 text-xs/snug',
-        label: 'text-xs/snug',
+        input: 'h-8 px-2 text-xs/normal',
+        label: 'text-xs/normal',
       },
       'sm': {
-        input: 'h-10 px-3 text-sm/snug',
-        label: 'text-xs/snug',
+        input: 'h-10 px-3 text-sm/normal',
+        label: 'text-xs/normal',
       },
       'md': {
-        input: 'h-12 px-4 text-base/snug',
-        label: 'text-sm/snug',
+        input: 'h-12 px-4 text-base/normal',
+        label: 'text-sm/normal',
       },
       'lg': {
-        input: 'h-14 px-5 text-lg/snug',
-        label: 'text-base/snug',
+        input: 'h-14 px-5 text-lg/normal',
+        label: 'text-base/normal',
       },
       'xl': {
-        input: 'h-16 px-6 text-xl/snug',
-        label: 'text-lg/snug',
+        input: 'h-16 px-6 text-xl/normal',
+        label: 'text-lg/normal',
       },
       '2xl': {
-        input: 'h-18 px-7 text-xl/snug',
-        label: 'text-lg/snug',
+        input: 'h-18 px-7 text-xl/normal',
+        label: 'text-lg/normal',
       },
     },
     variant: {

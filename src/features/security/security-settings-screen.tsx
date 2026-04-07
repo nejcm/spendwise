@@ -58,7 +58,7 @@ export function SecuritySettingsScreen() {
   return (
     <>
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
+      <ScrollView className="flex-1" contentContainerClassName="px-4 pt-4" style={defaultStyles.transparentBg}>
         <DetailsSection data={[{
           label: translate('security.app_lock'),
           description: translate('security.app_lock_desc'),

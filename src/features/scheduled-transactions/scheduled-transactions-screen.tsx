@@ -48,7 +48,7 @@ export function ScheduledTransactionsScreen() {
             </>
           )
         : (
-            <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
+            <ScrollView className="flex-1" contentContainerClassName="px-4 pt-4" style={defaultStyles.transparentBg}>
               {activeRules.map((rule) => (
                 <Pressable
                   key={rule.id}

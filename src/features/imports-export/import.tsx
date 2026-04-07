@@ -104,7 +104,7 @@ function PreviewStep({
           <Text className="font-medium text-muted-foreground">
             {translate('import-export.select_account')}
           </Text>
-          <ScrollView horizontal className="mb-4 py-2">
+          <ScrollView horizontal contentContainerClassName="py-2 mb-4">
             <View className="flex-row gap-2">
               {accounts.map((a) => (
                 <SolidButton

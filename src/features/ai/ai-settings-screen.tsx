@@ -42,7 +42,7 @@ export function AiSettingsScreen() {
   return (
     <>
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-4" style={defaultStyles.transparentBg}>
+      <ScrollView className="flex-1" contentContainerClassName="px-4 pt-4" style={defaultStyles.transparentBg}>
         <Text className="mb-1 text-lg font-medium">{translate('settings.ai_provider')}</Text>
         <Text className="mb-6 text-sm text-muted-foreground">
           {translate('settings.ai_provider_desc')}

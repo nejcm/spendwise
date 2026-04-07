@@ -50,7 +50,7 @@ export function ScheduledTransactionDetailScreen() {
   if (isEditing) {
     return (
       <>
-        <ScrollView className="flex-1 px-4 py-8">
+        <ScrollView className="flex-1" contentContainerClassName="px-4 py-8">
           <ScheduledTransactionForm
             initialValues={{
               ...rule,
@@ -90,7 +90,7 @@ export function ScheduledTransactionDetailScreen() {
   return (
     <>
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 py-8">
+      <ScrollView className="flex-1" contentContainerClassName="px-4 py-8">
         <View className="items-center pb-6">
           <FormattedCurrency
             value={rule.amount}

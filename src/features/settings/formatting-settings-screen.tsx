@@ -129,7 +129,7 @@ export function FormattingSettingsScreen() {
           <ActivityIndicator size="large" />
         </View>
       )}
-      <ScrollView className="flex-1 px-4 pt-8" style={defaultStyles.transparentBg}>
+      <ScrollView className="flex-1" contentContainerClassName="px-4 pt-8" style={defaultStyles.transparentBg}>
         <SettingsContainer className="mb-2">
           <SettingsItem
             icon={<CircleDollarSign colorClassName={iconColor} size={20} />}

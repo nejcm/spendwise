@@ -7,7 +7,7 @@ export function PrivacyScreen() {
   return (
     <>
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-8 pb-12" style={defaultStyles.transparentBg}>
+      <ScrollView className="flex-1" contentContainerClassName="px-4 pt-8 pb-12" style={defaultStyles.transparentBg}>
         <Text className="mb-4 text-2xl font-bold text-foreground">
           Privacy Policy
         </Text>

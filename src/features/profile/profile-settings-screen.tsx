@@ -15,7 +15,7 @@ export function ProfileSettingsScreen() {
   return (
     <>
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 p-12" style={defaultStyles.transparentBg}>
+      <ScrollView className="flex-1" contentContainerClassName="p-12" style={defaultStyles.transparentBg}>
         <Pressable
           className="mb-8 items-center justify-center"
           onPress={() => avatarModal.present()}

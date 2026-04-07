@@ -35,7 +35,7 @@ export function TransactionDetailScreen() {
     return (
       <>
         <FocusAwareStatusBar />
-        <ScrollView className="flex-1 px-4 py-10">
+        <ScrollView className="flex-1" contentContainerClassName="px-4 py-10">
           <TransactionForm
             initialValues={{ ...transaction, date: unixToISODate(transaction.date) }}
             onSuccess={() => setIsEditing(false)}

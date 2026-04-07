@@ -11,7 +11,7 @@ export function GeneralSettingsScreen() {
   return (
     <>
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 pt-8" style={defaultStyles.transparentBg}>
+      <ScrollView className="flex-1" contentContainerClassName="px-4 pt-8" style={defaultStyles.transparentBg}>
         <DetailsSection
           className="mb-4"
           data={[{

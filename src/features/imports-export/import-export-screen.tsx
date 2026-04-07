@@ -7,7 +7,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import DetailsSection from '@/components/details';
 
-import { Alert, FocusAwareStatusBar, ScrollView, Select, SolidButton, Switch, Text } from '@/components/ui';
+import { Alert, FocusAwareStatusBar, ScrollView, Select, SolidButton, Switch, Text, View } from '@/components/ui';
 import { ArrowUp, Download, Upload } from '@/components/ui/icon';
 import { formatDate } from '@/features/formatting/helpers';
 import { IS_AUTO_BACKUP_SUPPORTED } from '@/features/imports-export/backup-file';
@@ -177,42 +177,45 @@ export function ImportScreen() {
   return (
     <>
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1 px-4 py-8" style={defaultStyles.transparentBg}>
-        {!inProgress && (
-          <>
-            <Text className="mb-2 font-bold dark:text-muted-foreground" tx="import-export.external_section_title" />
-            <DetailsSection
-              className="mb-6"
-              data={[{
-                label: translate('import-export.import_title'),
-                description: translate('import-export.pick_description'),
-                value: (
-                  <SolidButton
-                    size="sm"
-                    className="min-w-16"
-                    iconLeft={<ArrowUp className="mr-1 text-background" size={16} />}
-                    label={translate('common.import')}
-                    loading={pickFileMutation.isPending}
-                    onPress={() => pickFileMutation.mutate()}
+      <ScrollView className="flex-1" style={defaultStyles.transparentBg}>
+        <View className="flex-1 px-4 py-8">
+          {inProgress
+            ? (
+                <Import
+                  state={csvState}
+                  setMapping={(mapping) =>
+                    setCsvState((prev) => ({
+                      ...prev,
+                      mapping,
+                    }))}
+                  onClose={() => setInProgress(false)}
+                />
+              )
+            : (
+                <>
+                  <Text className="mb-2 font-bold dark:text-muted-foreground" tx="import-export.external_section_title" />
+                  <DetailsSection
+                    className="mb-6"
+                    data={[{
+                      label: translate('import-export.import_title'),
+                      description: translate('import-export.pick_description'),
+                      value: (
+                        <SolidButton
+                          size="sm"
+                          className="min-w-16"
+                          iconLeft={<ArrowUp className="mr-1 text-background" size={16} />}
+                          label={translate('common.import')}
+                          loading={pickFileMutation.isPending}
+                          onPress={() => pickFileMutation.mutate()}
+                        />
+                      ),
+                    }]}
                   />
-                ),
-              }]}
-            />
-            <AutoBackupSection />
-            <BackupSection />
-          </>
-        )}
-        {inProgress && (
-          <Import
-            state={csvState}
-            setMapping={(mapping) =>
-              setCsvState((prev) => ({
-                ...prev,
-                mapping,
-              }))}
-            onClose={() => setInProgress(false)}
-          />
-        )}
+                  <AutoBackupSection />
+                  <BackupSection />
+                </>
+              )}
+        </View>
       </ScrollView>
     </>
   );

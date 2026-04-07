@@ -56,7 +56,7 @@ export function AccountsScreen() {
 
       <PeriodSelector selection={selection} />
 
-      <ScrollView className="flex-1 px-4" style={defaultStyles.transparentBg} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+      <ScrollView className="flex-1" style={defaultStyles.transparentBg} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <View className="flex-col items-center justify-between gap-2 px-4 pt-4 pb-6">
           <Text className="text-sm text-muted-foreground">{translate('accounts.total_balance')}</Text>
           <FormattedCurrency value={totalBalance} currency={currency} className="text-3xl font-bold" />

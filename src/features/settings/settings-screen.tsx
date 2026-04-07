@@ -30,7 +30,7 @@ export function SettingsScreen() {
   return (
     <>
       <FocusAwareStatusBar />
-      <ScrollView className="pb-12" style={defaultStyles.transparentBg}>
+      <ScrollView className="flex-1" contentContainerClassName="pb-12" style={defaultStyles.transparentBg}>
         <View className="flex-1 px-4 pt-16 pb-8">
 
           <GhostButton className="mx-auto mb-2 h-auto flex-col justify-center" onPress={() => router.push('/settings/profile')}>

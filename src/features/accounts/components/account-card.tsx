@@ -17,7 +17,6 @@ type Props = {
 export function AccountCard({ account, onPress }: Props) {
   const userCurrency = useAppStore.use.currency();
   const periodSelection = useAppStore.use.periodSelection();
-  const showConverted = account.currency !== userCurrency;
   const scaledBudget = account.budget != null ? scaleBudgetForPeriod(account.budget, periodSelection) : null;
   const isMonthView = periodSelection.mode === 'month';
 
@@ -38,10 +37,7 @@ export function AccountCard({ account, onPress }: Props) {
           </Text>
         </View>
         <View className="items-end">
-          <FormattedCurrency value={account.balance} currency={account.currency} className="text-lg font-bold" />
-          {showConverted && (
-            <FormattedCurrency value={account.baseBalance} currency={userCurrency} className="text-sm text-muted-foreground" />
-          )}
+          <FormattedCurrency value={account.baseBalance} currency={userCurrency} className="text-lg font-bold" />
         </View>
       </View>
       {account.budget != null && account.budget > 0 && account.monthlyExpense != null && periodSelection.mode !== 'all' && (

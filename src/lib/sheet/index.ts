@@ -31,7 +31,7 @@ export const SHEET_SNAP_POINTS: Record<SheetType, string[]> = {
   'add-transaction': ['80%'],
   'add-account': ['72%'],
   'edit-account': ['72%'],
-  'add-category': ['58%'],
-  'edit-category': ['58%'],
+  'add-category': ['72%'],
+  'edit-category': ['72%'],
   'add-scheduled': ['82%'],
 };

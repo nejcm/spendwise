@@ -15,13 +15,13 @@ import { translate } from '@/lib/i18n';
 import { closeSheet } from '@/lib/local-store';
 import { useAppStore } from '@/lib/store';
 import { getRandomColor } from '@/lib/theme/colors';
-import { refinePositiveNumber } from '@/lib/validation/helpers';
+import { refinePositiveNumberOrNull } from '@/lib/validation/helpers';
 
 const schema = z.object({
   name: z.string().min(1, translate('categories.name_required')),
   icon: z.emoji().nullable(),
   color: z.string(),
-  budget: z.string().nullable().refine(refinePositiveNumber, translate('categories.budget_invalid')),
+  budget: z.string().nullable().refine(refinePositiveNumberOrNull, translate('categories.budget_invalid')),
 });
 
 export type CategoryInitialValues = (Partial<CategoryFormData> & { id: undefined }) | (CategoryFormData & { id: Category['id'] });
@@ -117,30 +117,28 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
         )}
       />
 
-      <View className="mb-6">
-        <View className="flex-row gap-2">
-          <View className="w-[100] flex-row items-center justify-center gap-2 px-4">
-            <Image source={CURRENCY_IMAGES[preferredCurrency]} className="size-6 rounded-full" />
-            <Text className="border-none bg-transparent">
-              {preferredCurrency}
-            </Text>
-          </View>
-          <form.Field
-            name="budget"
-            children={(field) => (
-              <Input
-                value={field.state.value ?? ''}
-                onBlur={field.handleBlur}
-                onChangeText={field.handleChange}
-                placeholder={translate('categories.budget_placeholder')}
-                keyboardType="decimal-pad"
-                containerClassName="flex-1"
-                size="lg"
-                error={getFieldError(field)}
-              />
-            )}
-          />
+      <View className="mb-6 flex-row gap-2">
+        <View className="w-[100] flex-row items-center justify-center gap-2 px-4">
+          <Image source={CURRENCY_IMAGES[preferredCurrency]} className="size-6 rounded-full" />
+          <Text className="border-none bg-transparent">
+            {preferredCurrency}
+          </Text>
         </View>
+        <form.Field
+          name="budget"
+          children={(field) => (
+            <Input
+              value={field.state.value ?? ''}
+              onBlur={field.handleBlur}
+              onChangeText={field.handleChange}
+              placeholder={translate('categories.budget_placeholder')}
+              keyboardType="decimal-pad"
+              containerClassName="flex-1"
+              size="lg"
+              error={getFieldError(field)}
+            />
+          )}
+        />
       </View>
 
       <form.Subscribe

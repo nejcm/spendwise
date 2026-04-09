@@ -177,6 +177,7 @@
     "total_balance": "Gesamtsaldo"
   },
   "import-export": {
+    "auto_backup_backups_title": "Backups",
     "auto_backup_enable_description": "Speichert ein JSON-Backup im App-Speicher, wenn du die App öffnest, gemäß dem Intervall unten.",
     "auto_backup_enable_label": "Automatisches Backup",
     "auto_backup_interval_daily": "Täglich",
@@ -185,7 +186,9 @@
     "auto_backup_interval_weekly": "Wöchentlich",
     "auto_backup_last_label": "Letztes Backup",
     "auto_backup_never": "Nie",
+    "auto_backup_no_backups": "Noch keine Backups gefunden.",
     "auto_backup_section_title": "Automatisches Backup",
+    "auto_backup_view_backups": "Backups anzeigen",
     "auto_backup_web_unavailable_description": "Automatisches Backup auf dem Gerät ist nur in der mobilen App verfügbar.",
     "auto_backup_web_unavailable_title": "Im Web nicht verfügbar",
     "backup_complete_message": "Deine Daten wurden erfolgreich wiederhergestellt",

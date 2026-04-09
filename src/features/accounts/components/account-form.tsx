@@ -5,14 +5,13 @@ import * as React from 'react';
 import { View } from 'react-native';
 import * as z from 'zod';
 import ColorSelector from '@/components/color-selector';
-import { Input, OutlineButton, Select, SolidButton, Text } from '@/components/ui';
+import { Image, Input, OutlineButton, SolidButton, Text } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { CURRENCY_VALUES } from '@/features/currencies';
-import { mergeCurrencyArrays } from '@/features/currencies/helpers';
-import { CURRENCY_OPTIONS } from '@/features/currencies/images';
+import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { translate } from '@/lib/i18n';
-import { addLastUsedCurrency, selectAccountFormPrefs, selectLastUsedCurrencies, setAccountFormPrefs, useAppStore } from '@/lib/store';
+import { addLastUsedCurrency, selectAccountFormPrefs, setAccountFormPrefs, useAppStore } from '@/lib/store';
 import { getRandomColor } from '@/lib/theme/colors';
 import { useArchiveAccountConfirmation, useCreateAccount, useUpdateAccount } from '../api';
 import { ACCOUNT_TYPE_LABELS, ACCOUNT_TYPES } from '../types';
@@ -48,10 +47,11 @@ const defaultValues: AccountFormData = {
 export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess, onCancel }: AccountFormProps) {
   const createAccount = useCreateAccount();
   const updateAccount = useUpdateAccount();
+  const preferredCurrency = useAppStore.use.currency();
   const archiveAccount = useArchiveAccountConfirmation(onDeleteSuccess);
   const accountFormPrefs = useAppStore(selectAccountFormPrefs);
-  const lastUsedCurrencies = useAppStore(selectLastUsedCurrencies);
-  const orderedCurrencies = React.useMemo(() => mergeCurrencyArrays(lastUsedCurrencies, CURRENCY_OPTIONS), [lastUsedCurrencies]);
+  // const lastUsedCurrencies = useAppStore(selectLastUsedCurrencies);
+  // const orderedCurrencies = React.useMemo(() => mergeCurrencyArrays(lastUsedCurrencies, CURRENCY_OPTIONS), [lastUsedCurrencies]);
 
   const form = useForm({
     defaultValues: {
@@ -146,6 +146,24 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
         )}
       />
 
+      {/* <form.Field
+        name="currency"
+        children={(field) => (
+          <Select
+            value={field.state.value}
+            options={orderedCurrencies}
+            searchEnabled
+            size="lg"
+            onSelect={(value) => {
+              if (!value) return;
+              field.handleChange(String(value) as CurrencyKey);
+            }}
+            showChevron={false}
+            stackBehavior="push"
+          />
+        )}
+      /> */}
+
       <form.Field
         name="type"
         children={(field) => (
@@ -168,24 +186,12 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
       />
 
       <View className="mb-6 flex-row gap-2">
-        <form.Field
-          name="currency"
-          children={(field) => (
-            <Select
-              value={field.state.value}
-              options={orderedCurrencies}
-              searchEnabled
-              size="lg"
-              onSelect={(value) => {
-                if (!value) return;
-                field.handleChange(String(value) as CurrencyKey);
-              }}
-              showChevron={false}
-              stackBehavior="push"
-              containerClassName="w-[100]"
-            />
-          )}
-        />
+        <View className="w-[100] flex-row items-center justify-center gap-2 px-4">
+          <Image source={CURRENCY_IMAGES[preferredCurrency]} className="size-6 rounded-full" />
+          <Text className="border-none bg-transparent">
+            {preferredCurrency}
+          </Text>
+        </View>
         <form.Field
           name="budget"
           children={(field) => (

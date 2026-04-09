@@ -127,8 +127,8 @@ function Providers({ children }: { children: React.ReactNode }) {
                 <DatabaseErrorBoundary>
                   <APIProvider>
                     <BootstrappedSQLite>
-                      <CurrencyRatesInitializer />
                       <AppErrorBoundary>
+                        <CurrencyRatesInitializer />
                         <ScheduledTransactionsProcessor />
                         <AutoBackupProcessor />
                         <FontLoader>
@@ -155,13 +155,14 @@ function Providers({ children }: { children: React.ReactNode }) {
   );
 }
 
+const hiddenHeader = { headerShown: false };
 export default function RootLayout() {
   const { dark } = useThemeConfig();
   return (
     <Providers>
       <Stack screenOptions={{ navigationBarColor: dark ? TAB_BAR_DARK_COLOR : TAB_BAR_COLOR }}>
-        <Stack.Screen name="(app)" options={{ headerShown: false }} />
-        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+        <Stack.Screen name="(app)" options={hiddenHeader} />
+        <Stack.Screen name="onboarding" options={hiddenHeader} />
       </Stack>
       <PersistentTabBar />
       <GlobalSheet />

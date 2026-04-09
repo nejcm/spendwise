@@ -1,6 +1,7 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { SheetConfig, SheetType } from '@/lib/sheet';
 import { useEffect, useMemo, useRef } from 'react';
+import { BackHandler } from 'react-native';
 import { ModalSheet, Text, View } from '@/components/ui';
 import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { AccountForm } from '@/features/accounts/components/account-form';
@@ -11,6 +12,7 @@ import { TransactionForm } from '@/features/transactions/components/transaction-
 import { translate } from '@/lib/i18n';
 import { closeSheet, useLocalStore } from '@/lib/local-store';
 import { SHEET_SNAP_POINTS } from '@/lib/sheet';
+import { IS_WEB } from '../lib/base';
 
 const SHEET_DATA: Record<SheetType, { title: string; content?: React.ReactNode }> = {
   'add-transaction': { title: translate('transactions.add'), content: <ScanFab /> },
@@ -164,6 +166,19 @@ export function GlobalSheet() {
     if (config) modalRef.current?.present();
     else modalRef.current?.dismiss();
   }, [config]);
+
+  const isOpen = config !== undefined;
+
+  useEffect(() => {
+    if (IS_WEB) return;
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (!isOpen) return false;
+      closeSheet();
+      return true;
+    });
+
+    return () => sub.remove();
+  }, [isOpen]);
 
   return (
     <ModalSheet

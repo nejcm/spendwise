@@ -118,7 +118,6 @@ const ModalSheetHeader = React.memo(({ title, dismiss }: ModalSheetHeaderProps) 
     <>
       {title && (
         <View className="flex-row px-2 py-4">
-          <View className="size-6" />
           <View className="flex-1">
             {typeof title === 'string' ? <Text className="text-center text-lg font-bold text-foreground">{title}</Text> : title}
           </View>

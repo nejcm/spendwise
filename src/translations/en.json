@@ -185,7 +185,7 @@
     "auto_backup_interval_label": "Backup interval",
     "auto_backup_interval_monthly": "Monthly",
     "auto_backup_interval_weekly": "Weekly",
-    "auto_backup_last_label": "Last backup",
+    "auto_backup_last_label": "Last",
     "auto_backup_never": "Never",
     "auto_backup_no_backups": "No backups found yet.",
     "auto_backup_section_title": "Automatic backup",

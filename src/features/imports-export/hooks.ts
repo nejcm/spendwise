@@ -114,3 +114,60 @@ export function useImportBackup() {
     },
   });
 }
+
+export function useRestoreAutoBackup() {
+  const db = useSQLiteContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (fileUri: string) => {
+      const text = await (await fetch(fileUri)).text();
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(text);
+      }
+      catch {
+        throw new Error(translate('import-export.backup_invalid_error'));
+      }
+
+      let backup;
+      try {
+        backup = validateBackup(parsed);
+      }
+      catch {
+        throw new Error(translate('import-export.backup_invalid_error'));
+      }
+
+      await new Promise<void>((resolve, reject) => {
+        Alert.alert(
+          translate('import-export.backup_restore_confirm_title'),
+          translate('import-export.backup_restore_confirm_message'),
+          [
+            { text: translate('common.cancel'), onPress: () => reject(new Error('cancelled')), style: 'cancel' },
+            { text: translate('common.yes'), onPress: () => resolve() },
+          ],
+        );
+      });
+
+      await importBackup(db, backup);
+    },
+    onSuccess: () => {
+      invalidateFor(
+        queryClient,
+        'transaction',
+        'account',
+        'category',
+        'scheduledTransaction',
+      );
+
+      Alert.alert(
+        translate('import-export.backup_complete_title'),
+        translate('import-export.backup_complete_message'),
+      );
+    },
+    onError: (error) => {
+      if (error instanceof Error && error.message === 'cancelled') return;
+      Alert.alert(translate('common.error'), error instanceof Error ? error.message : String(error));
+    },
+  });
+}

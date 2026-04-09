@@ -9,6 +9,12 @@ export const DEFAULT_AUTO_BACKUP_RETENTION = 5;
 
 export type AutoBackupInterval = 'daily' | 'weekly' | 'monthly';
 
+export type AutoBackupFileEntry = {
+  name: string;
+  uri: string;
+  ts: number;
+};
+
 export function buildManualBackupFileName(date = new Date()): string {
   return `${BACKUP_FILE_NAME_PREFIX}${date.toISOString().slice(0, 10)}.json`;
 }
@@ -21,9 +27,9 @@ export function getAutoBackupDirectory(): Directory | null {
 export const IS_AUTO_BACKUP_SUPPORTED = !IS_WEB;
 
 const INTERVAL_MS: Record<AutoBackupInterval, number> = {
-  daily: 24 * 60 * 60 * 1000,
-  weekly: 7 * 24 * 60 * 60 * 1000,
-  monthly: 30 * 24 * 60 * 60 * 1000,
+  daily: 24 * 60 * 60000,
+  weekly: 7 * 24 * 60 * 60000,
+  monthly: 30 * 24 * 60 * 60000,
 };
 
 export function shouldRunAutoBackup(
@@ -38,6 +44,24 @@ export function shouldRunAutoBackup(
 }
 
 const AUTO_BACKUP_NAME_RE = new RegExp(`^${BACKUP_FILE_NAME_PREFIX}(\\d+)\\.json$`);
+
+export function listAutoBackupFiles(): AutoBackupFileEntry[] {
+  const dir = getAutoBackupDirectory();
+  if (!dir?.exists) return [];
+
+  const entries: AutoBackupFileEntry[] = [];
+  for (const item of dir.list()) {
+    if (!(item instanceof File)) continue;
+    const m = AUTO_BACKUP_NAME_RE.exec(item.name);
+    if (!m) continue;
+    const ts = Number(m[1]);
+    if (!Number.isFinite(ts)) continue;
+    entries.push({ name: item.name, uri: item.uri, ts });
+  }
+
+  entries.sort((a, b) => b.ts - a.ts);
+  return entries;
+}
 
 function pruneAutoBackups(dir: Directory, keepCount: number): void {
   if (!dir.exists || keepCount < 1) return;

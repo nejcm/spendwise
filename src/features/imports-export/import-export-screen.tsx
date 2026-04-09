@@ -1,4 +1,3 @@
-import type { AutoBackupInterval } from '@/features/imports-export/backup-file';
 import type { ImportProps } from '@/features/imports-export/import';
 import { useMutation } from '@tanstack/react-query';
 
@@ -6,140 +5,21 @@ import * as React from 'react';
 import { useState } from 'react';
 import DetailsSection from '@/components/details';
 
-import { Alert, FocusAwareStatusBar, ScrollView, Select, SolidButton, Switch, Text, View } from '@/components/ui';
-import { ArrowUp, Download, Upload } from '@/components/ui/icon';
-import { formatDate } from '@/features/formatting/helpers';
-import { IS_AUTO_BACKUP_SUPPORTED } from '@/features/imports-export/backup-file';
+import { Alert, FocusAwareStatusBar, ScrollView, SolidButton, Text, View } from '@/components/ui';
+import { ArrowUp } from '@/components/ui/icon';
 import { autoDetectColumnMapping, parseCSV } from '@/features/imports-export/csv-parser';
-import { useExportBackup, useImportBackup } from '@/features/imports-export/hooks';
 import Import from '@/features/imports-export/import';
 import { documentPickerTypeForCsv, pickValidatedFile } from '@/features/imports-export/pick-file';
 import { translate } from '@/lib/i18n';
-import { updateAutoBackup, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
+import AutoBackupSection from './auto-backup-section';
+import BackupSection from './backup-section';
 
 const initialCsvState: ImportProps['state'] = {
   headers: [],
   allRows: [],
   mapping: { amount: null, date: null, currency: null, note: null, type: null, category: null },
 };
-
-function autoBackupIntervalOptions(): { label: string; value: AutoBackupInterval }[] {
-  return [
-    { label: translate('import-export.auto_backup_interval_daily'), value: 'daily' },
-    { label: translate('import-export.auto_backup_interval_weekly'), value: 'weekly' },
-    { label: translate('import-export.auto_backup_interval_monthly'), value: 'monthly' },
-  ];
-}
-
-function AutoBackupSection() {
-  const autoBackup = useAppStore.use.autoBackup();
-  const dateFormat = useAppStore.use.dateFormat();
-
-  if (!IS_AUTO_BACKUP_SUPPORTED) {
-    return (
-      <>
-        <Text className="mb-2 font-bold dark:text-muted-foreground" tx="import-export.auto_backup_section_title" />
-        <DetailsSection
-          className="mb-4"
-          data={[{
-            label: translate('import-export.auto_backup_web_unavailable_title'),
-            description: translate('import-export.auto_backup_web_unavailable_description'),
-            value: <Text className="text-muted-foreground">—</Text>,
-          }]}
-        />
-      </>
-    );
-  }
-
-  const lastDisplay = autoBackup.lastAutoBackupAt
-    ? formatDate(Math.floor(new Date(autoBackup.lastAutoBackupAt).getTime() / 1000), dateFormat)
-    : translate('import-export.auto_backup_never');
-
-  return (
-    <>
-      <Text className="mb-2 font-bold dark:text-muted-foreground" tx="import-export.auto_backup_section_title" />
-      <DetailsSection
-        className="mb-4"
-        data={[
-          {
-            label: translate('import-export.auto_backup_enable_label'),
-            description: translate('import-export.auto_backup_enable_description'),
-            value: (
-              <Switch
-                accessibilityLabel={translate('import-export.auto_backup_enable_label')}
-                checked={autoBackup.enabled}
-                onChange={(checked) => updateAutoBackup({ enabled: checked })}
-              />
-            ),
-          },
-          ...(autoBackup.enabled
-            ? [{
-                label: translate('import-export.auto_backup_interval_label'),
-                value: (
-                  <Select<AutoBackupInterval>
-                    containerClassName="min-w-36"
-                    size="sm"
-                    options={autoBackupIntervalOptions()}
-                    value={autoBackup.interval}
-                    onSelect={(interval) => updateAutoBackup({ interval })}
-                  />
-                ),
-              }]
-            : []),
-          {
-            label: translate('import-export.auto_backup_last_label'),
-            value: lastDisplay,
-          },
-        ]}
-      />
-    </>
-  );
-}
-
-function BackupSection() {
-  const exportBackup = useExportBackup();
-  const importBackup = useImportBackup();
-
-  return (
-    <>
-      <Text className="mb-2 font-bold dark:text-muted-foreground" tx="import-export.backup_section_title" />
-      <DetailsSection
-        className="mb-4"
-        data={[
-          {
-            label: translate('import-export.backup_download_label'),
-            description: translate('import-export.backup_download_description'),
-            value: (
-              <SolidButton
-                size="sm"
-                className="min-w-16"
-                iconLeft={<Download className="mr-1 text-background" size={16} />}
-                label={translate('common.download')}
-                loading={exportBackup.isPending}
-                onPress={() => void exportBackup.mutate()}
-              />
-            ),
-          },
-          {
-            label: translate('import-export.backup_restore_label'),
-            description: translate('import-export.backup_restore_description'),
-            value: (
-              <SolidButton
-                size="sm"
-                className="min-w-16"
-                iconLeft={<Upload className="mr-1 text-background" size={16} />}
-                label={translate('common.restore')}
-                loading={importBackup.isPending}
-                onPress={() => importBackup.mutate()}
-              />
-            ),
-          },
-        ]}
-      />
-    </>
-  );
-}
 
 export function ImportScreen() {
   const [inProgress, setInProgress] = useState<boolean>(false);
@@ -205,7 +85,7 @@ export function ImportScreen() {
                       value: (
                         <SolidButton
                           size="sm"
-                          className="min-w-16"
+                          className="min-w-28"
                           iconLeft={<ArrowUp className="mr-1 text-background" size={16} />}
                           label={translate('common.import')}
                           loading={pickFileMutation.isPending}

@@ -2,7 +2,6 @@ import type { AutoBackupInterval } from '@/features/imports-export/backup-file';
 import type { ImportProps } from '@/features/imports-export/import';
 import { useMutation } from '@tanstack/react-query';
 
-import * as DocumentPicker from 'expo-document-picker';
 import * as React from 'react';
 import { useState } from 'react';
 import DetailsSection from '@/components/details';
@@ -14,6 +13,7 @@ import { IS_AUTO_BACKUP_SUPPORTED } from '@/features/imports-export/backup-file'
 import { autoDetectColumnMapping, parseCSV } from '@/features/imports-export/csv-parser';
 import { useExportBackup, useImportBackup } from '@/features/imports-export/hooks';
 import Import from '@/features/imports-export/import';
+import { documentPickerTypeForCsv, pickValidatedFile } from '@/features/imports-export/pick-file';
 import { translate } from '@/lib/i18n';
 import { updateAutoBackup, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -147,12 +147,15 @@ export function ImportScreen() {
 
   const pickFileMutation = useMutation({
     mutationFn: async () => {
-      const result = await DocumentPicker.getDocumentAsync({
-        copyToCacheDirectory: true,
-        type: 'text/csv',
+      const asset = await pickValidatedFile({
+        type: documentPickerTypeForCsv(),
+        ext: '.csv',
+        mimeNeedle: 'csv',
+        errorMessage: translate('import-export.csv_invalid_type_error'),
       });
-      if (result.canceled || !result.assets[0]) return null;
-      const text = await (await fetch(result.assets[0].uri)).text();
+      if (!asset) return null;
+
+      const text = await (await fetch(asset.uri)).text();
       const rows = parseCSV(text);
 
       if (rows.length < 2) {

@@ -1,5 +1,4 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import * as DocumentPicker from 'expo-document-picker';
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -7,6 +6,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { Alert } from '@/components/ui';
 import { exportBackup, importBackup, validateBackup } from '@/features/imports-export/backup';
 import { buildManualBackupFileName } from '@/features/imports-export/backup-file';
+import { documentPickerTypeForJson, pickValidatedFile } from '@/features/imports-export/pick-file';
 import { IS_WEB } from '@/lib/base';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { translate } from '@/lib/i18n';
@@ -56,13 +56,15 @@ export function useImportBackup() {
 
   return useMutation({
     mutationFn: async () => {
-      const result = await DocumentPicker.getDocumentAsync({
-        copyToCacheDirectory: true,
-        type: 'application/json',
+      const asset = await pickValidatedFile({
+        type: documentPickerTypeForJson(),
+        ext: '.json',
+        mimeNeedle: 'json',
+        errorMessage: translate('import-export.backup_invalid_type_error'),
       });
-      if (result.canceled || !result.assets[0]) return;
+      if (!asset) return;
 
-      const text = await (await fetch(result.assets[0].uri)).text();
+      const text = await (await fetch(asset.uri)).text();
       let parsed: unknown;
       try {
         parsed = JSON.parse(text);

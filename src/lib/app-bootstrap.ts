@@ -30,7 +30,7 @@ export async function bootstrapApp(
       ),
     ),
   ]);
-  SplashScreen.hide();
+  await SplashScreen.hideAsync();
 }
 
 async function bootstrapAppInternal(

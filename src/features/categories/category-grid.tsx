@@ -8,12 +8,14 @@ import Animated, { useAnimatedRef } from 'react-native-reanimated';
 
 import Sortable from 'react-native-sortables';
 import { NoDataCard } from '@/components/no-data-card';
-import { FormattedCurrency, Text, View } from '@/components/ui';
+import { Alert, FormattedCurrency, Text, View } from '@/components/ui';
 import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
-import { Lightbulb } from '@/components/ui/icon';
+import { Lightbulb, TrashIcon } from '@/components/ui/icon';
+import { IconButton } from '@/components/ui/icon-button';
 import { scaleBudgetForPeriod } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
+import { useDeleteCategory } from './hooks';
 
 export type CategoryGridProps = {
   categories: CategorySpend[];
@@ -36,6 +38,7 @@ export const CategoryGrid = React.memo(({
   const periodSelection = useAppStore.use.periodSelection();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const [refreshing, setRefreshing] = useState(false);
+  const deleteCategory = useDeleteCategory();
 
   const handleRefresh = React.useCallback(async () => {
     setRefreshing(true);
@@ -47,6 +50,13 @@ export const CategoryGrid = React.memo(({
     const updates = params.data.map((item, idx) => ({ id: item.category_id, sort_order: idx }));
     onReorder(updates);
   }
+
+  const onDeletePress = React.useCallback((categoryId: string, name: string) => {
+    Alert.alert(translate('common.delete'), translate('categories.delete_confirm', { name }), [
+      { text: translate('common.cancel'), style: 'cancel' },
+      { text: translate('common.delete'), style: 'destructive', onPress: () => deleteCategory.mutate(categoryId) },
+    ]);
+  }, [deleteCategory]);
 
   return (
     <Animated.ScrollView ref={scrollRef} className="flex-1 bg-background" refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}>
@@ -76,6 +86,7 @@ export const CategoryGrid = React.memo(({
                     currency={currency}
                     periodSelection={periodSelection}
                     onPress={onPress}
+                    onDeletePress={editMode ? onDeletePress : undefined}
                   />
                 )}
               />
@@ -98,9 +109,10 @@ export type CategoryGridCellProps = {
   currency: CurrencyKey;
   periodSelection: PeriodSelection;
   onPress: (category: CategorySpend) => void;
+  onDeletePress?: (categoryId: string, name: string) => void;
 };
 
-function CategoryCard({ item, currency, periodSelection, onPress }: CategoryGridCellProps) {
+function CategoryCard({ item, currency, periodSelection, onPress, onDeletePress }: CategoryGridCellProps) {
   const emoji = item.category_icon && item.category_icon.trim() ? item.category_icon : item.category_name.charAt(0).toUpperCase();
   const showBudget = item.category_budget != null && item.category_budget > 0;
   const monthlyBudget = item.category_budget ?? 0;
@@ -108,27 +120,38 @@ function CategoryCard({ item, currency, periodSelection, onPress }: CategoryGrid
   const isMonthView = periodSelection.mode === 'month';
 
   return (
-    <Pressable onPress={() => onPress(item)} className="min-h-[86] flex-1 justify-center rounded-xl bg-card px-3 py-1">
-      <View
-        className="mb-1 flex-row items-center justify-start gap-2"
-      >
-        <Text className="text-xl">{emoji}</Text>
-        <Text className="w-full text-sm text-muted-foreground" numberOfLines={1}>
-          {item.category_name}
-        </Text>
-      </View>
-      {item.total !== undefined && (
-        <FormattedCurrency value={item.total} currency={currency} className="font-medium" numberOfLines={1} />
+    <View className="min-h-[86] flex-1 justify-center rounded-xl bg-card">
+      {onDeletePress && (
+        <IconButton
+          size="sm"
+          color="none"
+          className="absolute top-1 right-1 z-10 bg-background/70"
+          hitSlop={10}
+          onPress={() => onDeletePress(item.category_id, item.category_name)}
+        >
+          <TrashIcon colorClassName="accent-muted-foreground" size={15} />
+        </IconButton>
       )}
-      {showBudget && periodSelection.mode !== 'all' && (
-        <BudgetProgressBar
-          spent={item.expense_total}
-          budget={scaledBudget ?? 0}
-          monthlyBudget={!isMonthView ? monthlyBudget : undefined}
-          currency={currency}
-          className="mt-0.5"
-        />
-      )}
-    </Pressable>
+      <Pressable onPress={() => onPress(item)} className="flex-1 justify-center px-3 py-1">
+        <View className="mb-1 flex-row items-center justify-start gap-2">
+          <Text className="text-xl">{emoji}</Text>
+          <Text className="w-full text-sm text-muted-foreground" numberOfLines={1}>
+            {item.category_name}
+          </Text>
+        </View>
+        {item.total !== undefined && (
+          <FormattedCurrency value={item.total} currency={currency} className="font-medium" numberOfLines={1} />
+        )}
+        {showBudget && periodSelection.mode !== 'all' && (
+          <BudgetProgressBar
+            spent={item.expense_total}
+            budget={scaledBudget ?? 0}
+            monthlyBudget={!isMonthView ? monthlyBudget : undefined}
+            currency={currency}
+            className="mt-0.5"
+          />
+        )}
+      </Pressable>
+    </View>
   );
 }

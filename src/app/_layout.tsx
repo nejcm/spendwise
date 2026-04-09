@@ -48,10 +48,10 @@ SplashScreen.setOptions({
   fade: true,
 });
 // Safety net: force-hide splash after 10s in case initialization hangs in production.
-// hideAsync() is idempotent — the normal 1s hide in (app)/_layout still works as expected.
+// hideAsync() is idempotent — bootstrap also calls hide when SQLite onInit succeeds.
 setTimeout(() => {
   SplashScreen.hideAsync().catch(() => {});
-}, 10_000);
+}, 6_000);
 
 function PersistentTabBar() {
   const pathname = usePathname();

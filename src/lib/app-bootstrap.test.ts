@@ -1,8 +1,9 @@
 import type { QueryClient } from '@tanstack/react-query';
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import { ensureAndroidChannel } from '@/features/notifications/notifications';
+import * as SplashScreen from 'expo-splash-screen';
 
+import { ensureAndroidChannel } from '@/features/notifications/notifications';
 import { syncDueScheduledTransactions } from '@/features/scheduled-transactions/api';
 import { migrateDb } from '@/lib/sqlite';
 import { bootstrapApp } from './app-bootstrap';
@@ -17,6 +18,10 @@ jest.mock('@/features/notifications/notifications', () => ({
 
 jest.mock('@/features/scheduled-transactions/api', () => ({
   syncDueScheduledTransactions: jest.fn().mockResolvedValue(0),
+}));
+
+jest.mock('expo-splash-screen', () => ({
+  hideAsync: jest.fn().mockResolvedValue(undefined),
 }));
 
 describe('bootstrapApp', () => {
@@ -42,6 +47,7 @@ describe('bootstrapApp', () => {
 
     await bootstrapApp(db, qc);
 
+    expect(SplashScreen.hideAsync).toHaveBeenCalled();
     expect(order).toEqual(['migrate', 'channel', 'sync']);
     expect(migrateDb).toHaveBeenCalledWith(db);
     expect(ensureAndroidChannel).toHaveBeenCalledWith();

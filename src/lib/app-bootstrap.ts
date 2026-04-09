@@ -1,7 +1,8 @@
 import type { QueryClient } from '@tanstack/react-query';
 import type { SQLiteDatabase } from 'expo-sqlite';
-
 import { useQueryClient } from '@tanstack/react-query';
+
+import * as SplashScreen from 'expo-splash-screen';
 import { useCallback } from 'react';
 import { ensureAndroidChannel } from '@/features/notifications/notifications';
 import { syncDueScheduledTransactions } from '@/features/scheduled-transactions/api';
@@ -29,6 +30,7 @@ export async function bootstrapApp(
       ),
     ),
   ]);
+  SplashScreen.hide();
 }
 
 async function bootstrapAppInternal(

@@ -356,6 +356,8 @@
     "changeCurrencyWarning": "Changing your display currency will recalculate all transaction totals using historical rates. This may take a moment.",
     "clear": "Clear",
     "clear_transactions": "Clear Transactions",
+    "currencyBackupFailedMessage": "Could not create a backup before changing currency. You can still continue, but consider exporting a backup from Settings → Import/Export.",
+    "currencyBackupFailedTitle": "Backup unavailable",
     "currency_format": "Currency format",
     "date_format": "Date format",
     "default": "Default",

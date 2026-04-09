@@ -356,6 +356,8 @@
     "changeCurrencyWarning": "Beim Ändern deiner Anzeigewährung werden alle Transaktionssummen anhand historischer Kurse neu berechnet. Das kann einen Moment dauern.",
     "clear": "Leeren",
     "clear_transactions": "Transaktionen leeren",
+    "currencyBackupFailedMessage": "Vor dem Ändern der Währung konnte kein Backup erstellt werden. Du kannst trotzdem fortfahren, aber exportiere am besten vorher ein Backup unter Einstellungen → Import/Export.",
+    "currencyBackupFailedTitle": "Backup nicht verfügbar",
     "currency_format": "Währungsformat",
     "date_format": "Datumsformat",
     "default": "Standard",

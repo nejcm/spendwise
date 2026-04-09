@@ -30,7 +30,7 @@ export function AccountsScreen() {
   const db = useSQLiteContext();
   usePrefetchAdjacentPeriods(selection, (start, end) => accountsWithBalanceForRangeQueryOptions(db, start, end));
 
-  const totalBalance = accounts.reduce((sum, a) => sum + a.balance, 0);
+  const totalBalance = accounts.reduce((sum, a) => sum + a.baseBalance, 0);
   const { refreshing, onRefresh } = useRefresh();
 
   const openCreateAccountForm = React.useCallback(() => {
@@ -57,37 +57,39 @@ export function AccountsScreen() {
       <PeriodSelector selection={selection} />
 
       <ScrollView className="flex-1" style={defaultStyles.transparentBg} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-        <View className="flex-col items-center justify-between gap-2 px-4 pt-4 pb-6">
-          <Text className="text-sm text-muted-foreground">{translate('accounts.total_balance')}</Text>
-          <FormattedCurrency value={totalBalance} currency={currency} className="text-3xl font-bold" />
+        <View className="px-4 pb-6">
+          <View className="flex-col items-center justify-between gap-2 px-4 pt-4 pb-6">
+            <Text className="text-sm text-muted-foreground">{translate('accounts.total_balance')}</Text>
+            <FormattedCurrency value={totalBalance} currency={currency} className="text-3xl font-bold" />
+          </View>
+
+          {isLoading
+            ? <SkeletonRows count={3} />
+            : accounts.length === 0
+              ? (
+                  <NoData title={translate('accounts.no_accounts')} className="mt-6" />
+                )
+              : (
+                  accounts.map((account) => (
+                    <AccountCard
+                      key={account.id}
+                      account={account}
+                      onPress={() => openEditAccountForm(account)}
+                    />
+                  ))
+                )}
+
+          <View className="mt-4 flex-row items-center justify-center">
+            <SolidButton
+              iconLeft={<Plus className="mr-1 text-background" size={20} />}
+              label={translate('common.add')}
+              size="sm"
+              className="px-6"
+              onPress={openCreateAccountForm}
+            />
+          </View>
+
         </View>
-
-        {isLoading
-          ? <SkeletonRows count={3} />
-          : accounts.length === 0
-            ? (
-                <NoData title={translate('accounts.no_accounts')} className="mt-6" />
-              )
-            : (
-                accounts.map((account) => (
-                  <AccountCard
-                    key={account.id}
-                    account={account}
-                    onPress={() => openEditAccountForm(account)}
-                  />
-                ))
-              )}
-
-        <View className="mt-4 flex-row items-center justify-center">
-          <SolidButton
-            iconLeft={<Plus className="mr-1 text-background" size={20} />}
-            label={translate('common.add')}
-            size="sm"
-            className="px-6"
-            onPress={openCreateAccountForm}
-          />
-        </View>
-
       </ScrollView>
     </PeriodSwipeContainer>
   );

@@ -9,6 +9,7 @@ import { IconButton } from '@/components/ui/icon-button';
 import { SkeletonBox, SkeletonGrid } from '@/components/ui/skeleton';
 import { AccountsOverview } from '@/features/home/accounts-overview';
 import { CategoriesOverview } from '@/features/home/categories-overview';
+import { ScreensGrid } from '@/features/home/screens-grid';
 import { useMonthSummary } from '@/features/transactions/api';
 import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
@@ -74,6 +75,7 @@ export function HomeScreen() {
           </View>
           <AccountsOverview />
           <CategoriesOverview />
+          <ScreensGrid />
           <TransactionsList />
         </View>
       </ScrollView>

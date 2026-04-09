@@ -169,6 +169,7 @@
     "expenses": "Expenses",
     "hi": "Hi {{name}}",
     "income": "Income",
+    "links": "Links",
     "make_recurring": "Make recurring",
     "no_transactions": "No transactions yet",
     "recent_transactions": "Recent Transactions",

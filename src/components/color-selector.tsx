@@ -6,12 +6,12 @@ import { Select, View } from './ui';
 const DEFAULT_COLOR = 'bg-sky-600';
 
 const sizes: Record<NonNullable<SelectProps['size']>, string> = {
-  'xs': 'min-w-8 min-h-8',
-  'sm': 'min-w-10 min-h-10',
-  'md': 'min-w-12 min-h-12',
-  'lg': 'min-w-14 min-h-14',
-  'xl': 'min-w-16 min-h-16',
-  '2xl': 'min-w-18 min-h-18',
+  'xs': 'size-8',
+  'sm': 'size-10',
+  'md': 'size-12',
+  'lg': 'size-14',
+  'xl': 'size-16',
+  '2xl': 'size-18',
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -27,7 +27,7 @@ function renderItem(item: OptionType) {
 
 function renderSelectedItem(size: SelectProps['size'] = 'md') {
   return (item: OptionType | null) => (
-    <View className={`size-full flex-1 rounded-full border border-border ${sizes[size]} ${getBgColor(String(item?.value || DEFAULT_COLOR))}`} />
+    <View className={`rounded-full border border-border ${sizes[size]} ${getBgColor(String(item?.value || DEFAULT_COLOR))}`} />
   );
 }
 

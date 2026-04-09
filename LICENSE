@@ -1,0 +1,45 @@
+Copyright (c) 2026 Spendwise authors. All rights reserved.
+
+Permission is granted to use this software and its source code only in the
+following ways:
+
+  • Run, install, and execute the Software on your own devices for personal,
+    non-commercial purposes.
+
+You may not:
+
+  • Modify, adapt, translate, or create derivative works from the Software,
+    except as expressly allowed under “Contributing” below.
+  • Copy, reproduce, mirror, or republish the Software or any part of it,
+    except transient copies strictly necessary to run the Software on your
+    devices as permitted above, or as expressly allowed under “Contributing”
+    below.
+  • Distribute, sublicense, lease, lend, sell, or otherwise make the Software
+    available to any third party, whether for fee or free.
+  • Remove or alter any proprietary notices.
+
+Contributing
+
+You may clone this repository and create modifications solely to prepare
+contributions for the project maintainers. Where the host allows it (for example
+GitHub forks), you may keep one copy tied to your account solely to open pull
+requests or send patches to this upstream project. You must not distribute the
+Software or your modifications to others except by submitting them here for
+review. A public fork used only to propose pull requests to this repository is
+allowed; using a fork or clone for any other publication, product, or audience
+is not.
+
+By submitting a contribution for inclusion in this project, you grant the
+copyright holders of the Software a perpetual, irrevocable, worldwide,
+non-exclusive, royalty-free license to use, reproduce, modify, display,
+perform, sublicense, and distribute your contribution as part of the Software.
+You retain your copyright in your contribution. You represent that you have
+the right to grant this license.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

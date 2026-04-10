@@ -7,7 +7,7 @@ import { cn } from 'tailwind-variants';
 import { FormattedCurrency, Text } from '@/components/ui';
 import { formatShortDate } from '@/features/formatting/helpers';
 import { useAppStore } from '@/lib/store';
-import { useThemeConfig } from '@/lib/theme/use-theme-config';
+import { bgColorOr, hexWithOpacity } from '@/lib/theme/colors';
 
 export type TransactionCardProps = {
   transaction: TransactionWithCategory;
@@ -16,23 +16,18 @@ export type TransactionCardProps = {
 
 export const TransactionCard = React.memo(({ transaction, className }: TransactionCardProps) => {
   const router = useRouter();
-  const theme = useThemeConfig();
   const currency = useAppStore.use.currency();
   const isIncome = transaction.type === 'income';
   const displayName = transaction.category_name || 'Unknown';
   const showConverted = transaction.currency !== currency;
-  const bgColor = React.useMemo(
-    () => `${transaction.category_color ?? '#90A4AE'}${theme.dark ? '10' : '20'}`,
-    [transaction.category_color, theme.dark],
-  );
 
   return (
     <Pressable className={cn('flex-row items-center gap-3 p-3', className)} onPress={() => router.push(`/transactions/${transaction.id}`)}>
       <View
-        className="size-10 items-center justify-center rounded-full"
-        style={{ backgroundColor: bgColor }}
+        className={`size-10 items-center justify-center rounded-lg ${bgColorOr(transaction.category_color)}`}
+        style={{ backgroundColor: hexWithOpacity(transaction.category_color, 30) }}
       >
-        <Text className="text-xl font-medium" style={{ color: transaction.category_color || '#90A4AE' }}>
+        <Text className="text-xl font-medium">
           {(transaction.category_icon || '?')}
         </Text>
       </View>

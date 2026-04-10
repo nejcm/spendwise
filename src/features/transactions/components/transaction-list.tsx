@@ -78,8 +78,7 @@ function groupByDate(transactions: TransactionWithCategory[]): DateGroup[] {
   const groups: Map<number, TransactionWithCategory[]> = new Map();
 
   for (const t of transactions) {
-    // Normalize to day-start Unix seconds (floor to day boundary using 86400s/day)
-    const dayKey = Math.floor(t.date / 86400) * 86400;
+    const dayKey = new Date(t.date * 1000).setHours(0, 0, 0, 0) / 1000;
     const existing = groups.get(dayKey);
     groups.set(dayKey, existing ? [...existing, t] : [t]);
   }

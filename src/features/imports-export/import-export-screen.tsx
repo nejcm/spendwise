@@ -78,7 +78,7 @@ export function ImportScreen() {
                 <>
                   <Text className="mb-2 font-bold dark:text-muted-foreground" tx="import-export.external_section_title" />
                   <DetailsSection
-                    className="mb-6"
+                    className="mb-8"
                     data={[{
                       label: translate('import-export.import_title'),
                       description: translate('import-export.pick_description'),

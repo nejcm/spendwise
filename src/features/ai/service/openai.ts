@@ -215,7 +215,7 @@ export async function scanReceiptOpenAI(
         content: [
           {
             type: 'image_url',
-            image_url: { url: `data:${mimeType};base64,${base64Image}`, detail: 'low' },
+            image_url: { url: `data:${mimeType};base64,${base64Image}`, detail: 'high' },
           },
           { type: 'text', text: prompt },
         ],

@@ -33,7 +33,7 @@ export default function AutoBackupSection() {
       <>
         <Text className="mb-2 font-bold dark:text-muted-foreground" tx="import-export.auto_backup_section_title" />
         <DetailsSection
-          className="mb-6"
+          className="mb-8"
           data={[{
             label: translate('import-export.auto_backup_web_unavailable_title'),
             description: translate('import-export.auto_backup_web_unavailable_description'),
@@ -58,7 +58,7 @@ export default function AutoBackupSection() {
     <>
       <Text className="mb-2 font-bold dark:text-muted-foreground" tx="import-export.auto_backup_section_title" />
       <DetailsSection
-        className="mb-6"
+        className="mb-8"
         data={[
           {
             label: translate('import-export.auto_backup_enable_label'),

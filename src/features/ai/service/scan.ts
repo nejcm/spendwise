@@ -10,7 +10,7 @@ import { scanReceiptOpenAI } from './openai';
 export const scannedReceiptSchema = z.object({
   /** Total amount in smallest currency unit (cents). Required — no fallback. */
   amount: z.number().positive().transform(Math.round),
-  currency: z.enum(CURRENCY_VALUES as [CurrencyKey, ...CurrencyKey[]]).optional(),
+  currency: z.enum(CURRENCY_VALUES as CurrencyKey[]).optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).catch(() => todayISO()),
   note: z.string().nullable().catch(null),
   type: z.enum(['expense', 'income'] as const).catch('expense'),
@@ -30,7 +30,7 @@ function buildPrompt(categories: Pick<Category, 'id' | 'name'>[], currency: Curr
 
 Required JSON fields:
 - "amount": integer, the total amount in cents (e.g. $12.50 → 1250)
-- "currency": string, ISO 4217 code (e.g. "EUR", "USD"). Default to "${currency}" if unclear.
+- "currency": string, ISO 4217 code (e.g. "EUR", "USD"). Infer from symbols (€ £ $ ¥ etc.), printed ISO/code, or merchant location. Default to "${currency}" if unclear.
 - "date": string, ISO date "YYYY-MM-DD". Default to today if unclear.
 - "note": string or null, the merchant name or a short description of the purchase.
 - "type": "expense" or "income". Almost always "expense" for receipts.

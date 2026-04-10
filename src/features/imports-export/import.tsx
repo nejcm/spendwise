@@ -7,7 +7,7 @@ import { useRouter } from 'expo-router';
 
 import * as React from 'react';
 import { ScrollView, View } from 'react-native';
-import { Alert, FormattedCurrency, FormattedDate, Select, SolidButton, Text } from '@/components/ui';
+import { Alert, FormattedCurrency, FormattedDate, GhostButton, Select, SolidButton, Text } from '@/components/ui';
 
 import { translate } from '@/lib/i18n';
 import { OutlineButton } from '../../components/ui/outline-button';
@@ -86,6 +86,7 @@ export type PreviewStepProps = {
   preview: ParsedRow[];
 };
 
+const ITEMS_NUM = 10;
 function PreviewStep({
   preview,
   accounts,
@@ -94,6 +95,8 @@ function PreviewStep({
   onImport,
   importing,
 }: PreviewStepProps) {
+  const [show, setShow] = React.useState(ITEMS_NUM);
+  const hasMore = preview.length > show;
   return (
     <View>
       <Text className="mb-4 text-xl font-medium">
@@ -122,14 +125,14 @@ function PreviewStep({
           </ScrollView>
         </>
       )}
-      {preview.slice(0, 10).map((row) => (
+      {preview.slice(0, show).map((row) => (
         <View
           key={`${row.date}-${row.amount}`}
           className="mb-1 flex-row items-center justify-between rounded-lg bg-card p-2"
         >
           <View className="flex-1">
             <Text className="text-sm font-medium">
-              {row.note || '?'}
+              {row.note || '- No note -'}
             </Text>
             <View className="flex-row items-baseline gap-1">
               <Text className="text-xs text-gray-500">
@@ -147,13 +150,24 @@ function PreviewStep({
           />
         </View>
       ))}
-      {preview.length > 10 && (
-        <Text className="mt-2 text-center text-sm text-gray-500">
-          {translate('import-export.more_rows', { count: preview.length - 10 })}
-        </Text>
-      )}
+      <View className="mt-2 flex-row items-center justify-between gap-4">
+        {preview.length > ITEMS_NUM && (
+          <Text className="text-sm text-muted-foreground">
+            {translate('import-export.more_rows', { count: preview.length - show })}
+          </Text>
+        )}
+        {hasMore && (
+          <GhostButton
+            size="xs"
+            color="secondary"
+            label={translate('common.show_more')}
+            onPress={() => setShow((prev) => prev + ITEMS_NUM)}
+            textClassName="underline"
+          />
+        )}
+      </View>
       <SolidButton
-        className="mt-8"
+        className="mt-10"
         fullWidth
         disabled={!accountId || importing !== undefined}
         label={

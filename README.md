@@ -8,14 +8,14 @@ Spendwise is a personal finance app built with Expo and React Native. The app is
 
 - Onboarding and profile setup (name + avatar)
 - Preferences: theme (system/light/dark) and language
-- Accounts: create/edit/delete, opening balance, monthly budget, balance overview
-- Categories: create/edit/delete, emoji icons, ordering/reorder UI, monthly budgets
-- Transactions: income/expense/transfer, search + filters, detail screen, per-account assignment
+- Accounts: create/edit/delete, opening balance, monthly budget, balance overview, color customization
+- Categories: create/edit/delete, emoji icons, color customization, ordering/reorder UI, monthly budgets
+- Transactions: income/expense/transfer, advanced search + filters (type, account, category, date range), detail screen, per-account assignment
 - Recurring rules (scheduled transactions): create/edit/remove rules, next-due tracking, upcoming bill checks
 - Stats: totals, trends (weekly/monthly breakdown), category breakdowns, top income/expenses
 - Insights: monthly trend + spending by category analytics
 - Import/Export:
-  - CSV import (column mapping + preview) and CSV export
+  - CSV import (column mapping + enhanced preview) and CSV export
   - Full JSON backup export and restore
 - Currencies and formatting:
   - Display currency selection with historical rate recalculation

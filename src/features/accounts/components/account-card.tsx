@@ -3,18 +3,19 @@ import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
 import { FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
-import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
 
+import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
 import { scaleBudgetForPeriod } from '@/lib/date/helpers';
 import { useAppStore } from '@/lib/store';
+import { bgColorOr, hexWithOpacity } from '@/lib/theme/colors';
 import { ACCOUNT_TYPE_LABELS } from '../types';
 
-type Props = {
+export type AccountCardProps = {
   account: AccountWithBalance;
   onPress?: () => void;
 };
 
-export function AccountCard({ account, onPress }: Props) {
+export function AccountCard({ account, onPress }: AccountCardProps) {
   const userCurrency = useAppStore.use.currency();
   const periodSelection = useAppStore.use.periodSelection();
   const scaledBudget = account.budget != null ? scaleBudgetForPeriod(account.budget, periodSelection) : null;
@@ -28,7 +29,12 @@ export function AccountCard({ account, onPress }: Props) {
     >
       <View className="flex-row items-center justify-between gap-3">
         {account.icon && (
-          <Text className="text-3xl">{account.icon}</Text>
+          <View
+            className={`size-12 items-center justify-center rounded-lg ${bgColorOr(account.color)}`}
+            style={{ backgroundColor: hexWithOpacity(account.color, 15) }}
+          >
+            <Text className="text-3xl">{account.icon}</Text>
+          </View>
         )}
         <View className="flex-1">
           <Text className="text-base/snug">{account.name}</Text>

@@ -143,3 +143,26 @@ export const COLOR_OPTIONS = COLORS.map((color) => ({ label: color, value: color
 export function getRandomColor() {
   return COLORS[Math.floor(Math.random() * COLORS.length)];
 }
+
+export function isHexColor(value: Maybe<string>) {
+  return !!value?.startsWith('#');
+}
+
+export function isBgColor(value: Maybe<string>) {
+  return !!value?.startsWith('bg-');
+}
+
+export function bgColorOr(value: Maybe<string>, fallback?: string) {
+  return isBgColor(value) ? value : fallback;
+}
+
+/**
+ * Converts a hex color to a hex color with a given opacity.
+ * @param hex - The hex color to convert (#4a6df3).
+ * @param opacity - The opacity to apply to the hex color (0-99).
+ * @returns The hex color with the given opacity.
+ */
+export function hexWithOpacity(hex: Maybe<string>, opacity: number) {
+  if (!hex || !isHexColor(hex)) return undefined;
+  return `${hex}${opacity}`;
+}

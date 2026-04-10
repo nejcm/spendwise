@@ -15,6 +15,7 @@ import { IconButton } from '@/components/ui/icon-button';
 import { scaleBudgetForPeriod } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
+import { bgColorOr, hexWithOpacity } from '@/lib/theme/colors';
 import { useDeleteCategory } from './hooks';
 
 export type CategoryGridProps = {
@@ -120,7 +121,7 @@ function CategoryCard({ item, currency, periodSelection, onPress, onDeletePress 
   const isMonthView = periodSelection.mode === 'month';
 
   return (
-    <View className="min-h-[86] flex-1 justify-center rounded-xl bg-card">
+    <View className="min-h-[88] flex-1 justify-center rounded-xl bg-card">
       {onDeletePress && (
         <IconButton
           size="sm"
@@ -133,8 +134,10 @@ function CategoryCard({ item, currency, periodSelection, onPress, onDeletePress 
         </IconButton>
       )}
       <Pressable onPress={() => onPress(item)} className="flex-1 justify-center px-3 py-1">
-        <View className="mb-1 flex-row items-center justify-start gap-2">
-          <Text className="text-xl">{emoji}</Text>
+        <View className={`mb-1 flex-row items-center justify-start gap-2 ${bgColorOr(item.category_color)}`}>
+          <View className="size-8.5 items-center justify-center rounded-lg" style={{ backgroundColor: hexWithOpacity(item.category_color, 15) }}>
+            <Text className="text-xl">{emoji}</Text>
+          </View>
           <Text className="w-full text-sm text-muted-foreground" numberOfLines={1}>
             {item.category_name}
           </Text>

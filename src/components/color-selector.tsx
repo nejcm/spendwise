@@ -14,20 +14,15 @@ const sizes: Record<NonNullable<SelectProps['size']>, string> = {
   '2xl': 'size-18',
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
-export function getBgColor(color: string | undefined) {
-  return color?.startsWith('#') ? `bg-[${color}]` : color;
-}
-
 function renderItem(item: OptionType) {
   return (
-    <View className={`size-full min-h-12 max-w-12 flex-1 rounded-full border border-border ${getBgColor(String(item.value))}`} />
+    <View className={`size-full min-h-12 max-w-12 flex-1 rounded-full border border-border ${item.value}`} />
   );
 }
 
 function renderSelectedItem(size: SelectProps['size'] = 'md') {
   return (item: OptionType | null) => (
-    <View className={`rounded-full border border-border ${sizes[size]} ${getBgColor(String(item?.value || DEFAULT_COLOR))}`} />
+    <View className={`rounded-full border border-border ${sizes[size]} ${item?.value || DEFAULT_COLOR}`} />
   );
 }
 

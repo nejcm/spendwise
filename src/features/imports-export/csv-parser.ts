@@ -1,5 +1,6 @@
-import type { CurrencyKey } from '@/features/currencies';
+import type { TransactionType } from '../transactions/types';
 
+import type { CurrencyKey } from '@/features/currencies';
 import { CURRENCY_VALUES } from '@/features/currencies';
 
 const RE_NON_NUMERIC = /[^\d.-]/g;
@@ -71,7 +72,7 @@ export type ParsedRow = {
   amount: number; // cents, positive = income, negative = expense
   note: string;
   currency?: CurrencyKey;
-  type?: 'income' | 'expense' | 'transfer';
+  type?: TransactionType;
   categoryName?: string; // raw name from CSV, resolved to ID at import time
   isDuplicate?: boolean;
 };

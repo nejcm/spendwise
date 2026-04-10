@@ -1,3 +1,4 @@
+import type { TransactionType } from './types';
 import { useDebouncedValue } from '@tanstack/react-pacer';
 import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
@@ -25,6 +26,7 @@ export function TransactionsScreen() {
     wait: 500,
   });
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [typeFilter, setTypeFilter] = useState<TransactionType | null>(null);
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
   const { data: transactions = [], isLoading, refetch } = useTransactions(startDate, endDate);
 
@@ -35,10 +37,11 @@ export function TransactionsScreen() {
     let result = transactions;
     const q = debouncedSearch?.trim().toLowerCase();
     const hasQuery = q.length > 0;
-    if (hasQuery || categoryFilter) {
+    if (hasQuery || categoryFilter || typeFilter) {
       result = result.filter(
         (t) => {
           if (categoryFilter && t.category_id !== categoryFilter) return false;
+          if (typeFilter && t.type !== typeFilter) return false;
           if (hasQuery) return t.note?.toLowerCase().includes(q) || t.category_name?.toLowerCase().includes(q);
           return true;
         },
@@ -46,7 +49,7 @@ export function TransactionsScreen() {
     }
 
     return result;
-  }, [transactions, debouncedSearch, categoryFilter]);
+  }, [transactions, debouncedSearch, categoryFilter, typeFilter]);
 
   return (
     <PeriodSwipeContainer selection={selection}>
@@ -54,7 +57,7 @@ export function TransactionsScreen() {
 
       <PeriodSelector selection={selection} />
 
-      <View className="flex-row items-center gap-2 px-4 pb-2">
+      <View className="flex-row items-center gap-2 px-4">
         <View className={inputClassNames}>
           <Input
             value={search}
@@ -78,7 +81,9 @@ export function TransactionsScreen() {
       </View>
       <TransactionFilterBar
         selectedCategoryId={categoryFilter}
+        selectedType={typeFilter}
         onSelectCategory={setCategoryFilter}
+        onSelectType={setTypeFilter}
       />
       <View className="flex-1">
         <TransactionList transactions={filtered} isLoading={isLoading} onRefresh={() => void refetch()} />

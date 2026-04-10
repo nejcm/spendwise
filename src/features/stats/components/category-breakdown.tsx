@@ -1,5 +1,6 @@
 import type { CurrencyKey } from '../../currencies';
 
+import type { CategoryType } from '../../insights/types';
 import * as React from 'react';
 import { FormattedCurrency, Text, View } from '@/components/ui';
 import { useCategorySpendByRange } from '@/features/insights/api';
@@ -9,7 +10,7 @@ export type CategoryBreakdownProps = {
   startDate: number | undefined;
   endDate: number | undefined;
   currency: CurrencyKey;
-  type: 'expense' | 'income';
+  type: CategoryType;
   limit?: number;
 };
 

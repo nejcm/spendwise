@@ -1,10 +1,12 @@
+export type CategoryType = 'expense' | 'income';
+
 export type CategorySpend = {
   category_id: string;
   category_name: string;
   category_color: string;
   category_icon: string;
   category_budget: number | null;
-  category_type: 'expense' | 'income';
+  category_type: CategoryType;
   sort_order: number;
   total: number;
   income_total: number;

@@ -464,6 +464,8 @@
     "date": "Date",
     "date_required": "Date is required",
     "delete_confirmation": "Are you sure you want to delete this transaction?",
+    "detail_title": "Transaction Details",
+    "edit_title": "Edit Transaction",
     "expense": "Expense",
     "income": "Income",
     "make_recurring": "Make recurring",

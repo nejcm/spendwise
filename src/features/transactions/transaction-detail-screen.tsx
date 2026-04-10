@@ -11,6 +11,7 @@ import { useAccounts } from '@/features/accounts/api';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/local-store';
+import ScreenHeader from '../../components/screen-header';
 import { useDeleteTransaction, useTransaction } from './api';
 import { TransactionForm } from './components/transaction-form';
 
@@ -25,9 +26,13 @@ export function TransactionDetailScreen() {
 
   if (isLoading || !transaction) {
     return (
-      <View className="flex-1 items-center justify-center bg-background">
-        <Text>{translate('common.loading')}</Text>
-      </View>
+      <>
+        <FocusAwareStatusBar />
+        <ScreenHeader title={translate('transactions.detail_title')} />
+        <View className="flex-1 items-center justify-center bg-background">
+          <Text>{translate('common.loading')}</Text>
+        </View>
+      </>
     );
   }
 
@@ -35,6 +40,7 @@ export function TransactionDetailScreen() {
     return (
       <>
         <FocusAwareStatusBar />
+        <ScreenHeader title={translate('transactions.edit_title')} />
         <ScrollView className="flex-1" contentContainerClassName="px-4 py-10">
           <TransactionForm
             initialValues={{ ...transaction, date: unixToISODate(transaction.date) }}
@@ -84,6 +90,7 @@ export function TransactionDetailScreen() {
 
   return (
     <>
+      <ScreenHeader title={translate('transactions.detail_title')} />
       <FocusAwareStatusBar />
       <ScrollView className="flex-1" contentContainerStyle={{ flex: 1 }}>
         <View className="flex-1 px-4 py-10">

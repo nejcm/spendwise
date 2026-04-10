@@ -1,3 +1,4 @@
+import type { TransactionType } from '../../transactions/types';
 import type { Category } from '@/features/categories/types';
 import type { CurrencyKey } from '@/features/currencies';
 import * as z from 'zod';
@@ -13,7 +14,7 @@ export const scannedReceiptSchema = z.object({
   currency: z.enum(CURRENCY_VALUES as CurrencyKey[]).optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).catch(() => todayISO()),
   note: z.string().nullable().catch(null),
-  type: z.enum(['expense', 'income'] as const).catch('expense'),
+  type: z.enum(['expense', 'income'] as TransactionType[]).catch('expense'),
   /** Matched from provided category list, or null if no match. */
   category_id: z.string().optional().catch(undefined),
 });

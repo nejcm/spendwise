@@ -464,6 +464,8 @@
     "date": "Datum",
     "date_required": "Datum ist erforderlich",
     "delete_confirmation": "Möchtest du diese Transaktion wirklich löschen?",
+    "detail_title": "Transaktion Details",
+    "edit_title": "Transaktion bearbeiten",
     "expense": "Ausgabe",
     "income": "Einnahme",
     "make_recurring": "Wiederkehrend machen",

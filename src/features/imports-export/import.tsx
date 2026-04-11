@@ -132,21 +132,21 @@ function PreviewStep({
       )}
       {!!totalSkipped && (
         <View className="mb-3 rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900">
-          <Text className="mb-1 text-sm font-medium text-yellow-800 dark:text-yellow-200">
+          <Text className="mb-1 text-sm font-medium text-yellow-900 dark:text-yellow-100">
             {translate('import-export.skipped_warning', { count: totalSkipped })}
           </Text>
           {skipped.slice(0, MAX_SKIPPED).map((s, i) => (
             <View key={i} className="flex-row items-center justify-between py-0.5">
-              <Text className="flex-1 text-xs text-amber-700 dark:text-amber-300" numberOfLines={1}>
+              <Text className="flex-1 text-xs text-yellow-800 dark:text-yellow-200" numberOfLines={1}>
                 {s.note || '-'}
               </Text>
-              <Text className="ml-2 text-xs font-medium text-amber-700 dark:text-amber-300">
+              <Text className="ml-2 text-xs font-medium text-yellow-800 dark:text-yellow-200">
                 {s.rawCurrency}
               </Text>
             </View>
           ))}
           {totalSkipped > MAX_SKIPPED && (
-            <Text className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+            <Text className="mt-1 text-xs text-yellow-700 dark:text-yellow-500">
               {translate('import-export.skipped_more', { count: totalSkipped - MAX_SKIPPED })}
             </Text>
           )}

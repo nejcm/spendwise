@@ -237,6 +237,8 @@
     "rows": "Zeilen",
     "select_account": "Konto auswählen",
     "skip_column": "Spalte überspringen",
+    "skipped_more": "+{{count}} weitere",
+    "skipped_warning": "{{count}} Zeilen übersprungen — nicht unterstützte Währungen:",
     "title": "Import/Export"
   },
   "insights": {

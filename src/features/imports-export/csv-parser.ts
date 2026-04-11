@@ -2,6 +2,7 @@ import type { TransactionType } from '../transactions/types';
 
 import type { CurrencyKey } from '@/features/currencies';
 import { CURRENCY_VALUES } from '@/features/currencies';
+import { DEFAULT_USER_CURRENCY } from '../../config';
 
 const RE_NON_NUMERIC = /[^\d.-]/g;
 const RE_ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -77,23 +78,34 @@ export type ParsedRow = {
   isDuplicate?: boolean;
 };
 
+export type SkippedRow = {
+  date: string;
+  amount: number;
+  note: string;
+  rawCurrency: string;
+};
+
+export type MapRowsResult = {
+  rows: ParsedRow[];
+  skipped: SkippedRow[];
+};
+
 /**
  * Convert raw CSV rows to ParsedRow[] using column mapping.
  * Handles both signed amounts (negative = expense) and type columns.
+ * Rows with a mapped but unrecognized currency are skipped and returned separately.
  */
-export function mapRows(rows: string[][], mapping: ColumnMapping, hasHeader: boolean): ParsedRow[] {
+export function mapRows(rows: string[][], mapping: ColumnMapping, hasHeader: boolean): MapRowsResult {
   const dataRows = hasHeader ? rows.slice(1) : rows;
   const parsed: ParsedRow[] = [];
+  const skipped: SkippedRow[] = [];
 
   for (const row of dataRows) {
     const rawDate = mapping.date !== null ? (row[mapping.date] ?? '') : '';
     const rawAmount = mapping.amount !== null ? (row[mapping.amount] ?? '') : '';
     const rawNote = mapping.note !== null ? (row[mapping.note] ?? '') : '';
     const rawType = mapping.type !== null ? (row[mapping.type] ?? '') : '';
-
-    if (!rawDate || !rawAmount) {
-      continue;
-    }
+    if (!rawDate || !rawAmount) continue;
 
     const numericAmount = Number.parseFloat(rawAmount.replaceAll(RE_NON_NUMERIC, ''));
     if (Number.isNaN(numericAmount)) {
@@ -123,12 +135,15 @@ export function mapRows(rows: string[][], mapping: ColumnMapping, hasHeader: boo
       amountCents = -amountCents;
     }
 
-    const rawCurrency = mapping.currency !== null
-      ? (row[mapping.currency] ?? '').trim().toUpperCase()
-      : '';
-    const currency = (CURRENCY_VALUES as string[]).includes(rawCurrency)
-      ? (rawCurrency as CurrencyKey)
-      : undefined;
+    const rawCurrency = mapping.currency ? (row[mapping.currency] ?? '').trim().toUpperCase() : '';
+    const currencyKnown = CURRENCY_VALUES.includes(rawCurrency as CurrencyKey);
+    const currency = currencyKnown ? (rawCurrency as CurrencyKey) : undefined;
+
+    // Skip rows where a currency column is mapped, a value is present, but it's not recognized
+    if (!currency && rawCurrency !== '') {
+      skipped.push({ date: normalizeDate(rawDate), amount: amountCents, note: rawNote, rawCurrency });
+      continue;
+    }
 
     // Category name
     const rawCategory = mapping.category !== null ? (row[mapping.category] ?? '').trim() : '';
@@ -138,12 +153,12 @@ export function mapRows(rows: string[][], mapping: ColumnMapping, hasHeader: boo
       amount: amountCents,
       note: rawNote,
       type,
-      currency,
+      currency: currency ?? DEFAULT_USER_CURRENCY,
       ...(rawCategory && { categoryName: rawCategory }),
     });
   }
 
-  return parsed;
+  return { rows: parsed, skipped };
 }
 
 function normalizeDate(raw: string): string {

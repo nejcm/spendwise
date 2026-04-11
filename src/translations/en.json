@@ -237,6 +237,8 @@
     "rows": "rows",
     "select_account": "Select Account",
     "skip_column": "Skip Column",
+    "skipped_more": "+{{count}} more",
+    "skipped_warning": "{{count}} rows skipped — unsupported currencies:",
     "title": "Import/Export"
   },
   "insights": {

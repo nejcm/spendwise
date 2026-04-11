@@ -1,7 +1,7 @@
 import type { Account } from '../accounts/types';
 
 import type { TransactionFormData } from '../transactions/types';
-import type { ColumnMapping, ParsedRow } from './csv-parser';
+import type { ColumnMapping, ParsedRow, SkippedRow } from './csv-parser';
 
 import { useRouter } from 'expo-router';
 
@@ -17,6 +17,7 @@ import { useAccounts } from '../accounts/api';
 import { useCategories } from '../categories/api';
 import { useCreateTransactions } from '../transactions/api';
 import { mapRows } from './csv-parser';
+
 import { mapCategoryNameToId } from './helpers';
 
 type Step = 'map' | 'preview';
@@ -84,9 +85,11 @@ export type PreviewStepProps = {
   onAccountSelect: (id: string) => void;
   onImport: () => void;
   preview: ParsedRow[];
+  skipped: SkippedRow[];
 };
 
 const ITEMS_NUM = 10;
+const MAX_SKIPPED = 5;
 function PreviewStep({
   preview,
   accounts,
@@ -94,9 +97,11 @@ function PreviewStep({
   onAccountSelect,
   onImport,
   importing,
+  skipped,
 }: PreviewStepProps) {
   const [show, setShow] = React.useState(ITEMS_NUM);
   const hasMore = preview.length > show;
+  const totalSkipped = skipped.length;
   return (
     <View>
       <Text className="mb-4 text-xl font-medium">
@@ -124,6 +129,28 @@ function PreviewStep({
             </View>
           </ScrollView>
         </>
+      )}
+      {!!totalSkipped && (
+        <View className="mb-3 rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900">
+          <Text className="mb-1 text-sm font-medium text-yellow-800 dark:text-yellow-200">
+            {translate('import-export.skipped_warning', { count: totalSkipped })}
+          </Text>
+          {skipped.slice(0, MAX_SKIPPED).map((s, i) => (
+            <View key={i} className="flex-row items-center justify-between py-0.5">
+              <Text className="flex-1 text-xs text-amber-700 dark:text-amber-300" numberOfLines={1}>
+                {s.note || '-'}
+              </Text>
+              <Text className="ml-2 text-xs font-medium text-amber-700 dark:text-amber-300">
+                {s.rawCurrency}
+              </Text>
+            </View>
+          ))}
+          {totalSkipped > MAX_SKIPPED && (
+            <Text className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+              {translate('import-export.skipped_more', { count: totalSkipped - MAX_SKIPPED })}
+            </Text>
+          )}
+        </View>
       )}
       {preview.slice(0, show).map((row) => (
         <View
@@ -200,6 +227,7 @@ export default function Import({ state, setMapping, onClose }: ImportProps) {
   const [step, setStep] = React.useState<Step>('map');
   const [importing, setImporting] = React.useState<number | undefined>(undefined);
   const [preview, setPreview] = React.useState<ParsedRow[]>([]);
+  const [skippedCurrencies, setSkippedCurrencies] = React.useState<SkippedRow[]>([]);
   const [accountId, setAccountId] = React.useState<string>(accounts[0]?.id ?? '');
   const createTransactions = useCreateTransactions();
 
@@ -238,7 +266,9 @@ export default function Import({ state, setMapping, onClose }: ImportProps) {
       Alert.alert(translate('common.error'), translate('import-export.date_amount_required'));
       return;
     }
-    setPreview(mapRows(allRows, mapping, true));
+    const result = mapRows(allRows, mapping, true);
+    setPreview(result.rows);
+    setSkippedCurrencies(result.skipped);
     setStep('preview');
   };
 
@@ -258,6 +288,7 @@ export default function Import({ state, setMapping, onClose }: ImportProps) {
           accounts={accounts}
           importing={importing}
           preview={preview}
+          skipped={skippedCurrencies}
           onAccountSelect={setAccountId}
           onImport={runImport}
         />

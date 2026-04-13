@@ -66,7 +66,7 @@ function Label({ text, testID, className = '' }: LabelProps) {
 }
 
 export function CheckboxIcon({ checked = false, size = 'md' }: IconProps) {
-  const background = String(useCSSVariable('--color-background'));
+  const background = String(useCSSVariable('--color-background') ?? '#000');
   const SIZE = checkboxSizes[size];
   return (
     <View
@@ -118,8 +118,8 @@ export const Checkbox = Object.assign(CheckboxBase, {
 });
 
 export function RadioIcon({ checked = false, size = 'md' }: IconProps) {
-  const foreground = useCSSVariable('--color-foreground');
-  const background = useCSSVariable('--color-gray-400');
+  const foreground = useCSSVariable('--color-foreground') ?? '#000000';
+  const background = useCSSVariable('--color-gray-400') ?? '#CCCFD6';
   const color = checked ? String(foreground) : String(background);
   const SIZE = checkboxSizes[size];
   return (
@@ -172,9 +172,9 @@ export const Radio = Object.assign(RadioBase, {
 export function SwitchIcon({ checked = false }: IconProps) {
   const translateX = checked ? THUMB_OFFSET : WIDTH - THUMB_WIDTH - THUMB_OFFSET;
 
-  const foreground = useCSSVariable('--color-foreground');
-  const background = useCSSVariable('--color-gray-400');
-  const thumbColor = useCSSVariable('--color-surface');
+  const foreground = useCSSVariable('--color-foreground') ?? '#000000';
+  const background = useCSSVariable('--color-gray-400') ?? '#CCCFD6';
+  const thumbColor = useCSSVariable('--color-surface') ?? '#FFFFFF';
   const backgroundColor = checked ? String(foreground) : String(background);
 
   return (

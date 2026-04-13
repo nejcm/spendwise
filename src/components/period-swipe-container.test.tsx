@@ -28,6 +28,7 @@ const mockSetPeriodSelection = jest.fn();
 
 jest.mock('@/lib/date/helpers', () => ({
   navigatePeriod: (...args: unknown[]) => mockNavigatePeriod(...args),
+  isNavigablePeriodMode: (mode: string) => mode !== 'all' && mode !== 'custom' && mode !== 'today',
 }));
 
 jest.mock('@/lib/store', () => ({
@@ -171,5 +172,40 @@ describe('periodSwipeContainer', () => {
     expect(latestPanGesture?.runOnJS).toHaveBeenCalledWith(true);
     expect(mockNavigatePeriod).not.toHaveBeenCalled();
     expect(mockSetPeriodSelection).not.toHaveBeenCalled();
+  });
+
+  it('ignores swipes when today mode is selected', () => {
+    renderContainer({ mode: 'today' });
+    endPan({ translationX: -60 });
+
+    expect(mockNavigatePeriod).not.toHaveBeenCalled();
+    expect(mockSetPeriodSelection).not.toHaveBeenCalled();
+  });
+
+  it('navigates forward on left swipe when this-week mode is selected', () => {
+    const selection: PeriodSelection = { mode: 'this-week' };
+    renderContainer(selection);
+    endPan({ translationX: -60 });
+
+    expect(mockNavigatePeriod).toHaveBeenCalledWith(selection, 1);
+    expect(mockSetPeriodSelection).toHaveBeenCalled();
+  });
+
+  it('navigates backward on right swipe when this-month mode is selected', () => {
+    const selection: PeriodSelection = { mode: 'this-month' };
+    renderContainer(selection);
+    endPan({ translationX: 60 });
+
+    expect(mockNavigatePeriod).toHaveBeenCalledWith(selection, -1);
+    expect(mockSetPeriodSelection).toHaveBeenCalled();
+  });
+
+  it('navigates forward on left swipe when this-year mode is selected', () => {
+    const selection: PeriodSelection = { mode: 'this-year' };
+    renderContainer(selection);
+    endPan({ translationX: -60 });
+
+    expect(mockNavigatePeriod).toHaveBeenCalledWith(selection, 1);
+    expect(mockSetPeriodSelection).toHaveBeenCalled();
   });
 });

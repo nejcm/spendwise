@@ -1,19 +1,19 @@
-import { useQueryClient } from '@tanstack/react-query';
 import Env from 'env';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
+import * as React from 'react';
 
-import { FocusAwareStatusBar, Image, ScrollView, Text, View } from '@/components/ui';
+import { FocusAwareStatusBar, Image, ScrollView, Text, useModalSheet, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
-import { ALargeSmall, Banknote, Bell, Bot, BotMessageSquare, Database, DatabaseBackupIcon, DatabaseZap, HelpCircle, Import, LayoutGrid, Link, ListChecks, PieChart, Printer, RefreshCcw, ScanLine, Settings, Share, Shield, User } from '@/components/ui/icon';
+import { ALargeSmall, Banknote, Bell, Bot, BotMessageSquare, DatabaseZap, HelpCircle, Import, LayoutGrid, Link, ListChecks, PieChart, RefreshCcw, ScanLine, Settings, Share, Shield, User } from '@/components/ui/icon';
 import { config } from '@/config';
-import { clearData, clearTransactionsData, dumpDbTables, resetDb, seedData, seedMockData } from '@/lib/dev';
 import { triggerScanPicker } from '@/lib/local-store';
 import { selectProfile, useAppStore } from '@/lib/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { getAvatar } from '../profile';
 import { CurrencyItem } from './components/currency-item';
+import { DeleteDataSheet } from './components/delete-data-sheet';
+import DevSection from './components/dev-section';
 import { LanguageItem } from './components/language-item';
 import { SettingsContainer } from './components/settings-container';
 import { SettingsItem } from './components/settings-item';
@@ -24,8 +24,7 @@ const iconColor = 'text-foreground';
 export function SettingsScreen() {
   const router = useRouter();
   const profile = useAppStore(selectProfile);
-  const db = useSQLiteContext();
-  const queryClient = useQueryClient();
+  const deleteModal = useModalSheet();
 
   return (
     <>
@@ -112,6 +111,11 @@ export function SettingsScreen() {
               text="settings.import"
               onPress={() => router.push('/settings/import-export')}
             />
+            <SettingsItem
+              text="settings.delete_data"
+              icon={<DatabaseZap className={iconColor} size={20} />}
+              onPress={() => deleteModal.present()}
+            />
             <LanguageItem />
             <CurrencyItem />
             <ThemeItem />
@@ -143,24 +147,10 @@ export function SettingsScreen() {
               onPress={() => router.push('/settings/terms')}
             />
           </SettingsContainer>
-
-          {Env.EXPO_PUBLIC_APP_ENV === 'development' && (
-            <SettingsContainer title="settings.dev">
-              <SettingsItem text="settings.reset" icon={<DatabaseBackupIcon className={iconColor} size={20} />} onPress={() => resetDb(db, queryClient)} />
-              <SettingsItem text="settings.clear" icon={<DatabaseZap className={iconColor} size={20} />} onPress={() => clearData(db, queryClient)} />
-              <SettingsItem text="settings.clear_transactions" icon={<DatabaseZap className={iconColor} size={20} />} onPress={() => clearTransactionsData(db, queryClient)} />
-              <SettingsItem text="settings.seed" icon={<DatabaseZap className={iconColor} size={20} />} onPress={() => seedData(db, queryClient)} />
-              <SettingsItem
-                text="settings.mock_data"
-                icon={<Database className={iconColor} size={20} />}
-                onPress={() => seedMockData(db, queryClient)}
-              />
-              <SettingsItem text="settings.dump_db" icon={<Printer className={iconColor} size={20} />} onPress={() => dumpDbTables(db)} />
-            </SettingsContainer>
-          )}
-
+          <DevSection />
         </View>
       </ScrollView>
+      <DeleteDataSheet ref={deleteModal.ref} />
     </>
   );
 }

@@ -10,7 +10,8 @@
  */
 import Database from 'better-sqlite3';
 
-import { clearDbData, migrateDb } from '@/lib/sqlite/migrations';
+import { clearDbData } from '@/lib/sqlite/db';
+import { migrateDb } from '@/lib/sqlite/migrations';
 
 export type TestDb = Awaited<ReturnType<typeof createTestDb>>;
 

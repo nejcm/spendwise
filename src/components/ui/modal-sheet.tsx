@@ -16,7 +16,7 @@ export type ModalSheetProps = BottomSheetModalProps & {
   title?: React.ReactNode;
 };
 
-type ModalSheetRef<T> = React.ForwardedRef<BottomSheetModal<T>>;
+export type ModalSheetRef<T> = React.ForwardedRef<BottomSheetModal<T>>;
 
 export type ModalSheetHeaderProps = {
   title?: React.ReactNode;

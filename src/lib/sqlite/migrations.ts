@@ -4,47 +4,6 @@ import { seedDefaults } from './seed';
 const DATABASE_VERSION = 1;
 
 /**
- * Clears all data from the database.
- */
-export async function clearDbData(db: SQLiteDatabase): Promise<void> {
-  await db.execAsync(`
-    PRAGMA foreign_keys = OFF;
-    DELETE FROM recurring_rule_runs;
-    DELETE FROM recurring_rules;
-    DELETE FROM transactions;
-    DELETE FROM accounts;
-    DELETE FROM categories;
-    DELETE FROM currency_rates;
-    PRAGMA foreign_keys = ON;
-  `);
-};
-
-/**
- * Clears all transactions from the database.
- */
-export async function clearTransactionsDb(db: SQLiteDatabase): Promise<void> {
-  await db.execAsync(`
-    DELETE FROM transactions;
-  `);
-}
-
-/**
- * Drops all tables and sets the user version to 0.
- */
-export async function dropDb(db: SQLiteDatabase): Promise<void> {
-  await db.execAsync(`
-    DROP TABLE IF EXISTS _meta;
-    DROP TABLE IF EXISTS accounts;
-    DROP TABLE IF EXISTS categories;
-    DROP TABLE IF EXISTS transactions;
-    DROP TABLE IF EXISTS recurring_rules;
-    DROP TABLE IF EXISTS recurring_rule_runs;
-    DROP TABLE IF EXISTS currency_rates;
-  `);
-  await db.execAsync(`PRAGMA user_version = 0`);
-}
-
-/**
  * Runs on first open. Sets WAL mode and runs schema migrations via PRAGMA user_version.
  * Bump DATABASE_VERSION and add a migration block when you change the schema.
  */

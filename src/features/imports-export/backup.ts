@@ -3,7 +3,7 @@ import type { Account } from '../accounts/types';
 import type { Category } from '../categories/types';
 import type { ScheduledTransaction, ScheduledTransactionRun } from '../scheduled-transactions/types';
 import type { Transaction } from '../transactions/types';
-import { clearDbData } from '@/lib/sqlite/migrations';
+import { clearDbData } from '@/lib/sqlite/db';
 
 export type BackupData = {
   version: 1;

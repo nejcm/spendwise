@@ -50,7 +50,6 @@ type LabelProps = {
   className?: string;
   testID?: string;
 };
-
 function Label({ text, testID, className = '' }: LabelProps) {
   return (
     <Text testID={testID} className={`${className} pl-2`}>
@@ -58,6 +57,11 @@ function Label({ text, testID, className = '' }: LabelProps) {
     </Text>
   );
 }
+
+const transition = {
+  backgroundColor: { type: 'timing', duration: 100 },
+  borderColor: { type: 'timing', duration: 100 },
+} as const;
 
 export function CheckboxIcon({ checked = false }: IconProps) {
   const checkedColor = useCSSVariable('--color-foreground');
@@ -68,18 +72,15 @@ export function CheckboxIcon({ checked = false }: IconProps) {
       style={{
         height: SIZE,
         width: SIZE,
-        borderColor: (color),
+        borderColor: color,
       }}
       className="items-center justify-center rounded-md border-2"
       from={{ backgroundColor: 'transparent', borderColor: '#CCCFD6' }}
       animate={{
-        backgroundColor: checked ? (color) : 'transparent',
-        borderColor: (color),
+        backgroundColor: checked ? color : 'transparent',
+        borderColor: color,
       }}
-      transition={{
-        backgroundColor: { type: 'timing', duration: 100 },
-        borderColor: { type: 'timing', duration: 100 },
-      }}
+      transition={transition}
     >
       <MotiView
         from={{ opacity: 0 }}

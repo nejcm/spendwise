@@ -112,7 +112,7 @@
     "name": "Name",
     "net": "Netto",
     "next": "Weiter",
-    "next_on": "Nächster am",
+    "next_on": "Nächster am {{date}}",
     "no": "Nein",
     "no_data": "Keine Daten gefunden",
     "none": "Keine",

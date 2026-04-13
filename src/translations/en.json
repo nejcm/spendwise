@@ -112,7 +112,7 @@
     "name": "Name",
     "net": "Net",
     "next": "Next",
-    "next_on": "Next on",
+    "next_on": "Next on {{date}}",
     "no": "No",
     "no_data": "No data found",
     "none": "None",

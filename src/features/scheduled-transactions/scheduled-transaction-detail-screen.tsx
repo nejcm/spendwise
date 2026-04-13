@@ -134,17 +134,16 @@ export function ScheduledTransactionDetailScreen() {
         />
 
         <View className="mb-6 justify-center">
-          <OutlineButton
+          <GhostButton
             label={translate('common.delete')}
             color="danger"
             onPress={handleDelete}
-            className="rounded-3xl px-6"
-            size="sm"
+            fullWidth
           />
         </View>
 
         <View className="flex-row gap-2">
-          <GhostButton
+          <OutlineButton
             color="secondary"
             label={translate('common.back')}
             onPress={() => router.back()}

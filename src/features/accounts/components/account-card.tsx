@@ -31,7 +31,7 @@ export function AccountCard({ account, onPress }: AccountCardProps) {
         {account.icon && (
           <View
             className={`size-12 items-center justify-center rounded-lg ${bgColorOr(account.color)}`}
-            style={{ backgroundColor: hexWithOpacity(account.color, 30) }}
+            style={{ backgroundColor: hexWithOpacity(account.color, 26) }}
           >
             <Text className="text-3xl">{account.icon}</Text>
           </View>

@@ -12,11 +12,12 @@ export type BudgetProgressBarProps = {
   monthlyBudget?: number; // cents (raw monthly amount — shows /mo hint when period ≠ month)
   currency?: CurrencyKey; // required when monthlyBudget is set
   className?: string;
+  showPercentage?: boolean;
   showValues?: boolean;
   bg?: string;
 };
 
-export function BudgetProgressBar({ spent, budget, monthlyBudget, currency, className, showValues = true, bg = 'bg-gray-300 dark:bg-gray-700' }: BudgetProgressBarProps) {
+export function BudgetProgressBar({ spent, budget, monthlyBudget, currency, className, showValues = false, showPercentage = true, bg = 'bg-gray-300 dark:bg-gray-700' }: BudgetProgressBarProps) {
   const numberFormat = useAppStore.use.numberFormat();
   const currencyFormat = useAppStore.use.currencyFormat();
 
@@ -39,10 +40,9 @@ export function BudgetProgressBar({ spent, budget, monthlyBudget, currency, clas
           style={{ width: `${percentage}%` }}
         />
       </View>
-      {showValues && (
+      {(!!showPercentage || !!showValues) && (
         <Text className="text-xs/tight text-muted-foreground">
-          {percentage.toFixed(0)}
-          %
+          {!!showPercentage && `${percentage.toFixed(0)}%`}
           {monthlyHint}
         </Text>
       )}

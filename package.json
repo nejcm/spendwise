@@ -1,6 +1,6 @@
 {
   "name": "spendwise",
-  "version": "0.0.25",
+  "version": "0.0.27",
   "private": true,
   "packageManager": "pnpm@10.12.3",
   "repository": {

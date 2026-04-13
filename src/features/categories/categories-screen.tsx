@@ -44,7 +44,21 @@ export function CategoriesScreen() {
   return (
     <PeriodSwipeContainer selection={selection}>
       <FocusAwareStatusBar />
-      <View className="flex-row items-center justify-between px-4 pt-2">
+      {isEditMode
+        ? (
+            <View className="flex-row items-center justify-center gap-2 py-4.5">
+              <FileWarning className="text-warning-500" size={16} />
+              <Text className="text-sm text-warning-500">
+                {translate('categories.edit_mode')}
+              </Text>
+            </View>
+          )
+        : (
+            <PeriodSelector
+              selection={selection}
+            />
+          )}
+      <View className="flex-row items-center justify-between px-4 pb-3">
         <View className="w-8"></View>
         <Pressable
           onPress={() => router.navigate('/stats')}
@@ -61,21 +75,6 @@ export function CategoriesScreen() {
           <EditIcon className="text-muted-foreground" size={16} />
         </IconButton>
       </View>
-      {isEditMode
-        ? (
-            <View className="flex-row items-center justify-center gap-2 py-3.5">
-              <FileWarning className="text-warning-500" size={16} />
-              <Text className="text-sm text-warning-500">
-                {translate('categories.edit_mode')}
-              </Text>
-            </View>
-          )
-        : (
-            <PeriodSelector
-              selection={selection}
-              className="pt-2"
-            />
-          )}
       {isLoading
         ? (
             <SkeletonGrid className="px-4 pt-2" cols={2} rows={3} />

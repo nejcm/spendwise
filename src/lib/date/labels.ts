@@ -25,5 +25,7 @@ export function getPeriodLabel(selection: PeriodSelection): string {
     }
     case 'all':
       return translate('common.all-time');
+    default:
+      return translate(`common.${selection.mode}`);
   }
 }

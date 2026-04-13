@@ -5,7 +5,7 @@ import { cn } from 'tailwind-variants';
 import { Text, useModalSheet } from '@/components/ui';
 import { ArrowLeftIcon, ArrowRightIcon } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
-import { navigatePeriod } from '@/lib/date/helpers';
+import { isNavigablePeriodMode, navigatePeriod } from '@/lib/date/helpers';
 import { getPeriodLabel } from '@/lib/date/labels';
 import { setPeriodSelection } from '@/lib/store';
 import { PeriodSelectorModal } from './period-selector-modal';
@@ -17,19 +17,20 @@ export type PeriodSelectorProps = {
 
 export function PeriodSelector({ selection, className }: PeriodSelectorProps) {
   const { ref, present } = useModalSheet();
-  const isAll = selection.mode === 'all';
+  const isFixed = !isNavigablePeriodMode(selection.mode);
+  const iconColor = `text-muted-foreground ${isFixed ? 'opacity-50' : ''}`;
 
   return (
     <>
       <View className={cn('flex-row items-center justify-between px-4 py-3', className)}>
-        <IconButton size="sm" color="none" disabled={isAll} onPress={() => setPeriodSelection(navigatePeriod(selection, -1))} hitSlop={12}>
-          <ArrowLeftIcon className="text-muted-foreground" size={20} />
+        <IconButton size="sm" color="none" disabled={isFixed} onPress={() => setPeriodSelection(navigatePeriod(selection, -1))} hitSlop={12}>
+          <ArrowLeftIcon className={iconColor} size={20} />
         </IconButton>
         <Pressable onPress={present} hitSlop={12}>
           <Text className="text-lg font-medium">{getPeriodLabel(selection)}</Text>
         </Pressable>
-        <IconButton size="sm" color="none" disabled={isAll} onPress={() => setPeriodSelection(navigatePeriod(selection, 1))} hitSlop={12}>
-          <ArrowRightIcon className="text-muted-foreground" size={20} />
+        <IconButton size="sm" color="none" disabled={isFixed} onPress={() => setPeriodSelection(navigatePeriod(selection, 1))} hitSlop={12}>
+          <ArrowRightIcon className={iconColor} size={20} />
         </IconButton>
       </View>
       <PeriodSelectorModal ref={ref} selection={selection} />

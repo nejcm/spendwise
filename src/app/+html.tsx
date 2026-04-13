@@ -9,6 +9,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
+        <title>Spendwise</title>
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
 
         {/*

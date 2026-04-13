@@ -40,14 +40,16 @@ export function StatsTrend({ period, startDate, endDate }: StatsTrendProps) {
     }
 
     const availableWidth = screenWidth - 104;
-    const targetBarWidth = period === 'year' ? 8 : period === 'week' ? 12 : 24;
-    const minSpacing = period === 'week' ? 10 : 8;
+    const isYearLike = period === 'year' || period === 'this-year';
+    const isWeekLike = period === 'week' || period === 'this-week' || period === 'today';
+    const targetBarWidth = isYearLike ? 8 : isWeekLike ? 12 : 24;
+    const minSpacing = isWeekLike ? 10 : 8;
     const computedSpacing = Math.max(
       minSpacing,
       Math.floor(availableWidth / groupCount - 2 * targetBarWidth - PAIR_GAP),
     );
     const labelWidth = 2 * targetBarWidth + PAIR_GAP;
-    const labelFontSize = period === 'year' ? 9 : groupCount > 7 ? 8 : 10;
+    const labelFontSize = isYearLike ? 9 : groupCount > 7 ? 8 : 10;
 
     const data = sourceData.flatMap((point) => [
       {

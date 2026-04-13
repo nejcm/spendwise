@@ -2,7 +2,7 @@ import type { PeriodSelection } from '@/lib/store';
 import * as React from 'react';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
-import { navigatePeriod } from '@/lib/date/helpers';
+import { isNavigablePeriodMode, navigatePeriod } from '@/lib/date/helpers';
 import { setPeriodSelection } from '@/lib/store';
 
 export type PeriodSwipeContainerProps = {
@@ -11,7 +11,7 @@ export type PeriodSwipeContainerProps = {
 };
 
 export function PeriodSwipeContainer({ selection, children }: PeriodSwipeContainerProps) {
-  const isAll = selection.mode === 'all';
+  const isFixed = !isNavigablePeriodMode(selection.mode);
   const translateX = useSharedValue(0);
   const opacity = useSharedValue(1);
 
@@ -20,14 +20,14 @@ export function PeriodSwipeContainer({ selection, children }: PeriodSwipeContain
     .failOffsetY([-10, 10])
     .runOnJS(true)
     .onUpdate((event) => {
-      if (isAll) return;
+      if (isFixed) return;
       translateX.value = Math.max(-12, Math.min(12, event.translationX * 0.2));
       opacity.value = Math.max(0.7, 1 - Math.abs(event.translationX) / 300);
     })
     .onEnd((event) => {
       translateX.value = withSpring(0, { damping: 20, stiffness: 300 });
       opacity.value = withTiming(1, { duration: 80 });
-      if (isAll) return;
+      if (isFixed) return;
       if (event.translationX < -50) {
         setPeriodSelection(navigatePeriod(selection, 1));
       }

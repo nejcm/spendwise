@@ -22,14 +22,31 @@ export type TokenType = {
 
 export type ColorThemeType = 'red' | 'blue' | 'green' | 'purple' | 'orange' | 'black' | 'white';
 
-export type PeriodMode = 'year' | 'month' | 'week' | 'custom' | 'all';
+export type PeriodMode = 'year' | 'month' | 'week' | 'custom' | 'all' | 'today' | 'this-week' | 'this-month' | 'this-year';
 
 export type PeriodSelectionYear = { mode: 'year'; year: number };
 export type PeriodSelectionMonth = { mode: 'month'; year: number; month: number };
 export type PeriodSelectionWeek = { mode: 'week'; year: number; week: number };
 export type PeriodSelectionCustom = { mode: 'custom'; startDate: string; endDate: string };
 export type PeriodSelectionAll = { mode: 'all' };
-export type PeriodSelection = PeriodSelectionYear | PeriodSelectionMonth | PeriodSelectionWeek | PeriodSelectionCustom | PeriodSelectionAll;
+export type PeriodSelectionToday = { mode: 'today' };
+export type PeriodSelectionThisWeek = { mode: 'this-week' };
+export type PeriodSelectionThisMonth = { mode: 'this-month' };
+export type PeriodSelectionThisYear = { mode: 'this-year' };
+export type PeriodSelection
+  = | PeriodSelectionYear
+    | PeriodSelectionMonth
+    | PeriodSelectionWeek
+    | PeriodSelectionCustom
+    | PeriodSelectionAll
+    | PeriodSelectionToday
+    | PeriodSelectionThisWeek
+    | PeriodSelectionThisMonth
+    | PeriodSelectionThisYear;
+
+export const DYNAMIC_PERIOD_MODES = ['today', 'this-week', 'this-month', 'this-year'] as const satisfies PeriodMode[];
+
+export type DynamicPeriodMode = typeof DYNAMIC_PERIOD_MODES[number];
 
 export type AutoBackupSettings = {
   enabled: boolean;

@@ -1,16 +1,17 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
-import type { PeriodMode, PeriodSelection } from '@/lib/store';
+import type { DynamicPeriodMode, PeriodMode, PeriodSelection } from '@/lib/store';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { format } from 'date-fns';
 import * as React from 'react';
 import { View } from 'react-native';
-import { ModalSheet, SolidButton, Text, useModalSheet } from '@/components/ui';
+import { ModalSheet, OutlineButton, SolidButton, Text, useModalSheet } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { ArrowLeftIcon, ArrowRightIcon } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
-import { currentISOWeek, getWeeksInYear } from '@/lib/date/helpers';
+import { currentISOWeek, getWeeksInYear, isDynamicPeriodMode } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { setPeriodSelection } from '@/lib/store';
+
 import { todayISO } from '../features/formatting/helpers';
 import { GhostButton } from './ui/ghost-button';
 
@@ -40,6 +41,13 @@ const MODES: { key: PeriodMode; label: string }[] = [
   { key: 'all', label: 'All' },
 ];
 
+const QUICK_MODES: { key: DynamicPeriodMode; label: string }[] = [
+  { key: 'today', label: translate('common.today') },
+  { key: 'this-week', label: translate('common.this-week') },
+  { key: 'this-month', label: translate('common.this-month') },
+  { key: 'this-year', label: translate('common.this-year') },
+];
+
 export type PeriodSelectorModalProps = {
   selection: PeriodSelection;
 };
@@ -47,6 +55,8 @@ export type PeriodSelectorModalProps = {
 function defaultDraftFor(selection: PeriodSelection): PeriodSelection {
   return selection;
 }
+
+const MODE_BUTTONS = [...QUICK_MODES, ...MODES];
 
 export function PeriodSelectorModal({
   ref,
@@ -104,26 +114,32 @@ export function PeriodSelectorModal({
       case 'all':
         setDraft({ mode: 'all' });
         break;
+      case 'today':
+      case 'this-week':
+      case 'this-month':
+      case 'this-year':
+        setDraft({ mode });
+        break;
     }
   }, [draft]);
 
   return (
     <ModalSheet ref={modal.ref} title="Select Period" snapPoints={['75%']}>
-      <View className="flex-1 px-4 pt-2">
-        <View className="mb-4 flex-row gap-1">
-          {MODES.map(({ key, label }) => (
-            <SolidButton
-              key={key}
-              className="flex-1 items-center rounded-3xl px-2"
-              color={draft.mode === key ? 'secondary' : 'primary-alt'}
-              textClassName={draft.mode === key ? 'text-foreground' : 'text-muted-foreground'}
-              size="sm"
-              label={label}
-              onPress={() => switchMode(key)}
-            />
+      <View className="flex-1 gap-8 px-4 pt-2">
+        <View className="flex-row flex-wrap gap-2">
+          {MODE_BUTTONS.map(({ key, label }) => (
+            <View className="min-w-[30%] flex-1 grow" key={key}>
+              <OutlineButton
+                className={`items-center px-3 ${draft.mode === key ? '' : 'border-border'}`}
+                color="primary"
+                textClassName={`text-sm ${draft.mode === key ? '' : 'text-muted-foreground'}`}
+                fullWidth
+                label={label}
+                onPress={() => switchMode(key)}
+              />
+            </View>
           ))}
         </View>
-
         <View className="flex-1">
           {draft.mode === 'year' && (
             <YearBody
@@ -162,6 +178,11 @@ export function PeriodSelectorModal({
           {draft.mode === 'all' && (
             <View className="flex-1 items-center justify-center">
               <Text className="text-muted-foreground">{translate('common.all-data-shown')}</Text>
+            </View>
+          )}
+          {isDynamicPeriodMode(draft.mode) && (
+            <View className="flex-1 items-center justify-center">
+              <Text className="text-muted-foreground">{translate('common.always-current-period')}</Text>
             </View>
           )}
         </View>

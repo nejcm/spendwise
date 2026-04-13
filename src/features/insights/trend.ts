@@ -112,11 +112,16 @@ function buildBuckets(period: PeriodMode, startDate: string, endDate: string): T
     case 'all':
       return buildYearlyBuckets(startDate, endDate);
     case 'year':
+    case 'this-year':
       return buildMonthlyBuckets(startDate, endDate);
-    case 'week':
-      return buildDailyBuckets(startDate, endDate, true);
     case 'month':
+    case 'this-month':
       return buildWeeklyBuckets(startDate, endDate, true);
+    case 'week':
+    case 'this-week':
+      return buildDailyBuckets(startDate, endDate, true);
+    case 'today':
+      return buildDailyBuckets(startDate, endDate, false);
     case 'custom':
       if (rangeDays <= 7) return buildDailyBuckets(startDate, endDate, false);
       if (rangeDays <= 31) return buildWeeklyBuckets(startDate, endDate, false);

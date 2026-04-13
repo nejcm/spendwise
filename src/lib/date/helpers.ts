@@ -1,4 +1,4 @@
-import type { PeriodSelection } from '@/lib/store';
+import type { DynamicPeriodMode, PeriodMode, PeriodSelection } from '@/lib/store';
 import { UTCDate } from '@date-fns/utc';
 import {
   addDays,
@@ -12,10 +12,17 @@ import {
   getISOWeeksInYear,
   parse,
   setISOWeek,
+  startOfDay,
   startOfISOWeek,
   startOfMonth,
   startOfYear,
 } from 'date-fns';
+import { DYNAMIC_PERIOD_MODES } from '@/lib/store';
+
+export const isDynamicPeriodMode = (mode: PeriodMode): mode is DynamicPeriodMode => DYNAMIC_PERIOD_MODES.includes(mode as DynamicPeriodMode);
+
+export const isNavigablePeriodMode = (mode: PeriodMode) => mode !== 'all' && mode !== 'custom' && mode !== 'today';
+
 /** Convert a Date or yyyy-MM-dd string to Unix seconds (UTC). */
 export function dateToUnix(date: Date | string): number {
   if (typeof date === 'string') return Math.floor(new Date(date).getTime() / 1000);
@@ -98,6 +105,30 @@ export function getPeriodRange(selection: PeriodSelection): [number | undefined,
     }
     case 'all':
       return [undefined, undefined];
+    case 'today': {
+      const now = new Date();
+      const start = startOfDay(now);
+      const end = addDays(start, 1);
+      return [dateToUnix(start), dateToUnix(end)];
+    }
+    case 'this-week': {
+      const now = new Date();
+      const start = startOfISOWeek(now);
+      const end = addDays(endOfISOWeek(now), 1);
+      return [dateToUnix(start), dateToUnix(end)];
+    }
+    case 'this-month': {
+      const now = new Date();
+      const start = startOfMonth(now);
+      const end = addMonths(start, 1);
+      return [dateToUnix(start), dateToUnix(end)];
+    }
+    case 'this-year': {
+      const now = new Date();
+      const start = startOfYear(now);
+      const end = startOfYear(addYears(start, 1));
+      return [dateToUnix(start), dateToUnix(end)];
+    }
   }
 }
 
@@ -132,7 +163,20 @@ export function navigatePeriod(selection: PeriodSelection, dir: -1 | 1): PeriodS
       };
     }
     case 'all':
+    case 'today':
       return selection;
+    case 'this-week': {
+      const { year, week } = currentISOWeek();
+      return navigatePeriod({ mode: 'week', year, week }, dir);
+    }
+    case 'this-month': {
+      const now = new Date();
+      return navigatePeriod({ mode: 'month', year: now.getFullYear(), month: now.getMonth() + 1 }, dir);
+    }
+    case 'this-year': {
+      const now = new Date();
+      return navigatePeriod({ mode: 'year', year: now.getFullYear() }, dir);
+    }
   }
 }
 
@@ -159,12 +203,18 @@ const AVERAGE_DAYS_PER_MONTH = 365.25 / 12;
  */
 export function scaleBudgetForPeriod(monthlyBudget: number, selection: PeriodSelection): number | undefined {
   if (selection.mode === 'all') return undefined;
+  if ((DYNAMIC_PERIOD_MODES).includes(selection.mode as DynamicPeriodMode)) {
+    const [startUnix, endUnix] = getPeriodRange(selection) as [number, number];
+    const daysInPeriod = (endUnix - startUnix) / 86400;
+    const daysInMonth = getDaysInMonth(unixToDate(startUnix));
+    return Math.round(monthlyBudget * daysInPeriod / daysInMonth);
+  }
   if (selection.mode === 'month') return monthlyBudget;
 
   const [startUnix, endUnix] = getPeriodRange(selection) as [number, number];
   const daysInPeriod = (endUnix - startUnix) / 86400;
 
-  let daysInMonth: number;
+  let daysInMonth: number = 30;
   switch (selection.mode) {
     case 'year':
       daysInMonth = daysInPeriod / 12;

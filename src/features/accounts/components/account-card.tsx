@@ -2,12 +2,13 @@ import type { AccountWithBalance } from '@/features/accounts/types';
 import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
-import { FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
+import { DEFAULT_COLOR } from '@/components/color-selector';
 
+import { FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
 import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
 import { scaleBudgetForPeriod } from '@/lib/date/helpers';
 import { useAppStore } from '@/lib/store';
-import { bgColorOr, hexWithOpacity } from '@/lib/theme/colors';
+import { hexWithOpacity } from '@/lib/theme/colors';
 import { ACCOUNT_TYPE_LABELS } from '../types';
 
 export type AccountCardProps = {
@@ -30,8 +31,8 @@ export function AccountCard({ account, onPress }: AccountCardProps) {
       <View className="flex-row items-center justify-between gap-3">
         {account.icon && (
           <View
-            className={`size-12 items-center justify-center rounded-lg ${bgColorOr(account.color)}`}
-            style={{ backgroundColor: hexWithOpacity(account.color, 26) }}
+            className="size-12 items-center justify-center rounded-lg"
+            style={{ backgroundColor: hexWithOpacity(account.color ?? DEFAULT_COLOR, 26) }}
           >
             <Text className="text-3xl">{account.icon}</Text>
           </View>

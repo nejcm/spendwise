@@ -1,6 +1,6 @@
 {
   "name": "spendwise",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "private": true,
   "packageManager": "pnpm@10.12.3",
   "repository": {
@@ -156,8 +156,6 @@
     "knip": "~6.3.0",
     "lint-staged": "~16.4.0",
     "np": "~11.0.3",
-    "prettier": "~3.8.1",
-    "prettier-plugin-tailwindcss": "~0.7.2",
     "sharp": "~0.34.5",
     "tailwindcss": "4.2.2",
     "tsx": "~4.21.0",

@@ -4,10 +4,11 @@ import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
 import { cn } from 'tailwind-variants';
+import { DEFAULT_COLOR } from '@/components/color-selector';
 import { FormattedCurrency, Text } from '@/components/ui';
 import { formatShortDate } from '@/features/formatting/helpers';
 import { useAppStore } from '@/lib/store';
-import { bgColorOr, hexWithOpacity } from '@/lib/theme/colors';
+import { hexWithOpacity } from '@/lib/theme/colors';
 
 export type TransactionCardProps = {
   transaction: TransactionWithCategory;
@@ -24,8 +25,8 @@ export const TransactionCard = React.memo(({ transaction, className }: Transacti
   return (
     <Pressable className={cn('flex-row items-center gap-3 p-3', className)} onPress={() => router.push(`/transactions/${transaction.id}`)}>
       <View
-        className={`size-10 items-center justify-center rounded-lg ${bgColorOr(transaction.category_color)}`}
-        style={{ backgroundColor: hexWithOpacity(transaction.category_color, 30) }}
+        className="size-10 items-center justify-center rounded-lg"
+        style={{ backgroundColor: hexWithOpacity(transaction.category_color ?? DEFAULT_COLOR, 30) }}
       >
         <Text className="text-xl font-medium">
           {(transaction.category_icon || '?')}

@@ -4,12 +4,13 @@ import type { PeriodSelection } from '@/lib/store';
 import * as React from 'react';
 import { Pressable } from 'react-native';
 
+import { DEFAULT_COLOR } from '@/components/color-selector';
 import { FormattedCurrency, Text, View } from '@/components/ui';
 import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
 import { TrashIcon } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { scaleBudgetForPeriod } from '@/lib/date/helpers';
-import { bgColorOr, hexWithOpacity } from '@/lib/theme/colors';
+import { hexWithOpacity } from '@/lib/theme/colors';
 
 export type CategoryCardProps = {
   item: CategorySpend;
@@ -41,8 +42,8 @@ export default function CategoryCard({ item, currency, periodSelection, onPress,
       )}
       <Pressable onPress={() => onPress(item)} className="flex-1 flex-row items-center gap-2 px-2 py-1">
         <View
-          className={`size-12 items-center justify-center rounded-lg ${bgColorOr(item.category_color)}`}
-          style={{ backgroundColor: hexWithOpacity(item.category_color, 30) }}
+          className="size-12 items-center justify-center rounded-lg"
+          style={{ backgroundColor: hexWithOpacity(item.category_color ?? DEFAULT_COLOR, 30) }}
         >
           <Text className="text-2xl">{emoji}</Text>
         </View>

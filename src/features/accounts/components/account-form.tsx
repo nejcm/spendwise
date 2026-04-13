@@ -5,9 +5,9 @@ import * as React from 'react';
 import { View } from 'react-native';
 import * as z from 'zod';
 import ColorSelector from '@/components/color-selector';
-import { Image, Input, OutlineButton, SolidButton, Text } from '@/components/ui';
+import { GhostButton, Image, Input, OutlineButton, SolidButton, Text } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
-import { GhostButton } from '@/components/ui/ghost-button';
+import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { CURRENCY_VALUES } from '@/features/currencies';
 import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { translate } from '@/lib/i18n';
@@ -32,6 +32,7 @@ export type AccountFormProps = {
   onSuccess?: () => void;
   onDeleteSuccess?: () => void;
   onCancel?: () => void;
+  isSheet?: boolean;
 };
 
 const defaultValues: AccountFormData = {
@@ -44,7 +45,14 @@ const defaultValues: AccountFormData = {
   budget: null,
 };
 
-export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess, onCancel }: AccountFormProps) {
+export function AccountForm({
+  initialData,
+  accountId,
+  onSuccess,
+  onDeleteSuccess,
+  onCancel,
+  isSheet,
+}: AccountFormProps) {
   const createAccount = useCreateAccount();
   const updateAccount = useUpdateAccount();
   const preferredCurrency = useAppStore.use.currency();
@@ -87,8 +95,8 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
     },
   });
 
-  return (
-    <View className="flex-1 gap-4">
+  const formBody = (
+    <>
       <View className="mb-2 flex-row items-center justify-center gap-3">
         <form.Field
           name="color"
@@ -185,8 +193,8 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
         )}
       />
 
-      <View className="mb-6 flex-row gap-2">
-        <View className="w-[100] flex-row items-center justify-center gap-2 px-4">
+      <View className="flex-row gap-2">
+        <View className="w-[85] flex-row items-center justify-center gap-2 pr-4 pl-0">
           <Image source={CURRENCY_IMAGES[preferredCurrency]} className="size-6 rounded-full" />
           <Text className="border-none bg-transparent">
             {preferredCurrency}
@@ -208,11 +216,24 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
           )}
         />
       </View>
+      {!!accountId && (
+        <GhostButton
+          label={translate('common.delete')}
+          color="danger"
+          className="mt-6"
+          fullWidth
+          onPress={() => archiveAccount.submit(accountId, initialData?.name)}
+        />
+      )}
+    </>
+  );
 
+  const formFooter = (
+    <>
       <form.Subscribe
         selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
         children={(state) => (
-          <View className="mt-auto flex-row items-center gap-3">
+          <>
             {onCancel && <OutlineButton label={translate('common.cancel')} onPress={onCancel} color="secondary" />}
             <SolidButton
               label={translate('common.save')}
@@ -221,19 +242,35 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
               disabled={!schema.safeParse(state.values).success}
               className="flex-1"
             />
-          </View>
+          </>
         )}
       />
-      {!!accountId && (
-        <View className="mb-2 flex-row justify-center">
-          <GhostButton
-            label={translate('common.delete')}
-            color="danger"
-            fullWidth
-            onPress={() => archiveAccount.submit(accountId, initialData?.name)}
-          />
+    </>
+  );
+
+  if (isSheet) {
+    return (
+      <>
+        <BottomSheetKeyboardAwareScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          {formBody}
+        </BottomSheetKeyboardAwareScrollView>
+        <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
+          {formFooter}
         </View>
-      )}
+      </>
+    );
+  }
+
+  return (
+    <View className="flex-1 gap-4">
+      {formBody}
+      <View className="mt-auto flex-row gap-3 pt-4">
+        {formFooter}
+      </View>
     </View>
   );
 }

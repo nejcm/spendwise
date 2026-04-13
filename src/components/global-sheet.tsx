@@ -3,7 +3,6 @@ import type { SheetConfig, SheetType } from '@/lib/sheet';
 import { useEffect, useMemo, useRef } from 'react';
 import { BackHandler } from 'react-native';
 import { ModalSheet, Text, View } from '@/components/ui';
-import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { AccountForm } from '@/features/accounts/components/account-form';
 import { CategoryForm } from '@/features/categories/category-form';
 import { ScheduledTransactionForm } from '@/features/scheduled-transactions/components/scheduled-transaction-form';
@@ -111,7 +110,7 @@ function SheetContent({ config, onClose }: { config: SheetConfig; onClose: () =>
         />
       );
     case 'add-account':
-      return <AccountForm onSuccess={onClose} onCancel={onClose} />;
+      return <AccountForm onSuccess={onClose} onCancel={onClose} isSheet />;
     case 'edit-account':
       return (
         <AccountForm
@@ -121,6 +120,7 @@ function SheetContent({ config, onClose }: { config: SheetConfig; onClose: () =>
           onSuccess={onClose}
           onDeleteSuccess={onClose}
           onCancel={onClose}
+          isSheet
         />
       );
     case 'add-category':
@@ -129,6 +129,7 @@ function SheetContent({ config, onClose }: { config: SheetConfig; onClose: () =>
           initialValues={{ id: undefined }}
           onSuccess={onClose}
           onCancel={onClose}
+          isSheet
         />
       );
     case 'edit-category':
@@ -137,6 +138,7 @@ function SheetContent({ config, onClose }: { config: SheetConfig; onClose: () =>
           initialValues={config.initialValues}
           onSuccess={onClose}
           onCancel={onClose}
+          isSheet
         />
       );
     case 'add-scheduled':
@@ -191,12 +193,8 @@ export function GlobalSheet() {
       {...config?.props}
       android_keyboardInputMode="adjustPan"
     >
-      <BottomSheetKeyboardAwareScrollView
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, minHeight: '100%' }}
-        keyboardShouldPersistTaps="handled"
-      >
-        {config && <SheetContent config={config} onClose={closeSheet} />}
-      </BottomSheetKeyboardAwareScrollView>
+
+      {config && <SheetContent config={config} onClose={closeSheet} />}
     </ModalSheet>
   );
 }

@@ -28,10 +28,10 @@ export type SheetType = SheetConfig['type'];
 // ---------------------------------------------------------------------------
 
 export const SHEET_SNAP_POINTS: Record<SheetType, string[]> = {
-  'add-transaction': ['80%'],
-  'add-account': ['72%'],
-  'edit-account': ['72%'],
-  'add-category': ['72%'],
-  'edit-category': ['72%'],
-  'add-scheduled': ['82%'],
+  'add-transaction': ['85%'],
+  'add-account': ['80%'],
+  'edit-account': ['80%'],
+  'add-category': ['80%'],
+  'edit-category': ['80%'],
+  'add-scheduled': ['85%'],
 };

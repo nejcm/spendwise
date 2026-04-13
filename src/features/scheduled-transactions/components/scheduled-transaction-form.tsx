@@ -18,6 +18,7 @@ import {
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
 import { GhostButton } from '@/components/ui/ghost-button';
+import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { useAccounts } from '@/features/accounts/api';
 import { CategoryPicker } from '@/features/categories/category-picker';
 import { CURRENCY_VALUES } from '@/features/currencies';
@@ -166,8 +167,9 @@ export function ScheduledTransactionForm({
   });
 
   const HScrollView = isSheet ? BottomSheetScrollView : ScrollView;
-  return (
-    <View className="gap-4">
+
+  const formBody = (
+    <>
       <View className="mb-4 flex-row gap-3">
         <form.Field
           name="currency"
@@ -351,31 +353,60 @@ export function ScheduledTransactionForm({
         )}
       />
 
-      <form.Subscribe
-        selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
-        children={(state) => (
-          <View className="mt-6 flex-row gap-3">
-            {onCancel && (
-              <OutlineButton
-                label={translate('common.cancel')}
-                onPress={onCancel}
-                color="secondary"
-              />
-            )}
-            <SolidButton
-              label={translate('common.save')}
-              onPress={form.handleSubmit}
-              loading={
-                (!!state.isSubmitting)
-                || createScheduledTransaction.isPending
-                || updateScheduledTransaction.isPending
-              }
-              disabled={!schema.safeParse(state.values).success}
-              className="flex-1"
+    </>
+  );
+
+  const formFooter = (
+    <form.Subscribe
+      selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
+      children={(state) => (
+        <>
+          {onCancel && (
+            <OutlineButton
+              label={translate('common.cancel')}
+              onPress={onCancel}
+              color="secondary"
             />
-          </View>
-        )}
-      />
+          )}
+          <SolidButton
+            label={translate('common.save')}
+            onPress={form.handleSubmit}
+            loading={
+              (!!state.isSubmitting)
+              || createScheduledTransaction.isPending
+              || updateScheduledTransaction.isPending
+            }
+            disabled={!schema.safeParse(state.values).success}
+            className="flex-1"
+          />
+        </>
+      )}
+    />
+  );
+
+  if (isSheet) {
+    return (
+      <>
+        <BottomSheetKeyboardAwareScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          {formBody}
+        </BottomSheetKeyboardAwareScrollView>
+        <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
+          {formFooter}
+        </View>
+      </>
+    );
+  }
+
+  return (
+    <View className="flex-1 gap-4">
+      {formBody}
+      <View className="mt-auto flex-row gap-3 pt-4">
+        {formFooter}
+      </View>
     </View>
   );
 }

@@ -6,8 +6,8 @@ import * as z from 'zod';
 
 import ColorSelector from '@/components/color-selector';
 import { Alert, GhostButton, Image, Input, SolidButton, Text } from '@/components/ui';
-
 import { getFieldError } from '@/components/ui/form-utils';
+import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { OutlineButton } from '@/components/ui/outline-button';
 import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/features/categories/api';
 import { CURRENCY_IMAGES } from '@/features/currencies/images';
@@ -30,6 +30,7 @@ export type CategoryManageModalProps = {
   initialValues?: CategoryInitialValues;
   onSuccess?: () => void;
   onCancel?: () => void;
+  isSheet?: boolean;
 };
 
 const defaultValues: CategoryFormData = {
@@ -39,7 +40,7 @@ const defaultValues: CategoryFormData = {
   budget: null,
 };
 
-export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryManageModalProps) {
+export function CategoryForm({ initialValues, onSuccess, onCancel, isSheet }: CategoryManageModalProps) {
   const id = initialValues?.id;
   const { data: categories = [] } = useCategories();
   const preferredCurrency = useAppStore.use.currency();
@@ -73,8 +74,8 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
     ]);
   };
 
-  return (
-    <View className="flex-1 gap-4">
+  const formBody = (
+    <>
       <View className="mb-2 flex-row items-center justify-center gap-3">
         <form.Field
           name="color"
@@ -117,7 +118,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
         )}
       />
 
-      <View className="mb-6 flex-row gap-2">
+      <View className="flex-row gap-2">
         <View className="w-[100] flex-row items-center justify-center gap-2 px-4">
           <Image source={CURRENCY_IMAGES[preferredCurrency]} className="size-6 rounded-full" />
           <Text className="border-none bg-transparent">
@@ -140,11 +141,24 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
           )}
         />
       </View>
+      {!!id && (
+        <GhostButton
+          label={translate('common.delete')}
+          color="danger"
+          className="mt-6"
+          fullWidth
+          onPress={() => onDeletePress(id, initialValues?.name ?? '')}
+        />
+      )}
+    </>
+  );
 
+  const formFooter = (
+    <>
       <form.Subscribe
         selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
         children={(state) => (
-          <View className="mt-auto flex-row items-center gap-3">
+          <>
             {onCancel && (
               <OutlineButton
                 label={translate('common.cancel')}
@@ -159,22 +173,36 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
               disabled={!schema.safeParse(state.values).success}
               className="flex-1"
             />
-          </View>
+          </>
         )}
       />
 
-      {!!id && (
-        <View className="flex-row justify-center">
-          <GhostButton
-            label={translate('common.delete')}
-            color="danger"
-            size="sm"
-            textClassName="text-base/snug"
-            onPress={() => onDeletePress(id, initialValues?.name ?? '')}
-            fullWidth
-          />
+    </>
+  );
+
+  if (isSheet) {
+    return (
+      <>
+        <BottomSheetKeyboardAwareScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          {formBody}
+        </BottomSheetKeyboardAwareScrollView>
+        <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
+          {formFooter}
         </View>
-      )}
+      </>
+    );
+  }
+
+  return (
+    <View className="flex-1 gap-4">
+      {formBody}
+      <View className="mt-auto flex-row gap-3 pt-4">
+        {formFooter}
+      </View>
     </View>
   );
 }

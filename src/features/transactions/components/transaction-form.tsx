@@ -8,6 +8,7 @@ import { ScrollView, View } from 'react-native';
 import { Image, Input, OutlineButton, Select, SolidButton, Text } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
+import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { useAccounts } from '@/features/accounts/api';
 import { CategoryPicker } from '@/features/categories/category-picker';
 import { mergeCurrencyArrays } from '@/features/currencies/helpers';
@@ -94,8 +95,8 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
   });
 
   const HScrollView = isSheet ? BottomSheetScrollView : ScrollView;
-  return (
-    <View className="flex-1 gap-4">
+  const formBody = (
+    <>
       <form.Subscribe
         selector={(s) => ({
           amount: s.values.amount,
@@ -279,28 +280,56 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
           />
         )}
       />
+    </>
+  );
 
-      <form.Subscribe
-        selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
-        children={(state) => (
-          <View className="mt-auto flex-row gap-3 pt-4">
-            {onCancel && (
-              <OutlineButton
-                label={translate('common.cancel')}
-                onPress={onCancel}
-                color="secondary"
-              />
-            )}
-            <SolidButton
-              label={translate('common.save')}
-              onPress={form.handleSubmit}
-              loading={(!!state.isSubmitting) || createTransaction.isPending || updateTransaction.isPending}
-              disabled={!transactionFormSchema.safeParse(state.values).success}
-              className="flex-1"
+  const formFooter = (
+    <form.Subscribe
+      selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
+      children={(state) => (
+        <>
+          {onCancel && (
+            <OutlineButton
+              label={translate('common.cancel')}
+              onPress={onCancel}
+              color="secondary"
             />
-          </View>
-        )}
-      />
+          )}
+          <SolidButton
+            label={translate('common.save')}
+            onPress={form.handleSubmit}
+            loading={(!!state.isSubmitting) || createTransaction.isPending || updateTransaction.isPending}
+            disabled={!transactionFormSchema.safeParse(state.values).success}
+            className="flex-1"
+          />
+        </>
+      )}
+    />
+  );
+
+  if (isSheet) {
+    return (
+      <>
+        <BottomSheetKeyboardAwareScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          {formBody}
+        </BottomSheetKeyboardAwareScrollView>
+        <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
+          {formFooter}
+        </View>
+      </>
+    );
+  }
+
+  return (
+    <View className="flex-1 gap-4">
+      {formBody}
+      <View className="mt-auto flex-row gap-3 pt-4">
+        {formFooter}
+      </View>
     </View>
   );
 }

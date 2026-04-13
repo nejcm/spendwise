@@ -42,6 +42,12 @@ src/
 - Do not edit `android/` or `ios/` directly for app logic.
 - Update docs and `AGENTS.md` when architecture, routes, or major workflows change.
 
+## Verification Before Completing Tasks
+
+- Run checks before treating work as finished: prefer `pnpm verify` (ESLint, `tsc`, translation JSON lint, Jest). Command details are in [`.docs/setup.md`](.docs/setup.md).
+- If the change is very small, run the narrowest subset that still validates it (for example `pnpm lint:all` plus `pnpm test`, or targeted Jest paths when you only touched specific tests or modules).
+- Fix lint and test failures introduced by the change; do not hand off a “done” task with a red `verify` unless you clearly state what is blocked and why.
+
 ## Response And Planning Style
 
 Keep responses concise, concrete, and tied to the actual codebase. When creating implementation plans: cite specific file paths, break work into logical testable steps, call out edge cases, and end with unresolved questions when requirements are ambiguous.

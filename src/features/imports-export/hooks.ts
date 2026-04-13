@@ -1,15 +1,70 @@
+import type { TransactionFormData } from '../transactions/types';
+import type { ParsedRow } from './csv-parser';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { File, Paths } from 'expo-file-system';
+
+import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useSQLiteContext } from 'expo-sqlite';
-
 import { Alert } from '@/components/ui';
 import { exportBackup, importBackup, validateBackup } from '@/features/imports-export/backup';
-import { buildManualBackupFileName } from '@/features/imports-export/backup-file';
+import { buildManualBackupFileName, IS_AUTO_BACKUP_SUPPORTED, writeAutoBackupFile } from '@/features/imports-export/backup-file';
 import { documentPickerTypeForJson, pickValidatedFile } from '@/features/imports-export/pick-file';
 import { IS_WEB } from '@/lib/base';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { translate } from '@/lib/i18n';
+import { useAppStore } from '@/lib/store';
+import { useCategories } from '../categories/hooks';
+import { useCreateTransactions } from '../transactions/hooks';
+import { mapCategoryNameToId } from './helpers';
+
+export function useImportTransactions() {
+  const db = useSQLiteContext();
+  const router = useRouter();
+  const preferredCurrency = useAppStore.use.currency();
+  const { data: categories = [] } = useCategories();
+  const onImportSuccess = (data: string[]) => {
+    Alert.alert(
+      translate('import-export.complete_title'),
+      translate('import-export.complete_message', { count: data?.length }),
+      [
+        { onPress: () => router.back(), text: translate('common.ok') },
+      ],
+    );
+  };
+  const createTransactions = useCreateTransactions(onImportSuccess);
+
+  const prepareMutation = useMutation({
+    mutationFn: async ({ data, accountId }: { data: ParsedRow[]; accountId: string }) => {
+      if (!accountId || data.length === 0) throw new Error('No data to import');
+      if (IS_AUTO_BACKUP_SUPPORTED) {
+        await writeAutoBackupFile(db);
+      }
+      const transactions: TransactionFormData[] = [];
+      for (const row of data) {
+        const type = row.type ?? (row.amount >= 0 ? 'income' : 'expense');
+        transactions.push({
+          account_id: accountId,
+          amount: Math.abs(row.amount) / 100,
+          currency: row.currency ?? preferredCurrency,
+          category_id: mapCategoryNameToId(row.categoryName, categories),
+          date: Math.floor(new Date(row.date).getTime() / 1000),
+          note: row.note,
+          type,
+        });
+      }
+      return transactions;
+    },
+    onSuccess: (txs) => {
+      createTransactions.mutate(txs);
+    },
+  });
+
+  return {
+    isLoading: prepareMutation.isPending || createTransactions.isPending,
+    onImport: prepareMutation.mutateAsync,
+  };
+}
 
 export function useExportBackup() {
   const db = useSQLiteContext();

@@ -5,7 +5,7 @@ import { IS_WEB } from '@/lib/base';
 
 export const BACKUP_FILE_NAME_PREFIX = 'spendwise-backup-';
 export const AUTO_BACKUP_SUBDIR = 'spendwise-auto-backups';
-export const DEFAULT_AUTO_BACKUP_RETENTION = 5;
+export const DEFAULT_AUTO_BACKUP_RETENTION = 12;
 
 export type AutoBackupInterval = 'daily' | 'weekly' | 'monthly';
 

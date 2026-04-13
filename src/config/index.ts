@@ -18,8 +18,8 @@ export const ANTHROPIC_MODEL = 'claude-haiku-4-5';
 export const AI_MAX_TOOL_ROUNDS = 3;
 
 export const DEFAULT_DATE_FORMAT = 'MMM d, yyyy' satisfies DateFormat;
-export const DEFAULT_CURRENCY = 'EUR' satisfies CurrencyKey;
-export const DEFAULT_USER_CURRENCY = 'USD' satisfies CurrencyKey;
+export const DEFAULT_CURRENCY = 'EUR' satisfies CurrencyKey; // system base currency for rates
+export const DEFAULT_USER_CURRENCY = 'USD' satisfies CurrencyKey; // user default currency
 
 // AI
 

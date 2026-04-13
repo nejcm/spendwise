@@ -1,24 +1,18 @@
 import type { Account } from '../accounts/types';
 
-import type { TransactionFormData } from '../transactions/types';
 import type { ColumnMapping, ParsedRow, SkippedRow } from './csv-parser';
-
-import { useRouter } from 'expo-router';
 
 import * as React from 'react';
 import { ScrollView, View } from 'react-native';
 import { Alert, FormattedCurrency, FormattedDate, GhostButton, Select, SolidButton, Text } from '@/components/ui';
 
+import { OutlineButton } from '@/components/ui/outline-button';
+import { DEFAULT_CURRENCY } from '@/config';
 import { translate } from '@/lib/i18n';
-import { OutlineButton } from '../../components/ui/outline-button';
-import { DEFAULT_CURRENCY } from '../../config';
-import { useAppStore } from '../../lib/store';
 import { useAccounts } from '../accounts/api';
-import { useCategories } from '../categories/api';
-import { useCreateTransactions } from '../transactions/api';
-import { mapRows } from './csv-parser';
 
-import { mapCategoryNameToId } from './helpers';
+import { mapRows } from './csv-parser';
+import { useImportTransactions } from './hooks';
 
 type Step = 'map' | 'preview';
 
@@ -81,11 +75,11 @@ function MapStep({ headers, mapping, onMapping, onNext }: MapStepProps) {
 export type PreviewStepProps = {
   accounts: Account[];
   accountId: string;
-  importing: number | undefined;
   onAccountSelect: (id: string) => void;
   onImport: () => void;
   preview: ParsedRow[];
   skipped: SkippedRow[];
+  loading?: boolean;
 };
 
 const ITEMS_NUM = 10;
@@ -96,8 +90,8 @@ function PreviewStep({
   accountId,
   onAccountSelect,
   onImport,
-  importing,
   skipped,
+  loading,
 }: PreviewStepProps) {
   const [show, setShow] = React.useState(ITEMS_NUM);
   const hasMore = preview.length > show;
@@ -196,10 +190,10 @@ function PreviewStep({
       <SolidButton
         className="mt-10"
         fullWidth
-        disabled={!accountId || importing !== undefined}
+        disabled={!accountId || loading}
         label={
-          importing
-            ? `${translate('common.loading')} (${importing} / ${preview.length})`
+          loading
+            ? `${translate('common.loading')}`
             : `${translate('import-export.import')} ${preview.length} ${translate('import-export.rows')}`
         }
         onPress={onImport}
@@ -219,47 +213,13 @@ export type ImportProps = {
 };
 
 export default function Import({ state, setMapping, onClose }: ImportProps) {
-  const router = useRouter();
   const { headers, allRows, mapping } = state;
   const { data: accounts = [] } = useAccounts();
-  const { data: categories = [] } = useCategories();
-  const preferredCurrency = useAppStore.use.currency();
   const [step, setStep] = React.useState<Step>('map');
-  const [importing, setImporting] = React.useState<number | undefined>(undefined);
   const [preview, setPreview] = React.useState<ParsedRow[]>([]);
   const [skippedCurrencies, setSkippedCurrencies] = React.useState<SkippedRow[]>([]);
   const [accountId, setAccountId] = React.useState<string>(accounts[0]?.id ?? '');
-  const createTransactions = useCreateTransactions();
-
-  const runImport = async () => {
-    if (!accountId || preview.length === 0) return;
-    setImporting(0);
-    const transactions: TransactionFormData[] = [];
-    let count = 0;
-    for (const row of preview) {
-      const type = row.type ?? (row.amount >= 0 ? 'income' : 'expense');
-      transactions.push({
-        account_id: accountId,
-        amount: Math.abs(row.amount) / 100,
-        currency: row.currency ?? preferredCurrency,
-        category_id: mapCategoryNameToId(row.categoryName, categories),
-        date: Math.floor(new Date(row.date).getTime() / 1000),
-        note: row.note,
-        type,
-      });
-      count++;
-      setImporting(count);
-    }
-    await createTransactions.mutateAsync(transactions);
-    setImporting(undefined);
-    Alert.alert(
-      translate('import-export.complete_title'),
-      translate('import-export.complete_message', { count: transactions.length }),
-      [
-        { onPress: () => router.back(), text: translate('common.ok') },
-      ],
-    );
-  };
+  const { isLoading, onImport } = useImportTransactions();
 
   const buildPreview = () => {
     if (mapping.date === null || mapping.amount === null) {
@@ -286,11 +246,11 @@ export default function Import({ state, setMapping, onClose }: ImportProps) {
         <PreviewStep
           accountId={accountId}
           accounts={accounts}
-          importing={importing}
           preview={preview}
           skipped={skippedCurrencies}
           onAccountSelect={setAccountId}
-          onImport={runImport}
+          onImport={() => onImport({ data: preview, accountId })}
+          loading={isLoading}
         />
       )}
       <OutlineButton className="mt-2" label={translate('common.cancel')} fullWidth onPress={onClose} />

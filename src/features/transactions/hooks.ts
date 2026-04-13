@@ -79,7 +79,7 @@ function prepareTransactionData(
   };
 }
 
-async function prepareTransactionsForInsert(
+export async function prepareTransactionsForInsert(
   db: SQLiteDatabase,
   items: TransactionFormData[],
 ): Promise<TransactionInsertData[]> {
@@ -115,7 +115,7 @@ export function useCreateTransaction() {
   });
 }
 
-export function useCreateTransactions() {
+export function useCreateTransactions(onSuccess?: (data: string[]) => void) {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
 
@@ -124,7 +124,8 @@ export function useCreateTransactions() {
       const prepared = await prepareTransactionsForInsert(db, items);
       return queries.createTransactions(db, prepared);
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      onSuccess?.(data);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       invalidateFor(queryClient, 'transaction');
     },

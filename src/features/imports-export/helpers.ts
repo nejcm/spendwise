@@ -1,3 +1,4 @@
+import type { Account } from '../accounts/types';
 import type { Category } from '../categories/types';
 
 const AMPERSAND_PATTERN = /&/g;
@@ -138,6 +139,35 @@ function findCategoryByNeedles(categories: Category[], needles: readonly string[
   }
 
   return undefined;
+}
+
+function normalizeAccountLabel(name: string): string {
+  return name.trim().toLowerCase().replace(WHITESPACE_PATTERN, ' ');
+}
+
+/**
+ * Find the best-matching account for a raw CSV account name.
+ * Tries exact match first, then contains match (either direction).
+ * Falls back to `fallbackId` when no match is found.
+ */
+export function matchAccountNameToId(
+  name: string | undefined,
+  accounts: Account[],
+): string {
+  if (!name || accounts.length === 0) return accounts[0]?.id;
+
+  const normalized = normalizeAccountLabel(name);
+
+  const exact = accounts.find((a) => normalizeAccountLabel(a.name) === normalized);
+  if (exact) return exact.id;
+
+  const contains = accounts.find((a) => {
+    const accountName = normalizeAccountLabel(a.name);
+    return accountName.includes(normalized) || normalized.includes(accountName);
+  });
+  if (contains) return contains.id;
+
+  return accounts[0].id;
 }
 
 export function mapCategoryNameToId(name: string | undefined, categories: Category[]): string {

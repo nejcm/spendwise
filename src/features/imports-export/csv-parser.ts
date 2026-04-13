@@ -66,6 +66,7 @@ export type ColumnMapping = {
   note: number | null;
   type: number | null; // column with "income"/"expense" or positive/negative
   category: number | null;
+  account: number | null; // column with account name, resolved to account_id at import time
 };
 
 export type ParsedRow = {
@@ -74,7 +75,8 @@ export type ParsedRow = {
   note: string;
   currency?: CurrencyKey;
   type?: TransactionType;
-  categoryName?: string; // raw name from CSV, resolved to ID at import time
+  categoryName?: string; // raw name from CSV, resolved to category_id at import time
+  accountName?: string; // raw name from CSV, resolved to account_id at import time
   isDuplicate?: boolean;
 };
 
@@ -148,6 +150,9 @@ export function mapRows(rows: string[][], mapping: ColumnMapping, hasHeader: boo
     // Category name
     const rawCategory = mapping.category !== null ? (row[mapping.category] ?? '').trim() : '';
 
+    // Account name
+    const rawAccount = mapping.account !== null ? (row[mapping.account] ?? '').trim() : '';
+
     parsed.push({
       date: normalizeDate(rawDate),
       amount: amountCents,
@@ -155,6 +160,7 @@ export function mapRows(rows: string[][], mapping: ColumnMapping, hasHeader: boo
       type,
       currency: currency ?? DEFAULT_USER_CURRENCY,
       ...(rawCategory && { categoryName: rawCategory }),
+      ...(rawAccount && { accountName: rawAccount }),
     });
   }
 
@@ -182,21 +188,21 @@ function normalizeDate(raw: string): string {
 
 export function autoDetectColumnMapping(rows: string[][]): ColumnMapping {
   const [headers, sampleRow] = rows;
-  const mapping: ColumnMapping = { amount: null, date: null, note: null, type: null, currency: null, category: null };
+  const mapping: ColumnMapping = { amount: null, date: null, note: null, type: null, currency: null, category: null, account: null };
 
   if (!headers) return mapping;
 
   headers.forEach((header, index) => {
     const lower = header.trim().toLowerCase();
 
-    if (mapping.date === null && (lower.includes('date') || lower.includes('datum'))) {
+    if (mapping.date === null && (lower.includes('date'))) {
       mapping.date = index;
       return;
     }
 
     if (
       mapping.amount === null
-      && (lower.includes('amount') || lower.includes('value') || lower.includes('znesek') || lower.includes('sum'))
+      && (lower.includes('amount') || lower.includes('value') || lower.includes('sum'))
     ) {
       mapping.amount = index;
       return;
@@ -207,8 +213,7 @@ export function autoDetectColumnMapping(rows: string[][]): ColumnMapping {
       && (lower.includes('note')
         || lower.includes('memo')
         || lower.includes('description')
-        || lower.includes('details')
-        || lower.includes('opis'))
+        || lower.includes('details'))
     ) {
       mapping.note = index;
       return;
@@ -235,9 +240,14 @@ export function autoDetectColumnMapping(rows: string[][]): ColumnMapping {
 
     if (
       mapping.currency === null
-      && (lower.includes('currency') || lower.includes('curr') || lower.includes('valuta'))
+      && (lower.includes('currency') || lower.includes('curr'))
     ) {
       mapping.currency = index;
+      return;
+    }
+
+    if (mapping.account === null && lower.includes('account')) {
+      mapping.account = index;
     }
   });
 

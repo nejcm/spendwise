@@ -18,7 +18,7 @@ import BackupSection from './backup-section';
 const initialCsvState: ImportProps['state'] = {
   headers: [],
   allRows: [],
-  mapping: { amount: null, date: null, currency: null, note: null, type: null, category: null },
+  mapping: { amount: null, date: null, currency: null, note: null, type: null, category: null, account: null },
 };
 
 export function ImportScreen() {

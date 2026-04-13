@@ -219,6 +219,7 @@
     "export_title": "Export Transactions",
     "export_unavailable_error": "File sharing is not available on this device.",
     "external_section_title": "External Apps",
+    "field_account": "Account",
     "field_amount": "Amount",
     "field_category": "Category",
     "field_currency": "Currency",

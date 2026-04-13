@@ -18,18 +18,13 @@ describe('mapRows', () => {
         ['date', 'amount', 'type', 'note'],
         ['2026-03-18', '50.00', 'transfer', 'Move to savings'],
       ],
-      { date: 0, amount: 1, type: 2, note: 3, currency: null, category: null },
+      { date: 0, amount: 1, type: 2, note: 3, currency: null, category: null, account: null },
       true,
     );
 
-    expect(rows).toEqual([
-      {
-        date: '2026-03-18',
-        amount: 5000,
-        note: 'Move to savings',
-        type: 'transfer',
-      },
-    ]);
+    expect(rows).toEqual(
+      { rows: [{ amount: 5000, currency: 'USD', date: '2026-03-18', note: 'Move to savings', type: 'transfer' }], skipped: [] },
+    );
   });
 
   it('maps currency and category columns', () => {
@@ -38,20 +33,13 @@ describe('mapRows', () => {
         ['DATE', 'TYPE', 'FROM ACCOUNT', 'TO ACCOUNT/TO CATEGORY', 'AMOUNT', 'CURRENCY', 'AMOUNT 2', 'CURRENCY 2', 'TAGS', 'NOTES'],
         ['3/18/26', 'Expense', 'USD', 'Bills', '4.7', 'USD', '21', 'MYR', '', 'Youtube'],
       ],
-      { date: 0, type: 1, amount: 4, currency: 5, note: 9, category: 3 },
+      { date: 0, type: 1, amount: 4, currency: 5, note: 9, category: 3, account: null },
       true,
     );
 
-    expect(rows).toEqual([
-      {
-        date: '2026-03-18',
-        amount: -470,
-        note: 'Youtube',
-        type: 'expense',
-        currency: 'USD',
-        categoryName: 'Bills',
-      },
-    ]);
+    expect(rows).toEqual(
+      { rows: [{ amount: -470, categoryName: 'Bills', currency: 'USD', date: '2026-03-18', note: 'Youtube', type: 'expense' }], skipped: [] },
+    );
   });
 });
 

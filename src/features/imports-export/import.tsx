@@ -1,22 +1,19 @@
-import type { Account } from '../accounts/types';
-
 import type { ColumnMapping, ParsedRow, SkippedRow } from './csv-parser';
 
 import * as React from 'react';
-import { ScrollView, View } from 'react-native';
+import { View } from 'react-native';
 import { Alert, FormattedCurrency, FormattedDate, GhostButton, Select, SolidButton, Text } from '@/components/ui';
 
 import { OutlineButton } from '@/components/ui/outline-button';
 import { DEFAULT_CURRENCY } from '@/config';
 import { translate } from '@/lib/i18n';
-import { useAccounts } from '../accounts/api';
 
 import { mapRows } from './csv-parser';
 import { useImportTransactions } from './hooks';
 
 type Step = 'map' | 'preview';
 
-const COLUMN_FIELDS: (keyof ColumnMapping)[] = ['date', 'amount', 'currency', 'note', 'type', 'category'];
+const COLUMN_FIELDS: (keyof ColumnMapping)[] = ['date', 'amount', 'currency', 'note', 'type', 'category', 'account'];
 
 type MapStepProps = {
   headers: string[];
@@ -44,7 +41,7 @@ function MapStep({ headers, mapping, onMapping, onNext }: MapStepProps) {
       <Text className="mb-4 text-xl font-medium">{translate('import-export.map_columns')}</Text>
       {COLUMN_FIELDS.map((field) => (
         <View key={field} className="mb-4 flex-row items-center justify-between gap-4">
-          <View className="flex-1">
+          <View className="min-w-32">
             <Text className="mb-1 text-sm font-medium text-gray-600 dark:text-gray-400">
               {translate(`import-export.field_${field}` as any)}
               {field === 'date' || field === 'amount'
@@ -73,9 +70,6 @@ function MapStep({ headers, mapping, onMapping, onNext }: MapStepProps) {
 }
 
 export type PreviewStepProps = {
-  accounts: Account[];
-  accountId: string;
-  onAccountSelect: (id: string) => void;
   onImport: () => void;
   preview: ParsedRow[];
   skipped: SkippedRow[];
@@ -86,9 +80,6 @@ const ITEMS_NUM = 10;
 const MAX_SKIPPED = 5;
 function PreviewStep({
   preview,
-  accounts,
-  accountId,
-  onAccountSelect,
   onImport,
   skipped,
   loading,
@@ -101,29 +92,6 @@ function PreviewStep({
       <Text className="mb-4 text-xl font-medium">
         {`${translate('import-export.preview_title')} (${preview.length} ${translate('import-export.rows')})`}
       </Text>
-      {accounts.length > 0 && (
-        <>
-          <Text className="font-medium text-muted-foreground">
-            {translate('import-export.select_account')}
-          </Text>
-          <ScrollView horizontal contentContainerClassName="py-2 mb-4">
-            <View className="flex-row gap-2">
-              {accounts.map((a) => (
-                <SolidButton
-                  key={a.id}
-                  size="sm"
-                  className="items-center rounded-3xl"
-                  color={accountId === a.id ? 'primary' : 'secondary'}
-                  label={`${a.icon} ${a.name}`}
-                  onPress={() => {
-                    onAccountSelect(a.id);
-                  }}
-                />
-              ))}
-            </View>
-          </ScrollView>
-        </>
-      )}
       {!!totalSkipped && (
         <View className="mb-3 rounded-lg bg-yellow-50 p-3 dark:bg-yellow-900">
           <Text className="mb-1 text-sm font-medium text-yellow-900 dark:text-yellow-100">
@@ -155,11 +123,13 @@ function PreviewStep({
             <Text className="text-sm font-medium">
               {row.note || '- No note -'}
             </Text>
-            <View className="flex-row items-baseline gap-1">
+            <View>
               <Text className="text-xs text-gray-500">
                 {row.categoryName || '?'}
                 {' '}
-                -
+                ·
+                {' '}
+                {row.accountName || '?'}
               </Text>
               <FormattedDate className="text-xs text-gray-500" value={new Date(row.date).getTime() / 1000} />
             </View>
@@ -167,7 +137,7 @@ function PreviewStep({
           <FormattedCurrency
             value={Math.abs(row.amount)}
             currency={row.currency ?? DEFAULT_CURRENCY}
-            className="text-sm font-medium"
+            className="font-medium"
           />
         </View>
       ))}
@@ -190,7 +160,7 @@ function PreviewStep({
       <SolidButton
         className="mt-10"
         fullWidth
-        disabled={!accountId || loading}
+        disabled={loading}
         label={
           loading
             ? `${translate('common.loading')}`
@@ -214,12 +184,10 @@ export type ImportProps = {
 
 export default function Import({ state, setMapping, onClose }: ImportProps) {
   const { headers, allRows, mapping } = state;
-  const { data: accounts = [] } = useAccounts();
   const [step, setStep] = React.useState<Step>('map');
   const [preview, setPreview] = React.useState<ParsedRow[]>([]);
   const [skippedCurrencies, setSkippedCurrencies] = React.useState<SkippedRow[]>([]);
-  const [accountId, setAccountId] = React.useState<string>(accounts[0]?.id ?? '');
-  const { isLoading, onImport } = useImportTransactions();
+  const { isLoading, isInitializing, onImport } = useImportTransactions();
 
   const buildPreview = () => {
     if (mapping.date === null || mapping.amount === null) {
@@ -244,13 +212,10 @@ export default function Import({ state, setMapping, onClose }: ImportProps) {
       )}
       {step === 'preview' && (
         <PreviewStep
-          accountId={accountId}
-          accounts={accounts}
           preview={preview}
           skipped={skippedCurrencies}
-          onAccountSelect={setAccountId}
-          onImport={() => onImport({ data: preview, accountId })}
-          loading={isLoading}
+          onImport={() => onImport({ data: preview })}
+          loading={isLoading || isInitializing}
         />
       )}
       <OutlineButton className="mt-2" label={translate('common.cancel')} fullWidth onPress={onClose} />

@@ -14,15 +14,17 @@ import { IS_WEB } from '@/lib/base';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store';
+import { useAccounts } from '../accounts/hooks';
 import { useCategories } from '../categories/hooks';
 import { useCreateTransactions } from '../transactions/hooks';
-import { mapCategoryNameToId } from './helpers';
+import { mapCategoryNameToId, matchAccountNameToId } from './helpers';
 
 export function useImportTransactions() {
   const db = useSQLiteContext();
   const router = useRouter();
   const preferredCurrency = useAppStore.use.currency();
-  const { data: categories = [] } = useCategories();
+  const { isLoading: isCategoriesLoading, data: categories = [] } = useCategories();
+  const { isLoading: isAccountsLoading, data: accounts = [] } = useAccounts();
   const onImportSuccess = (data: string[]) => {
     Alert.alert(
       translate('import-export.complete_title'),
@@ -35,8 +37,8 @@ export function useImportTransactions() {
   const createTransactions = useCreateTransactions(onImportSuccess);
 
   const prepareMutation = useMutation({
-    mutationFn: async ({ data, accountId }: { data: ParsedRow[]; accountId: string }) => {
-      if (!accountId || data.length === 0) throw new Error('No data to import');
+    mutationFn: async ({ data }: { data: ParsedRow[] }) => {
+      if (data.length === 0) throw new Error('No data to import');
       if (IS_AUTO_BACKUP_SUPPORTED) {
         await writeAutoBackupFile(db);
       }
@@ -44,7 +46,7 @@ export function useImportTransactions() {
       for (const row of data) {
         const type = row.type ?? (row.amount >= 0 ? 'income' : 'expense');
         transactions.push({
-          account_id: accountId,
+          account_id: matchAccountNameToId(row.accountName, accounts),
           amount: Math.abs(row.amount) / 100,
           currency: row.currency ?? preferredCurrency,
           category_id: mapCategoryNameToId(row.categoryName, categories),
@@ -62,6 +64,7 @@ export function useImportTransactions() {
 
   return {
     isLoading: prepareMutation.isPending || createTransactions.isPending,
+    isInitializing: isCategoriesLoading || isAccountsLoading,
     onImport: prepareMutation.mutateAsync,
   };
 }

@@ -39,30 +39,28 @@ export default function CategoryCard({ item, currency, periodSelection, onPress,
           <TrashIcon colorClassName="accent-muted-foreground" size={15} />
         </IconButton>
       )}
-      <Pressable onPress={() => onPress(item)} className="flex-1 justify-center px-2 py-1">
-        <View className={`flex-row items-center gap-2 ${bgColorOr(item.category_color)}`}>
-          <View
-            className="size-12 items-center justify-center rounded-lg"
-            style={{ backgroundColor: hexWithOpacity(item.category_color, 30) }}
-          >
-            <Text className="text-2xl">{emoji}</Text>
-          </View>
-          <View className="min-w-0 flex-1">
-            <Text className="text-sm text-muted-foreground" numberOfLines={1}>
-              {item.category_name}
-            </Text>
-            {item.total !== undefined && (
-              <FormattedCurrency value={item.total} currency={currency} className="font-medium" numberOfLines={1} />
-            )}
-            {showBudget && periodSelection.mode !== 'all' && (
-              <BudgetProgressBar
-                spent={item.expense_total}
-                budget={scaledBudget ?? 0}
-                monthlyBudget={!isMonthView ? monthlyBudget : undefined}
-                currency={currency}
-              />
-            )}
-          </View>
+      <Pressable onPress={() => onPress(item)} className="flex-1 flex-row items-center gap-2 px-2 py-1">
+        <View
+          className={`size-12 items-center justify-center rounded-lg ${bgColorOr(item.category_color)}`}
+          style={{ backgroundColor: hexWithOpacity(item.category_color, 30) }}
+        >
+          <Text className="text-2xl">{emoji}</Text>
+        </View>
+        <View className="min-w-0 flex-1">
+          <Text className="text-sm text-muted-foreground" numberOfLines={1}>
+            {item.category_name}
+          </Text>
+          {item.total !== undefined && (
+            <FormattedCurrency value={item.total} currency={currency} className="font-medium" numberOfLines={1} />
+          )}
+          {showBudget && periodSelection.mode !== 'all' && (
+            <BudgetProgressBar
+              spent={item.expense_total}
+              budget={scaledBudget ?? 0}
+              monthlyBudget={!isMonthView ? monthlyBudget : undefined}
+              currency={currency}
+            />
+          )}
         </View>
       </Pressable>
     </View>

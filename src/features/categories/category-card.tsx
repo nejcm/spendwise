@@ -55,7 +55,7 @@ export default function CategoryCard({ item, currency, periodSelection, onPress,
             <FormattedCurrency
               value={item.total}
               currency={currency}
-              className={`font-medium ${item.total > 100_000_000 ? 'text-sm 2xs:text-base' : ''}`}
+              className={`text-sm font-medium sm:text-base ${item.total > 100_000_000 ? '' : '2xs:text-base'}`}
               numberOfLines={1}
             />
           )}

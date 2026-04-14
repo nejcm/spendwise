@@ -42,7 +42,7 @@ export default function CategoryCard({ item, currency, periodSelection, onPress,
       )}
       <Pressable onPress={() => onPress(item)} className="flex-1 flex-row items-center gap-2 px-2 py-1">
         <View
-          className="size-12 items-center justify-center rounded-lg"
+          className="size-9 items-center justify-center rounded-lg 3xs:size-10 2xs:size-12"
           style={{ backgroundColor: hexWithOpacity(item.category_color ?? DEFAULT_COLOR, 30) }}
         >
           <Text className="text-2xl">{emoji}</Text>
@@ -52,7 +52,12 @@ export default function CategoryCard({ item, currency, periodSelection, onPress,
             {item.category_name}
           </Text>
           {item.total !== undefined && (
-            <FormattedCurrency value={item.total} currency={currency} className="font-medium" numberOfLines={1} />
+            <FormattedCurrency
+              value={item.total}
+              currency={currency}
+              className={`font-medium ${item.total > 100_000_000 ? 'text-sm 2xs:text-base' : ''}`}
+              numberOfLines={1}
+            />
           )}
           {showBudget && periodSelection.mode !== 'all' && (
             <BudgetProgressBar

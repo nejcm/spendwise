@@ -3,6 +3,12 @@
 @import 'uniwind';
 
 @theme {
+
+  /* Breakpoints */
+  --breakpoint-3xs: 380px;
+  --breakpoint-2xs: 400px;
+  --breakpoint-xs: 420px;
+
   /* Font families */
   --font-family-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-family-regular: 'Inter', ui-sans-serif, system-ui, sans-serif;

@@ -1,4 +1,6 @@
-export type RateMap = Partial<Record<string, number>>;
+import type { CurrencyKey } from '..';
+
+export type RateMap = Partial<Record<CurrencyKey, number>>;
 
 export type FetchRatesResult = {
   rates: RateMap;

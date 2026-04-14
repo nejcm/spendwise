@@ -4,6 +4,9 @@ export type Currency = {
   symbol: string;
 };
 
+// IMPORTANT: When adding new currencies here, also add a SQL migration that
+// runs `DELETE FROM currency_rates`. Existing cached rows don't include the
+// new currency, which causes silent rate=1 fallbacks during conversion.
 export const CURRENCIES_MAP = {
   AUD: { name: 'Australian Dollar', value: 'AUD', symbol: '$' },
   BRL: { name: 'Brazilian Real', value: 'BRL', symbol: 'R$' },

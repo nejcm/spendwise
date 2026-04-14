@@ -4,6 +4,7 @@ import type { CurrencyKey } from './';
 import type { RateMap } from './service';
 
 import { findClosestDateBinary, unixToISODate } from '@/lib/date/helpers';
+import { CURRENCY_VALUES } from './';
 
 import { fetchRates, fetchRatesForDate, fetchRatesForDateRange } from './service';
 
@@ -43,8 +44,8 @@ const CLOSEST_EUR_RATE_DATE_SQL = `
   ) bx
 `;
 
-function closestRateDateParams(dateUnix: number) {
-  return [dateUnix, dateUnix, dateUnix, dateUnix, dateUnix, dateUnix] as const;
+function hasMissingCurrencies(rates: RatesMap): boolean {
+  return CURRENCY_VALUES.some((c) => c !== 'EUR' && !(c in rates));
 }
 
 // ─── Pure Conversion Helper ───
@@ -88,36 +89,49 @@ export async function getLastFetchedAt(db: SQLiteDatabase): Promise<number | nul
  * and saves them before returning. Falls back to the oldest available rates only
  * if the historical fetch also fails.
  */
-export async function getRatesForDate(db: SQLiteDatabase, dateUnix: number): Promise<RatesMap> {
+export async function getRatesForDate(db: SQLiteDatabase, dateUnix: number, currency?: CurrencyKey): Promise<RatesMap> {
+  const params = currency ? [currency, dateUnix] : [dateUnix];
   const rows = await db.getAllAsync<{ quote: string; rate: number }>(
     `SELECT quote, rate
-     FROM currency_rates
-     WHERE base = 'EUR' AND date = (${CLOSEST_EUR_RATE_DATE_SQL})`,
-    [...closestRateDateParams(dateUnix)],
+    FROM currency_rates
+    WHERE base = 'EUR' 
+    ${currency ? `AND quote = ?` : ''}
+    AND date = ?`,
+    params,
   );
 
-  if (rows.length > 0) return toRatesMap(rows);
+  if (rows.length > 0) {
+    const cached = toRatesMap(rows);
+    if (currency) return cached;
+    if (!hasMissingCurrencies(cached)) return cached;
+  }
 
-  // No local rates found — try fetching historical rates for that specific date
+  // No local rates found or missing currencies — try fetching historical rates for that specific date
   const dayTimestamp = dateUnix - (dateUnix % 86400);
   const dateStr = new Date(dayTimestamp * 1000).toISOString().slice(0, 10);
   const fetched = await fetchRatesForDate(dateStr);
-
   if (fetched) {
     await saveRatesForDate(db, fetched.rates, dayTimestamp);
-    return toRatesMap(
+    const freshMap = toRatesMap(
       Object.entries(fetched.rates)
         .filter(([, v]) => v != null)
         .map(([quote, rate]) => ({ quote, rate: rate as number })),
     );
+    // note: fetching fresh rates still might have missing currencies
+    if (!currency || freshMap[currency]) return freshMap;
   }
 
   // Final fallback: use rates from the closest available date
+  const params2 = currency
+    ? [currency, dateUnix, dateUnix, dateUnix, dateUnix, dateUnix, dateUnix]
+    : [dateUnix, dateUnix, dateUnix, dateUnix, dateUnix, dateUnix];
   const fallback = await db.getAllAsync<{ quote: string; rate: number }>(
     `SELECT quote, rate
      FROM currency_rates
-     WHERE base = 'EUR' AND date = (${CLOSEST_EUR_RATE_DATE_SQL})`,
-    [...closestRateDateParams(dateUnix)],
+     WHERE base = 'EUR' 
+      ${currency ? `AND quote = ?` : ''}
+      AND date = (${CLOSEST_EUR_RATE_DATE_SQL})`,
+    params2,
   );
   return toRatesMap(fallback);
 }
@@ -242,8 +256,9 @@ export async function getRatesForDates(
 
     for (const [trunc, storedDate] of hitDatesMap) {
       const rates = ratesByStoredDate.get(storedDate);
-      if (rates) truncResult.set(trunc, rates);
-      else missDates.push(trunc); // demoted: DB had the date but no rate rows
+      // demoted: DB had the date but no rate rows or missing currencies
+      if (!rates || hasMissingCurrencies(rates)) missDates.push(trunc);
+      else truncResult.set(trunc, rates);
     }
   }
 

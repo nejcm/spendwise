@@ -12,7 +12,7 @@ import { OutlineButton } from '@/components/ui/outline-button';
 import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/features/categories/api';
 import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { translate } from '@/lib/i18n';
-import { closeSheet } from '@/lib/local-store';
+import { closeSheet } from '@/lib/store/local-store';
 import { useAppStore } from '@/lib/store/store';
 import { getRandomColor } from '@/lib/theme/colors';
 import { refinePositiveNumberOrNull } from '@/lib/validation/helpers';

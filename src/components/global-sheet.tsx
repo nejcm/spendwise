@@ -9,8 +9,8 @@ import { ScheduledTransactionForm } from '@/features/scheduled-transactions/comp
 import { ScanFab } from '@/features/transactions/components/scan-fab';
 import { TransactionForm } from '@/features/transactions/components/transaction-form';
 import { translate } from '@/lib/i18n';
-import { closeSheet, useLocalStore } from '@/lib/local-store';
 import { SHEET_SNAP_POINTS } from '@/lib/sheet';
+import { closeSheet, useLocalStore } from '@/lib/store/local-store';
 import { IS_WEB } from '../lib/base';
 
 const SHEET_DATA: Record<SheetType, { title: string; content?: React.ReactNode }> = {

@@ -1,9 +1,4 @@
 import type { StoreApi, UseBoundStore } from 'zustand';
-import { Linking } from 'react-native';
-
-export function openLinkInBrowser(url: string) {
-  Linking.canOpenURL(url).then((canOpen) => canOpen && Linking.openURL(url));
-}
 
 type WithSelectors<S> = S extends { getState: () => infer T } ? S & { use: { [K in keyof T]: () => T[K] } } : never;
 

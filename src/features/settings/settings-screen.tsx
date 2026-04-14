@@ -7,7 +7,7 @@ import { FocusAwareStatusBar, Image, ScrollView, Text, useModalSheet, View } fro
 import { GhostButton } from '@/components/ui/ghost-button';
 import { ALargeSmall, Banknote, Bell, Bot, BotMessageSquare, DatabaseZap, HelpCircle, Import, LayoutGrid, Link, ListChecks, PieChart, RefreshCcw, ScanLine, Settings, Share, Shield, User } from '@/components/ui/icon';
 import { config } from '@/config';
-import { triggerScanPicker } from '@/lib/local-store';
+import { triggerScanPicker } from '@/lib/store/local-store';
 import { selectProfile, useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { getAvatar } from '../profile';

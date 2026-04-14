@@ -1,6 +1,6 @@
-import type { SheetConfig } from './sheet';
+import type { SheetConfig } from '../sheet';
 import { create } from 'zustand';
-import { createSelectors } from './utils';
+import { createSelectors } from '../utils';
 
 export type ScanTriggeredType = 'camera' | 'gallery' | 'select';
 

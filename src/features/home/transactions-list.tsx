@@ -9,7 +9,7 @@ import { SkeletonRows } from '@/components/ui/skeleton';
 import { useRecentTransactions } from '@/features/transactions/api';
 import { TransactionCard } from '@/features/transactions/components/transaction-card';
 import { translate } from '@/lib/i18n';
-import { openSheet } from '@/lib/local-store';
+import { openSheet } from '@/lib/store/local-store';
 
 export default function TransactionsList() {
   const router = useRouter();

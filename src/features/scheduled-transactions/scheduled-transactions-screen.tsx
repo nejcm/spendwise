@@ -5,7 +5,7 @@ import { FocusAwareStatusBar, ScrollView, SolidButton } from '@/components/ui';
 import { Plus } from '@/components/ui/icon';
 import { SkeletonRows } from '@/components/ui/skeleton';
 import { translate } from '@/lib/i18n';
-import { openSheet } from '@/lib/local-store';
+import { openSheet } from '@/lib/store/local-store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { useScheduledTransactions } from './api';
 import ScheduledTransactionCard from './components/scheduled-transaction-card';

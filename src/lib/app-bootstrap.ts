@@ -37,7 +37,7 @@ async function bootstrapAppInternal(
   db: SQLiteDatabase,
   queryClient: QueryClient,
 ): Promise<void> {
-  console.log('[bootstrap] starting migrations');
+  console.log('[bootstrap] starting...');
   try {
     await migrateDb(db);
     console.log('[bootstrap] migrations complete');
@@ -47,7 +47,6 @@ async function bootstrapAppInternal(
     throw e;
   }
 
-  console.log('[bootstrap] running post-migration tasks');
   try {
     await Promise.all([
       ensureAndroidChannel(),

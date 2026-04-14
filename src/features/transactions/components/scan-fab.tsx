@@ -3,7 +3,7 @@ import * as React from 'react';
 import { getPressedStyle, IconButton } from '@/components/ui';
 import { ScanLine } from '@/components/ui/icon';
 import { translate } from '@/lib/i18n';
-import { closeSheet, triggerScanPicker } from '@/lib/local-store';
+import { closeSheet, triggerScanPicker } from '@/lib/store/local-store';
 
 export type ScanFabProps = Partial<IconButtonProps>;
 

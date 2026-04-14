@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { Home, LayoutGrid, PieChart, PlusIcon, UserIcon } from '@/components/ui/icon';
-import { openSheet, triggerScan } from '@/lib/local-store';
+import { openSheet, triggerScan } from '@/lib/store/local-store';
 
 export const TAB_BAR_COLOR = '#f6f6f6' as const;
 export const TAB_BAR_DARK_COLOR = '#17191C' as const;

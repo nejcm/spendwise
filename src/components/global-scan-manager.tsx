@@ -1,7 +1,7 @@
 import type { Action } from 'expo-image-manipulator';
 import type { ScannedReceipt, ScanVariables } from '@/features/ai/use-scan-receipt';
 import type { TransactionFormData } from '@/features/transactions/types';
-import type { ScanTriggeredType } from '@/lib/local-store';
+import type { ScanTriggeredType } from '@/lib/store/local-store';
 import { useMutation } from '@tanstack/react-query';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
@@ -16,7 +16,7 @@ import { centsToAmount } from '@/features/formatting/helpers';
 import { useCreateTransaction } from '@/features/transactions/api';
 import { dateToUnix } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
-import { closeScan, openSheet, useLocalStore } from '@/lib/local-store';
+import { closeScan, openSheet, useLocalStore } from '@/lib/store/local-store';
 import {
   selectIsAiEnabled,
   selectTransactionFormPrefs,

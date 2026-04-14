@@ -9,7 +9,7 @@ import { clearAiChat, setAiDraftQuestion, setAiMessages, useAiChatStore } from '
 import { captureError } from '@/lib/analytics';
 import { translate } from '@/lib/i18n';
 import { generateId } from '@/lib/sqlite';
-import { selectIsAiEnabled, useAppStore } from '@/lib/store';
+import { selectIsAiEnabled, useAppStore } from '@/lib/store/store';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import { getMarkdownStyle } from './helpers';
 

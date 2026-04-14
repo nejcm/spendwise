@@ -1,6 +1,6 @@
 import type { CurrencyKey } from '../currencies';
 import type { CategorySpend } from '@/features/insights/types';
-import type { PeriodSelection } from '@/lib/store';
+import type { PeriodSelection } from '@/lib/store/store';
 import * as React from 'react';
 import { Pressable } from 'react-native';
 

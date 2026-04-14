@@ -7,7 +7,7 @@ import { useRatesForDate } from '@/features/currencies/hooks';
 import { amountToCents, formatMajorUnitsInputFromCents } from '@/features/formatting/helpers';
 import { dateToUnix } from '@/lib/date/helpers';
 import { toNumber } from '@/lib/number';
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/store';
 
 type FormLike = { setFieldValue: (name: 'baseAmount', value: string) => void };
 

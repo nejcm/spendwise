@@ -3,7 +3,7 @@ import { Pressable, View } from 'react-native';
 
 import { FocusAwareStatusBar, Image, Input, ModalSheet, ScrollView, Text, useModalSheet } from '@/components/ui';
 import { translate } from '@/lib/i18n';
-import { updateProfile, useAppStore } from '@/lib/store';
+import { updateProfile, useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 
 import { AVATARS_LIST, getAvatar } from '.';

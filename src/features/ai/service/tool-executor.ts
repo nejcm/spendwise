@@ -6,7 +6,7 @@ import { centsToAmount } from '@/features/formatting/helpers';
 import { getCategorySpendByRange, getSummaryByRange, getTrendByRange } from '@/features/insights/queries';
 import { getTransactionsSample } from '@/features/transactions/queries';
 import { dateToUnix, unixToISODate } from '@/lib/date/helpers';
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/store';
 
 const MAX_TRANSACTION_LIMIT = 20;
 const DEFAULT_TRANSACTION_LIMIT = 12;

@@ -1,4 +1,4 @@
-import type { PeriodMode } from '@/lib/store';
+import type { PeriodMode } from '@/lib/store/store';
 import * as React from 'react';
 import { useColorScheme, useWindowDimensions } from 'react-native';
 

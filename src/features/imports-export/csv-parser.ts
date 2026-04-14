@@ -67,6 +67,8 @@ export type ColumnMapping = {
   type: number | null; // column with "income"/"expense" or positive/negative
   category: number | null;
   account: number | null; // column with account name, resolved to account_id at import time
+  fallbackAmount: number | null; // column index to use for amount when currency is unsupported
+  fallbackCurrency: number | null; // column index containing the fallback currency when row currency is unsupported
 };
 
 export type ParsedRow = {
@@ -78,6 +80,7 @@ export type ParsedRow = {
   categoryName?: string; // raw name from CSV, resolved to category_id at import time
   accountName?: string; // raw name from CSV, resolved to account_id at import time
   isDuplicate?: boolean;
+  usedFallback?: boolean; // true when fallback amount/currency was applied due to unsupported currency
 };
 
 export type SkippedRow = {
@@ -137,14 +140,40 @@ export function mapRows(rows: string[][], mapping: ColumnMapping, hasHeader: boo
       amountCents = -amountCents;
     }
 
-    const rawCurrency = mapping.currency ? (row[mapping.currency] ?? '').trim().toUpperCase() : '';
+    const rawCurrency = mapping.currency !== null ? (row[mapping.currency] ?? '').trim().toUpperCase() : '';
     const currencyKnown = CURRENCY_VALUES.includes(rawCurrency as CurrencyKey);
-    const currency = currencyKnown ? (rawCurrency as CurrencyKey) : undefined;
 
-    // Skip rows where a currency column is mapped, a value is present, but it's not recognized
-    if (!currency && rawCurrency !== '') {
-      skipped.push({ date: normalizeDate(rawDate), amount: amountCents, note: rawNote, rawCurrency });
-      continue;
+    let currency: CurrencyKey | undefined;
+    let resolvedAmountCents = amountCents;
+    let usedFallback = false;
+
+    if (currencyKnown) {
+      currency = rawCurrency as CurrencyKey;
+    }
+    else if (rawCurrency !== '') {
+      // Currency column is mapped and value is present but unsupported — try fallback
+      const rawFallbackCurrency = mapping.fallbackCurrency !== null
+        ? (row[mapping.fallbackCurrency] ?? '').trim().toUpperCase()
+        : '';
+      const fallbackCurrencyKnown = CURRENCY_VALUES.includes(rawFallbackCurrency as CurrencyKey);
+
+      if (fallbackCurrencyKnown) {
+        currency = rawFallbackCurrency as CurrencyKey;
+        usedFallback = true;
+        if (mapping.fallbackAmount !== null) {
+          const rawFallback = (row[mapping.fallbackAmount] ?? '').replaceAll(RE_NON_NUMERIC, '');
+          const fallbackNum = Number.parseFloat(rawFallback);
+          if (!Number.isNaN(fallbackNum)) {
+            resolvedAmountCents = Math.round(Math.abs(fallbackNum) * 100);
+            if (type === 'expense') resolvedAmountCents = -resolvedAmountCents;
+          }
+        }
+      }
+      else {
+        // No valid fallback — skip as before
+        skipped.push({ date: normalizeDate(rawDate), amount: amountCents, note: rawNote, rawCurrency });
+        continue;
+      }
     }
 
     // Category name
@@ -155,12 +184,13 @@ export function mapRows(rows: string[][], mapping: ColumnMapping, hasHeader: boo
 
     parsed.push({
       date: normalizeDate(rawDate),
-      amount: amountCents,
+      amount: resolvedAmountCents,
       note: rawNote,
       type,
       currency: currency ?? DEFAULT_USER_CURRENCY,
       ...(rawCategory && { categoryName: rawCategory }),
       ...(rawAccount && { accountName: rawAccount }),
+      ...(usedFallback && { usedFallback: true }),
     });
   }
 
@@ -188,7 +218,7 @@ function normalizeDate(raw: string): string {
 
 export function autoDetectColumnMapping(rows: string[][]): ColumnMapping {
   const [headers, sampleRow] = rows;
-  const mapping: ColumnMapping = { amount: null, date: null, note: null, type: null, currency: null, category: null, account: null };
+  const mapping: ColumnMapping = { amount: null, date: null, note: null, type: null, currency: null, category: null, account: null, fallbackAmount: null, fallbackCurrency: null };
 
   if (!headers) return mapping;
 
@@ -212,6 +242,7 @@ export function autoDetectColumnMapping(rows: string[][]): ColumnMapping {
       mapping.note === null
       && (lower.includes('note')
         || lower.includes('memo')
+        || lower.includes('comment')
         || lower.includes('description')
         || lower.includes('details'))
     ) {

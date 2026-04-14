@@ -10,7 +10,7 @@ import { computeBaseAmount } from '@/features/currencies/conversion';
 import { getRatesForDate } from '@/features/currencies/queries';
 import { unixToISODate } from '@/lib/date/helpers';
 import { generateId } from '@/lib/sqlite';
-import { getAppState } from '@/lib/store';
+import { getAppState } from '@/lib/store/store';
 
 export { unixToISODate };
 

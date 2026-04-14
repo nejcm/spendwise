@@ -3,7 +3,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import type { ChatMessage, ProviderChatMessage, ToolCall } from '../types';
 
 import { AI_MAX_TOOL_ROUNDS } from '@/config';
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/store';
 import {
   appendAnthropicToolCall,
   appendAnthropicToolResult,

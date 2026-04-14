@@ -2,7 +2,7 @@ import type { ThemeType } from '@/features/settings/theme';
 import * as React from 'react';
 
 import { Uniwind, useUniwind } from 'uniwind';
-import { getAppState, setTheme, useAppStore } from '@/lib/store';
+import { getAppState, setTheme, useAppStore } from '@/lib/store/store';
 
 export type { ThemeType as ColorSchemeType };
 

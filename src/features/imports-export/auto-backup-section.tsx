@@ -10,7 +10,7 @@ import { formatDate } from '@/features/formatting/helpers';
 import { IS_AUTO_BACKUP_SUPPORTED, listAutoBackupFiles } from '@/features/imports-export/backup-file';
 import { useRestoreAutoBackup } from '@/features/imports-export/hooks';
 import { translate } from '@/lib/i18n';
-import { updateAutoBackup, useAppStore } from '@/lib/store';
+import { updateAutoBackup, useAppStore } from '@/lib/store/store';
 
 function autoBackupIntervalOptions(): { label: string; value: AutoBackupInterval }[] {
   return [

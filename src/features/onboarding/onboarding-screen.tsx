@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useState } from 'react';
 
 import { FocusAwareStatusBar, View } from '@/components/ui';
-import { setIsFirstTime } from '@/lib/store';
+import { setIsFirstTime } from '@/lib/store/store';
 import ProfileStep from './Profile';
 import SettingsStep from './Settings';
 import ThemeStep from './Theme';

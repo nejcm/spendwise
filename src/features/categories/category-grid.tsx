@@ -9,7 +9,7 @@ import { NoDataCard } from '@/components/no-data-card';
 import { Alert, Text, View } from '@/components/ui';
 import { Lightbulb } from '@/components/ui/icon';
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/store';
 import CategoryCard from './category-card';
 import { useDeleteCategory } from './hooks';
 

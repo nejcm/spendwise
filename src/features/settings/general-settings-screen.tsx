@@ -2,7 +2,7 @@ import * as React from 'react';
 import DetailsSection from '@/components/details';
 import { FocusAwareStatusBar, ScrollView, Switch } from '@/components/ui';
 import { translate } from '@/lib/i18n';
-import { updateAppState, useAppStore } from '@/lib/store';
+import { updateAppState, useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 
 export function GeneralSettingsScreen() {

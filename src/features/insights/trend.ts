@@ -1,5 +1,5 @@
 import type { DailyTrendTotal, TrendPoint } from './types';
-import type { PeriodMode } from '@/lib/store';
+import type { PeriodMode } from '@/lib/store/store';
 
 import {
   addDays,

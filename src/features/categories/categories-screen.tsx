@@ -16,7 +16,7 @@ import { getPeriodRange } from '@/lib/date/helpers';
 import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/local-store';
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/store';
 import { CategoryGrid } from './category-grid';
 
 export function CategoriesScreen() {

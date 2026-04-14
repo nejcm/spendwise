@@ -8,7 +8,7 @@ import { CURRENCIES_MAP } from '@/features/currencies';
 import { CURRENCY_IMAGES, CURRENCY_OPTIONS } from '@/features/currencies/images';
 import { LANGUAGES_OPTIONS } from '@/features/languages';
 import { translate, useSelectedLanguage } from '@/lib/i18n';
-import { setCurrency, useAppStore } from '@/lib/store';
+import { setCurrency, useAppStore } from '@/lib/store/store';
 import OnboardingLayout from '../layout';
 
 export type SettingsStepProps = {

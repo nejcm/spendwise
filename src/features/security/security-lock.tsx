@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 
 import { LockScreen } from '@/features/security/lock-screen';
-import { setIsLocked, useAppStore } from '@/lib/store';
+import { setIsLocked, useAppStore } from '@/lib/store/store';
 
 export function SecurityLock() {
   const lockEnabled = useAppStore.use.lockEnabled();

@@ -21,7 +21,7 @@ import {
   selectIsAiEnabled,
   selectTransactionFormPrefs,
   useAppStore,
-} from '@/lib/store';
+} from '@/lib/store/store';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import { ActivityIndicator, Modal, Text } from './ui';
 

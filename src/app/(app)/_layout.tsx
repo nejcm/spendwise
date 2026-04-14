@@ -1,7 +1,7 @@
 import { Redirect, Stack } from 'expo-router';
 import * as React from 'react';
 
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 

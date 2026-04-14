@@ -3,7 +3,7 @@ import type { CurrencyKey } from '@/features/currencies';
 import type { NumberFormat } from '@/features/formatting/constants';
 import * as React from 'react';
 import { formatCurrency, formatDate, formatDateFull, formatNumber } from '@/features/formatting/helpers';
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/store';
 import { Text } from './text';
 
 type BaseProps = Omit<TextProps, 'children'> & {

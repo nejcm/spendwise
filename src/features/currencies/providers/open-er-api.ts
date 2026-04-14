@@ -14,11 +14,11 @@ async function fetchLatestImpl(): Promise<FetchRatesResult | null> {
   );
 }
 
-async function fetchHistoricalImpl(dateStr: string): Promise<FetchRatesResult | null> {
+async function fetchHistoricalImpl(_dateStr: string): Promise<FetchRatesResult | null> {
   throw new Error('open-er-api does not support historical rates');
 }
 
-async function fetchRangeImpl(startDate: string, endDate: string): Promise<DateRangeRatesResult | null> {
+async function fetchRangeImpl(_startDate: string, _endDate: string): Promise<DateRangeRatesResult | null> {
   throw new Error('open-er-api does not support date-range rates');
 }
 

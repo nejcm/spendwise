@@ -12,7 +12,7 @@ import { todayISO } from '@/features/formatting/helpers';
 import { IS_WEB } from '@/lib/base';
 import { tryFormatDate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/store';
 
 export type DateInputProps = {
   value: string;

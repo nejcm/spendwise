@@ -12,8 +12,8 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { currentPeriodSelection } from '@/lib/date/helpers';
 import { createSelectors } from '@/lib/utils';
-import { DEFAULT_DATE_FORMAT, DEFAULT_USER_CURRENCY } from '../config';
-import { mmkvStorage } from './storage';
+import { DEFAULT_DATE_FORMAT, DEFAULT_USER_CURRENCY } from '../../config';
+import { mmkvStorage } from '../storage';
 
 export type TokenType = {
   access: string;

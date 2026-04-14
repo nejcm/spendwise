@@ -1,4 +1,4 @@
-import type { PeriodSelectionWeek } from '../store';
+import type { PeriodSelectionWeek } from '../store/store';
 import {
   dateToUnix,
   findClosestDateBinary,

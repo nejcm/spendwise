@@ -18,11 +18,11 @@ import BackupSection from './backup-section';
 const initialCsvState: ImportProps['state'] = {
   headers: [],
   allRows: [],
-  mapping: { amount: null, date: null, currency: null, note: null, type: null, category: null, account: null },
+  mapping: { amount: null, date: null, currency: null, note: null, type: null, category: null, account: null, fallbackAmount: null, fallbackCurrency: null },
 };
 
 export function ImportScreen() {
-  const [inProgress, setInProgress] = useState<boolean>(false);
+  const [importing, setImporting] = useState<boolean>(false);
   const [csvState, setCsvState] = useState<ImportProps['state']>(() => initialCsvState);
 
   const pickFileMutation = useMutation({
@@ -50,7 +50,7 @@ export function ImportScreen() {
     onSuccess: (state) => {
       if (!state) return;
       setCsvState(state);
-      setInProgress(true);
+      setImporting(true);
     },
     onError: (error) => {
       Alert.alert(translate('common.error'), error.message);
@@ -62,7 +62,7 @@ export function ImportScreen() {
       <FocusAwareStatusBar />
       <ScrollView className="flex-1" style={defaultStyles.transparentBg}>
         <View className="flex-1 px-4 py-8">
-          {inProgress
+          {importing
             ? (
                 <Import
                   state={csvState}
@@ -71,7 +71,7 @@ export function ImportScreen() {
                       ...prev,
                       mapping,
                     }))}
-                  onClose={() => setInProgress(false)}
+                  onClose={() => setImporting(false)}
                 />
               )
             : (

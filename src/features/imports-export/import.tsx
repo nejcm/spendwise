@@ -57,13 +57,60 @@ function MapStep({ headers, mapping, onMapping, onNext }: MapStepProps) {
               value={mapping[field] === null ? 'none' : String(mapping[field]) ?? 'none'}
               options={options}
               onSelect={(value) => {
-                if (value === 'none') onMapping({ ...mapping, [field]: null });
-                else onMapping({ ...mapping, [field]: Number.parseInt(value) });
+                const parsed = value === 'none' ? null : Number.parseInt(value);
+                onMapping({
+                  ...mapping,
+                  [field]: parsed,
+                  ...(field === 'currency' && parsed === null
+                    ? { fallbackAmount: null, fallbackCurrency: null }
+                    : {}),
+                });
               }}
             />
           </View>
         </View>
       ))}
+      {mapping.currency !== null && (
+        <View className="mt-2 border-t border-border pt-4">
+          <Text className="mb-3 text-sm font-medium text-muted-foreground">
+            {translate('import-export.fallback_section_title')}
+          </Text>
+          <View className="mb-4 flex-row items-center justify-between gap-4">
+            <View className="min-w-32">
+              <Text className="mb-1 text-sm font-medium text-gray-600 dark:text-gray-400">
+                {translate('import-export.field_fallback_amount')}
+              </Text>
+            </View>
+            <View className="flex-1">
+              <Select
+                size="sm"
+                value={mapping.fallbackAmount === null ? 'none' : String(mapping.fallbackAmount)}
+                options={options}
+                onSelect={(value) => {
+                  onMapping({ ...mapping, fallbackAmount: value === 'none' ? null : Number.parseInt(value) });
+                }}
+              />
+            </View>
+          </View>
+          <View className="mb-4 flex-row items-center justify-between gap-4">
+            <View className="min-w-32">
+              <Text className="mb-1 text-sm font-medium text-gray-600 dark:text-gray-400">
+                {translate('import-export.field_fallback_currency')}
+              </Text>
+            </View>
+            <View className="flex-1">
+              <Select
+                size="sm"
+                value={mapping.fallbackCurrency === null ? 'none' : String(mapping.fallbackCurrency)}
+                options={options}
+                onSelect={(value) => {
+                  onMapping({ ...mapping, fallbackCurrency: value === 'none' ? null : Number.parseInt(value) });
+                }}
+              />
+            </View>
+          </View>
+        </View>
+      )}
       <SolidButton fullWidth className="mt-8" label={translate('import-export.preview')} onPress={onNext} />
     </View>
   );

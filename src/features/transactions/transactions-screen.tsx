@@ -12,7 +12,7 @@ import { X } from '@/components/ui/icon';
 import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/store';
 import { transactionsQueryOptions, useTransactions } from './api';
 import { TransactionFilterBar } from './components/transaction-filter-bar';
 import { TransactionList } from './components/transaction-list';

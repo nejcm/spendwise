@@ -7,7 +7,7 @@ import { cn } from 'tailwind-variants';
 import { DEFAULT_COLOR } from '@/components/color-selector';
 import { FormattedCurrency, Text } from '@/components/ui';
 import { formatShortDate } from '@/features/formatting/helpers';
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/store';
 import { hexWithOpacity } from '@/lib/theme/colors';
 
 export type TransactionCardProps = {

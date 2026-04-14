@@ -13,7 +13,7 @@ import { ScreensGrid } from '@/features/home/screens-grid';
 import { useMonthSummary } from '@/features/transactions/api';
 import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import TransactionsList from './transactions-list';

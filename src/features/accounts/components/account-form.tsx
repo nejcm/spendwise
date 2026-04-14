@@ -11,7 +11,7 @@ import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-a
 import { CURRENCY_VALUES } from '@/features/currencies';
 import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { translate } from '@/lib/i18n';
-import { addLastUsedCurrency, selectAccountFormPrefs, setAccountFormPrefs, useAppStore } from '@/lib/store';
+import { addLastUsedCurrency, selectAccountFormPrefs, setAccountFormPrefs, useAppStore } from '@/lib/store/store';
 import { getRandomColor } from '@/lib/theme/colors';
 import { useArchiveAccountConfirmation, useCreateAccount, useUpdateAccount } from '../api';
 import { ACCOUNT_TYPE_LABELS, ACCOUNT_TYPES } from '../types';

@@ -7,7 +7,7 @@ import { DEFAULT_COLOR } from '@/components/color-selector';
 import { FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
 import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
 import { scaleBudgetForPeriod } from '@/lib/date/helpers';
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/store';
 import { hexWithOpacity } from '@/lib/theme/colors';
 import { ACCOUNT_TYPE_LABELS } from '../types';
 

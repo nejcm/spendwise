@@ -3,7 +3,7 @@ import type { CurrencyKey } from '@/features/currencies';
 import * as React from 'react';
 import { Euro, Options, useModalSheet } from '@/components/ui';
 import { CURRENCY_OPTIONS } from '@/features/currencies/images';
-import { setCurrency, useAppStore } from '@/lib/store';
+import { setCurrency, useAppStore } from '@/lib/store/store';
 import { SettingsItem } from './settings-item';
 
 export function CurrencyItem() {

@@ -1,5 +1,5 @@
 import type { FetchQueryOptions } from '@tanstack/react-query';
-import type { PeriodSelection } from '@/lib/store';
+import type { PeriodSelection } from '@/lib/store/store';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { getPeriodRange, isNavigablePeriodMode, navigatePeriod } from '@/lib/date/helpers';

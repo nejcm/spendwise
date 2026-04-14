@@ -3,7 +3,7 @@ import * as React from 'react';
 import { View } from 'react-native';
 import { cn } from 'tailwind-variants';
 import { formatCurrency } from '@/features/formatting/helpers';
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/store';
 import { Text } from './text';
 
 export type BudgetProgressBarProps = {

@@ -13,7 +13,7 @@ import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory 
 import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { translate } from '@/lib/i18n';
 import { closeSheet } from '@/lib/local-store';
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/store';
 import { getRandomColor } from '@/lib/theme/colors';
 import { refinePositiveNumberOrNull } from '@/lib/validation/helpers';
 

@@ -5,7 +5,7 @@ import { dropDb, migrateDb } from '../sqlite';
 import { clearDbData, clearSelectedDataDb, clearTransactionsDb } from '../sqlite/db';
 import { mockData } from '../sqlite/mock-data';
 import { seedDefaults } from '../sqlite/seed';
-import { clearAppStore } from '../store';
+import { clearAppStore } from '../store/store';
 
 export async function clearData(db: SQLiteDatabase, queryClient: QueryClient) {
   try {

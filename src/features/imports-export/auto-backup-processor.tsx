@@ -2,7 +2,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
 import { AppState } from 'react-native';
 import { IS_AUTO_BACKUP_SUPPORTED, shouldRunAutoBackup, writeAutoBackupFile } from '@/features/imports-export/backup-file';
-import { getAppState, updateAutoBackup } from '@/lib/store';
+import { getAppState, updateAutoBackup } from '@/lib/store/store';
 
 export function AutoBackupProcessor() {
   const db = useSQLiteContext();

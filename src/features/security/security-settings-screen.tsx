@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Alert, FocusAwareStatusBar, ScrollView, Select, Switch, Text, View } from '@/components/ui';
 
 import { translate } from '@/lib/i18n';
-import { setIsLocked, setLockEnabled, setLockTimeoutMinutes, useAppStore } from '@/lib/store';
+import { setIsLocked, setLockEnabled, setLockTimeoutMinutes, useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import DetailsSection from '../../components/details';
 

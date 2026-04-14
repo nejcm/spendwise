@@ -1,4 +1,4 @@
-import type { PeriodSelection } from '@/lib/store';
+import type { PeriodSelection } from '@/lib/store/store';
 import { endOfISOWeek, format, setISOWeek, startOfISOWeek, startOfYear } from 'date-fns';
 import { translate } from '../i18n';
 

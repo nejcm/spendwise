@@ -30,7 +30,7 @@ import {
   selectTransactionFormPrefs,
   setTransactionFormPrefs,
   useAppStore,
-} from '@/lib/store';
+} from '@/lib/store/store';
 
 export type TransactionFormProps = {
   initialValues?: TransactionFormInitialValues;

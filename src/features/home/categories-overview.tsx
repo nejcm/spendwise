@@ -8,7 +8,7 @@ import { GhostButton } from '@/components/ui/ghost-button';
 import { SkeletonRows } from '@/components/ui/skeleton';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { NoDataCard } from '../../components/no-data-card';
 import { useCategorySpendByRange } from '../insights/api';

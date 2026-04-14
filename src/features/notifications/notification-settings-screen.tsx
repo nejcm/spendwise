@@ -5,7 +5,7 @@ import { Platform } from 'react-native';
 import DetailsSection from '@/components/details';
 import { Alert, FocusAwareStatusBar, ScrollView, Select, Switch } from '@/components/ui';
 import { translate } from '@/lib/i18n';
-import { updateNotifications, useAppStore } from '@/lib/store';
+import { updateNotifications, useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { notificationsQuery, setupNotifications } from './notifications';
 

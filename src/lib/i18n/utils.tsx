@@ -9,7 +9,7 @@ import { useCallback, useMemo } from 'react';
 import { I18nManager, NativeModules, Platform } from 'react-native';
 import RNRestart from 'react-native-restart';
 
-import { getAppState, setLanguage, useAppStore } from '@/lib/store';
+import { getAppState, setLanguage, useAppStore } from '@/lib/store/store';
 import { DEFAULT_LANGUAGE, LANGUAGES_OPTIONS } from '../../features/languages';
 import { IS_WEB } from '../base';
 

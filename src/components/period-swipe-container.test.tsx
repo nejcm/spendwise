@@ -1,5 +1,5 @@
 import type * as React from 'react';
-import type { PeriodSelection } from '@/lib/store';
+import type { PeriodSelection } from '@/lib/store/store';
 import { Text } from 'react-native';
 import { cleanup, render } from '@/lib/test-utils';
 

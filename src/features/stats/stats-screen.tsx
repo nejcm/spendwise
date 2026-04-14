@@ -7,7 +7,7 @@ import { FocusAwareStatusBar, ScrollView, Text, View } from '@/components/ui';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { CategoryBreakdown } from './components/category-breakdown';
 import { StatsTrend } from './components/stats-trend';

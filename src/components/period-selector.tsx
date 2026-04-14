@@ -1,4 +1,4 @@
-import type { PeriodSelection } from '@/lib/store';
+import type { PeriodSelection } from '@/lib/store/store';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { cn } from 'tailwind-variants';
@@ -7,7 +7,7 @@ import { ArrowLeftIcon, ArrowRightIcon } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { isNavigablePeriodMode, navigatePeriod } from '@/lib/date/helpers';
 import { getPeriodLabel } from '@/lib/date/labels';
-import { setPeriodSelection } from '@/lib/store';
+import { setPeriodSelection } from '@/lib/store/store';
 import { PeriodSelectorModal } from './period-selector-modal';
 
 export type PeriodSelectorProps = {

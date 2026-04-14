@@ -8,7 +8,7 @@ import { writeAutoBackupFile } from '@/features/imports-export/backup-file';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
 import { translate } from '@/lib/i18n';
-import { setCurrency } from '@/lib/store';
+import { setCurrency } from '@/lib/store/store';
 
 import * as queries from './queries';
 import { recalculateAllBaseAmounts } from './recalculate';

@@ -1,10 +1,10 @@
 import type { AiProviderType } from './types';
-import type { AppState } from '@/lib/store';
+import type { AppState } from '@/lib/store/store';
 import * as React from 'react';
 import { Linking, Pressable, View } from 'react-native';
 import { showMessage } from 'react-native-flash-message';
 import { FocusAwareStatusBar, Input, ScrollView, Select, SolidButton, Text } from '@/components/ui';
-import { setAiProvider, setAnthropicApiKey, setOpenaiApiKey, useAppStore } from '@/lib/store';
+import { setAiProvider, setAnthropicApiKey, setOpenaiApiKey, useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { translate } from '../../lib/i18n';
 

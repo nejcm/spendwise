@@ -33,7 +33,7 @@ import {
   selectTransactionFormPrefs,
   setTransactionFormPrefs,
   useAppStore,
-} from '@/lib/store';
+} from '@/lib/store/store';
 import { mergeCurrencyArrays } from '../../currencies/helpers';
 import {
   useCreateScheduledTransaction,

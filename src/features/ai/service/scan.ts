@@ -4,7 +4,7 @@ import type { CurrencyKey } from '@/features/currencies';
 import * as z from 'zod';
 import { CURRENCY_VALUES } from '@/features/currencies';
 import { todayISO } from '@/features/formatting/helpers';
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/store';
 import { scanReceiptAnthropic } from './anthropic';
 import { scanReceiptOpenAI } from './openai';
 

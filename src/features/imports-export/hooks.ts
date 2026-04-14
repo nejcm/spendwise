@@ -13,7 +13,7 @@ import { documentPickerTypeForJson, pickValidatedFile } from '@/features/imports
 import { IS_WEB } from '@/lib/base';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '@/lib/store';
+import { useAppStore } from '@/lib/store/store';
 import { useAccounts } from '../accounts/hooks';
 import { useCategories } from '../categories/hooks';
 import { useCreateTransactions } from '../transactions/hooks';

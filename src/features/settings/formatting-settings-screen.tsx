@@ -9,7 +9,7 @@ import { Calendar, CircleDollarSign, DecimalsArrowRight, Euro } from '@/componen
 import { useChangeCurrency } from '@/features/currencies/hooks';
 import { CURRENCY_OPTIONS } from '@/features/currencies/images';
 import { translate } from '@/lib/i18n';
-import { setCurrencyFormat, setDateFormat, setMonthStartDay, setNumberFormat, useAppStore } from '@/lib/store';
+import { setCurrencyFormat, setDateFormat, setMonthStartDay, setNumberFormat, useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { CURRENCY_FORMAT_OPTIONS, DATE_FORMAT_OPTIONS, NUMBER_FORMAT_OPTIONS } from '../formatting/constants';
 import { SettingsContainer } from './components/settings-container';

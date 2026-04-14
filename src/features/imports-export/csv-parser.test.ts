@@ -18,7 +18,7 @@ describe('mapRows', () => {
         ['date', 'amount', 'type', 'note'],
         ['2026-03-18', '50.00', 'transfer', 'Move to savings'],
       ],
-      { date: 0, amount: 1, type: 2, note: 3, currency: null, category: null, account: null },
+      { date: 0, amount: 1, type: 2, note: 3, currency: null, category: null, account: null, fallbackAmount: null, fallbackCurrency: null },
       true,
     );
 
@@ -33,13 +33,43 @@ describe('mapRows', () => {
         ['DATE', 'TYPE', 'FROM ACCOUNT', 'TO ACCOUNT/TO CATEGORY', 'AMOUNT', 'CURRENCY', 'AMOUNT 2', 'CURRENCY 2', 'TAGS', 'NOTES'],
         ['3/18/26', 'Expense', 'USD', 'Bills', '4.7', 'USD', '21', 'MYR', '', 'Youtube'],
       ],
-      { date: 0, type: 1, amount: 4, currency: 5, note: 9, category: 3, account: null },
+      { date: 0, type: 1, amount: 4, currency: 5, note: 9, category: 3, account: null, fallbackAmount: null, fallbackCurrency: null },
       true,
     );
 
     expect(rows).toEqual(
       { rows: [{ amount: -470, categoryName: 'Bills', currency: 'USD', date: '2026-03-18', note: 'Youtube', type: 'expense' }], skipped: [] },
     );
+  });
+
+  it('uses fallback amount and currency when row currency is unsupported', () => {
+    const result = mapRows(
+      [
+        ['DATE', 'AMOUNT', 'CURRENCY', 'AMOUNT_EUR', 'CURRENCY_2', 'NOTES'],
+        ['2026-03-18', '4.7', 'XYZ', '21', 'EUR', 'Youtube'],
+      ],
+      { date: 0, amount: 1, currency: 2, note: 5, type: null, category: null, account: null, fallbackAmount: 3, fallbackCurrency: 4 },
+      true,
+    );
+
+    expect(result.skipped).toHaveLength(0);
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0]).toMatchObject({ amount: 2100, currency: 'EUR', usedFallback: true });
+  });
+
+  it('skips row when currency is unsupported and no fallback is configured', () => {
+    const result = mapRows(
+      [
+        ['DATE', 'AMOUNT', 'CURRENCY', 'NOTES'],
+        ['2026-03-18', '4.7', 'XYZ', 'Youtube'],
+      ],
+      { date: 0, amount: 1, currency: 2, note: 3, type: null, category: null, account: null, fallbackAmount: null, fallbackCurrency: null },
+      true,
+    );
+
+    expect(result.rows).toHaveLength(0);
+    expect(result.skipped).toHaveLength(1);
+    expect(result.skipped[0]?.rawCurrency).toBe('XYZ');
   });
 });
 

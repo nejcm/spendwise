@@ -1,9 +1,9 @@
-import type { PeriodSelection } from '@/lib/store';
+import type { PeriodSelection } from '@/lib/store/store';
 import * as React from 'react';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { isNavigablePeriodMode, navigatePeriod } from '@/lib/date/helpers';
-import { setPeriodSelection } from '@/lib/store';
+import { setPeriodSelection } from '@/lib/store/store';
 
 export type PeriodSwipeContainerProps = {
   selection: PeriodSelection;

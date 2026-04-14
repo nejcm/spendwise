@@ -16,7 +16,7 @@ import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
 
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '../../lib/store';
+import { useAppStore } from '../../lib/store/store';
 import { amountToCents } from '../formatting/helpers';
 import * as queries from './queries';
 

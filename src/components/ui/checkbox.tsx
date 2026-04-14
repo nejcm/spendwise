@@ -6,6 +6,7 @@ import { useCallback } from 'react';
 import { I18nManager, Pressable, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
+import { cn } from 'tailwind-variants';
 import { useCSSVariable } from 'uniwind';
 import { Text } from './text';
 
@@ -32,6 +33,7 @@ export type RootProps = {
 export type IconProps = {
   checked: boolean;
   size?: RootProps['size'];
+  disabled?: boolean;
 };
 
 export function Root({ checked = false, children, onChange, disabled, className = '', ...props }: RootProps) {
@@ -42,7 +44,7 @@ export function Root({ checked = false, children, onChange, disabled, className 
   return (
     <Pressable
       onPress={handleChange}
-      className={`flex-row items-center ${className} ${disabled ? 'opacity-50' : ''}`}
+      className={cn(`flex-row items-center`, className)}
       accessibilityState={{ checked }}
       disabled={disabled}
       {...props}
@@ -65,7 +67,7 @@ function Label({ text, testID, className = '' }: LabelProps) {
   );
 }
 
-export function CheckboxIcon({ checked = false, size = 'md' }: IconProps) {
+export function CheckboxIcon({ checked = false, size = 'md', disabled = false }: IconProps) {
   const background = String(useCSSVariable('--color-background') ?? '#000');
   const SIZE = checkboxSizes[size];
   return (
@@ -74,7 +76,7 @@ export function CheckboxIcon({ checked = false, size = 'md' }: IconProps) {
         height: SIZE,
         width: SIZE,
       }}
-      className={`items-center justify-center rounded-md border-2 border-foreground transition-colors duration-150 ${checked ? 'bg-foreground' : 'bg-transparent'}`}
+      className={`items-center justify-center rounded-md border-2 border-foreground transition-colors duration-150 ${checked ? 'bg-foreground' : 'bg-transparent'} ${disabled ? 'opacity-50' : ''}`}
     >
       <View className={`transition-opacity duration-100 ${checked ? 'opacity-100' : 'opacity-0'}`}>
         <Svg width={SIZE * 1.2} height={SIZE * 1.2} viewBox="0 0 24 24" fill="none">
@@ -105,7 +107,7 @@ function CheckboxBase({
 }: RootProps & { label?: string }) {
   return (
     <CheckboxRoot checked={checked} testID={testID} {...props}>
-      <CheckboxIcon checked={checked} size={size} />
+      <CheckboxIcon checked={checked} size={size} disabled={!!props.disabled} />
       {label ? <Label text={label} testID={testID ? `${testID}-label` : undefined} className="pr-2" /> : null}
     </CheckboxRoot>
   );

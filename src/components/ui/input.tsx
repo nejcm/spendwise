@@ -8,7 +8,7 @@ import { cn, tv } from 'tailwind-variants';
 import { InputLabel, labelDefaults } from './input-label';
 import { Text } from './text';
 
-export const inputDefaults = 'rounded-lg border font-family-sans focus:outline-none';
+export const inputDefaults = 'rounded-lg border font-family-sans focus:outline-none text-base/snug';
 export const inputDefaultDefaults = 'border-border bg-input text-foreground';
 
 export const inputTv = tv({
@@ -29,28 +29,28 @@ export const inputTv = tv({
     },
     size: {
       'xs': {
-        input: 'h-8 px-2 text-xs/normal',
-        label: 'text-xs/normal',
+        label: 'text-xs/snug',
+        input: 'h-8 px-2 text-xs/snug',
       },
       'sm': {
-        input: 'h-10 px-3 text-sm/normal',
-        label: 'text-xs/normal',
+        label: 'text-xs/snug',
+        input: 'h-10 px-3 text-sm/snug',
       },
       'md': {
-        input: 'h-12 px-4 text-base/normal',
-        label: 'text-sm/normal',
+        label: 'text-sm/snug',
+        input: 'h-12 px-4 text-base/snug',
       },
       'lg': {
-        input: 'h-14 px-5 text-lg/normal',
-        label: 'text-base/normal',
+        label: 'text-base/snug',
+        input: 'h-14 px-5 text-lg/snug',
       },
       'xl': {
-        input: 'h-16 px-6 text-xl/normal',
-        label: 'text-lg/normal',
+        label: 'text-lg/snug',
+        input: 'h-16 px-6 text-xl/snug',
       },
       '2xl': {
-        input: 'h-18 px-7 text-xl/normal',
-        label: 'text-lg/normal',
+        label: 'text-lg/snug',
+        input: 'h-18 px-7 text-xl/snug',
       },
     },
     variant: {

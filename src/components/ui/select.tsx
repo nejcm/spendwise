@@ -23,7 +23,7 @@ const selectTv = tv({
     container: '',
     label: 'mb-1 text-sm/normal text-foreground',
     input:
-      'flex-row items-center justify-center rounded-lg border px-4',
+      'flex-row items-center justify-center rounded-lg border px-4 text-base/tight',
     inputValue: '',
     image: 'size-6 rounded-full',
   },
@@ -41,38 +41,38 @@ const selectTv = tv({
     size: {
       'xs': {
         input: 'h-8 px-2',
-        label: 'text-xs/normal',
-        inputValue: 'text-xs/normal',
+        label: 'text-xs/snug',
+        inputValue: 'text-xs/tight',
         image: 'size-2',
       },
       'sm': {
         input: 'h-10 px-3',
-        label: 'text-sm/normal',
-        inputValue: 'text-sm/normal',
+        label: 'text-sm/snug',
+        inputValue: 'text-sm/tight',
         image: 'size-3',
       },
       'md': {
         input: 'h-12 px-4',
-        label: 'text-sm/normal',
-        inputValue: 'text-base/normal',
+        label: 'text-sm/snug',
+        inputValue: 'text-base/tight',
         image: 'size-4',
       },
       'lg': {
         input: 'h-14 px-5',
-        label: 'text-base/normal',
-        inputValue: 'text-lg/normal',
+        label: 'text-base/snug',
+        inputValue: 'text-lg/tight',
         image: 'size-5',
       },
       'xl': {
         input: 'h-16 px-6',
-        label: 'text-lg/normal',
-        inputValue: 'text-xl/normal',
+        label: 'text-lg/snug',
+        inputValue: 'text-xl/tight',
         image: 'size-6',
       },
       '2xl': {
         input: 'h-18 px-7',
-        label: 'text-lg/normal',
-        inputValue: 'text-xl/normal',
+        label: 'text-lg/snug',
+        inputValue: 'text-xl/tight',
         image: 'size-7',
       },
     },
@@ -331,7 +331,7 @@ export function Select<T extends string | number>({
           {renderSelectedItem?.(selectedOption)
             || (
               <>
-                <View className="flex-1 flex-row items-center gap-2">
+                <View className="h-full flex-1 flex-row items-center gap-2">
                   {selectedOption?.image && <Image source={selectedOption.image} className={styles.image()} />}
                   <Text className={styles.inputValue({
                     className: !selectedOption?.label ? 'text-muted-foreground' : '',

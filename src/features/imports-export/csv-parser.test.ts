@@ -23,7 +23,12 @@ describe('mapRows', () => {
     );
 
     expect(rows).toEqual(
-      { rows: [{ amount: 5000, currency: 'USD', date: '2026-03-18', note: 'Move to savings', type: 'transfer' }], skipped: [] },
+      { rows: [], skipped: [{
+        amount: 5000,
+        date: '2026-03-18',
+        note: 'Move to savings',
+        rawCurrency: '',
+      }] },
     );
   });
 
@@ -38,7 +43,7 @@ describe('mapRows', () => {
     );
 
     expect(rows).toEqual(
-      { rows: [{ amount: -470, categoryName: 'Bills', currency: 'USD', date: '2026-03-18', note: 'Youtube', type: 'expense' }], skipped: [] },
+      { rows: [{ amount: -470, categoryName: 'Bills', currency: 'USD', date: '2026-03-18', note: 'Youtube', type: 'expense', usedFallback: false }], skipped: [] },
     );
   });
 

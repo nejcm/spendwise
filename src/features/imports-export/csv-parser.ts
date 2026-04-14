@@ -117,8 +117,6 @@ export function mapRows(rows: string[][], mapping: ColumnMapping, hasHeader: boo
       continue;
     }
 
-    let amountCents = Math.round(Math.abs(numericAmount) * 100);
-
     // Determine sign from type column or from amount sign.
     let type: ParsedRow['type'];
     let isExpense = numericAmount < 0;
@@ -136,44 +134,40 @@ export function mapRows(rows: string[][], mapping: ColumnMapping, hasHeader: boo
       type = isExpense ? 'expense' : 'income';
     }
 
-    if (type === 'expense') {
-      amountCents = -amountCents;
-    }
-
-    const rawCurrency = mapping.currency !== null ? (row[mapping.currency] ?? '').trim().toUpperCase() : '';
-    const currencyKnown = CURRENCY_VALUES.includes(rawCurrency as CurrencyKey);
-
-    let currency: CurrencyKey | undefined;
-    let resolvedAmountCents = amountCents;
+    let finalCurrency: CurrencyKey | undefined;
+    let finalAmount = Math.round(Math.abs(numericAmount) * 100);
     let usedFallback = false;
 
+    const rawCurrency = (mapping.currency ? (row[mapping.currency] ?? '').trim().toUpperCase() : '') as CurrencyKey;
+    const rawFallbackCurrency = (mapping.fallbackCurrency ? (row[mapping.fallbackCurrency] ?? '').trim().toUpperCase() : '') as CurrencyKey;
+    const currencyKnown = CURRENCY_VALUES.includes(rawCurrency);
     if (currencyKnown) {
-      currency = rawCurrency as CurrencyKey;
+      finalCurrency = rawCurrency;
     }
-    else if (rawCurrency !== '') {
-      // Currency column is mapped and value is present but unsupported — try fallback
-      const rawFallbackCurrency = mapping.fallbackCurrency !== null
-        ? (row[mapping.fallbackCurrency] ?? '').trim().toUpperCase()
-        : '';
-      const fallbackCurrencyKnown = CURRENCY_VALUES.includes(rawFallbackCurrency as CurrencyKey);
+    // try fallback currency and amount
+    else {
+      const fallbackCurrencyKnown = CURRENCY_VALUES.includes(rawFallbackCurrency);
 
-      if (fallbackCurrencyKnown) {
-        currency = rawFallbackCurrency as CurrencyKey;
-        usedFallback = true;
-        if (mapping.fallbackAmount !== null) {
-          const rawFallback = (row[mapping.fallbackAmount] ?? '').replaceAll(RE_NON_NUMERIC, '');
-          const fallbackNum = Number.parseFloat(rawFallback);
-          if (!Number.isNaN(fallbackNum)) {
-            resolvedAmountCents = Math.round(Math.abs(fallbackNum) * 100);
-            if (type === 'expense') resolvedAmountCents = -resolvedAmountCents;
-          }
+      if (fallbackCurrencyKnown && mapping.fallbackAmount) {
+        const rawFallback = (row[mapping.fallbackAmount] ?? '').replaceAll(RE_NON_NUMERIC, '');
+        const fallbackNum = Number.parseFloat(rawFallback);
+        if (!Number.isNaN(fallbackNum)) {
+          finalCurrency = rawFallbackCurrency;
+          finalAmount = Math.round(Math.abs(fallbackNum) * 100);
+          usedFallback = true;
         }
       }
-      else {
-        // No valid fallback — skip as before
-        skipped.push({ date: normalizeDate(rawDate), amount: amountCents, note: rawNote, rawCurrency });
-        continue;
-      }
+    }
+
+    // Skip row if no valid currency was found
+    if (!finalCurrency) {
+      skipped.push({
+        date: normalizeDate(rawDate),
+        amount: finalAmount,
+        note: rawNote,
+        rawCurrency: rawCurrency.length ? rawCurrency : rawFallbackCurrency,
+      });
+      continue;
     }
 
     // Category name
@@ -184,13 +178,13 @@ export function mapRows(rows: string[][], mapping: ColumnMapping, hasHeader: boo
 
     parsed.push({
       date: normalizeDate(rawDate),
-      amount: resolvedAmountCents,
+      amount: type === 'expense' ? -finalAmount : finalAmount,
       note: rawNote,
       type,
-      currency: currency ?? DEFAULT_USER_CURRENCY,
+      currency: finalCurrency ?? DEFAULT_USER_CURRENCY,
+      usedFallback,
       ...(rawCategory && { categoryName: rawCategory }),
       ...(rawAccount && { accountName: rawAccount }),
-      ...(usedFallback && { usedFallback: true }),
     });
   }
 

@@ -65,7 +65,7 @@ export function useImportTransactions() {
   return {
     isLoading: prepareMutation.isPending || createTransactions.isPending,
     isInitializing: isCategoriesLoading || isAccountsLoading,
-    onImport: prepareMutation.mutateAsync,
+    onImport: prepareMutation.mutate,
   };
 }
 

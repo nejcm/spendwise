@@ -3,7 +3,7 @@ import type { RateMap } from './types';
 import { CURRENCY_VALUES } from '../index';
 
 /** Attempts per provider before giving up (handles rate limits / transient errors). */
-const RATE_FETCH_MAX_ATTEMPTS = 4;
+const RATE_FETCH_MAX_ATTEMPTS = 3;
 const RATE_FETCH_INITIAL_BACKOFF_MS = 400;
 
 function sleepMs(ms: number): Promise<void> {

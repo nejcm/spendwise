@@ -31,7 +31,7 @@ jest.mock('@/lib/date/helpers', () => ({
   isNavigablePeriodMode: (mode: string) => mode !== 'all' && mode !== 'custom' && mode !== 'today',
 }));
 
-jest.mock('@/lib/store', () => ({
+jest.mock('@/lib/store/store', () => ({
   setPeriodSelection: (...args: unknown[]) => mockSetPeriodSelection(...args),
 }));
 

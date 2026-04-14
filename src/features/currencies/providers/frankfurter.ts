@@ -1,13 +1,11 @@
-import type { DateRangeRatesResult, FetchRatesResult, RateMap } from './types';
+import type { CurrencyRatesProvider, DateRangeRatesResult, FetchRatesResult, RateMap } from './types';
 
 import { CURRENCY_VALUES } from '../index';
 import { fetchRatesWithBackoff, filterSupportedRates } from './utils';
 
-// https://api.frankfurter.app — ECB data, no auth needed
-
 const FRANKFURTER_SYMBOLS = CURRENCY_VALUES.filter((c) => c !== 'EUR').join(',');
 
-export async function fetchFromFrankfurter(): Promise<FetchRatesResult | null> {
+async function fetchLatestImpl(): Promise<FetchRatesResult | null> {
   return fetchRatesWithBackoff(
     () =>
       fetch(
@@ -23,7 +21,7 @@ export async function fetchFromFrankfurter(): Promise<FetchRatesResult | null> {
   );
 }
 
-export async function fetchHistoricalFromFrankfurter(dateStr: string): Promise<FetchRatesResult | null> {
+async function fetchHistoricalImpl(dateStr: string): Promise<FetchRatesResult | null> {
   return fetchRatesWithBackoff(
     () =>
       fetch(
@@ -50,7 +48,7 @@ function parseRangeSegment(data: { rates?: Record<string, Record<string, number>
   return ratesByDate;
 }
 
-export async function fetchRangeFromFrankfurter(
+async function fetchRangeImpl(
   startDate: string,
   endDate: string,
 ): Promise<DateRangeRatesResult | null> {
@@ -67,3 +65,10 @@ export async function fetchRangeFromFrankfurter(
     },
   );
 }
+
+export const frankfurterProvider: CurrencyRatesProvider = {
+  id: 'frankfurter',
+  latest: fetchLatestImpl,
+  historical: fetchHistoricalImpl,
+  range: fetchRangeImpl,
+};

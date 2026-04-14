@@ -1,41 +1,55 @@
-import type { DateRangeRatesResult, FetchRatesResult, RateMap } from './providers/types';
+import type { CurrencyRatesProvider, DateRangeRatesResult, FetchRatesResult, RateMap } from './providers/types';
 import { captureError } from '@/lib/analytics';
 
 import { splitBy } from '@/lib/date/helpers';
-import { fetchFromFawazahmed0, fetchHistoricalFromFawazahmed0 } from './providers/fawazahmed0';
-import { fetchFromFrankfurter, fetchHistoricalFromFrankfurter, fetchRangeFromFrankfurter } from './providers/frankfurter';
-import { fetchFromOpenErApi } from './providers/open-er-api';
+import { fawazahmed0Provider } from './providers/fawazahmed0';
+import { frankfurterProvider } from './providers/frankfurter';
+import { openErApiProvider } from './providers/open-er-api';
 
-export type { DateRangeRatesResult, FetchRatesResult, RateMap };
+export type { CurrencyRatesProvider, DateRangeRatesResult, FetchRatesResult, RateMap };
 
-// Current rates: tries providers in order
+/**
+ * Other services
+ * - https://openexchangerates.org/
+ * - https://freecurrencyapi.com/
+ * - https://www.exchangerate-api.com/
+ */
+
+const defaultProviderOrder: readonly CurrencyRatesProvider[] = [
+  frankfurterProvider,
+  fawazahmed0Provider,
+  openErApiProvider,
+] as const;
+
 export async function fetchRates() {
-  const result
-    = (await fetchFromFrankfurter())
-      ?? (await fetchFromFawazahmed0())
-      ?? (await fetchFromOpenErApi());
+  let result: FetchRatesResult | null | undefined;
+  for (const p of defaultProviderOrder) {
+    result = await p.latest();
+    if (result) break;
+  }
 
   if (!result) {
     const err = new Error('All currency rate providers failed');
     console.error(err.message);
     captureError(err);
-    return undefined;
+    throw err;
   }
 
   return result;
 }
 
-// Historical (single date)
 export async function fetchRatesForDate(dateStr: string) {
-  const result
-    = (await fetchHistoricalFromFrankfurter(dateStr))
-      ?? (await fetchHistoricalFromFawazahmed0(dateStr));
+  let result: FetchRatesResult | null | undefined;
+  for (const p of defaultProviderOrder) {
+    result = await p.historical(dateStr);
+    if (result) break;
+  }
 
   if (!result) {
     const err = new Error(`Historical currency rate providers failed for date ${dateStr}`);
     console.error(err.message);
     captureError(err, { date: dateStr });
-    return undefined;
+    throw err;
   }
 
   return result;
@@ -53,7 +67,13 @@ export async function fetchRatesForDateRange(
   }
 
   const results = await Promise.allSettled(
-    segments.map((seg) => fetchRangeFromFrankfurter(seg.start, seg.end)),
+    segments.map(async (seg) => {
+      for (const p of defaultProviderOrder) {
+        const value = await p.range(seg.start, seg.end);
+        if (value) return value;
+      }
+      return null;
+    }),
   );
 
   const merged: Record<string, RateMap> = {};
@@ -64,10 +84,14 @@ export async function fetchRatesForDateRange(
       captureError(err, { startDate, endDate: endDate ?? startDate });
       continue;
     }
-    if (result.status === 'fulfilled') {
+    if (result.status === 'fulfilled' && result.value) {
       Object.assign(merged, result.value.ratesByDate);
     }
   }
 
-  return { ratesByDate: merged, source: 'frankfurter-range' };
+  if (Object.keys(merged).length === 0) {
+    throw new Error(`Date-range currency rate providers failed for ${startDate}..${endDate}`);
+  }
+
+  return { ratesByDate: merged, source: 'currency-range' };
 }

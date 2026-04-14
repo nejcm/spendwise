@@ -10,3 +10,10 @@ export type DateRangeRatesResult = {
   ratesByDate: Record<string, RateMap>;
   source: string;
 };
+
+export type CurrencyRatesProvider = {
+  id: string;
+  latest: () => Promise<FetchRatesResult | null>;
+  historical: (dateStr: string) => Promise<FetchRatesResult | null>;
+  range: (startDate: string, endDate: string) => Promise<DateRangeRatesResult | null>;
+};

@@ -61,6 +61,21 @@ export async function fetchRatesWithBackoff<T extends { source: string }>(
   return null;
 }
 
+export const RANGE_HISTORICAL_MAX_FETCHES = 100;
+
+/** When `items` is longer than `maxCount`, returns up to `maxCount` evenly spaced picks (first and last included when `maxCount` ≥ 2). */
+export function subsampleOrderedToMaxCount<T>(items: readonly T[], maxCount: number): T[] {
+  const n = items.length;
+  if (n === 0 || maxCount < 1) return [];
+  if (n <= maxCount) return [...items];
+  if (maxCount === 1) return [items[n - 1]!];
+  const out: T[] = [];
+  for (let j = 0; j < maxCount; j++) {
+    out.push(items[Math.floor((j * (n - 1)) / (maxCount - 1))]!);
+  }
+  return out;
+}
+
 export function filterSupportedRates(raw: Record<string, unknown>): RateMap {
   const result: RateMap = {};
   for (const key of CURRENCY_VALUES) {

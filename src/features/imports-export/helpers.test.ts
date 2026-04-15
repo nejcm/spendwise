@@ -80,29 +80,29 @@ describe('mapCategoryNameToId', () => {
 
     // "cafe" shares few characters with "coffee" — 1-char substitution (a→o) is not
     // close enough for Fuse.js at threshold 0.4. Semantic synonyms require a rule entry.
-    it('does NOT fuzzy-match "cafe" to "Coffee & Drinks" — falls through to _unknown', () => {
-      expect(mapCategoryNameToId('cafe', CATEGORIES)).toBe('_unknown');
+    it('does NOT fuzzy-match "cafe" to "Coffee & Drinks" — falls back to first category', () => {
+      expect(mapCategoryNameToId('cafe', CATEGORIES)).toBe(CATEGORIES[0]!.id);
     });
 
-    it('does NOT fuzzy-match "espresso" to "Coffee & Drinks" — no lexical overlap', () => {
-      expect(mapCategoryNameToId('espresso', CATEGORIES)).toBe('_unknown');
+    it('does NOT fuzzy-match "espresso" to "Coffee & Drinks" — falls back to first category', () => {
+      expect(mapCategoryNameToId('espresso', CATEGORIES)).toBe(CATEGORIES[0]!.id);
     });
 
-    it('falls through to _unknown when no category is a close enough match', () => {
-      expect(mapCategoryNameToId('xyz123abc', CATEGORIES, 'qwerty zxcvbn noop')).toBe('_unknown');
+    it('falls back to first category when no match is found', () => {
+      expect(mapCategoryNameToId('xyz123abc', CATEGORIES, 'qwerty zxcvbn noop')).toBe(CATEGORIES[0]!.id);
     });
   });
 
   describe('edge cases', () => {
-    it('returns _unknown for undefined name', () => {
-      expect(mapCategoryNameToId(undefined, CATEGORIES)).toBe('_unknown');
+    it('returns first category id for undefined name', () => {
+      expect(mapCategoryNameToId(undefined, CATEGORIES)).toBe(CATEGORIES[0]!.id);
     });
 
-    it('returns _unknown for whitespace-only name', () => {
-      expect(mapCategoryNameToId('   ', CATEGORIES)).toBe('_unknown');
+    it('returns first category id for whitespace-only name', () => {
+      expect(mapCategoryNameToId('   ', CATEGORIES)).toBe(CATEGORIES[0]!.id);
     });
 
-    it('returns _unknown when categories array is empty', () => {
+    it('returns DEFAULT_CATEGORY_ID when categories array is empty', () => {
       expect(mapCategoryNameToId('food', [])).toBe('_unknown');
     });
 

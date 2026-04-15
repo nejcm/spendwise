@@ -6,13 +6,14 @@ import { Select, View } from './ui';
 
 export const DEFAULT_COLOR = '#0284c7';
 
-const sizes: Record<NonNullable<SelectProps['size']>, string> = {
-  'xs': 'size-8',
-  'sm': 'size-10',
-  'md': 'size-12',
-  'lg': 'size-14',
-  'xl': 'size-16',
-  '2xl': 'size-18',
+// [item size, item container size]
+const sizes: Record<NonNullable<SelectProps['size']>, [string, string]> = {
+  'xs': ['size-8', 'min-h-10'],
+  'sm': ['size-10', 'min-h-12'],
+  'md': ['size-12', 'min-h-14'],
+  'lg': ['size-14', 'min-h-16'],
+  'xl': ['size-16', 'min-h-18'],
+  '2xl': ['size-18', 'min-h-20'],
 };
 
 function renderItem(item: OptionType) {
@@ -27,7 +28,7 @@ function renderItem(item: OptionType) {
 function renderSelectedItem(size: SelectProps['size'] = 'md', fallback: string | number | undefined) {
   return (item: OptionType | null) => (
     <View
-      className={`rounded-full border border-border ${sizes[size]}`}
+      className={`rounded-full border border-border ${sizes[size][0]}}`}
       style={{ backgroundColor: String(item?.value || fallback) }}
     />
   );
@@ -36,16 +37,18 @@ function renderSelectedItem(size: SelectProps['size'] = 'md', fallback: string |
 const listProps: OptionsProps<string>['listProps'] = { numColumns: 5 };
 
 export default function ColorSelector(props: Omit<SelectProps, 'options'>) {
+  const size = props.size ?? 'md';
   return (
     <Select
       options={COLOR_OPTIONS}
       showChevron={false}
       {...props}
+      size={size}
       listProps={listProps}
       inputClassName={cn('border-0 bg-transparent px-0', props.inputClassName)}
-      itemClassName="min-h-10 px-1 py-2 min-w-10"
+      itemClassName={`px-1 py-2 ${sizes[size][1]} w-auto`}
       renderItem={renderItem}
-      renderSelectedItem={renderSelectedItem(props.size ?? 'md', props.value)}
+      renderSelectedItem={renderSelectedItem(size, props.value)}
     />
   );
 }

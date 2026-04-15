@@ -21,6 +21,7 @@ export type TokenType = {
 };
 
 export type ColorThemeType = 'red' | 'blue' | 'green' | 'purple' | 'orange' | 'black' | 'white';
+export type LongPressActionType = 'scan_receipt' | 'pick_from_gallery';
 
 export type PeriodMode = 'year' | 'month' | 'week' | 'custom' | 'all' | 'today' | 'this-week' | 'this-month' | 'this-year';
 
@@ -78,6 +79,7 @@ export type AppState = {
   notifications: NotificationSettings;
   autoBackup: AutoBackupSettings;
   saveOnScan: boolean | undefined;
+  longPressAction: LongPressActionType;
 
   // Security
   lockEnabled: boolean;
@@ -122,6 +124,7 @@ function getDefaultState(): AppState {
     isFirstTime: true,
     language: undefined,
     saveOnScan: undefined,
+    longPressAction: 'scan_receipt',
     lockEnabled: false,
     lockTimeoutMinutes: 1,
     isLocked: false,

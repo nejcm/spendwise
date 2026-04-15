@@ -422,6 +422,12 @@
     "income_categories": "Einnahmekategorien",
     "language": "Sprache",
     "links": "Links",
+    "long_press_action": "Langdruck-Aktion",
+    "long_press_action_description": "Was tun, wenn du eine Transaktion lang drückst.",
+    "long_press_action_options": {
+      "pick_from_gallery": "Aus Galerie wählen",
+      "scan_receipt": "Beleg scannen"
+    },
     "mock_data": "Beispieldaten",
     "month_start": "Monatsbeginn",
     "more": "Mehr",

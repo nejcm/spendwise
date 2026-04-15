@@ -422,6 +422,12 @@
     "income_categories": "Income Categories",
     "language": "Language",
     "links": "Links",
+    "long_press_action": "Long press action",
+    "long_press_action_description": "What to do when you long press a transaction.",
+    "long_press_action_options": {
+      "pick_from_gallery": "Pick from gallery",
+      "scan_receipt": "Scan receipt"
+    },
     "mock_data": "Mock Data",
     "month_start": "Start of month",
     "more": "More",

@@ -49,7 +49,7 @@ export function useImportTransactions() {
           account_id: matchAccountNameToId(row.accountName, accounts),
           amount: Math.abs(row.amount) / 100,
           currency: row.currency ?? preferredCurrency,
-          category_id: mapCategoryNameToId(row.categoryName, categories),
+          category_id: mapCategoryNameToId(row.categoryName, categories, row.note),
           date: Math.floor(new Date(row.date).getTime() / 1000),
           note: row.note,
           type,

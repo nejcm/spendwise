@@ -1,5 +1,6 @@
 import type { Account } from '../accounts/types';
 import type { Category } from '../categories/types';
+import Fuse from 'fuse.js';
 
 const AMPERSAND_PATTERN = /&/g;
 const WHITESPACE_PATTERN = /\s+/g;
@@ -141,6 +142,21 @@ function findCategoryByNeedles(categories: Category[], needles: readonly string[
   return undefined;
 }
 
+/**
+ * Fuzzy-match `text` against the user's category names using Fuse.js.
+ * Only returns a result when the match score is ≤ 0.4 (≈ ≥60% similarity).
+ */
+function findCategoryByFuzzy(text: string, categories: Category[]): Category | undefined {
+  if (!text || categories.length === 0) return undefined;
+  const fuse = new Fuse(categories, {
+    keys: ['name'],
+    threshold: 0.4,
+    ignoreLocation: true,
+    minMatchCharLength: 3,
+  });
+  return fuse.search(text)[0]?.item;
+}
+
 function normalizeAccountLabel(name: string): string {
   return name.trim().toLowerCase().replace(WHITESPACE_PATTERN, ' ');
 }
@@ -170,21 +186,34 @@ export function matchAccountNameToId(
   return accounts[0].id;
 }
 
-export function mapCategoryNameToId(name: string | undefined, categories: Category[]): string {
+export function mapCategoryNameToId(
+  name: string | undefined,
+  categories: Category[],
+  note?: string,
+): string {
   if (!name) return '_unknown';
 
   const trimmed = name.trim();
+
+  // Stage 1: exact match (case-insensitive, normalised)
   const direct = categories.find((c) => categoryNamesMatch(c.name, trimmed));
   if (direct) return direct.id;
 
   const normalized = normalizeImportLabel(trimmed);
 
+  // Stage 2: rule-based matching
   for (const rule of CATEGORY_IMPORT_RULES) {
     if (!ruleMatches(normalized, rule)) continue;
     const hit = findCategoryByNeedles(categories, rule.needles);
     if (hit) return hit.id;
   }
 
-  const fuzzy = categories.find((c) => normalizeImportLabel(c.name) === normalized);
-  return fuzzy?.id ?? '_unknown';
+  // Stage 3: fuzzy similarity — try category name first, then note as fallback signal
+  const fuzzyHit = findCategoryByFuzzy(trimmed, categories)
+    ?? (note ? findCategoryByFuzzy(note, categories) : undefined);
+  if (fuzzyHit) return fuzzyHit.id;
+
+  // Stage 4: exact normalised fallback
+  const fallback = categories.find((c) => normalizeImportLabel(c.name) === normalized);
+  return fallback?.id ?? '_unknown';
 }

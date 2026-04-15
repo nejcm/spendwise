@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { ScrollView, View } from 'react-native';
 import DetailsSection from '@/components/details';
-import { Alert, FocusAwareStatusBar, FormattedCurrency, FormattedDate, GhostButton, SolidButton, Text } from '@/components/ui';
+import { Alert, FocusAwareStatusBar, FormattedCurrency, FormattedDate, GhostButton, SolidButton, Text, TrashIcon } from '@/components/ui';
 
 import { OutlineButton } from '@/components/ui/outline-button';
 import { useAccounts } from '@/features/accounts/api';
@@ -135,7 +135,14 @@ export function TransactionDetailScreen() {
                 textClassName="underline"
               />
             )}
-            <GhostButton label={translate('common.delete')} color="danger" onPress={handleDelete} className="flex-1" textClassName="underline" />
+            <GhostButton
+              label={translate('common.delete')}
+              color="danger"
+              onPress={handleDelete}
+              className="flex-1"
+              textClassName="underline"
+              iconLeft={<TrashIcon size={16} colorClassName="accent-danger-600" className="mr-2" />}
+            />
           </View>
 
           <View className="mt-auto flex-row gap-2">

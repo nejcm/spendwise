@@ -1,6 +1,7 @@
 import type { Account } from '../accounts/types';
 import type { Category } from '../categories/types';
 import Fuse from 'fuse.js';
+import { DEFAULT_CATEGORY_ID } from '@/config';
 
 const AMPERSAND_PATTERN = /&/g;
 const WHITESPACE_PATTERN = /\s+/g;
@@ -191,7 +192,7 @@ export function mapCategoryNameToId(
   categories: Category[],
   note?: string,
 ): string {
-  if (!name) return '_unknown';
+  if (!name) return categories[0]?.id ?? DEFAULT_CATEGORY_ID;
 
   const trimmed = name.trim();
 
@@ -215,5 +216,5 @@ export function mapCategoryNameToId(
 
   // Stage 4: exact normalised fallback
   const fallback = categories.find((c) => normalizeImportLabel(c.name) === normalized);
-  return fallback?.id ?? '_unknown';
+  return fallback?.id ?? categories[0]?.id ?? DEFAULT_CATEGORY_ID;
 }

@@ -5,7 +5,7 @@ import * as React from 'react';
 import { View } from 'react-native';
 import * as z from 'zod';
 import ColorSelector from '@/components/color-selector';
-import { GhostButton, Image, Input, OutlineButton, SolidButton, Text } from '@/components/ui';
+import { GhostButton, Image, Input, OutlineButton, SolidButton, Text, TrashIcon } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { CURRENCY_VALUES } from '@/features/currencies';
@@ -222,6 +222,8 @@ export function AccountForm({
           color="danger"
           className="mt-6"
           fullWidth
+          textClassName="underline"
+          iconLeft={<TrashIcon size={16} colorClassName="accent-danger-600" className="mr-2" />}
           onPress={() => archiveAccount.submit(accountId, initialData?.name)}
         />
       )}

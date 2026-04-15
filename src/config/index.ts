@@ -21,6 +21,8 @@ export const DEFAULT_DATE_FORMAT = 'MMM d, yyyy' satisfies DateFormat;
 export const DEFAULT_CURRENCY = 'EUR' satisfies CurrencyKey; // system base currency for rates
 export const DEFAULT_USER_CURRENCY = 'USD' satisfies CurrencyKey; // user default currency
 
+export const DEFAULT_CATEGORY_ID = '_unknown';
+
 // AI
 
 export const OPEN_AI_API_URL = 'https://api.openai.com/v1/chat/completions';

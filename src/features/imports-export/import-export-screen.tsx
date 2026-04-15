@@ -94,8 +94,8 @@ export function ImportScreen() {
                       ),
                     }]}
                   />
-                  <AutoBackupSection />
                   <BackupSection />
+                  <AutoBackupSection />
                 </>
               )}
         </View>

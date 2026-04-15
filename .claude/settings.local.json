@@ -25,7 +25,9 @@
       "Bash(pnpm expo:*)",
       "Bash(grep *)",
       "Bash(ls *)",
-      "Bash(npx expo:*)"
+      "Bash(npx expo:*)",
+      "Bash(git remote:*)",
+      "Bash(git stash:*)"
     ]
   }
 }

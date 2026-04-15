@@ -14,6 +14,7 @@ export default function BackupSection() {
     <>
       <Text className="mb-2 font-bold dark:text-muted-foreground" tx="import-export.backup_section_title" />
       <DetailsSection
+        className="mb-8"
         data={[
           {
             label: translate('import-export.backup_download_label'),

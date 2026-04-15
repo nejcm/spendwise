@@ -40,7 +40,9 @@ export function GeneralSettingsScreen() {
                   value: option,
                 }))}
                 size="sm"
+                containerClassName="w-36"
                 value={longPressAction}
+                selectedItemProps={{ numberOfLines: 1 }}
                 onSelect={(option) => {
                   updateAppState({ longPressAction: option });
                 }}

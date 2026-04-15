@@ -207,6 +207,7 @@
     "backup_invalid_error": "This file is not a valid Spendwise backup.",
     "backup_invalid_type_error": "Please select a Spendwise backup .json file.",
     "backup_restore_confirm_message": "This will replace all current data. This cannot be undone. Continue?",
+    "backup_restore_confirm_summary": "Transactions: {{transactions}} · Accounts: {{accounts}} · Categories: {{categories}} · Recurring rules: {{recurringRules}}",
     "backup_restore_confirm_title": "Restore Backup",
     "backup_restore_description": "Import a Spendwise backup file to restore all data",
     "backup_restore_label": "Restore Backup",

@@ -207,6 +207,7 @@
     "backup_invalid_error": "Diese Datei ist kein gültiges Spendwise-Backup.",
     "backup_invalid_type_error": "Bitte wähle eine Spendwise-Backup-.json-Datei aus.",
     "backup_restore_confirm_message": "Dadurch werden alle aktuellen Daten ersetzt. Dies kann nicht rückgängig gemacht werden. Fortfahren?",
+    "backup_restore_confirm_summary": "Transaktionen: {{transactions}} · Konten: {{accounts}} · Kategorien: {{categories}} · Wiederholende Regeln: {{recurringRules}}",
     "backup_restore_confirm_title": "Backup wiederherstellen",
     "backup_restore_description": "Importiere eine Spendwise-Backup-Datei, um alle Daten wiederherzustellen",
     "backup_restore_label": "Backup wiederherstellen",

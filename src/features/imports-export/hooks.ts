@@ -139,10 +139,17 @@ export function useImportBackup() {
         throw new Error(translate('import-export.backup_invalid_error'));
       }
 
+      const summary = translate('import-export.backup_restore_confirm_summary', {
+        transactions: backup.transactions.length,
+        accounts: backup.accounts.length,
+        categories: backup.categories.length,
+        recurringRules: backup.recurring_rules.length,
+      });
+
       await new Promise<void>((resolve, reject) => {
         Alert.alert(
           translate('import-export.backup_restore_confirm_title'),
-          translate('import-export.backup_restore_confirm_message'),
+          `${translate('import-export.backup_restore_confirm_message')}\n\n${summary}`,
           [
             { text: translate('common.cancel'), onPress: () => reject(new Error('cancelled')), style: 'cancel' },
             { text: translate('common.yes'), onPress: () => resolve() },
@@ -196,10 +203,17 @@ export function useRestoreAutoBackup() {
         throw new Error(translate('import-export.backup_invalid_error'));
       }
 
+      const summary = translate('import-export.backup_restore_confirm_summary', {
+        transactions: backup.transactions.length,
+        accounts: backup.accounts.length,
+        categories: backup.categories.length,
+        recurringRules: backup.recurring_rules.length,
+      });
+
       await new Promise<void>((resolve, reject) => {
         Alert.alert(
           translate('import-export.backup_restore_confirm_title'),
-          translate('import-export.backup_restore_confirm_message'),
+          `${translate('import-export.backup_restore_confirm_message')}\n\n${summary}`,
           [
             { text: translate('common.cancel'), onPress: () => reject(new Error('cancelled')), style: 'cancel' },
             { text: translate('common.yes'), onPress: () => resolve() },

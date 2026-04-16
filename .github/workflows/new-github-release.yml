@@ -44,7 +44,7 @@ jobs:
 
       - name: 🏷️ Read app version
         id: version
-        run: echo "apk_version=$(node -p \"require('./package.json').version\")" >> "$GITHUB_OUTPUT"
+        run: printf 'apk_version=%s\n' "$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
         shell: bash
 
       - name: 📦 Prepare APK asset

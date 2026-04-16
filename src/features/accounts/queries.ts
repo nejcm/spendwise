@@ -1,5 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+import type { MonthSummary } from '../transactions/types';
 import type { Account, AccountFormData, AccountWithBalance } from './types';
 
 import { parseToCents } from '@/lib/data/money';
@@ -136,6 +137,27 @@ export async function getTotalBalance(
 
   const result = await db.getFirstAsync<{ total: number }>(sql, params);
   return result?.total ?? 0;
+}
+
+export async function getAccountSummaryByRange(
+  db: SQLiteDatabase,
+  accountId: string,
+  startDate: number | undefined,
+  endDate: number | undefined,
+): Promise<MonthSummary> {
+  const hasRange = !!startDate && !!endDate;
+  const row = await db.getFirstAsync<{ income: number; expense: number }>(
+    `SELECT
+       COALESCE(SUM(CASE WHEN type = 'income' THEN baseAmount ELSE 0 END), 0) as income,
+       COALESCE(SUM(CASE WHEN type = 'expense' THEN baseAmount ELSE 0 END), 0) as expense
+     FROM transactions
+     WHERE account_id = ?
+     ${hasRange ? 'AND date >= ? AND date < ?' : ''}`,
+    hasRange ? [accountId, startDate, endDate] : [accountId],
+  );
+  const income = row?.income ?? 0;
+  const expense = row?.expense ?? 0;
+  return { income, expense, balance: income - expense };
 }
 
 // ─── Write Queries ───

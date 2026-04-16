@@ -1,6 +1,6 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { ImageSource } from 'expo-image';
-import type { FlatListProps, PressableProps } from 'react-native';
+import type { FlatListProps, PressableProps, TextProps } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
 import type { ModalSheetProps } from './modal-sheet';
 import { BottomSheetFlatList } from '@gorhom/bottom-sheet';
@@ -266,6 +266,7 @@ export type SelectProps<T extends string | number = string | number> = {
   searchEnabled?: OptionsProps<T>['searchEnabled'];
   searchPlaceholder?: OptionsProps<T>['searchPlaceholder'];
   itemClassName?: string;
+  selectedItemProps?: TextProps;
 } & Omit<VariantProps<typeof selectTv>, 'error'> & Omit<ModalSheetProps, 'children'>;
 
 export function Select<T extends string | number>({
@@ -286,6 +287,7 @@ export function Select<T extends string | number>({
   searchEnabled,
   searchPlaceholder,
   itemClassName,
+  selectedItemProps,
   ...rest
 }: SelectProps<T>) {
   const modal = useModalSheet();
@@ -333,9 +335,11 @@ export function Select<T extends string | number>({
               <>
                 <View className="h-full flex-1 flex-row items-center gap-2">
                   {selectedOption?.image && <Image source={selectedOption.image} className={styles.image()} />}
-                  <Text className={styles.inputValue({
-                    className: !selectedOption?.label ? 'text-muted-foreground' : '',
-                  })}
+                  <Text
+                    className={styles.inputValue({
+                      className: !selectedOption?.label ? 'text-muted-foreground' : '',
+                    })}
+                    {...selectedItemProps}
                   >
                     {selectedOption?.label ?? placeholder ?? ''}
                   </Text>

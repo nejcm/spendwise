@@ -1,4 +1,4 @@
-import type { TransactionType } from './types';
+import type { FilterState } from './types';
 import { useDebouncedValue } from '@tanstack/react-pacer';
 import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
@@ -19,14 +19,25 @@ import { TransactionList } from './components/transaction-list';
 
 const inputClassNames = cn(inputDefaults, inputDefaultDefaults, 'min-w-0 flex-1 flex-row items-center p-0');
 
+const defaultFilters: FilterState = {
+  categoryId: null,
+  type: null,
+  accountId: null,
+};
+
+const debounceSettings = {
+  wait: 500,
+} as const;
+
 export function TransactionsScreen() {
   const selection = useAppStore.use.periodSelection();
   const [search, setSearch] = useState('');
-  const [debouncedSearch] = useDebouncedValue(search, {
-    wait: 500,
-  });
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
-  const [typeFilter, setTypeFilter] = useState<TransactionType | null>(null);
+  const [debouncedSearch] = useDebouncedValue(search, debounceSettings);
+  const [filters, setFilters] = useState<FilterState>(defaultFilters);
+  const { categoryId, type, accountId } = filters;
+  const updateFilters = React.useCallback((newFilters: Partial<FilterState>) => {
+    setFilters((prev) => ({ ...prev, ...newFilters }));
+  }, [setFilters]);
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
   const { data: transactions = [], isLoading, refetch } = useTransactions(startDate, endDate);
 
@@ -34,22 +45,21 @@ export function TransactionsScreen() {
   usePrefetchAdjacentPeriods(selection, (start, end) => transactionsQueryOptions(db, start, end));
 
   const filtered = useMemo(() => {
-    let result = transactions;
     const q = debouncedSearch?.trim().toLowerCase();
     const hasQuery = q.length > 0;
-    if (hasQuery || categoryFilter || typeFilter) {
-      result = result.filter(
+    if (hasQuery || categoryId || type || accountId) {
+      return transactions.filter(
         (t) => {
-          if (categoryFilter && t.category_id !== categoryFilter) return false;
-          if (typeFilter && t.type !== typeFilter) return false;
+          if (categoryId && t.category_id !== categoryId) return false;
+          if (type && t.type !== type) return false;
+          if (accountId && t.account_id !== accountId) return false;
           if (hasQuery) return t.note?.toLowerCase().includes(q) || t.category_name?.toLowerCase().includes(q);
           return true;
         },
       );
     }
-
-    return result;
-  }, [transactions, debouncedSearch, categoryFilter, typeFilter]);
+    return transactions;
+  }, [transactions, debouncedSearch, categoryId, type, accountId]);
 
   return (
     <PeriodSwipeContainer selection={selection}>
@@ -80,10 +90,9 @@ export function TransactionsScreen() {
         </View>
       </View>
       <TransactionFilterBar
-        selectedCategoryId={categoryFilter}
-        selectedType={typeFilter}
-        onSelectCategory={setCategoryFilter}
-        onSelectType={setTypeFilter}
+        filters={filters}
+        hasActiveFilters={type !== null || accountId !== null}
+        updateFilters={updateFilters}
       />
       <View className="flex-1">
         <TransactionList transactions={filtered} isLoading={isLoading} onRefresh={() => void refetch()} />

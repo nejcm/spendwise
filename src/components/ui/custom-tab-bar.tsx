@@ -6,6 +6,7 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { Home, LayoutGrid, PieChart, PlusIcon, UserIcon } from '@/components/ui/icon';
 import { openSheet, triggerScan } from '@/lib/store/local-store';
+import { useAppStore } from '@/lib/store/store';
 
 export const TAB_BAR_COLOR = '#f6f6f6' as const;
 export const TAB_BAR_DARK_COLOR = '#17191C' as const;
@@ -61,6 +62,7 @@ function sheetConfigForPathname(pathname: string): SheetConfig {
 export function CustomTabBar() {
   const router = useRouter();
   const pathname = usePathname() || '';
+  const longPressAction = useAppStore.use.longPressAction();
   const getIsActive = (tab: TabConfig): boolean => {
     if (tab.name === 'index') return pathname === '/' || pathname === '';
     return pathname.startsWith(tab.path);
@@ -80,7 +82,7 @@ export function CustomTabBar() {
             <View key="add" className="flex-1 items-center justify-center">
               <Pressable
                 onPress={() => openSheet(sheetConfigForPathname(pathname))}
-                onLongPress={() => triggerScan('camera')}
+                onLongPress={() => triggerScan(longPressAction === 'pick_from_gallery' ? 'gallery' : 'camera')}
                 delayLongPress={400}
                 className="size-12 items-center justify-center rounded-full bg-gray-950 dark:bg-white"
                 style={({ pressed }) => ({

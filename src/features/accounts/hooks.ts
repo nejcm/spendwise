@@ -42,6 +42,19 @@ export function useAccountsWithBalanceForRange(startDate: number | undefined, en
   return useQuery(accountsWithBalanceForRangeQueryOptions(db, startDate, endDate));
 }
 
+export function useAccountSummaryByRange(
+  accountId: string | undefined,
+  startDate: number | undefined,
+  endDate: number | undefined,
+) {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: queryKeys.accounts.summaryForRange(accountId, startDate, endDate),
+    queryFn: () => queries.getAccountSummaryByRange(db, accountId!, startDate, endDate),
+    enabled: !!accountId,
+  });
+}
+
 export function useTotalBalance(yearMonth?: string) {
   const db = useSQLiteContext();
   return useQuery({

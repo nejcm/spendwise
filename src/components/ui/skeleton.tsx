@@ -49,7 +49,7 @@ export function SkeletonBox({ height, width, className }: SkeletonBoxProps) {
   );
 }
 
-export type LoaderDimensions = [number | DimensionValue, number | DimensionValue][];
+export type LoaderDimensions = [number | DimensionValue, number | DimensionValue, string?][];
 export type SkeletonRowsProps = {
   count?: number;
   /** Array of [width, height] pairs */
@@ -63,11 +63,14 @@ export function SkeletonRows({ count = 3, dimensions = rowDefault, className }: 
     <SkeletonWrapper className={cn('flex-col gap-2', className)}>
       {(props) => (
         <>
-          {Array.from({ length: count }, (_, i) => (
-            <View key={i} style={{ width: dimensions[i % dimensions.length][0] }}>
-              <Skeleton key={i} {...props} height={dimensions[i % dimensions.length][1]} width="100%" />
-            </View>
-          ))}
+          {Array.from({ length: count }, (_, i) => {
+            const [width, height, cls] = dimensions[i % dimensions.length];
+            return (
+              <View key={i} style={{ width }} className={cls}>
+                <Skeleton key={i} {...props} height={height} width="100%" />
+              </View>
+            );
+          })}
         </>
       )}
     </SkeletonWrapper>

@@ -1,4 +1,5 @@
 import type { AccountFormData, AccountWithBalance } from './types';
+import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
 import { useMemo } from 'react';
@@ -21,6 +22,7 @@ import { defaultStyles } from '@/lib/theme/styles';
 import { AccountCard } from './components/account-card';
 
 export function AccountsScreen() {
+  const router = useRouter();
   const currency = useAppStore.use.currency();
   const selection = useAppStore.use.periodSelection();
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
@@ -74,7 +76,8 @@ export function AccountsScreen() {
                     <AccountCard
                       key={account.id}
                       account={account}
-                      onPress={() => openEditAccountForm(account)}
+                      onPress={() => router.push(`/accounts/${account.id}`)}
+                      onLongPress={() => openEditAccountForm(account)}
                     />
                   ))
                 )}

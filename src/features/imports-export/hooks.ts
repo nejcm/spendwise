@@ -1,5 +1,7 @@
 import type { TransactionFormData } from '../transactions/types';
 import type { ParsedRow } from './csv-parser';
+import type { CurrencyKey } from '@/features/currencies';
+import type { BackupData } from '@/features/imports-export/backup';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { File, Paths } from 'expo-file-system';
 
@@ -7,17 +9,28 @@ import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Alert } from '@/components/ui';
+import { CURRENCY_VALUES } from '@/features/currencies';
 import { exportBackup, importBackup, validateBackup } from '@/features/imports-export/backup';
 import { buildManualBackupFileName, IS_AUTO_BACKUP_SUPPORTED, writeAutoBackupFile } from '@/features/imports-export/backup-file';
 import { documentPickerTypeForJson, pickValidatedFile } from '@/features/imports-export/pick-file';
 import { IS_WEB } from '@/lib/base';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '@/lib/store/store';
+import { setCurrency, useAppStore } from '@/lib/store/store';
 import { useAccounts } from '../accounts/hooks';
 import { useCategories } from '../categories/hooks';
 import { useCreateTransactions } from '../transactions/hooks';
 import { mapCategoryNameToId, matchAccountNameToId } from './helpers';
+
+function inferBackupCurrency(backup: BackupData): CurrencyKey | undefined {
+  if ('baseCurrency' in backup) {
+    const candidate = backup.baseCurrency;
+    if (CURRENCY_VALUES.includes(candidate as CurrencyKey)) return candidate as CurrencyKey;
+  }
+  const txBaseCurrency = backup.transactions.at(0)?.baseCurrency;
+  if (!txBaseCurrency || !CURRENCY_VALUES.includes(txBaseCurrency as CurrencyKey)) return undefined;
+  return txBaseCurrency as CurrencyKey;
+}
 
 export function useImportTransactions() {
   const db = useSQLiteContext();
@@ -156,7 +169,11 @@ export function useImportBackup() {
           ],
         );
       });
-
+      const previousCurrency = useAppStore.getState().currency;
+      const backupCurrency = inferBackupCurrency(backup);
+      if (backupCurrency && backupCurrency !== previousCurrency) {
+        setCurrency(backupCurrency);
+      }
       await importBackup(db, backup);
     },
     onSuccess: () => {
@@ -221,6 +238,11 @@ export function useRestoreAutoBackup() {
         );
       });
 
+      const backupCurrency = inferBackupCurrency(backup);
+      const previousCurrency = useAppStore.getState().currency;
+      if (backupCurrency && backupCurrency !== previousCurrency) {
+        setCurrency(backupCurrency);
+      }
       await importBackup(db, backup);
     },
     onSuccess: () => {

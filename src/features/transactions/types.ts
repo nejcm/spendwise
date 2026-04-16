@@ -39,3 +39,9 @@ export type DateGroup = {
   date: number; // Unix seconds
   transactions: TransactionWithCategory[];
 };
+
+export type FilterState = {
+  categoryId: string | null;
+  type: TransactionType | null;
+  accountId: string | null;
+};

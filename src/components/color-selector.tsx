@@ -19,7 +19,7 @@ const sizes: Record<NonNullable<SelectProps['size']>, [string, string]> = {
 function renderItem(item: OptionType) {
   return (
     <View
-      className="min-h-12 w-full max-w-12 flex-1 rounded-full border border-border"
+      className="min-h-10 w-full max-w-10 flex-1 rounded-full border border-border 2xs:min-h-12 2xs:max-w-12"
       style={{ backgroundColor: String(item.value) }}
     />
   );
@@ -46,7 +46,7 @@ export default function ColorSelector(props: Omit<SelectProps, 'options'>) {
       size={size}
       listProps={listProps}
       inputClassName={cn('border-0 bg-transparent px-0', props.inputClassName)}
-      itemClassName="px-1 py-2 w-full h-full min-h-12"
+      itemClassName="px-1 py-2 w-full min-h-14 2xs:min-h-16"
       renderItem={renderItem}
       renderSelectedItem={renderSelectedItem(size, props.value)}
     />

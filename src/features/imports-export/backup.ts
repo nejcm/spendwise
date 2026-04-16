@@ -4,9 +4,11 @@ import type { Category } from '../categories/types';
 import type { ScheduledTransaction, ScheduledTransactionRun } from '../scheduled-transactions/types';
 import type { Transaction } from '../transactions/types';
 import { clearDbData } from '@/lib/sqlite/db';
+import { getAppState } from '@/lib/store/store';
 
 export type BackupData = {
-  version: 1;
+  version: number;
+  baseCurrency?: string;
   exported_at: string;
   accounts: Account[];
   categories: Category[];
@@ -30,9 +32,12 @@ export async function exportBackup(db: SQLiteDatabase): Promise<BackupData> {
     db.getAllAsync<ScheduledTransactionRun>('SELECT * FROM recurring_rule_runs'),
   ]);
 
+  const baseCurrency = getAppState().currency;
+
   return {
-    version: 1,
+    version: 2,
     exported_at: new Date().toISOString(),
+    baseCurrency,
     accounts,
     categories,
     transactions,
@@ -48,7 +53,7 @@ export function validateBackup(parsed: unknown): BackupData {
 
   const data = parsed as Record<string, unknown>;
 
-  if (data.version !== 1) {
+  if (!data.version) {
     throw new Error('invalid');
   }
 

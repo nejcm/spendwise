@@ -4,14 +4,16 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { getPressedStyle, Text } from '@/components/ui';
-import { Banknote, BotIcon, Calendar, DatabaseBackupIcon, LayoutGrid, ListChecks, PieChart, UserIcon } from '@/components/ui/icon';
+import { Banknote, BotIcon, Calendar, LayoutGrid, ListChecks, PieChart, ScanLine, Settings } from '@/components/ui/icon';
 import { translate } from '@/lib/i18n';
+import { triggerScanPicker } from '../../lib/store/local-store';
 
 type Destination = {
   key: string;
-  href: Href;
   labelKey: Parameters<typeof translate>[0];
   Icon: UniwindLucideIcon;
+  href?: Href;
+  onPress?: () => void;
 };
 
 const DESTINATIONS: Destination[] = [
@@ -20,22 +22,22 @@ const DESTINATIONS: Destination[] = [
   { key: 'categories', href: '/categories', labelKey: 'common.categories', Icon: LayoutGrid },
   { key: 'stats', href: '/stats', labelKey: 'stats.title', Icon: PieChart },
   { key: 'scheduled', href: '/scheduled', labelKey: 'scheduled.title', Icon: Calendar },
-  { key: 'settings', href: '/settings', labelKey: 'settings.title', Icon: UserIcon },
+  { key: 'settings', href: '/settings', labelKey: 'settings.title', Icon: Settings },
   { key: 'ai', href: '/ai', labelKey: 'settings.ai_chat', Icon: BotIcon },
-  { key: 'importExport', href: '/settings/import-export', labelKey: 'import-export.title', Icon: DatabaseBackupIcon },
+  { key: 'scan', onPress: triggerScanPicker, labelKey: 'settings.scan', Icon: ScanLine },
 ];
 
-export function ScreensGrid() {
+export const ScreensLinksGrid = React.memo(() => {
   const router = useRouter();
 
   return (
     <View>
       <Text className="mb-2 text-lg font-medium">{translate('home.links')}</Text>
       <View className="flex-row flex-wrap gap-2">
-        {DESTINATIONS.map(({ key, href, labelKey, Icon }) => (
+        {DESTINATIONS.map(({ key, href, onPress, labelKey, Icon }) => (
           <Pressable
             key={key}
-            onPress={() => router.push(href)}
+            onPress={href ? () => router.push(href) : onPress}
             className="min-w-[48%] flex-1 flex-row items-center gap-1 rounded-xl bg-card px-2 py-1.5"
             style={getPressedStyle}
           >
@@ -50,4 +52,4 @@ export function ScreensGrid() {
       </View>
     </View>
   );
-}
+});

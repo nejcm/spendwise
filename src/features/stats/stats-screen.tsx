@@ -3,10 +3,9 @@ import { useMemo } from 'react';
 import { RefreshControl } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
 import { PeriodSwipeContainer } from '@/components/period-swipe-container';
-import { FocusAwareStatusBar, ScrollView, Text, View } from '@/components/ui';
+import { FocusAwareStatusBar, ScrollView, View } from '@/components/ui';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { useRefresh } from '@/lib/hooks/use-refresh';
-import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { CategoryBreakdown } from './components/category-breakdown';
@@ -26,8 +25,7 @@ export function StatsScreen() {
       <PeriodSelector selection={selection} />
 
       <ScrollView className="flex-1" style={defaultStyles.transparentBg} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-        <View className="px-4 pt-2 pb-6">
-          <Text className="pb-4 text-center text-2xl font-medium">{translate('stats.title')}</Text>
+        <View className="px-4 pt-4 pb-6">
           <Summary startDate={startDate} endDate={endDate} currency={currency} />
 
           <StatsTrend

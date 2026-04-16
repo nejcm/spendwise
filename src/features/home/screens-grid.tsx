@@ -27,7 +27,7 @@ const DESTINATIONS: Destination[] = [
   { key: 'scan', onPress: triggerScanPicker, labelKey: 'settings.scan', Icon: ScanLine },
 ];
 
-export function ScreensLinksGrid() {
+export const ScreensLinksGrid = React.memo(() => {
   const router = useRouter();
 
   return (
@@ -52,4 +52,4 @@ export function ScreensLinksGrid() {
       </View>
     </View>
   );
-}
+});

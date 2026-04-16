@@ -11,7 +11,7 @@ import { TransactionCard } from '@/features/transactions/components/transaction-
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/store/local-store';
 
-export default function TransactionsList() {
+export const TransactionsList = React.memo(() => {
   const router = useRouter();
   const { data = [], isLoading } = useRecentTransactions(15);
   const hasTransactions = data.length > 0;
@@ -45,4 +45,4 @@ export default function TransactionsList() {
             )}
     </View>
   );
-}
+});

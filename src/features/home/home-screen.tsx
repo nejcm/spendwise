@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 
-import { useRouter } from 'expo-router';
+import { Link } from 'expo-router';
 import * as React from 'react';
 import { Pressable, RefreshControl, View } from 'react-native';
 import { FormattedCurrency, getPressedStyle, Image, ScrollView, Text } from '@/components/ui';
@@ -16,11 +16,10 @@ import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
-import TransactionsList from './transactions-list';
+import { TransactionsList } from './transactions-list';
 
 export function HomeScreen() {
   const theme = useThemeConfig();
-  const router = useRouter();
   const currency = useAppStore.use.currency();
   const profile = useAppStore.use.profile();
   const name = profile?.name?.trim() || translate('common.there');
@@ -37,9 +36,11 @@ export function HomeScreen() {
               className="h-[24] w-[120]"
             />
             <View className="flex-row items-center gap-2">
-              <IconButton size="sm" color="secondary" onPress={() => router.push('/ai')}>
-                <BotIcon size={22} className="text-muted-foreground" />
-              </IconButton>
+              <Link href="/ai" asChild>
+                <IconButton size="sm" color="secondary">
+                  <BotIcon size={22} className="text-muted-foreground" />
+                </IconButton>
+              </Link>
             </View>
           </View>
           <View>
@@ -61,18 +62,22 @@ export function HomeScreen() {
                   )
                 : (
                     <>
-                      <Pressable onPress={() => router.push('/stats')} style={getPressedStyle} className="flex-1">
-                        <View className="gap-1 rounded-xl bg-success-500/8 px-4 py-3 dark:bg-success-700/10">
-                          <FormattedCurrency className="text-lg font-bold text-success-600" value={data?.income ?? 0} currency={currency} prefix="+" />
-                          <Text className="text-sm text-muted-foreground">{translate('home.income')}</Text>
-                        </View>
-                      </Pressable>
-                      <Pressable onPress={() => router.push('/stats')} style={getPressedStyle} className="flex-1">
-                        <View className="gap-1 rounded-xl bg-danger-500/8 px-4 py-3 dark:bg-danger-600/6">
-                          <FormattedCurrency className="text-lg font-bold text-danger-500" value={data?.expense ?? 0} currency={currency} prefix="-" />
-                          <Text className="text-sm text-muted-foreground">{translate('home.expenses')}</Text>
-                        </View>
-                      </Pressable>
+                      <Link href="/stats" asChild>
+                        <Pressable className="flex-1" style={getPressedStyle}>
+                          <View className="w-full gap-0.5 rounded-xl bg-success-500/8 px-4 py-3 dark:bg-success-700/10">
+                            <FormattedCurrency className="text-lg font-bold text-success-600" value={data?.income ?? 0} currency={currency} prefix="+" />
+                            <Text className="text-sm text-muted-foreground">{translate('home.income')}</Text>
+                          </View>
+                        </Pressable>
+                      </Link>
+                      <Link href="/stats" asChild>
+                        <Pressable className="flex-1" style={getPressedStyle}>
+                          <View className="w-full gap-0.5 rounded-xl bg-danger-500/8 px-4 py-3 dark:bg-danger-600/6">
+                            <FormattedCurrency className="text-lg font-bold text-danger-500" value={data?.expense ?? 0} currency={currency} prefix="-" />
+                            <Text className="text-sm text-muted-foreground">{translate('home.expenses')}</Text>
+                          </View>
+                        </Pressable>
+                      </Link>
                     </>
                   )}
             </View>

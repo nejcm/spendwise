@@ -28,6 +28,8 @@ export const queryKeys = {
     totalBalance: ['total-balance'] as const,
     totalBalanceForMonth: (yearMonth: string) =>
       ['total-balance', yearMonth] as const,
+    summaryForRange: (accountId: string | undefined, startDate: number | undefined, endDate: number | undefined) =>
+      ['accounts', 'summary-range', accountId, startDate, endDate] as const,
   },
 
   // ─── Categories ───

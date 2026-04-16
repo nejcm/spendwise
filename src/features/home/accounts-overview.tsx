@@ -36,7 +36,7 @@ export const AccountsOverview = React.memo(() => {
                   return (
                     <Pressable
                       key={account.id}
-                      onPress={() => router.push('/accounts')}
+                      onPress={() => router.push(`/accounts/${account.id}`)}
                       className="w-34 rounded-xl bg-card px-3 py-2"
                     >
                       <Text className="text-2xl">

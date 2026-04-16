@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, RefreshControl, View } from 'react-native';
 import { FormattedCurrency, getPressedStyle, Image, ScrollView, Text } from '@/components/ui';
@@ -19,6 +19,7 @@ import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import { TransactionsList } from './transactions-list';
 
 export function HomeScreen() {
+  const router = useRouter();
   const theme = useThemeConfig();
   const currency = useAppStore.use.currency();
   const profile = useAppStore.use.profile();
@@ -62,22 +63,18 @@ export function HomeScreen() {
                   )
                 : (
                     <>
-                      <Link href="/stats" asChild>
-                        <Pressable className="flex-1" style={getPressedStyle}>
-                          <View className="w-full gap-0.5 rounded-xl bg-success-500/8 px-4 py-3 dark:bg-success-700/10">
-                            <FormattedCurrency className="text-lg font-bold text-success-600" value={data?.income ?? 0} currency={currency} prefix="+" />
-                            <Text className="text-sm text-muted-foreground">{translate('home.income')}</Text>
-                          </View>
-                        </Pressable>
-                      </Link>
-                      <Link href="/stats" asChild>
-                        <Pressable className="flex-1" style={getPressedStyle}>
-                          <View className="w-full gap-0.5 rounded-xl bg-danger-500/8 px-4 py-3 dark:bg-danger-600/6">
-                            <FormattedCurrency className="text-lg font-bold text-danger-500" value={data?.expense ?? 0} currency={currency} prefix="-" />
-                            <Text className="text-sm text-muted-foreground">{translate('home.expenses')}</Text>
-                          </View>
-                        </Pressable>
-                      </Link>
+                      <Pressable className="flex-1" style={getPressedStyle} onPress={() => router.push('/stats')}>
+                        <View className="gap-0.5 rounded-xl bg-success-500/8 px-4 py-3 dark:bg-success-700/10">
+                          <FormattedCurrency className="text-lg font-bold text-success-600" value={data?.income ?? 0} currency={currency} prefix="+" />
+                          <Text className="text-sm text-muted-foreground">{translate('home.income')}</Text>
+                        </View>
+                      </Pressable>
+                      <Pressable className="flex-1" style={getPressedStyle} onPress={() => router.push('/stats')}>
+                        <View className="gap-0.5 rounded-xl bg-danger-500/8 px-4 py-3 dark:bg-danger-600/6">
+                          <FormattedCurrency className="text-lg font-bold text-danger-500" value={data?.expense ?? 0} currency={currency} prefix="-" />
+                          <Text className="text-sm text-muted-foreground">{translate('home.expenses')}</Text>
+                        </View>
+                      </Pressable>
                     </>
                   )}
             </View>

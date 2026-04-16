@@ -6,6 +6,7 @@
     "color": "Farbe",
     "delete_confirm": "Möchtest du {{name}} wirklich löschen?",
     "description_placeholder": "Beschreibung...",
+    "detail_title": "Kontodetails",
     "edit": "Konto bearbeiten",
     "from_account": "Von Konto",
     "from_required": "Quellkonto erforderlich",

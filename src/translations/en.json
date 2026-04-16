@@ -6,6 +6,7 @@
     "color": "Color",
     "delete_confirm": "Are you sure you want to delete {{name}}?",
     "description_placeholder": "Description...",
+    "detail_title": "Account Details",
     "edit": "Edit Account",
     "from_account": "From Account",
     "from_required": "From account required",

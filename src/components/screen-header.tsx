@@ -8,12 +8,14 @@ export type ScreenHeaderProps = {
   back?: boolean;
   /** Used when there is no navigation history (e.g. deep link); avoids unhandled GO_BACK. */
   backHref?: Parameters<Router['replace']>[0];
+  children?: React.ReactNode;
 };
 
 export default function ScreenHeader({
   title,
   back = true,
   backHref = '/settings',
+  children,
 }: ScreenHeaderProps) {
   const router = useRouter();
 
@@ -25,6 +27,7 @@ export default function ScreenHeader({
         </IconButton>
       )}
       <Text className="py-3 text-center text-lg font-medium text-foreground">{title}</Text>
+      {children}
     </View>
   );
 }

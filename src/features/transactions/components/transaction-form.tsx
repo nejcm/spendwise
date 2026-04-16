@@ -233,7 +233,6 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
                   label={option.label}
                   onPress={() => {
                     field.handleChange(option.value);
-                    form.setFieldValue('category_id', '');
                   }}
                 />
               ))}

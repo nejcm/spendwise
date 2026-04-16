@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { cn } from 'tailwind-variants';
 import { DEFAULT_COLOR } from '@/components/color-selector';
-import { FormattedCurrency, Text } from '@/components/ui';
+import { FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
 import { formatShortDate } from '@/features/formatting/helpers';
 import { useAppStore } from '@/lib/store/store';
 import { hexWithOpacity } from '@/lib/theme/colors';
@@ -23,7 +23,7 @@ export const TransactionCard = React.memo(({ transaction, className }: Transacti
   const showConverted = transaction.currency !== currency;
 
   return (
-    <Pressable className={cn('flex-row items-center gap-3 p-3', className)} onPress={() => router.push(`/transactions/${transaction.id}`)}>
+    <Pressable className={cn('flex-row items-center gap-3 p-3', className)} style={getPressedStyle} onPress={() => router.push(`/transactions/${transaction.id}`)}>
       <View
         className="size-10 items-center justify-center rounded-lg"
         style={{ backgroundColor: hexWithOpacity(transaction.category_color ?? DEFAULT_COLOR, 30) }}

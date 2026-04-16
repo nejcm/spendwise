@@ -108,7 +108,7 @@ function CheckboxBase({
   return (
     <CheckboxRoot checked={checked} testID={testID} {...props}>
       <CheckboxIcon checked={checked} size={size} disabled={!!props.disabled} />
-      {label ? <Label text={label} testID={testID ? `${testID}-label` : undefined} className="pr-2" /> : null}
+      {label ? <Label text={label} testID={testID ? `${testID}-label` : undefined} className={`pr-2 ${props.disabled ? 'opacity-50' : ''}`} /> : null}
     </CheckboxRoot>
   );
 }

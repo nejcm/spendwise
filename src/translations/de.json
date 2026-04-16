@@ -203,6 +203,7 @@
     "auto_backup_web_unavailable_title": "Im Web nicht verfügbar",
     "backup_complete_message": "Deine Daten wurden erfolgreich wiederhergestellt",
     "backup_complete_title": "Wiederherstellung abgeschlossen",
+    "backup_currency_changed_notice": "Die Basiswährung wurde auf {{currency}} aktualisiert, um dem Backup zu entsprechen.",
     "backup_download_description": "Alle Daten als JSON-Backup-Datei exportieren",
     "backup_download_label": "Backup herunterladen",
     "backup_empty_error": "Es gibt noch keine Daten für ein Backup.",

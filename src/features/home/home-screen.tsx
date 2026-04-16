@@ -62,13 +62,13 @@ export function HomeScreen() {
                 : (
                     <>
                       <Pressable onPress={() => router.push('/stats')} style={getPressedStyle} className="flex-1">
-                        <View className="flex-1 gap-1 rounded-xl bg-success-500/8 px-4 py-3 dark:bg-success-700/10">
+                        <View className="gap-1 rounded-xl bg-success-500/8 px-4 py-3 dark:bg-success-700/10">
                           <FormattedCurrency className="text-lg font-bold text-success-600" value={data?.income ?? 0} currency={currency} prefix="+" />
                           <Text className="text-sm text-muted-foreground">{translate('home.income')}</Text>
                         </View>
                       </Pressable>
                       <Pressable onPress={() => router.push('/stats')} style={getPressedStyle} className="flex-1">
-                        <View className="flex-1 gap-1 rounded-xl bg-danger-500/8 px-4 py-3 dark:bg-danger-600/6">
+                        <View className="gap-1 rounded-xl bg-danger-500/8 px-4 py-3 dark:bg-danger-600/6">
                           <FormattedCurrency className="text-lg font-bold text-danger-500" value={data?.expense ?? 0} currency={currency} prefix="-" />
                           <Text className="text-sm text-muted-foreground">{translate('home.expenses')}</Text>
                         </View>

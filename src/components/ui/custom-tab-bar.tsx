@@ -1,5 +1,4 @@
 /* eslint-disable react-refresh/only-export-components */
-import type { SheetConfig } from '@/lib/sheet';
 import { usePathname, useRouter } from 'expo-router';
 
 import * as React from 'react';
@@ -52,13 +51,6 @@ const TABS: TabConfig[] = [
   },
 ];
 
-function sheetConfigForPathname(pathname: string): SheetConfig {
-  if (pathname.startsWith('/accounts')) return { type: 'add-account' };
-  if (pathname.startsWith('/scheduled')) return { type: 'add-scheduled' };
-  if (pathname.startsWith('/categories')) return { type: 'add-category' };
-  return { type: 'add-transaction' };
-}
-
 export function CustomTabBar() {
   const router = useRouter();
   const pathname = usePathname() || '';
@@ -81,7 +73,7 @@ export function CustomTabBar() {
           return (
             <View key="add" className="flex-1 items-center justify-center">
               <Pressable
-                onPress={() => openSheet(sheetConfigForPathname(pathname))}
+                onPress={() => openSheet({ type: 'add-transaction' })}
                 onLongPress={() => triggerScan(longPressAction === 'pick_from_gallery' ? 'gallery' : 'camera')}
                 delayLongPress={400}
                 className="size-12 items-center justify-center rounded-full bg-gray-950 dark:bg-white"

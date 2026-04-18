@@ -6,8 +6,8 @@ import Animated, { useAnimatedRef } from 'react-native-reanimated';
 
 import Sortable from 'react-native-sortables';
 import { NoDataCard } from '@/components/no-data-card';
-import { Alert, Text, View } from '@/components/ui';
-import { Lightbulb } from '@/components/ui/icon';
+import { Alert, SolidButton, Text, View } from '@/components/ui';
+import { Lightbulb, Plus } from '@/components/ui/icon';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import CategoryCard from './category-card';
@@ -95,6 +95,15 @@ export const CategoryGrid = React.memo(({
             </Text>
           </View>
         )}
+        <View className="mt-6 flex-row items-center justify-center">
+          <SolidButton
+            iconLeft={<Plus className="mr-1 text-background" size={20} />}
+            label={translate('common.add')}
+            size="sm"
+            className="px-6"
+            onPress={onAddPress}
+          />
+        </View>
       </View>
     </Animated.ScrollView>
   );

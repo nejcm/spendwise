@@ -1,19 +1,20 @@
+import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { ScheduledTransactionFormData } from '../types';
-
+import type { ModalSheetProps, ModalSheetRef } from '@/components/ui';
 import type { CurrencyKey } from '@/features/currencies';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useForm } from '@tanstack/react-form';
 import * as React from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import * as z from 'zod';
 import {
   Input,
+  ModalSheet,
   OutlineButton,
   Select,
   SolidButton,
   Switch,
   Text,
-  View,
 } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
@@ -67,8 +68,7 @@ const schema = z
     is_active: z.boolean(),
   })
   .refine(
-    (value) =>
-      !value.end_date || value.end_date >= value.start_date,
+    (value) => !value.end_date || value.end_date >= value.start_date,
     {
       message: translate('scheduled.end_date_invalid'),
       path: ['end_date'],
@@ -103,16 +103,12 @@ export type ScheduledTransactionFormProps = {
   initialValues?: ScheduledTransactionInitialValues;
   onCancel?: () => void;
   onSuccess?: () => void;
-  isSheet?: boolean;
 };
 
-// eslint-disable-next-line max-lines-per-function
-export function ScheduledTransactionForm({
-  initialValues,
-  onCancel,
-  onSuccess,
-  isSheet,
-}: ScheduledTransactionFormProps) {
+function useScheduledTransactionForm(
+  initialValues?: ScheduledTransactionInitialValues,
+  onSuccess?: () => void,
+) {
   const { data: accounts = [] } = useAccounts();
   const createScheduledTransaction = useCreateScheduledTransaction();
   const updateScheduledTransaction = useUpdateScheduledTransaction();
@@ -135,9 +131,7 @@ export function ScheduledTransactionForm({
       ...initialValues,
       amount: initialValues?.amount?.toString() || '',
     } as FormValues,
-    validators: {
-      onChange: schema,
-    },
+    validators: { onChange: schema },
     onSubmit: async ({ value }) => {
       const payload: ScheduledTransactionFormData = {
         ...value,
@@ -166,9 +160,27 @@ export function ScheduledTransactionForm({
     },
   });
 
-  const HScrollView = isSheet ? BottomSheetScrollView : ScrollView;
+  return {
+    form,
+    accounts,
+    createScheduledTransaction,
+    updateScheduledTransaction,
+    orderedCurrencies,
+  };
+}
 
-  const formBody = (
+type UseScheduledTransactionFormReturn = ReturnType<typeof useScheduledTransactionForm>;
+
+type ScheduledTransactionFormBodyProps = {
+  form: UseScheduledTransactionFormReturn['form'];
+  accounts: UseScheduledTransactionFormReturn['accounts'];
+  orderedCurrencies: UseScheduledTransactionFormReturn['orderedCurrencies'];
+  isSheet?: boolean;
+};
+
+function ScheduledTransactionFormBody({ form, accounts, orderedCurrencies, isSheet }: ScheduledTransactionFormBodyProps) {
+  const HScrollView = isSheet ? BottomSheetScrollView : ScrollView;
+  return (
     <>
       <View className="mb-4 flex-row gap-3">
         <form.Field
@@ -352,61 +364,120 @@ export function ScheduledTransactionForm({
           </View>
         )}
       />
-
     </>
   );
+}
 
-  const formFooter = (
-    <form.Subscribe
-      selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
-      children={(state) => (
-        <>
-          {onCancel && (
-            <OutlineButton
-              label={translate('common.cancel')}
-              onPress={onCancel}
-              color="secondary"
-            />
-          )}
-          <SolidButton
-            label={translate('common.save')}
-            onPress={form.handleSubmit}
-            loading={
-              (!!state.isSubmitting)
-              || createScheduledTransaction.isPending
-              || updateScheduledTransaction.isPending
-            }
-            disabled={!schema.safeParse(state.values).success}
-            className="flex-1"
-          />
-        </>
-      )}
-    />
-  );
-
-  if (isSheet) {
-    return (
-      <>
-        <BottomSheetKeyboardAwareScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
-          keyboardShouldPersistTaps="handled"
-        >
-          {formBody}
-        </BottomSheetKeyboardAwareScrollView>
-        <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
-          {formFooter}
-        </View>
-      </>
-    );
-  }
+export function ScheduledTransactionForm({ initialValues, onCancel, onSuccess }: ScheduledTransactionFormProps) {
+  const {
+    form,
+    accounts,
+    createScheduledTransaction,
+    updateScheduledTransaction,
+    orderedCurrencies,
+  } = useScheduledTransactionForm(initialValues, onSuccess);
 
   return (
     <View className="flex-1 gap-4">
-      {formBody}
+      <ScheduledTransactionFormBody
+        form={form}
+        accounts={accounts}
+        orderedCurrencies={orderedCurrencies}
+      />
       <View className="mt-auto flex-row gap-3 pt-4">
-        {formFooter}
+        <form.Subscribe
+          selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
+          children={(state) => (
+            <>
+              {onCancel && (
+                <OutlineButton
+                  label={translate('common.cancel')}
+                  onPress={onCancel}
+                  color="secondary"
+                />
+              )}
+              <SolidButton
+                label={translate('common.save')}
+                onPress={form.handleSubmit}
+                loading={
+                  (!!state.isSubmitting)
+                  || createScheduledTransaction.isPending
+                  || updateScheduledTransaction.isPending
+                }
+                disabled={!schema.safeParse(state.values).success}
+                className="flex-1"
+              />
+            </>
+          )}
+        />
       </View>
     </View>
+  );
+}
+
+export type ScheduledTransactionFormSheetProps = ScheduledTransactionFormProps & { ref: ModalSheetRef<BottomSheetModal> } & Partial<ModalSheetProps>;
+export function ScheduledTransactionFormSheet({
+  initialValues,
+  onCancel,
+  onSuccess,
+  ref,
+  ...props
+}: ScheduledTransactionFormSheetProps) {
+  const {
+    form,
+    accounts,
+    createScheduledTransaction,
+    updateScheduledTransaction,
+    orderedCurrencies,
+  } = useScheduledTransactionForm(initialValues, onSuccess);
+
+  const isLoading = createScheduledTransaction.isPending || updateScheduledTransaction.isPending;
+  const { Subscribe, handleSubmit } = form;
+
+  const footerComponent = React.useCallback(() => (
+    <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
+      <Subscribe
+        selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
+        children={(state) => (
+          <>
+            {onCancel && (
+              <OutlineButton
+                label={translate('common.cancel')}
+                onPress={onCancel}
+                color="secondary"
+              />
+            )}
+            <SolidButton
+              label={translate('common.save')}
+              onPress={handleSubmit}
+              loading={(!!state.isSubmitting) || isLoading}
+              disabled={!schema.safeParse(state.values).success}
+              className="flex-1"
+            />
+          </>
+        )}
+      />
+    </View>
+  ), [onCancel, Subscribe, handleSubmit, isLoading]);
+
+  return (
+    <ModalSheet
+      ref={ref}
+      {...props}
+      footerComponent={footerComponent}
+    >
+      <BottomSheetKeyboardAwareScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <ScheduledTransactionFormBody
+          form={form}
+          accounts={accounts}
+          orderedCurrencies={orderedCurrencies}
+          isSheet
+        />
+      </BottomSheetKeyboardAwareScrollView>
+    </ModalSheet>
   );
 }

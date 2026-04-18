@@ -19,7 +19,7 @@ import { translate } from '@/lib/i18n';
 import { setCurrency, useAppStore } from '@/lib/store/store';
 import { useAccounts } from '../accounts/hooks';
 import { useCategories } from '../categories/hooks';
-import { useCreateTransactions } from '../transactions/hooks';
+import { useCreateTransactions } from '../transactions/hooks/api';
 import { mapCategoryNameToId, matchAccountNameToId } from './helpers';
 
 function inferBackupCurrency(backup: BackupData): CurrencyKey | undefined {

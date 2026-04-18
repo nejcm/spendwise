@@ -1,11 +1,13 @@
+import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { AccountFormData, AccountType } from '../types';
+import type { ModalSheetProps, ModalSheetRef } from '@/components/ui';
 import type { CurrencyKey } from '@/features/currencies';
 import { useForm } from '@tanstack/react-form';
 import * as React from 'react';
 import { View } from 'react-native';
 import * as z from 'zod';
 import ColorSelector from '@/components/color-selector';
-import { GhostButton, Image, Input, OutlineButton, SolidButton, Text, TrashIcon } from '@/components/ui';
+import { GhostButton, Image, Input, ModalSheet, OutlineButton, SolidButton, Text, TrashIcon } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { CURRENCY_VALUES } from '@/features/currencies';
@@ -26,15 +28,6 @@ const schema = z.object({
   budget: z.string().nullable(),
 });
 
-export type AccountFormProps = {
-  initialData?: AccountFormData;
-  accountId?: string;
-  onSuccess?: () => void;
-  onDeleteSuccess?: () => void;
-  onCancel?: () => void;
-  isSheet?: boolean;
-};
-
 const defaultValues: AccountFormData = {
   name: '',
   type: 'checking',
@@ -45,21 +38,25 @@ const defaultValues: AccountFormData = {
   budget: null,
 };
 
-export function AccountForm({
-  initialData,
-  accountId,
-  onSuccess,
-  onDeleteSuccess,
-  onCancel,
-  isSheet,
-}: AccountFormProps) {
+export type AccountFormProps = {
+  initialData?: AccountFormData;
+  accountId?: string;
+  onSuccess?: () => void;
+  onDeleteSuccess?: () => void;
+  onCancel?: () => void;
+};
+
+function useAccountForm(
+  initialData?: AccountFormData,
+  accountId?: string,
+  onSuccess?: () => void,
+  onDeleteSuccess?: () => void,
+) {
   const createAccount = useCreateAccount();
   const updateAccount = useUpdateAccount();
   const preferredCurrency = useAppStore.use.currency();
   const archiveAccount = useArchiveAccountConfirmation(onDeleteSuccess);
   const accountFormPrefs = useAppStore(selectAccountFormPrefs);
-  // const lastUsedCurrencies = useAppStore(selectLastUsedCurrencies);
-  // const orderedCurrencies = React.useMemo(() => mergeCurrencyArrays(lastUsedCurrencies, CURRENCY_OPTIONS), [lastUsedCurrencies]);
 
   const form = useForm({
     defaultValues: {
@@ -86,16 +83,27 @@ export function AccountForm({
       else {
         await createAccount.mutateAsync(data);
       }
-      setAccountFormPrefs({
-        type: data.type,
-        currency: data.currency,
-      });
+      setAccountFormPrefs({ type: data.type, currency: data.currency });
       addLastUsedCurrency(data.currency);
       onSuccess?.();
     },
   });
 
-  const formBody = (
+  return { form, createAccount, updateAccount, archiveAccount, preferredCurrency };
+}
+
+type UseAccountFormReturn = ReturnType<typeof useAccountForm>;
+
+type AccountFormBodyProps = {
+  form: UseAccountFormReturn['form'];
+  preferredCurrency: CurrencyKey;
+  archiveAccount: UseAccountFormReturn['archiveAccount'];
+  accountId?: string;
+  initialData?: AccountFormData;
+};
+
+function AccountFormBody({ form, preferredCurrency, archiveAccount, accountId, initialData }: AccountFormBodyProps) {
+  return (
     <>
       <View className="mb-2 flex-row items-center justify-center gap-3">
         <form.Field
@@ -109,7 +117,6 @@ export function AccountForm({
             />
           )}
         />
-
         <form.Field
           name="icon"
           children={(field) => (
@@ -153,24 +160,6 @@ export function AccountForm({
           />
         )}
       />
-
-      {/* <form.Field
-        name="currency"
-        children={(field) => (
-          <Select
-            value={field.state.value}
-            options={orderedCurrencies}
-            searchEnabled
-            size="lg"
-            onSelect={(value) => {
-              if (!value) return;
-              field.handleChange(String(value) as CurrencyKey);
-            }}
-            showChevron={false}
-            stackBehavior="push"
-          />
-        )}
-      /> */}
 
       <form.Field
         name="type"
@@ -216,6 +205,7 @@ export function AccountForm({
           )}
         />
       </View>
+
       {!!accountId && (
         <GhostButton
           label={translate('common.delete')}
@@ -229,50 +219,105 @@ export function AccountForm({
       )}
     </>
   );
+}
 
-  const formFooter = (
-    <>
-      <form.Subscribe
+export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess, onCancel }: AccountFormProps) {
+  const { form, createAccount, updateAccount, archiveAccount, preferredCurrency } = useAccountForm(
+    initialData,
+    accountId,
+    onSuccess,
+    onDeleteSuccess,
+  );
+
+  return (
+    <View className="flex-1 gap-4">
+      <AccountFormBody
+        form={form}
+        preferredCurrency={preferredCurrency}
+        archiveAccount={archiveAccount}
+        accountId={accountId}
+        initialData={initialData}
+      />
+      <View className="mt-auto flex-row gap-3 pt-4">
+        <form.Subscribe
+          selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
+          children={(state) => (
+            <>
+              {onCancel && <OutlineButton label={translate('common.cancel')} onPress={onCancel} color="secondary" />}
+              <SolidButton
+                label={translate('common.save')}
+                onPress={form.handleSubmit}
+                loading={(!!state.isSubmitting) || createAccount.isPending || updateAccount.isPending || archiveAccount.mutation.isPending}
+                disabled={!schema.safeParse(state.values).success}
+                className="flex-1"
+              />
+            </>
+          )}
+        />
+      </View>
+    </View>
+  );
+}
+
+export type AccountFormSheetProps = AccountFormProps & { ref: ModalSheetRef<BottomSheetModal> } & Partial<ModalSheetProps>;
+export function AccountFormSheet({
+  initialData,
+  accountId,
+  onSuccess,
+  onDeleteSuccess,
+  onCancel,
+  ref,
+  ...props
+}: AccountFormSheetProps) {
+  const { form, createAccount, updateAccount, archiveAccount, preferredCurrency } = useAccountForm(
+    initialData,
+    accountId,
+    onSuccess,
+    onDeleteSuccess,
+  );
+
+  const isLoading = createAccount.isPending || updateAccount.isPending || archiveAccount.mutation.isPending;
+  const { Subscribe, handleSubmit } = form;
+
+  const footerComponent = React.useCallback(() => (
+    <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
+      <Subscribe
         selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
         children={(state) => (
           <>
             {onCancel && <OutlineButton label={translate('common.cancel')} onPress={onCancel} color="secondary" />}
             <SolidButton
               label={translate('common.save')}
-              onPress={form.handleSubmit}
-              loading={(!!state.isSubmitting) || createAccount.isPending || updateAccount.isPending || archiveAccount.mutation.isPending}
+              onPress={handleSubmit}
+              loading={(!!state.isSubmitting) || isLoading}
               disabled={!schema.safeParse(state.values).success}
               className="flex-1"
             />
           </>
         )}
       />
-    </>
-  );
-
-  if (isSheet) {
-    return (
-      <>
-        <BottomSheetKeyboardAwareScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
-          keyboardShouldPersistTaps="handled"
-        >
-          {formBody}
-        </BottomSheetKeyboardAwareScrollView>
-        <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
-          {formFooter}
-        </View>
-      </>
-    );
-  }
+    </View>
+  ), [onCancel, Subscribe, handleSubmit, isLoading]);
 
   return (
-    <View className="flex-1 gap-4">
-      {formBody}
-      <View className="mt-auto flex-row gap-3 pt-4">
-        {formFooter}
-      </View>
-    </View>
+    <ModalSheet
+      ref={ref}
+      {...props}
+      footerComponent={footerComponent}
+    >
+      <BottomSheetKeyboardAwareScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <AccountFormBody
+          form={form}
+          preferredCurrency={preferredCurrency}
+          archiveAccount={archiveAccount}
+          accountId={accountId}
+          initialData={initialData}
+        />
+      </BottomSheetKeyboardAwareScrollView>
+    </ModalSheet>
   );
 }

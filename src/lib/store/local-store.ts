@@ -18,21 +18,24 @@ const _useLocalStore = create<LocalStoreState>(() => (defaultState));
 
 export const useLocalStore = createSelectors(_useLocalStore);
 
-// ---------------------------------------------------------------------------
-// Public helpers – call these from anywhere in the app
-// ---------------------------------------------------------------------------
+export function updateLocalState(state: Partial<LocalStoreState> | ((prev: LocalStoreState) => Partial<LocalStoreState>)): void {
+  useLocalStore.setState((prev) => ({ ...prev, ...(typeof state === 'function' ? state(prev) : state) }));
+}
 export function openSheet(config: SheetConfig): void {
-  useLocalStore.setState({ sheet: config });
+  updateLocalState({ sheet: config });
 }
 export function closeSheet(): void {
-  useLocalStore.setState({ sheet: undefined });
+  updateLocalState({ sheet: undefined });
+}
+export function setSheetProps(props: SheetConfig['props']): void {
+  updateLocalState((prev) => ({ sheet: { ...prev.sheet, props } as SheetConfig }));
 }
 export function triggerScan(type: ScanTriggeredType = 'select'): void {
-  useLocalStore.setState({ scanTriggered: type });
+  updateLocalState({ scanTriggered: type });
 }
 export function triggerScanPicker(): void {
-  useLocalStore.setState({ scanTriggered: 'select' });
+  updateLocalState({ scanTriggered: 'select' });
 }
 export function closeScan(): void {
-  useLocalStore.setState({ scanTriggered: undefined });
+  updateLocalState({ scanTriggered: undefined });
 }

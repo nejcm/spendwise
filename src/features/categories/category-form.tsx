@@ -1,11 +1,13 @@
+import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { Category, CategoryFormData } from './types';
+import type { ModalSheetProps, ModalSheetRef } from '@/components/ui';
 import { useForm } from '@tanstack/react-form';
 import * as React from 'react';
 import { View } from 'react-native';
 import * as z from 'zod';
 
 import ColorSelector from '@/components/color-selector';
-import { Alert, GhostButton, Image, Input, SolidButton, Text, TrashIcon } from '@/components/ui';
+import { Alert, GhostButton, Image, Input, ModalSheet, SolidButton, Text, TrashIcon } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { OutlineButton } from '@/components/ui/outline-button';
@@ -30,7 +32,6 @@ export type CategoryManageModalProps = {
   initialValues?: CategoryInitialValues;
   onSuccess?: () => void;
   onCancel?: () => void;
-  isSheet?: boolean;
 };
 
 const defaultValues: CategoryFormData = {
@@ -40,12 +41,13 @@ const defaultValues: CategoryFormData = {
   budget: null,
 };
 
-export function CategoryForm({ initialValues, onSuccess, onCancel, isSheet }: CategoryManageModalProps) {
+function useCategoryForm(initialValues?: CategoryInitialValues, onSuccess?: () => void) {
   const id = initialValues?.id;
   const { data: categories = [] } = useCategories();
   const preferredCurrency = useAppStore.use.currency();
   const createCategory = useCreateCategory(() => closeSheet());
   const updateCategory = useUpdateCategory(() => closeSheet());
+  const deleteCategory = useDeleteCategory(() => closeSheet());
 
   const form = useForm({
     defaultValues: {
@@ -66,7 +68,20 @@ export function CategoryForm({ initialValues, onSuccess, onCancel, isSheet }: Ca
     },
   });
 
-  const deleteCategory = useDeleteCategory(() => closeSheet());
+  return { form, createCategory, updateCategory, deleteCategory, preferredCurrency, id };
+}
+
+type UseCategoryFormReturn = ReturnType<typeof useCategoryForm>;
+
+type CategoryFormBodyProps = {
+  form: UseCategoryFormReturn['form'];
+  preferredCurrency: UseCategoryFormReturn['preferredCurrency'];
+  deleteCategory: UseCategoryFormReturn['deleteCategory'];
+  id: UseCategoryFormReturn['id'];
+  initialValues?: CategoryInitialValues;
+};
+
+function CategoryFormBody({ form, preferredCurrency, deleteCategory, id, initialValues }: CategoryFormBodyProps) {
   const onDeletePress = (categoryId: string, name: string) => {
     Alert.alert(translate('common.delete'), translate('categories.delete_confirm', { name }), [
       { text: translate('common.cancel'), style: 'cancel' },
@@ -74,7 +89,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel, isSheet }: Ca
     ]);
   };
 
-  const formBody = (
+  return (
     <>
       <View className="mb-2 flex-row items-center justify-center gap-3">
         <form.Field
@@ -141,6 +156,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel, isSheet }: Ca
           )}
         />
       </View>
+
       {!!id && (
         <GhostButton
           label={translate('common.delete')}
@@ -154,10 +170,69 @@ export function CategoryForm({ initialValues, onSuccess, onCancel, isSheet }: Ca
       )}
     </>
   );
+}
 
-  const formFooter = (
-    <>
-      <form.Subscribe
+export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryManageModalProps) {
+  const { form, createCategory, updateCategory, deleteCategory, preferredCurrency, id } = useCategoryForm(
+    initialValues,
+    onSuccess,
+  );
+
+  return (
+    <View className="flex-1 gap-4">
+      <CategoryFormBody
+        form={form}
+        preferredCurrency={preferredCurrency}
+        deleteCategory={deleteCategory}
+        id={id}
+        initialValues={initialValues}
+      />
+      <View className="mt-auto flex-row gap-3 pt-4">
+        <form.Subscribe
+          selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
+          children={(state) => (
+            <>
+              {onCancel && (
+                <OutlineButton
+                  label={translate('common.cancel')}
+                  onPress={onCancel}
+                  color="secondary"
+                />
+              )}
+              <SolidButton
+                label={translate('common.save')}
+                onPress={form.handleSubmit}
+                loading={(!!state.isSubmitting) || createCategory.isPending || updateCategory.isPending}
+                disabled={!schema.safeParse(state.values).success}
+                className="flex-1"
+              />
+            </>
+          )}
+        />
+      </View>
+    </View>
+  );
+}
+
+export type CategoryFormSheetProps = CategoryManageModalProps & { ref: ModalSheetRef<BottomSheetModal> } & Partial<ModalSheetProps>;
+export function CategoryFormSheet({
+  initialValues,
+  onSuccess,
+  onCancel,
+  ref,
+  ...props
+}: CategoryFormSheetProps) {
+  const { form, createCategory, updateCategory, deleteCategory, preferredCurrency, id } = useCategoryForm(
+    initialValues,
+    onSuccess,
+  );
+
+  const isLoading = createCategory.isPending || updateCategory.isPending;
+  const { Subscribe, handleSubmit } = form;
+
+  const footerComponent = React.useCallback(() => (
+    <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
+      <Subscribe
         selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
         children={(state) => (
           <>
@@ -170,41 +245,36 @@ export function CategoryForm({ initialValues, onSuccess, onCancel, isSheet }: Ca
             )}
             <SolidButton
               label={translate('common.save')}
-              onPress={form.handleSubmit}
-              loading={(!!state.isSubmitting) || createCategory.isPending || updateCategory.isPending}
+              onPress={handleSubmit}
+              loading={(!!state.isSubmitting) || isLoading}
               disabled={!schema.safeParse(state.values).success}
               className="flex-1"
             />
           </>
         )}
       />
-
-    </>
-  );
-
-  if (isSheet) {
-    return (
-      <>
-        <BottomSheetKeyboardAwareScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
-          keyboardShouldPersistTaps="handled"
-        >
-          {formBody}
-        </BottomSheetKeyboardAwareScrollView>
-        <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
-          {formFooter}
-        </View>
-      </>
-    );
-  }
+    </View>
+  ), [onCancel, Subscribe, handleSubmit, isLoading]);
 
   return (
-    <View className="flex-1 gap-4">
-      {formBody}
-      <View className="mt-auto flex-row gap-3 pt-4">
-        {formFooter}
-      </View>
-    </View>
+    <ModalSheet
+      ref={ref}
+      {...props}
+      footerComponent={footerComponent}
+    >
+      <BottomSheetKeyboardAwareScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <CategoryFormBody
+          form={form}
+          preferredCurrency={preferredCurrency}
+          deleteCategory={deleteCategory}
+          id={id}
+          initialValues={initialValues}
+        />
+      </BottomSheetKeyboardAwareScrollView>
+    </ModalSheet>
   );
 }

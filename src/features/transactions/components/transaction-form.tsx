@@ -1,101 +1,55 @@
-import type { CurrencyKey } from '@/features/currencies';
-import type { TransactionFormInitialValues, TransactionFormValues } from '@/features/transactions/components/transaction-form-schema';
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import { useForm } from '@tanstack/react-form';
+import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 
+import type { UseTransactionFormReturnType } from '../hooks/form';
+import type { ModalSheetProps, ModalSheetRef, OptionType } from '@/components/ui';
+import type { Account } from '@/features/accounts/types';
+import type { CurrencyKey } from '@/features/currencies';
+import type { TransactionFormInitialValues } from '@/features/transactions/components/transaction-form-schema';
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import * as React from 'react';
 import { ScrollView, View } from 'react-native';
-import { Image, Input, OutlineButton, Select, SolidButton, Text } from '@/components/ui';
+import { Image, Input, ModalSheet, OutlineButton, Select, SolidButton, Text } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
 import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
-import { useAccounts } from '@/features/accounts/api';
 import { CategoryPicker } from '@/features/categories/category-picker';
-import { mergeCurrencyArrays } from '@/features/currencies/helpers';
-import { CURRENCY_IMAGES, CURRENCY_OPTIONS } from '@/features/currencies/images';
-import { useCreateTransaction, useUpdateTransaction } from '@/features/transactions/api';
+import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { TransactionBaseAmountSync } from '@/features/transactions/components/transaction-base-amount-sync';
 import {
-  amountToString,
   TRANSACTION_TYPE_OPTIONS,
-  transactionFormDefaultValues,
   transactionFormSchema,
 } from '@/features/transactions/components/transaction-form-schema';
-import { dateToUnix } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
-import { toNumber } from '@/lib/number';
-import {
-  addLastUsedCurrency,
-  selectLastUsedCurrencies,
-  selectTransactionFormPrefs,
-  setTransactionFormPrefs,
-  useAppStore,
-} from '@/lib/store/store';
+import { useTransactionForm } from '../hooks/form';
 
 export type TransactionFormProps = {
   initialValues?: TransactionFormInitialValues;
   onSuccess?: () => void;
   onCancel?: () => void;
-  isSheet?: boolean;
 };
 
-// eslint-disable-next-line max-lines-per-function
-export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }: TransactionFormProps) {
-  const { data: accounts = [] } = useAccounts();
-  const id = initialValues?.id;
-  const preferredCurrency = useAppStore.use.currency();
-  const createTransaction = useCreateTransaction();
-  const updateTransaction = useUpdateTransaction();
-  const lastUsedCurrencies = useAppStore(selectLastUsedCurrencies);
-  const orderedCurrencies = React.useMemo(() => mergeCurrencyArrays(lastUsedCurrencies, CURRENCY_OPTIONS), [lastUsedCurrencies]);
-  const transactionFormPrefs = useAppStore(selectTransactionFormPrefs);
-  const [baseAmountIsManual, setBaseAmountIsManual] = React.useState(false);
-  const onBaseDriversChanged = React.useCallback(() => {
-    setBaseAmountIsManual(false);
-  }, []);
-
-  const form = useForm({
-    defaultValues: {
-      ...transactionFormDefaultValues,
-      type: transactionFormPrefs?.type || transactionFormDefaultValues.type,
-      currency: transactionFormPrefs?.currency || transactionFormDefaultValues.currency,
-      category_id: transactionFormPrefs?.category_id || '',
-      account_id: transactionFormPrefs?.account_id || (accounts[0]?.id ?? ''),
-      ...initialValues,
-      amount: amountToString(initialValues?.amount),
-      baseAmount: amountToString(initialValues?.baseAmount),
-    } as TransactionFormValues,
-    validators: {
-      onChange: transactionFormSchema,
-    },
-    onSubmit: async ({ value }) => {
-      if (!value.account_id) return;
-      const data = {
-        ...value,
-        amount: toNumber(value.amount) ?? 0,
-        baseAmount: toNumber(value.baseAmount) ?? 0,
-        date: dateToUnix(new Date(value.date)),
-      };
-      if (id) {
-        await updateTransaction.mutateAsync({ id, data });
-      }
-      else {
-        await createTransaction.mutateAsync(data);
-        form.reset();
-      }
-      setTransactionFormPrefs({
-        type: data.type,
-        currency: data.currency,
-        category_id: data.category_id,
-        account_id: data.account_id,
-      });
-      addLastUsedCurrency(data.currency);
-      onSuccess?.();
-    },
-  });
-
+type TransactionFormBodyProps = {
+  form: UseTransactionFormReturnType['form'];
+  accounts: Account[];
+  baseAmountIsManual: boolean;
+  onBaseDriversChanged: () => void;
+  orderedCurrencies: OptionType[];
+  preferredCurrency: CurrencyKey;
+  setBaseAmountIsManual: (value: boolean) => void;
+  isSheet?: boolean;
+};
+function TransactionFormBody({
+  form,
+  accounts,
+  baseAmountIsManual,
+  onBaseDriversChanged,
+  orderedCurrencies,
+  preferredCurrency,
+  setBaseAmountIsManual,
+  isSheet,
+}: TransactionFormBodyProps) {
   const HScrollView = isSheet ? BottomSheetScrollView : ScrollView;
-  const formBody = (
+  return (
     <>
       <form.Subscribe
         selector={(s) => ({
@@ -282,54 +236,132 @@ export function TransactionForm({ initialValues, onSuccess, onCancel, isSheet }:
       />
     </>
   );
+}
 
-  const formFooter = (
-    <form.Subscribe
-      selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
-      children={(state) => (
-        <>
-          {onCancel && (
-            <OutlineButton
-              label={translate('common.cancel')}
-              onPress={onCancel}
-              color="secondary"
-            />
-          )}
-          <SolidButton
-            label={translate('common.save')}
-            onPress={form.handleSubmit}
-            loading={(!!state.isSubmitting) || createTransaction.isPending || updateTransaction.isPending}
-            disabled={!transactionFormSchema.safeParse(state.values).success}
-            className="flex-1"
-          />
-        </>
-      )}
-    />
-  );
-
-  if (isSheet) {
-    return (
-      <>
-        <BottomSheetKeyboardAwareScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
-          keyboardShouldPersistTaps="handled"
-        >
-          {formBody}
-        </BottomSheetKeyboardAwareScrollView>
-        <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
-          {formFooter}
-        </View>
-      </>
-    );
-  }
+export function TransactionForm({ initialValues, onSuccess, onCancel }: TransactionFormProps) {
+  const {
+    form,
+    accounts,
+    createTransaction,
+    updateTransaction,
+    baseAmountIsManual,
+    onBaseDriversChanged,
+    orderedCurrencies,
+    preferredCurrency,
+    setBaseAmountIsManual,
+  } = useTransactionForm(initialValues, onSuccess);
 
   return (
     <View className="flex-1 gap-4">
-      {formBody}
+      <TransactionFormBody
+        form={form}
+        accounts={accounts}
+        baseAmountIsManual={baseAmountIsManual}
+        onBaseDriversChanged={onBaseDriversChanged}
+        orderedCurrencies={orderedCurrencies}
+        preferredCurrency={preferredCurrency}
+        setBaseAmountIsManual={setBaseAmountIsManual}
+        isSheet={false}
+      />
       <View className="mt-auto flex-row gap-3 pt-4">
-        {formFooter}
+        <form.Subscribe
+          selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
+          children={(state) => (
+            <>
+              {onCancel && (
+                <OutlineButton
+                  label={translate('common.cancel')}
+                  onPress={onCancel}
+                  color="secondary"
+                />
+              )}
+              <SolidButton
+                label={translate('common.save')}
+                onPress={form.handleSubmit}
+                loading={(!!state.isSubmitting) || createTransaction.isPending || updateTransaction.isPending}
+                disabled={!transactionFormSchema.safeParse(state.values).success}
+                className="flex-1"
+              />
+            </>
+          )}
+        />
       </View>
     </View>
+  );
+}
+
+export type TransactionFormSheetProps = TransactionFormProps & { ref: ModalSheetRef<BottomSheetModal> } & Partial<ModalSheetProps>;
+export function TransactionFormSheet({
+  initialValues,
+  onSuccess,
+  onCancel,
+  ref,
+  ...props
+}: TransactionFormSheetProps) {
+  const {
+    form,
+    accounts,
+    createTransaction,
+    updateTransaction,
+    baseAmountIsManual,
+    onBaseDriversChanged,
+    orderedCurrencies,
+    preferredCurrency,
+    setBaseAmountIsManual,
+  } = useTransactionForm(initialValues, onSuccess);
+
+  const isLoading = createTransaction.isPending || updateTransaction.isPending;
+  const { Subscribe, handleSubmit } = form;
+
+  const footerComponent = React.useCallback(() => (
+    <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
+      <Subscribe
+        selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
+        children={(state) => (
+          <>
+            {onCancel && (
+              <OutlineButton
+                label={translate('common.cancel')}
+                onPress={onCancel}
+                color="secondary"
+              />
+            )}
+            <SolidButton
+              label={translate('common.save')}
+              onPress={handleSubmit}
+              loading={(!!state.isSubmitting) || isLoading}
+              disabled={!transactionFormSchema.safeParse(state.values).success}
+              className="flex-1"
+            />
+          </>
+        )}
+      />
+    </View>
+  ), [onCancel, Subscribe, handleSubmit, isLoading]);
+
+  return (
+    <ModalSheet
+      ref={ref}
+      {...props}
+      footerComponent={footerComponent}
+    >
+      <BottomSheetKeyboardAwareScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <TransactionFormBody
+          form={form}
+          accounts={accounts}
+          baseAmountIsManual={baseAmountIsManual}
+          onBaseDriversChanged={onBaseDriversChanged}
+          orderedCurrencies={orderedCurrencies}
+          preferredCurrency={preferredCurrency}
+          setBaseAmountIsManual={setBaseAmountIsManual}
+          isSheet={true}
+        />
+      </BottomSheetKeyboardAwareScrollView>
+
+    </ModalSheet>
   );
 }

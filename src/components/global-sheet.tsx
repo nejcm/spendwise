@@ -3,11 +3,11 @@ import type { SheetConfig, SheetType } from '@/lib/sheet';
 import { useEffect, useMemo, useRef } from 'react';
 import { BackHandler } from 'react-native';
 import { ModalSheet, Text, View } from '@/components/ui';
-import { AccountForm } from '@/features/accounts/components/account-form';
-import { CategoryForm } from '@/features/categories/category-form';
-import { ScheduledTransactionForm } from '@/features/scheduled-transactions/components/scheduled-transaction-form';
+import { AccountFormSheet } from '@/features/accounts/components/account-form';
+import { CategoryFormSheet } from '@/features/categories/category-form';
+import { ScheduledTransactionFormSheet } from '@/features/scheduled-transactions/components/scheduled-transaction-form';
 import { ScanFab } from '@/features/transactions/components/scan-fab';
-import { TransactionForm } from '@/features/transactions/components/transaction-form';
+import { TransactionFormSheet } from '@/features/transactions/components/transaction-form';
 import { translate } from '@/lib/i18n';
 import { SHEET_SNAP_POINTS } from '@/lib/sheet';
 import { closeSheet, useLocalStore } from '@/lib/store/local-store';
@@ -98,62 +98,7 @@ function SheetTitle({ config }: { config: SheetConfig | undefined }) {
   );
 }
 
-function SheetContent({ config, onClose }: { config: SheetConfig; onClose: () => void }) {
-  switch (config.type) {
-    case 'add-transaction':
-      return (
-        <TransactionForm
-          initialValues={config.initialValues}
-          onSuccess={onClose}
-          onCancel={onClose}
-          isSheet
-        />
-      );
-    case 'add-account':
-      return <AccountForm onSuccess={onClose} onCancel={onClose} isSheet />;
-    case 'edit-account':
-      return (
-        <AccountForm
-          key={config.accountId}
-          accountId={config.accountId}
-          initialData={config.initialData}
-          onSuccess={onClose}
-          onDeleteSuccess={onClose}
-          onCancel={onClose}
-          isSheet
-        />
-      );
-    case 'add-category':
-      return (
-        <CategoryForm
-          initialValues={{ id: undefined }}
-          onSuccess={onClose}
-          onCancel={onClose}
-          isSheet
-        />
-      );
-    case 'edit-category':
-      return (
-        <CategoryForm
-          initialValues={config.initialValues}
-          onSuccess={onClose}
-          onCancel={onClose}
-          isSheet
-        />
-      );
-    case 'add-scheduled':
-      return (
-        <ScheduledTransactionForm
-          initialValues={config.initialValues}
-          onSuccess={onClose}
-          onCancel={onClose}
-          isSheet
-        />
-      );
-    default:
-      return null;
-  }
-}
+const modalKey = 'global-sheet';
 
 export function GlobalSheet() {
   const config = useLocalStore.use.sheet();
@@ -182,19 +127,98 @@ export function GlobalSheet() {
     return () => sub.remove();
   }, [isOpen]);
 
-  return (
-    <ModalSheet
-      ref={modalRef}
-      onDismiss={closeSheet}
-      title={<SheetTitle config={config} />}
-      snapPoints={snapPoints}
-      enablePanDownToClose={false}
-      enableDynamicSizing
-      {...config?.props}
-      android_keyboardInputMode="adjustPan"
-    >
+  if (!config) {
+    return (
+      <ModalSheet
+        key={modalKey}
+        ref={modalRef}
+        onDismiss={closeSheet}
+        title={<SheetTitle config={config} />}
+        snapPoints={snapPoints}
+        enablePanDownToClose={false}
+        enableDynamicSizing
+        android_keyboardInputMode="adjustPan"
+      >
 
-      {config && <SheetContent config={config} onClose={closeSheet} />}
-    </ModalSheet>
-  );
+        {null}
+      </ModalSheet>
+    );
+  }
+
+  const sheetProps = {
+    key: modalKey,
+    ref: modalRef,
+    onDismiss: closeSheet,
+    title: <SheetTitle config={config} />,
+    snapPoints,
+    enablePanDownToClose: false,
+    enableDynamicSizing: true,
+    android_keyboardInputMode: 'adjustPan',
+  } as const;
+
+  switch (config?.type) {
+    case 'add-transaction':
+      return (
+        <TransactionFormSheet
+          {...sheetProps}
+          {...config?.props}
+          initialValues={config.initialValues}
+          onSuccess={closeSheet}
+          onCancel={closeSheet}
+        />
+      );
+    case 'add-account':
+      return (
+        <AccountFormSheet
+          {...sheetProps}
+          {...config?.props}
+          onSuccess={closeSheet}
+          onCancel={closeSheet}
+        />
+      );
+    case 'edit-account':
+      return (
+        <AccountFormSheet
+          {...sheetProps}
+          {...config?.props}
+          accountId={config.accountId}
+          initialData={config.initialData}
+          onSuccess={closeSheet}
+          onDeleteSuccess={closeSheet}
+          onCancel={closeSheet}
+        />
+      );
+    case 'add-category':
+      return (
+        <CategoryFormSheet
+          {...sheetProps}
+          {...config?.props}
+          initialValues={{ id: undefined }}
+          onSuccess={closeSheet}
+          onCancel={closeSheet}
+        />
+      );
+    case 'edit-category':
+      return (
+        <CategoryFormSheet
+          {...sheetProps}
+          {...config?.props}
+          initialValues={config.initialValues}
+          onSuccess={closeSheet}
+          onCancel={closeSheet}
+        />
+      );
+    case 'add-scheduled':
+      return (
+        <ScheduledTransactionFormSheet
+          {...sheetProps}
+          {...config?.props}
+          initialValues={config.initialValues}
+          onSuccess={closeSheet}
+          onCancel={closeSheet}
+        />
+      );
+    default:
+      return null;
+  }
 }

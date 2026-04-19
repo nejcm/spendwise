@@ -127,62 +127,28 @@ export function GlobalSheet() {
     return () => sub.remove();
   }, [isOpen]);
 
-  if (!config) {
-    return (
-      <ModalSheet
-        key={modalKey}
-        ref={modalRef}
-        onDismiss={closeSheet}
-        title={<SheetTitle config={config} />}
-        snapPoints={snapPoints}
-        enablePanDownToClose={false}
-        enableDynamicSizing
-        android_keyboardInputMode="adjustPan"
-      >
-
-        {null}
-      </ModalSheet>
-    );
-  }
-
-  const sheetProps = {
-    ref: modalRef,
-    onDismiss: closeSheet,
-    title: <SheetTitle config={config} />,
-    snapPoints,
-    enablePanDownToClose: false,
-    enableDynamicSizing: true,
-    android_keyboardInputMode: 'adjustPan',
-  } as const;
-
+  let children = null;
   switch (config?.type) {
     case 'add-transaction':
-      return (
+      children = (
         <TransactionFormSheet
-          key={modalKey}
-          {...sheetProps}
-          {...config?.props}
           initialValues={config.initialValues}
           onSuccess={closeSheet}
           onCancel={closeSheet}
         />
       );
+      break;
     case 'add-account':
-      return (
+      children = (
         <AccountFormSheet
-          key={modalKey}
-          {...sheetProps}
-          {...config?.props}
           onSuccess={closeSheet}
           onCancel={closeSheet}
         />
       );
+      break;
     case 'edit-account':
-      return (
+      children = (
         <AccountFormSheet
-          key={modalKey}
-          {...sheetProps}
-          {...config?.props}
           accountId={config.accountId}
           initialData={config.initialData}
           onSuccess={closeSheet}
@@ -190,40 +156,51 @@ export function GlobalSheet() {
           onCancel={closeSheet}
         />
       );
+      break;
     case 'add-category':
-      return (
+      children = (
         <CategoryFormSheet
-          key={modalKey}
-          {...sheetProps}
-          {...config?.props}
           initialValues={{ id: undefined }}
           onSuccess={closeSheet}
           onCancel={closeSheet}
         />
       );
+      break;
     case 'edit-category':
-      return (
+      children = (
         <CategoryFormSheet
-          key={modalKey}
-          {...sheetProps}
-          {...config?.props}
           initialValues={config.initialValues}
           onSuccess={closeSheet}
           onCancel={closeSheet}
         />
       );
+      break;
     case 'add-scheduled':
-      return (
+      children = (
         <ScheduledTransactionFormSheet
-          key={modalKey}
-          {...sheetProps}
-          {...config?.props}
           initialValues={config.initialValues}
           onSuccess={closeSheet}
           onCancel={closeSheet}
         />
       );
+      break;
     default:
-      return null;
+      children = null;
+      break;
   }
+
+  return (
+    <ModalSheet
+      ref={modalRef}
+      onDismiss={closeSheet}
+      title={<SheetTitle config={config} />}
+      snapPoints={snapPoints}
+      enablePanDownToClose={false}
+      enableDynamicSizing={true}
+      android_keyboardInputMode="adjustPan"
+      {...config?.props}
+    >
+      {children}
+    </ModalSheet>
+  );
 }

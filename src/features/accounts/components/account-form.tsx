@@ -1,13 +1,12 @@
-import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { AccountFormData, AccountType } from '../types';
-import type { ModalSheetProps, ModalSheetRef } from '@/components/ui';
 import type { CurrencyKey } from '@/features/currencies';
 import { useForm } from '@tanstack/react-form';
-import * as React from 'react';
 import { View } from 'react-native';
+import { KeyboardStickyView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
 import ColorSelector from '@/components/color-selector';
-import { GhostButton, Image, Input, ModalSheet, OutlineButton, SolidButton, Text, TrashIcon } from '@/components/ui';
+import { GhostButton, Image, Input, OutlineButton, SolidButton, Text, TrashIcon } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { CURRENCY_VALUES } from '@/features/currencies';
@@ -259,15 +258,13 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
   );
 }
 
-export type AccountFormSheetProps = AccountFormProps & { ref: ModalSheetRef<BottomSheetModal> } & Partial<ModalSheetProps>;
+export type AccountFormSheetProps = AccountFormProps;
 export function AccountFormSheet({
   initialData,
   accountId,
   onSuccess,
   onDeleteSuccess,
   onCancel,
-  ref,
-  ...props
 }: AccountFormSheetProps) {
   const { form, createAccount, updateAccount, archiveAccount, preferredCurrency } = useAccountForm(
     initialData,
@@ -277,34 +274,10 @@ export function AccountFormSheet({
   );
 
   const isLoading = createAccount.isPending || updateAccount.isPending || archiveAccount.mutation.isPending;
-  const { Subscribe, handleSubmit } = form;
-
-  const footerComponent = React.useCallback(() => (
-    <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
-      <Subscribe
-        selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
-        children={(state) => (
-          <>
-            {onCancel && <OutlineButton label={translate('common.cancel')} onPress={onCancel} color="secondary" />}
-            <SolidButton
-              label={translate('common.save')}
-              onPress={handleSubmit}
-              loading={(!!state.isSubmitting) || isLoading}
-              disabled={!schema.safeParse(state.values).success}
-              className="flex-1"
-            />
-          </>
-        )}
-      />
-    </View>
-  ), [onCancel, Subscribe, handleSubmit, isLoading]);
+  const insets = useSafeAreaInsets();
 
   return (
-    <ModalSheet
-      ref={ref}
-      {...props}
-      footerComponent={footerComponent}
-    >
+    <>
       <BottomSheetKeyboardAwareScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
@@ -318,6 +291,25 @@ export function AccountFormSheet({
           initialData={initialData}
         />
       </BottomSheetKeyboardAwareScrollView>
-    </ModalSheet>
+      <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>
+        <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
+          <form.Subscribe
+            selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
+            children={(state) => (
+              <>
+                {onCancel && <OutlineButton label={translate('common.cancel')} onPress={onCancel} color="secondary" />}
+                <SolidButton
+                  label={translate('common.save')}
+                  onPress={form.handleSubmit}
+                  loading={(!!state.isSubmitting) || isLoading}
+                  disabled={!schema.safeParse(state.values).success}
+                  className="flex-1"
+                />
+              </>
+            )}
+          />
+        </View>
+      </KeyboardStickyView>
+    </>
   );
 }

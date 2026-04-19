@@ -1,13 +1,12 @@
-import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { Category, CategoryFormData } from './types';
-import type { ModalSheetProps, ModalSheetRef } from '@/components/ui';
 import { useForm } from '@tanstack/react-form';
-import * as React from 'react';
 import { View } from 'react-native';
+import { KeyboardStickyView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
 
 import ColorSelector from '@/components/color-selector';
-import { Alert, GhostButton, Image, Input, ModalSheet, SolidButton, Text, TrashIcon } from '@/components/ui';
+import { Alert, GhostButton, Image, Input, SolidButton, Text, TrashIcon } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { OutlineButton } from '@/components/ui/outline-button';
@@ -214,13 +213,11 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
   );
 }
 
-export type CategoryFormSheetProps = CategoryManageModalProps & { ref: ModalSheetRef<BottomSheetModal> } & Partial<ModalSheetProps>;
+export type CategoryFormSheetProps = CategoryManageModalProps;
 export function CategoryFormSheet({
   initialValues,
   onSuccess,
   onCancel,
-  ref,
-  ...props
 }: CategoryFormSheetProps) {
   const { form, createCategory, updateCategory, deleteCategory, preferredCurrency, id } = useCategoryForm(
     initialValues,
@@ -228,40 +225,10 @@ export function CategoryFormSheet({
   );
 
   const isLoading = createCategory.isPending || updateCategory.isPending;
-  const { Subscribe, handleSubmit } = form;
-
-  const footerComponent = React.useCallback(() => (
-    <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
-      <Subscribe
-        selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
-        children={(state) => (
-          <>
-            {onCancel && (
-              <OutlineButton
-                label={translate('common.cancel')}
-                onPress={onCancel}
-                color="secondary"
-              />
-            )}
-            <SolidButton
-              label={translate('common.save')}
-              onPress={handleSubmit}
-              loading={(!!state.isSubmitting) || isLoading}
-              disabled={!schema.safeParse(state.values).success}
-              className="flex-1"
-            />
-          </>
-        )}
-      />
-    </View>
-  ), [onCancel, Subscribe, handleSubmit, isLoading]);
+  const insets = useSafeAreaInsets();
 
   return (
-    <ModalSheet
-      ref={ref}
-      {...props}
-      footerComponent={footerComponent}
-    >
+    <>
       <BottomSheetKeyboardAwareScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
@@ -275,6 +242,31 @@ export function CategoryFormSheet({
           initialValues={initialValues}
         />
       </BottomSheetKeyboardAwareScrollView>
-    </ModalSheet>
+      <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>
+        <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
+          <form.Subscribe
+            selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
+            children={(state) => (
+              <>
+                {onCancel && (
+                  <OutlineButton
+                    label={translate('common.cancel')}
+                    onPress={onCancel}
+                    color="secondary"
+                  />
+                )}
+                <SolidButton
+                  label={translate('common.save')}
+                  onPress={form.handleSubmit}
+                  loading={(!!state.isSubmitting) || isLoading}
+                  disabled={!schema.safeParse(state.values).success}
+                  className="flex-1"
+                />
+              </>
+            )}
+          />
+        </View>
+      </KeyboardStickyView>
+    </>
   );
 }

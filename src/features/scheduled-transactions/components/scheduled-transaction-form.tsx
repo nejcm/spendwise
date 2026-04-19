@@ -1,15 +1,14 @@
-import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { ScheduledTransactionFormData } from '../types';
-import type { ModalSheetProps, ModalSheetRef } from '@/components/ui';
 import type { CurrencyKey } from '@/features/currencies';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useForm } from '@tanstack/react-form';
 import * as React from 'react';
 import { ScrollView, View } from 'react-native';
+import { KeyboardStickyView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
 import {
   Input,
-  ModalSheet,
   OutlineButton,
   Select,
   SolidButton,
@@ -415,13 +414,11 @@ export function ScheduledTransactionForm({ initialValues, onCancel, onSuccess }:
   );
 }
 
-export type ScheduledTransactionFormSheetProps = ScheduledTransactionFormProps & { ref: ModalSheetRef<BottomSheetModal> } & Partial<ModalSheetProps>;
+export type ScheduledTransactionFormSheetProps = ScheduledTransactionFormProps;
 export function ScheduledTransactionFormSheet({
   initialValues,
   onCancel,
   onSuccess,
-  ref,
-  ...props
 }: ScheduledTransactionFormSheetProps) {
   const {
     form,
@@ -432,40 +429,10 @@ export function ScheduledTransactionFormSheet({
   } = useScheduledTransactionForm(initialValues, onSuccess);
 
   const isLoading = createScheduledTransaction.isPending || updateScheduledTransaction.isPending;
-  const { Subscribe, handleSubmit } = form;
-
-  const footerComponent = React.useCallback(() => (
-    <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
-      <Subscribe
-        selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
-        children={(state) => (
-          <>
-            {onCancel && (
-              <OutlineButton
-                label={translate('common.cancel')}
-                onPress={onCancel}
-                color="secondary"
-              />
-            )}
-            <SolidButton
-              label={translate('common.save')}
-              onPress={handleSubmit}
-              loading={(!!state.isSubmitting) || isLoading}
-              disabled={!schema.safeParse(state.values).success}
-              className="flex-1"
-            />
-          </>
-        )}
-      />
-    </View>
-  ), [onCancel, Subscribe, handleSubmit, isLoading]);
+  const insets = useSafeAreaInsets();
 
   return (
-    <ModalSheet
-      ref={ref}
-      {...props}
-      footerComponent={footerComponent}
-    >
+    <>
       <BottomSheetKeyboardAwareScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
@@ -478,6 +445,34 @@ export function ScheduledTransactionFormSheet({
           isSheet
         />
       </BottomSheetKeyboardAwareScrollView>
-    </ModalSheet>
+      <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>
+        <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
+          <form.Subscribe
+            selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
+            children={(state) => (
+              <>
+                {onCancel && (
+                  <OutlineButton
+                    label={translate('common.cancel')}
+                    onPress={onCancel}
+                    color="secondary"
+                  />
+                )}
+                <SolidButton
+                  label={translate('common.save')}
+                  onPress={form.handleSubmit}
+                  loading={
+                    (!!state.isSubmitting)
+                    || isLoading
+                  }
+                  disabled={!schema.safeParse(state.values).success}
+                  className="flex-1"
+                />
+              </>
+            )}
+          />
+        </View>
+      </KeyboardStickyView>
+    </>
   );
 }

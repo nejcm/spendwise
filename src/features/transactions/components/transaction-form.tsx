@@ -1,14 +1,13 @@
-import type { BottomSheetModal } from '@gorhom/bottom-sheet';
-
 import type { UseTransactionFormReturnType } from '../hooks/form';
-import type { ModalSheetProps, ModalSheetRef, OptionType } from '@/components/ui';
+import type { OptionType } from '@/components/ui';
 import type { Account } from '@/features/accounts/types';
 import type { CurrencyKey } from '@/features/currencies';
 import type { TransactionFormInitialValues } from '@/features/transactions/components/transaction-form-schema';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
-import * as React from 'react';
 import { ScrollView, View } from 'react-native';
-import { Image, Input, ModalSheet, OutlineButton, Select, SolidButton, Text } from '@/components/ui';
+import { KeyboardStickyView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Image, Input, OutlineButton, Select, SolidButton, Text } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
 import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
@@ -290,13 +289,11 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
   );
 }
 
-export type TransactionFormSheetProps = TransactionFormProps & { ref: ModalSheetRef<BottomSheetModal> } & Partial<ModalSheetProps>;
+export type TransactionFormSheetProps = TransactionFormProps;
 export function TransactionFormSheet({
   initialValues,
   onSuccess,
   onCancel,
-  ref,
-  ...props
 }: TransactionFormSheetProps) {
   const {
     form,
@@ -311,40 +308,10 @@ export function TransactionFormSheet({
   } = useTransactionForm(initialValues, onSuccess);
 
   const isLoading = createTransaction.isPending || updateTransaction.isPending;
-  const { Subscribe, handleSubmit } = form;
-
-  const footerComponent = React.useCallback(() => (
-    <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
-      <Subscribe
-        selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
-        children={(state) => (
-          <>
-            {onCancel && (
-              <OutlineButton
-                label={translate('common.cancel')}
-                onPress={onCancel}
-                color="secondary"
-              />
-            )}
-            <SolidButton
-              label={translate('common.save')}
-              onPress={handleSubmit}
-              loading={(!!state.isSubmitting) || isLoading}
-              disabled={!transactionFormSchema.safeParse(state.values).success}
-              className="flex-1"
-            />
-          </>
-        )}
-      />
-    </View>
-  ), [onCancel, Subscribe, handleSubmit, isLoading]);
+  const insets = useSafeAreaInsets();
 
   return (
-    <ModalSheet
-      ref={ref}
-      {...props}
-      footerComponent={footerComponent}
-    >
+    <>
       <BottomSheetKeyboardAwareScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
@@ -361,7 +328,31 @@ export function TransactionFormSheet({
           isSheet={true}
         />
       </BottomSheetKeyboardAwareScrollView>
-
-    </ModalSheet>
+      <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>
+        <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
+          <form.Subscribe
+            selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
+            children={(state) => (
+              <>
+                {onCancel && (
+                  <OutlineButton
+                    label={translate('common.cancel')}
+                    onPress={onCancel}
+                    color="secondary"
+                  />
+                )}
+                <SolidButton
+                  label={translate('common.save')}
+                  onPress={form.handleSubmit}
+                  loading={(!!state.isSubmitting) || isLoading}
+                  disabled={!transactionFormSchema.safeParse(state.values).success}
+                  className="flex-1"
+                />
+              </>
+            )}
+          />
+        </View>
+      </KeyboardStickyView>
+    </>
   );
 }

@@ -51,7 +51,7 @@ export function CategoryPicker({ selectedId, onSelect, label, error, ...props }:
         <View className="flex-1 items-center justify-center gap-2 py-1 2xs:gap-3">
           <View
             className="size-14 items-center justify-center rounded-full 3xs:size-16 2xs:size-18"
-            style={{ backgroundColor: hexWithOpacity(opt.color, 30) }}
+            style={{ backgroundColor: hexWithOpacity(opt.color, 36) }}
           >
             {opt.icon
               ? <Text className="text-2xl 3xs:text-3xl 2xs:text-4xl">{opt.icon}</Text>

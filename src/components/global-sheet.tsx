@@ -146,7 +146,6 @@ export function GlobalSheet() {
   }
 
   const sheetProps = {
-    key: modalKey,
     ref: modalRef,
     onDismiss: closeSheet,
     title: <SheetTitle config={config} />,
@@ -160,6 +159,7 @@ export function GlobalSheet() {
     case 'add-transaction':
       return (
         <TransactionFormSheet
+          key={modalKey}
           {...sheetProps}
           {...config?.props}
           initialValues={config.initialValues}
@@ -170,6 +170,7 @@ export function GlobalSheet() {
     case 'add-account':
       return (
         <AccountFormSheet
+          key={modalKey}
           {...sheetProps}
           {...config?.props}
           onSuccess={closeSheet}
@@ -179,6 +180,7 @@ export function GlobalSheet() {
     case 'edit-account':
       return (
         <AccountFormSheet
+          key={modalKey}
           {...sheetProps}
           {...config?.props}
           accountId={config.accountId}
@@ -191,6 +193,7 @@ export function GlobalSheet() {
     case 'add-category':
       return (
         <CategoryFormSheet
+          key={modalKey}
           {...sheetProps}
           {...config?.props}
           initialValues={{ id: undefined }}
@@ -201,6 +204,7 @@ export function GlobalSheet() {
     case 'edit-category':
       return (
         <CategoryFormSheet
+          key={modalKey}
           {...sheetProps}
           {...config?.props}
           initialValues={config.initialValues}
@@ -211,6 +215,7 @@ export function GlobalSheet() {
     case 'add-scheduled':
       return (
         <ScheduledTransactionFormSheet
+          key={modalKey}
           {...sheetProps}
           {...config?.props}
           initialValues={config.initialValues}

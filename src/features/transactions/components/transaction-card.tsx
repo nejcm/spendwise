@@ -26,7 +26,7 @@ export const TransactionCard = React.memo(({ transaction, className }: Transacti
     <Pressable className={cn('flex-row items-center gap-3 p-3', className)} style={getPressedStyle} onPress={() => router.push(`/transactions/${transaction.id}`)}>
       <View
         className="size-10 items-center justify-center rounded-lg"
-        style={{ backgroundColor: hexWithOpacity(transaction.category_color ?? DEFAULT_COLOR, 30) }}
+        style={{ backgroundColor: hexWithOpacity(transaction.category_color ?? DEFAULT_COLOR, 36) }}
       >
         <Text className="text-xl font-medium">
           {(transaction.category_icon || '?')}

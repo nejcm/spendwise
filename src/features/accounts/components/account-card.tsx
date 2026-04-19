@@ -34,7 +34,7 @@ export function AccountCard({ account, onPress, onLongPress }: AccountCardProps)
         {account.icon && (
           <View
             className="size-12 items-center justify-center rounded-lg"
-            style={{ backgroundColor: hexWithOpacity(account.color ?? DEFAULT_COLOR, 26) }}
+            style={{ backgroundColor: hexWithOpacity(account.color ?? DEFAULT_COLOR, 36) }}
           >
             <Text className="text-3xl">{account.icon}</Text>
           </View>

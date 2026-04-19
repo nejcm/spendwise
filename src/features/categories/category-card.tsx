@@ -43,7 +43,7 @@ export default function CategoryCard({ item, currency, periodSelection, onPress,
       <Pressable onPress={() => onPress(item)} className="flex-1 flex-row items-center gap-2 px-2 py-1">
         <View
           className="size-9 items-center justify-center rounded-lg 3xs:size-10 2xs:size-12"
-          style={{ backgroundColor: hexWithOpacity(item.category_color ?? DEFAULT_COLOR, 30) }}
+          style={{ backgroundColor: hexWithOpacity(item.category_color ?? DEFAULT_COLOR, 36) }}
         >
           <Text className="text-2xl">{emoji}</Text>
         </View>

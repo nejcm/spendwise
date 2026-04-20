@@ -199,7 +199,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
                 />
               )}
               <SolidButton
-                color="accent"
+                color="primary"
                 label={translate('common.save')}
                 onPress={form.handleSubmit}
                 loading={(!!state.isSubmitting) || createCategory.isPending || updateCategory.isPending}
@@ -257,7 +257,7 @@ export function CategoryFormSheet({
                   />
                 )}
                 <SolidButton
-                  color="accent"
+                  color="primary"
                   label={translate('common.save')}
                   onPress={form.handleSubmit}
                   loading={(!!state.isSubmitting) || isLoading}

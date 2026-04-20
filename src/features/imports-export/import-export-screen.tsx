@@ -94,7 +94,7 @@ export function ImportScreen() {
                       description: translate('import-export.pick_description'),
                       value: (
                         <SolidButton
-                          color="accent"
+                          color="primary"
                           size="sm"
                           className="min-w-28"
                           iconLeft={<ArrowUp className="mr-1 text-background" size={16} />}

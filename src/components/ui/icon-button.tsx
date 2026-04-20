@@ -53,7 +53,7 @@ export function IconButton({
   ref,
   disabled = false,
   size = 'md',
-  color = 'primary',
+  color = 'default',
   className = '',
   testID,
   style,

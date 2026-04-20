@@ -17,7 +17,7 @@ export const defaultStyles = StyleSheet.create({
 export const LightTheme: Theme = {
   ...DefaultTheme,
   colors: {
-    primary: '#ff7b1a',
+    primary: '#3965cc',
     background: '#fcfcfc',
     card: '#efefef',
     text: '#0a0a0a',
@@ -29,7 +29,7 @@ export const LightTheme: Theme = {
 export const DarkTheme: Theme = {
   ..._DarkTheme,
   colors: {
-    primary: '#ff7b1a',
+    primary: '#3965cc',
     background: '#1A1C20',
     card: '#21232C',
     text: '#fafafa',

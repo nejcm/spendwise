@@ -131,7 +131,6 @@ export function PeriodSelectorModal({
             <View className="min-w-[30%] flex-1 grow" key={key}>
               <OutlineButton
                 className={`items-center px-3 ${draft.mode === key ? '' : 'border-border'}`}
-                color="primary"
                 textClassName={`text-sm ${draft.mode === key ? '' : 'text-muted-foreground'}`}
                 fullWidth
                 label={label}
@@ -194,7 +193,13 @@ export function PeriodSelectorModal({
             size="sm"
             textClassName="underline"
           />
-          <SolidButton color="accent" label={translate('common.apply')} className="flex-1" size="sm" onPress={handleApply} />
+          <SolidButton
+            color="primary"
+            label={translate('common.apply')}
+            className="flex-1"
+            size="sm"
+            onPress={handleApply}
+          />
         </View>
       </View>
     </ModalSheet>

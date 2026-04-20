@@ -43,21 +43,21 @@ export function TransactionFilterSheet({
             <View className="flex-row flex-wrap gap-2">
               <SolidButton
                 className="items-center rounded-2xl px-3"
-                color={selectedType === 'expense' ? 'primary' : 'secondary'}
+                color={selectedType === 'expense' ? 'default' : 'secondary'}
                 size="xs"
                 label={translate('transactions.expense')}
                 onPress={() => onSelectType(selectedType === 'expense' ? null : 'expense')}
               />
               <SolidButton
                 className="items-center rounded-2xl px-3"
-                color={selectedType === 'income' ? 'primary' : 'secondary'}
+                color={selectedType === 'income' ? 'default' : 'secondary'}
                 size="xs"
                 label={translate('transactions.income')}
                 onPress={() => onSelectType(selectedType === 'income' ? null : 'income')}
               />
               <SolidButton
                 className="items-center rounded-2xl px-3"
-                color={selectedType === 'transfer' ? 'primary' : 'secondary'}
+                color={selectedType === 'transfer' ? 'default' : 'secondary'}
                 size="xs"
                 label={translate('transactions.transfer')}
                 onPress={() => onSelectType(selectedType === 'transfer' ? null : 'transfer')}
@@ -73,7 +73,7 @@ export function TransactionFilterSheet({
               <View className="flex-row flex-wrap gap-2">
                 <SolidButton
                   className="items-center rounded-2xl px-4"
-                  color={!selectedAccountId ? 'primary' : 'secondary'}
+                  color={!selectedAccountId ? 'default' : 'secondary'}
                   size="xs"
                   label={translate('transactions.all')}
                   onPress={() => onSelectAccount(null)}
@@ -82,7 +82,7 @@ export function TransactionFilterSheet({
                   <SolidButton
                     key={account.id}
                     className="items-center rounded-2xl px-3"
-                    color={selectedAccountId === account.id ? 'primary' : 'secondary'}
+                    color={selectedAccountId === account.id ? 'default' : 'secondary'}
                     size="xs"
                     label={account.icon ? `${account.icon} ${account.name}` : account.name}
                     onPress={() => onSelectAccount(selectedAccountId === account.id ? null : account.id)}
@@ -100,7 +100,7 @@ export function TransactionFilterSheet({
             className="flex-1"
           />
           <SolidButton
-            color="accent"
+            color="primary"
             label={translate('common.done')}
             onPress={onClose}
             className="flex-1"

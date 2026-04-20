@@ -21,7 +21,7 @@ export default function BackupSection() {
             description: translate('import-export.backup_download_description'),
             value: (
               <SolidButton
-                color="accent"
+                color="primary"
                 size="sm"
                 className="min-w-28"
                 iconLeft={<Download className="mr-1 text-background" size={16} />}
@@ -36,7 +36,7 @@ export default function BackupSection() {
             description: translate('import-export.backup_restore_description'),
             value: (
               <SolidButton
-                color="accent"
+                color="primary"
                 size="sm"
                 className="min-w-28"
                 iconLeft={<Upload className="mr-1 text-background" size={16} />}

@@ -12,19 +12,24 @@ const outlineButton = tv({
   variants: {
     color: {
       'primary': {
+        container: 'border-primary/80 bg-transparent',
+        label: 'text-primary',
+        indicator: 'text-primary',
+      },
+      'default': {
         container: 'border-foreground/80 bg-transparent',
         label: 'text-foreground',
         indicator: 'text-foreground',
+      },
+      'default-alt': {
+        container: 'border-background/80 bg-transparent',
+        label: 'text-background',
+        indicator: 'text-background',
       },
       'secondary': {
         container: 'border-muted-foreground/80 bg-transparent',
         label: 'text-muted-foreground',
         indicator: 'text-muted-foreground',
-      },
-      'primary-alt': {
-        container: 'border-background/80 bg-transparent',
-        label: 'text-background',
-        indicator: 'text-background',
       },
       'secondary-alt': {
         container: 'border-muted/80 bg-transparent',
@@ -69,7 +74,7 @@ export type OutlineButtonProps = {
 export function OutlineButton({
   ref,
   className = '',
-  color = 'primary',
+  color = 'default',
   disabled = false,
   fullWidth = false,
   loading = false,

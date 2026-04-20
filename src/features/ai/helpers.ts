@@ -50,7 +50,7 @@ export function getMarkdownStyle(isDark: Theme['dark']): MarkdownStyle {
       color: colors.text,
       backgroundColor: muted,
     },
-    link: { color: colors.primary, underline: true },
+    link: { color: '#2668ab', underline: true },
     thematicBreak: { color: colors.border },
   } as const;
 }

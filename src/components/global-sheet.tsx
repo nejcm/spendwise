@@ -98,8 +98,6 @@ function SheetTitle({ config }: { config: SheetConfig | undefined }) {
   );
 }
 
-const modalKey = 'global-sheet';
-
 export function GlobalSheet() {
   const config = useLocalStore.use.sheet();
   const modalRef = useRef<BottomSheetModal>(null);

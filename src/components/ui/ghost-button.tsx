@@ -13,10 +13,15 @@ const outlineButton = tv({
     color: {
       'primary': {
         container: 'bg-transparent',
+        label: 'text-primary',
+        indicator: 'text-primary',
+      },
+      'default': {
+        container: 'bg-transparent',
         label: 'text-foreground',
         indicator: 'text-foreground',
       },
-      'primary-alt': {
+      'default-alt': {
         container: 'bg-transparent',
         label: 'text-background',
         indicator: 'text-background',
@@ -54,6 +59,7 @@ const outlineButton = tv({
     },
   },
   defaultVariants: {
+    color: 'default',
     disabled: false,
     fullWidth: false,
     size: 'md',
@@ -74,7 +80,7 @@ export type GhostButtonProps = {
 export function GhostButton({
   ref,
   className = '',
-  color = 'primary',
+  color = 'default',
   disabled = false,
   fullWidth = false,
   loading = false,

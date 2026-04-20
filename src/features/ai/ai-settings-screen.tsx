@@ -121,7 +121,7 @@ export function AiSettingsScreen() {
 
         <View className="mb-10">
           <SolidButton
-            color="accent"
+            color="primary"
             fullWidth
             label={translate('common.save')}
             onPress={onSave}

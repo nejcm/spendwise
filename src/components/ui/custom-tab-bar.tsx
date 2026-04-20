@@ -74,7 +74,7 @@ export function CustomTabBar() {
           return (
             <View key="add" className="flex-1 items-center justify-center">
               <SolidButton
-                color="accent"
+                color="primary"
                 onPress={() => openSheet({ type: 'add-transaction' })}
                 onLongPress={() => triggerScan(longPressAction === 'pick_from_gallery' ? 'gallery' : 'camera')}
                 delayLongPress={400}

@@ -17,7 +17,7 @@ export type SolidButtonProps = {
 export function SolidButton({
   ref,
   className = '',
-  color = 'primary',
+  color = 'default',
   disabled = false,
   fullWidth = false,
   loading = false,

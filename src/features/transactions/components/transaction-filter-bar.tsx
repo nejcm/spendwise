@@ -30,7 +30,7 @@ export function TransactionFilterBar({ filters, hasActiveFilters, updateFilters 
           <View className="flex-row items-center gap-1 py-3">
             <SolidButton
               className="items-center rounded-2xl px-4"
-              color={!filters.categoryId ? 'primary' : 'secondary'}
+              color={!filters.categoryId ? 'default' : 'secondary'}
               size="xs"
               label={translate('transactions.all')}
               onPress={() => updateFilters({ categoryId: null })}
@@ -39,7 +39,7 @@ export function TransactionFilterBar({ filters, hasActiveFilters, updateFilters 
               <SolidButton
                 key={cat.id}
                 className="items-center rounded-2xl px-3"
-                color={filters.categoryId === cat.id ? 'primary' : 'secondary'}
+                color={filters.categoryId === cat.id ? 'default' : 'secondary'}
                 size="xs"
                 label={cat.name}
                 onPress={() => updateFilters({ categoryId: filters.categoryId === cat.id ? null : cat.id })}

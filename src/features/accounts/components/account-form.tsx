@@ -171,7 +171,7 @@ function AccountFormBody({ form, preferredCurrency, archiveAccount, accountId, i
                   key={t}
                   size="sm"
                   className="items-center rounded-3xl"
-                  color={field.state.value === t ? 'primary' : 'secondary'}
+                  color={field.state.value === t ? 'default' : 'secondary'}
                   label={ACCOUNT_TYPE_LABELS[t]}
                   onPress={() => field.handleChange(t)}
                 />
@@ -250,7 +250,7 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
                 />
               )}
               <SolidButton
-                color="accent"
+                color="primary"
                 label={translate('common.save')}
                 onPress={form.handleSubmit}
                 loading={(!!state.isSubmitting) || createAccount.isPending || updateAccount.isPending || archiveAccount.mutation.isPending}

@@ -231,7 +231,7 @@ function ScheduledTransactionFormBody({ form, accounts, orderedCurrencies, isShe
                   key={option.value}
                   size="sm"
                   className="items-center rounded-3xl"
-                  color={field.state.value === option.value ? 'primary' : 'secondary'}
+                  color={field.state.value === option.value ? 'default' : 'secondary'}
                   label={option.label}
                   onPress={() => {
                     field.handleChange(option.value);
@@ -258,7 +258,7 @@ function ScheduledTransactionFormBody({ form, accounts, orderedCurrencies, isShe
                     key={account.id}
                     size="sm"
                     className="items-center rounded-3xl"
-                    color={field.state.value === account.id ? 'primary' : 'secondary'}
+                    color={field.state.value === account.id ? 'default' : 'secondary'}
                     label={`${account.icon} ${account.name}`}
                     onPress={() => field.handleChange(account.id)}
                   />
@@ -459,7 +459,7 @@ export function ScheduledTransactionFormSheet({
                   />
                 )}
                 <SolidButton
-                  color="accent"
+                  color="primary"
                   label={translate('common.save')}
                   onPress={form.handleSubmit}
                   loading={

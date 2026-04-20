@@ -28,18 +28,6 @@
   --color-gray-900: #1a1c20;
   --color-gray-950: #101114;
 
-  /* Primary palette */
-  --color-primary-50: #ffe2cc;
-  --color-primary-100: #ffc499;
-  --color-primary-200: #ffa766;
-  --color-primary-300: #ff984c;
-  --color-primary-400: #ff8933;
-  --color-primary-500: #ff7b1a;
-  --color-primary-600: #ff6c00;
-  --color-primary-700: #e56100;
-  --color-primary-800: #cc5600;
-  --color-primary-900: #b24c00;
-
   /* Success palette */
   --color-success-50: #f0fdf4;
   --color-success-100: #dcfce7;
@@ -76,16 +64,14 @@
   --color-danger-800: #991b1b;
   --color-danger-900: #7f1d1d;
 
-  /* Accent palette (runtime-overridable) */
-  --color-accent: #0a0a0a;
-  --color-accent-foreground: #fcfcfc;
+  --color-primary: #0a0a0a;
+  --color-primary-foreground: #fcfcfc;
 }
 
 /* Theme specific variables */
 @layer theme {
   :root {
     @variant light {
-      /* Semantic colors - using primary for main brand color */
       --color-background: #fcfcfc;
       --color-foreground: #0a0a0a;
 
@@ -102,8 +88,8 @@
       --color-input: #fcfcfc;
       --color-ring: #ff6c00;
       
-      --color-accent: #0a0a0a;
-      --color-accent-foreground: #fcfcfc;
+      --color-primary: #0a0a0a;
+      --color-primary-foreground: #fcfcfc;
 
       --color-destructive: #ef4444;
       --color-destructive-foreground: #ffffff;
@@ -114,8 +100,8 @@
       --color-subtle-4: #a3a6a9;
       --color-subtle-5: #63686b;
     }
+    
     @variant dark {
-      /* Semantic colors - using primary for main brand color */
       --color-background: #1a1c20;
       --color-foreground: #fafafa;
 
@@ -132,8 +118,8 @@
       --color-input: #2b2f3f;
       --color-ring: #ff6c00;
       
-      --color-accent: #fafafa;
-      --color-accent-foreground: #1a1c20;
+      --color-primary: #fafafa;
+      --color-primary-foreground: #1a1c20;
 
       --color-destructive: #ef4444;
       --color-destructive-foreground: #ffffff;

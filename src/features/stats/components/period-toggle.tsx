@@ -14,7 +14,7 @@ export function PeriodToggle({ value, onChange }: Props) {
     <View className="flex-row items-center justify-center gap-2 pb-4">
       <SolidButton
         className="min-w-18 items-center rounded-2xl"
-        color={value === 'week' ? 'secondary' : 'primary-alt'}
+        color={value === 'week' ? 'secondary' : 'default-alt'}
         textClassName={value === 'week' ? '' : 'text-muted-foreground'}
         size="sm"
         label={translate('common.week')}
@@ -23,7 +23,7 @@ export function PeriodToggle({ value, onChange }: Props) {
       <SolidButton
         onPress={() => onChange('month')}
         className="min-w-18 items-center rounded-2xl"
-        color={value === 'month' ? 'secondary' : 'primary-alt'}
+        color={value === 'month' ? 'secondary' : 'default-alt'}
         textClassName={value === 'month' ? 'text-foreground' : 'text-muted-foreground'}
         size="sm"
         label={translate('common.month')}
@@ -31,7 +31,7 @@ export function PeriodToggle({ value, onChange }: Props) {
       <SolidButton
         onPress={() => onChange('year')}
         className="min-w-18 items-center rounded-2xl"
-        color={value === 'year' ? 'secondary' : 'primary-alt'}
+        color={value === 'year' ? 'secondary' : 'default-alt'}
         textClassName={value === 'year' ? 'text-foreground' : 'text-muted-foreground'}
         size="sm"
         label={translate('common.year')}

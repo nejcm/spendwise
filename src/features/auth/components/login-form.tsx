@@ -103,7 +103,7 @@ export function LoginForm({ onSubmit = () => {} }: LoginFormProps) {
           selector={(state) => [state.isSubmitting]}
           children={([isSubmitting]) => (
             <SolidButton
-              color="accent"
+              color="primary"
               testID="login-button"
               label={translate('auth.login')}
               onPress={form.handleSubmit}

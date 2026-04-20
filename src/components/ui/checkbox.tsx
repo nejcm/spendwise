@@ -76,7 +76,7 @@ export function CheckboxIcon({ checked = false, size = 'md', disabled = false }:
         height: SIZE,
         width: SIZE,
       }}
-      className={`items-center justify-center rounded-md border-2 transition-colors duration-150 ${disabled ? 'border-accent/50' : 'border-accent'} ${checked ? (disabled ? 'bg-accent/50' : 'bg-accent') : 'bg-transparent'}`}
+      className={`items-center justify-center rounded-md border-2 transition-colors duration-150 ${disabled ? 'border-primary/50' : 'border-primary'} ${checked ? (disabled ? 'bg-primary/50' : 'bg-primary') : 'bg-transparent'}`}
     >
       <View className={`transition-opacity duration-100 ${checked ? 'opacity-100' : 'opacity-0'}`}>
         <Svg width={SIZE * 1.2} height={SIZE * 1.2} viewBox="0 0 24 24" fill="none">

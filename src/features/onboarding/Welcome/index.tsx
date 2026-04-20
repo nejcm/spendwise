@@ -38,7 +38,7 @@ export default function WelcomeStep({ onNext, currentStep }: WelcomeStepProps) {
         </View>
 
         <SolidButton
-          color="accent"
+          color="primary"
           label={translate('onboarding.get_started')}
           onPress={onNext}
           className="mt-8"

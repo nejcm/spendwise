@@ -8,12 +8,12 @@ function applyColorThemeVariables(colorTheme: ColorThemeType) {
   const { light, dark } = COLOR_THEME_VARIABLES[colorTheme] || COLOR_THEME_VARIABLES.black;
 
   Uniwind.updateCSSVariables('light', {
-    '--color-accent': light.accent,
-    '--color-accent-foreground': light.accentForeground,
+    '--color-primary': light.accent,
+    '--color-primary-foreground': light.accentForeground,
   });
   Uniwind.updateCSSVariables('dark', {
-    '--color-accent': dark.accent,
-    '--color-accent-foreground': dark.accentForeground,
+    '--color-primary': dark.accent,
+    '--color-primary-foreground': dark.accentForeground,
   });
 }
 

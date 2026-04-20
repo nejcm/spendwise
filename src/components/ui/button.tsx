@@ -12,17 +12,17 @@ export const buttonTv = tv({
   },
   variants: {
     color: {
-      'accent': {
-        container: 'bg-accent',
-        label: 'text-accent-foreground',
-        indicator: 'accent-accent-foreground',
-      },
       'primary': {
+        container: 'bg-primary',
+        label: 'text-primary-foreground',
+        indicator: 'accent-foreground',
+      },
+      'default': {
         container: 'bg-foreground',
         label: 'text-background',
         indicator: 'accent-background',
       },
-      'primary-alt': {
+      'default-alt': {
         container: 'bg-background',
         label: 'text-foreground',
         indicator: 'accent-foreground',

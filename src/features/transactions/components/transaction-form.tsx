@@ -183,7 +183,7 @@ function TransactionFormBody({
                   key={option.value}
                   size="sm"
                   className="items-center rounded-3xl"
-                  color={field.state.value === option.value ? 'primary' : 'secondary'}
+                  color={field.state.value === option.value ? 'default' : 'secondary'}
                   label={option.label}
                   onPress={() => {
                     field.handleChange(option.value);
@@ -209,7 +209,7 @@ function TransactionFormBody({
                     key={a.id}
                     size="sm"
                     className="items-center rounded-3xl"
-                    color={field.state.value === a.id ? 'primary' : 'secondary'}
+                    color={field.state.value === a.id ? 'default' : 'secondary'}
                     label={`${a.icon} ${a.name}`}
                     onPress={() => field.handleChange(a.id)}
                   />
@@ -275,7 +275,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
                 />
               )}
               <SolidButton
-                color="accent"
+                color="primary"
                 label={translate('common.save')}
                 onPress={form.handleSubmit}
                 loading={(!!state.isSubmitting) || createTransaction.isPending || updateTransaction.isPending}
@@ -343,7 +343,7 @@ export function TransactionFormSheet({
                   />
                 )}
                 <SolidButton
-                  color="accent"
+                  color="primary"
                   label={translate('common.save')}
                   onPress={form.handleSubmit}
                   loading={(!!state.isSubmitting) || isLoading}

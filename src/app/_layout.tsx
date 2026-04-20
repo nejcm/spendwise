@@ -116,11 +116,7 @@ function Providers({ children }: { children: React.ReactNode }) {
   const FontLoader = IS_WEB ? WebFontsLoader : React.Fragment;
 
   return (
-    <GestureHandlerRootView
-      style={styles.container}
-      // eslint-disable-next-line better-tailwindcss/no-unknown-classes
-      className={theme.dark ? `dark` : undefined}
-    >
+    <GestureHandlerRootView style={styles.container}>
       <PosthogProviderWrapper>
         <SafeAreaProvider>
           <KeyboardProvider>

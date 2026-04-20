@@ -80,7 +80,7 @@ export function CustomTabBar() {
                 delayLongPress={400}
                 className="size-12 items-center justify-center rounded-full p-0"
               >
-                <Icon colorClassName="accent-background" size={24} strokeWidth={2} />
+                <Icon colorClassName="accent-primary-foreground" size={24} strokeWidth={2} />
               </SolidButton>
             </View>
           );

@@ -96,7 +96,7 @@ export function AiScreen() {
                 color="primary"
                 size="xs"
                 label={translate('ai.new_chat')}
-                iconLeft={<Plus colorClassName="accent-background" className="mr-1" size={15} />}
+                iconLeft={<Plus colorClassName="accent-primary-foreground" className="mr-1" size={15} />}
                 onPress={actions.reset}
                 disabled={!messages.length}
               />

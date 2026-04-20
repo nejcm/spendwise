@@ -53,6 +53,7 @@ export default function SettingsStep({ onBack, onNext, currentStep }: SettingsSt
               onPress={onBack}
             />
             <SolidButton
+              color="accent"
               label={translate('common.next')}
               onPress={onNext}
               className="flex-1"

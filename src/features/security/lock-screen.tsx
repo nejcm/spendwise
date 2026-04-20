@@ -46,7 +46,7 @@ export function LockScreen({ visible, onUnlock }: Props) {
         {hint !== null && (
           <Text className="mb-4 text-sm text-gray-400">{hint}</Text>
         )}
-        <SolidButton size="lg" label={translate('security.unlock')} onPress={authenticate} className="min-w-44" />
+        <SolidButton color="accent" size="lg" label={translate('security.unlock')} onPress={authenticate} className="min-w-44" />
       </View>
     </Modal>
   );

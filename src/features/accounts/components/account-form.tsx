@@ -242,8 +242,15 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
           selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
           children={(state) => (
             <>
-              {onCancel && <OutlineButton label={translate('common.cancel')} onPress={onCancel} color="secondary" />}
+              {onCancel && (
+                <OutlineButton
+                  label={translate('common.cancel')}
+                  onPress={onCancel}
+                  color="secondary"
+                />
+              )}
               <SolidButton
+                color="accent"
                 label={translate('common.save')}
                 onPress={form.handleSubmit}
                 loading={(!!state.isSubmitting) || createAccount.isPending || updateAccount.isPending || archiveAccount.mutation.isPending}

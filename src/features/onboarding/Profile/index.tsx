@@ -32,6 +32,7 @@ export default function ProfileStep({ onBack, onNext, currentStep }: ProfileStep
               onPress={onBack}
             />
             <SolidButton
+              color="accent"
               label={translate('common.next')}
               onPress={onNext}
               className="flex-1"

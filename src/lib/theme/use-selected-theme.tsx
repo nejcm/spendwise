@@ -2,7 +2,7 @@ import type { ThemeType } from '@/features/settings/theme';
 import * as React from 'react';
 
 import { Uniwind, useUniwind } from 'uniwind';
-import { getAppState, setTheme, useAppStore } from '@/lib/store/store';
+import { setTheme, useAppStore } from '@/lib/store/store';
 
 export type { ThemeType as ColorSchemeType };
 
@@ -26,7 +26,7 @@ export function useSelectedTheme() {
 
 // to be used in the root file to load the selected theme from the store
 export function loadSelectedTheme() {
-  const theme = getAppState().theme;
+  const theme = useAppStore.getState().theme;
   if (theme !== undefined) {
     Uniwind.setTheme(theme);
   }

@@ -125,8 +125,8 @@ export function PeriodSelectorModal({
 
   return (
     <ModalSheet ref={modal.ref} title="Select Period" snapPoints={['75%']}>
-      <View className="flex-1 gap-8 px-4 pt-2">
-        <View className="flex-row flex-wrap gap-2">
+      <View className="flex-1 px-4 pt-2">
+        <View className="mb-8 flex-row flex-wrap gap-2">
           {MODE_BUTTONS.map(({ key, label }) => (
             <View className="min-w-[30%] flex-1 grow" key={key}>
               <OutlineButton
@@ -187,13 +187,14 @@ export function PeriodSelectorModal({
           )}
         </View>
 
-        <View className="flex-row items-center justify-center gap-2 pt-4 pb-6">
+        <View className="flex-row items-center justify-center gap-2 py-4">
           <GhostButton
             label={translate('common.clear')}
             onPress={handleClear}
             size="sm"
+            textClassName="underline"
           />
-          <SolidButton label={translate('common.apply')} className="flex-1" size="sm" onPress={handleApply} />
+          <SolidButton color="accent" label={translate('common.apply')} className="flex-1" size="sm" onPress={handleApply} />
         </View>
       </View>
     </ModalSheet>

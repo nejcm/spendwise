@@ -12,6 +12,11 @@ export const buttonTv = tv({
   },
   variants: {
     color: {
+      'accent': {
+        container: 'bg-accent',
+        label: 'text-accent-foreground',
+        indicator: 'accent-accent-foreground',
+      },
       'primary': {
         container: 'bg-foreground',
         label: 'text-background',

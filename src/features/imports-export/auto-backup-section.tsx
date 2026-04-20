@@ -93,6 +93,7 @@ export default function AutoBackupSection() {
       >
         {autoBackup.enabled && (
           <SolidButton
+            color="accent"
             size="sm"
             className="mt-2 min-w-30"
             label={translate('import-export.auto_backup_view_backups')}
@@ -142,6 +143,7 @@ export default function AutoBackupSection() {
                           <Text className="text-xs text-muted-foreground">{entry.name}</Text>
                         </View>
                         <SolidButton
+                          color="accent"
                           size="sm"
                           className="min-w-20"
                           label={translate('common.restore')}

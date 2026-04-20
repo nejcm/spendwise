@@ -75,6 +75,10 @@
   --color-danger-700: #b91c1c;
   --color-danger-800: #991b1b;
   --color-danger-900: #7f1d1d;
+
+  /* Accent palette (runtime-overridable) */
+  --color-accent: #0a0a0a;
+  --color-accent-foreground: #fcfcfc;
 }
 
 /* Theme specific variables */
@@ -97,6 +101,9 @@
       --color-border: #d8dbdf;
       --color-input: #fcfcfc;
       --color-ring: #ff6c00;
+      
+      --color-accent: #0a0a0a;
+      --color-accent-foreground: #fcfcfc;
 
       --color-destructive: #ef4444;
       --color-destructive-foreground: #ffffff;
@@ -124,6 +131,9 @@
       --color-border: #2b2f3f;
       --color-input: #2b2f3f;
       --color-ring: #ff6c00;
+      
+      --color-accent: #fafafa;
+      --color-accent-foreground: #1a1c20;
 
       --color-destructive: #ef4444;
       --color-destructive-foreground: #ffffff;

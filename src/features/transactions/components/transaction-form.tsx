@@ -275,6 +275,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
                 />
               )}
               <SolidButton
+                color="accent"
                 label={translate('common.save')}
                 onPress={form.handleSubmit}
                 loading={(!!state.isSubmitting) || createTransaction.isPending || updateTransaction.isPending}
@@ -342,6 +343,7 @@ export function TransactionFormSheet({
                   />
                 )}
                 <SolidButton
+                  color="accent"
                   label={translate('common.save')}
                   onPress={form.handleSubmit}
                   loading={(!!state.isSubmitting) || isLoading}

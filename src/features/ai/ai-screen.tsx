@@ -93,9 +93,10 @@ export function AiScreen() {
           {hasKey && messages.length > 0 && (
             <View className="flex-row items-center justify-end border-b border-border px-4 py-2">
               <SolidButton
+                color="accent"
                 size="xs"
                 label={translate('ai.new_chat')}
-                iconLeft={<Plus className="text-background" size={15} />}
+                iconLeft={<Plus className="text-accent-foreground" size={15} />}
                 onPress={actions.reset}
                 disabled={!messages.length}
               />
@@ -119,13 +120,13 @@ export function AiScreen() {
                   }}
                   className={`mb-2 max-w-[85%] rounded-lg px-3 py-2 ${
                     m.role === 'user'
-                      ? 'self-end bg-foreground dark:bg-foreground/40'
+                      ? 'self-end bg-accent'
                       : 'self-start bg-card'
                   }`}
                 >
                   {m.role === 'user'
                     ? (
-                        <Text className="text-sm text-white">
+                        <Text className="text-sm text-accent-foreground">
                           {m.content}
                         </Text>
                       )
@@ -176,7 +177,7 @@ export function AiScreen() {
                 disabled={isStreaming || !draftQuestion.trim() || !hasKey}
                 className="absolute right-2 bottom-2 rounded-full"
               >
-                <SendHorizonal className="text-background disabled:text-foreground" size={20} />
+                <SendHorizonal className="text-accent-foreground disabled:text-foreground" size={20} />
               </IconButton>
             </View>
           </View>

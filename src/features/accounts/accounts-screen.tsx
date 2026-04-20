@@ -84,6 +84,7 @@ export function AccountsScreen() {
 
           <View className="mt-4 flex-row items-center justify-center">
             <SolidButton
+              color="accent"
               iconLeft={<Plus className="mr-1 text-background" size={20} />}
               label={translate('common.add')}
               size="sm"

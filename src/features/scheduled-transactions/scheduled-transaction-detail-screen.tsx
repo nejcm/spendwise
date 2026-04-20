@@ -151,6 +151,7 @@ export function ScheduledTransactionDetailScreen() {
             onPress={() => router.back()}
           />
           <SolidButton
+            color="accent"
             className="flex-1"
             label={translate('common.edit')}
             onPress={() => setIsEditing(true)}

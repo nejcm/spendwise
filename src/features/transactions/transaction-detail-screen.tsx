@@ -146,8 +146,17 @@ export function TransactionDetailScreen() {
           </View>
 
           <View className="mt-auto flex-row gap-2">
-            <OutlineButton color="secondary" label={translate('common.back')} onPress={() => router.back()} />
-            <SolidButton className="flex-1" label={translate('common.edit')} onPress={() => setIsEditing(true)} />
+            <OutlineButton
+              color="secondary"
+              label={translate('common.back')}
+              onPress={() => router.back()}
+            />
+            <SolidButton
+              color="accent"
+              className="flex-1"
+              label={translate('common.edit')}
+              onPress={() => setIsEditing(true)}
+            />
           </View>
         </View>
       </ScrollView>

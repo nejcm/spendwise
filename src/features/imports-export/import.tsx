@@ -111,7 +111,13 @@ function MapStep({ headers, mapping, onMapping, onNext }: MapStepProps) {
           </View>
         </View>
       )}
-      <SolidButton fullWidth className="mt-8" label={translate('import-export.preview')} onPress={onNext} />
+      <SolidButton
+        color="accent"
+        fullWidth
+        className="mt-8"
+        label={translate('import-export.preview')}
+        onPress={onNext}
+      />
     </View>
   );
 }
@@ -205,6 +211,7 @@ function PreviewStep({
         )}
       </View>
       <SolidButton
+        color="accent"
         className="mt-10"
         fullWidth
         disabled={loading}

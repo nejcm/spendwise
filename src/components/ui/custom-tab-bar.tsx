@@ -6,6 +6,7 @@ import { Pressable, View } from 'react-native';
 import { Home, LayoutGrid, PieChart, PlusIcon, UserIcon } from '@/components/ui/icon';
 import { openSheet, triggerScan } from '@/lib/store/local-store';
 import { useAppStore } from '@/lib/store/store';
+import { SolidButton } from './solid-button';
 
 export const TAB_BAR_COLOR = '#f6f6f6' as const;
 export const TAB_BAR_DARK_COLOR = '#17191C' as const;
@@ -72,17 +73,15 @@ export function CustomTabBar() {
         if (isAddButton) {
           return (
             <View key="add" className="flex-1 items-center justify-center">
-              <Pressable
+              <SolidButton
+                color="accent"
                 onPress={() => openSheet({ type: 'add-transaction' })}
                 onLongPress={() => triggerScan(longPressAction === 'pick_from_gallery' ? 'gallery' : 'camera')}
                 delayLongPress={400}
-                className="size-12 items-center justify-center rounded-full bg-gray-950 dark:bg-white"
-                style={({ pressed }) => ({
-                  opacity: pressed ? 0.85 : 1,
-                })}
+                className="size-12 items-center justify-center rounded-full p-0"
               >
                 <Icon colorClassName="accent-background" size={24} strokeWidth={2} />
-              </Pressable>
+              </SolidButton>
             </View>
           );
         }

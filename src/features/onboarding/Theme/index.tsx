@@ -45,6 +45,7 @@ export default function ThemeStep({ onBack, onNext, currentStep }: ThemeStepProp
               accessibilityLabel={translate('common.back')}
             />
             <SolidButton
+              color="accent"
               label={translate('onboarding.finish_setup')}
               onPress={onNext}
               className="flex-1"

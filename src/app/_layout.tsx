@@ -27,6 +27,7 @@ import { APIProvider } from '@/lib/api';
 import { useAppBootstrapOnInit } from '@/lib/app-bootstrap';
 import { IS_WEB } from '@/lib/base';
 import { DatabaseErrorBoundary, OpfsCleaner } from '@/lib/sqlite';
+import { loadSelectedColorTheme } from '@/lib/theme/use-selected-color-theme';
 import { loadSelectedTheme, useSelectedTheme } from '@/lib/theme/use-selected-theme';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 // Import  global CSS file
@@ -40,6 +41,7 @@ export const unstable_settings = {
 };
 
 loadSelectedTheme();
+loadSelectedColorTheme();
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 // Set the animation options. This is optional.

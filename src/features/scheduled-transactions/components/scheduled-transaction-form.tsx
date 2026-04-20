@@ -459,6 +459,7 @@ export function ScheduledTransactionFormSheet({
                   />
                 )}
                 <SolidButton
+                  color="accent"
                   label={translate('common.save')}
                   onPress={form.handleSubmit}
                   loading={

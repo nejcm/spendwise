@@ -101,6 +101,7 @@ export type OptionType<T extends string | number = string | number> = {
   label: string;
   subtext?: string;
   value: T;
+  prefix?: React.ReactNode;
   image?: string | ImageSource;
   className?: string;
   grid?: boolean;
@@ -111,6 +112,7 @@ const Option = React.memo(
     label,
     selected = false,
     image,
+    prefix,
     subtext,
     className,
     children,
@@ -132,6 +134,7 @@ const Option = React.memo(
           || (
             <>
               {image && <Image source={image} className="mr-3 size-8 rounded-full" />}
+              {prefix}
               <View className="flex-1">
                 <Text className="leading-tight dark:text-gray-100">{label}</Text>
                 {subtext && <Text className="text-sm/snug text-gray-500 dark:text-gray-400">{subtext}</Text>}
@@ -196,6 +199,7 @@ export function Options<T extends string | number>({
         label={item.label}
         selected={value === item.value}
         image={item.image}
+        prefix={item.prefix}
         subtext={item.subtext}
         children={renderItem?.(item)}
         onPress={() => onSelect(item)}

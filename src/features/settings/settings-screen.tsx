@@ -11,6 +11,7 @@ import { triggerScanPicker } from '@/lib/store/local-store';
 import { selectProfile, useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { getAvatar } from '../profile';
+import { ColorThemeItem } from './components/color-theme-item';
 import { CurrencyItem } from './components/currency-item';
 import { DeleteDataSheet } from './components/delete-data-sheet';
 import DevSection from './components/dev-section';
@@ -119,6 +120,7 @@ export function SettingsScreen() {
             <LanguageItem />
             <CurrencyItem />
             <ThemeItem />
+            <ColorThemeItem />
           </SettingsContainer>
 
           <SettingsContainer title="settings.about">

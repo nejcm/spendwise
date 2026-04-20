@@ -20,7 +20,24 @@ export type TokenType = {
   refresh: string;
 };
 
-export type ColorThemeType = 'red' | 'blue' | 'green' | 'purple' | 'orange' | 'black' | 'white';
+export type ColorThemeType
+  = | 'black'
+    | 'mist'
+    | 'stone'
+    | 'clay'
+    | 'meadow'
+    | 'ocean'
+    | 'wave'
+    | 'grass'
+    | 'pink'
+    | 'reflection'
+    | 'crimson'
+    | 'gold'
+    | 'lime'
+    | 'coffee'
+    | 'saltwater'
+    | 'purple'
+;
 export type LongPressActionType = 'scan_receipt' | 'pick_from_gallery';
 
 export type PeriodMode = 'year' | 'month' | 'week' | 'custom' | 'all' | 'today' | 'this-week' | 'this-month' | 'this-year';
@@ -120,7 +137,7 @@ function getDefaultState(): AppState {
     numberFormat: 'stop',
     monthStartDay: 1,
     theme: 'system',
-    colorTheme: 'red',
+    colorTheme: 'black',
     isFirstTime: true,
     language: undefined,
     saveOnScan: undefined,
@@ -162,6 +179,7 @@ const _useAppStore = create<AppState>()(
     (_set) => (getDefaultState()),
     {
       name: 'app-storage',
+      version: 1,
       storage: createJSONStorage(() => mmkvStorage),
       partialize: ({ isLocked: _, periodSelection: __, ...rest }) => rest as AppState,
     },
@@ -228,6 +246,10 @@ export function setMonthStartDay(monthStartDay: number) {
 
 export function setTheme(theme: ThemeType) {
   return updateAppState({ theme });
+}
+
+export function setColorTheme(colorTheme: ColorThemeType) {
+  return updateAppState({ colorTheme });
 }
 
 export function setIsFirstTime(isFirstTime: boolean) {

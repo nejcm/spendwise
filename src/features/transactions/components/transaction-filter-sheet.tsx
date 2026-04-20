@@ -100,8 +100,8 @@ export function TransactionFilterSheet({
             className="flex-1"
           />
           <SolidButton
+            color="accent"
             label={translate('common.done')}
-            color="primary"
             onPress={onClose}
             className="flex-1"
           />

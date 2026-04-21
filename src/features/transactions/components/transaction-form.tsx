@@ -81,9 +81,11 @@ function TransactionFormBody({
                   if (!value) return;
                   field.handleChange(String(value) as CurrencyKey);
                 }}
-                size="xl"
+                size="lg"
                 showChevron={false}
-                containerClassName="w-[100]"
+                containerClassName="w-[105]"
+                selectedItemTextProps={{ className: 'text-xl/tight' }}
+                selectedItemClassName="justify-center"
                 inputClassName="px-2"
                 stackBehavior="push"
               />
@@ -97,12 +99,12 @@ function TransactionFormBody({
                 onBlur={field.handleBlur}
                 onChangeText={field.handleChange}
                 placeholder="0.00"
-                size="xl"
+                size="lg"
                 keyboardType="decimal-pad"
                 testID="amount-input"
                 error={getFieldError(field)}
                 containerClassName="min-w-[72] flex-1"
-                className="px-3 text-2xl"
+                className="justify-center px-3 text-xl"
                 autoFocus
               />
             )}
@@ -113,7 +115,7 @@ function TransactionFormBody({
           selector={(s) => [s.values.currency]}
           children={([selectedCurrency]) => selectedCurrency !== preferredCurrency && (
             <View className="mb-2 flex-row items-center gap-2">
-              <View className="w-[100] flex-row items-center justify-center gap-2 px-4">
+              <View className="w-[105] flex-row items-center justify-center gap-2 px-2">
                 <Image source={CURRENCY_IMAGES[preferredCurrency]} className="size-6 rounded-full" />
                 <Text className="border-none bg-transparent">
                   {preferredCurrency}
@@ -144,31 +146,37 @@ function TransactionFormBody({
           )}
         />
       </View>
-
-      <form.Field
-        name="date"
-        children={(field) => (
-          <DateInput
-            size="lg"
-            value={field.state.value}
-            onChange={field.handleChange}
-            error={getFieldError(field)}
-            modalProps={{ stackBehavior: 'push' }}
-          />
-        )}
-      />
-
-      <form.Field
-        name="category_id"
-        children={(field) => (
-          <CategoryPicker
-            size="lg"
-            selectedId={field.state.value}
-            onSelect={(cat) => field.handleChange(cat.id)}
-            error={getFieldError(field)}
-          />
-        )}
-      />
+      <View className="flex-col gap-x-2 gap-y-4 3xs:flex-row">
+        <form.Field
+          name="date"
+          children={(field) => (
+            <DateInput
+              size="lg"
+              containerClassName="flex-1"
+              className="px-3"
+              value={field.state.value}
+              onChange={field.handleChange}
+              error={getFieldError(field)}
+              modalProps={{ stackBehavior: 'push' }}
+            />
+          )}
+        />
+        <form.Field
+          name="category_id"
+          children={(field) => (
+            <CategoryPicker
+              size="lg"
+              containerClassName="flex-1"
+              inputClassName="px-3"
+              showChevron={false}
+              selectedItemTextProps={{ numberOfLines: 1 }}
+              selectedId={field.state.value}
+              onSelect={(cat) => field.handleChange(cat.id)}
+              error={getFieldError(field)}
+            />
+          )}
+        />
+      </View>
 
       <form.Field
         name="type"
@@ -226,6 +234,7 @@ function TransactionFormBody({
           <Input
             value={field.state.value || ''}
             size="lg"
+            className="text-base/snug"
             onBlur={field.handleBlur}
             onChangeText={field.handleChange}
             placeholder={translate('common.note')}

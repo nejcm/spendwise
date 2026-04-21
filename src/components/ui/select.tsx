@@ -43,37 +43,37 @@ const selectTv = tv({
         input: 'h-8 px-2',
         label: 'text-xs/snug',
         inputValue: 'text-xs/tight',
-        image: 'size-2',
+        image: 'size-3',
       },
       'sm': {
         input: 'h-10 px-3',
         label: 'text-sm/snug',
         inputValue: 'text-sm/tight',
-        image: 'size-3',
+        image: 'size-4',
       },
       'md': {
         input: 'h-12 px-4',
         label: 'text-sm/snug',
         inputValue: 'text-base/tight',
-        image: 'size-4',
+        image: 'size-5',
       },
       'lg': {
         input: 'h-14 px-5',
         label: 'text-base/snug',
         inputValue: 'text-lg/tight',
-        image: 'size-5',
+        image: 'size-6',
       },
       'xl': {
         input: 'h-16 px-6',
         label: 'text-lg/snug',
         inputValue: 'text-xl/tight',
-        image: 'size-6',
+        image: 'size-7',
       },
       '2xl': {
         input: 'h-18 px-7',
         label: 'text-lg/snug',
         inputValue: 'text-xl/tight',
-        image: 'size-7',
+        image: 'size-8',
       },
     },
     error: {
@@ -270,7 +270,8 @@ export type SelectProps<T extends string | number = string | number> = {
   searchEnabled?: OptionsProps<T>['searchEnabled'];
   searchPlaceholder?: OptionsProps<T>['searchPlaceholder'];
   itemClassName?: string;
-  selectedItemProps?: TextProps;
+  selectedItemClassName?: string;
+  selectedItemTextProps?: TextProps;
 } & Omit<VariantProps<typeof selectTv>, 'error'> & Omit<ModalSheetProps, 'children'>;
 
 export function Select<T extends string | number>({
@@ -291,7 +292,8 @@ export function Select<T extends string | number>({
   searchEnabled,
   searchPlaceholder,
   itemClassName,
-  selectedItemProps,
+  selectedItemClassName,
+  selectedItemTextProps,
   ...rest
 }: SelectProps<T>) {
   const modal = useModalSheet();
@@ -337,13 +339,13 @@ export function Select<T extends string | number>({
           {renderSelectedItem?.(selectedOption)
             || (
               <>
-                <View className="h-full flex-1 flex-row items-center gap-2">
+                <View className={cn('h-full flex-1 flex-row items-center gap-2', selectedItemClassName)}>
                   {selectedOption?.image && <Image source={selectedOption.image} className={styles.image()} />}
                   <Text
-                    className={styles.inputValue({
+                    {...selectedItemTextProps}
+                    className={cn(styles.inputValue({
                       className: !selectedOption?.label ? 'text-muted-foreground' : '',
-                    })}
-                    {...selectedItemProps}
+                    }), selectedItemTextProps?.className)}
                   >
                     {selectedOption?.label ?? placeholder ?? ''}
                   </Text>

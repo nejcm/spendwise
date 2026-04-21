@@ -95,8 +95,8 @@ export type InputProps = {
   showErrorMessage?: boolean;
 } & Omit<VariantProps<typeof inputTv>, 'error'> & Omit<TextInputProps, 'size'>;
 
-export function Input({ ref, showErrorMessage = true, ...props }: InputProps & { ref?: React.Ref<NTextInput | null> }) {
-  const { label, error, size = 'md', value, color = 'default', testID, onBlur: onBlurProp, onFocus: onFocusProp, containerClassName, rightSection, className, variant, ...inputProps } = props;
+export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInput | null> }) {
+  const { label, error, size = 'md', value, color = 'default', testID, onBlur: onBlurProp, onFocus: onFocusProp, containerClassName, rightSection, className, variant, showErrorMessage = true, ...inputProps } = props;
   const [isFocussed, setIsFocussed] = React.useState(false);
 
   const onBlur = React.useCallback(

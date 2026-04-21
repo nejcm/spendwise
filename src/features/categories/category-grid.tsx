@@ -98,7 +98,7 @@ export const CategoryGrid = React.memo(({
         <View className="mt-6 flex-row items-center justify-center">
           <SolidButton
             color="primary"
-            iconLeft={<Plus className="mr-1 text-background" size={20} />}
+            iconLeft={<Plus className="mr-1" colorClassName="accent-primary-foreground" size={20} />}
             label={translate('common.add')}
             size="sm"
             className="px-6"

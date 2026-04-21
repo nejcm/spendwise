@@ -22,7 +22,7 @@ Spendwise is a local-first personal finance app built on Expo + React Native. Us
 ```
 src/
 ├── app/          # Expo Router route files and layouts (keep thin)
-├── features/     # Feature modules (home, accounts, transactions, budgets, …)
+├── features/     # Feature modules (home, accounts, transactions, scheduled-transactions, …)
 ├── components/   # Shared components and UI primitives
 ├── lib/          # SQLite, storage, theme, i18n, API/query providers
 └── translations/ # i18n JSON files

@@ -15,11 +15,6 @@ import { createSelectors } from '@/lib/utils';
 import { DEFAULT_DATE_FORMAT, DEFAULT_USER_CURRENCY } from '../../config';
 import { mmkvStorage } from '../storage';
 
-export type TokenType = {
-  access: string;
-  refresh: string;
-};
-
 export type ColorThemeType
   = | 'black'
     | 'mist'
@@ -79,10 +74,6 @@ export type AppState = {
     avatar: number;
   };
 
-  // Auth
-  token: TokenType | null;
-  authStatus: 'idle' | 'signOut' | 'signIn';
-
   // Preferences
   currency: CurrencyKey;
   currencyFormat: CurrencyFormat;
@@ -129,8 +120,6 @@ function getDefaultState(): AppState {
       name: '',
       avatar: 1,
     },
-    token: null,
-    authStatus: 'idle',
     currency: DEFAULT_USER_CURRENCY,
     currencyFormat: 'symbol-after',
     dateFormat: DEFAULT_DATE_FORMAT,
@@ -207,21 +196,6 @@ export function updateProfile(profile: Partial<AppState['profile']>) {
   return updateAppState((prev) => ({ profile: { ...prev.profile, ...profile } }));
 }
 export const selectProfile = (state: AppState) => state.profile;
-
-// Auth actions
-export function signIn(token: TokenType) {
-  return updateAppState({ token, authStatus: 'signIn' });
-}
-
-export function signOut() {
-  return updateAppState({ token: null, authStatus: 'signOut' });
-}
-
-export function hydrateAuth() {
-  const { token } = getAppState();
-  if (token !== null) signIn(token);
-  else signOut();
-}
 
 // Preference actions
 export function setCurrency(currency: CurrencyKey) {

@@ -15,17 +15,19 @@
 ### Secondary Routes
 
 - `src/app/onboarding.tsx`
-- `src/app/import-export/index.tsx`
-- `src/app/transactions/[id].tsx`
-- `src/app/budgets/create.tsx`
-- `src/app/budgets/[id].tsx`
-- `src/app/settings/profile.tsx`
-- `src/app/settings/formatting.tsx`
-- `src/app/settings/notifications.tsx`
-- `src/app/settings/security.tsx`
-- `src/app/settings/ai.tsx`
-- `src/app/settings/privacy.tsx`
-- `src/app/settings/terms.tsx`
+- `src/app/(app)/accounts/[id].tsx`
+- `src/app/(app)/transactions/[id].tsx`
+- `src/app/(app)/scheduled/index.tsx`
+- `src/app/(app)/scheduled/[id].tsx`
+- `src/app/(app)/settings/profile.tsx`
+- `src/app/(app)/settings/general.tsx`
+- `src/app/(app)/settings/formatting.tsx`
+- `src/app/(app)/settings/import-export.tsx`
+- `src/app/(app)/settings/notifications.tsx`
+- `src/app/(app)/settings/security.tsx`
+- `src/app/(app)/settings/ai.tsx`
+- `src/app/(app)/settings/privacy.tsx`
+- `src/app/(app)/settings/terms.tsx`
 
 ## Feature Modules
 
@@ -39,11 +41,11 @@
 
 - `stats`: high-level summaries, trends, category breakdowns
 - `insights`: deeper trend and monthly analytics
-- `budgets`: budget create/detail logic and progress UI
+- `scheduled-transactions`: recurring rules, due-date tracking, and processing
 
 ### Utility Flows
 
-- `imports`: CSV parsing, mapping, preview, and import
+- `imports-export`: CSV parsing, mapping, preview, import/export, and JSON backup/restore
 - `currencies`: rate fetching/storage and currency helpers
 - `formatting`: number/date/currency display preferences
 - `notifications`: permissions, reminders, budget alerts, upcoming bill checks
@@ -59,7 +61,6 @@
 ### Optional / Starter-Carried Areas
 
 - `ai`: AI chat and provider settings using client-side provider calls. Exports a single `useChat` hook from `index.ts`; internals (context assembly, provider adapters, streaming, message persistence) are private.
-- `auth`: starter-era auth module still exists but is not part of the current routed app shell
 
 ## Contributor Notes
 

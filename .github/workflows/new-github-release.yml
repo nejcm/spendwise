@@ -47,6 +47,14 @@ jobs:
         run: printf 'apk_version=%s\n' "$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
         shell: bash
 
+      - name: 🏷️ Create version tag
+        env:
+          TAG_NAME: v${{ steps.version.outputs.apk_version }}
+        run: |
+          git tag "${TAG_NAME}" "${GITHUB_SHA}"
+          git push origin "refs/tags/${TAG_NAME}"
+        shell: bash
+
       - name: 📦 Prepare APK asset
         run: |
           cp ./android/app/build/outputs/apk/release/app-release.apk "./spendwise-${{ steps.version.outputs.apk_version }}.apk"
@@ -55,6 +63,7 @@ jobs:
       - name: 🏃‍♂️ Create A Draft Github Release
         uses: ncipollo/release-action@v1
         with:
+          tag: v${{ steps.version.outputs.apk_version }}
           generateReleaseNotes: true
           draft: false
           artifacts: ./spendwise-${{ steps.version.outputs.apk_version }}.apk

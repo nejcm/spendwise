@@ -503,6 +503,8 @@
     "profile": "Profile",
     "provider_anthropic": "Anthropic",
     "provider_openai": "OpenAI",
+    "recommendations_enabled": "Recommendations",
+    "recommendations_enabled_description": "Enable smart recommendations across the app.",
     "reset": "Reset",
     "reset_db": "Reset Database",
     "save_on_scan": "Save on scan",

@@ -88,6 +88,7 @@ export type AppState = {
   autoBackup: AutoBackupSettings;
   saveOnScan: boolean | undefined;
   longPressAction: LongPressActionType;
+  recommendationsEnabled: boolean;
 
   // Security
   lockEnabled: boolean;
@@ -131,6 +132,7 @@ function getDefaultState(): AppState {
     language: undefined,
     saveOnScan: undefined,
     longPressAction: 'scan_receipt',
+    recommendationsEnabled: true,
     lockEnabled: false,
     lockTimeoutMinutes: 1,
     isLocked: false,

@@ -18,7 +18,10 @@ export async function checkRecommendations(
 ): Promise<void> {
   if (settings.recommendations !== true) return;
 
-  const currency = getAppState().currency;
+  const appState = getAppState();
+  if (!appState.recommendationsEnabled) return;
+
+  const currency = appState.currency;
   const recommendations = await getRecommendations(db);
 
   const urgentRecommendations = recommendations.filter((recommendation) => (

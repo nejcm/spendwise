@@ -125,7 +125,7 @@ function RecommendationCard({
   );
 }
 
-export function HomeRecommendations() {
+function HomeRecommendationsBody() {
   const { recommendations, isLoading, dismiss } = useVisibleRecommendations();
 
   if (isLoading) {
@@ -155,4 +155,10 @@ export function HomeRecommendations() {
       </ScrollView>
     </View>
   );
+}
+
+export function HomeRecommendations() {
+  const recommendationsEnabled = useAppStore.use.recommendationsEnabled();
+  if (!recommendationsEnabled) return null;
+  return <HomeRecommendationsBody />;
 }

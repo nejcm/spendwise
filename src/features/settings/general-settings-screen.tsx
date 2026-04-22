@@ -11,6 +11,7 @@ const LONG_PRESS_ACTION_OPTIONS: LongPressActionType[] = ['scan_receipt', 'pick_
 export function GeneralSettingsScreen() {
   const saveOnScan = useAppStore.use.saveOnScan();
   const longPressAction = useAppStore.use.longPressAction();
+  const recommendationsEnabled = useAppStore.use.recommendationsEnabled();
 
   return (
     <>
@@ -27,6 +28,18 @@ export function GeneralSettingsScreen() {
                 checked={!!saveOnScan}
                 onChange={(checked) => {
                   updateAppState({ saveOnScan: checked });
+                }}
+              />
+            ),
+          }, {
+            label: translate('settings.recommendations_enabled'),
+            description: translate('settings.recommendations_enabled_description'),
+            value: (
+              <Switch
+                accessibilityLabel={translate('settings.recommendations_enabled')}
+                checked={!!recommendationsEnabled}
+                onChange={(checked) => {
+                  updateAppState({ recommendationsEnabled: checked });
                 }}
               />
             ),

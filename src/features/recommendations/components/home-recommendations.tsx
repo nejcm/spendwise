@@ -17,15 +17,15 @@ import { useVisibleRecommendations } from '../hooks';
 function RecommendationIcon({ kind }: { kind: Recommendation['kind'] }) {
   switch (kind) {
     case 'upcoming_cashflow':
-      return <AlertTriangle size={18} className="text-warning-600" />;
+      return <AlertTriangle size={20} className="text-warning-600" />;
     case 'subscription_reminder':
-      return <Bell size={18} className="text-primary" />;
+      return <Bell size={20} className="text-primary" />;
     case 'category_anomaly':
     case 'unusual_spending':
-      return <TrendingUp size={18} className="text-danger-500" />;
+      return <TrendingUp size={20} className="text-danger-500" />;
     case 'budget_suggestion':
     default:
-      return <Lightbulb size={18} className="text-success-600" />;
+      return <Lightbulb size={20} className="text-success-600" />;
   }
 }
 
@@ -50,6 +50,22 @@ function navigateToTarget(router: ReturnType<typeof useRouter>, target: Recommen
   }
 }
 
+const sharedGradientCls = 'bg-linear-to-br to-white dark:to-card';
+function getRecommendationCardGradient(kind: Recommendation['kind']) {
+  switch (kind) {
+    case 'upcoming_cashflow':
+      return `from-warning-500/15 dark:from-warning-500/12 ${sharedGradientCls}`;
+    case 'subscription_reminder':
+      return `from-primary/15 dark:from-primary/12 ${sharedGradientCls}`;
+    case 'category_anomaly':
+    case 'unusual_spending':
+      return `from-danger-500/15 dark:from-danger-500/12 ${sharedGradientCls}`;
+    case 'budget_suggestion':
+    default:
+      return `from-success-500/15 dark:from-success-500/12 ${sharedGradientCls}`;
+  }
+}
+
 function RecommendationCard({
   recommendation,
   onDismiss,
@@ -63,29 +79,31 @@ function RecommendationCard({
   const copy = getRecommendationCopy(recommendation, currency);
 
   return (
-    <View className="w-[280] rounded-2xl bg-card p-3 2xs:w-[320]">
+    <View className={`w-[280] rounded-2xl border border-border/60 p-3 2xs:w-[320] ${getRecommendationCardGradient(recommendation.kind)}`}>
       <View className="mb-2 flex-row items-start justify-between gap-2">
         <View className="flex-1 flex-row items-center gap-3">
           <RecommendationIcon kind={recommendation.kind} />
           <View className="min-w-0 flex-1">
             <Text className="mb-0.5 text-sm/tight font-medium text-foreground">{copy.title}</Text>
-            <Text className="text-xs/snug tracking-[0.05rem] text-muted-foreground uppercase">
+            <Text className="text-xs/snug font-medium tracking-[0.03rem] text-muted-foreground uppercase">
               {translate(`recommendations.severity.${recommendation.severity}` as const)}
+              {' '}
+              <Text className="text-xs/snug font-medium tracking-[0.03rem] text-muted-foreground uppercase"></Text>
             </Text>
           </View>
         </View>
-        <IconButton size="xs" color="none" onPress={() => onDismiss(recommendation.id)} className="size-6 self-start rounded-full bg-muted px-0">
+        <IconButton size="xs" color="none" onPress={() => onDismiss(recommendation.id)} className="size-6 self-start rounded-full bg-black/8 px-0">
           <X size={16} colorClassName="accent-muted-foreground" />
         </IconButton>
       </View>
 
-      <Text className="mb-2 text-sm/snug text-muted-foreground">{copy.summary}</Text>
+      <Text className="mb-3 text-xs/snug text-muted-foreground">{copy.summary}</Text>
 
       <View className="mt-auto flex-row flex-wrap items-center gap-1">
         <SolidButton
           size="xs"
           color="secondary"
-          className="rounded-full px-3"
+          className="rounded-full bg-black/10 px-3"
           textClassName="text-foreground"
           label={copy.actionLabel}
           onPress={() => navigateToTarget(router, recommendation.primaryTarget)}

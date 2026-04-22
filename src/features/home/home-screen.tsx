@@ -39,12 +39,12 @@ export function HomeScreen() {
             <View className="flex-row items-center gap-2">
               <Link href="/ai" asChild>
                 <IconButton size="sm" color="secondary">
-                  <BotIcon size={21} className="text-muted-foreground" />
+                  <BotIcon size={21} colorClassName="accent-muted-foreground" />
                 </IconButton>
               </Link>
               <Link href="/settings" asChild>
                 <IconButton size="sm" color="secondary">
-                  <Settings size={21} className="text-muted-foreground" />
+                  <Settings size={21} colorClassName="accent-muted-foreground" />
                 </IconButton>
               </Link>
             </View>

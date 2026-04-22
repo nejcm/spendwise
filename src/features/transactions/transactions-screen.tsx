@@ -1,8 +1,10 @@
+import type { TransactionRouteParams } from './route-params';
 import type { FilterState } from './types';
 import { useDebouncedValue } from '@tanstack/react-pacer';
+import { useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { cn } from 'tailwind-variants';
 import { PeriodSelector } from '@/components/period-selector';
@@ -16,24 +18,21 @@ import { useAppStore } from '@/lib/store/store';
 import { transactionsQueryOptions, useTransactions } from './api';
 import { TransactionFilterBar } from './components/transaction-filter-bar';
 import { TransactionList } from './components/transaction-list';
+import { parseTransactionsRouteSeed } from './route-params';
 
 const inputClassNames = cn(inputDefaults, inputDefaultDefaults, 'min-w-0 flex-1 flex-row items-center p-0');
-
-const defaultFilters: FilterState = {
-  categoryId: null,
-  type: null,
-  accountId: null,
-};
 
 const debounceSettings = {
   wait: 500,
 } as const;
 
 export function TransactionsScreen() {
+  const params = useLocalSearchParams<TransactionRouteParams>();
+  const initialRouteSeed = useRef(parseTransactionsRouteSeed(params)).current;
   const selection = useAppStore.use.periodSelection();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(initialRouteSeed.search);
+  const [filters, setFilters] = useState<FilterState>(initialRouteSeed.filters);
   const [debouncedSearch] = useDebouncedValue(search, debounceSettings);
-  const [filters, setFilters] = useState<FilterState>(defaultFilters);
   const { categoryId, type, accountId } = filters;
   const updateFilters = React.useCallback((newFilters: Partial<FilterState>) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
@@ -91,7 +90,7 @@ export function TransactionsScreen() {
       </View>
       <TransactionFilterBar
         filters={filters}
-        hasActiveFilters={type !== null || accountId !== null}
+        hasActiveFilters={categoryId !== null || type !== null || accountId !== null}
         updateFilters={updateFilters}
       />
       <View className="flex-1">

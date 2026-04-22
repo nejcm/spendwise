@@ -10,16 +10,12 @@ import { dateToUnix } from '@/lib/date/helpers';
 
 const LOOKBACK_MONTHS = 3;
 const UPCOMING_WINDOW_DAYS = 7;
-// TODO: should be in EUR
-const MIN_UNUSUAL_AMOUNT = 3_000; // in DEFAULT_CURRENCY
-const MIN_UNUSUAL_DIFF = 2_000; // in DEFAULT_CURRENCY
 const UNUSUAL_RATIO = 1.75;
-// TODO: should be in EUR
-const MIN_CATEGORY_ANOMALY_AMOUNT = 8_000; // in DEFAULT_CURRENCY
-const MIN_CATEGORY_ANOMALY_DIFF = 4_000; // in DEFAULT_CURRENCY
 const CATEGORY_ANOMALY_RATIO = 1.35;
-// TODO: should be in EUR
-const MIN_BUDGET_SUGGESTION_AVERAGE = 5_000; // in DEFAULT_CURRENCY
+const MIN_HISTORY_TRANSACTIONS = 3;
+const MIN_NON_ZERO_HISTORY_MONTHS = 2;
+const MIN_CATEGORY_SHARE = 0.05;
+const MEDIUM_CATEGORY_SHARE = 0.10;
 
 type DueRuleRow = {
   id: string;
@@ -166,7 +162,7 @@ async function detectSubscriptionReminder(
   return {
     id: recommendationId('subscription_reminder', nextRule.id, nextRule.next_due_date),
     kind: 'subscription_reminder',
-    severity: nextRule.amount >= 5_000 ? 'medium' : 'low',
+    severity: dueRules.length >= 2 ? 'medium' : 'low',
     primaryTarget: 'scheduled',
     accountId: nextRule.account_id,
     accountName: nextRule.account_name,
@@ -221,11 +217,11 @@ async function detectCategoryAnomaly(
   for (const row of currentRows) {
     const history: number[] = historyByCategory.get(row.category_id) ?? Array.from({ length: LOOKBACK_MONTHS }).fill(0) as number[];
     const average = history.reduce((sum, value) => sum + value, 0) / history.length;
-    const difference = row.expense_total - average;
     const ratio = average > 0 ? row.expense_total / average : 0;
+    const nonZeroMonths = history.filter((v) => v > 0).length;
 
-    if (average <= 0 || row.expense_total < MIN_CATEGORY_ANOMALY_AMOUNT) continue;
-    if (difference < MIN_CATEGORY_ANOMALY_DIFF || ratio < CATEGORY_ANOMALY_RATIO) continue;
+    if (average <= 0 || nonZeroMonths < MIN_NON_ZERO_HISTORY_MONTHS) continue;
+    if (ratio < CATEGORY_ANOMALY_RATIO) continue;
 
     const recommendation: Recommendation = {
       id: recommendationId('category_anomaly', row.category_id, format(today, 'yyyy-MM')),
@@ -275,14 +271,12 @@ async function detectUnusualSpending(
     if (transaction.type !== 'expense') continue;
     const signature = (transaction.note?.trim().toLowerCase() || `category:${transaction.category_id}`);
     const history = historyBySignature.get(signature) ?? [];
-    if (history.length < 2) continue;
+    if (history.length < MIN_HISTORY_TRANSACTIONS) continue;
 
     const average = history.reduce((sum, value) => sum + value, 0) / history.length;
-    const difference = transaction.baseAmount - average;
     const ratio = average > 0 ? transaction.baseAmount / average : 0;
 
-    if (transaction.baseAmount < MIN_UNUSUAL_AMOUNT) continue;
-    if (difference < MIN_UNUSUAL_DIFF || ratio < UNUSUAL_RATIO) continue;
+    if (ratio < UNUSUAL_RATIO) continue;
 
     const label = transaction.note?.trim() || transaction.category_name || null;
     const recommendation: Recommendation = {
@@ -321,6 +315,9 @@ async function detectBudgetSuggestion(
   });
 
   const historyRows = await Promise.all(previousRanges.map((range) => getCategorySpendByRange(db, range.start, range.end)));
+  const monthlyTotals = historyRows.map((rows) => rows.reduce((sum, row) => sum + row.expense_total, 0));
+  const averageMonthlyTotal
+    = monthlyTotals.length > 0 ? monthlyTotals.reduce((sum, t) => sum + t, 0) / monthlyTotals.length : 0;
   const categories = new Map<string, { budget: number | null; name: string; totals: number[] }>();
 
   for (const rows of historyRows) {
@@ -344,12 +341,15 @@ async function detectBudgetSuggestion(
     if (category.totals.length === 0) continue;
 
     const average = category.totals.reduce((sum, value) => sum + value, 0) / category.totals.length;
-    if (average < MIN_BUDGET_SUGGESTION_AVERAGE) continue;
+    const nonZeroMonths = category.totals.filter((v) => v > 0).length;
+
+    if (nonZeroMonths < MIN_NON_ZERO_HISTORY_MONTHS) continue;
+    if (averageMonthlyTotal <= 0 || average / averageMonthlyTotal < MIN_CATEGORY_SHARE) continue;
 
     const recommendation: Recommendation = {
       id: recommendationId('budget_suggestion', categoryId, format(today, 'yyyy-MM')),
       kind: 'budget_suggestion',
-      severity: average >= 12_000 ? 'medium' : 'low',
+      severity: average / averageMonthlyTotal >= MEDIUM_CATEGORY_SHARE ? 'medium' : 'low',
       primaryTarget: 'categories',
       categoryId,
       categoryName: category.name,

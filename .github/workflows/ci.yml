@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  checks:
+    name: Type Check, Lint, Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout project repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Setup Node + PNPM + install deps
+        uses: ./.github/actions/setup-node-pnpm-install
+
+      - name: 📦 Install Reviewdog
+        if: github.event_name == 'pull_request'
+        uses: reviewdog/action-setup@v1
+
+      - name: 🏃‍♂️ Run TypeScript PR
+        if: github.event_name == 'pull_request'
+        run: |
+          pnpm lint:ts | reviewdog -name="tsc" -efm="%f(%l,%c): error TS%n: %m" -reporter="github-pr-review" -filter-mode="nofilter" -fail-on-error -tee
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏃‍♂️ Run TypeScript Commit
+        if: github.event_name != 'pull_request'
+        run: pnpm lint:ts
+
+      - name: 🏃‍♂️ Run ESLint PR
+        if: github.event_name == 'pull_request'
+        uses: reviewdog/action-eslint@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          eslint_flags: '. --ext .js,.jsx,.ts,.tsx'
+
+      - name: 🏃‍♂️ Run ESLint Commit
+        if: github.event_name != 'pull_request'
+        run: pnpm run lint
+
+      - name: 🏃‍♂️ Run Tests
+        run: pnpm run test:ci
+
+      - name: Jest Coverage Comment
+        uses: MishaKav/jest-coverage-comment@main
+        if: (success() || failure()) && github.event_name == 'pull_request'
+        with:
+          coverage-summary-path: ./coverage/coverage-summary.json
+          summary-title: 💯 Test Coverage
+          badge-title: Coverage
+          create-new-comment: false
+          junitxml-title: 😎 Tests Results
+          junitxml-path: ./coverage/jest-junit.xml
+          coverage-title: 👀 Tests Details
+          coverage-path: ./coverage/coverage.txt
+          report-only-changed-files: true

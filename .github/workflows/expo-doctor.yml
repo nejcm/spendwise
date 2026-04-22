@@ -37,7 +37,7 @@ jobs:
 
     steps:
       - name: 📦 Checkout project repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -55,7 +55,7 @@ jobs:
 
       - name: Add doctor report as comment on PR
         if: github.event_name == 'pull_request' && always()
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         with:
           header: expo-doctor
           path: .expo/expo-doctor.md

@@ -161,6 +161,7 @@ export function SettingsScreen() {
             <Text className="text-sm text-muted-foreground">
               {Env.EXPO_PUBLIC_NAME}
               {' '}
+              v
               {Env.EXPO_PUBLIC_VERSION}
             </Text>
           </View>

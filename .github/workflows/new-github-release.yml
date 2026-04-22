@@ -20,7 +20,7 @@ jobs:
     name: New GitHub Release
     if: ${{ startsWith(github.event.head_commit.message, 'chore(release):') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
       contents: write
     steps:
@@ -34,7 +34,7 @@ jobs:
 
       - name: 📦 Set Up JDK + Generate Release APK
         uses: ./.github/actions/setup-jdk-generate-apk
-        timeout-minutes: 40
+        timeout-minutes: 45
         with:
           APP_ENV: production
         env:

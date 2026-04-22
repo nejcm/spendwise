@@ -13,11 +13,13 @@ export type Transaction = {
   baseCurrency: CurrencyKey; // the preferred currency at time of creation
   date: number; // Unix seconds
   note: string | null;
+  merchant_name: string | null;
+  location: string | null;
   created_at: number; // Unix seconds
   updated_at: number; // Unix seconds
 };
 
-export type TransactionFormData = Pick<Transaction, 'account_id' | 'category_id' | 'amount' | 'currency' | 'note' | 'type' | 'date'> & {
+export type TransactionFormData = Pick<Transaction, 'account_id' | 'category_id' | 'amount' | 'currency' | 'note' | 'type' | 'date' | 'merchant_name' | 'location'> & {
   baseAmount?: number;
 };
 

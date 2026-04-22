@@ -83,6 +83,8 @@ export function GlobalScanManager() {
       currency: result.currency ?? preferredCurrency,
       amount: centsToAmount(result.amount),
       note: result.note,
+      merchant_name: result.merchant_name,
+      location: result.location,
       account_id: accountId,
       category_id: categoryId,
       date: dateToUnix(result.date),

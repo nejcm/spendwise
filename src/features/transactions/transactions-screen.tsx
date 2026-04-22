@@ -52,7 +52,11 @@ export function TransactionsScreen() {
           if (categoryId && t.category_id !== categoryId) return false;
           if (type && t.type !== type) return false;
           if (accountId && t.account_id !== accountId) return false;
-          if (hasQuery) return t.note?.toLowerCase().includes(q) || t.category_name?.toLowerCase().includes(q);
+          if (hasQuery) {
+            return t.note?.toLowerCase().includes(q)
+              || t.category_name?.toLowerCase().includes(q)
+              || t.merchant_name?.toLowerCase().includes(q);
+          }
           return true;
         },
       );

@@ -110,19 +110,21 @@ export async function importBackup(db: SQLiteDatabase, backup: BackupData): Prom
 
     for (const row of backup.transactions) {
       await db.runAsync(
-        `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note, merchant_name, location, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           row.id,
           row.account_id,
-          row.category_id ?? null,
+          row.category_id || null,
           row.type,
           row.amount,
           row.currency ?? 'EUR',
           row.baseAmount,
           row.baseCurrency,
           row.date,
-          row.note ?? null,
+          row.note || null,
+          row.merchant_name || null,
+          row.location || null,
           row.created_at,
           row.updated_at,
         ],

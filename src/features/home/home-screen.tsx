@@ -4,7 +4,7 @@ import { Link, useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, RefreshControl, View } from 'react-native';
 import { FormattedCurrency, getPressedStyle, Image, ScrollView, Text } from '@/components/ui';
-import { BotIcon } from '@/components/ui/icon';
+import { BotIcon, Settings } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { SkeletonBox, SkeletonGrid } from '@/components/ui/skeleton';
 import { AccountsOverview } from '@/features/home/accounts-overview';
@@ -39,7 +39,12 @@ export function HomeScreen() {
             <View className="flex-row items-center gap-2">
               <Link href="/ai" asChild>
                 <IconButton size="sm" color="secondary">
-                  <BotIcon size={22} className="text-muted-foreground" />
+                  <BotIcon size={21} className="text-muted-foreground" />
+                </IconButton>
+              </Link>
+              <Link href="/settings" asChild>
+                <IconButton size="sm" color="secondary">
+                  <Settings size={21} className="text-muted-foreground" />
                 </IconButton>
               </Link>
             </View>

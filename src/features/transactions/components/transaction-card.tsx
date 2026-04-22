@@ -19,7 +19,7 @@ export const TransactionCard = React.memo(({ transaction, className }: Transacti
   const router = useRouter();
   const currency = useAppStore.use.currency();
   const isIncome = transaction.type === 'income';
-  const displayName = transaction.category_name || 'Unknown';
+  const displayName = transaction.merchant_name || transaction.category_name || 'Unknown';
   const showConverted = transaction.currency !== currency;
 
   return (
@@ -38,6 +38,7 @@ export const TransactionCard = React.memo(({ transaction, className }: Transacti
         </Text>
         <Text className="text-sm text-muted-foreground" numberOfLines={1}>
           {formatShortDate(transaction.date)}
+          {transaction.merchant_name ? ` · ${transaction.category_name}` : ''}
           {transaction.note ? ` · ${transaction.note}` : ''}
         </Text>
       </View>

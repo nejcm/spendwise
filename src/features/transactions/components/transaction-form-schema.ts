@@ -17,6 +17,8 @@ export const transactionFormSchema = z.object({
   account_id: z.string().min(1, translate('transactions.account_required')),
   date: z.string().min(1, translate('transactions.date_required')),
   note: z.string().nullable(),
+  merchant_name: z.string().nullable(),
+  location: z.string().nullable(),
 });
 
 export const TRANSACTION_TYPE_OPTIONS: { label: string; value: 'expense' | 'income' }[] = [
@@ -42,6 +44,8 @@ export const transactionFormDefaultValues = {
   currency: DEFAULT_USER_CURRENCY,
   baseAmount: '',
   note: null,
+  merchant_name: null,
+  location: null,
 } satisfies TransactionFormValues;
 
 export function amountToString(amount?: number | string): string {

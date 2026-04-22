@@ -3,7 +3,7 @@ import { usePathname, useRouter } from 'expo-router';
 
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
-import { Home, LayoutGrid, PieChart, PlusIcon, UserIcon } from '@/components/ui/icon';
+import { Home, LayoutGrid, ListChecks, PieChart, PlusIcon } from '@/components/ui/icon';
 import { openSheet, triggerScan } from '@/lib/store/local-store';
 import { useAppStore } from '@/lib/store/store';
 import { SolidButton } from './solid-button';
@@ -35,20 +35,15 @@ const TABS: TabConfig[] = [
     path: '__add__',
     icon: PlusIcon,
   },
-  /* {
+  {
     name: 'transactions',
     path: '/transactions',
-    icon: Receipt,
-  }, */
+    icon: ListChecks,
+  },
   {
     name: 'stats',
     path: '/stats',
     icon: PieChart,
-  },
-  {
-    name: 'settings',
-    path: '/settings',
-    icon: UserIcon,
   },
 ];
 

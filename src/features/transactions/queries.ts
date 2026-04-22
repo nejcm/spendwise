@@ -96,8 +96,8 @@ function buildTransactionsBatchInsert(
   chunk: TransactionInsertData[],
   ids: string[],
 ): { sql: string; params: (string | number | null)[] } {
-  const rowPlaceholders = chunk.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ');
-  const sql = `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note)
+  const rowPlaceholders = chunk.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ');
+  const sql = `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note, merchant_name, location)
     VALUES ${rowPlaceholders}`;
   const params: (string | number | null)[] = [];
   for (let i = 0; i < chunk.length; i++) {
@@ -114,6 +114,8 @@ function buildTransactionsBatchInsert(
       data.baseCurrency,
       data.date,
       data.note || null,
+      data.merchant_name,
+      data.location,
     );
   }
   return { sql, params };
@@ -126,9 +128,9 @@ export async function createTransaction(
   const id = generateId();
 
   await db.runAsync(
-    `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [id, data.account_id, data.category_id, data.type, data.amount, data.currency, data.baseAmount, data.baseCurrency, data.date, data.note || null],
+    `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note, merchant_name, location)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [id, data.account_id, data.category_id, data.type, data.amount, data.currency, data.baseAmount, data.baseCurrency, data.date, data.note || null, data.merchant_name, data.location],
   );
 
   return id;
@@ -164,9 +166,9 @@ export async function updateTransaction(
 ): Promise<void> {
   await db.runAsync(
     `UPDATE transactions
-     SET account_id = ?, category_id = ?, type = ?, amount = ?, currency = ?, baseAmount = ?, baseCurrency = ?, date = ?, note = ?, updated_at = strftime('%s','now')
+     SET account_id = ?, category_id = ?, type = ?, amount = ?, currency = ?, baseAmount = ?, baseCurrency = ?, date = ?, note = ?, merchant_name = ?, location = ?, updated_at = strftime('%s','now')
      WHERE id = ?`,
-    [data.account_id, data.category_id, data.type, data.amount, data.currency, data.baseAmount, data.baseCurrency, data.date, data.note || null, id],
+    [data.account_id, data.category_id, data.type, data.amount, data.currency, data.baseAmount, data.baseCurrency, data.date, data.note || null, data.merchant_name, data.location, id],
   );
 }
 

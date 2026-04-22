@@ -91,7 +91,8 @@ Do not move transactional finance records into Zustand.
 
 - Route files live in `src/app`
 - Most route files should stay thin and delegate to feature screens
-- Primary visible tabs are home, categories, stats, and settings
+- Primary visible tabs are home, transactions, categories, and stats
+- `/transactions` is the shared route for seeded transaction drill-downs via search, filter, and date-range params
 - Additional routed flows include accounts, transactions, budgets, import, insights, onboarding, and settings subpages
 
 ## Feature Layout

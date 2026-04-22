@@ -50,12 +50,14 @@ async function seedTransaction(
     baseCurrency: 'EUR',
     date: MAR_MID,
     note: 'lunch',
+    merchant_name: null,
+    location: null,
     ...overrides,
   };
   await db.runAsync(
-    `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [row.id, row.account_id, row.category_id, row.type, row.amount, row.currency, row.baseAmount, row.baseCurrency, row.date, row.note],
+    `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note, merchant_name, location)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [row.id, row.account_id, row.category_id, row.type, row.amount, row.currency, row.baseAmount, row.baseCurrency, row.date, row.note, row.merchant_name, row.location],
   );
   return row;
 }
@@ -277,6 +279,8 @@ describe('createTransaction', () => {
       baseCurrency: 'EUR',
       date: MAR_MID,
       note: 'lunch',
+      merchant_name: null,
+      location: null,
     });
 
     expect(typeof id).toBe('string');
@@ -301,10 +305,35 @@ describe('createTransaction', () => {
       baseCurrency: 'EUR',
       date: MAR_MID,
       note: '',
+      merchant_name: null,
+      location: null,
     });
 
     const row = await getTransactionById(db as any, id);
     expect(row!.note).toBeNull();
+  });
+
+  it('stores structured merchant and full location metadata', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+
+    const id = await createTransaction(db as any, {
+      account_id: 'acc_1',
+      category_id: 'cat_1',
+      type: 'expense',
+      amount: 5000,
+      currency: 'EUR',
+      baseAmount: 5000,
+      baseCurrency: 'EUR',
+      date: MAR_MID,
+      note: 'team lunch',
+      merchant_name: 'Cafe Roma',
+      location: 'Downtown branch, Berlin, DE',
+    });
+
+    const row = await getTransactionById(db as any, id);
+    expect(row!.merchant_name).toBe('Cafe Roma');
+    expect(row!.location).toBe('Downtown branch, Berlin, DE');
   });
 });
 
@@ -332,6 +361,8 @@ describe('createTransactions', () => {
     baseCurrency: 'EUR' as const,
     date: MAR_MID,
     note: 'x',
+    merchant_name: null,
+    location: null,
   };
 
   it('inserts multiple rows in one multi-value statement', async () => {
@@ -394,11 +425,15 @@ describe('updateTransaction', () => {
       baseCurrency: 'EUR',
       date: MAR_MID,
       note: 'updated',
+      merchant_name: 'New Merchant',
+      location: 'HQ, Munich, DE',
     });
 
     const row = await getTransactionById(db as any, 'txn_1');
     expect(row!.amount).toBe(3000);
     expect(row!.note).toBe('updated');
+    expect(row!.merchant_name).toBe('New Merchant');
+    expect(row!.location).toBe('HQ, Munich, DE');
   });
 
   it('returns undefined (void)', async () => {
@@ -416,6 +451,8 @@ describe('updateTransaction', () => {
       baseCurrency: 'EUR',
       date: MAR_MID,
       note: null,
+      merchant_name: null,
+      location: null,
     });
 
     expect(result).toBeUndefined();

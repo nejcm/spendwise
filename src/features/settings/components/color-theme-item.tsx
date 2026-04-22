@@ -27,7 +27,7 @@ export function ColorThemeItem() {
     <>
       <SettingsItem
         text="settings.color_theme.title"
-        icon={<Paintbrush className="text-foreground" size={20} />}
+        icon={<Paintbrush colorClassName="accent-foreground" size={20} />}
         value={colorTheme?.label}
         onPress={modal.present}
       />

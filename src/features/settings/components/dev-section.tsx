@@ -8,7 +8,7 @@ import { clearData, dumpDbTables, resetDb, seedData, seedMockData } from '@/lib/
 import { SettingsContainer } from './settings-container';
 import { SettingsItem } from './settings-item';
 
-const iconColor = 'text-foreground';
+const iconColor = 'accent-foreground';
 
 export default function DevSection() {
   const db = useSQLiteContext();
@@ -17,15 +17,15 @@ export default function DevSection() {
   if (Env.EXPO_PUBLIC_APP_ENV !== 'development') return null;
   return (
     <SettingsContainer title="settings.dev">
-      <SettingsItem text="settings.reset" icon={<DatabaseBackupIcon className={iconColor} size={20} />} onPress={() => resetDb(db, queryClient)} />
-      <SettingsItem text="settings.clear" icon={<DatabaseZap className={iconColor} size={20} />} onPress={() => clearData(db, queryClient)} />
-      <SettingsItem text="settings.seed" icon={<DatabaseZap className={iconColor} size={20} />} onPress={() => seedData(db, queryClient)} />
+      <SettingsItem text="settings.reset" icon={<DatabaseBackupIcon colorClassName={iconColor} size={20} />} onPress={() => resetDb(db, queryClient)} />
+      <SettingsItem text="settings.clear" icon={<DatabaseZap colorClassName={iconColor} size={20} />} onPress={() => clearData(db, queryClient)} />
+      <SettingsItem text="settings.seed" icon={<DatabaseZap colorClassName={iconColor} size={20} />} onPress={() => seedData(db, queryClient)} />
       <SettingsItem
         text="settings.mock_data"
-        icon={<Database className={iconColor} size={20} />}
+        icon={<Database colorClassName={iconColor} size={20} />}
         onPress={() => seedMockData(db, queryClient)}
       />
-      <SettingsItem text="settings.dump_db" icon={<Printer className={iconColor} size={20} />} onPress={() => dumpDbTables(db)} />
+      <SettingsItem text="settings.dump_db" icon={<Printer colorClassName={iconColor} size={20} />} onPress={() => dumpDbTables(db)} />
     </SettingsContainer>
   );
 }

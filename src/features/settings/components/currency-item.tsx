@@ -20,7 +20,7 @@ export function CurrencyItem() {
 
   return (
     <>
-      <SettingsItem text="common.currency" icon={<Euro className="text-foreground" size={20} />} value={currency} onPress={modal.present} />
+      <SettingsItem text="common.currency" icon={<Euro colorClassName="accent-foreground" size={20} />} value={currency} onPress={modal.present} />
       <Options ref={modal.ref} options={CURRENCY_OPTIONS} onSelect={onSelect} value={currency} />
     </>
   );

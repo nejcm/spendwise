@@ -370,6 +370,7 @@
     "anthropic_api_key": "Anthropic-API-Schlüssel",
     "anthropic_api_key_help": "Melde dich in der Anthropic Console an und erstelle unter API-Schlüsseln einen Schlüssel.",
     "app_name": "App-Name",
+    "bug_report": "Fehler melden",
     "categories": "Kategorien",
     "category_name": "Kategoriename",
     "changeCurrencyTitle": "Währung ändern",
@@ -411,6 +412,7 @@
     "dump_db": "DB-Tabellen ausgeben",
     "english": "Englisch",
     "expense_categories": "Ausgabenkategorien",
+    "feature_suggestions": "Funktionsvorschlag",
     "finance": "Finanzen",
     "formatting": "Formatierung",
     "formattingOptions": {

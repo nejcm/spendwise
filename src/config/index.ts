@@ -1,14 +1,18 @@
 import type { CurrencyKey } from '../features/currencies';
 import type { DateFormat } from '../features/formatting/constants';
 
+const github = 'https://github.com/nejcm/spendwise' as const;
+
 export const config = {
   appName: 'Spendwise',
   links: {
     androidApp: 'TODO',
     iosApp: 'TODO',
-    support: 'https://github.com/nejcm/spendwise',
+    bugs: `${github}/issues` as const,
+    featureSuggestions: `${github}/issues/new?template=feature-request.yml` as const,
+    support: github,
   },
-};
+} as const;
 
 // System
 export const DB_NAME = 'spendwise.db';

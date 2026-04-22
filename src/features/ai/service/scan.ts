@@ -24,7 +24,11 @@ export const scannedReceiptSchema = z.object({
 export type ScannedReceipt = z.infer<typeof scannedReceiptSchema>;
 
 // Prompt
-function buildPrompt(categories: Pick<Category, 'id' | 'name'>[], currency: CurrencyKey): string {
+function buildPrompt(
+  categories: Pick<Category, 'id' | 'name'>[],
+  currency: CurrencyKey,
+): string {
+  const today = todayISO();
   const categoryList = categories
     .map((c) => `  - id: "${c.id}", name: "${c.name}"`)
     .join('\n');
@@ -34,7 +38,7 @@ function buildPrompt(categories: Pick<Category, 'id' | 'name'>[], currency: Curr
 Required JSON fields:
 - "amount": integer, the total amount in cents (e.g. $12.50 → 1250)
 - "currency": string, ISO 4217 code (e.g. "EUR", "USD"). Infer from symbols (€ £ $ ¥ etc.), printed ISO/code, or merchant location. Default to "${currency}" if unclear.
-- "date": string, ISO date "YYYY-MM-DD". Default to today if unclear.
+- "date": string, ISO date "YYYY-MM-DD". Use the receipt date only if the day is explicitly visible and unambiguous. If the day is missing, partially obscured, low-confidence, or there are multiple plausible days, set "date" to "${today}"
 - "merchant_name": string or null, the merchant/payee name when it is visible.
 - "location": string or null, the full address or best single location string shown on the receipt.
 - "note": string or null, a short description of the purchase. Do not repeat the merchant name here unless no better description is available.

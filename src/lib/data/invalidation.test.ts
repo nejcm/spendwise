@@ -19,7 +19,7 @@ describe('invalidateFor', () => {
     const qc = createMockQueryClient();
     invalidateFor(qc, 'transaction');
 
-    expect(qc.invalidateQueries).toHaveBeenCalledTimes(5);
+    expect(qc.invalidateQueries).toHaveBeenCalledTimes(6);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.transactions.all]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.withBalance]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.totalBalance]);
@@ -40,7 +40,7 @@ describe('invalidateFor', () => {
     const qc = createMockQueryClient();
     invalidateFor(qc, 'account');
 
-    expect(qc.invalidateQueries).toHaveBeenCalledTimes(3);
+    expect(qc.invalidateQueries).toHaveBeenCalledTimes(4);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.all]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.withBalance]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.totalBalance]);
@@ -50,7 +50,7 @@ describe('invalidateFor', () => {
     const qc = createMockQueryClient();
     invalidateFor(qc, 'category');
 
-    expect(qc.invalidateQueries).toHaveBeenCalledTimes(2);
+    expect(qc.invalidateQueries).toHaveBeenCalledTimes(3);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.categories.all]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.insights.all]);
   });
@@ -59,7 +59,7 @@ describe('invalidateFor', () => {
     const qc = createMockQueryClient();
     invalidateFor(qc, 'scheduledTransaction');
 
-    expect(qc.invalidateQueries).toHaveBeenCalledTimes(1);
+    expect(qc.invalidateQueries).toHaveBeenCalledTimes(2);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.scheduledTransactions.all]);
   });
 });

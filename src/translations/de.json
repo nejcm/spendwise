@@ -277,6 +277,9 @@
     "low_balance_description": "Erhalte eine Benachrichtigung, wenn ein Kontostand unter einen festgelegten Schwellenwert fällt.",
     "low_balance_threshold": "Warnschwelle",
     "low_balance_title": "Niedriger Kontostand",
+    "recommendations": "Smarte Empfehlungen",
+    "recommendations_description": "Erhalte Hinweise bei ungewöhnlichen Ausgaben, anstehenden Abos oder bevorstehenden Cashflow-Risiken.",
+    "recommendations_title": "Smarte Empfehlung",
     "upcoming_bills": "Anstehende Rechnung",
     "upcoming_bills_days": "Erinnerungszeitraum",
     "upcoming_bills_days_1": "1 Tag vorher",
@@ -305,6 +308,43 @@
     "title": "Spendwise",
     "welcome_copy": "Verfolge Ausgaben, verwalte Budgets und entwickle bessere Geldgewohnheiten an einem Ort.",
     "welcome_headline": "Intelligentes Finanzmanagement"
+  },
+  "recommendations": {
+    "actions": {
+      "ask_ai": "KI fragen",
+      "review_accounts": "Konten prüfen",
+      "review_categories": "Kategorien prüfen",
+      "review_schedule": "Plan prüfen",
+      "review_stats": "Statistiken prüfen",
+      "review_transactions": "Transaktionen prüfen"
+    },
+    "budget_suggestion": {
+      "summary": "Die letzten Monate lagen im Schnitt bei {{amount}}. Ein Budget würde diese Kategorie leichter steuerbar machen.",
+      "title": "Budget für {{category}} festlegen"
+    },
+    "category_anomaly": {
+      "summary": "Dieser Monat liegt bereits bei {{amount}} und damit über deinem jüngsten Monatsdurchschnitt von {{average}}.",
+      "title": "{{category}} liegt über deinem üblichen Niveau"
+    },
+    "dismiss_all": "Alle ausblenden",
+    "section_title": "Empfehlungen",
+    "severity": {
+      "high": "Hohe Priorität",
+      "low": "Niedrige Priorität",
+      "medium": "Bald prüfen"
+    },
+    "subscription_reminder": {
+      "summary": "{{amount}} ist für {{date}} geplant. {{count}} wiederkehrende Rechnungen sind bald fällig.",
+      "title": "{{name}} ist bald fällig"
+    },
+    "unusual_spending": {
+      "summary": "{{label}} lag bei {{amount}}, also etwa {{multiple}}x über deinem üblichen Niveau.",
+      "title": "Ungewöhnliche Ausgabe erkannt"
+    },
+    "upcoming_cashflow": {
+      "summary": "{{count}} anstehende Rechnungen summieren sich in den nächsten {{days}} Tagen auf {{amount}} bei einem Kontostand von {{balance}}.",
+      "title": "{{account}} könnte knapp werden"
+    }
   },
   "scan": {
     "analyzing": "Beleg wird analysiert…",
@@ -463,6 +503,8 @@
     "profile": "Profil",
     "provider_anthropic": "Anthropic",
     "provider_openai": "OpenAI",
+    "recommendations_enabled": "Empfehlungen",
+    "recommendations_enabled_description": "Smarte Empfehlungen in der gesamten App aktivieren.",
     "reset": "Zurücksetzen",
     "reset_db": "Datenbank zurücksetzen",
     "save_on_scan": "Transaktionen speichern",

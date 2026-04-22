@@ -23,18 +23,22 @@ const INVALIDATION_RULES = {
     queryKeys.accounts.totalBalance,
     queryKeys.monthSummary.all,
     queryKeys.insights.all,
+    queryKeys.recommendations.all,
   ],
   account: [
     queryKeys.accounts.all,
     queryKeys.accounts.withBalance,
     queryKeys.accounts.totalBalance,
+    queryKeys.recommendations.all,
   ],
   category: [
     queryKeys.categories.all,
     queryKeys.insights.all,
+    queryKeys.recommendations.all,
   ],
   scheduledTransaction: [
     queryKeys.scheduledTransactions.all,
+    queryKeys.recommendations.all,
   ],
   currencyRates: [
     queryKeys.currencyRates.all,

@@ -10,6 +10,7 @@ import { SkeletonBox, SkeletonGrid } from '@/components/ui/skeleton';
 import { AccountsOverview } from '@/features/home/accounts-overview';
 import { CategoriesOverview } from '@/features/home/categories-overview';
 import { ScreensLinksGrid } from '@/features/home/screens-grid';
+import { HomeRecommendations } from '@/features/recommendations/components/home-recommendations';
 import { useMonthSummary } from '@/features/transactions/api';
 import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
@@ -85,6 +86,7 @@ export function HomeScreen() {
             </View>
           </View>
           <AccountsOverview />
+          <HomeRecommendations />
           <CategoriesOverview />
           <ScreensLinksGrid />
           <TransactionsList />

@@ -76,6 +76,21 @@ export function NotificationSettingsScreen() {
 
             <DetailsSection
               className="mb-4"
+              data={[{
+                label: translate('notifications.recommendations'),
+                description: translate('notifications.recommendations_description'),
+                value: (
+                  <Switch
+                    accessibilityLabel={translate('notifications.recommendations')}
+                    checked={settings.recommendations !== false}
+                    onChange={(checked) => updateNotifications({ recommendations: checked })}
+                  />
+                ),
+              }]}
+            />
+
+            <DetailsSection
+              className="mb-4"
               data={[
                 {
                   label: translate('notifications.upcoming_bills_label'),

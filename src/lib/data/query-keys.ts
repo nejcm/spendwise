@@ -73,4 +73,10 @@ export const queryKeys = {
     detail: (id: string) =>
       ['scheduled-transactions', 'detail', id] as const,
   },
+
+  // ─── Recommendations ───
+  recommendations: {
+    all: ['recommendations'] as const,
+    home: ['recommendations', 'home'] as const,
+  },
 } as const;

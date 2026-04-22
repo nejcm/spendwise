@@ -6,6 +6,7 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { checkBudgetAlerts } from './checks/check-budget-alerts';
 import { checkLowBalance } from './checks/check-low-balance';
+import { checkRecommendations } from './checks/check-recommendations';
 import { checkUpcomingBills } from './checks/check-upcoming-bills';
 import { checkWeeklyDigest } from './checks/check-weekly-digest';
 
@@ -66,8 +67,10 @@ export async function runAllNotificationChecks(
   if (!settings.global) return;
   if (!(await canNotify())) return;
 
+  // TODO: can run in parallel?
   await checkUpcomingBills(db, settings);
   await checkBudgetAlerts(db, settings);
   await checkLowBalance(db, settings);
   await checkWeeklyDigest(db, settings);
+  await checkRecommendations(db, settings);
 }

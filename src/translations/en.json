@@ -278,6 +278,9 @@
     "low_balance_description": "Get notified when an account balance drops below a set threshold.",
     "low_balance_threshold": "Alert threshold",
     "low_balance_title": "Low Balance",
+    "recommendations": "Smart recommendations",
+    "recommendations_description": "Get alerted when the app spots unusual spending, subscription reminders, or upcoming cashflow risk.",
+    "recommendations_title": "Smart Recommendation",
     "upcoming_bills": "Upcoming Bill",
     "upcoming_bills_days": "Reminder window",
     "upcoming_bills_days_1": "1 day before",
@@ -306,6 +309,43 @@
     "title": "Spendwise",
     "welcome_copy": "Track spending, manage budgets, and build better money habits in one place.",
     "welcome_headline": "Smart money management"
+  },
+  "recommendations": {
+    "actions": {
+      "ask_ai": "Ask AI",
+      "review_accounts": "Review accounts",
+      "review_categories": "Review categories",
+      "review_schedule": "Review schedule",
+      "review_stats": "Review stats",
+      "review_transactions": "Review transactions"
+    },
+    "budget_suggestion": {
+      "summary": "Recent monthly spending averages {{amount}}. Adding a budget would make this category easier to track.",
+      "title": "Set a budget for {{category}}"
+    },
+    "category_anomaly": {
+      "summary": "This month is already at {{amount}}, above your recent monthly average of {{average}}.",
+      "title": "{{category}} is trending above normal"
+    },
+    "dismiss_all": "Dismiss all",
+    "section_title": "Recommendations",
+    "severity": {
+      "high": "High priority",
+      "low": "Low priority",
+      "medium": "Watch soon"
+    },
+    "subscription_reminder": {
+      "summary": "{{amount}} is scheduled for {{date}}. You have {{count}} recurring bills due soon.",
+      "title": "{{name}} is due soon"
+    },
+    "unusual_spending": {
+      "summary": "{{label}} came in at {{amount}}, about {{multiple}}x your usual spend.",
+      "title": "Unusual spending detected"
+    },
+    "upcoming_cashflow": {
+      "summary": "{{count}} upcoming bills total {{amount}} over the next {{days}} days, against a balance of {{balance}}.",
+      "title": "{{account}} may run short"
+    }
   },
   "scan": {
     "analyzing": "Analyzing receipt…",
@@ -525,4 +565,3 @@
     "updated_at": "Updated at"
   }
 }
-

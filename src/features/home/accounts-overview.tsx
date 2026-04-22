@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { FormattedCurrency, Text } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
-import { SkeletonRows } from '@/components/ui/skeleton';
+import { SkeletonGrid } from '@/components/ui/skeleton';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -56,7 +56,11 @@ export const AccountsOverview = React.memo(() => {
             </ScrollView>
           )
         : isLoading
-          ? <SkeletonRows count={3} />
+          ? (
+              <View className="gap-2">
+                <SkeletonGrid rows={1} cols={2} />
+              </View>
+            )
           : <NoDataCard onPress={() => router.push('/accounts')} label={translate('accounts.add')} />}
     </View>
   );

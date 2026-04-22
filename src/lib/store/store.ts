@@ -141,6 +141,7 @@ function getDefaultState(): AppState {
 
     notifications: {
       budgetAlerts: true,
+      recommendations: true,
       upcomingBills: true,
       upcomingBillsDays: 7,
       lowBalance: false,

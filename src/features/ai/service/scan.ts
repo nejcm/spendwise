@@ -13,6 +13,8 @@ export const scannedReceiptSchema = z.object({
   amount: z.number().positive().transform(Math.round),
   currency: z.enum(CURRENCY_VALUES as CurrencyKey[]).optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).catch(() => todayISO()),
+  merchant_name: z.string().nullable().catch(null),
+  location: z.string().nullable().catch(null),
   note: z.string().nullable().catch(null),
   type: z.enum(['expense', 'income'] as TransactionType[]).catch('expense'),
   /** Matched from provided category list, or null if no match. */
@@ -33,7 +35,9 @@ Required JSON fields:
 - "amount": integer, the total amount in cents (e.g. $12.50 → 1250)
 - "currency": string, ISO 4217 code (e.g. "EUR", "USD"). Infer from symbols (€ £ $ ¥ etc.), printed ISO/code, or merchant location. Default to "${currency}" if unclear.
 - "date": string, ISO date "YYYY-MM-DD". Default to today if unclear.
-- "note": string or null, the merchant name or a short description of the purchase.
+- "merchant_name": string or null, the merchant/payee name when it is visible.
+- "location": string or null, the full address or best single location string shown on the receipt.
+- "note": string or null, a short description of the purchase. Do not repeat the merchant name here unless no better description is available.
 - "type": "expense" or "income". Almost always "expense" for receipts.
 - "category_id": string or null, pick the best matching id from the list below, or null if none fits.
 

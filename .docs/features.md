@@ -5,11 +5,11 @@
 ### Primary App Routes
 
 - `src/app/(app)/index.tsx`: home dashboard
+- `src/app/(app)/transactions.tsx`: transaction list and seeded drill-down destination
 - `src/app/(app)/categories.tsx`: category management
 - `src/app/(app)/stats.tsx`: stats overview
 - `src/app/(app)/settings.tsx`: settings landing page
 - `src/app/(app)/accounts.tsx`: accounts list
-- `src/app/(app)/transactions.tsx`: transaction list
 - `src/app/(app)/ai.tsx`: AI assistant
 
 ### Secondary Routes
@@ -67,3 +67,4 @@
 - Add new route entry points under `src/app`
 - Keep route files thin and put feature logic in `src/features/[feature]`
 - Prefer extending an existing feature module before creating a new cross-cutting folder
+- Use `/transactions` for seeded list drill-downs instead of creating duplicate transaction list routes

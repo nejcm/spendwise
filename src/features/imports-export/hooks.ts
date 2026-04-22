@@ -65,6 +65,8 @@ export function useImportTransactions() {
           category_id: mapCategoryNameToId(row.categoryName, categories, row.note),
           date: Math.floor(new Date(row.date).getTime() / 1000),
           note: row.note,
+          merchant_name: null,
+          location: null,
           type,
         });
       }

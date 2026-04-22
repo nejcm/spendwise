@@ -37,6 +37,7 @@ type TransactionFormBodyProps = {
   setBaseAmountIsManual: (value: boolean) => void;
   isSheet?: boolean;
 };
+
 function TransactionFormBody({
   form,
   accounts,
@@ -237,7 +238,37 @@ function TransactionFormBody({
             className="text-base/snug"
             onBlur={field.handleBlur}
             onChangeText={field.handleChange}
-            placeholder={translate('common.note')}
+            placeholder={translate('transactions.note_placeholder')}
+            error={getFieldError(field)}
+          />
+        )}
+      />
+
+      <form.Field
+        name="merchant_name"
+        children={(field) => (
+          <Input
+            value={field.state.value || ''}
+            size="lg"
+            className="text-base/snug"
+            onBlur={field.handleBlur}
+            onChangeText={field.handleChange}
+            placeholder={translate('transactions.merchant_name_placeholder')}
+            error={getFieldError(field)}
+          />
+        )}
+      />
+
+      <form.Field
+        name="location"
+        children={(field) => (
+          <Input
+            value={field.state.value || ''}
+            size="lg"
+            className="text-base/snug"
+            onBlur={field.handleBlur}
+            onChangeText={field.handleChange}
+            placeholder={translate('transactions.location_placeholder')}
             error={getFieldError(field)}
           />
         )}

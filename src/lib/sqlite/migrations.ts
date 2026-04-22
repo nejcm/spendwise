@@ -1,7 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { seedDefaults } from './seed';
 
-const DATABASE_VERSION = 2;
+const DATABASE_VERSION = 4;
 
 /**
  * Runs on first open. Sets WAL mode and runs schema migrations via PRAGMA user_version.
@@ -131,5 +131,13 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
     // Clear cached currency rates so newly added currencies are re-fetched.
     await db.runAsync('DELETE FROM currency_rates');
     await db.execAsync(`PRAGMA user_version = 2`);
+  }
+
+  if (currentDbVersion < 3) {
+    await db.execAsync(`
+      ALTER TABLE transactions ADD COLUMN merchant_name TEXT;
+      ALTER TABLE transactions ADD COLUMN location TEXT;
+    `);
+    await db.execAsync(`PRAGMA user_version = 3`);
   }
 }

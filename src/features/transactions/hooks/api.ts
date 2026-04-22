@@ -76,6 +76,8 @@ function prepareTransactionData(
     amount: amountToCents(amount),
     baseAmount: amount === 0 ? 0 : (item.baseAmount ? amountToCents(item.baseAmount) : computeBaseAmount(amountToCents(amount), item.currency, baseCurrency, rates ?? {})),
     baseCurrency,
+    merchant_name: item.merchant_name?.trim() || null,
+    location: item.location?.trim() || null,
   };
 }
 

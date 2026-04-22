@@ -63,3 +63,15 @@ jobs:
       - name: 🏃‍♂️ Run App release
         run: |
           pnpm app-release ${{ github.event.inputs.release-type }}
+
+      - name: 🏷️ Read app version
+        id: version
+        run: printf 'app_version=%s\n' "$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
+        shell: bash
+
+      - name: 🚀 Create GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v${{ steps.version.outputs.app_version }}
+          generateReleaseNotes: true
+          draft: false

@@ -159,28 +159,17 @@ App startup happens in `src/app/_layout.tsx`, where the app initializes SQLite, 
 - [PocketGuard](https://pocketguard.com/)
 - [Wallet / BudgetBakers](https://budgetbakers.com/en/)
 
-
 ## Resources
 
-- Avatars: https://www.figma.com/design/LcTCGVae3fI72lJASdNtHn/Playful-Avatar-Creator---DrawKit--Community-?node-id=3-3&p=f&t=FrbHnCBsjZzFhIHh-0
-- Flag icons: https://github.com/lipis/flag-icons
+- Avatars: <https://www.figma.com/design/LcTCGVae3fI72lJASdNtHn/Playful-Avatar-Creator---DrawKit--Community-?node-id=3-3&p=f&t=FrbHnCBsjZzFhIHh-0>
+- Flag icons: <https://github.com/lipis/flag-icons>
 
 ## Known issues
 
-- https://github.com/facebook/react-native/issues/51490
+- <https://github.com/facebook/react-native/issues/51490>
 
 ---
 
 ## Roadmap
 
-High-level roadmap (subject to change):
-
-### AI features
-
-- [ ] Recommendations and Insights
-
-### Product polish
-
-- [ ] Improve overall UI/UX across the app
-- [ ] Add richer transaction details (e.g. merchant)
-
+[Roadmap](https://github.com/users/nejcm/projects/5/views/1)

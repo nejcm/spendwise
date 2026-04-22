@@ -55,12 +55,12 @@ export function TransactionDetailScreen() {
   const isIncome = transaction.type === 'income';
   const account = accounts.find((a) => a.id === transaction.account_id);
   const primaryDetails: DetailsRowProps[] = [
+    { label: translate('transactions.date'), value: <FormattedDate value={transaction.date} className="text-foreground" /> },
     { label: translate('transactions.category'), value: transaction ? `${transaction.category_icon} ${transaction.category_name}` : '-' },
     { label: translate('transactions.account'), value: account ? `${account.icon} ${account.name}` : '-' },
     { label: translate('transactions.type'), value: transaction.type, className: 'capitalize' },
     ...(transaction.merchant_name ? [{ label: translate('transactions.merchant_name'), value: transaction.merchant_name }] : []),
     ...(transaction.location ? [{ label: translate('transactions.location'), value: transaction.location }] : []),
-    { label: translate('transactions.note'), value: transaction.note || '-', sectionClassName: 'flex-col justify-start items-start gap-1' },
   ];
 
   const handleDelete = () => {
@@ -115,12 +115,17 @@ export function TransactionDetailScreen() {
               prefix={isIncome ? '+' : '-'}
               className="text-lg text-muted-foreground"
             />
-            <FormattedDate value={transaction.date} className="mt-2 text-muted-foreground" />
           </View>
 
           <DetailsSection
             className="mb-4"
             data={primaryDetails}
+          />
+          <DetailsSection
+            className="mb-4"
+            data={[
+              { label: translate('transactions.note'), value: transaction.note || '-', sectionClassName: 'flex-col justify-start items-start gap-1' },
+            ]}
           />
           <DetailsSection
             className="mb-4"

@@ -23,7 +23,7 @@ export function LanguageItem() {
 
   return (
     <>
-      <SettingsItem text="settings.language" icon={<Languages className="text-foreground" size={20} />} value={selected?.name} onPress={modal.present} />
+      <SettingsItem text="settings.language" icon={<Languages colorClassName="accent-foreground" size={20} />} value={selected?.name} onPress={modal.present} />
       <Options ref={modal.ref} options={LANGUAGES_OPTIONS} onSelect={onSelect} value={selected?.value} />
     </>
   );

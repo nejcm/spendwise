@@ -55,7 +55,8 @@ export function TransactionsScreen() {
           if (hasQuery) {
             return t.note?.toLowerCase().includes(q)
               || t.category_name?.toLowerCase().includes(q)
-              || t.merchant_name?.toLowerCase().includes(q);
+              || t.merchant_name?.toLowerCase().includes(q)
+              || t.amount?.toString().includes(q);
           }
           return true;
         },

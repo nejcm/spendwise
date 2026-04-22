@@ -20,21 +20,21 @@ jobs:
     name: New GitHub Release
     if: ${{ startsWith(github.event.head_commit.message, 'chore(release):') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     permissions:
       contents: write
     steps:
       - name: 📦 Checkout project repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 50
 
       - name: 📦 Setup Node + PNPM + install deps
         uses: ./.github/actions/setup-node-pnpm-install
 
       - name: 📦 Set Up JDK + Generate Release APK
         uses: ./.github/actions/setup-jdk-generate-apk
-        timeout-minutes: 40
+        timeout-minutes: 45
         with:
           APP_ENV: production
         env:
@@ -47,6 +47,14 @@ jobs:
         run: printf 'apk_version=%s\n' "$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
         shell: bash
 
+      - name: 🏷️ Create version tag
+        env:
+          TAG_NAME: v${{ steps.version.outputs.apk_version }}
+        run: |
+          git tag "${TAG_NAME}" "${GITHUB_SHA}"
+          git push origin "refs/tags/${TAG_NAME}"
+        shell: bash
+
       - name: 📦 Prepare APK asset
         run: |
           cp ./android/app/build/outputs/apk/release/app-release.apk "./spendwise-${{ steps.version.outputs.apk_version }}.apk"
@@ -55,6 +63,7 @@ jobs:
       - name: 🏃‍♂️ Create A Draft Github Release
         uses: ncipollo/release-action@v1
         with:
+          tag: v${{ steps.version.outputs.apk_version }}
           generateReleaseNotes: true
           draft: false
           artifacts: ./spendwise-${{ steps.version.outputs.apk_version }}.apk

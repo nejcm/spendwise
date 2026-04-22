@@ -410,6 +410,7 @@
     "anthropic_api_key": "Anthropic API key",
     "anthropic_api_key_help": "Sign in to the Anthropic Console and create a key under API keys.",
     "app_name": "App Name",
+    "bug_report": "Bug report",
     "categories": "Categories",
     "category_name": "Category Name",
     "changeCurrencyTitle": "Change currency",
@@ -451,6 +452,7 @@
     "dump_db": "Dump DB tables",
     "english": "English",
     "expense_categories": "Expense Categories",
+    "feature_suggestions": "Feature suggestions",
     "finance": "Finance",
     "formatting": "Formatting",
     "formattingOptions": {

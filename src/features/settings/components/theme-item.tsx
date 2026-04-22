@@ -25,7 +25,7 @@ export function ThemeItem() {
 
   return (
     <>
-      <SettingsItem text="settings.theme.title" icon={<Sun className="text-foreground" size={20} />} value={theme?.label} onPress={modal.present} />
+      <SettingsItem text="settings.theme.title" icon={<Sun colorClassName="accent-foreground" size={20} />} value={theme?.label} onPress={modal.present} />
       <Options ref={modal.ref} options={THEMES_OPTIONS} onSelect={onSelect} value={theme?.value} />
     </>
   );

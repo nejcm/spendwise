@@ -20,7 +20,7 @@ export function TransactionFilterBar({ filters, hasActiveFilters, updateFilters 
 
   return (
     <>
-      <View className="flex-row items-center gap-2 px-4">
+      <View className="flex-row items-center px-4">
         <ScrollView
           style={defaultStyles.transparentBg}
           horizontal
@@ -48,19 +48,21 @@ export function TransactionFilterBar({ filters, hasActiveFilters, updateFilters 
           </View>
         </ScrollView>
 
-        <IconButton
-          onPress={filterSheet.present}
-          hitSlop={8}
-          className="relative py-3"
-          accessibilityLabel={translate('common.filters')}
-          accessibilityRole="button"
-          size="sm"
-        >
-          <SlidersHorizontal size={20} colorClassName="accent-background" />
-          {hasActiveFilters && (
-            <View className="absolute top-0.5 right-0.5 size-2 rounded-full bg-red-600" />
-          )}
-        </IconButton>
+        <View className="pl-2 shadow-[-5px_0px_12px_1px_rgba(0,0,0,0.4)]">
+          <IconButton
+            onPress={filterSheet.present}
+            hitSlop={8}
+            className="relative py-3"
+            accessibilityLabel={translate('common.filters')}
+            accessibilityRole="button"
+            size="sm"
+          >
+            <SlidersHorizontal size={20} colorClassName="accent-background" />
+            {hasActiveFilters && (
+              <View className="absolute top-0.5 right-0.5 size-2 rounded-full bg-red-600" />
+            )}
+          </IconButton>
+        </View>
       </View>
       <TransactionFilterSheet
         ref={filterSheet.ref}

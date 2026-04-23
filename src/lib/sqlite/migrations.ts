@@ -1,7 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { seedDefaults } from './seed';
 
-const DATABASE_VERSION = 4;
+const DATABASE_VERSION = 5;
 
 /**
  * Runs on first open. Sets WAL mode and runs schema migrations via PRAGMA user_version.
@@ -139,5 +139,24 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
       ALTER TABLE transactions ADD COLUMN location TEXT;
     `);
     await db.execAsync(`PRAGMA user_version = 3`);
+  }
+
+  if (currentDbVersion < 5) {
+    await db.execAsync(`
+      ALTER TABLE categories ADD COLUMN budget_rollover INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE categories ADD COLUMN budget_alert_threshold INTEGER;
+
+      CREATE TABLE IF NOT EXISTS budget_rollover_history (
+        id TEXT PRIMARY KEY NOT NULL,
+        category_id TEXT NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+        year_month INTEGER NOT NULL,
+        rollover_amount INTEGER NOT NULL DEFAULT 0,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+        UNIQUE(category_id, year_month)
+      );
+      CREATE INDEX IF NOT EXISTS idx_budget_rollover_history_category_month
+        ON budget_rollover_history(category_id, year_month DESC);
+    `);
+    await db.execAsync(`PRAGMA user_version = 5`);
   }
 }

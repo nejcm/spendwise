@@ -2,7 +2,7 @@ import type { Category } from '../categories/types';
 import { mapCategoryNameToId } from '@/features/imports-export/helpers';
 
 function makeCategory(id: string, name: string): Category {
-  return { id, name, icon: null, color: '#000000', budget: null, sort_order: 0, created_at: 0 };
+  return { id, name, icon: null, color: '#000000', budget: null, budget_rollover: false, budget_alert_threshold: null, sort_order: 0, created_at: 0 };
 }
 
 const CATEGORIES: Category[] = [

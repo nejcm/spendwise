@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
 
 import ColorSelector from '@/components/color-selector';
-import { Alert, GhostButton, Image, Input, SolidButton, Text, TrashIcon } from '@/components/ui';
+import { Alert, GhostButton, Image, Input, SolidButton, Switch, Text, TrashIcon } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { OutlineButton } from '@/components/ui/outline-button';
@@ -23,6 +23,12 @@ const schema = z.object({
   icon: z.emoji().nullable(),
   color: z.string(),
   budget: z.string().nullable().refine(refinePositiveNumberOrNull, translate('categories.budget_invalid')),
+  budget_rollover: z.boolean().optional(),
+  budget_alert_threshold: z.string().nullable().optional().refine((val) => {
+    if (!val?.trim()) return true;
+    const n = Number(val);
+    return Number.isFinite(n) && n >= 1 && n <= 99;
+  }, translate('categories.budget_alert_threshold_invalid')),
 });
 
 export type CategoryInitialValues = (Partial<CategoryFormData> & { id: undefined }) | (CategoryFormData & { id: Category['id'] });
@@ -38,6 +44,8 @@ const defaultValues: CategoryFormData = {
   icon: null,
   color: 'bg-sky-600',
   budget: null,
+  budget_rollover: false,
+  budget_alert_threshold: null,
 };
 
 function useCategoryForm(initialValues?: CategoryInitialValues, onSuccess?: () => void) {
@@ -155,6 +163,44 @@ function CategoryFormBody({ form, preferredCurrency, deleteCategory, id, initial
           )}
         />
       </View>
+
+      <form.Subscribe
+        selector={(s) => s.values.budget}
+        children={(budget) => {
+          if (!budget?.trim()) return null;
+          return (
+            <>
+              <form.Field
+                name="budget_rollover"
+                children={(field) => (
+                  <View className="flex-row items-center justify-between px-1">
+                    <Text className="text-sm text-foreground">{translate('categories.budget_rollover')}</Text>
+                    <Switch
+                      checked={!!field.state.value}
+                      onChange={field.handleChange}
+                      accessibilityLabel={translate('categories.budget_rollover')}
+                    />
+                  </View>
+                )}
+              />
+              <form.Field
+                name="budget_alert_threshold"
+                children={(field) => (
+                  <Input
+                    value={field.state.value ?? ''}
+                    onBlur={field.handleBlur}
+                    onChangeText={field.handleChange}
+                    placeholder={translate('categories.budget_alert_threshold_placeholder')}
+                    keyboardType="decimal-pad"
+                    size="lg"
+                    error={getFieldError(field)}
+                  />
+                )}
+              />
+            </>
+          );
+        }}
+      />
 
       {!!id && (
         <GhostButton

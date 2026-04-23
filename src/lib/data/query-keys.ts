@@ -79,4 +79,12 @@ export const queryKeys = {
     all: ['recommendations'] as const,
     home: ['recommendations', 'home'] as const,
   },
+
+  // ─── Budgets ───
+  budgets: {
+    all: ['budgets'] as const,
+    overview: (yearMonth: string) => ['budgets', 'overview', yearMonth] as const,
+    history: (categoryId: string) => ['budgets', 'history', categoryId] as const,
+    rollover: (categoryId: string) => ['budgets', 'rollover', categoryId] as const,
+  },
 } as const;

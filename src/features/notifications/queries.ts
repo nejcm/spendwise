@@ -8,6 +8,7 @@ export type CategoryBudgetRow = {
   name: string;
   budget: number;
   spent: number;
+  budget_alert_threshold: number | null;
 };
 
 export type AccountBalanceRow = {
@@ -31,6 +32,7 @@ export async function getBudgetSpendForMonth(
        c.id,
        c.name,
        c.budget,
+       c.budget_alert_threshold,
        COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0) AS spent
      FROM categories c
      LEFT JOIN transactions t

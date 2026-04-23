@@ -7,7 +7,7 @@ import { storage } from '@/lib/storage';
 import { currentMonthRange, getBudgetSpendForMonth } from '../queries';
 import { send } from '../send';
 
-function budgetAlertKey(categoryId: string, yearMonth: string, threshold: 80 | 100) {
+function budgetAlertKey(categoryId: string, yearMonth: string, threshold: number) {
   return `notif.budget.${categoryId}.${yearMonth}.${threshold}`;
 }
 
@@ -23,15 +23,16 @@ export async function checkBudgetAlerts(
 
   for (const cat of categories) {
     const pct = cat.budget > 0 ? (cat.spent / cat.budget) * 100 : 0;
+    const warningThreshold = cat.budget_alert_threshold ?? 80;
 
-    if (pct >= 80) {
-      const key80 = budgetAlertKey(cat.id, yearMonth, 80);
-      if (storage.getString(key80) !== '1') {
+    if (pct >= warningThreshold) {
+      const keyWarn = budgetAlertKey(cat.id, yearMonth, warningThreshold);
+      if (storage.getString(keyWarn) !== '1') {
         await send(
           translate('notifications.budget_alert_title'),
           translate('notifications.budget_approaching', { name: cat.name, percent: Math.round(pct) } as never),
         );
-        storage.set(key80, '1');
+        storage.set(keyWarn, '1');
       }
     }
 

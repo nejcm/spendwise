@@ -15,9 +15,10 @@ export async function createCategory(
 ): Promise<string> {
   const id = generateId();
   const budgetCents = data.budget?.trim() ? amountToCents(Number(data.budget)) : null;
+  const alertThreshold = data.budget_alert_threshold?.trim() ? Number(data.budget_alert_threshold) : null;
   await db.runAsync(
-    'INSERT INTO categories (id, name, icon, color, budget, sort_order) VALUES (?, ?, ?, ?, ?, ?)',
-    [id, data.name.trim(), data.icon?.trim() || null, data.color, budgetCents, data.sort_order ?? 999999],
+    'INSERT INTO categories (id, name, icon, color, budget, budget_rollover, budget_alert_threshold, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    [id, data.name.trim(), data.icon?.trim() || null, data.color, budgetCents, data.budget_rollover ? 1 : 0, alertThreshold, data.sort_order ?? 999999],
   );
   return id;
 }
@@ -25,12 +26,13 @@ export async function createCategory(
 export async function updateCategory(
   db: SQLiteDatabase,
   id: string,
-  data: Pick<CategoryFormData, 'name' | 'icon' | 'color' | 'budget' | 'sort_order'>,
+  data: Pick<CategoryFormData, 'name' | 'icon' | 'color' | 'budget' | 'budget_rollover' | 'budget_alert_threshold' | 'sort_order'>,
 ): Promise<void> {
   const budgetCents = data.budget?.trim() ? amountToCents(Number(data.budget)) : null;
+  const alertThreshold = data.budget_alert_threshold?.trim() ? Number(data.budget_alert_threshold) : null;
   await db.runAsync(
-    'UPDATE categories SET name = ?, icon = ?, color = ?, budget = ? WHERE id = ?',
-    [data.name.trim(), data.icon?.trim() || null, data.color, budgetCents, id],
+    'UPDATE categories SET name = ?, icon = ?, color = ?, budget = ?, budget_rollover = ?, budget_alert_threshold = ? WHERE id = ?',
+    [data.name.trim(), data.icon?.trim() || null, data.color, budgetCents, data.budget_rollover ? 1 : 0, alertThreshold, id],
   );
 }
 

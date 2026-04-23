@@ -50,7 +50,7 @@ describe('invalidateFor', () => {
     const qc = createMockQueryClient();
     invalidateFor(qc, 'category');
 
-    expect(qc.invalidateQueries).toHaveBeenCalledTimes(3);
+    expect(qc.invalidateQueries).toHaveBeenCalledTimes(4);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.categories.all]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.insights.all]);
   });

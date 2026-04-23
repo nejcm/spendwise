@@ -43,7 +43,7 @@ export function useUpdateCategory(onSuccess?: () => void) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (params: { id: string; data: Pick<CategoryFormData, 'name' | 'icon' | 'color' | 'sort_order'> }) =>
+    mutationFn: (params: { id: string; data: Pick<CategoryFormData, 'name' | 'icon' | 'color' | 'budget' | 'budget_rollover' | 'budget_alert_threshold' | 'sort_order'> }) =>
       queries.updateCategory(db, params.id, params.data),
     onSuccess: () => {
       invalidateFor(queryClient, 'category');

@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { getPressedStyle, Text } from '@/components/ui';
-import { Banknote, BotIcon, Calendar, LayoutGrid, ListChecks, PieChart, ScanLine, Settings } from '@/components/ui/icon';
+import { Banknote, BotIcon, Calendar, CircleDollarSign, LayoutGrid, ListChecks, PieChart, ScanLine, Settings } from '@/components/ui/icon';
 import { translate } from '@/lib/i18n';
 import { triggerScanPicker } from '../../lib/store/local-store';
 
@@ -20,6 +20,7 @@ const DESTINATIONS: Destination[] = [
   { key: 'accounts', href: '/accounts', labelKey: 'settings.accounts', Icon: Banknote },
   { key: 'transactions', href: '/transactions', labelKey: 'transactions.title', Icon: ListChecks },
   { key: 'categories', href: '/categories', labelKey: 'common.categories', Icon: LayoutGrid },
+  { key: 'budgets', href: '/budgets' as any, labelKey: 'budgets.title', Icon: CircleDollarSign },
   { key: 'stats', href: '/stats', labelKey: 'stats.title', Icon: PieChart },
   { key: 'scheduled', href: '/scheduled', labelKey: 'scheduled.title', Icon: Calendar },
   { key: 'settings', href: '/settings', labelKey: 'settings.title', Icon: Settings },

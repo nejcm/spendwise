@@ -5,6 +5,7 @@ import * as React from 'react';
 import { useAccounts } from '@/features/accounts/api';
 import { mergeCurrencyArrays } from '@/features/currencies/helpers';
 import { CURRENCY_OPTIONS } from '@/features/currencies/images';
+import { todayISO } from '@/features/formatting/helpers';
 import { useCreateTransaction, useUpdateTransaction } from '@/features/transactions/api';
 import {
   amountToString,
@@ -43,6 +44,7 @@ export function useTransactionForm({ initialValues, onSuccess }: UseTransactionF
   const form = useForm({
     defaultValues: {
       ...transactionFormDefaultValues,
+      date: todayISO(),
       type: transactionFormPrefs?.type || transactionFormDefaultValues.type,
       currency: transactionFormPrefs?.currency || transactionFormDefaultValues.currency,
       category_id: transactionFormPrefs?.category_id || '',

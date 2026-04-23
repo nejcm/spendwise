@@ -87,6 +87,7 @@ export type AppState = {
   notifications: NotificationSettings;
   autoBackup: AutoBackupSettings;
   saveOnScan: boolean | undefined;
+  openTxOnCreate: boolean;
   longPressAction: LongPressActionType;
   recommendationsEnabled: boolean;
 
@@ -131,6 +132,7 @@ function getDefaultState(): AppState {
     isFirstTime: true,
     language: undefined,
     saveOnScan: undefined,
+    openTxOnCreate: true,
     longPressAction: 'scan_receipt',
     recommendationsEnabled: true,
     lockEnabled: false,

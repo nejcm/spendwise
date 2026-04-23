@@ -21,11 +21,16 @@ import {
   useAppStore,
 } from '@/lib/store/store';
 
-export function useTransactionForm(initialValues?: TransactionFormInitialValues, onSuccess?: () => void) {
+export type UseTransactionFormProps = {
+  initialValues?: TransactionFormInitialValues;
+  onSuccess?: (transactionId?: string) => void;
+};
+
+export function useTransactionForm({ initialValues, onSuccess }: UseTransactionFormProps) {
   const { data: accounts = [] } = useAccounts();
   const id = initialValues?.id;
   const preferredCurrency = useAppStore.use.currency();
-  const createTransaction = useCreateTransaction();
+  const createTransaction = useCreateTransaction(onSuccess);
   const updateTransaction = useUpdateTransaction();
   const lastUsedCurrencies = useAppStore(selectLastUsedCurrencies);
   const orderedCurrencies = React.useMemo(() => mergeCurrencyArrays(lastUsedCurrencies, CURRENCY_OPTIONS), [lastUsedCurrencies]);
@@ -57,13 +62,8 @@ export function useTransactionForm(initialValues?: TransactionFormInitialValues,
         baseAmount: toNumber(value.baseAmount) ?? 0,
         date: dateToUnix(new Date(value.date)),
       };
-      if (id) {
-        await updateTransaction.mutateAsync({ id, data });
-      }
-      else {
-        await createTransaction.mutateAsync(data);
-        form.reset();
-      }
+      if (id) updateTransaction.mutate({ id, data });
+      else createTransaction.mutate(data);
       setTransactionFormPrefs({
         type: data.type,
         currency: data.currency,
@@ -71,7 +71,6 @@ export function useTransactionForm(initialValues?: TransactionFormInitialValues,
         account_id: data.account_id,
       });
       addLastUsedCurrency(data.currency);
-      onSuccess?.();
     },
   });
 

@@ -1,5 +1,6 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { SheetConfig, SheetType } from '@/lib/sheet';
+import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef } from 'react';
 import { BackHandler } from 'react-native';
 import { ModalSheet, Text, View } from '@/components/ui';
@@ -11,6 +12,7 @@ import { TransactionFormSheet } from '@/features/transactions/components/transac
 import { translate } from '@/lib/i18n';
 import { SHEET_SNAP_POINTS } from '@/lib/sheet';
 import { closeSheet, useLocalStore } from '@/lib/store/local-store';
+import { useAppStore } from '@/lib/store/store';
 import { IS_WEB } from '../lib/base';
 
 const SHEET_DATA: Record<SheetType, { title: string; content?: React.ReactNode }> = {
@@ -99,7 +101,9 @@ function SheetTitle({ config }: { config: SheetConfig | undefined }) {
 }
 
 export function GlobalSheet() {
+  const router = useRouter();
   const config = useLocalStore.use.sheet();
+  const openTxDetails = useAppStore.use.openTxOnCreate();
   const modalRef = useRef<BottomSheetModal>(null);
 
   const snapPoints = useMemo(
@@ -131,7 +135,12 @@ export function GlobalSheet() {
       children = (
         <TransactionFormSheet
           initialValues={config.initialValues}
-          onSuccess={closeSheet}
+          onSuccess={(transactionId) => {
+            closeSheet();
+            if (openTxDetails && transactionId) {
+              router.push(`/transactions/${transactionId}`);
+            }
+          }}
           onCancel={closeSheet}
         />
       );

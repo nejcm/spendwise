@@ -98,7 +98,7 @@ export async function prepareTransactionsForInsert(
   });
 }
 
-export function useCreateTransaction() {
+export function useCreateTransaction(onSuccess?: (transactionId: string) => void) {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
 
@@ -109,9 +109,10 @@ export function useCreateTransaction() {
       const rates = data.baseAmount ? undefined : await getRatesForDate(db, data.date);
       return queries.createTransaction(db, prepareTransactionData(data, rates, baseCurrency));
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       invalidateFor(queryClient, 'transaction');
+      onSuccess?.(data);
     },
     onError,
   });
@@ -135,7 +136,7 @@ export function useCreateTransactions(onSuccess?: (data: string[]) => void) {
   });
 }
 
-export function useUpdateTransaction() {
+export function useUpdateTransaction(onSuccess?: (transactionId: string) => void) {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
 
@@ -147,9 +148,10 @@ export function useUpdateTransaction() {
       const prepared = prepareTransactionData(params.data, rates, baseCurrency);
       return queries.updateTransaction(db, params.id, prepared);
     },
-    onSuccess: () => {
+    onSuccess: (_, vars) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       invalidateFor(queryClient, 'transaction');
+      onSuccess?.(vars.id);
     },
     onError,
   });

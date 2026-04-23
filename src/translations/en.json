@@ -497,6 +497,8 @@
     "more": "More",
     "notifications": "Notifications",
     "number_format": "Number format",
+    "open_transaction_after_create": "Open details after save",
+    "open_transaction_after_create_description": "After creating a transaction, open its details screen instead of only closing the form.",
     "openai_api_key": "OpenAI API key",
     "openai_api_key_help": "Sign in to OpenAI, open your account, and create a secret key under API keys.",
     "privacy": "Privacy Policy",

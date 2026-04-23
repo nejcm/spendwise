@@ -1,8 +1,7 @@
-import type { UseTransactionFormReturnType } from '../hooks/form';
+import type { UseTransactionFormProps, UseTransactionFormReturnType } from '../hooks/form';
 import type { OptionType } from '@/components/ui';
 import type { Account } from '@/features/accounts/types';
 import type { CurrencyKey } from '@/features/currencies';
-import type { TransactionFormInitialValues } from '@/features/transactions/components/transaction-form-schema';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { ScrollView, View } from 'react-native';
 import { KeyboardStickyView } from 'react-native-keyboard-controller';
@@ -21,9 +20,7 @@ import {
 import { translate } from '@/lib/i18n';
 import { useTransactionForm } from '../hooks/form';
 
-export type TransactionFormProps = {
-  initialValues?: TransactionFormInitialValues;
-  onSuccess?: () => void;
+export type TransactionFormProps = UseTransactionFormProps & {
   onCancel?: () => void;
 };
 
@@ -288,7 +285,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
     orderedCurrencies,
     preferredCurrency,
     setBaseAmountIsManual,
-  } = useTransactionForm(initialValues, onSuccess);
+  } = useTransactionForm({ initialValues, onSuccess });
 
   return (
     <View className="flex-1 gap-4">
@@ -346,7 +343,7 @@ export function TransactionFormSheet({
     orderedCurrencies,
     preferredCurrency,
     setBaseAmountIsManual,
-  } = useTransactionForm(initialValues, onSuccess);
+  } = useTransactionForm({ initialValues, onSuccess });
 
   const isLoading = createTransaction.isPending || updateTransaction.isPending;
   const insets = useSafeAreaInsets();

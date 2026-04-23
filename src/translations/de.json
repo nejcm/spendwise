@@ -522,6 +522,8 @@
     "more": "Mehr",
     "notifications": "Benachrichtigungen",
     "number_format": "Zahlenformat",
+    "open_transaction_after_create": "Details nach dem Speichern öffnen",
+    "open_transaction_after_create_description": "Nach dem Erstellen einer Transaktion deren Detailansicht öffnen, statt nur das Formular zu schließen.",
     "openai_api_key": "OpenAI-API-Schlüssel",
     "openai_api_key_help": "Melde dich bei OpenAI an, öffne dein Konto und erstelle unter API-Schlüsseln einen geheimen Schlüssel.",
     "privacy": "Datenschutzerklärung",

@@ -10,6 +10,7 @@ const LONG_PRESS_ACTION_OPTIONS: LongPressActionType[] = ['scan_receipt', 'pick_
 
 export function GeneralSettingsScreen() {
   const saveOnScan = useAppStore.use.saveOnScan();
+  const openTransactionDetailOnCreate = useAppStore.use.openTxOnCreate();
   const longPressAction = useAppStore.use.longPressAction();
   const recommendationsEnabled = useAppStore.use.recommendationsEnabled();
 
@@ -28,6 +29,18 @@ export function GeneralSettingsScreen() {
                 checked={!!saveOnScan}
                 onChange={(checked) => {
                   updateAppState({ saveOnScan: checked });
+                }}
+              />
+            ),
+          }, {
+            label: translate('settings.open_transaction_after_create'),
+            description: translate('settings.open_transaction_after_create_description'),
+            value: (
+              <Switch
+                accessibilityLabel={translate('settings.open_transaction_after_create')}
+                checked={!!openTransactionDetailOnCreate}
+                onChange={(checked) => {
+                  updateAppState({ openTxOnCreate: checked });
                 }}
               />
             ),

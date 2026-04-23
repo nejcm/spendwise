@@ -33,7 +33,18 @@ jobs:
       - name: 📦 Setup Node + PNPM + install deps
         uses: ./.github/actions/setup-node-pnpm-install
 
+      - name: 🔎 Detect build skip flag
+        id: build_flags
+        run: |
+          if [[ "${{ github.event.head_commit.message }}" == *"[skip-build]"* ]]; then
+            echo "skip_build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip_build=false" >> "$GITHUB_OUTPUT"
+          fi
+        shell: bash
+
       - name: 📦 Set Up JDK + Generate Release APK
+        if: ${{ steps.build_flags.outputs.skip_build != 'true' }}
         uses: ./.github/actions/setup-jdk-generate-apk
         timeout-minutes: 45
         with:
@@ -57,14 +68,24 @@ jobs:
         shell: bash
 
       - name: 📦 Prepare APK asset
+        if: ${{ steps.build_flags.outputs.skip_build != 'true' }}
         run: |
           cp ./android/app/build/outputs/apk/release/app-release.apk "./spendwise-${{ steps.version.outputs.apk_version }}.apk"
         shell: bash
 
-      - name: 🏃‍♂️ Create A Draft Github Release
+      - name: 🏃‍♂️ Create Github Release with APK
+        if: ${{ steps.build_flags.outputs.skip_build != 'true' }}
         uses: ncipollo/release-action@v1
         with:
           tag: v${{ steps.version.outputs.apk_version }}
           generateReleaseNotes: true
           draft: false
           artifacts: ./spendwise-${{ steps.version.outputs.apk_version }}.apk
+
+      - name: 🏃‍♂️ Create Github Release without APK
+        if: ${{ steps.build_flags.outputs.skip_build == 'true' }}
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v${{ steps.version.outputs.apk_version }}
+          generateReleaseNotes: true
+          draft: false

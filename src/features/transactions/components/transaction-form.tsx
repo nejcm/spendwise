@@ -177,6 +177,31 @@ function TransactionFormBody({
       </View>
 
       <form.Field
+        name="account_id"
+        children={(field) => (
+          <View>
+            <Text className="mb-2 text-sm font-medium">
+              {translate('transactions.account')}
+            </Text>
+            <HScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View className="flex-row gap-2">
+                {accounts.map((a) => (
+                  <SolidButton
+                    key={a.id}
+                    size="sm"
+                    className="items-center rounded-3xl"
+                    color={field.state.value === a.id ? 'default' : 'secondary'}
+                    label={`${a.icon} ${a.name}`}
+                    onPress={() => field.handleChange(a.id)}
+                  />
+                ))}
+              </View>
+            </HScrollView>
+          </View>
+        )}
+      />
+
+      <form.Field
         name="type"
         children={(field) => (
           <View>
@@ -202,37 +227,12 @@ function TransactionFormBody({
       />
 
       <form.Field
-        name="account_id"
-        children={(field) => (
-          <View className="mb-2">
-            <Text className="mb-2 text-sm font-medium">
-              {translate('transactions.account')}
-            </Text>
-            <HScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View className="flex-row gap-2">
-                {accounts.map((a) => (
-                  <SolidButton
-                    key={a.id}
-                    size="sm"
-                    className="items-center rounded-3xl"
-                    color={field.state.value === a.id ? 'default' : 'secondary'}
-                    label={`${a.icon} ${a.name}`}
-                    onPress={() => field.handleChange(a.id)}
-                  />
-                ))}
-              </View>
-            </HScrollView>
-          </View>
-        )}
-      />
-
-      <form.Field
         name="note"
         children={(field) => (
           <Input
             value={field.state.value || ''}
             size="lg"
-            className="text-base/snug"
+            className="mt-2 text-base/snug"
             onBlur={field.handleBlur}
             onChangeText={field.handleChange}
             placeholder={translate('transactions.note_placeholder')}
@@ -288,7 +288,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
   } = useTransactionForm({ initialValues, onSuccess });
 
   return (
-    <View className="flex-1 gap-4">
+    <View className="flex-1 gap-3">
       <TransactionFormBody
         form={form}
         accounts={accounts}
@@ -352,7 +352,7 @@ export function TransactionFormSheet({
     <>
       <BottomSheetKeyboardAwareScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
+        contentContainerStyle={{ gap: 12, paddingBottom: 8, paddingHorizontal: 16 }}
         keyboardShouldPersistTaps="handled"
       >
         <TransactionFormBody

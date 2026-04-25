@@ -229,7 +229,7 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
   );
 
   return (
-    <View className="flex-1 gap-4">
+    <View className="flex-1 gap-3">
       <AccountFormBody
         form={form}
         preferredCurrency={preferredCurrency}
@@ -287,7 +287,7 @@ export function AccountFormSheet({
     <>
       <BottomSheetKeyboardAwareScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
+        contentContainerStyle={{ gap: 12, paddingBottom: 8, paddingHorizontal: 16 }}
         keyboardShouldPersistTaps="handled"
       >
         <AccountFormBody

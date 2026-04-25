@@ -111,7 +111,7 @@ function CategoryFormBody({ form, preferredCurrency, deleteCategory, id, initial
               onChangeText={(v) => field.handleChange(v.trim() || null)}
               placeholder={translate('categories.icon_placeholder')}
               containerClassName="w-[100]"
-              className="border-0 px-0.5 text-center text-3xl"
+              className="px-0.5 text-center text-3xl"
               size="2xl"
             />
           )}

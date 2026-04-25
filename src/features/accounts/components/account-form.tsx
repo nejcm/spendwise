@@ -125,7 +125,7 @@ function AccountFormBody({ form, preferredCurrency, archiveAccount, accountId, i
               onChangeText={(v) => field.handleChange(v.trim() || null)}
               placeholder={translate('accounts.icon_placeholder')}
               containerClassName="w-[100]"
-              className="border-0 px-0.5 text-center text-3xl"
+              className="px-0.5 text-center text-3xl"
               size="2xl"
             />
           )}

@@ -3,7 +3,20 @@ import { endOfISOWeek, format, setISOWeek, startOfISOWeek, startOfYear } from 'd
 import { translate } from '../i18n';
 
 export function getPeriodLabel(selection: PeriodSelection): string {
+  const now = new Date();
+
   switch (selection.mode) {
+    case 'today':
+      return format(now, 'MMM d, yyyy');
+    case 'this-week': {
+      const weekStart = startOfISOWeek(now);
+      const weekEnd = endOfISOWeek(now);
+      return `${format(weekStart, 'MMM d')} – ${format(weekEnd, 'MMM d')}`;
+    }
+    case 'this-month':
+      return format(now, 'MMMM yyyy');
+    case 'this-year':
+      return format(now, 'yyyy');
     case 'year':
       return String(selection.year);
     case 'month': {
@@ -25,7 +38,5 @@ export function getPeriodLabel(selection: PeriodSelection): string {
     }
     case 'all':
       return translate('common.all-time');
-    default:
-      return translate(`common.${selection.mode}`);
   }
 }

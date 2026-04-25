@@ -130,7 +130,7 @@ export function PeriodSelectorModal({
           {MODE_BUTTONS.map(({ key, label }) => (
             <View className="min-w-[30%] flex-1 grow" key={key}>
               <OutlineButton
-                className={`items-center px-3 ${draft.mode === key ? '' : 'border-border'}`}
+                className={`items-center px-1 ${draft.mode === key ? '' : 'border-border'}`}
                 textClassName={`text-sm ${draft.mode === key ? '' : 'text-muted-foreground'}`}
                 fullWidth
                 label={label}

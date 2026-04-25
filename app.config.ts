@@ -6,6 +6,8 @@ import 'tsx/cjs';
 // adding lint exception as we need to import tsx/cjs before env.ts is imported
 // eslint-disable-next-line perfectionist/sort-imports
 import Env from './env';
+// eslint-disable-next-line perfectionist/sort-imports
+import { withGradleProperties } from '@expo/config-plugins';
 
 const EXPO_ACCOUNT_OWNER = 'ncncm';
 const EAS_PROJECT_ID = 'c19931e0-c086-4d69-9a71-c64aea5c6f5a';
@@ -28,128 +30,146 @@ const appIconBadgeConfig: AppIconBadgeConfig = {
   ],
 };
 
-export default ({ config }: ConfigContext): ExpoConfig => ({
-  ...config,
-  name: Env.EXPO_PUBLIC_NAME,
-  description: `${Env.EXPO_PUBLIC_NAME} Mobile App`,
-  owner: EXPO_ACCOUNT_OWNER,
-  scheme: Env.EXPO_PUBLIC_SCHEME,
-  slug: 'spendwise',
-  version: Env.EXPO_PUBLIC_VERSION.toString(),
-  orientation: 'portrait',
-  icon: './assets/icon/spendwise.png',
-  userInterfaceStyle: 'automatic',
-  newArchEnabled: true,
-  updates: {
-    fallbackToCacheTimeout: 0,
-    url: 'https://u.expo.dev/c19931e0-c086-4d69-9a71-c64aea5c6f5a',
-  },
-  assetBundlePatterns: ['**/*'],
-  ios: {
-    supportsTablet: true,
-    bundleIdentifier: Env.EXPO_PUBLIC_BUNDLE_ID,
-    infoPlist: {
-      ITSAppUsesNonExemptEncryption: false,
+function withJvmArgs(cfg: ExpoConfig): ExpoConfig {
+  return withGradleProperties(cfg, (gradleConfig) => {
+    const key = 'org.gradle.jvmargs';
+    const value = '-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError';
+    const existing = gradleConfig.modResults.find(
+      (item) => item.type === 'property' && item.key === key,
+    );
+    if (existing && existing.type === 'property') {
+      existing.value = value;
+    }
+    else {
+      gradleConfig.modResults.push({ type: 'property', key, value });
+    }
+    return gradleConfig;
+  });
+}
+
+export default ({ config }: ConfigContext): ExpoConfig =>
+  withJvmArgs({
+    ...config,
+    name: Env.EXPO_PUBLIC_NAME,
+    description: `${Env.EXPO_PUBLIC_NAME} Mobile App`,
+    owner: EXPO_ACCOUNT_OWNER,
+    scheme: Env.EXPO_PUBLIC_SCHEME,
+    slug: 'spendwise',
+    version: Env.EXPO_PUBLIC_VERSION.toString(),
+    orientation: 'portrait',
+    icon: './assets/icon/spendwise.png',
+    userInterfaceStyle: 'automatic',
+    newArchEnabled: true,
+    updates: {
+      fallbackToCacheTimeout: 0,
+      url: 'https://u.expo.dev/c19931e0-c086-4d69-9a71-c64aea5c6f5a',
     },
-  },
-  experiments: {
-    typedRoutes: true,
-  },
-  android: {
-    adaptiveIcon: {
-      foregroundImage: './assets/icon/spendwise.png',
-      backgroundColor: '#ffffff',
+    assetBundlePatterns: ['**/*'],
+    ios: {
+      supportsTablet: true,
+      bundleIdentifier: Env.EXPO_PUBLIC_BUNDLE_ID,
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false,
+      },
     },
-    package: Env.EXPO_PUBLIC_PACKAGE,
-  },
-  web: {
-    favicon: './assets/icon/spendwise.png',
-    bundler: 'metro',
-  },
-  plugins: [
-    'expo-sqlite',
-    '@react-native-community/datetimepicker',
-    [
-      'expo-splash-screen',
-      {
+    experiments: {
+      typedRoutes: true,
+    },
+    android: {
+      adaptiveIcon: {
+        foregroundImage: './assets/icon/spendwise.png',
         backgroundColor: '#ffffff',
-        image: './assets/spendwise.png',
-        imageWidth: 150,
       },
-    ],
-    [
-      'expo-font',
-      {
-        ios: {
-          fonts: [
-            'node_modules/@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf',
-            'node_modules/@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf',
-            'node_modules/@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf',
-            'node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf',
-          ],
+      package: Env.EXPO_PUBLIC_PACKAGE,
+    },
+    web: {
+      favicon: './assets/icon/spendwise.png',
+      bundler: 'metro',
+    },
+    plugins: [
+      'expo-sqlite',
+      '@react-native-community/datetimepicker',
+      [
+        'expo-splash-screen',
+        {
+          backgroundColor: '#ffffff',
+          image: './assets/spendwise.png',
+          imageWidth: 150,
         },
-        android: {
-          fonts: [
-            {
-              fontFamily: 'Inter',
-              fontDefinitions: [
-                {
-                  path: 'node_modules/@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf',
-                  weight: 400,
-                },
-                {
-                  path: 'node_modules/@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf',
-                  weight: 500,
-                },
-                {
-                  path: 'node_modules/@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf',
-                  weight: 600,
-                },
-                {
-                  path: 'node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf',
-                  weight: 700,
-                },
-              ],
-            },
-          ],
+      ],
+      [
+        'expo-font',
+        {
+          ios: {
+            fonts: [
+              'node_modules/@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf',
+              'node_modules/@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf',
+              'node_modules/@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf',
+              'node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf',
+            ],
+          },
+          android: {
+            fonts: [
+              {
+                fontFamily: 'Inter',
+                fontDefinitions: [
+                  {
+                    path: 'node_modules/@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf',
+                    weight: 400,
+                  },
+                  {
+                    path: 'node_modules/@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf',
+                    weight: 500,
+                  },
+                  {
+                    path: 'node_modules/@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf',
+                    weight: 600,
+                  },
+                  {
+                    path: 'node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf',
+                    weight: 700,
+                  },
+                ],
+              },
+            ],
+          },
         },
-      },
-    ],
-    [
-      'expo-image-picker',
-      {
-        cameraPermission: 'Allow Spendwise to take photos of receipts.',
-        photosPermission: 'Allow Spendwise to access your photos to scan receipts.',
-      },
-    ],
-    'expo-localization',
-    [
-      'expo-router',
-      {
-      /* headers: {
+      ],
+      [
+        'expo-image-picker',
+        {
+          cameraPermission: 'Allow Spendwise to take photos of receipts.',
+          photosPermission: 'Allow Spendwise to access your photos to scan receipts.',
+        },
+      ],
+      'expo-localization',
+      [
+        'expo-router',
+        {
+          /* headers: {
         'Cross-Origin-Embedder-Policy': 'credentialless',
         'Cross-Origin-Opener-Policy': 'same-origin',
       }, */
-      },
-    ],
-    ['app-icon-badge', appIconBadgeConfig],
-    [
-      'react-native-edge-to-edge',
-      {
-        android: {
+        },
+      ],
+      ['app-icon-badge', appIconBadgeConfig],
+      [
+        'react-native-edge-to-edge',
+        {
+          android: {
           // Required for Stack `navigationBarColor` / window nav color to show under edge-to-edge.
           // Without this, Android may apply a contrast scrim so the bar color looks unchanged.
-          enforceNavigationBarContrast: false,
+            enforceNavigationBarContrast: false,
+          },
         },
-      },
+      ],
     ],
-  ],
-  extra: {
-    eas: {
-      projectId: EAS_PROJECT_ID,
+    extra: {
+      eas: {
+        projectId: EAS_PROJECT_ID,
+      },
     },
-  },
-  runtimeVersion: {
-    policy: 'appVersion',
-  },
-});
+    runtimeVersion: {
+      policy: 'appVersion',
+    },
+  } as ExpoConfig);

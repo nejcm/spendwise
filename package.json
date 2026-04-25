@@ -1,6 +1,6 @@
 {
   "name": "spendwise",
-  "version": "0.0.48",
+  "version": "0.0.50",
   "private": true,
   "packageManager": "pnpm@10.12.3",
   "repository": {
@@ -35,7 +35,7 @@
     "build:production:ios": "eas build --profile production --platform ios",
     "build:production:android": "eas build --profile production --platform android",
     "prepare": "husky",
-    "app-release": "cross-env SKIP_BRANCH_PROTECTION=true np --no-publish --no-cleanup --no-release-draft --message \"chore(release): v%s\"",
+    "app-release": "cross-env SKIP_BRANCH_PROTECTION=true np --no-publish --no-cleanup --no-release-draft --message \"chore(release): v%s [skip ci]\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:ts": "tsc --noEmit",

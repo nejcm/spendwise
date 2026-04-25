@@ -119,7 +119,7 @@ function CategoryFormBody({ form, preferredCurrency, deleteCategory, id, initial
               onChangeText={(v) => field.handleChange(v.trim() || null)}
               placeholder={translate('categories.icon_placeholder')}
               containerClassName="w-[100]"
-              className="border-0 px-0.5 text-center text-3xl"
+              className="px-0.5 text-center text-3xl"
               size="2xl"
             />
           )}
@@ -224,7 +224,7 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
   );
 
   return (
-    <View className="flex-1 gap-4">
+    <View className="flex-1 gap-3">
       <CategoryFormBody
         form={form}
         preferredCurrency={preferredCurrency}
@@ -278,7 +278,7 @@ export function CategoryFormSheet({
     <>
       <BottomSheetKeyboardAwareScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
+        contentContainerStyle={{ gap: 12, paddingBottom: 8, paddingHorizontal: 16 }}
         keyboardShouldPersistTaps="handled"
       >
         <CategoryFormBody

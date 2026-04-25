@@ -377,7 +377,7 @@ export function ScheduledTransactionForm({ initialValues, onCancel, onSuccess }:
   } = useScheduledTransactionForm(initialValues, onSuccess);
 
   return (
-    <View className="flex-1 gap-4">
+    <View className="flex-1 gap-3">
       <ScheduledTransactionFormBody
         form={form}
         accounts={accounts}
@@ -435,7 +435,7 @@ export function ScheduledTransactionFormSheet({
     <>
       <BottomSheetKeyboardAwareScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: 16, paddingBottom: 8, paddingHorizontal: 16 }}
+        contentContainerStyle={{ gap: 12, paddingBottom: 8, paddingHorizontal: 16 }}
         keyboardShouldPersistTaps="handled"
       >
         <ScheduledTransactionFormBody

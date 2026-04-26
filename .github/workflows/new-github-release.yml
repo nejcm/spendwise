@@ -60,6 +60,7 @@ jobs:
         shell: bash
 
       - name: 🏷️ Create version tag
+        continue-on-error: true
         env:
           TAG_NAME: v${{ steps.version.outputs.apk_version }}
         run: |

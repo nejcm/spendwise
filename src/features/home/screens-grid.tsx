@@ -38,7 +38,7 @@ export const ScreensLinksGrid = React.memo(() => {
           <Pressable
             key={key}
             onPress={href ? () => router.push(href) : onPress}
-            className="min-w-[48%] flex-1 flex-row items-center gap-1 rounded-xl bg-card px-2 py-1.5"
+            className="min-w-[45%] flex-1 flex-row items-center gap-1 rounded-xl bg-card px-1.5 py-1"
             style={getPressedStyle}
           >
             <View className="size-10 items-center justify-center">

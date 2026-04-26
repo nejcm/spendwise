@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { getPressedStyle, Text } from '@/components/ui';
-import { Banknote, BotIcon, Calendar, CircleDollarSign, LayoutGrid, ListChecks, PieChart, ScanLine, Settings } from '@/components/ui/icon';
+import { Banknote, BotIcon, Calendar, CircleDollarSign, Import, LayoutGrid, ListChecks, PieChart, ScanLine, Settings } from '@/components/ui/icon';
 import { translate } from '@/lib/i18n';
 import { triggerScanPicker } from '../../lib/store/local-store';
 
@@ -23,9 +23,10 @@ const DESTINATIONS: Destination[] = [
   { key: 'budgets', href: '/budgets' as any, labelKey: 'budgets.title', Icon: CircleDollarSign },
   { key: 'stats', href: '/stats', labelKey: 'stats.title', Icon: PieChart },
   { key: 'scheduled', href: '/scheduled', labelKey: 'scheduled.title', Icon: Calendar },
-  { key: 'settings', href: '/settings', labelKey: 'settings.title', Icon: Settings },
   { key: 'ai', href: '/ai', labelKey: 'settings.ai_chat', Icon: BotIcon },
   { key: 'scan', onPress: triggerScanPicker, labelKey: 'settings.scan', Icon: ScanLine },
+  { key: 'settings', href: '/settings', labelKey: 'settings.title', Icon: Settings },
+  { key: 'import', href: '/settings/import-export', labelKey: 'settings.import', Icon: Import },
 ];
 
 export const ScreensLinksGrid = React.memo(() => {
@@ -39,7 +40,7 @@ export const ScreensLinksGrid = React.memo(() => {
           <Pressable
             key={key}
             onPress={href ? () => router.push(href) : onPress}
-            className="min-w-[48%] flex-1 flex-row items-center gap-1 rounded-xl bg-card px-2 py-1.5"
+            className="min-w-[46%] flex-1 flex-row items-center gap-1 rounded-xl bg-card px-1.5 py-1"
             style={getPressedStyle}
           >
             <View className="size-10 items-center justify-center">

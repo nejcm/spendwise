@@ -1,11 +1,10 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import { startOfMonth } from 'date-fns';
-import { dateToUnix } from '@/lib/date/helpers';
-
 export type CategoryBudgetRow = {
   id: string;
   name: string;
+  icon: string | null;
+  color: string;
   budget: number;
   spent: number;
 };
@@ -30,6 +29,8 @@ export async function getBudgetSpendForMonth(
     `SELECT
        c.id,
        c.name,
+       c.icon,
+       c.color,
        c.budget,
        COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0) AS spent
      FROM categories c
@@ -77,13 +78,4 @@ export async function getWeeklySpendSummary(
     [weekStart, weekEnd],
   );
   return row ?? { income: 0, expense: 0 };
-}
-
-/** Returns [monthStartUnix, nextMonthStartUnix] for the current calendar month. */
-export function currentMonthRange(): [number, number] {
-  const now = new Date();
-  const monthStart = startOfMonth(now);
-  const nextMonthStart = new Date(monthStart);
-  nextMonthStart.setMonth(nextMonthStart.getMonth() + 1);
-  return [dateToUnix(monthStart), dateToUnix(nextMonthStart)];
 }

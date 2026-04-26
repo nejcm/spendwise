@@ -274,3 +274,18 @@ export function findClosestDateBinary(
 
   return Math.abs(best - target) <= toleranceSec ? best : undefined;
 }
+
+/** Returns [monthStartUnix, nextMonthStartUnix] for an arbitrary year/month (1-indexed). */
+export function getMonthBoundaries(year: number, month: number): [number, number] {
+  const monthStart = startOfMonth(new Date(year, month - 1, 1));
+  return [dateToUnix(monthStart), dateToUnix(addMonths(monthStart, 1))];
+}
+
+/** Returns [monthStartUnix, nextMonthStartUnix] for the current calendar month. */
+export function currentMonthRange(): [number, number] {
+  const now = new Date();
+  const monthStart = startOfMonth(now);
+  const nextMonthStart = new Date(monthStart);
+  nextMonthStart.setMonth(nextMonthStart.getMonth() + 1);
+  return [dateToUnix(monthStart), dateToUnix(nextMonthStart)];
+}

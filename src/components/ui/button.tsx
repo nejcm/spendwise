@@ -54,6 +54,11 @@ export const buttonTv = tv({
       },
     },
     size: {
+      '2xs': {
+        container: 'h-7 px-2',
+        label: 'text-xs/tight font-normal',
+        indicator: 'size-2',
+      },
       'xs': {
         container: 'h-8 px-2',
         label: 'text-xs/tight font-normal',

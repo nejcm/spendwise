@@ -41,7 +41,10 @@ describe('fetchRates', () => {
       .mockResolvedValueOnce(createMockResponse({ status: 503 }))
       .mockResolvedValueOnce(createMockResponse({
         status: 200,
-        body: { rates: { USD: 1.11, GBP: 0.85 } },
+        body: [
+          { date: '2026-04-25', base: 'EUR', quote: 'USD', rate: 1.11 },
+          { date: '2026-04-25', base: 'EUR', quote: 'GBP', rate: 0.85 },
+        ],
       }));
 
     const promise = fetchRates();
@@ -51,7 +54,7 @@ describe('fetchRates', () => {
     expect(result.source).toBe('frankfurter');
     expect(result.rates).toMatchObject({ EUR: 1, USD: 1.11, GBP: 0.85 });
     expect(fetchMock).toHaveBeenCalledTimes(3);
-    expect(fetchMock.mock.calls.every(([url]) => String(url).includes('api.frankfurter.app/latest'))).toBe(true);
+    expect(fetchMock.mock.calls.every(([url]) => String(url).includes('api.frankfurter.dev/v2/rates'))).toBe(true);
   });
 
   it('falls back to the next provider when first provider keeps failing', async () => {
@@ -73,7 +76,7 @@ describe('fetchRates', () => {
     expect(result.source).toBe('fawazahmed0');
     expect(result.rates).toMatchObject({ EUR: 1, USD: 1.2, GBP: 0.89 });
     expect(fetchMock).toHaveBeenCalledTimes(4);
-    expect(urls.slice(0, 3).every((url) => url.includes('api.frankfurter.app/latest'))).toBe(true);
+    expect(urls.slice(0, 3).every((url) => url.includes('api.frankfurter.dev/v2/rates'))).toBe(true);
     expect(urls[3]).toContain('cdn.jsdelivr.net');
   });
 
@@ -91,7 +94,7 @@ describe('fetchRates', () => {
 
     expect(result.source).toBe('fawazahmed0');
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(urls[0]).toContain('api.frankfurter.app/latest');
+    expect(urls[0]).toContain('api.frankfurter.dev/v2/rates');
     expect(urls[1]).toContain('cdn.jsdelivr.net');
   });
 
@@ -113,7 +116,7 @@ describe('fetchRates', () => {
 
     await rejection;
     expect(fetchMock).toHaveBeenCalledTimes(9);
-    expect(urls.slice(0, 3).every((url) => url.includes('api.frankfurter.app/latest'))).toBe(true);
+    expect(urls.slice(0, 3).every((url) => url.includes('api.frankfurter.dev/v2/rates'))).toBe(true);
     expect(urls.slice(3, 6).every((url) => url.includes('cdn.jsdelivr.net'))).toBe(true);
     expect(urls.slice(6).every((url) => url.includes('open.er-api.com'))).toBe(true);
     expect(captureError).toHaveBeenCalledWith(expect.any(Error));

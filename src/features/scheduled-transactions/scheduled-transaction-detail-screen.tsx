@@ -108,6 +108,7 @@ export function ScheduledTransactionDetailScreen() {
 
         <DetailsSection
           className="mb-4"
+          growSide="right"
           data={[
             { label: translate('transactions.category'), value: rule.category_name ? `${rule.category_icon} ${rule.category_name}` : '-' },
             { label: translate('transactions.account'), value: rule.account_name ? `${rule.account_icon} ${rule.account_name}` : '-' },
@@ -121,6 +122,7 @@ export function ScheduledTransactionDetailScreen() {
         />
         <DetailsSection
           className="mb-8"
+          growSide="right"
           data={[
             {
               label: translate('transactions.created_at'),

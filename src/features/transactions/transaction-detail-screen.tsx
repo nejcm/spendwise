@@ -2,16 +2,17 @@ import type { DetailsRowProps } from '@/components/details';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { ScrollView } from 'react-native';
 import DetailsSection from '@/components/details';
-import { Alert, FocusAwareStatusBar, FormattedCurrency, FormattedDate, GhostButton, SolidButton, Text, TrashIcon } from '@/components/ui';
+import ScreenHeader from '@/components/screen-header';
+
+import { Alert, FocusAwareStatusBar, FormattedCurrency, FormattedDate, GhostButton, SolidButton, Text, TrashIcon, View } from '@/components/ui';
 
 import { OutlineButton } from '@/components/ui/outline-button';
 import { useAccounts } from '@/features/accounts/api';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/store/local-store';
-import ScreenHeader from '../../components/screen-header';
 import { useDeleteTransaction, useTransaction } from './api';
 import { TransactionForm } from './components/transaction-form';
 
@@ -101,7 +102,7 @@ export function TransactionDetailScreen() {
       <ScreenHeader title={translate('transactions.detail_title')} />
       <FocusAwareStatusBar />
       <ScrollView className="flex-1" contentContainerStyle={{ flex: 1 }}>
-        <View className="flex-1 px-4 py-10">
+        <View className="min-h-full px-4 py-10">
           <View className="items-center pb-6">
             <FormattedCurrency
               value={transaction.amount}
@@ -119,16 +120,19 @@ export function TransactionDetailScreen() {
 
           <DetailsSection
             className="mb-4"
+            growSide="right"
             data={primaryDetails}
           />
           <DetailsSection
             className="mb-4"
+            growSide="right"
             data={[
               { label: translate('transactions.note'), value: transaction.note || '-', sectionClassName: 'flex-col justify-start items-start gap-1' },
             ]}
           />
           <DetailsSection
             className="mb-4"
+            growSide="right"
             data={[
               { label: translate('transactions.created_at'), value: <FormattedDate value={transaction.created_at} className="text-foreground" /> },
               { label: translate('transactions.updated_at'), value: <FormattedDate value={transaction.updated_at} className="text-foreground" /> },

@@ -8,16 +8,19 @@ export type DetailsRowProps = {
   value: string | React.ReactNode;
   className?: string;
   sectionClassName?: string;
+  growSide?: 'left' | 'right';
 };
 
-export function DetailsRow({ label, labelClassName, description, value, className, sectionClassName }: DetailsRowProps) {
+export function DetailsRow({ label, labelClassName, description, value, className, sectionClassName, growSide = 'left' }: DetailsRowProps) {
   return (
-    <View className={cn('flex-row items-center justify-between gap-4', sectionClassName)}>
-      <View className="min-w-20 flex-1">
+    <View className={cn('flex-row items-start gap-4', sectionClassName)}>
+      <View className={`min-w-20 ${growSide === 'left' ? 'flex-1' : ''}`}>
         <Text className={cn(description ? 'text-foreground' : 'text-muted-foreground', labelClassName)}>{label}</Text>
         {!!description && <Text className="text-sm/snug text-muted-foreground">{description}</Text>}
       </View>
-      {typeof value === 'string' ? <Text className={cn('text-foreground', className)}>{value}</Text> : value}
+      <View className={`min-w-0 items-end ${growSide === 'right' ? 'flex-1' : ''}`}>
+        {typeof value === 'string' ? <Text className={cn('text-right text-foreground', className)}>{value}</Text> : value}
+      </View>
     </View>
   );
 }
@@ -26,13 +29,14 @@ export type DetailsSectionProps = {
   className?: string;
   data: DetailsRowProps[];
   children?: React.ReactNode;
+  growSide?: 'left' | 'right';
 };
 
-export default function DetailsSection({ className, data, children }: DetailsSectionProps) {
+export default function DetailsSection({ className, data, children, growSide = 'left' }: DetailsSectionProps) {
   return (
     <View className={cn('gap-4 rounded-xl bg-card p-4', className)}>
       {data.map((row, index) => (
-        <DetailsRow key={index} {...row} />
+        <DetailsRow key={index} growSide={growSide} {...row} />
       ))}
       {children}
     </View>

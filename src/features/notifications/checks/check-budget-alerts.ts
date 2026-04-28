@@ -2,9 +2,10 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { NotificationSettings } from '../types';
 import { format } from 'date-fns';
+import { currentMonthRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { storage } from '@/lib/storage';
-import { currentMonthRange, getBudgetSpendForMonth } from '../queries';
+import { getBudgetSpendForMonth } from '../queries';
 import { send } from '../send';
 
 function budgetAlertKey(categoryId: string, yearMonth: string, threshold: 80 | 100) {

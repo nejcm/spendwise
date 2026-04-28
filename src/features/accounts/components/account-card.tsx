@@ -55,7 +55,7 @@ export function AccountCard({ account, onPress, onLongPress }: AccountCardProps)
           budget={scaledBudget ?? 0}
           monthlyBudget={!isMonthView ? account.budget : undefined}
           currency={userCurrency}
-          className="mt-2"
+          containerClassName="mt-2"
           showValues={true}
           bg="bg-muted-foreground/30"
         />

@@ -1,5 +1,6 @@
+import type { StatsTab } from './components/stats-tab-bar';
 import * as React from 'react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { RefreshControl } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
 import { PeriodSwipeContainer } from '@/components/period-swipe-container';
@@ -8,7 +9,9 @@ import { getPeriodRange } from '@/lib/date/helpers';
 import { useRefresh } from '@/lib/hooks/use-refresh';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
+import { BudgetTab } from './components/budget-tab';
 import { CategoryBreakdown } from './components/category-breakdown';
+import { StatsTabBar } from './components/stats-tab-bar';
 import { StatsTrend } from './components/stats-trend';
 import { Summary } from './components/summary';
 
@@ -17,41 +20,51 @@ export function StatsScreen() {
   const selection = useAppStore.use.periodSelection();
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
   const { refreshing, onRefresh } = useRefresh();
+  const [activeTab, setActiveTab] = useState<StatsTab>('overview');
 
   return (
     <PeriodSwipeContainer selection={selection}>
       <FocusAwareStatusBar />
 
-      <PeriodSelector selection={selection} />
+      <StatsTabBar value={activeTab} onChange={setActiveTab} />
 
-      <ScrollView className="flex-1" style={defaultStyles.transparentBg} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-        <View className="px-4 pt-4 pb-6">
-          <Summary startDate={startDate} endDate={endDate} currency={currency} />
+      {activeTab === 'overview' && (
+        <>
+          <PeriodSelector selection={selection} />
+          <ScrollView className="flex-1" style={defaultStyles.transparentBg} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+            <View className="px-4 pt-4 pb-6">
+              <Summary startDate={startDate} endDate={endDate} currency={currency} />
 
-          <StatsTrend
-            key={`${selection.mode}-${startDate}`}
-            period={selection.mode}
-            startDate={startDate}
-            endDate={endDate}
-          />
+              <StatsTrend
+                key={`${selection.mode}-${startDate}`}
+                period={selection.mode}
+                startDate={startDate}
+                endDate={endDate}
+              />
 
-          <CategoryBreakdown
-            startDate={startDate}
-            endDate={endDate}
-            currency={currency}
-            type="expense"
-            limit={10}
-          />
+              <CategoryBreakdown
+                startDate={startDate}
+                endDate={endDate}
+                currency={currency}
+                type="expense"
+                limit={10}
+              />
 
-          <CategoryBreakdown
-            startDate={startDate}
-            endDate={endDate}
-            currency={currency}
-            type="income"
-            limit={8}
-          />
-        </View>
-      </ScrollView>
+              <CategoryBreakdown
+                startDate={startDate}
+                endDate={endDate}
+                currency={currency}
+                type="income"
+                limit={8}
+              />
+            </View>
+          </ScrollView>
+        </>
+      )}
+
+      {activeTab === 'budget' && (
+        <BudgetTab currency={currency} />
+      )}
     </PeriodSwipeContainer>
   );
 }

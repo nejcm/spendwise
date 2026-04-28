@@ -74,6 +74,12 @@ export const queryKeys = {
       ['scheduled-transactions', 'detail', id] as const,
   },
 
+  // ─── Budget Stats ───
+  budgetStats: {
+    byMonth: (year: number, month: number) =>
+      ['budget-stats', 'by-month', year, month] as const,
+  },
+
   // ─── Recommendations ───
   recommendations: {
     all: ['recommendations'] as const,

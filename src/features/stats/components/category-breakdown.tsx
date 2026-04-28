@@ -2,9 +2,12 @@ import type { CurrencyKey } from '../../currencies';
 
 import type { CategoryType } from '../../insights/types';
 import * as React from 'react';
-import { FormattedCurrency, Text, View } from '@/components/ui';
+import { PieChart } from 'react-native-gifted-charts';
+import { FormattedCurrency, SolidButton, Text, View } from '@/components/ui';
+import { centsToAmount } from '@/features/formatting/helpers';
 import { useCategorySpendByRange } from '@/features/insights/api';
 import { translate } from '@/lib/i18n';
+import { useThemeConfig } from '../../../lib/theme/use-theme-config';
 
 export type CategoryBreakdownProps = {
   startDate: number | undefined;
@@ -21,7 +24,10 @@ export function CategoryBreakdown({
   type,
   limit = 5,
 }: CategoryBreakdownProps) {
+  const themeConfig = useThemeConfig();
+  const labelColor = themeConfig.dark ? '#9ca3af' : '#6b7280';
   const { data: categories, isLoading } = useCategorySpendByRange(startDate, endDate);
+  const [viewMode, setViewMode] = React.useState<'list' | 'chart'>('list');
 
   const filtered = React.useMemo(() => {
     return (categories ?? [])
@@ -32,6 +38,12 @@ export function CategoryBreakdown({
 
   const maxTotal = filtered[0]?.total ?? 1;
   const title = type === 'expense' ? translate('stats.top_expenses') : translate('stats.top_income');
+  const chartData = React.useMemo(() => {
+    return filtered.map((category) => ({
+      value: centsToAmount(category.total),
+      color: category.category_color,
+    }));
+  }, [filtered]);
 
   if (isLoading && !categories) return null;
 
@@ -54,33 +66,82 @@ export function CategoryBreakdown({
         {title}
       </Text>
       <View className="rounded-xl bg-card p-4">
-        <View className="gap-3">
-          {filtered.map((category) => {
-            const barWidth = maxTotal > 0 ? (category.total / maxTotal) * 100 : 0;
-            return (
-              <View key={category.category_id} className="gap-1">
-                <View className="flex-row items-center justify-between">
-                  <View className="flex-row items-center gap-2">
-                    <Text className="text-lg">{category.category_icon}</Text>
-                    <Text className="text-sm text-foreground" numberOfLines={1}>
-                      {category.category_name}
-                    </Text>
-                  </View>
-                  <FormattedCurrency value={category.total} currency={currency} className="text-sm font-medium text-foreground" />
-                </View>
-                <View className="h-1.5 rounded-full bg-muted">
-                  <View
-                    className="h-1.5 rounded-full"
-                    style={{
-                      width: `${barWidth}%`,
-                      backgroundColor: category.category_color,
-                    }}
-                  />
+        <View className="mb-4 flex-row rounded-lg bg-muted p-1">
+          <SolidButton
+            size="2xs"
+            className="flex-1"
+            textClassName="text-sm/snug"
+            color={viewMode === 'list' ? 'default' : 'secondary'}
+            onPress={() => setViewMode('list')}
+            label={translate('stats.breakdown_view_list')}
+          />
+          <SolidButton
+            size="2xs"
+            className="flex-1"
+            textClassName="text-sm/snug"
+            color={viewMode === 'chart' ? 'default' : 'secondary'}
+            onPress={() => setViewMode('chart')}
+            label={translate('stats.breakdown_view_chart')}
+          />
+        </View>
+
+        {viewMode === 'list'
+          ? (
+              <View className="gap-3">
+                {filtered.map((category) => {
+                  const itemBarWidth = maxTotal > 0 ? (category.total / maxTotal) * 100 : 0;
+                  return (
+                    <View key={category.category_id} className="gap-1">
+                      <View className="flex-row items-center justify-between">
+                        <View className="flex-row items-center gap-2">
+                          <Text className="text-lg">{category.category_icon}</Text>
+                          <Text className="text-sm text-foreground" numberOfLines={1}>
+                            {category.category_name}
+                          </Text>
+                        </View>
+                        <FormattedCurrency value={category.total} currency={currency} className="text-sm font-medium text-foreground" />
+                      </View>
+                      <View className="h-1.5 rounded-full bg-muted">
+                        <View
+                          className="h-1.5 rounded-full"
+                          style={{
+                            width: `${itemBarWidth}%`,
+                            backgroundColor: category.category_color,
+                          }}
+                        />
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            )
+          : (
+              <View className="items-center gap-4">
+                <PieChart
+                  data={chartData}
+                  donut
+                  innerCircleColor={themeConfig.colors.card}
+                  showText
+                  textColor={labelColor}
+                  textSize={10}
+                  radius={80}
+                  innerRadius={42}
+                />
+                <View className="w-full gap-2">
+                  {filtered.map((category) => (
+                    <View key={category.category_id} className="flex-row items-center justify-between">
+                      <View className="flex-row items-center gap-2">
+                        <View className="size-2.5 rounded-full" style={{ backgroundColor: category.category_color }} />
+                        <Text className="text-xs text-foreground" numberOfLines={1}>
+                          {category.category_name}
+                        </Text>
+                      </View>
+                      <FormattedCurrency value={category.total} currency={currency} className="text-xs text-muted-foreground" />
+                    </View>
+                  ))}
                 </View>
               </View>
-            );
-          })}
-        </View>
+            )}
       </View>
     </View>
   );

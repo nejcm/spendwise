@@ -24,6 +24,7 @@ const INVALIDATION_RULES = {
     queryKeys.monthSummary.all,
     queryKeys.insights.all,
     queryKeys.recommendations.all,
+    queryKeys.globalBudget.all,
   ],
   account: [
     queryKeys.accounts.all,
@@ -42,6 +43,9 @@ const INVALIDATION_RULES = {
   ],
   currencyRates: [
     queryKeys.currencyRates.all,
+  ],
+  globalBudget: [
+    queryKeys.globalBudget.all,
   ],
 } as const;
 

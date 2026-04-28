@@ -1,10 +1,13 @@
+import type { GlobalBudget } from './global-budget-queries';
 import type { MonthSlice } from './types';
 import type { CategoryBudgetRow } from '@/features/notifications/queries';
-import { useQueries, useQuery } from '@tanstack/react-query';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
 import { getBudgetSpendForMonth } from '@/features/notifications/queries';
+import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
 import { getMonthBoundaries } from '@/lib/date/helpers';
+import { getGlobalBudget, getGlobalBudgetSpend, setGlobalBudget } from './global-budget-queries';
 
 export type MonthBudgetResult = {
   year: number;
@@ -21,6 +24,34 @@ function sortBySpendRatio(rows: CategoryBudgetRow[]): CategoryBudgetRow[] {
     const ra = a.budget > 0 ? a.spent / a.budget : 0;
     const rb = b.budget > 0 ? b.spent / b.budget : 0;
     return rb - ra;
+  });
+}
+
+export function useGlobalBudget() {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: queryKeys.globalBudget.all,
+    queryFn: () => getGlobalBudget(db),
+  });
+}
+
+export function useSetGlobalBudget() {
+  const db = useSQLiteContext();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (budget: GlobalBudget | null) => setGlobalBudget(db, budget),
+    onSuccess: () => {
+      invalidateFor(queryClient, 'globalBudget');
+    },
+  });
+}
+
+export function useGlobalBudgetSpend(startDate: number, endDate: number, enabled = true) {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: queryKeys.globalBudget.spend(startDate, endDate),
+    enabled,
+    queryFn: () => getGlobalBudgetSpend(db, startDate, endDate),
   });
 }
 

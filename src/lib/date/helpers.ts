@@ -1,4 +1,5 @@
-import type { DynamicPeriodMode, PeriodMode, PeriodSelection } from '@/lib/store/store';
+import type { DynamicPeriodMode } from '@/lib/date/period-modes';
+import type { PeriodMode, PeriodSelection } from '@/lib/store/store';
 import { UTCDate } from '@date-fns/utc';
 import {
   addDays,
@@ -17,7 +18,7 @@ import {
   startOfMonth,
   startOfYear,
 } from 'date-fns';
-import { DYNAMIC_PERIOD_MODES } from '@/lib/store/store';
+import { DYNAMIC_PERIOD_MODES } from '@/lib/date/period-modes';
 
 export const isDynamicPeriodMode = (mode: PeriodMode): mode is DynamicPeriodMode => DYNAMIC_PERIOD_MODES.includes(mode as DynamicPeriodMode);
 
@@ -288,4 +289,12 @@ export function currentMonthRange(): [number, number] {
   const nextMonthStart = new Date(monthStart);
   nextMonthStart.setMonth(nextMonthStart.getMonth() + 1);
   return [dateToUnix(monthStart), dateToUnix(nextMonthStart)];
+}
+
+/** Returns [yearStartUnix, nextYearStartUnix] for the current calendar year. */
+export function currentYearRange(): [number, number] {
+  const now = new Date();
+  const yearStart = new Date(now.getFullYear(), 0, 1);
+  const nextYearStart = new Date(now.getFullYear() + 1, 0, 1);
+  return [dateToUnix(yearStart), dateToUnix(nextYearStart)];
 }

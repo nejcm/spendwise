@@ -2,6 +2,7 @@ import type { BottomSheetModalProps } from '@gorhom/bottom-sheet';
 import type { AccountFormData } from '@/features/accounts/types';
 import type { CategoryInitialValues } from '@/features/categories/category-form';
 import type { ScheduledTransactionInitialValues } from '@/features/scheduled-transactions/components/scheduled-transaction-form';
+import type { GlobalBudget } from '@/features/stats/global-budget-queries';
 import type { TransactionFormInitialValues } from '@/features/transactions/components/transaction-form-schema';
 
 // ---------------------------------------------------------------------------
@@ -16,10 +17,8 @@ export type SheetConfig
       | { type: 'edit-account'; accountId: string; initialData: AccountFormData }
       | { type: 'add-category' }
       | { type: 'edit-category'; categoryId: string; initialValues: CategoryInitialValues }
-      | {
-        type: 'add-scheduled';
-        initialValues?: ScheduledTransactionInitialValues;
-      });
+      | { type: 'add-scheduled'; initialValues?: ScheduledTransactionInitialValues }
+      | { type: 'set-global-budget'; currentBudget: GlobalBudget | null });
 
 export type SheetType = SheetConfig['type'];
 
@@ -34,4 +33,5 @@ export const SHEET_SNAP_POINTS: Record<SheetType, string[]> = {
   'add-category': ['80%'],
   'edit-category': ['80%'],
   'add-scheduled': ['92%'],
+  'set-global-budget': ['50%'],
 };

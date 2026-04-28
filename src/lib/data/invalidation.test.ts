@@ -19,12 +19,13 @@ describe('invalidateFor', () => {
     const qc = createMockQueryClient();
     invalidateFor(qc, 'transaction');
 
-    expect(qc.invalidateQueries).toHaveBeenCalledTimes(6);
+    expect(qc.invalidateQueries).toHaveBeenCalledTimes(7);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.transactions.all]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.withBalance]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.totalBalance]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.monthSummary.all]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.insights.all]);
+    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.globalBudget.all]);
   });
 
   it('deduplicates overlapping prefixes when multiple entities are passed', () => {
@@ -61,5 +62,13 @@ describe('invalidateFor', () => {
 
     expect(qc.invalidateQueries).toHaveBeenCalledTimes(2);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.scheduledTransactions.all]);
+  });
+
+  it('invalidates global budget prefix for globalBudget entity', () => {
+    const qc = createMockQueryClient();
+    invalidateFor(qc, 'globalBudget');
+
+    expect(qc.invalidateQueries).toHaveBeenCalledTimes(1);
+    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.globalBudget.all]);
   });
 });

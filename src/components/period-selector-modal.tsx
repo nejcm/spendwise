@@ -1,5 +1,6 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
-import type { DynamicPeriodMode, PeriodMode, PeriodSelection } from '@/lib/store/store';
+import type { DynamicPeriodMode } from '@/lib/date/period-modes';
+import type { PeriodMode, PeriodSelection } from '@/lib/store/store';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { format } from 'date-fns';
 import * as React from 'react';
@@ -10,8 +11,8 @@ import { ArrowLeftIcon, ArrowRightIcon } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { currentISOWeek, getWeeksInYear, isDynamicPeriodMode } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
-import { setPeriodSelection } from '@/lib/store/store';
 
+import { setPeriodSelection } from '@/lib/store/store';
 import { todayISO } from '../features/formatting/helpers';
 import { GhostButton } from './ui/ghost-button';
 

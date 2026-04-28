@@ -121,7 +121,7 @@ export function AiScreen() {
                   className={`mb-2 max-w-[85%] rounded-lg px-3 py-2 ${
                     m.role === 'user'
                       ? 'self-end bg-foreground'
-                      : 'self-start bg-card'
+                      : 'self-start bg-muted'
                   }`}
                 >
                   {m.role === 'user'

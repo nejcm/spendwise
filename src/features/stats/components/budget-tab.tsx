@@ -9,6 +9,7 @@ import { BudgetCategoryList } from './budget-category-list';
 import { BudgetPeriodSelector } from './budget-period-selector';
 import { BudgetRangeView } from './budget-range-view';
 import { BudgetSummary } from './budget-summary';
+import { GlobalBudgetCard } from './global-budget-card';
 
 type Props = {
   currency: CurrencyKey;
@@ -41,6 +42,7 @@ export function BudgetTab({ currency }: Props) {
           isLoading={rangeData.isLoading}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+          selection={selection}
         />
       </View>
     );
@@ -54,6 +56,7 @@ export function BudgetTab({ currency }: Props) {
       <BudgetPeriodSelector selection={selection} onChange={setSelection} />
       <ScrollView className="flex-1" style={defaultStyles.transparentBg}>
         <View className="px-4 pt-1 pb-8">
+          <GlobalBudgetCard selection={selection} currency={currency} />
           {totalBudget > 0 && (
             <BudgetSummary
               totalBudget={totalBudget}

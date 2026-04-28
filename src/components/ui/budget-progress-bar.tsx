@@ -20,8 +20,8 @@ export type BudgetProgressBarProps = {
 };
 
 export function getColorClass(ratio: number): [string, string] {
-  if (ratio >= 1) return ['bg-danger-500', 'text-danger-500'];
-  if (ratio >= 0.8) return ['bg-warning-500', 'text-warning-500'];
+  if (ratio >= 1) return ['bg-danger-600', 'text-danger-600'];
+  if (ratio >= 0.8) return ['bg-warning-600', 'text-warning-600'];
   return ['bg-foreground', 'text-foreground'];
 }
 

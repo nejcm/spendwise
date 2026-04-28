@@ -3,6 +3,7 @@ import type { OptionType } from '@/components/ui';
 import type { Account } from '@/features/accounts/types';
 import type { CurrencyKey } from '@/features/currencies';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import * as React from 'react';
 import { ScrollView, View } from 'react-native';
 import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

@@ -6,6 +6,8 @@ import type { Transaction } from '../transactions/types';
 import { clearDbData } from '@/lib/sqlite/db';
 import { getAppState } from '@/lib/store/store';
 
+const CURRENT_BACKUP_VERSION = 2;
+
 export type BackupData = {
   version: number;
   baseCurrency?: string;
@@ -35,7 +37,7 @@ export async function exportBackup(db: SQLiteDatabase): Promise<BackupData> {
   const baseCurrency = getAppState().currency;
 
   return {
-    version: 2,
+    version: CURRENT_BACKUP_VERSION,
     exported_at: new Date().toISOString(),
     baseCurrency,
     accounts,
@@ -79,6 +81,7 @@ export async function importBackup(db: SQLiteDatabase, backup: BackupData): Prom
   await clearDbData(db);
 
   await db.withTransactionAsync(async () => {
+    await db.execAsync('PRAGMA foreign_keys = ON;');
     for (const row of backup.categories) {
       await db.runAsync(
         `INSERT INTO categories (id, name, icon, color, budget, sort_order, created_at)

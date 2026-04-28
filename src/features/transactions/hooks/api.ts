@@ -6,6 +6,7 @@ import type { TransactionFormData, TransactionInsertData } from '../types';
 import type { RatesMap } from '@/features/currencies/queries';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { format, parse, subMonths } from 'date-fns';
 import * as Haptics from 'expo-haptics';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Alert } from '@/components/ui';
@@ -56,6 +57,39 @@ export function useMonthSummary(yearMonth: string) {
     queryKey: queryKeys.monthSummary.byMonth(yearMonth),
     queryFn: () => queries.getMonthSummary(db, yearMonth),
   });
+}
+
+export type MonthTrend = {
+  incomeDeltaPct: number | null;
+  expenseDeltaPct: number | null;
+};
+
+export function calcDeltaPct(current: number, prior: number): number | null {
+  if (prior === 0) return null;
+  const pct = Math.round(((current - prior) / prior) * 100);
+  return pct === 0 ? null : pct;
+}
+
+export function useMonthTrend(currentYearMonth: string): MonthTrend {
+  const db = useSQLiteContext();
+  const priorYearMonth = format(subMonths(parse(currentYearMonth, 'yyyy-MM', new Date()), 1), 'yyyy-MM');
+
+  const { data: current } = useQuery({
+    queryKey: queryKeys.monthSummary.byMonth(currentYearMonth),
+    queryFn: () => queries.getMonthSummary(db, currentYearMonth),
+  });
+
+  const { data: prior } = useQuery({
+    queryKey: queryKeys.monthSummary.byMonth(priorYearMonth),
+    queryFn: () => queries.getMonthSummary(db, priorYearMonth),
+  });
+
+  if (!current || !prior) return { incomeDeltaPct: null, expenseDeltaPct: null };
+
+  return {
+    incomeDeltaPct: calcDeltaPct(current.income, prior.income),
+    expenseDeltaPct: calcDeltaPct(current.expense, prior.expense),
+  };
 }
 
 // ─── Write Hooks ───

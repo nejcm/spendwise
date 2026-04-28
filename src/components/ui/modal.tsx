@@ -1,7 +1,7 @@
 import type { ModalProps as RNModalProps } from 'react-native';
-import { Modal as RNModal } from 'react-native';
+import { Modal as RNModal, View } from 'react-native';
 import { cn } from 'tailwind-variants';
-import { CloseButton, View } from './';
+import { CloseButton } from './modal-sheet';
 
 export type ModalProps = RNModalProps & {
   children: React.ReactNode;

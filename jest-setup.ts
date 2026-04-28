@@ -1,19 +1,21 @@
 /* eslint-disable ts/ban-ts-comment */
 /* eslint-disable no-restricted-globals */
 
+import { Uniwind } from 'uniwind';
+
 // Uniwind logs when CSS variables aren't resolved in the Jest RN environment; suppress that noise only.
-const originalConsoleWarn = console.warn.bind(console);
-function isUniwindMissingCssVarWarn(args: unknown[]): boolean {
-  const text = args.map((a) => (typeof a === 'string' ? a : String(a))).join(' ');
-  return text.includes('Uniwind') && text.includes('--color-foreground');
-}
-if (!(globalThis as { __spendwiseConsoleWarnFiltered?: boolean }).__spendwiseConsoleWarnFiltered) {
-  (globalThis as { __spendwiseConsoleWarnFiltered?: boolean }).__spendwiseConsoleWarnFiltered = true;
-  console.warn = (...args: Parameters<typeof console.warn>) => {
-    if (isUniwindMissingCssVarWarn(args)) return;
-    originalConsoleWarn(...args);
-  };
-}
+Uniwind.updateCSSVariables('light', {
+  '--color-background': '#fcfcfc',
+  '--color-foreground': '#1a1c20',
+  '--color-gray-400': '#9ca3af',
+  '--color-surface': '#9ca3af',
+});
+Uniwind.updateCSSVariables('dark', {
+  '--color-background': '#1a1c20',
+  '--color-foreground': '#fcfcfc',
+  '--color-gray-400': '#9ca3af',
+  '--color-surface': '#9ca3af',
+});
 
 // Mock react-native-worklets first
 jest.mock('react-native-worklets', () => ({

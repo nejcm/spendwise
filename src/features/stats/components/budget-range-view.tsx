@@ -5,10 +5,10 @@ import { ScrollView, SolidButton, View } from '@/components/ui';
 import { SkeletonBox } from '@/components/ui/skeleton';
 import { translate } from '@/lib/i18n';
 import { defaultStyles } from '@/lib/theme/styles';
-import { GlobalBudgetCard } from './global-budget-card';
 import { BudgetMonthCardList } from './budget-month-card';
 import { BudgetMonthChart } from './budget-month-chart';
 import { BudgetSummary } from './budget-summary';
+import { GlobalBudgetCard } from './global-budget-card';
 
 type BudgetRangeViewProps = {
   months: MonthBudgetResult[];

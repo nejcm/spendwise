@@ -1,9 +1,12 @@
 import type { CurrencyKey } from '../../currencies';
 
 import type { CategoryType } from '../../insights/types';
+import { useRouter } from 'expo-router';
 import * as React from 'react';
+import { Pressable } from 'react-native';
 import { PieChart } from 'react-native-gifted-charts';
-import { FormattedCurrency, SolidButton, Text, View } from '@/components/ui';
+import { FormattedCurrency, getPressedStyle, SolidButton, Text, View } from '@/components/ui';
+import { ChevronRight } from '@/components/ui/icon';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { useCategorySpendByRange } from '@/features/insights/api';
 import { translate } from '@/lib/i18n';
@@ -24,6 +27,7 @@ export function CategoryBreakdown({
   type,
   limit = 5,
 }: CategoryBreakdownProps) {
+  const router = useRouter();
   const themeConfig = useThemeConfig();
   const labelColor = themeConfig.dark ? '#9ca3af' : '#6b7280';
   const { data: categories, isLoading } = useCategorySpendByRange(startDate, endDate);
@@ -91,7 +95,13 @@ export function CategoryBreakdown({
                 {filtered.map((category) => {
                   const itemBarWidth = maxTotal > 0 ? (category.total / maxTotal) * 100 : 0;
                   return (
-                    <View key={category.category_id} className="gap-1">
+                    <Pressable
+                      key={category.category_id}
+                      className="gap-1"
+                      style={getPressedStyle}
+                      onPress={() => router.push(`/transactions?categoryId=${category.category_id}`)}
+                      accessibilityRole="button"
+                    >
                       <View className="flex-row items-center justify-between">
                         <View className="flex-row items-center gap-2">
                           <Text className="text-lg">{category.category_icon}</Text>
@@ -99,7 +109,10 @@ export function CategoryBreakdown({
                             {category.category_name}
                           </Text>
                         </View>
-                        <FormattedCurrency value={category.total} currency={currency} className="text-sm font-medium text-foreground" />
+                        <View className="flex-row items-center gap-1">
+                          <FormattedCurrency value={category.total} currency={currency} className="text-sm font-medium text-foreground" />
+                          <ChevronRight size={14} colorClassName="accent-muted-foreground" />
+                        </View>
                       </View>
                       <View className="h-1.5 rounded-full bg-muted">
                         <View
@@ -110,7 +123,7 @@ export function CategoryBreakdown({
                           }}
                         />
                       </View>
-                    </View>
+                    </Pressable>
                   );
                 })}
               </View>

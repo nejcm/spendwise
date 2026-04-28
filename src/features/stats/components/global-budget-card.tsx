@@ -4,12 +4,12 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { cn } from 'tailwind-variants';
 import { FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
-import { PlusIcon } from '@/components/ui/icon';
 import { BudgetProgressBar, getColorClass } from '@/components/ui/budget-progress-bar';
+import { PlusIcon } from '@/components/ui/icon';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/store/local-store';
-import { useGlobalBudget, useGlobalBudgetSpend } from '../hooks';
 import { getBudgetSelectionBoundaries, scaleGlobalBudget } from '../helpers';
+import { useGlobalBudget, useGlobalBudgetSpend } from '../hooks';
 
 function getPeriodBudgetLabel(selection: BudgetPeriodSelection): string {
   if (selection.mode === 'year') return translate('stats.global_budget_period_annual');
@@ -17,12 +17,12 @@ function getPeriodBudgetLabel(selection: BudgetPeriodSelection): string {
   return translate('stats.global_budget_period_month');
 }
 
-type Props = {
+type GlobalBudgetCardProps = {
   selection: BudgetPeriodSelection;
   currency: CurrencyKey;
 };
 
-export function GlobalBudgetCard({ selection, currency }: Props) {
+export function GlobalBudgetCard({ selection, currency }: GlobalBudgetCardProps) {
   const { data: monthlyBudget, isLoading } = useGlobalBudget();
   const [startDate, endDate] = React.useMemo(
     () => getBudgetSelectionBoundaries(selection),
@@ -31,12 +31,11 @@ export function GlobalBudgetCard({ selection, currency }: Props) {
   const scaledBudget = monthlyBudget != null ? scaleGlobalBudget(monthlyBudget, selection) : 0;
   const { data: spent = 0 } = useGlobalBudgetSpend(startDate, endDate, monthlyBudget != null);
 
-  if (isLoading) return null;
-
   const handlePress = React.useCallback(() => {
     openSheet({ type: 'set-global-budget', currentAmountCents: monthlyBudget ?? null });
   }, [monthlyBudget]);
 
+  if (isLoading) return null;
   if (monthlyBudget == null) {
     return (
       <Pressable

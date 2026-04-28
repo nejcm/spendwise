@@ -19,7 +19,7 @@ Spendwise is a local-first personal finance app built on Expo + React Native. Us
 
 ## Project Structure
 
-```
+```md
 src/
 ├── app/          # Expo Router route files and layouts (keep thin)
 ├── features/     # Feature modules (home, accounts, transactions, scheduled-transactions, …)
@@ -39,6 +39,7 @@ src/
 - Prefer `src/components/ui` primitives before creating new controls.
 - Style with Uniwind `className` and shared tokens; avoid inline style objects.
 - Keep all user-facing copy translatable; update `src/translations` when adding strings.
+- Translation parity is required: when adding/renaming/removing i18n keys, update both `src/translations/en.json` and `src/translations/de.json` in the same change.
 - Do not edit `android/` or `ios/` directly for app logic.
 - Update docs and `AGENTS.md` when architecture, routes, or major workflows change.
 
@@ -46,6 +47,7 @@ src/
 
 - Run checks before treating work as finished: prefer `pnpm verify` (ESLint, `tsc`, translation JSON lint, Jest). Command details are in [`.docs/setup.md`](.docs/setup.md).
 - If the change is very small, run the narrowest subset that still validates it (for example `pnpm lint:all` plus `pnpm test`, or targeted Jest paths when you only touched specific tests or modules).
+- If translation files were touched, run `pnpm lint:translations` before handoff.
 - Fix lint and test failures introduced by the change; do not hand off a “done” task with a red `verify` unless you clearly state what is blocked and why.
 
 ## Response And Planning Style

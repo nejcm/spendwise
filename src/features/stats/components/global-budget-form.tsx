@@ -7,9 +7,9 @@ import * as z from 'zod';
 import { GhostButton, Input, SolidButton, Text } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
-import { translate } from '@/lib/i18n';
-import { parseToCents } from '@/lib/data/money';
 import { centsToAmount } from '@/features/formatting/helpers';
+import { parseToCents } from '@/lib/data/money';
+import { translate } from '@/lib/i18n';
 import { useSetGlobalBudget } from '../hooks';
 
 const schema = z.object({
@@ -47,7 +47,7 @@ export function GlobalBudgetForm({ currentAmountCents, onSuccess, onCancel }: Pr
 
   const handleClear = async () => {
     await setGlobalBudget.mutateAsync(null);
-    onSuccess();
+    onCancel();
   };
 
   return (

@@ -6,10 +6,10 @@ import { defaultStyles } from '@/lib/theme/styles';
 import { defaultBudgetPeriodSelection, expandToMonthSlices } from '../helpers';
 import { useBudgetStats, useBudgetStatsByRange } from '../hooks';
 import { BudgetCategoryList } from './budget-category-list';
-import { GlobalBudgetCard } from './global-budget-card';
 import { BudgetPeriodSelector } from './budget-period-selector';
 import { BudgetRangeView } from './budget-range-view';
 import { BudgetSummary } from './budget-summary';
+import { GlobalBudgetCard } from './global-budget-card';
 
 type Props = {
   currency: CurrencyKey;

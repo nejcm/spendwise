@@ -44,6 +44,7 @@ export function getBudgetSelectionBoundaries(selection: BudgetPeriodSelection): 
 
 /** Scale a global budget to the full span of a BudgetPeriodSelection. */
 export function scaleGlobalBudget(budget: GlobalBudget, selection: BudgetPeriodSelection): number {
+  if (!budget.amountCents) return 0;
   const months = expandToMonthSlices(selection).length;
   if (budget.type === 'yearly') {
     return Math.round((budget.amountCents / 12) * months);

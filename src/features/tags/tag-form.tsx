@@ -26,7 +26,7 @@ type Props = {
   onCancel: () => void;
 };
 
-export function TagForm({ tag, onSuccess, onCancel }: Props) {
+export function TagForm({ tag, onSuccess }: Props) {
   const createTag = useCreateTag();
   const updateTag = useUpdateTag();
   const deleteTag = useDeleteTag();

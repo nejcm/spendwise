@@ -57,7 +57,7 @@ export async function checkBudgetAlerts(
     }
   }
 
-  if (globalBudget != null && globalBudget.amountCents > 0) {
+  if (globalBudget && globalBudget.amountCents) {
     const isYearly = globalBudget.type === 'yearly';
     const year = String(new Date().getFullYear());
     const [rangeStart, rangeEnd] = isYearly ? currentYearRange() : [monthStart, monthEnd];

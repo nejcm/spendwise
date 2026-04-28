@@ -1,4 +1,3 @@
-import type { GlobalBudget } from './global-budget-queries';
 import { createTestDb } from '@/test-utils/sqlite-db';
 
 import { getGlobalBudget, getGlobalBudgetSpend, setGlobalBudget } from './global-budget-queries';

@@ -1,3 +1,4 @@
+import type { GlobalBudget } from './global-budget-queries';
 import type { MonthSlice } from './types';
 import type { CategoryBudgetRow } from '@/features/notifications/queries';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -6,7 +7,6 @@ import { getBudgetSpendForMonth } from '@/features/notifications/queries';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
 import { getMonthBoundaries } from '@/lib/date/helpers';
-import type { GlobalBudget } from './global-budget-queries';
 import { getGlobalBudget, getGlobalBudgetSpend, setGlobalBudget } from './global-budget-queries';
 
 export type MonthBudgetResult = {

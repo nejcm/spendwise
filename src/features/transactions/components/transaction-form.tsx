@@ -293,6 +293,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
 
   React.useEffect(() => {
     if (existingTags) {
+      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
       setTagIds(existingTags.map((t) => t.id));
     }
   }, [existingTags]);
@@ -367,6 +368,7 @@ export function TransactionFormSheet({
   const setTransactionTags = useSetTransactionTags();
 
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
     if (existingTags) setTagIds(existingTags.map((t) => t.id));
   }, [existingTags]);
 

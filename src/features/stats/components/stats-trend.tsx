@@ -9,6 +9,7 @@ import { centsToAmount } from '@/features/formatting/helpers';
 import { useTrendByRange } from '@/features/insights/api';
 import { buildTrendSeries } from '@/features/insights/trend';
 import { translate } from '@/lib/i18n';
+import { expenseColor, incomeColor } from '@/lib/theme/colors';
 
 export type StatsTrendProps = {
   period: PeriodMode;
@@ -17,9 +18,6 @@ export type StatsTrendProps = {
 };
 
 const PAIR_GAP = 2;
-// TODO: move to theme vars
-const incomeColor = '#2ebe7e';
-const expenseColor = '#e12f30';
 
 export function StatsTrend({ period, startDate, endDate }: StatsTrendProps) {
   const colorScheme = useColorScheme();
@@ -42,8 +40,8 @@ export function StatsTrend({ period, startDate, endDate }: StatsTrendProps) {
     const availableWidth = screenWidth - 104;
     const isYearLike = period === 'year' || period === 'this-year';
     const isWeekLike = period === 'week' || period === 'this-week' || period === 'today';
-    const targetBarWidth = isYearLike ? 8 : isWeekLike ? 12 : 24;
-    const minSpacing = isWeekLike ? 10 : 8;
+    const targetBarWidth = isYearLike ? 8 : isWeekLike ? 12 : 16;
+    const minSpacing = 10;
     const computedSpacing = Math.max(
       minSpacing,
       Math.floor(availableWidth / groupCount - 2 * targetBarWidth - PAIR_GAP),

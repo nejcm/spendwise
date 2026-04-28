@@ -10,6 +10,7 @@ import { ChevronRight } from '@/components/ui/icon';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { useCategorySpendByRange } from '@/features/insights/api';
 import { translate } from '@/lib/i18n';
+import { chartColors } from '../../../lib/theme/colors';
 import { useThemeConfig } from '../../../lib/theme/use-theme-config';
 
 export type CategoryBreakdownProps = {
@@ -43,9 +44,10 @@ export function CategoryBreakdown({
   const maxTotal = filtered[0]?.total ?? 1;
   const title = type === 'expense' ? translate('stats.top_expenses') : translate('stats.top_income');
   const chartData = React.useMemo(() => {
+    let i = 0;
     return filtered.map((category) => ({
       value: centsToAmount(category.total),
-      color: category.category_color,
+      color: category.category_color ?? chartColors[i++ % chartColors.length],
     }));
   }, [filtered]);
 

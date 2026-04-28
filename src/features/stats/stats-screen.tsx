@@ -11,7 +11,6 @@ import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { BudgetTab } from './components/budget-tab';
 import { CategoryBreakdown } from './components/category-breakdown';
-import { MonthlySpendChart } from './components/monthly-spend-chart';
 import { StatsTabBar } from './components/stats-tab-bar';
 import { StatsTrend } from './components/stats-trend';
 import { Summary } from './components/summary';
@@ -35,8 +34,6 @@ export function StatsScreen() {
           <ScrollView className="flex-1" style={defaultStyles.transparentBg} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
             <View className="px-4 pt-4 pb-6">
               <Summary startDate={startDate} endDate={endDate} currency={currency} />
-
-              <MonthlySpendChart />
 
               <StatsTrend
                 key={`${selection.mode}-${startDate}`}

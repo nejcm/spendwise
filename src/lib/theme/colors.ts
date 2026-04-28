@@ -2,19 +2,22 @@
 
 import type { OptionType } from '@/components/ui';
 
-export const chartColors = {
-  red: '#ef4444',
-  green: '#22c55e',
-  blue: '#3b82f6',
-  yellow: '#f59e0b',
-  purple: '#8b5cf6',
-  pink: '#ec4899',
-  orange: '#f97316',
-  teal: '#2dd4bf',
-  lime: '#84cc16',
-  cyan: '#06b6d4',
-  brown: '#854d0e',
-};
+export const expenseColor = 'rgba(248, 60, 78, 0.88)';
+export const incomeColor = 'rgba(37, 174, 94, 0.88)';
+
+export const chartColors = [
+  expenseColor,
+  incomeColor,
+  'rgba(59, 130, 246, 0.88)',
+  'rgba(245, 158, 11, 0.88)',
+  'rgba(139, 92, 246, 0.88)',
+  'rgba(236, 72, 153, 0.88)',
+  'rgba(249, 115, 22, 0.88)',
+  'rgba(45, 212, 191, 0.88)',
+  'rgba(132, 204, 22, 0.88)',
+  'rgba(6, 182, 212, 0.88)',
+  'rgba(133, 77, 14, 0.88)',
+];
 
 export const COLORS = [
   // gray

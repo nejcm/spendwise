@@ -57,10 +57,6 @@ export type PeriodSelection
     | PeriodSelectionThisMonth
     | PeriodSelectionThisYear;
 
-export const DYNAMIC_PERIOD_MODES = ['today', 'this-week', 'this-month', 'this-year'] as const satisfies PeriodMode[];
-
-export type DynamicPeriodMode = typeof DYNAMIC_PERIOD_MODES[number];
-
 export type AutoBackupSettings = {
   enabled: boolean;
   interval: AutoBackupInterval;

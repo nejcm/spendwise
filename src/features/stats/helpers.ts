@@ -1,3 +1,4 @@
+import type { GlobalBudget } from './global-budget-queries';
 import type { BudgetPeriodSelection, MonthSlice } from './types';
 import { format } from 'date-fns';
 import { getMonthBoundaries } from '@/lib/date/helpers';
@@ -41,9 +42,13 @@ export function getBudgetSelectionBoundaries(selection: BudgetPeriodSelection): 
   return [start, end];
 }
 
-/** Scale a monthly budget to the full span of a BudgetPeriodSelection. */
-export function scaleGlobalBudget(monthlyBudget: number, selection: BudgetPeriodSelection): number {
-  return monthlyBudget * expandToMonthSlices(selection).length;
+/** Scale a global budget to the full span of a BudgetPeriodSelection. */
+export function scaleGlobalBudget(budget: GlobalBudget, selection: BudgetPeriodSelection): number {
+  const months = expandToMonthSlices(selection).length;
+  if (budget.type === 'yearly') {
+    return Math.round((budget.amountCents / 12) * months);
+  }
+  return budget.amountCents * months;
 }
 
 export function defaultBudgetPeriodSelection(): BudgetPeriodSelection {

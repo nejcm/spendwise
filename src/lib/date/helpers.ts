@@ -289,3 +289,11 @@ export function currentMonthRange(): [number, number] {
   nextMonthStart.setMonth(nextMonthStart.getMonth() + 1);
   return [dateToUnix(monthStart), dateToUnix(nextMonthStart)];
 }
+
+/** Returns [yearStartUnix, nextYearStartUnix] for the current calendar year. */
+export function currentYearRange(): [number, number] {
+  const now = new Date();
+  const yearStart = new Date(now.getFullYear(), 0, 1);
+  const nextYearStart = new Date(now.getFullYear() + 1, 0, 1);
+  return [dateToUnix(yearStart), dateToUnix(nextYearStart)];
+}

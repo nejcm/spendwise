@@ -2,6 +2,7 @@ import type { BottomSheetModalProps } from '@gorhom/bottom-sheet';
 import type { AccountFormData } from '@/features/accounts/types';
 import type { CategoryInitialValues } from '@/features/categories/category-form';
 import type { ScheduledTransactionInitialValues } from '@/features/scheduled-transactions/components/scheduled-transaction-form';
+import type { GlobalBudget } from '@/features/stats/global-budget-queries';
 import type { TransactionFormInitialValues } from '@/features/transactions/components/transaction-form-schema';
 
 // ---------------------------------------------------------------------------
@@ -17,7 +18,7 @@ export type SheetConfig
       | { type: 'add-category' }
       | { type: 'edit-category'; categoryId: string; initialValues: CategoryInitialValues }
       | { type: 'add-scheduled'; initialValues?: ScheduledTransactionInitialValues }
-      | { type: 'set-global-budget'; currentAmountCents: number | null });
+      | { type: 'set-global-budget'; currentBudget: GlobalBudget | null });
 
 export type SheetType = SheetConfig['type'];
 

@@ -5,7 +5,7 @@ import { Pressable, View } from 'react-native';
 import { cn } from 'tailwind-variants';
 import { FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
 import { BudgetProgressBar, getColorClass } from '@/components/ui/budget-progress-bar';
-import { PlusIcon } from '@/components/ui/icon';
+import { Pencil, PlusIcon } from '@/components/ui/icon';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/store/local-store';
 import { getBudgetSelectionBoundaries, scaleGlobalBudget } from '../helpers';
@@ -23,20 +23,20 @@ type GlobalBudgetCardProps = {
 };
 
 export function GlobalBudgetCard({ selection, currency }: GlobalBudgetCardProps) {
-  const { data: monthlyBudget, isLoading } = useGlobalBudget();
+  const { data: budget, isLoading } = useGlobalBudget();
   const [startDate, endDate] = React.useMemo(
     () => getBudgetSelectionBoundaries(selection),
     [selection],
   );
-  const scaledBudget = monthlyBudget != null ? scaleGlobalBudget(monthlyBudget, selection) : 0;
-  const { data: spent = 0 } = useGlobalBudgetSpend(startDate, endDate, monthlyBudget != null);
+  const scaledBudget = budget != null ? scaleGlobalBudget(budget, selection) : 0;
+  const { data: spent = 0 } = useGlobalBudgetSpend(startDate, endDate, budget != null);
 
   const handlePress = React.useCallback(() => {
-    openSheet({ type: 'set-global-budget', currentAmountCents: monthlyBudget ?? null });
-  }, [monthlyBudget]);
+    openSheet({ type: 'set-global-budget', currentBudget: budget ?? null });
+  }, [budget]);
 
   if (isLoading) return null;
-  if (monthlyBudget == null) {
+  if (budget == null) {
     return (
       <Pressable
         onPress={handlePress}
@@ -65,10 +65,12 @@ export function GlobalBudgetCard({ selection, currency }: GlobalBudgetCardProps)
     <Pressable onPress={handlePress} style={getPressedStyle} className="mb-6">
       <View className="overflow-hidden rounded-2xl bg-card">
         <View className="p-5">
-          <Text className="mb-4 text-xs font-medium text-muted-foreground">
-            {translate('stats.global_budget_label')}
-          </Text>
-
+          <View className="mb-4 flex-row justify-between gap-2">
+            <Text className="text-sm font-medium text-muted-foreground">
+              {translate('stats.global_budget_label')}
+            </Text>
+            <Pencil size={16} colorClassName="accent-muted-foreground" />
+          </View>
           <FormattedCurrency
             value={spent}
             currency={currency}

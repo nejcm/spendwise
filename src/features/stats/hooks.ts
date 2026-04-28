@@ -6,6 +6,7 @@ import { getBudgetSpendForMonth } from '@/features/notifications/queries';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
 import { getMonthBoundaries } from '@/lib/date/helpers';
+import type { GlobalBudget } from './global-budget-queries';
 import { getGlobalBudget, getGlobalBudgetSpend, setGlobalBudget } from './global-budget-queries';
 
 export type MonthBudgetResult = {
@@ -38,7 +39,7 @@ export function useSetGlobalBudget() {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (amountCents: number | null) => setGlobalBudget(db, amountCents),
+    mutationFn: (budget: GlobalBudget | null) => setGlobalBudget(db, budget),
     onSuccess: () => {
       invalidateFor(queryClient, 'globalBudget');
     },

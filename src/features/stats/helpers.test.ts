@@ -1,6 +1,10 @@
+import type { GlobalBudget } from './global-budget-queries';
 import { getMonthBoundaries } from '@/lib/date/helpers';
 
 import { getBudgetSelectionBoundaries, scaleGlobalBudget } from './helpers';
+
+const MONTHLY: GlobalBudget = { amountCents: 100_000, type: 'monthly' };
+const YEARLY: GlobalBudget = { amountCents: 1_200_000, type: 'yearly' };
 
 // ─── getBudgetSelectionBoundaries ─────────────────────────────────────────────
 
@@ -61,44 +65,65 @@ describe('getBudgetSelectionBoundaries', () => {
 // ─── scaleGlobalBudget ────────────────────────────────────────────────────────
 
 describe('scaleGlobalBudget', () => {
-  it('month mode: returns the budget unchanged (×1)', () => {
-    expect(scaleGlobalBudget(100_000, { mode: 'month', year: 2026, month: 3 })).toBe(100_000);
-  });
-
-  it('year mode: scales to 12 months', () => {
-    expect(scaleGlobalBudget(100_000, { mode: 'year', year: 2026 })).toBe(1_200_000);
-  });
-
-  it('range mode: scales by the number of months in the range', () => {
-    // Feb–Apr = 3 months
-    expect(scaleGlobalBudget(100_000, {
-      mode: 'range',
-      startYear: 2026,
-      startMonth: 2,
-      endYear: 2026,
-      endMonth: 4,
-    })).toBe(300_000);
-  });
-
-  it('range mode: single month range equals monthly budget', () => {
-    expect(scaleGlobalBudget(100_000, {
-      mode: 'range',
-      startYear: 2026,
-      startMonth: 3,
-      endYear: 2026,
-      endMonth: 3,
-    })).toBe(100_000);
-  });
-
-  it('range mode: caps at 36 months for very long ranges', () => {
-    // 40-month range — should be capped at 36
-    const result = scaleGlobalBudget(100_000, {
-      mode: 'range',
-      startYear: 2023,
-      startMonth: 1,
-      endYear: 2026,
-      endMonth: 4,
+  describe('monthly budget', () => {
+    it('month mode: returns the budget unchanged (×1)', () => {
+      expect(scaleGlobalBudget(MONTHLY, { mode: 'month', year: 2026, month: 3 })).toBe(100_000);
     });
-    expect(result).toBe(100_000 * 36);
+
+    it('year mode: scales to 12 months', () => {
+      expect(scaleGlobalBudget(MONTHLY, { mode: 'year', year: 2026 })).toBe(1_200_000);
+    });
+
+    it('range mode: scales by the number of months in the range', () => {
+      expect(scaleGlobalBudget(MONTHLY, {
+        mode: 'range',
+        startYear: 2026,
+        startMonth: 2,
+        endYear: 2026,
+        endMonth: 4,
+      })).toBe(300_000);
+    });
+
+    it('range mode: single month range equals monthly budget', () => {
+      expect(scaleGlobalBudget(MONTHLY, {
+        mode: 'range',
+        startYear: 2026,
+        startMonth: 3,
+        endYear: 2026,
+        endMonth: 3,
+      })).toBe(100_000);
+    });
+
+    it('range mode: caps at 36 months for very long ranges', () => {
+      const result = scaleGlobalBudget(MONTHLY, {
+        mode: 'range',
+        startYear: 2023,
+        startMonth: 1,
+        endYear: 2026,
+        endMonth: 4,
+      });
+      expect(result).toBe(100_000 * 36);
+    });
+  });
+
+  describe('yearly budget', () => {
+    it('month mode: pro-rates to 1/12 of yearly amount', () => {
+      expect(scaleGlobalBudget(YEARLY, { mode: 'month', year: 2026, month: 3 })).toBe(100_000);
+    });
+
+    it('year mode: returns full yearly amount', () => {
+      expect(scaleGlobalBudget(YEARLY, { mode: 'year', year: 2026 })).toBe(1_200_000);
+    });
+
+    it('range mode: pro-rates across months in the range', () => {
+      // 3 months → 1_200_000 / 12 * 3 = 300_000
+      expect(scaleGlobalBudget(YEARLY, {
+        mode: 'range',
+        startYear: 2026,
+        startMonth: 2,
+        endYear: 2026,
+        endMonth: 4,
+      })).toBe(300_000);
+    });
   });
 });

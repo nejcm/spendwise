@@ -196,7 +196,7 @@ export function GlobalSheet() {
     case 'set-global-budget':
       children = (
         <GlobalBudgetForm
-          currentAmountCents={config.currentAmountCents}
+          currentBudget={config.currentBudget}
           onSuccess={closeSheet}
           onCancel={closeSheet}
         />

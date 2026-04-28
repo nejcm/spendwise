@@ -9,6 +9,7 @@ import AssistantMessageWeb from '@/features/ai/components/assistant-message.web'
 import { IS_WEB } from '@/lib/base';
 import { translate } from '@/lib/i18n';
 import { defaultStyles } from '@/lib/theme/styles';
+import { getFollowUps } from './follow-ups';
 import { useChat } from './use-chat';
 
 const PRESET_QUESTIONS = [
@@ -76,11 +77,18 @@ export function AiScreen() {
     isStreaming,
     errorMessage,
     toolStatus,
+    lastCompletedAssistantId,
     actions,
     scroll,
     getMessageRenderInfo,
     markdownStyle,
   } = useChat();
+
+  const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user')?.content ?? '';
+  const followUps = React.useMemo(
+    () => (lastCompletedAssistantId ? getFollowUps(lastUserMessage) : []),
+    [lastCompletedAssistantId, lastUserMessage],
+  );
 
   return (
     <>
@@ -112,31 +120,50 @@ export function AiScreen() {
             <Empty hasKey={hasKey} hasMessages={messages.length > 0} onSend={actions.send} />
             {messages.map((m) => {
               const { displayContent, isLiveStreaming } = getMessageRenderInfo(m);
+              const isLastCompleted = m.id === lastCompletedAssistantId;
               return (
                 <View
                   key={m.id}
                   onLayout={(event) => {
                     scroll.onMessageLayout(m.id, event);
                   }}
-                  className={`mb-2 max-w-[85%] rounded-lg px-3 py-2 ${
-                    m.role === 'user'
-                      ? 'self-end bg-foreground'
-                      : 'self-start bg-card'
-                  }`}
                 >
-                  {m.role === 'user'
-                    ? (
-                        <Text className="text-sm text-background">
-                          {m.content}
-                        </Text>
-                      )
-                    : (
-                        <MessageComponent
-                          content={displayContent}
-                          streaming={isLiveStreaming}
-                          markdownStyle={markdownStyle}
+                  <View
+                    className={`mb-2 max-w-[85%] rounded-lg px-3 py-2 ${
+                      m.role === 'user'
+                        ? 'self-end bg-foreground'
+                        : 'self-start bg-card'
+                    }`}
+                  >
+                    {m.role === 'user'
+                      ? (
+                          <Text className="text-sm text-background">
+                            {m.content}
+                          </Text>
+                        )
+                      : (
+                          <MessageComponent
+                            content={displayContent}
+                            streaming={isLiveStreaming}
+                            markdownStyle={markdownStyle}
+                          />
+                        )}
+                  </View>
+                  {isLastCompleted && followUps.length > 0 && (
+                    <View className="mb-3 flex-col gap-1.5">
+                      {followUps.map((q) => (
+                        <SolidButton
+                          key={q}
+                          color="secondary"
+                          size="sm"
+                          label={q}
+                          className="h-auto self-start rounded-3xl px-4 py-2"
+                          textClassName="text-left leading-tight font-normal text-foreground"
+                          onPress={() => { void actions.send(q); }}
                         />
-                      )}
+                      ))}
+                    </View>
+                  )}
                 </View>
               );
             })}

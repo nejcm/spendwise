@@ -1,7 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { seedDefaults } from './seed';
 
-const DATABASE_VERSION = 4;
+const DATABASE_VERSION = 5;
 
 /**
  * Runs on first open. Sets WAL mode and runs schema migrations via PRAGMA user_version.
@@ -139,5 +139,31 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
       ALTER TABLE transactions ADD COLUMN location TEXT;
     `);
     await db.execAsync(`PRAGMA user_version = 3`);
+  }
+
+  // Note: version 4 was reserved but had no schema changes. This block handles
+  // upgrades from any version ≤ 4 and fresh installs.
+  if (currentDbVersion < 5) {
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS tags (
+        id TEXT PRIMARY KEY NOT NULL,
+        name TEXT NOT NULL,
+        color TEXT NOT NULL,
+        sort_order INTEGER NOT NULL DEFAULT 999999,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s','now'))
+      );
+
+      CREATE TABLE IF NOT EXISTS transaction_tags (
+        transaction_id TEXT NOT NULL REFERENCES transactions(id) ON DELETE CASCADE,
+        tag_id TEXT NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+        PRIMARY KEY (transaction_id, tag_id)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_transaction_tags_transaction
+        ON transaction_tags(transaction_id);
+      CREATE INDEX IF NOT EXISTS idx_transaction_tags_tag
+        ON transaction_tags(tag_id);
+    `);
+    await db.execAsync(`PRAGMA user_version = 5`);
   }
 }

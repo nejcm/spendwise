@@ -12,6 +12,7 @@ describe('parseTransactionsRouteSeed', () => {
       filters: {
         accountId: 'acc_1',
         categoryId: 'cat_1',
+        tagId: null,
         type: 'expense',
       },
     });
@@ -25,6 +26,7 @@ describe('parseTransactionsRouteSeed', () => {
       filters: {
         accountId: null,
         categoryId: null,
+        tagId: null,
         type: null,
       },
     });
@@ -39,6 +41,19 @@ describe('parseTransactionsRouteSeed', () => {
       filters: {
         accountId: 'acc_1',
         categoryId: null,
+        tagId: null,
+        type: null,
+      },
+    });
+  });
+
+  it('parses tagId from route params', () => {
+    expect(parseTransactionsRouteSeed({ tagId: 'tag_1' })).toEqual({
+      search: '',
+      filters: {
+        accountId: null,
+        categoryId: null,
+        tagId: 'tag_1',
         type: null,
       },
     });

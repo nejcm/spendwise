@@ -86,6 +86,15 @@ export const queryKeys = {
     home: ['recommendations', 'home'] as const,
   },
 
+  // ─── Tags ───
+  tags: {
+    all: ['tags'] as const,
+    forTransaction: (transactionId: string) =>
+      ['tags', 'transaction', transactionId] as const,
+    transactionIds: (tagId: string) =>
+      ['tags', 'transaction-ids', tagId] as const,
+  },
+
   // ─── Global Budget ───
   globalBudget: {
     all: ['global-budget'] as const,

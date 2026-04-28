@@ -7,6 +7,7 @@ export type TransactionRouteParams = {
   accountId?: ParamValue;
   categoryId?: ParamValue;
   search?: ParamValue;
+  tagId?: ParamValue;
   type?: ParamValue;
 };
 
@@ -35,6 +36,7 @@ export function parseTransactionsRouteSeed(params: TransactionRouteParams): Tran
     filters: {
       accountId: firstValue(params.accountId) ?? null,
       categoryId: firstValue(params.categoryId) ?? null,
+      tagId: firstValue(params.tagId) ?? null,
       type: parseType(params.type),
     },
   };

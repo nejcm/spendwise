@@ -41,9 +41,9 @@ export function GlobalBudgetCard({ selection, currency }: GlobalBudgetCardProps)
       <Pressable
         onPress={handlePress}
         style={getPressedStyle}
-        className="mb-6 flex-row items-center gap-3 rounded-2xl border border-dashed border-border bg-card px-5 py-4"
+        className="mb-6 flex-row items-center gap-3 rounded-2xl border-2 border-dashed border-border bg-card p-3"
       >
-        <PlusIcon size={20} colorClassName="accent-muted-foreground" />
+        <PlusIcon size={30} colorClassName="accent-muted-foreground" />
         <View className="flex-1">
           <Text className="text-sm font-medium text-foreground">
             {translate('stats.global_budget_set')}

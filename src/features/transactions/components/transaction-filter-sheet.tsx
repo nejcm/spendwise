@@ -6,16 +6,19 @@ import { View } from 'react-native';
 import { OutlineButton, SolidButton, Text } from '@/components/ui';
 import { ModalSheet } from '@/components/ui/modal-sheet';
 import { useAccounts } from '@/features/accounts/hooks';
+import { useTags } from '@/features/tags/hooks';
 import { translate } from '@/lib/i18n';
 
-const SNAP_POINTS = ['50%'];
+const SNAP_POINTS = ['60%'];
 
 export type TransactionFilterSheetProps = {
   ref?: ModalSheetRef<any>;
   selectedType: TransactionType | null;
   selectedAccountId: string | null;
+  selectedTagId: string | null;
   onSelectType: (type: TransactionType | null) => void;
   onSelectAccount: (id: string | null) => void;
+  onSelectTag: (id: string | null) => void;
   onClearAll: () => void;
   onClose: () => void;
 };
@@ -24,12 +27,15 @@ export function TransactionFilterSheet({
   ref,
   selectedType,
   selectedAccountId,
+  selectedTagId,
   onSelectType,
   onSelectAccount,
+  onSelectTag,
   onClearAll,
   onClose,
 }: TransactionFilterSheetProps) {
   const { data: accounts = [] } = useAccounts();
+  const { data: tags = [] } = useTags();
   const activeAccounts = accounts.filter((a) => !a.is_archived);
 
   return (
@@ -86,6 +92,26 @@ export function TransactionFilterSheet({
                     size="xs"
                     label={account.icon ? `${account.icon} ${account.name}` : account.name}
                     onPress={() => onSelectAccount(selectedAccountId === account.id ? null : account.id)}
+                  />
+                ))}
+              </View>
+            </View>
+          )}
+
+          {tags.length > 0 && (
+            <View className="gap-3">
+              <Text className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+                {translate('settings.tags')}
+              </Text>
+              <View className="flex-row flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <SolidButton
+                    key={tag.id}
+                    className="items-center rounded-2xl px-3"
+                    color={selectedTagId === tag.id ? 'default' : 'secondary'}
+                    size="xs"
+                    label={tag.name}
+                    onPress={() => onSelectTag(selectedTagId === tag.id ? null : tag.id)}
                   />
                 ))}
               </View>

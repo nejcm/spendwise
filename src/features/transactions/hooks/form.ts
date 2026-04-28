@@ -32,7 +32,7 @@ export function useTransactionForm({ initialValues, onSuccess }: UseTransactionF
   const id = initialValues?.id;
   const preferredCurrency = useAppStore.use.currency();
   const createTransaction = useCreateTransaction(onSuccess);
-  const updateTransaction = useUpdateTransaction();
+  const updateTransaction = useUpdateTransaction(onSuccess);
   const lastUsedCurrencies = useAppStore(selectLastUsedCurrencies);
   const orderedCurrencies = React.useMemo(() => mergeCurrencyArrays(lastUsedCurrencies, CURRENCY_OPTIONS), [lastUsedCurrencies]);
   const transactionFormPrefs = useAppStore(selectTransactionFormPrefs);

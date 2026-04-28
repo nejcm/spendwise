@@ -2,9 +2,12 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import type { Account } from '../accounts/types';
 import type { Category } from '../categories/types';
 import type { ScheduledTransaction, ScheduledTransactionRun } from '../scheduled-transactions/types';
+import type { Tag } from '../tags/types';
 import type { Transaction } from '../transactions/types';
 import { clearDbData } from '@/lib/sqlite/db';
 import { getAppState } from '@/lib/store/store';
+
+const CURRENT_BACKUP_VERSION = 3;
 
 export type BackupData = {
   version: number;
@@ -15,6 +18,8 @@ export type BackupData = {
   transactions: Transaction[];
   recurring_rules: ScheduledTransaction[];
   recurring_rule_runs: ScheduledTransactionRun[];
+  tags?: Tag[];
+  transaction_tags?: Array<{ transaction_id: string; tag_id: string }>;
 };
 
 export async function exportBackup(db: SQLiteDatabase): Promise<BackupData> {
@@ -24,18 +29,22 @@ export async function exportBackup(db: SQLiteDatabase): Promise<BackupData> {
     transactions,
     recurring_rules,
     recurring_rule_runs,
+    tags,
+    transaction_tags,
   ] = await Promise.all([
     db.getAllAsync<Account>('SELECT * FROM accounts'),
     db.getAllAsync<Category>('SELECT * FROM categories'),
     db.getAllAsync<Transaction>('SELECT * FROM transactions ORDER BY date DESC'),
     db.getAllAsync<ScheduledTransaction>('SELECT * FROM recurring_rules'),
     db.getAllAsync<ScheduledTransactionRun>('SELECT * FROM recurring_rule_runs'),
+    db.getAllAsync<Tag>('SELECT * FROM tags ORDER BY sort_order ASC'),
+    db.getAllAsync<{ transaction_id: string; tag_id: string }>('SELECT * FROM transaction_tags'),
   ]);
 
   const baseCurrency = getAppState().currency;
 
   return {
-    version: 2,
+    version: CURRENT_BACKUP_VERSION,
     exported_at: new Date().toISOString(),
     baseCurrency,
     accounts,
@@ -43,6 +52,8 @@ export async function exportBackup(db: SQLiteDatabase): Promise<BackupData> {
     transactions,
     recurring_rules,
     recurring_rule_runs,
+    tags,
+    transaction_tags,
   };
 }
 
@@ -55,6 +66,10 @@ export function validateBackup(parsed: unknown): BackupData {
 
   if (!data.version) {
     throw new Error('invalid');
+  }
+
+  if (typeof data.version === 'number' && data.version > CURRENT_BACKUP_VERSION) {
+    throw new Error('version_too_new');
   }
 
   const requiredArrays: (keyof BackupData)[] = [
@@ -79,6 +94,7 @@ export async function importBackup(db: SQLiteDatabase, backup: BackupData): Prom
   await clearDbData(db);
 
   await db.withTransactionAsync(async () => {
+    await db.execAsync('PRAGMA foreign_keys = ON;');
     for (const row of backup.categories) {
       await db.runAsync(
         `INSERT INTO categories (id, name, icon, color, budget, sort_order, created_at)
@@ -159,6 +175,20 @@ export async function importBackup(db: SQLiteDatabase, backup: BackupData): Prom
         `INSERT INTO recurring_rule_runs (id, rule_id, scheduled_for_date, transaction_id, created_at)
          VALUES (?, ?, ?, ?, ?)`,
         [row.id, row.rule_id, row.scheduled_for_date, row.transaction_id, row.created_at],
+      );
+    }
+
+    for (const row of (backup.tags ?? [])) {
+      await db.runAsync(
+        `INSERT INTO tags (id, name, color, sort_order, created_at) VALUES (?, ?, ?, ?, ?)`,
+        [row.id, row.name, row.color, row.sort_order ?? 999999, row.created_at],
+      );
+    }
+
+    for (const row of (backup.transaction_tags ?? [])) {
+      await db.runAsync(
+        `INSERT INTO transaction_tags (transaction_id, tag_id) VALUES (?, ?)`,
+        [row.transaction_id, row.tag_id],
       );
     }
   });

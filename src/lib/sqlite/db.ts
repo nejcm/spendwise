@@ -6,6 +6,8 @@ export type ClearSelectedDataOptions = {
 };
 
 const deleteTransactionsSql = 'DELETE FROM transactions;';
+const deleteTransactionTagsSql = 'DELETE FROM transaction_tags;';
+const deleteTagsSql = 'DELETE FROM tags;';
 const deleteRecurringRuleRunsSql = 'DELETE FROM recurring_rule_runs;';
 const deleteRecurringRulesSql = 'DELETE FROM recurring_rules;';
 const deleteAccountsSql = 'DELETE FROM accounts;';
@@ -18,6 +20,8 @@ const deleteCurrencyRatesSql = 'DELETE FROM currency_rates;';
 export async function clearDbData(db: SQLiteDatabase): Promise<void> {
   await db.execAsync(`
     PRAGMA foreign_keys = OFF;
+    ${deleteTransactionTagsSql}
+    ${deleteTagsSql}
     ${deleteRecurringRuleRunsSql}
     ${deleteRecurringRulesSql}
     ${deleteTransactionsSql}

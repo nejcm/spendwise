@@ -36,6 +36,7 @@ export type UseChatReturn = {
   readonly isStreaming: boolean;
   readonly errorMessage: string | null;
   readonly toolStatus: string | null;
+  readonly lastCompletedAssistantId: string | null;
   readonly actions: ChatActions;
   readonly scroll: ChatScrollHandlers;
   readonly getMessageRenderInfo: (message: ChatMessage) => MessageRenderInfo;

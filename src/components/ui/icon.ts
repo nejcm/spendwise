@@ -59,6 +59,7 @@ import {
   Shield as LucideShield,
   SlidersHorizontal as LucideSlidersHorizontal,
   Sun as LucideSun,
+  Tag as LucideTag,
   TrashIcon as LucideTrashIcon,
   TrendingDown as LucideTrendingDown,
   TrendingUp as LucideTrendingUp,
@@ -120,6 +121,7 @@ export const Printer = withUniwind(LucidePrinter);
 export const RefreshCcw = withUniwind(LucideRefreshCcw);
 export const ScanLine = withUniwind(LucideScanLine);
 export const SendHorizonal = withUniwind(LucideSendHorizonal);
+export const Tag = withUniwind(LucideTag);
 export const Share = withUniwind(LucideShare);
 export const Shield = withUniwind(LucideShield);
 export const Sun = withUniwind(LucideSun);

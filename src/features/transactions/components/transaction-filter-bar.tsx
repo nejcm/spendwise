@@ -68,10 +68,12 @@ export function TransactionFilterBar({ filters, hasActiveFilters, updateFilters 
         ref={filterSheet.ref}
         selectedType={filters.type}
         selectedAccountId={filters.accountId}
+        selectedTagId={filters.tagId}
         onSelectType={(type) => updateFilters({ type })}
         onSelectAccount={(id) => updateFilters({ accountId: id })}
+        onSelectTag={(id) => updateFilters({ tagId: id })}
         onClearAll={() => {
-          updateFilters({ type: null, accountId: null, categoryId: null });
+          updateFilters({ type: null, accountId: null, categoryId: null, tagId: null });
         }}
         onClose={filterSheet.dismiss}
       />

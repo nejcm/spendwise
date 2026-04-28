@@ -7,6 +7,7 @@ import { cn } from 'tailwind-variants';
 import { DEFAULT_COLOR } from '@/components/color-selector';
 import { FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
 import { formatShortDate } from '@/features/formatting/helpers';
+import { TransactionTagChips } from '@/features/tags/transaction-tag-chips';
 import { useAppStore } from '@/lib/store/store';
 import { hexWithOpacity } from '@/lib/theme/colors';
 
@@ -41,6 +42,7 @@ export const TransactionCard = React.memo(({ transaction, className }: Transacti
           {transaction.merchant_name ? ` · ${transaction.category_name}` : ''}
           {transaction.note ? ` · ${transaction.note}` : ''}
         </Text>
+        <TransactionTagChips transactionId={transaction.id} />
       </View>
       <View className="items-end">
         <FormattedCurrency

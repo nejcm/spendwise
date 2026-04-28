@@ -38,6 +38,7 @@ export default function AppLayout() {
       <Stack.Screen name="settings/formatting" />
       <Stack.Screen name="settings/import-export" />
       <Stack.Screen name="settings/privacy" />
+      <Stack.Screen name="settings/tags" />
       <Stack.Screen name="settings/terms" />
     </Stack>
   );

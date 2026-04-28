@@ -3,6 +3,7 @@ import type { OptionType } from '@/components/ui';
 import type { Account } from '@/features/accounts/types';
 import type { CurrencyKey } from '@/features/currencies';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import * as React from 'react';
 import { ScrollView, View } from 'react-native';
 import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,6 +13,8 @@ import { getFieldError } from '@/components/ui/form-utils';
 import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { CategoryPicker } from '@/features/categories/category-picker';
 import { CURRENCY_IMAGES } from '@/features/currencies/images';
+import { useSetTransactionTags, useTagsForTransaction } from '@/features/tags/hooks';
+import { TagSelector } from '@/features/tags/tag-selector';
 import { TransactionBaseAmountSync } from '@/features/transactions/components/transaction-base-amount-sync';
 import {
   TRANSACTION_TYPE_OPTIONS,
@@ -33,6 +36,8 @@ type TransactionFormBodyProps = {
   preferredCurrency: CurrencyKey;
   setBaseAmountIsManual: (value: boolean) => void;
   isSheet?: boolean;
+  tagIds: string[];
+  onTagsChange: (ids: string[]) => void;
 };
 
 function TransactionFormBody({
@@ -44,6 +49,8 @@ function TransactionFormBody({
   preferredCurrency,
   setBaseAmountIsManual,
   isSheet,
+  tagIds,
+  onTagsChange,
 }: TransactionFormBodyProps) {
   const HScrollView = isSheet ? BottomSheetScrollView : ScrollView;
   return (
@@ -270,11 +277,31 @@ function TransactionFormBody({
           />
         )}
       />
+
+      <View>
+        <Text className="mb-2 text-sm font-medium">{translate('transactions.tags_label')}</Text>
+        <TagSelector selectedIds={tagIds} onChange={onTagsChange} />
+      </View>
     </>
   );
 }
 
 export function TransactionForm({ initialValues, onSuccess, onCancel }: TransactionFormProps) {
+  const [tagIds, setTagIds] = React.useState<string[]>([]);
+  const { data: existingTags } = useTagsForTransaction(initialValues?.id);
+  const setTransactionTags = useSetTransactionTags();
+
+  React.useEffect(() => {
+    if (existingTags) {
+      setTagIds(existingTags.map((t) => t.id));
+    }
+  }, [existingTags]);
+
+  const handleSuccess = React.useCallback(async (transactionId?: string) => {
+    if (transactionId) await setTransactionTags.mutateAsync({ transactionId, tagIds });
+    onSuccess?.(transactionId);
+  }, [tagIds, onSuccess, setTransactionTags]);
+
   const {
     form,
     accounts,
@@ -285,7 +312,7 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
     orderedCurrencies,
     preferredCurrency,
     setBaseAmountIsManual,
-  } = useTransactionForm({ initialValues, onSuccess });
+  } = useTransactionForm({ initialValues, onSuccess: handleSuccess });
 
   return (
     <View className="flex-1 gap-3">
@@ -298,6 +325,8 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
         preferredCurrency={preferredCurrency}
         setBaseAmountIsManual={setBaseAmountIsManual}
         isSheet={false}
+        tagIds={tagIds}
+        onTagsChange={setTagIds}
       />
       <View className="mt-auto flex-row gap-3 pt-4">
         <form.Subscribe
@@ -333,6 +362,19 @@ export function TransactionFormSheet({
   onSuccess,
   onCancel,
 }: TransactionFormSheetProps) {
+  const [tagIds, setTagIds] = React.useState<string[]>([]);
+  const { data: existingTags } = useTagsForTransaction(initialValues?.id);
+  const setTransactionTags = useSetTransactionTags();
+
+  React.useEffect(() => {
+    if (existingTags) setTagIds(existingTags.map((t) => t.id));
+  }, [existingTags]);
+
+  const handleSuccess = React.useCallback(async (transactionId?: string) => {
+    if (transactionId) await setTransactionTags.mutateAsync({ transactionId, tagIds });
+    onSuccess?.(transactionId);
+  }, [tagIds, onSuccess, setTransactionTags]);
+
   const {
     form,
     accounts,
@@ -343,7 +385,7 @@ export function TransactionFormSheet({
     orderedCurrencies,
     preferredCurrency,
     setBaseAmountIsManual,
-  } = useTransactionForm({ initialValues, onSuccess });
+  } = useTransactionForm({ initialValues, onSuccess: handleSuccess });
 
   const isLoading = createTransaction.isPending || updateTransaction.isPending;
   const insets = useSafeAreaInsets();
@@ -364,6 +406,8 @@ export function TransactionFormSheet({
           preferredCurrency={preferredCurrency}
           setBaseAmountIsManual={setBaseAmountIsManual}
           isSheet={true}
+          tagIds={tagIds}
+          onTagsChange={setTagIds}
         />
       </BottomSheetKeyboardAwareScrollView>
       <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>

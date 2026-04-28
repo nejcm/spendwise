@@ -23,6 +23,7 @@ export type ChatState = {
   errorMessage: string | null;
   toolStatus: string | null;
   lastSubmittedUserMessageId: string | null;
+  lastCompletedAssistantId: string | null;
   viewportHeight: number;
 };
 
@@ -34,6 +35,7 @@ function initialState(): ChatState {
     errorMessage: null,
     toolStatus: null,
     lastSubmittedUserMessageId: null,
+    lastCompletedAssistantId: null,
     viewportHeight: 0,
   };
 }
@@ -100,6 +102,7 @@ export function useChat(): UseChatReturn {
       errorMessage: null,
       toolStatus: null,
       lastSubmittedUserMessageId: userMessage.id,
+      lastCompletedAssistantId: null,
       streamingAssistantId: assistantPlaceholder.id,
       streamedAssistantContent: '',
       isStreaming: true,
@@ -136,6 +139,9 @@ export function useChat(): UseChatReturn {
             : m
         ));
         setAiMessages(finalMessages);
+        if (isMountedRef.current) {
+          setChatState((prev) => ({ ...prev, lastCompletedAssistantId: assistantPlaceholder.id }));
+        }
       }
       catch (err) {
         if (controller.signal.aborted) return;
@@ -246,7 +252,10 @@ export function useChat(): UseChatReturn {
     hasKey: isAiEnabled,
     messages,
     draftQuestion,
-    ...chatState,
+    isStreaming: chatState.isStreaming,
+    errorMessage: chatState.errorMessage,
+    toolStatus: chatState.toolStatus,
+    lastCompletedAssistantId: chatState.lastCompletedAssistantId,
     actions: {
       send,
       setDraft: setAiDraftQuestion,

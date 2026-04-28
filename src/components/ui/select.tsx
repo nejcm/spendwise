@@ -30,11 +30,11 @@ const selectTv = tv({
   variants: {
     color: {
       default: {
-        input: 'border-border bg-input focus:border-gray-800 focus:dark:border-gray-300',
+        input: 'border-border bg-input',
         inputValue: 'text-foreground',
       },
       secondary: {
-        input: 'border-gray-300 bg-gray-200 focus:border-gray-800 dark:border-border dark:bg-input focus:dark:border-gray-300',
+        input: 'border-gray-300 bg-gray-200 dark:border-border dark:bg-input',
         inputValue: 'text-foreground',
       },
     },
@@ -78,9 +78,14 @@ const selectTv = tv({
     },
     error: {
       true: {
-        input: 'border-danger-600 focus:border-danger-600 dark:border-danger-600',
+        input: 'border-danger-600 dark:border-danger-600',
         label: '',
         inputValue: '',
+      },
+    },
+    focused: {
+      true: {
+        input: 'border-gray-800 dark:border-gray-300',
       },
     },
     disabled: {
@@ -93,6 +98,7 @@ const selectTv = tv({
     size: 'md',
     color: 'default',
     error: false,
+    focused: false,
     disabled: false,
   },
 });
@@ -297,6 +303,7 @@ export function Select<T extends string | number>({
   ...rest
 }: SelectProps<T>) {
   const modal = useModalSheet();
+  const [isFocussed, setIsFocussed] = React.useState(false);
   const [selectedOption, setSelectedOption] = React.useState<OptionType<T> | null>(() => options.find((t) => t.value === value) ?? null);
 
   const onSelectOption = React.useCallback(
@@ -312,11 +319,12 @@ export function Select<T extends string | number>({
     () =>
       selectTv({
         error: Boolean(error),
+        focused: isFocussed,
         disabled,
         size,
         color,
       }),
-    [error, disabled, size, color],
+    [error, isFocussed, disabled, size, color],
   );
 
   return (
@@ -330,6 +338,10 @@ export function Select<T extends string | number>({
         <Pressable
           className={cn(styles.input(), inputClassName)}
           disabled={disabled}
+          onFocus={() => setIsFocussed(true)}
+          onBlur={() => setIsFocussed(false)}
+          onPressIn={() => setIsFocussed(true)}
+          onPressOut={() => setIsFocussed(false)}
           onPress={() => {
             Keyboard.dismiss();
             modal.present();

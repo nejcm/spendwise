@@ -46,5 +46,4 @@ export type FilterState = {
   categoryId: string | null;
   type: TransactionType | null;
   accountId: string | null;
-  tagId: string | null;
 };

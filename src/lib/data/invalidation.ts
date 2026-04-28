@@ -47,9 +47,6 @@ const INVALIDATION_RULES = {
   globalBudget: [
     queryKeys.globalBudget.all,
   ],
-  tag: [
-    queryKeys.tags.all,
-  ],
 } as const;
 
 /**

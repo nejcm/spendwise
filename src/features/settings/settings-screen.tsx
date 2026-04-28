@@ -5,7 +5,7 @@ import * as React from 'react';
 
 import { FocusAwareStatusBar, Image, ScrollView, Text, useModalSheet, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
-import { ALargeSmall, Banknote, Bell, Bot, BotMessageSquare, DatabaseZap, HelpCircle, Import, LayoutGrid, Link, ListChecks, PieChart, RefreshCcw, ScanLine, Settings, Share, Shield, Tag, User } from '@/components/ui/icon';
+import { ALargeSmall, Banknote, Bell, Bot, BotMessageSquare, DatabaseZap, HelpCircle, Import, LayoutGrid, Link, ListChecks, PieChart, RefreshCcw, ScanLine, Settings, Share, Shield, User } from '@/components/ui/icon';
 import { config } from '@/config';
 import { triggerScanPicker } from '@/lib/store/local-store';
 import { selectProfile, useAppStore } from '@/lib/store/store';
@@ -63,11 +63,6 @@ export function SettingsScreen() {
               icon={<RefreshCcw colorClassName={iconColor} size={20} />}
               text="settings.scheduled"
               onPress={() => router.push('/scheduled' as never)}
-            />
-            <SettingsItem
-              icon={<Tag colorClassName={iconColor} size={20} />}
-              text="settings.tags"
-              onPress={() => router.push('/settings/tags' as never)}
             />
             <SettingsItem
               icon={<BotMessageSquare colorClassName={iconColor} size={20} />}

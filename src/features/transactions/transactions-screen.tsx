@@ -11,7 +11,6 @@ import { PeriodSelector } from '@/components/period-selector';
 import { PeriodSwipeContainer } from '@/components/period-swipe-container';
 import { FocusAwareStatusBar, Input, inputDefaultDefaults, inputDefaults } from '@/components/ui';
 import { X } from '@/components/ui/icon';
-import { useTransactionIdsForTag } from '@/features/tags/hooks';
 import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
@@ -34,8 +33,7 @@ export function TransactionsScreen() {
   const [search, setSearch] = useState(initialRouteSeed.search);
   const [filters, setFilters] = useState<FilterState>(initialRouteSeed.filters);
   const [debouncedSearch] = useDebouncedValue(search, debounceSettings);
-  const { categoryId, type, accountId, tagId } = filters;
-  const { data: tagTransactionIds, isLoading: tagIdsLoading } = useTransactionIdsForTag(tagId);
+  const { categoryId, type, accountId } = filters;
   const updateFilters = React.useCallback((newFilters: Partial<FilterState>) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));
   }, [setFilters]);
@@ -45,21 +43,15 @@ export function TransactionsScreen() {
   const db = useSQLiteContext();
   usePrefetchAdjacentPeriods(selection, (start, end) => transactionsQueryOptions(db, start, end));
 
-  const tagIdSet = React.useMemo(
-    () => (tagTransactionIds ? new Set(tagTransactionIds) : null),
-    [tagTransactionIds],
-  );
-
   const filtered = useMemo(() => {
     const q = debouncedSearch?.trim().toLowerCase();
     const hasQuery = q.length > 0;
-    if (hasQuery || categoryId || type || accountId || tagId) {
+    if (hasQuery || categoryId || type || accountId) {
       return transactions.filter(
         (t) => {
           if (categoryId && t.category_id !== categoryId) return false;
           if (type && t.type !== type) return false;
           if (accountId && t.account_id !== accountId) return false;
-          if (tagId && (tagIdsLoading || !tagIdSet || !tagIdSet.has(t.id))) return false;
           if (hasQuery) {
             return t.note?.toLowerCase().includes(q)
               || t.category_name?.toLowerCase().includes(q)
@@ -71,7 +63,7 @@ export function TransactionsScreen() {
       );
     }
     return transactions;
-  }, [transactions, debouncedSearch, categoryId, type, accountId, tagId, tagIdSet, tagIdsLoading]);
+  }, [transactions, debouncedSearch, categoryId, type, accountId]);
 
   return (
     <PeriodSwipeContainer selection={selection}>
@@ -103,7 +95,7 @@ export function TransactionsScreen() {
       </View>
       <TransactionFilterBar
         filters={filters}
-        hasActiveFilters={categoryId !== null || type !== null || accountId !== null || tagId !== null}
+        hasActiveFilters={categoryId !== null || type !== null || accountId !== null}
         updateFilters={updateFilters}
       />
       <View className="flex-1">

@@ -536,7 +536,6 @@
     "stats": "Statistiken",
     "support": "Support",
     "support_us": "Unterstütze uns",
-    "tags": "Tags",
     "terms": "Nutzungsbedingungen",
     "theme": {
       "dark": "Dunkel",
@@ -586,16 +585,6 @@
     "trend_monthly": "Wöchentliche Aufschlüsselung",
     "trend_yearly": "Monatliche Aufschlüsselung"
   },
-  "tags": {
-    "add": "Tag hinzufügen",
-    "color": "Farbe",
-    "delete_confirm": "Möchtest du \"{{name}}\" wirklich löschen?",
-    "edit": "Tag bearbeiten",
-    "name_placeholder": "z. B. Geschäftlich",
-    "name_required": "Name ist erforderlich",
-    "no_tags": "Noch keine Tags. Füge einen hinzu, um Transaktionen zu beschriften.",
-    "title": "Tags"
-  },
   "transactions": {
     "account": "Konto",
     "account_required": "Konto ist erforderlich",
@@ -625,7 +614,6 @@
     "note": "Notiz",
     "note_placeholder": "📝 Notiz",
     "search": "Transaktionen suchen...",
-    "tags_label": "Tags",
     "title": "Transaktionen",
     "transfer": "Umbuchung",
     "type": "Typ",

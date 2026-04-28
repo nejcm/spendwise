@@ -85,4 +85,11 @@ export const queryKeys = {
     all: ['recommendations'] as const,
     home: ['recommendations', 'home'] as const,
   },
+
+  // ─── Global Budget ───
+  globalBudget: {
+    all: ['global-budget'] as const,
+    spend: (startDate: number, endDate: number) =>
+      ['global-budget', 'spend', startDate, endDate] as const,
+  },
 } as const;

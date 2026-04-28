@@ -151,7 +151,7 @@ function TransactionFormBody({
           children={(field) => (
             <DateInput
               size="lg"
-              containerClassName="flex-1"
+              containerClassName="flex-1 min-w-[45%]"
               className="px-3"
               value={field.state.value}
               onChange={field.handleChange}
@@ -165,7 +165,7 @@ function TransactionFormBody({
           children={(field) => (
             <CategoryPicker
               size="lg"
-              containerClassName="flex-1"
+              containerClassName="flex-1 min-w-[45%]"
               inputClassName="px-3"
               showChevron={false}
               selectedItemTextProps={{ numberOfLines: 1 }}

@@ -16,10 +16,8 @@ export type SheetConfig
       | { type: 'edit-account'; accountId: string; initialData: AccountFormData }
       | { type: 'add-category' }
       | { type: 'edit-category'; categoryId: string; initialValues: CategoryInitialValues }
-      | {
-        type: 'add-scheduled';
-        initialValues?: ScheduledTransactionInitialValues;
-      });
+      | { type: 'add-scheduled'; initialValues?: ScheduledTransactionInitialValues }
+      | { type: 'set-global-budget'; currentAmountCents: number | null });
 
 export type SheetType = SheetConfig['type'];
 
@@ -34,4 +32,5 @@ export const SHEET_SNAP_POINTS: Record<SheetType, string[]> = {
   'add-category': ['80%'],
   'edit-category': ['80%'],
   'add-scheduled': ['92%'],
+  'set-global-budget': ['50%'],
 };

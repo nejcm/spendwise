@@ -1,10 +1,11 @@
 import type { MonthBudgetResult } from '../hooks';
-import type { BudgetViewMode } from '../types';
+import type { BudgetPeriodSelection, BudgetViewMode } from '../types';
 import type { CurrencyKey } from '@/features/currencies';
 import { ScrollView, SolidButton, View } from '@/components/ui';
 import { SkeletonBox } from '@/components/ui/skeleton';
 import { translate } from '@/lib/i18n';
 import { defaultStyles } from '@/lib/theme/styles';
+import { GlobalBudgetCard } from './global-budget-card';
 import { BudgetMonthCardList } from './budget-month-card';
 import { BudgetMonthChart } from './budget-month-chart';
 import { BudgetSummary } from './budget-summary';
@@ -17,6 +18,7 @@ type BudgetRangeViewProps = {
   isLoading: boolean;
   viewMode: BudgetViewMode;
   onViewModeChange: (v: BudgetViewMode) => void;
+  selection: BudgetPeriodSelection;
 };
 
 const viewModes = ['cards', 'chart'] as const;
@@ -25,7 +27,7 @@ const translations = {
   chart: translate('stats.budget_view_chart'),
 };
 
-export function BudgetRangeView({ months, totalBudget, totalSpent, currency, isLoading, viewMode, onViewModeChange }: BudgetRangeViewProps) {
+export function BudgetRangeView({ months, totalBudget, totalSpent, currency, isLoading, viewMode, onViewModeChange, selection }: BudgetRangeViewProps) {
   if (isLoading) {
     return <SkeletonBox height={200} className="mx-4 mt-4" />;
   }
@@ -33,6 +35,7 @@ export function BudgetRangeView({ months, totalBudget, totalSpent, currency, isL
     <View className="flex-1">
       <ScrollView className="flex-1" style={defaultStyles.transparentBg}>
         <View className="px-4 pt-1 pb-8">
+          <GlobalBudgetCard selection={selection} currency={currency} />
           {totalBudget > 0 && (
             <BudgetSummary
               totalBudget={totalBudget}

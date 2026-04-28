@@ -7,6 +7,7 @@ import { ModalSheet, Text, View } from '@/components/ui';
 import { AccountFormSheet } from '@/features/accounts/components/account-form';
 import { CategoryFormSheet } from '@/features/categories/category-form';
 import { ScheduledTransactionFormSheet } from '@/features/scheduled-transactions/components/scheduled-transaction-form';
+import { GlobalBudgetForm } from '@/features/stats/components/global-budget-form';
 import { ScanFab } from '@/features/transactions/components/scan-fab';
 import { TransactionFormSheet } from '@/features/transactions/components/transaction-form';
 import { translate } from '@/lib/i18n';
@@ -22,6 +23,7 @@ const SHEET_DATA: Record<SheetType, { title: string; content?: React.ReactNode }
   'add-category': { title: translate('categories.add') },
   'edit-category': { title: translate('categories.edit') },
   'add-scheduled': { title: translate('scheduled.add') },
+  'set-global-budget': { title: translate('stats.global_budget_label') },
 };
 
 /* function DeleteAccountAction({ id, name }: { id: string; name: string }) {
@@ -186,6 +188,15 @@ export function GlobalSheet() {
       children = (
         <ScheduledTransactionFormSheet
           initialValues={config.initialValues}
+          onSuccess={closeSheet}
+          onCancel={closeSheet}
+        />
+      );
+      break;
+    case 'set-global-budget':
+      children = (
+        <GlobalBudgetForm
+          currentAmountCents={config.currentAmountCents}
           onSuccess={closeSheet}
           onCancel={closeSheet}
         />

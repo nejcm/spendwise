@@ -1,5 +1,6 @@
 import type { BudgetPeriodSelection, MonthSlice } from './types';
 import { format } from 'date-fns';
+import { getMonthBoundaries } from '@/lib/date/helpers';
 
 const MAX_MONTH_SLICES = 36;
 
@@ -23,6 +24,26 @@ export function expandToMonthSlices(selection: BudgetPeriodSelection): MonthSlic
     }
   }
   return slices;
+}
+
+/** Returns [startUnix, endUnix] for the full span of a BudgetPeriodSelection. */
+export function getBudgetSelectionBoundaries(selection: BudgetPeriodSelection): [number, number] {
+  if (selection.mode === 'month') {
+    return getMonthBoundaries(selection.year, selection.month);
+  }
+  if (selection.mode === 'year') {
+    const [start] = getMonthBoundaries(selection.year, 1);
+    const [, end] = getMonthBoundaries(selection.year, 12);
+    return [start, end];
+  }
+  const [start] = getMonthBoundaries(selection.startYear, selection.startMonth);
+  const [, end] = getMonthBoundaries(selection.endYear, selection.endMonth);
+  return [start, end];
+}
+
+/** Scale a monthly budget to the full span of a BudgetPeriodSelection. */
+export function scaleGlobalBudget(monthlyBudget: number, selection: BudgetPeriodSelection): number {
+  return monthlyBudget * expandToMonthSlices(selection).length;
 }
 
 export function defaultBudgetPeriodSelection(): BudgetPeriodSelection {

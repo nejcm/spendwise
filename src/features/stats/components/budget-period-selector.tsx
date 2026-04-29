@@ -26,17 +26,16 @@ export function BudgetPeriodSelector({ selection, onChange }: SelectorProps) {
 
   return (
     <>
-      <View className="flex-row items-center justify-center py-1">
-        <GhostButton
-          fullWidth
-          size="lg"
-          onPress={present}
-          hitSlop={12}
-          className="flex-row items-center gap-2"
-          label={budgetPeriodLabel(selection)}
-          iconRight={<ChevronRight size={16} colorClassName="accent-foreground" />}
-        />
-      </View>
+      <GhostButton
+        fullWidth
+        size="md"
+        onPress={present}
+        hitSlop={12}
+        textClassName="text-lg"
+        className="flex-row items-center gap-2"
+        label={budgetPeriodLabel(selection)}
+        iconRight={<ChevronRight size={16} colorClassName="accent-foreground" />}
+      />
       <BudgetPeriodSelectorModal ref={ref} selection={selection} onApply={onChange} />
     </>
   );

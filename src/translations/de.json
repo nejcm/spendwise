@@ -557,6 +557,8 @@
     "budget_no_categories": "Leg ein monatliches Budget für eine Kategorie fest, um zu beginnen, es zu verfolgen",
     "budget_over": "ÜBER",
     "budget_overspent": "Überschritten",
+    "budget_projected": "Prognose",
+    "budget_projected_used": "Prognostiziert",
     "budget_range": "Zeitraum",
     "budget_remaining": "Verbleibend",
     "budget_select_period": "Zeitraum auswählen",

@@ -49,25 +49,25 @@ export function BudgetSummary({ totalBudget, totalSpent, currency, label }: Prop
       </View>
 
       <View className="flex-row border-t border-border">
-        <View className="flex-1 items-center border-r border-border py-3.5">
+        <View className="flex-1 items-center border-r border-border py-3">
           <FormattedCurrency
             value={Math.abs(remaining)}
             currency={currency}
             className={cn('text-base font-semibold', colorClass[1])}
           />
-          <Text className="mt-0.5 text-xs text-muted-foreground">
+          <Text className="text-xs text-muted-foreground">
             {isOver
               ? translate('stats.budget_overspent')
               : translate('stats.budget_remaining')}
           </Text>
         </View>
 
-        <View className="flex-1 items-center py-3.5">
+        <View className="flex-1 items-center py-3">
           <Text className={cn('text-base font-semibold', colorClass[1])}>
             {(ratio * 100).toFixed(0)}
             %
           </Text>
-          <Text className="mt-0.5 text-xs text-muted-foreground">
+          <Text className="text-xs text-muted-foreground">
             {translate('stats.budget_used')}
           </Text>
         </View>

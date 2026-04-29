@@ -17,6 +17,13 @@ function getPeriodBudgetLabel(selection: BudgetPeriodSelection): string {
   return translate('stats.global_budget_period_month');
 }
 
+function getProjectionEndDate(startDate: number, endDate: number): number {
+  const now = Math.floor(Date.now() / 1000);
+  if (now <= startDate) return startDate;
+  if (now >= endDate) return endDate;
+  return now;
+}
+
 type GlobalBudgetCardProps = {
   selection: BudgetPeriodSelection;
   currency: CurrencyKey;
@@ -30,6 +37,12 @@ export function GlobalBudgetCard({ selection, currency }: GlobalBudgetCardProps)
   );
   const scaledBudget = budget != null ? scaleGlobalBudget(budget, selection) : 0;
   const { data: spent = 0 } = useGlobalBudgetSpend(startDate, endDate, budget != null);
+  const projectionEndDate = getProjectionEndDate(startDate, endDate);
+  const { data: spentSoFar = 0 } = useGlobalBudgetSpend(
+    startDate,
+    projectionEndDate,
+    budget != null && projectionEndDate > startDate,
+  );
 
   const handlePress = React.useCallback(() => {
     openSheet({ type: 'set-global-budget', currentBudget: budget ?? null });
@@ -60,12 +73,18 @@ export function GlobalBudgetCard({ selection, currency }: GlobalBudgetCardProps)
   const isOver = remaining < 0;
   const ratio = scaledBudget > 0 ? spent / scaledBudget : 0;
   const colorClass = getColorClass(ratio);
+  const elapsedRatio = projectionEndDate > startDate
+    ? (projectionEndDate - startDate) / (endDate - startDate)
+    : 0;
+  const projectedSpend = elapsedRatio > 0 ? Math.round(spentSoFar / elapsedRatio) : spentSoFar;
+  const projectedRatio = scaledBudget > 0 ? projectedSpend / scaledBudget : 0;
+  const projectionColorClass = getColorClass(projectedRatio);
 
   return (
     <Pressable onPress={handlePress} style={getPressedStyle} className="mb-6">
       <View className="overflow-hidden rounded-2xl bg-card">
         <View className="p-5">
-          <View className="mb-4 flex-row justify-between gap-2">
+          <View className="mb-2 flex-row justify-between gap-2">
             <Text className="text-sm font-medium text-muted-foreground">
               {translate('stats.global_budget_label')}
             </Text>
@@ -97,28 +116,53 @@ export function GlobalBudgetCard({ selection, currency }: GlobalBudgetCardProps)
           />
         </View>
 
-        <View className="flex-row border-t border-border">
-          <View className="flex-1 items-center border-r border-border py-3.5">
-            <FormattedCurrency
-              value={Math.abs(remaining)}
-              currency={currency}
-              className={cn('text-base font-semibold', colorClass[1])}
-            />
-            <Text className="mt-0.5 text-xs text-muted-foreground">
-              {isOver
-                ? translate('stats.budget_overspent')
-                : translate('stats.budget_remaining')}
-            </Text>
+        <View className="border-t border-border">
+          <View className="flex-row">
+            <View className="flex-1 items-center border-r border-border py-3">
+              <FormattedCurrency
+                value={Math.abs(remaining)}
+                currency={currency}
+                className={cn('text-base font-semibold', colorClass[1])}
+              />
+              <Text className="text-xs text-muted-foreground">
+                {isOver
+                  ? translate('stats.budget_overspent')
+                  : translate('stats.budget_remaining')}
+              </Text>
+            </View>
+
+            <View className="flex-1 items-center py-3">
+              <Text className={cn('text-base font-semibold', colorClass[1])}>
+                {(ratio * 100).toFixed(0)}
+                %
+              </Text>
+              <Text className="text-xs text-muted-foreground">
+                {translate('stats.budget_used')}
+              </Text>
+            </View>
           </View>
 
-          <View className="flex-1 items-center py-3.5">
-            <Text className={cn('text-base font-semibold', colorClass[1])}>
-              {(ratio * 100).toFixed(0)}
-              %
-            </Text>
-            <Text className="mt-0.5 text-xs text-muted-foreground">
-              {translate('stats.budget_used')}
-            </Text>
+          <View className="flex-row border-t border-border">
+            <View className="flex-1 items-center border-r border-border py-3">
+              <FormattedCurrency
+                value={projectedSpend}
+                currency={currency}
+                className={cn('text-base font-semibold', projectionColorClass[1])}
+              />
+              <Text className="text-xs text-muted-foreground">
+                {translate('stats.budget_projected')}
+              </Text>
+            </View>
+
+            <View className="flex-1 items-center py-3">
+              <Text className={cn('text-base font-semibold', projectionColorClass[1])}>
+                {(projectedRatio * 100).toFixed(0)}
+                %
+              </Text>
+              <Text className="text-xs text-muted-foreground">
+                {translate('stats.budget_projected_used')}
+              </Text>
+            </View>
           </View>
         </View>
       </View>

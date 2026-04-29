@@ -40,7 +40,8 @@ export function useSetGlobalBudget() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (budget: GlobalBudget | null) => setGlobalBudget(db, budget),
-    onSuccess: () => {
+    onSuccess: (_, budget) => {
+      queryClient.setQueryData(queryKeys.globalBudget.all, budget);
       invalidateFor(queryClient, 'globalBudget');
     },
   });

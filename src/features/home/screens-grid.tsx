@@ -40,7 +40,7 @@ export const ScreensLinksGrid = React.memo(() => {
             className="w-24 items-center gap-1.5 rounded-xl bg-card px-2 py-3"
             style={getPressedStyle}
           >
-            <Icon size={30} strokeWidth={2} colorClassName="accent-foreground" className="my-1" />
+            <Icon size={26} strokeWidth={2} colorClassName="accent-foreground" className="my-1" />
             <Text className="text-center text-xs font-medium text-foreground" numberOfLines={1}>
               {translate(labelKey)}
             </Text>

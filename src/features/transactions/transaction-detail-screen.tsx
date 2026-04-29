@@ -101,8 +101,8 @@ export function TransactionDetailScreen() {
     <>
       <ScreenHeader title={translate('transactions.detail_title')} />
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1" contentContainerStyle={{ flex: 1 }}>
-        <View className="min-h-full px-4 py-10">
+      <ScrollView className="flex-1" contentContainerClassName="flex-grow px-4 pt-10 pb-4">
+        <View className="flex-1">
           <View className="items-center pb-6">
             <FormattedCurrency
               value={transaction.amount}

@@ -103,7 +103,7 @@ function RecommendationCard({
         <SolidButton
           size="xs"
           color="secondary"
-          className="rounded-full bg-black/10 px-3"
+          className="rounded-full bg-black/10 px-3 dark:bg-black/25"
           textClassName="text-foreground"
           label={copy.actionLabel}
           onPress={() => navigateToTarget(router, recommendation.primaryTarget)}

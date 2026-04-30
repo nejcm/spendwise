@@ -215,7 +215,7 @@ export function GlobalSheet() {
       snapPoints={snapPoints}
       enablePanDownToClose={false}
       enableDynamicSizing={true}
-      android_keyboardInputMode="adjustPan"
+      android_keyboardInputMode="adjustResize"
       {...config?.props}
     >
       {children}

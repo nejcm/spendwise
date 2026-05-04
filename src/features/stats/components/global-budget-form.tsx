@@ -5,7 +5,7 @@ import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
 
-import { Input, OutlineButton, SolidButton, Text } from '@/components/ui';
+import { GhostButton, Input, SolidButton, Text } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { centsToAmount } from '@/features/formatting/helpers';
@@ -117,10 +117,9 @@ export function GlobalBudgetForm({ currentBudget, onSuccess, onCancel }: GlobalB
             children={() => (
               <>
                 {onCancel && (
-                  <OutlineButton
+                  <GhostButton
                     label={translate('common.cancel')}
                     onPress={onCancel}
-                    color="secondary"
                   />
                 )}
                 <SolidButton

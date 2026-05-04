@@ -6,7 +6,6 @@ import DetailsSection from '@/components/details';
 import { Alert, FocusAwareStatusBar, FormattedCurrency, FormattedDate, SolidButton, Text, TrashIcon } from '@/components/ui';
 
 import { GhostButton } from '@/components/ui/ghost-button';
-import { OutlineButton } from '@/components/ui/outline-button';
 import { formatDate } from '@/features/formatting/helpers';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
@@ -147,8 +146,7 @@ export function ScheduledTransactionDetailScreen() {
         </View>
 
         <View className="flex-row gap-2">
-          <OutlineButton
-            color="secondary"
+          <GhostButton
             label={translate('common.back')}
             onPress={() => router.back()}
           />

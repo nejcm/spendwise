@@ -6,7 +6,7 @@ import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
 import ColorSelector from '@/components/color-selector';
-import { GhostButton, Image, Input, OutlineButton, SolidButton, Text, TrashIcon } from '@/components/ui';
+import { GhostButton, Image, Input, SolidButton, Text, TrashIcon } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { CURRENCY_VALUES } from '@/features/currencies';
@@ -243,10 +243,9 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
           children={(state) => (
             <>
               {onCancel && (
-                <OutlineButton
+                <GhostButton
                   label={translate('common.cancel')}
                   onPress={onCancel}
-                  color="secondary"
                 />
               )}
               <SolidButton
@@ -304,7 +303,12 @@ export function AccountFormSheet({
             selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
             children={(state) => (
               <>
-                {onCancel && <OutlineButton label={translate('common.cancel')} onPress={onCancel} color="secondary" />}
+                {onCancel && (
+                  <GhostButton
+                    label={translate('common.cancel')}
+                    onPress={onCancel}
+                  />
+                )}
                 <SolidButton
                   label={translate('common.save')}
                   onPress={form.handleSubmit}

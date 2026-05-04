@@ -26,61 +26,6 @@ const SHEET_DATA: Record<SheetType, { title: string; content?: React.ReactNode }
   'set-global-budget': { title: translate('stats.global_budget_label') },
 };
 
-/* function DeleteAccountAction({ id, name }: { id: string; name: string }) {
-  const archiveAccount = useArchiveAccount();
-
-  const handleDelete = useCallback(() => {
-    if (!id) return;
-    Alert.alert(
-      translate('common.delete'),
-      translate('accounts.delete_confirm', { name: name ?? '' }),
-      [
-        { text: translate('common.cancel'), style: 'cancel' },
-        {
-          text: translate('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            await archiveAccount.mutateAsync(id);
-            closeSheet();
-          },
-        },
-      ],
-    );
-  }, [id, archiveAccount, name]);
-  return (
-    <OutlineButton
-      label={translate('common.delete')}
-      color="danger"
-      loading={archiveAccount.isPending}
-      onPress={handleDelete}
-      className="rounded-full px-3"
-      iconLeft={<TrashIcon colorClassName="accent-red-700" className="mr-1" size={14} />}
-      size="xs"
-    />
-  );
-}
-
-function DeleteCategoryAction({ id, name }: { id: string; name: string }) {
-  const deleteCategory = useDeleteCategory(() => closeSheet());
-  const onDeletePress = (categoryId: string, name: string) => {
-    Alert.alert(translate('common.delete'), translate('categories.delete_confirm', { name }), [
-      { text: translate('common.cancel'), style: 'cancel' },
-      { text: translate('common.delete'), style: 'destructive', onPress: () => deleteCategory.mutate(categoryId) },
-    ]);
-  };
-  return (
-    <OutlineButton
-      label={translate('common.delete')}
-      color="danger"
-      loading={deleteCategory.isPending}
-      onPress={() => onDeletePress(id, name)}
-      className="rounded-full px-3"
-      iconLeft={<TrashIcon colorClassName="accent-red-700" className="mr-1" />}
-      size="xs"
-    />
-  );
-} */
-
 function SheetTitle({ config }: { config: SheetConfig | undefined }) {
   if (!config) return null;
 

@@ -9,7 +9,6 @@ import ColorSelector from '@/components/color-selector';
 import { Alert, GhostButton, Image, Input, SolidButton, Text, TrashIcon } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
-import { OutlineButton } from '@/components/ui/outline-button';
 import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/features/categories/api';
 import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { translate } from '@/lib/i18n';
@@ -192,10 +191,9 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
           children={(state) => (
             <>
               {onCancel && (
-                <OutlineButton
+                <GhostButton
                   label={translate('common.cancel')}
                   onPress={onCancel}
-                  color="secondary"
                 />
               )}
               <SolidButton
@@ -250,10 +248,9 @@ export function CategoryFormSheet({
             children={(state) => (
               <>
                 {onCancel && (
-                  <OutlineButton
+                  <GhostButton
                     label={translate('common.cancel')}
                     onPress={onCancel}
-                    color="secondary"
                   />
                 )}
                 <SolidButton

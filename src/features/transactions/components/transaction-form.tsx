@@ -7,7 +7,7 @@ import * as React from 'react';
 import { ScrollView, View } from 'react-native';
 import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Image, Input, OutlineButton, Select, SolidButton, Text } from '@/components/ui';
+import { GhostButton, Image, Input, Select, SolidButton, Text } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
 import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
@@ -306,10 +306,9 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
           children={(state) => (
             <>
               {onCancel && (
-                <OutlineButton
+                <GhostButton
                   label={translate('common.cancel')}
                   onPress={onCancel}
-                  color="secondary"
                 />
               )}
               <SolidButton
@@ -374,10 +373,9 @@ export function TransactionFormSheet({
             children={(state) => (
               <>
                 {onCancel && (
-                  <OutlineButton
+                  <GhostButton
                     label={translate('common.cancel')}
                     onPress={onCancel}
-                    color="secondary"
                   />
                 )}
                 <SolidButton

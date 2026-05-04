@@ -50,19 +50,18 @@ function navigateToTarget(router: ReturnType<typeof useRouter>, target: Recommen
   }
 }
 
-const sharedGradientCls = 'bg-linear-to-br to-white dark:to-card';
 function getRecommendationCardGradient(kind: Recommendation['kind']) {
   switch (kind) {
     case 'upcoming_cashflow':
-      return `from-warning-500/15 dark:from-warning-500/12 ${sharedGradientCls}`;
+      return `from-warning-500/18 dark:from-warning-500/15 bg-linear-to-br to-warning-500/3 dark:to-warning-500/1`;
     case 'subscription_reminder':
-      return `from-primary/15 dark:from-primary/12 ${sharedGradientCls}`;
+      return `from-primary/18 dark:from-primary/15 bg-linear-to-br to-primary/3 dark:to-primary/1`;
     case 'category_anomaly':
     case 'unusual_spending':
-      return `from-danger-500/15 dark:from-danger-500/12 ${sharedGradientCls}`;
+      return `from-danger-500/18 dark:from-danger-500/15 bg-linear-to-br to-danger-500/3 dark:to-danger-500/1`;
     case 'budget_suggestion':
     default:
-      return `from-success-500/15 dark:from-success-500/12 ${sharedGradientCls}`;
+      return `from-success-500/18 dark:from-success-500/15 bg-linear-to-br to-success-500/3 dark:to-success-500/1`;
   }
 }
 
@@ -92,7 +91,7 @@ function RecommendationCard({
             </Text>
           </View>
         </View>
-        <IconButton size="xs" color="none" onPress={() => onDismiss(recommendation.id)} className="size-6 self-start rounded-full bg-black/8 px-0">
+        <IconButton size="xs" color="none" onPress={() => onDismiss(recommendation.id)} className="size-6 self-start rounded-full bg-black/15 px-0">
           <X size={16} colorClassName="accent-muted-foreground" />
         </IconButton>
       </View>

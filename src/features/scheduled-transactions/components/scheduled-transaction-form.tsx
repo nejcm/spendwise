@@ -9,7 +9,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
 import {
   Input,
-  OutlineButton,
   Select,
   SolidButton,
   Switch,
@@ -389,10 +388,9 @@ export function ScheduledTransactionForm({ initialValues, onCancel, onSuccess }:
           children={(state) => (
             <>
               {onCancel && (
-                <OutlineButton
+                <GhostButton
                   label={translate('common.cancel')}
                   onPress={onCancel}
-                  color="secondary"
                 />
               )}
               <SolidButton
@@ -452,10 +450,9 @@ export function ScheduledTransactionFormSheet({
             children={(state) => (
               <>
                 {onCancel && (
-                  <OutlineButton
+                  <GhostButton
                     label={translate('common.cancel')}
                     onPress={onCancel}
-                    color="secondary"
                   />
                 )}
                 <SolidButton

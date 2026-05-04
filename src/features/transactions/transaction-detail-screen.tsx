@@ -8,7 +8,6 @@ import ScreenHeader from '@/components/screen-header';
 
 import { Alert, FocusAwareStatusBar, FormattedCurrency, FormattedDate, GhostButton, SolidButton, Text, TrashIcon, View } from '@/components/ui';
 
-import { OutlineButton } from '@/components/ui/outline-button';
 import { useAccounts } from '@/features/accounts/api';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
@@ -101,14 +100,14 @@ export function TransactionDetailScreen() {
     <>
       <ScreenHeader title={translate('transactions.detail_title')} />
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1" contentContainerClassName="flex-grow px-4 pt-10 pb-4">
+      <ScrollView className="flex-1" contentContainerClassName="flex-grow px-4 pt-8 pb-4">
         <View className="flex-1">
           <View className="items-center pb-6">
             <FormattedCurrency
               value={transaction.amount}
               currency={transaction.currency}
               prefix={isIncome ? '+' : '-'}
-              className={`text-4xl font-bold ${isIncome ? 'text-success-600' : ''}`}
+              className={`text-3xl font-bold ${isIncome ? 'text-success-600' : ''}`}
             />
             <FormattedCurrency
               value={transaction.baseAmount}
@@ -158,8 +157,7 @@ export function TransactionDetailScreen() {
           </View>
 
           <View className="mt-auto flex-row gap-2">
-            <OutlineButton
-              color="secondary"
+            <GhostButton
               label={translate('common.back')}
               onPress={() => router.back()}
             />

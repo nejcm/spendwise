@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 import { useState } from 'react';
 import { ScrollView } from 'react-native';
-import DetailsSection from '@/components/details';
+import DetailsSection, { DetailsRow } from '@/components/details';
 import ScreenHeader from '@/components/screen-header';
 
 import { Alert, FocusAwareStatusBar, FormattedCurrency, FormattedDate, GhostButton, SolidButton, Text, TrashIcon, View } from '@/components/ui';
@@ -23,6 +23,7 @@ export function TransactionDetailScreen() {
   const deleteMut = useDeleteTransaction();
   const { data: accounts = [] } = useAccounts();
   const [isEditing, setIsEditing] = useState(false);
+  const [showAuditTimestamps, setShowAuditTimestamps] = useState(false);
 
   if (isLoading || !transaction) {
     return (
@@ -109,34 +110,46 @@ export function TransactionDetailScreen() {
               prefix={isIncome ? '+' : '-'}
               className={`text-3xl font-bold ${isIncome ? 'text-success-600' : ''}`}
             />
-            <FormattedCurrency
-              value={transaction.baseAmount}
-              currency={transaction.baseCurrency}
-              prefix={isIncome ? '+' : '-'}
-              className="text-lg text-muted-foreground"
-            />
+            {transaction.baseCurrency !== transaction.currency && (
+              <FormattedCurrency
+                value={transaction.baseAmount}
+                currency={transaction.baseCurrency}
+                prefix={isIncome ? '+' : '-'}
+                className="text-lg text-muted-foreground"
+              />
+            )}
           </View>
 
           <DetailsSection
             className="mb-4"
             growSide="right"
             data={primaryDetails}
-          />
-          <DetailsSection
-            className="mb-4"
-            growSide="right"
-            data={[
-              { label: translate('transactions.note'), value: transaction.note || '-', sectionClassName: 'flex-col justify-start items-start gap-1' },
-            ]}
-          />
-          <DetailsSection
-            className="mb-4"
-            growSide="right"
-            data={[
-              { label: translate('transactions.created_at'), value: <FormattedDate value={transaction.created_at} className="text-foreground" /> },
-              { label: translate('transactions.updated_at'), value: <FormattedDate value={transaction.updated_at} className="text-foreground" /> },
-            ]}
-          />
+          >
+            {showAuditTimestamps && (
+              <View className="gap-3">
+                <DetailsRow label={translate('transactions.created_at')} value={<FormattedDate value={transaction.created_at} className="text-foreground" />} />
+                <DetailsRow label={translate('transactions.updated_at')} value={<FormattedDate value={transaction.updated_at} className="text-foreground" />} />
+              </View>
+            )}
+            <View>
+              <GhostButton
+                size="sm"
+                color="secondary"
+                label={showAuditTimestamps ? translate('common.show_less') : translate('common.show_more')}
+                onPress={() => setShowAuditTimestamps((v) => !v)}
+                textClassName="underline"
+              />
+            </View>
+          </DetailsSection>
+          {!!transaction.note?.length && (
+            <DetailsSection
+              className="mb-4"
+              growSide="right"
+              data={[
+                { label: translate('transactions.note'), value: transaction.note, sectionClassName: 'flex-col justify-start items-start gap-1' },
+              ]}
+            />
+          )}
           <View className="mb-4 flex-row items-center justify-center gap-2">
             {transaction.type !== 'transfer' && (
               <GhostButton

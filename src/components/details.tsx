@@ -13,7 +13,7 @@ export type DetailsRowProps = {
 
 export function DetailsRow({ label, labelClassName, description, value, className, sectionClassName, growSide = 'left' }: DetailsRowProps) {
   return (
-    <View className={cn('flex-row items-start gap-4', sectionClassName)}>
+    <View className={cn('flex-row items-start gap-3', sectionClassName)}>
       <View className={`min-w-20 ${growSide === 'left' ? 'flex-1' : ''}`}>
         <Text className={cn(description ? 'text-foreground' : 'text-muted-foreground', labelClassName)}>{label}</Text>
         {!!description && <Text className="text-sm/snug text-muted-foreground">{description}</Text>}
@@ -34,7 +34,7 @@ export type DetailsSectionProps = {
 
 export default function DetailsSection({ className, data, children, growSide = 'left' }: DetailsSectionProps) {
   return (
-    <View className={cn('gap-4 rounded-xl bg-card p-4', className)}>
+    <View className={cn('gap-3 rounded-xl bg-card p-4', className)}>
       {data.map((row, index) => (
         <DetailsRow key={index} growSide={growSide} {...row} />
       ))}

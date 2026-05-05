@@ -1,6 +1,6 @@
 # Spendwise
 
-Spendwise is a personal finance app built with Expo and React Native. The app is local-first: core financial data lives in on-device SQLite and user preferences live in MMKV.
+Spendwise is a personal finance app built with Expo and React Native. The app is local-first: core financial data lives in on-device.
 
 <img src="screenshot.jpg" alt="Spendwise app" width="198" height="420" />
 

@@ -12,6 +12,7 @@ import { useAccounts } from '@/features/accounts/api';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { openSheet } from '@/lib/store/local-store';
+import { centsToAmount } from '../formatting/helpers';
 import { useDeleteTransaction, useTransaction } from './api';
 import { TransactionForm } from './components/transaction-form';
 
@@ -87,7 +88,7 @@ export function TransactionDetailScreen() {
       initialValues: {
         type: transaction.type,
         currency: transaction.currency,
-        amount: transaction.amount,
+        amount: centsToAmount(transaction.amount),
         category_id: transaction.category_id,
         account_id: transaction.account_id,
         note: transaction.note,

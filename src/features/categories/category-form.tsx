@@ -1,6 +1,6 @@
 import type { Category, CategoryFormData } from './types';
 import { useForm } from '@tanstack/react-form';
-import { View } from 'react-native';
+import { Keyboard, View } from 'react-native';
 import { KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
@@ -107,7 +107,11 @@ function CategoryFormBody({ form, preferredCurrency, deleteCategory, id, initial
             <Input
               value={field.state.value ?? ''}
               onBlur={field.handleBlur}
-              onChangeText={(v) => field.handleChange(v.trim() || null)}
+              onChangeText={(v) => {
+                const icon = v.trim() || null;
+                field.handleChange(icon);
+                if (icon) Keyboard.dismiss();
+              }}
               placeholder={translate('categories.icon_placeholder')}
               containerClassName="w-[100]"
               className="px-0.5 text-center text-3xl"

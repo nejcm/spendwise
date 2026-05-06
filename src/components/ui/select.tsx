@@ -250,7 +250,6 @@ export function Options<T extends string | number>({
         renderItem={renderSelectItem}
         ListHeaderComponent={listHeader}
         testID={testID ? `${testID}-modal` : undefined}
-        estimatedItemSize={52}
         style={{ flex: 1 }}
         {...listProps}
       />

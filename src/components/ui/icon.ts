@@ -67,6 +67,7 @@ import {
   UserIcon as LucideUserIcon,
   X as LucideX,
 } from 'lucide-react-native';
+import { createElement } from 'react';
 import { withUniwind } from 'uniwind';
 
 export type { LucideIcon, LucideProps } from 'lucide-react-native';
@@ -76,64 +77,78 @@ export type UniwindLucideIcon = ComponentType<
   LucideProps & { className?: string; colorClassName?: string; fontClassName?: string }
 >;
 
-export const ALargeSmall = withUniwind(LucideALargeSmall);
-export const AlertTriangle = withUniwind(LucideAlertTriangle);
-export const ArrowDown = withUniwind(LucideArrowDown);
-export const ArrowLeftIcon = withUniwind(LucideArrowLeftIcon);
-export const ArrowRight = withUniwind(LucideArrowRight);
-export const ArrowRightIcon = withUniwind(LucideArrowRightIcon);
-export const ArrowUp = withUniwind(LucideArrowUp);
-export const Banknote = withUniwind(LucideBanknote);
-export const Bell = withUniwind(LucideBell);
-export const Bot = withUniwind(LucideBot);
-export const BotIcon = withUniwind(LucideBotIcon);
-export const BotMessageSquare = withUniwind(LucideBotMessageSquare);
-export const Brain = withUniwind(LucideBrain);
-export const BrainCircuit = withUniwind(LucideBrainCircuit);
-export const Calendar = withUniwind(LucideCalendar);
-export const Camera = withUniwind(LucideCamera);
-export const Check = withUniwind(LucideCheck);
-export const ChevronDown = withUniwind(LucideChevronDown);
-export const CircleDollarSign = withUniwind(LucideCircleDollarSign);
-export const Database = withUniwind(LucideDatabase);
-export const DatabaseBackupIcon = withUniwind(LucideDatabaseBackupIcon);
-export const DatabaseSearch = withUniwind(LucideDatabaseSearch);
-export const DatabaseZap = withUniwind(LucideDatabaseZap);
-export const DecimalsArrowRight = withUniwind(LucideDecimalsArrowRight);
-export const Download = withUniwind(LucideDownload);
-export const Euro = withUniwind(LucideEuro);
-export const FileWarning = withUniwind(LucideFileWarning);
-export const HelpCircle = withUniwind(LucideHelpCircle);
-export const Home = withUniwind(LucideHome);
-export const Import = withUniwind(LucideImport);
-export const Languages = withUniwind(LucideLanguages);
-export const LayoutGrid = withUniwind(LucideLayoutGrid);
-export const Lightbulb = withUniwind(LucideLightbulb);
-export const Link = withUniwind(LucideLink);
-export const ListChecks = withUniwind(LucideListChecks);
-export const Pencil = withUniwind(LucidePencil);
-export const PencilOff = withUniwind(LucidePencilOff);
-export const PieChart = withUniwind(LucidePieChart);
-export const Plus = withUniwind(LucidePlus);
-export const PlusIcon = withUniwind(LucidePlusIcon);
-export const Printer = withUniwind(LucidePrinter);
-export const RefreshCcw = withUniwind(LucideRefreshCcw);
-export const ScanLine = withUniwind(LucideScanLine);
-export const SendHorizonal = withUniwind(LucideSendHorizonal);
-export const Share = withUniwind(LucideShare);
-export const Shield = withUniwind(LucideShield);
-export const Sun = withUniwind(LucideSun);
-export const TrashIcon = withUniwind(LucideTrashIcon);
-export const TrendingDown = withUniwind(LucideTrendingDown);
-export const TrendingUp = withUniwind(LucideTrendingUp);
-export const Upload = withUniwind(LucideUpload);
-export const User = withUniwind(LucideUser);
-export const UserIcon = withUniwind(LucideUserIcon);
-export const X = withUniwind(LucideX);
-export const Settings = withUniwind(LucideSettings);
-export const SlidersHorizontal = withUniwind(LucideSlidersHorizontal);
-export const PauseIcon = withUniwind(LucidePause);
-export const Paintbrush = withUniwind(LucidePaintbrush);
-export const ChevronRight = withUniwind(LucideChevronRight);
-export const ChevronLeft = withUniwind(LucideChevronLeft);
-export const ChevronUp = withUniwind(LucideChevronUp);
+interface UniwindLucideProps extends LucideProps {
+  className?: string;
+  colorClassName?: string;
+  fontClassName?: string;
+}
+
+function createIcon(Icon: ComponentType<LucideProps>): UniwindLucideIcon {
+  function IconAdapter({ colorClassName: _colorClassName, fontClassName: _fontClassName, ...props }: UniwindLucideProps) {
+    return createElement(Icon, props);
+  }
+
+  return withUniwind(IconAdapter) as UniwindLucideIcon;
+}
+
+export const ALargeSmall = createIcon(LucideALargeSmall);
+export const AlertTriangle = createIcon(LucideAlertTriangle);
+export const ArrowDown = createIcon(LucideArrowDown);
+export const ArrowLeftIcon = createIcon(LucideArrowLeftIcon);
+export const ArrowRight = createIcon(LucideArrowRight);
+export const ArrowRightIcon = createIcon(LucideArrowRightIcon);
+export const ArrowUp = createIcon(LucideArrowUp);
+export const Banknote = createIcon(LucideBanknote);
+export const Bell = createIcon(LucideBell);
+export const Bot = createIcon(LucideBot);
+export const BotIcon = createIcon(LucideBotIcon);
+export const BotMessageSquare = createIcon(LucideBotMessageSquare);
+export const Brain = createIcon(LucideBrain);
+export const BrainCircuit = createIcon(LucideBrainCircuit);
+export const Calendar = createIcon(LucideCalendar);
+export const Camera = createIcon(LucideCamera);
+export const Check = createIcon(LucideCheck);
+export const ChevronDown = createIcon(LucideChevronDown);
+export const CircleDollarSign = createIcon(LucideCircleDollarSign);
+export const Database = createIcon(LucideDatabase);
+export const DatabaseBackupIcon = createIcon(LucideDatabaseBackupIcon);
+export const DatabaseSearch = createIcon(LucideDatabaseSearch);
+export const DatabaseZap = createIcon(LucideDatabaseZap);
+export const DecimalsArrowRight = createIcon(LucideDecimalsArrowRight);
+export const Download = createIcon(LucideDownload);
+export const Euro = createIcon(LucideEuro);
+export const FileWarning = createIcon(LucideFileWarning);
+export const HelpCircle = createIcon(LucideHelpCircle);
+export const Home = createIcon(LucideHome);
+export const Import = createIcon(LucideImport);
+export const Languages = createIcon(LucideLanguages);
+export const LayoutGrid = createIcon(LucideLayoutGrid);
+export const Lightbulb = createIcon(LucideLightbulb);
+export const Link = createIcon(LucideLink);
+export const ListChecks = createIcon(LucideListChecks);
+export const Pencil = createIcon(LucidePencil);
+export const PencilOff = createIcon(LucidePencilOff);
+export const PieChart = createIcon(LucidePieChart);
+export const Plus = createIcon(LucidePlus);
+export const PlusIcon = createIcon(LucidePlusIcon);
+export const Printer = createIcon(LucidePrinter);
+export const RefreshCcw = createIcon(LucideRefreshCcw);
+export const ScanLine = createIcon(LucideScanLine);
+export const SendHorizonal = createIcon(LucideSendHorizonal);
+export const Share = createIcon(LucideShare);
+export const Shield = createIcon(LucideShield);
+export const Sun = createIcon(LucideSun);
+export const TrashIcon = createIcon(LucideTrashIcon);
+export const TrendingDown = createIcon(LucideTrendingDown);
+export const TrendingUp = createIcon(LucideTrendingUp);
+export const Upload = createIcon(LucideUpload);
+export const User = createIcon(LucideUser);
+export const UserIcon = createIcon(LucideUserIcon);
+export const X = createIcon(LucideX);
+export const Settings = createIcon(LucideSettings);
+export const SlidersHorizontal = createIcon(LucideSlidersHorizontal);
+export const PauseIcon = createIcon(LucidePause);
+export const Paintbrush = createIcon(LucidePaintbrush);
+export const ChevronRight = createIcon(LucideChevronRight);
+export const ChevronLeft = createIcon(LucideChevronLeft);
+export const ChevronUp = createIcon(LucideChevronUp);

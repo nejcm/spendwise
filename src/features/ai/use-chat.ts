@@ -62,7 +62,7 @@ export function useChat(): UseChatReturn {
       viewportHeight: prev.viewportHeight,
     }));
     clearAiChat();
-  }, []);
+  }, [setChatState]);
 
   React.useEffect(() => {
     return () => {
@@ -172,7 +172,7 @@ export function useChat(): UseChatReturn {
         }
       }
     })();
-  }, [db, chatState.isStreaming, draftQuestion]);
+  }, [db, chatState.isStreaming, draftQuestion, setChatState]);
 
   const markdownStyle = React.useMemo<MarkdownStyle>(
     () => getMarkdownStyle(theme.dark),
@@ -230,7 +230,7 @@ export function useChat(): UseChatReturn {
   const onScrollViewLayout = React.useCallback((event: LayoutChangeEvent) => {
     const height = event.nativeEvent.layout.height;
     setChatState((prev) => (prev.viewportHeight === height ? prev : { ...prev, viewportHeight: height }));
-  }, []);
+  }, [setChatState]);
 
   const onMessageLayout = React.useCallback((messageId: string, event: LayoutChangeEvent) => {
     messageLayoutsRef.current[messageId] = {

@@ -1,11 +1,13 @@
 import type { useModalSheet } from '@/components/ui';
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useQuery } from '@tanstack/react-query';
-import Env from 'env';
 
+import Env from 'env';
 import * as React from 'react';
-import { ModalSheet, Text, View } from '@/components/ui';
+import { GhostButton, ModalSheet, Text, View } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import { DATABASE_VERSION, useSQLiteContext } from '@/lib/sqlite';
+import { updateAppState } from '@/lib/store/store';
 
 export function AppInfoSheet({ modal }: { modal: ReturnType<typeof useModalSheet> }) {
   const db = useSQLiteContext();
@@ -34,8 +36,8 @@ export function AppInfoSheet({ modal }: { modal: ReturnType<typeof useModalSheet
       onDismiss={modal.close}
       snapPoints={['55%']}
     >
-      <View className="flex-1 px-4 pb-10">
-        <View className="gap-3 pt-2">
+      <BottomSheetScrollView className="flex-1" contentContainerClassName="pb-8">
+        <View className="gap-3 px-4 pt-2">
           <View className="flex-row items-center justify-between">
             <Text className="text-sm text-muted-foreground">{translate('settings.app_version')}</Text>
             <Text className="text-sm text-foreground">{`${Env.EXPO_PUBLIC_NAME} v${Env.EXPO_PUBLIC_VERSION}`}</Text>
@@ -71,7 +73,15 @@ export function AppInfoSheet({ modal }: { modal: ReturnType<typeof useModalSheet
             <Text className="text-sm text-foreground">{Env.EXPO_PUBLIC_PACKAGE}</Text>
           </View>
         </View>
-      </View>
+        <View className="flex-row items-center justify-center px-4 pt-6">
+          <GhostButton
+            label={translate('settings.show_intro')}
+            onPress={() => updateAppState({ isFirstTime: true })}
+            textClassName="underline"
+            size="sm"
+          />
+        </View>
+      </BottomSheetScrollView>
     </ModalSheet>
   );
 }

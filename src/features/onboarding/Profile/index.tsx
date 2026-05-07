@@ -1,6 +1,7 @@
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import * as React from 'react';
 
-import { Image, Input, ModalSheet, Pressable, ScrollView, SolidButton, Text, useModalSheet, View } from '@/components/ui';
+import { Image, Input, ModalSheet, Pressable, SolidButton, Text, useModalSheet, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { translate } from '@/lib/i18n';
 import { updateProfile, useAppStore } from '@/lib/store/store';
@@ -67,9 +68,10 @@ export default function ProfileStep({ onBack, onNext, currentStep }: ProfileStep
         ref={avatarModal.ref}
         title={translate('onboarding.choose_avatar')}
       >
-        <ScrollView
+        <BottomSheetScrollView
           style={defaultStyles.transparentBg}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 }}
+          keyboardShouldPersistTaps="handled"
         >
           <View className="flex-row flex-wrap justify-center gap-3">
             {AVATARS_LIST.map((imageSource, index) => {
@@ -94,7 +96,7 @@ export default function ProfileStep({ onBack, onNext, currentStep }: ProfileStep
               );
             })}
           </View>
-        </ScrollView>
+        </BottomSheetScrollView>
       </ModalSheet>
     </>
   );

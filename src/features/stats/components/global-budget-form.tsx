@@ -42,6 +42,7 @@ const defaultValues: GlobalBudgetFormData = {
 export function GlobalBudgetForm({ currentBudget, onSuccess, onCancel }: GlobalBudgetFormProps) {
   const insets = useSafeAreaInsets();
   const setGlobalBudget = useSetGlobalBudget();
+  const stickyFooterPadding = 56 + insets.bottom;
 
   const form = useForm({
     defaultValues: {
@@ -66,7 +67,7 @@ export function GlobalBudgetForm({ currentBudget, onSuccess, onCancel }: GlobalB
   return (
     <>
       <BottomSheetKeyboardAwareScrollView>
-        <View className="gap-6 px-4 pb-4">
+        <View className="gap-6 px-4" style={{ paddingBottom: 16 + stickyFooterPadding }}>
           <form.Field
             name="type"
             children={(field) => (

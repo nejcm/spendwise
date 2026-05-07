@@ -428,12 +428,13 @@ export function ScheduledTransactionFormSheet({
 
   const isLoading = createScheduledTransaction.isPending || updateScheduledTransaction.isPending;
   const insets = useSafeAreaInsets();
+  const stickyFooterPadding = 56 + insets.bottom;
 
   return (
     <>
       <BottomSheetKeyboardAwareScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: 12, paddingBottom: 8, paddingHorizontal: 16 }}
+        contentContainerStyle={{ gap: 12, paddingBottom: 8 + stickyFooterPadding, paddingHorizontal: 16 }}
         keyboardShouldPersistTaps="handled"
       >
         <ScheduledTransactionFormBody

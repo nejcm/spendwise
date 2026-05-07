@@ -1,4 +1,3 @@
-import Env from 'env';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
@@ -30,6 +29,7 @@ import { triggerScanPicker } from '@/lib/store/local-store';
 import { selectProfile, useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { getAvatar } from '../profile';
+import { AppInfoTrigger } from './components/app-info-trigger';
 import { ColorThemeItem } from './components/color-theme-item';
 import { CurrencyItem } from './components/currency-item';
 import { DeleteDataSheet } from './components/delete-data-sheet';
@@ -177,17 +177,8 @@ export function SettingsScreen() {
               onPress={() => Linking.openURL(config.links.support)}
             />
           </SettingsContainer>
-
           <DevSection />
-
-          <View>
-            <Text className="text-sm text-muted-foreground">
-              {Env.EXPO_PUBLIC_NAME}
-              {' '}
-              v
-              {Env.EXPO_PUBLIC_VERSION}
-            </Text>
-          </View>
+          <AppInfoTrigger />
         </View>
       </ScrollView>
       <DeleteDataSheet ref={deleteModal.ref} />

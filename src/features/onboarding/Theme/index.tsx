@@ -22,7 +22,7 @@ export default function ThemeStep({ onBack, onNext, currentStep }: ThemeStepProp
   const onSelect = React.useCallback(
     (option: OptionType) => {
       setSelectedTheme(option.value as ThemeType);
-      modal.dismiss();
+      modal.close();
     },
     [setSelectedTheme, modal],
   );

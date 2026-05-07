@@ -20,7 +20,7 @@ export type ModalSheetRef<T> = React.ForwardedRef<BottomSheetModal<T>>;
 
 export type ModalSheetHeaderProps = {
   title?: React.ReactNode;
-  dismiss: () => void;
+  close: () => void;
 };
 
 export function useModalSheet<T>() {
@@ -28,10 +28,10 @@ export function useModalSheet<T>() {
   const present = React.useCallback((data?: any) => {
     ref.current?.present(data);
   }, []);
-  const dismiss = React.useCallback(() => {
-    ref.current?.dismiss();
+  const close = React.useCallback(() => {
+    ref.current?.close();
   }, []);
-  return { ref, present, dismiss };
+  return { ref, present, close };
 }
 
 export function ModalSheet<T>({
@@ -55,10 +55,10 @@ export function ModalSheet<T>({
     () => (
       <>
         <View className={`mt-2 ${title ? 'mb-2' : 'mb-8'} h-1 w-12 self-center rounded-lg bg-gray-300 dark:bg-gray-700`} />
-        <ModalSheetHeader title={title} dismiss={modal.dismiss} />
+        <ModalSheetHeader title={title} close={modal.close} />
       </>
     ),
-    [title, modal.dismiss],
+    [title, modal.close],
   );
 
   return (
@@ -113,7 +113,7 @@ function getDetachedProps(detached: boolean) {
   return {} as Partial<BottomSheetModalProps>;
 }
 
-const ModalSheetHeader = React.memo(({ title, dismiss }: ModalSheetHeaderProps) => {
+const ModalSheetHeader = React.memo(({ title, close }: ModalSheetHeaderProps) => {
   return (
     <>
       {title && (
@@ -123,7 +123,7 @@ const ModalSheetHeader = React.memo(({ title, dismiss }: ModalSheetHeaderProps) 
           </View>
         </View>
       )}
-      <CloseButton close={dismiss} />
+      <CloseButton close={close} />
     </>
   );
 });

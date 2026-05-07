@@ -4,7 +4,6 @@ import { seedDefaults } from './seed';
 
 /**
  * Runs on first open. Sets WAL mode and runs schema migrations via PRAGMA user_version.
- * Bump DATABASE_VERSION and add a migration block when you change the schema.
  */
 export async function migrateDb(db: SQLiteDatabase): Promise<void> {
   const row = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');

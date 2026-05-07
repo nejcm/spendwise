@@ -309,7 +309,7 @@ export function Select<T extends string | number>({
     (option: OptionType<T>) => {
       setSelectedOption(option);
       onSelect?.(option.value);
-      modal.dismiss();
+      modal.close();
     },
     [modal, onSelect],
   );

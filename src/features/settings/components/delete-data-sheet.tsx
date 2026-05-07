@@ -19,9 +19,9 @@ export function DeleteDataSheet({ ref }: { ref: React.RefObject<BottomSheetModal
     setDeleteCategories(false);
   }, []);
 
-  const dismiss = React.useCallback(() => {
+  const close = React.useCallback(() => {
     resetOptions();
-    ref.current?.dismiss();
+    ref.current?.close();
   }, [ref, resetOptions]);
 
   const deleteDataMutation = useMutation({
@@ -32,7 +32,7 @@ export function DeleteDataSheet({ ref }: { ref: React.RefObject<BottomSheetModal
       });
     },
     onSuccess: () => {
-      dismiss();
+      close();
     },
     onError: (error) => {
       console.error('Failed to clear selected data', error);
@@ -95,7 +95,7 @@ export function DeleteDataSheet({ ref }: { ref: React.RefObject<BottomSheetModal
           fullWidth
           className="flex-1"
           label={translate('common.cancel')}
-          onPress={dismiss}
+          onPress={close}
           disabled={deleteDataMutation.isPending}
         />
         <SolidButton

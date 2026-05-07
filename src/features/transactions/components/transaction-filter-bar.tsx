@@ -73,7 +73,7 @@ export function TransactionFilterBar({ filters, hasActiveFilters, updateFilters 
         onClearAll={() => {
           updateFilters({ type: null, accountId: null, categoryId: null });
         }}
-        onClose={filterSheet.dismiss}
+        onClose={filterSheet.close}
       />
     </>
   );

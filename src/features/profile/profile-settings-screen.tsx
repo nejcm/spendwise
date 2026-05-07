@@ -52,7 +52,7 @@ export function ProfileSettingsScreen() {
                   key={id}
                   onPress={() => {
                     updateProfile({ avatar: id });
-                    avatarModal.dismiss();
+                    avatarModal.close();
                   }}
                   className={`rounded-full p-1 ${
                     isSelected ? 'border-2 border-gray-900 dark:border-white' : 'border border-transparent'

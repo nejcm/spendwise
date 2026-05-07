@@ -106,7 +106,7 @@ export default function AutoBackupSection() {
       <ModalSheet
         ref={backupsSheet.ref}
         title={translate('import-export.auto_backup_backups_title')}
-        onDismiss={backupsSheet.dismiss}
+        onDismiss={backupsSheet.close}
         snapPoints={['60%']}
       >
         <BottomSheetScrollView

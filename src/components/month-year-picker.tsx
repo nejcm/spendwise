@@ -37,7 +37,7 @@ export function MonthPicker({ ref, selectedMonth, onSelect }: MonthPickerProps &
           selectedValue={selectedMonth}
           onValueChange={(val) => {
             onSelect(val);
-            modal.dismiss();
+            modal.close();
           }}
           style={{
             color: colors.text,
@@ -66,7 +66,7 @@ export function YearPicker({ ref, selectedYear, onSelect }: YearPickerProps & { 
           selectedValue={selectedYear}
           onValueChange={(val) => {
             onSelect(val);
-            modal.dismiss();
+            modal.close();
           }}
           style={{
             color: colors.text,

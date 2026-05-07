@@ -26,18 +26,18 @@ export function FormattingSettingsScreen() {
   const dateFormat = useAppStore.use.dateFormat();
   const numberFormat = useAppStore.use.numberFormat();
   const modal = useModalSheet();
-  const { dismiss } = modal;
+  const { close } = modal;
   const [modalType, setModalType] = React.useState<ModalType | undefined>();
   const changeCurrency = useChangeCurrency();
 
   const handleCurrencySelect = React.useCallback((option: OptionType) => {
     const newCurrency = option.value as CurrencyKey;
     if (newCurrency === currency) {
-      dismiss();
+      close();
       return;
     }
 
-    dismiss();
+    close();
     Alert.alert(
       translate('settings.changeCurrencyTitle'),
       translate('settings.changeCurrencyWarning'),
@@ -51,7 +51,7 @@ export function FormattingSettingsScreen() {
         },
       ],
     );
-  }, [currency, dismiss, changeCurrency]);
+  }, [currency, close, changeCurrency]);
 
   const OptionsProps: Record<ModalType, {
     options: OptionType[];
@@ -116,10 +116,10 @@ export function FormattingSettingsScreen() {
       onSelect: (option: OptionType) => {
         opts.onSelect(option);
         // Currency modal dismisses itself after confirming — don't double-dismiss
-        if (modalType !== 'currency') dismiss();
+        if (modalType !== 'currency') close();
       },
     };
-  }, [modalType, OptionsProps, dismiss]);
+  }, [modalType, OptionsProps, close]);
 
   return (
     <>

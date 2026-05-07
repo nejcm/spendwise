@@ -58,8 +58,8 @@ function BudgetPeriodSelectorModal({ ref, selection, onApply }: ModalProps) {
 
   React.useImperativeHandle(ref, () => ({
     present: handlePresent,
-    dismiss: modal.dismiss,
-  } as BottomSheetModal), [handlePresent, modal.dismiss]);
+    close: modal.close,
+  } as BottomSheetModal), [handlePresent, modal.close]);
 
   const switchMode = React.useCallback((mode: BudgetPeriodSelection['mode']) => {
     const now = new Date();
@@ -86,12 +86,12 @@ function BudgetPeriodSelectorModal({ ref, selection, onApply }: ModalProps) {
 
   const handleApply = React.useCallback(() => {
     onApply(draft);
-    modal.dismiss();
+    modal.close();
   }, [draft, onApply, modal]);
 
   const handleClear = React.useCallback(() => {
     onApply(defaultBudgetPeriodSelection());
-    modal.dismiss();
+    modal.close();
   }, [onApply, modal]);
 
   const BUDGET_MODES: { key: BudgetPeriodSelection['mode']; label: string }[] = [

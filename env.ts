@@ -3,7 +3,7 @@ import z from 'zod';
 import packageJSON from './package.json';
 
 const APP_ENV_VALUES = ['development', 'preview', 'production'] as const;
-type AppEnv = (typeof APP_ENV_VALUES)[number];
+export type AppEnv = (typeof APP_ENV_VALUES)[number];
 
 function resolveAppEnv(): AppEnv {
   const raw = process.env.EXPO_PUBLIC_APP_ENV;

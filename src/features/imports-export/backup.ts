@@ -6,7 +6,7 @@ import type { Transaction } from '../transactions/types';
 import { clearDbData } from '@/lib/sqlite/db';
 import { getAppState } from '@/lib/store/store';
 
-const CURRENT_BACKUP_VERSION = 2;
+const CURRENT_BACKUP_VERSION = 3;
 
 export type BackupData = {
   version: number;
@@ -113,8 +113,8 @@ export async function importBackup(db: SQLiteDatabase, backup: BackupData): Prom
 
     for (const row of backup.transactions) {
       await db.runAsync(
-        `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note, merchant_name, location, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note, merchant_name, merchant_logo_slug, location, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           row.id,
           row.account_id,
@@ -127,6 +127,7 @@ export async function importBackup(db: SQLiteDatabase, backup: BackupData): Prom
           row.date,
           row.note || null,
           row.merchant_name || null,
+          row.merchant_logo_slug || null,
           row.location || null,
           row.created_at,
           row.updated_at,

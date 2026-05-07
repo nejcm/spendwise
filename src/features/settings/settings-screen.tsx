@@ -5,7 +5,26 @@ import * as React from 'react';
 
 import { FocusAwareStatusBar, Image, ScrollView, Text, useModalSheet, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
-import { ALargeSmall, Banknote, Bell, Bot, BotMessageSquare, DatabaseZap, HelpCircle, Import, LayoutGrid, Link, ListChecks, PieChart, RefreshCcw, ScanLine, Settings, Share, Shield, User } from '@/components/ui/icon';
+import {
+  ALargeSmall,
+  Banknote,
+  Bell,
+  Bot,
+  BotMessageSquare,
+  DatabaseZap,
+  HelpCircle,
+  Import,
+  LayoutGrid,
+  Link,
+  ListChecks,
+  PieChart,
+  RefreshCcw,
+  ScanLine,
+  Settings,
+  Share,
+  Shield,
+  User,
+} from '@/components/ui/icon';
 import { config } from '@/config';
 import { triggerScanPicker } from '@/lib/store/local-store';
 import { selectProfile, useAppStore } from '@/lib/store/store';
@@ -147,7 +166,11 @@ export function SettingsScreen() {
           </SettingsContainer>
 
           <SettingsContainer title="settings.support_us">
-            <SettingsItem text="settings.share" icon={<Share colorClassName={iconColor} size={20} />} onPress={() => Linking.openURL(config.links.support)} />
+            <SettingsItem
+              text="settings.share"
+              icon={<Share colorClassName={iconColor} size={20} />}
+              onPress={() => Linking.openURL(config.links.support)}
+            />
             <SettingsItem
               text="settings.support"
               icon={<HelpCircle colorClassName={iconColor} size={20} />}

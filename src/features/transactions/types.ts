@@ -14,6 +14,7 @@ export type Transaction = {
   date: number; // Unix seconds
   note: string | null;
   merchant_name: string | null;
+  merchant_logo_slug: string | null;
   location: string | null;
   created_at: number; // Unix seconds
   updated_at: number; // Unix seconds

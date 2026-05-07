@@ -51,6 +51,7 @@ async function seedTransaction(
     date: MAR_MID,
     note: 'lunch',
     merchant_name: null,
+    merchant_logo_slug: null,
     location: null,
     ...overrides,
   };
@@ -280,6 +281,7 @@ describe('createTransaction', () => {
       date: MAR_MID,
       note: 'lunch',
       merchant_name: null,
+      merchant_logo_slug: null,
       location: null,
     });
 
@@ -306,6 +308,7 @@ describe('createTransaction', () => {
       date: MAR_MID,
       note: '',
       merchant_name: null,
+      merchant_logo_slug: null,
       location: null,
     });
 
@@ -328,6 +331,7 @@ describe('createTransaction', () => {
       date: MAR_MID,
       note: 'team lunch',
       merchant_name: 'Cafe Roma',
+      merchant_logo_slug: null,
       location: 'Downtown branch, Berlin, DE',
     });
 
@@ -362,6 +366,7 @@ describe('createTransactions', () => {
     date: MAR_MID,
     note: 'x',
     merchant_name: null,
+    merchant_logo_slug: null,
     location: null,
   };
 
@@ -426,6 +431,7 @@ describe('updateTransaction', () => {
       date: MAR_MID,
       note: 'updated',
       merchant_name: 'New Merchant',
+      merchant_logo_slug: null,
       location: 'HQ, Munich, DE',
     });
 
@@ -452,6 +458,7 @@ describe('updateTransaction', () => {
       date: MAR_MID,
       note: null,
       merchant_name: null,
+      merchant_logo_slug: null,
       location: null,
     });
 

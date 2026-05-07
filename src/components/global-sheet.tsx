@@ -59,14 +59,11 @@ export function GlobalSheet() {
   );
 
   useEffect(() => {
-    console.log('[global-sheet]', { configType: config?.type, hasRef: !!modalRef.current });
     if (!modalRef.current) return;
     if (config) {
-      console.log('[global-sheet] presenting');
       modalRef.current.present();
       return;
     }
-    console.log('[global-sheet] dismissing');
     modalRef.current.close();
   }, [config]);
 

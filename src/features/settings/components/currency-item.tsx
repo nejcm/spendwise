@@ -13,7 +13,7 @@ export function CurrencyItem() {
   const onSelect = React.useCallback(
     (option: OptionType) => {
       setCurrency(option.value as CurrencyKey);
-      modal.dismiss();
+      modal.close();
     },
     [modal],
   );

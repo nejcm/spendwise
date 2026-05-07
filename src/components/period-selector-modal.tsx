@@ -78,17 +78,17 @@ export function PeriodSelectorModal({
   React.useImperativeHandle(ref, () => ({
     ...(modal.ref.current as BottomSheetModal),
     present: handlePresent,
-    dismiss: modal.dismiss,
+    close: modal.close,
   } as BottomSheetModal));
 
   const handleApply = React.useCallback(() => {
     setPeriodSelection(draft);
-    modal.dismiss();
+    modal.close();
   }, [draft, modal]);
 
   const handleClear = React.useCallback(() => {
     setPeriodSelection({ mode: 'month', year: new Date().getFullYear(), month: new Date().getMonth() + 1 });
-    modal.dismiss();
+    modal.close();
   }, [modal]);
 
   const switchMode = React.useCallback((mode: PeriodMode) => {

@@ -27,14 +27,14 @@ export default function SettingsStep({ onBack, onNext, currentStep }: SettingsSt
   const onSelect = React.useCallback(
     (option: OptionType) => {
       setLanguage(option.value as Language);
-      modal.dismiss();
+      modal.close();
     },
     [setLanguage, modal],
   );
   const onSelectCurrency = React.useCallback(
     (option: OptionType) => {
       setCurrency(option.value as CurrencyKey);
-      currencyModal.dismiss();
+      currencyModal.close();
     },
     [currencyModal],
   );

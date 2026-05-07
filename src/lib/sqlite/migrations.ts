@@ -1,7 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { seedDefaults } from './seed';
 
-const DATABASE_VERSION = 4;
+export const DATABASE_VERSION = 4;
 
 /**
  * Runs on first open. Sets WAL mode and runs schema migrations via PRAGMA user_version.

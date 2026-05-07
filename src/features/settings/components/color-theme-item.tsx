@@ -13,7 +13,7 @@ export function ColorThemeItem() {
   const onSelect = React.useCallback(
     (option: OptionType<ColorThemeType>) => {
       setSelectedColorTheme(option.value);
-      modal.dismiss();
+      modal.close();
     },
     [setSelectedColorTheme, modal],
   );

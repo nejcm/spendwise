@@ -16,7 +16,7 @@ export function LanguageItem() {
   const onSelect = React.useCallback(
     (option: OptionType) => {
       setLanguage(option.value as Language);
-      modal.dismiss();
+      modal.close();
     },
     [setLanguage, modal],
   );

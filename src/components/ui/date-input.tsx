@@ -21,7 +21,7 @@ export type DateInputProps = {
 } & Omit<InputProps, 'value' | 'onChange'>;
 
 export function DateInput({ label, value, onChange, error, modalProps, ...rest }: DateInputProps) {
-  const { ref, present, dismiss } = useModalSheet();
+  const { ref, present, close } = useModalSheet();
   const dateFormat = useAppStore.use.dateFormat();
 
   const dateValue = React.useMemo(() => parseISO(value || todayISO()), [value]);
@@ -29,9 +29,9 @@ export function DateInput({ label, value, onChange, error, modalProps, ...rest }
   const handleChange = React.useCallback(
     (_event: DateTimePickerEvent, selectedDate?: Date) => {
       if (selectedDate) onChange(format(selectedDate, 'yyyy-MM-dd'));
-      dismiss();
+      close();
     },
-    [onChange, dismiss],
+    [onChange, close],
   );
 
   if (IS_WEB) {

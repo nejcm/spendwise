@@ -16,7 +16,7 @@ export function ThemeItem() {
   const onSelect = React.useCallback(
     (option: OptionType) => {
       setSelectedTheme(option.value as ThemeType);
-      modal.dismiss();
+      modal.close();
     },
     [setSelectedTheme, modal],
   );

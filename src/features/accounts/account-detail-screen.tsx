@@ -1,6 +1,5 @@
 import type { LoaderDimensions } from '../../components/ui/skeleton';
-import type { AccountFormData } from './types';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 import { useMemo } from 'react';
 
@@ -10,12 +9,10 @@ import { PeriodSwipeContainer } from '@/components/period-swipe-container';
 import ScreenHeader from '@/components/screen-header';
 import { FocusAwareStatusBar, IconButton, Pencil } from '@/components/ui';
 import { SkeletonRows } from '@/components/ui/skeleton';
-import { centsToAmount } from '@/features/formatting/helpers';
 import { useTransactions } from '@/features/transactions/api';
 import { TransactionList } from '@/features/transactions/components/transaction-list';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
-import { openSheet } from '@/lib/store/local-store';
 import { useAppStore } from '@/lib/store/store';
 import { useAccountsWithBalanceForRange } from './api';
 import { AccountSummary } from './components/account-summary';
@@ -24,6 +21,7 @@ const loaderDimensions: LoaderDimensions = [['100%', 75, 'mb-8'], ['100%', 25], 
 
 export function AccountDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
   const currency = useAppStore.use.currency();
   const selection = useAppStore.use.periodSelection();
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
@@ -39,12 +37,8 @@ export function AccountDetailScreen() {
 
   const openEditForm = React.useCallback(() => {
     if (!account) return;
-    const initialData: AccountFormData = {
-      ...account,
-      budget: account.budget != null ? String(centsToAmount(account.budget)) : null,
-    };
-    openSheet({ type: 'edit-account', accountId: account.id, initialData });
-  }, [account]);
+    router.push({ pathname: '/accounts/[id]/edit', params: { id: account.id } });
+  }, [account, router]);
 
   if (accountsLoading || !account) {
     return (

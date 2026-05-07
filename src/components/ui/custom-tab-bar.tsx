@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { Home, LayoutGrid, ListChecks, PieChart, PlusIcon } from '@/components/ui/icon';
-import { openSheet, triggerScan } from '@/lib/store/local-store';
+import { triggerScan } from '@/lib/store/local-store';
 import { useAppStore } from '@/lib/store/store';
 import { SolidButton } from './solid-button';
 
@@ -70,7 +70,7 @@ export function CustomTabBar() {
             <View key="add" className="flex-1 items-center justify-center">
               <SolidButton
                 color="primary"
-                onPress={() => openSheet({ type: 'add-transaction' })}
+                onPress={() => router.push('/transactions/new')}
                 onLongPress={() => triggerScan(longPressAction === 'pick_from_gallery' ? 'gallery' : 'camera')}
                 delayLongPress={400}
                 className="size-12 items-center justify-center rounded-full p-0"

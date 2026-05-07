@@ -16,9 +16,9 @@ export const transactionFormSchema = z.object({
   category_id: z.string().min(1, translate('transactions.category_required')),
   account_id: z.string().min(1, translate('transactions.account_required')),
   date: z.string().min(1, translate('transactions.date_required')),
-  note: z.string().nullable(),
-  merchant_name: z.string().nullable(),
-  location: z.string().nullable(),
+  note: z.string().max(500).nullable(),
+  merchant_name: z.string().max(100).nullable(),
+  location: z.string().max(250).nullable(),
 });
 
 export const TRANSACTION_TYPE_OPTIONS: { label: string; value: 'expense' | 'income' }[] = [

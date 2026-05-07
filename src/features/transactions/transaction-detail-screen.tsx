@@ -11,7 +11,6 @@ import { Alert, FocusAwareStatusBar, FormattedCurrency, FormattedDate, GhostButt
 import { useAccounts } from '@/features/accounts/api';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
-import { openSheet } from '@/lib/store/local-store';
 import { centsToAmount } from '../formatting/helpers';
 import { useDeleteTransaction, useTransaction } from './api';
 import { TransactionForm } from './components/transaction-form';
@@ -83,9 +82,9 @@ export function TransactionDetailScreen() {
 
   const handleMakeRecurring = () => {
     if (transaction.type === 'transfer') return;
-    openSheet({
-      type: 'add-scheduled',
-      initialValues: {
+    router.push({
+      pathname: '/scheduled/new',
+      params: {
         type: transaction.type,
         currency: transaction.currency,
         amount: centsToAmount(transaction.amount),
@@ -95,7 +94,6 @@ export function TransactionDetailScreen() {
         start_date: unixToISODate(transaction.date),
       },
     });
-    router.replace('/scheduled');
   };
 
   return (

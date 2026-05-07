@@ -13,7 +13,6 @@ import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppErrorBoundary } from '@/components/app-error-boundary';
 import { GlobalScanManager } from '@/components/global-scan-manager';
-import { GlobalSheet } from '@/components/global-sheet';
 import { SafeAreaView, View } from '@/components/ui';
 import { CustomTabBar, TAB_BAR_COLOR, TAB_BAR_DARK_COLOR } from '@/components/ui/custom-tab-bar';
 import { DB_NAME } from '@/config';
@@ -26,6 +25,7 @@ import { PosthogProviderWrapper } from '@/lib/analytics/posthog';
 import { APIProvider } from '@/lib/api';
 import { useAppBootstrapOnInit } from '@/lib/app-bootstrap';
 import { IS_WEB } from '@/lib/base';
+import { getShouldShowPersistentTabBar } from '@/lib/navigation/persistent-tab-bar';
 import { DatabaseErrorBoundary, OpfsCleaner } from '@/lib/sqlite';
 import { loadSelectedColorTheme } from '@/lib/theme/use-selected-color-theme';
 import { loadSelectedTheme, useSelectedTheme } from '@/lib/theme/use-selected-theme';
@@ -57,7 +57,7 @@ setTimeout(() => {
 
 function PersistentTabBar() {
   const pathname = usePathname();
-  if (pathname === '/onboarding') return null;
+  if (!getShouldShowPersistentTabBar(pathname)) return null;
   return <CustomTabBar />;
 }
 
@@ -163,7 +163,6 @@ export default function RootLayout() {
         <Stack.Screen name="onboarding" options={hiddenHeader} />
       </Stack>
       <PersistentTabBar />
-      <GlobalSheet />
       <GlobalScanManager />
       <SecurityLock />
     </Providers>

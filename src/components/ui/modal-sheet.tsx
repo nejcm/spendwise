@@ -36,7 +36,7 @@ export function useModalSheet<T>() {
 
 export function ModalSheet<T>({
   ref,
-  snapPoints: _snapPoints = ['60%'] as (string | number)[],
+  snapPoints,
   title,
   detached = false,
   bottomInset: providedBottomInset,
@@ -46,8 +46,7 @@ export function ModalSheet<T>({
   const { bottom: bottomInset } = useSafeAreaInsets();
   const detachedProps = React.useMemo(() => getDetachedProps(detached), [detached]);
   const modal = useModalSheet<T>();
-  const snapPoints = React.useMemo(() => _snapPoints, [_snapPoints]);
-  const sheetBottomInset = providedBottomInset ?? (detached ? Math.max(bottomInset + 12, 46) : bottomInset);
+  const sheetBottomInset = providedBottomInset ?? (detached ? bottomInset + 12 : bottomInset);
 
   React.useImperativeHandle(ref, () => (modal.ref.current as BottomSheetModal<T>) || null);
 
@@ -67,11 +66,9 @@ export function ModalSheet<T>({
       {...detachedProps}
       backgroundStyle={theme.dark ? defaultStyles.backgroundDark : defaultStyles.background}
       ref={modal.ref}
-      index={0}
       snapPoints={snapPoints}
       bottomInset={sheetBottomInset}
       backdropComponent={props.backdropComponent || renderBackdrop}
-      enableDynamicSizing={false}
       handleComponent={renderHandleComponent}
       overDragResistanceFactor={IS_WEB ? 0.5 : props.overDragResistanceFactor}
     />

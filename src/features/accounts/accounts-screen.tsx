@@ -1,4 +1,4 @@
-import type { AccountFormData, AccountWithBalance } from './types';
+import type { AccountWithBalance } from './types';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
@@ -11,12 +11,10 @@ import { FocusAwareStatusBar, FormattedCurrency, ScrollView, SolidButton, Text }
 import { Plus } from '@/components/ui/icon';
 import { SkeletonRows } from '@/components/ui/skeleton';
 import { accountsWithBalanceForRangeQueryOptions, useAccountsWithBalanceForRange } from '@/features/accounts/api';
-import { centsToAmount } from '@/features/formatting/helpers';
 import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
-import { openSheet } from '@/lib/store/local-store';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { AccountCard } from './components/account-card';
@@ -36,21 +34,12 @@ export function AccountsScreen() {
   const { refreshing, onRefresh } = useRefresh();
 
   const openCreateAccountForm = React.useCallback(() => {
-    openSheet({ type: 'add-account' });
-  }, []);
+    router.push('/accounts/new');
+  }, [router]);
 
   const openEditAccountForm = React.useCallback((account: AccountWithBalance) => {
-    const initialData: AccountFormData = {
-      name: account.name,
-      type: account.type,
-      currency: account.currency,
-      description: account.description,
-      budget: account.budget != null ? String(centsToAmount(account.budget)) : null,
-      icon: account.icon,
-      color: account.color,
-    };
-    openSheet({ type: 'edit-account', accountId: account.id, initialData });
-  }, []);
+    router.push({ pathname: '/accounts/[id]/edit', params: { id: account.id } });
+  }, [router]);
 
   return (
     <PeriodSwipeContainer selection={selection}>

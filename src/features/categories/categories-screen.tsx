@@ -9,13 +9,11 @@ import { FileWarning, Pencil, PencilOff } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { SkeletonGrid } from '@/components/ui/skeleton';
 import { useUpdateCategoryOrder } from '@/features/categories/api';
-import { centsToAmount } from '@/features/formatting/helpers';
 import { categorySpendByRangeQueryOptions, useCategorySpendByRange } from '@/features/insights/api';
 import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
-import { openSheet } from '@/lib/store/local-store';
 import { useAppStore } from '@/lib/store/store';
 import { CategoryGrid } from './category-grid';
 
@@ -85,27 +83,17 @@ export function CategoriesScreen() {
               editMode={isEditMode}
               onRefresh={onRefresh}
               onReorder={(items) => updateOrder.mutate(items)}
-              onAddPress={() => openSheet({ type: 'add-category' })}
+              onAddPress={() => router.push('/categories/new')}
               onPress={(category) => {
                 if (!category) {
-                  openSheet({ type: 'add-category' });
+                  router.push('/categories/new');
                   return;
                 }
                 if (isEditMode) {
-                  openSheet({
-                    type: 'edit-category',
-                    categoryId: category.category_id,
-                    initialValues: {
-                      id: category.category_id,
-                      name: category.category_name,
-                      color: category.category_color,
-                      icon: category.category_icon || null,
-                      budget: category.category_budget ? String(centsToAmount(category.category_budget)) : null,
-                    },
-                  });
+                  router.push({ pathname: '/categories/[id]/edit', params: { id: category.category_id } });
                   return;
                 }
-                openSheet({ type: 'add-transaction', initialValues: { category_id: category.category_id } });
+                router.push({ pathname: '/transactions/new', params: { category_id: category.category_id } });
               }}
             />
           )}

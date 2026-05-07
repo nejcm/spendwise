@@ -1,10 +1,9 @@
 import type { ScheduledTransactionFormData } from '../types';
 import type { CurrencyKey } from '@/features/currencies';
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useForm } from '@tanstack/react-form';
 import * as React from 'react';
 import { ScrollView, View } from 'react-native';
-import { KeyboardStickyView } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
 import {
@@ -17,7 +16,6 @@ import {
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
 import { GhostButton } from '@/components/ui/ghost-button';
-import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { useAccounts } from '@/features/accounts/api';
 import { CategoryPicker } from '@/features/categories/category-picker';
 import { CURRENCY_VALUES } from '@/features/currencies';
@@ -173,11 +171,9 @@ type ScheduledTransactionFormBodyProps = {
   form: UseScheduledTransactionFormReturn['form'];
   accounts: UseScheduledTransactionFormReturn['accounts'];
   orderedCurrencies: UseScheduledTransactionFormReturn['orderedCurrencies'];
-  isSheet?: boolean;
 };
 
-function ScheduledTransactionFormBody({ form, accounts, orderedCurrencies, isSheet }: ScheduledTransactionFormBodyProps) {
-  const HScrollView = isSheet ? BottomSheetScrollView : ScrollView;
+function ScheduledTransactionFormBody({ form, accounts, orderedCurrencies }: ScheduledTransactionFormBodyProps) {
   return (
     <>
       <View className="mb-4 flex-row gap-3">
@@ -250,7 +246,7 @@ function ScheduledTransactionFormBody({ form, accounts, orderedCurrencies, isShe
             <Text className="mb-2 text-sm font-medium">
               {translate('transactions.account')}
             </Text>
-            <HScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View className="flex-row gap-2">
                 {accounts.map((account) => (
                   <SolidButton
@@ -263,7 +259,7 @@ function ScheduledTransactionFormBody({ form, accounts, orderedCurrencies, isShe
                   />
                 ))}
               </View>
-            </HScrollView>
+            </ScrollView>
           </View>
         )}
       />
@@ -412,12 +408,12 @@ export function ScheduledTransactionForm({ initialValues, onCancel, onSuccess }:
   );
 }
 
-export type ScheduledTransactionFormSheetProps = ScheduledTransactionFormProps;
-export function ScheduledTransactionFormSheet({
+export type ScheduledTransactionFormModalProps = ScheduledTransactionFormProps;
+export function ScheduledTransactionFormModal({
   initialValues,
   onCancel,
   onSuccess,
-}: ScheduledTransactionFormSheetProps) {
+}: ScheduledTransactionFormModalProps) {
   const {
     form,
     accounts,
@@ -432,18 +428,17 @@ export function ScheduledTransactionFormSheet({
 
   return (
     <>
-      <BottomSheetKeyboardAwareScrollView
+      <KeyboardAwareScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: 12, paddingBottom: 8 + stickyFooterPadding, paddingHorizontal: 16 }}
+        contentContainerStyle={{ gap: 12, paddingBottom: 8 + stickyFooterPadding, paddingHorizontal: 16, paddingTop: 32 }}
         keyboardShouldPersistTaps="handled"
       >
         <ScheduledTransactionFormBody
           form={form}
           accounts={accounts}
           orderedCurrencies={orderedCurrencies}
-          isSheet
         />
-      </BottomSheetKeyboardAwareScrollView>
+      </KeyboardAwareScrollView>
       <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>
         <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
           <form.Subscribe

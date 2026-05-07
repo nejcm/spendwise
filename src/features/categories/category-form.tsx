@@ -1,18 +1,16 @@
 import type { Category, CategoryFormData } from './types';
 import { useForm } from '@tanstack/react-form';
 import { Keyboard, View } from 'react-native';
-import { KeyboardStickyView } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
 
 import ColorSelector from '@/components/color-selector';
 import { Alert, GhostButton, Image, Input, SolidButton, Text, TrashIcon } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
-import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/features/categories/api';
 import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { translate } from '@/lib/i18n';
-import { closeSheet } from '@/lib/store/local-store';
 import { useAppStore } from '@/lib/store/store';
 import { getRandomColor } from '@/lib/theme/colors';
 import { refinePositiveNumberOrNull } from '@/lib/validation/helpers';
@@ -43,9 +41,9 @@ function useCategoryForm(initialValues?: CategoryInitialValues, onSuccess?: () =
   const id = initialValues?.id;
   const { data: categories = [] } = useCategories();
   const preferredCurrency = useAppStore.use.currency();
-  const createCategory = useCreateCategory(() => closeSheet());
-  const updateCategory = useUpdateCategory(() => closeSheet());
-  const deleteCategory = useDeleteCategory(() => closeSheet());
+  const createCategory = useCreateCategory();
+  const updateCategory = useUpdateCategory();
+  const deleteCategory = useDeleteCategory(onSuccess);
 
   const form = useForm({
     defaultValues: {
@@ -216,12 +214,12 @@ export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryMan
   );
 }
 
-export type CategoryFormSheetProps = CategoryManageModalProps;
-export function CategoryFormSheet({
+export type CategoryFormModalProps = CategoryManageModalProps;
+export function CategoryFormModal({
   initialValues,
   onSuccess,
   onCancel,
-}: CategoryFormSheetProps) {
+}: CategoryFormModalProps) {
   const { form, createCategory, updateCategory, deleteCategory, preferredCurrency, id } = useCategoryForm(
     initialValues,
     onSuccess,
@@ -233,9 +231,9 @@ export function CategoryFormSheet({
 
   return (
     <>
-      <BottomSheetKeyboardAwareScrollView
+      <KeyboardAwareScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: 12, paddingBottom: 8 + stickyFooterPadding, paddingHorizontal: 16 }}
+        contentContainerStyle={{ gap: 12, paddingBottom: 8 + stickyFooterPadding, paddingHorizontal: 16, paddingTop: 32 }}
         keyboardShouldPersistTaps="handled"
       >
         <CategoryFormBody
@@ -245,7 +243,7 @@ export function CategoryFormSheet({
           id={id}
           initialValues={initialValues}
         />
-      </BottomSheetKeyboardAwareScrollView>
+      </KeyboardAwareScrollView>
       <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>
         <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
           <form.Subscribe

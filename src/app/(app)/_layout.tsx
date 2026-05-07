@@ -21,14 +21,21 @@ export default function AppLayout() {
     >
       <Stack.Screen name="index" />
       <Stack.Screen name="categories" />
+      <Stack.Screen name="categories/new" options={{ presentation: 'fullScreenModal' }} />
+      <Stack.Screen name="categories/[id]/edit" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="stats" />
+      <Stack.Screen name="stats/global-budget" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="settings" />
       <Stack.Screen name="transactions" />
+      <Stack.Screen name="transactions/new" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="transactions/[id]" />
       <Stack.Screen name="accounts" />
+      <Stack.Screen name="accounts/new" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="accounts/[id]" />
+      <Stack.Screen name="accounts/[id]/edit" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="ai" />
       <Stack.Screen name="scheduled/index" />
+      <Stack.Screen name="scheduled/new" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="scheduled/[id]" />
       <Stack.Screen name="settings/profile" />
       <Stack.Screen name="settings/general" />

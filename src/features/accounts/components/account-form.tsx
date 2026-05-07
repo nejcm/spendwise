@@ -2,13 +2,12 @@ import type { AccountFormData, AccountType } from '../types';
 import type { CurrencyKey } from '@/features/currencies';
 import { useForm } from '@tanstack/react-form';
 import { Keyboard, View } from 'react-native';
-import { KeyboardStickyView } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
 import ColorSelector from '@/components/color-selector';
 import { GhostButton, Image, Input, SolidButton, Text, TrashIcon } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
-import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { CURRENCY_VALUES } from '@/features/currencies';
 import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { translate } from '@/lib/i18n';
@@ -268,14 +267,14 @@ export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess
   );
 }
 
-export type AccountFormSheetProps = AccountFormProps;
-export function AccountFormSheet({
+export type AccountFormModalProps = AccountFormProps;
+export function AccountFormModal({
   initialData,
   accountId,
   onSuccess,
   onDeleteSuccess,
   onCancel,
-}: AccountFormSheetProps) {
+}: AccountFormModalProps) {
   const { form, createAccount, updateAccount, archiveAccount, preferredCurrency } = useAccountForm(
     initialData,
     accountId,
@@ -289,9 +288,9 @@ export function AccountFormSheet({
 
   return (
     <>
-      <BottomSheetKeyboardAwareScrollView
+      <KeyboardAwareScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: 12, paddingBottom: 8 + stickyFooterPadding, paddingHorizontal: 16 }}
+        contentContainerStyle={{ gap: 12, paddingBottom: 8 + stickyFooterPadding, paddingHorizontal: 16, paddingTop: 32 }}
         keyboardShouldPersistTaps="handled"
       >
         <AccountFormBody
@@ -301,7 +300,7 @@ export function AccountFormSheet({
           accountId={accountId}
           initialData={initialData}
         />
-      </BottomSheetKeyboardAwareScrollView>
+      </KeyboardAwareScrollView>
       <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>
         <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
           <form.Subscribe

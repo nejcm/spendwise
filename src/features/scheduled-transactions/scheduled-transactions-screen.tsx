@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { View } from 'react-native';
 import NoData from '@/components/no-data';
@@ -6,16 +7,16 @@ import { FocusAwareStatusBar, ScrollView, SolidButton } from '@/components/ui';
 import { Plus } from '@/components/ui/icon';
 import { SkeletonRows } from '@/components/ui/skeleton';
 import { translate } from '@/lib/i18n';
-import { openSheet } from '@/lib/store/local-store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { useScheduledTransactions } from './api';
 import ScheduledTransactionCard from './components/scheduled-transaction-card';
 
 export function ScheduledTransactionsScreen() {
+  const router = useRouter();
   const { data = [], isLoading } = useScheduledTransactions();
 
   const openCreateScheduledForm = () => {
-    openSheet({ type: 'add-scheduled' });
+    router.push('/scheduled/new');
   };
 
   if (isLoading) {

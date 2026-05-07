@@ -1,13 +1,12 @@
 import type { GlobalBudget, GlobalBudgetType } from '../global-budget-queries';
 import { useForm } from '@tanstack/react-form';
 import { View } from 'react-native';
-import { KeyboardStickyView } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
 
 import { GhostButton, Input, SolidButton, Text } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
-import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { parseToCents } from '@/lib/data/money';
 import { translate } from '@/lib/i18n';
@@ -42,6 +41,7 @@ const defaultValues: GlobalBudgetFormData = {
 export function GlobalBudgetForm({ currentBudget, onSuccess, onCancel }: GlobalBudgetFormProps) {
   const insets = useSafeAreaInsets();
   const setGlobalBudget = useSetGlobalBudget();
+  const stickyFooterPadding = 56 + insets.bottom;
 
   const form = useForm({
     defaultValues: {
@@ -65,8 +65,8 @@ export function GlobalBudgetForm({ currentBudget, onSuccess, onCancel }: GlobalB
 
   return (
     <>
-      <BottomSheetKeyboardAwareScrollView>
-        <View className="gap-6 px-4 pb-4">
+      <KeyboardAwareScrollView style={{ flex: 1 }}>
+        <View className="gap-6 px-4" style={{ paddingBottom: 16 + stickyFooterPadding }}>
           <form.Field
             name="type"
             children={(field) => (
@@ -109,7 +109,7 @@ export function GlobalBudgetForm({ currentBudget, onSuccess, onCancel }: GlobalB
             )}
           />
         </View>
-      </BottomSheetKeyboardAwareScrollView>
+      </KeyboardAwareScrollView>
       <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>
         <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
           <form.Subscribe

@@ -72,6 +72,7 @@ export default antfu(
             '/ios',
             'README.md',
             'README-project.md',
+            'FUNDING.yml',
             'ISSUE_TEMPLATE.md',
             'PULL_REQUEST_TEMPLATE.md',
           ],

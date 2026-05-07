@@ -2,15 +2,13 @@ import type { UseTransactionFormProps, UseTransactionFormReturnType } from '../h
 import type { OptionType } from '@/components/ui';
 import type { Account } from '@/features/accounts/types';
 import type { CurrencyKey } from '@/features/currencies';
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import * as React from 'react';
 import { ScrollView, View } from 'react-native';
-import { KeyboardStickyView } from 'react-native-keyboard-controller';
+import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GhostButton, Image, Input, Select, SolidButton, Text } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
-import BottomSheetKeyboardAwareScrollView from '@/components/ui/modal-keyboard-aware-scroll-view';
 import { CategoryPicker } from '@/features/categories/category-picker';
 import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { TransactionBaseAmountSync } from '@/features/transactions/components/transaction-base-amount-sync';
@@ -33,7 +31,6 @@ type TransactionFormBodyProps = {
   orderedCurrencies: OptionType[];
   preferredCurrency: CurrencyKey;
   setBaseAmountIsManual: (value: boolean) => void;
-  isSheet?: boolean;
 };
 
 function TransactionFormBody({
@@ -44,9 +41,7 @@ function TransactionFormBody({
   orderedCurrencies,
   preferredCurrency,
   setBaseAmountIsManual,
-  isSheet,
 }: TransactionFormBodyProps) {
-  const HScrollView = isSheet ? BottomSheetScrollView : ScrollView;
   return (
     <>
       <form.Subscribe
@@ -184,7 +179,7 @@ function TransactionFormBody({
             <Text className="mb-2 text-sm font-medium">
               {translate('transactions.account')}
             </Text>
-            <HScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View className="flex-row gap-2">
                 {accounts.map((a) => (
                   <SolidButton
@@ -197,7 +192,7 @@ function TransactionFormBody({
                   />
                 ))}
               </View>
-            </HScrollView>
+            </ScrollView>
           </View>
         )}
       />
@@ -298,7 +293,6 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
         orderedCurrencies={orderedCurrencies}
         preferredCurrency={preferredCurrency}
         setBaseAmountIsManual={setBaseAmountIsManual}
-        isSheet={false}
       />
       <View className="mt-auto flex-row gap-3 pt-4">
         <form.Subscribe
@@ -327,12 +321,12 @@ export function TransactionForm({ initialValues, onSuccess, onCancel }: Transact
   );
 }
 
-export type TransactionFormSheetProps = TransactionFormProps;
-export function TransactionFormSheet({
+export type TransactionFormModalProps = TransactionFormProps;
+export function TransactionFormModal({
   initialValues,
   onSuccess,
   onCancel,
-}: TransactionFormSheetProps) {
+}: TransactionFormModalProps) {
   const {
     form,
     accounts,
@@ -347,12 +341,13 @@ export function TransactionFormSheet({
 
   const isLoading = createTransaction.isPending || updateTransaction.isPending;
   const insets = useSafeAreaInsets();
+  const stickyFooterPadding = 56 + insets.bottom;
 
   return (
     <>
-      <BottomSheetKeyboardAwareScrollView
+      <KeyboardAwareScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: 12, paddingBottom: 8, paddingHorizontal: 16 }}
+        contentContainerStyle={{ gap: 12, paddingBottom: 8 + stickyFooterPadding, paddingHorizontal: 16, paddingTop: 32 }}
         keyboardShouldPersistTaps="handled"
       >
         <TransactionFormBody
@@ -363,9 +358,8 @@ export function TransactionFormSheet({
           orderedCurrencies={orderedCurrencies}
           preferredCurrency={preferredCurrency}
           setBaseAmountIsManual={setBaseAmountIsManual}
-          isSheet={true}
         />
-      </BottomSheetKeyboardAwareScrollView>
+      </KeyboardAwareScrollView>
       <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>
         <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
           <form.Subscribe

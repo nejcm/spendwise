@@ -1,5 +1,6 @@
 import type { BudgetPeriodSelection } from '../types';
 import type { CurrencyKey } from '@/features/currencies';
+import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { cn } from 'tailwind-variants';
@@ -7,7 +8,6 @@ import { FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
 import { BudgetProgressBar, getColorClass } from '@/components/ui/budget-progress-bar';
 import { Pencil, PlusIcon } from '@/components/ui/icon';
 import { translate } from '@/lib/i18n';
-import { openSheet } from '@/lib/store/local-store';
 import { getBudgetSelectionBoundaries, scaleGlobalBudget } from '../helpers';
 import { useGlobalBudget, useGlobalBudgetSpend } from '../hooks';
 
@@ -30,6 +30,7 @@ type GlobalBudgetCardProps = {
 };
 
 export function GlobalBudgetCard({ selection, currency }: GlobalBudgetCardProps) {
+  const router = useRouter();
   const { data: budget, isLoading } = useGlobalBudget();
   const [startDate, endDate] = React.useMemo(
     () => getBudgetSelectionBoundaries(selection),
@@ -45,8 +46,8 @@ export function GlobalBudgetCard({ selection, currency }: GlobalBudgetCardProps)
   );
 
   const handlePress = React.useCallback(() => {
-    openSheet({ type: 'set-global-budget', currentBudget: budget ?? null });
-  }, [budget]);
+    router.push('/stats/global-budget');
+  }, [router]);
 
   if (isLoading) return null;
   if (budget == null) {

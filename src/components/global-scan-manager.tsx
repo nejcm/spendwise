@@ -5,7 +5,7 @@ import type { ScanTriggeredType } from '@/lib/store/local-store';
 import { useMutation } from '@tanstack/react-query';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from 'expo-router';
+import { usePathname, useRouter } from 'expo-router';
 import * as React from 'react';
 import { useCallback } from 'react';
 import { Alert } from '@/components/ui';
@@ -16,7 +16,7 @@ import { centsToAmount } from '@/features/formatting/helpers';
 import { useCreateTransaction } from '@/features/transactions/api';
 import { dateToUnix } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
-import { closeScan, openSheet, useLocalStore } from '@/lib/store/local-store';
+import { closeScan, useLocalStore } from '@/lib/store/local-store';
 import {
   selectIsAiEnabled,
   selectTransactionFormPrefs,
@@ -62,6 +62,8 @@ function ScanLoadingOverlay({ onClose }: { onClose: () => void }) {
 
 export function GlobalScanManager() {
   const router = useRouter();
+  const pathname = usePathname();
+  const isTransactionFormRoute = pathname === '/transactions/new';
   const isAiEnabled = useAppStore(selectIsAiEnabled);
   const scanTriggered = useLocalStore.use.scanTriggered();
   const saveOnScan = useAppStore.use.saveOnScan();
@@ -75,7 +77,15 @@ export function GlobalScanManager() {
     const accountId = transactionFormPrefs.account_id || accounts[0]?.id;
     const categoryId = result.category_id || transactionFormPrefs.category_id || categories[0]?.id;
     if (!saveOnScan || !accountId || !categoryId) {
-      openSheet({ type: 'add-transaction', initialValues: result });
+      const nextRoute = {
+        pathname: '/transactions/new',
+        params: {
+          ...result,
+          amount: centsToAmount(result.amount),
+        },
+      } as const;
+      if (isTransactionFormRoute) router.replace(nextRoute);
+      else router.push(nextRoute);
       return;
     }
     const data: TransactionFormData = {
@@ -90,7 +100,8 @@ export function GlobalScanManager() {
       date: dateToUnix(result.date),
     };
     const id = await createTransaction.mutateAsync(data);
-    router.push(`/transactions/${id}`);
+    if (isTransactionFormRoute) router.replace(`/transactions/${id}`);
+    else router.push(`/transactions/${id}`);
   };
   const scanMutation = useScanReceipt(handleScanSuccess);
 

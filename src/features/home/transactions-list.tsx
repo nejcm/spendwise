@@ -9,7 +9,6 @@ import { SkeletonRows } from '@/components/ui/skeleton';
 import { useRecentTransactions } from '@/features/transactions/api';
 import { TransactionCard } from '@/features/transactions/components/transaction-card';
 import { translate } from '@/lib/i18n';
-import { openSheet } from '@/lib/store/local-store';
 
 export const TransactionsList = React.memo(() => {
   const router = useRouter();
@@ -41,7 +40,7 @@ export const TransactionsList = React.memo(() => {
         : isLoading
           ? <SkeletonRows count={5} />
           : (
-              <NoDataCard onPress={() => openSheet({ type: 'add-transaction' })} label={translate('home.add_transaction')} />
+              <NoDataCard onPress={() => router.push('/transactions/new')} label={translate('home.add_transaction')} />
             )}
     </View>
   );

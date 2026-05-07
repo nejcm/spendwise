@@ -1,3 +1,4 @@
+import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 
@@ -38,9 +39,10 @@ export function ProfileSettingsScreen() {
       </ScrollView>
 
       <ModalSheet ref={avatarModal.ref} title={translate('onboarding.choose_avatar')}>
-        <ScrollView
+        <BottomSheetScrollView
           style={defaultStyles.transparentBg}
           contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 }}
+          keyboardShouldPersistTaps="handled"
         >
           <View className="flex-row flex-wrap justify-center gap-3">
             {AVATARS_LIST.map((imageSource, index) => {
@@ -65,7 +67,7 @@ export function ProfileSettingsScreen() {
               );
             })}
           </View>
-        </ScrollView>
+        </BottomSheetScrollView>
       </ModalSheet>
     </>
   );

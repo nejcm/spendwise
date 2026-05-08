@@ -26,9 +26,6 @@ export function AppInfoSheet({ modal }: { modal: ReturnType<typeof useModalSheet
     },
   });
 
-  const dbUserVersionDisplay = data ? String(data.dbUserVersion) : '—';
-  const sqliteVersionDisplay = data?.sqliteVersion ?? '—';
-
   return (
     <ModalSheet
       ref={modal.ref}
@@ -50,12 +47,12 @@ export function AppInfoSheet({ modal }: { modal: ReturnType<typeof useModalSheet
 
           <View className="flex-row items-center justify-between">
             <Text className="text-sm text-muted-foreground">{translate('settings.sqlite_version')}</Text>
-            <Text className="text-sm text-foreground">{sqliteVersionDisplay}</Text>
+            <Text className="text-sm text-foreground">{data?.sqliteVersion ?? '-'}</Text>
           </View>
 
           <View className="flex-row items-center justify-between">
             <Text className="text-sm text-muted-foreground">{translate('settings.db_version')}</Text>
-            <Text className="text-sm text-foreground">{dbUserVersionDisplay}</Text>
+            <Text className="text-sm text-foreground">{data?.dbUserVersion ?? '-'}</Text>
           </View>
 
           <View className="flex-row items-center justify-between">

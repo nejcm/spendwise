@@ -66,6 +66,9 @@ export function PeriodSelectorModal({
   const modal = useModalSheet();
 
   const [draft, setDraft] = React.useState<PeriodSelection>(() => defaultDraftFor(selection));
+  const scrollRef = React.useRef<React.ComponentRef<typeof BottomSheetScrollView>>(null);
+  const scrollReadyRef = React.useRef(false);
+  const selectedYRef = React.useRef<number | null>(null);
 
   React.useImperativeHandle(ref, () => modal.ref.current as BottomSheetModal);
 
@@ -124,29 +127,48 @@ export function PeriodSelectorModal({
     }
   }, [draft]);
 
+  const tryScrollToSelectedWeek = React.useCallback(() => {
+    if (scrollReadyRef.current && selectedYRef.current !== null) {
+      scrollRef.current?.scrollTo({ y: Math.max(0, selectedYRef.current - 80), animated: false });
+    }
+  }, []);
+
+  const weekYear = draft.mode === 'week' ? draft.year : null;
+  const weekWeek = draft.mode === 'week' ? draft.week : null;
+
+  React.useEffect(() => {
+    if (draft.mode !== 'week') return;
+    selectedYRef.current = null;
+    scrollReadyRef.current = false;
+  }, [draft.mode, weekYear, weekWeek]);
+
   return (
     <ModalSheet ref={modal.ref} title="Select Period" snapPoints={['75%']}>
-      <View className="flex-1 px-4 pt-2">
-        <View className="mb-8 flex-row flex-wrap gap-2">
-          {MODE_BUTTONS.map(({ key, label }) => (
-            <View className="min-w-[30%] flex-1 grow" key={key}>
-              <OutlineButton
-                className={`items-center px-1 ${draft.mode === key ? '' : 'border-border'}`}
-                textClassName={`text-sm ${draft.mode === key ? '' : 'text-muted-foreground'}`}
-                fullWidth
-                label={label}
-                onPress={() => switchMode(key)}
-              />
-            </View>
-          ))}
-        </View>
-        <View className="flex-1">
-          {draft.mode === 'year' && (
-            <YearBody
-              selectedYear={draft.year}
-              onSelect={(year) => setDraft({ mode: 'year', year })}
-            />
-          )}
+      <View className="flex-1">
+        <BottomSheetScrollView
+          ref={scrollRef}
+          className="flex-1"
+          contentContainerClassName="px-4 pt-2 pb-6"
+          onLayout={() => {
+            scrollReadyRef.current = true;
+            tryScrollToSelectedWeek();
+          }}
+        >
+          <View className="mb-8 flex-row flex-wrap gap-2">
+            {MODE_BUTTONS.map(({ key, label }) => (
+              <View className="min-w-[30%] flex-1 grow" key={key}>
+                <OutlineButton
+                  className={`items-center px-1 ${draft.mode === key ? '' : 'border-border'}`}
+                  textClassName={`text-sm ${draft.mode === key ? '' : 'text-muted-foreground'}`}
+                  fullWidth
+                  label={label}
+                  onPress={() => switchMode(key)}
+                />
+              </View>
+            ))}
+          </View>
+
+          {draft.mode === 'year' && <YearBody selectedYear={draft.year} onSelect={(year) => setDraft({ mode: 'year', year })} />}
           {draft.mode === 'month' && (
             <MonthBody
               year={draft.year}
@@ -165,6 +187,10 @@ export function PeriodSelectorModal({
                 setDraft({ mode: 'week', year, week });
               }}
               onChangeWeek={(week) => setDraft({ ...draft, week })}
+              onSelectedLayoutY={(y) => {
+                selectedYRef.current = y;
+                tryScrollToSelectedWeek();
+              }}
             />
           )}
           {draft.mode === 'custom' && (
@@ -176,18 +202,18 @@ export function PeriodSelectorModal({
             />
           )}
           {draft.mode === 'all' && (
-            <View className="flex-1 items-center justify-center">
+            <View className="items-center justify-center py-8">
               <Text className="text-muted-foreground">{translate('common.all-data-shown')}</Text>
             </View>
           )}
           {isDynamicPeriodMode(draft.mode) && (
-            <View className="flex-1 items-center justify-center">
+            <View className="items-center justify-center py-8">
               <Text className="text-muted-foreground">{translate('common.always-current-period')}</Text>
             </View>
           )}
-        </View>
+        </BottomSheetScrollView>
 
-        <View className="flex-row items-center justify-center gap-2 py-4">
+        <View className="flex-row items-center justify-center gap-2 p-4">
           <GhostButton
             label={translate('common.clear')}
             onPress={handleClear}
@@ -209,19 +235,17 @@ export function PeriodSelectorModal({
 
 function YearBody({ selectedYear, onSelect }: { selectedYear: number; onSelect: (year: number) => void }) {
   return (
-    <BottomSheetScrollView>
-      <View className="flex-row flex-wrap justify-evenly gap-2">
-        {YEAR_LIST.map((year) => (
-          <GhostButton
-            key={year}
-            className={`w-[30%] rounded-xl px-4 py-3 ${year === selectedYear ? 'bg-muted' : ''}`}
-            onPress={() => onSelect(year)}
-            textClassName={year === selectedYear ? '' : 'font-normal text-muted-foreground'}
-            label={year.toString()}
-          />
-        ))}
-      </View>
-    </BottomSheetScrollView>
+    <View className="flex-row flex-wrap justify-evenly gap-2">
+      {YEAR_LIST.map((year) => (
+        <GhostButton
+          key={year}
+          className={`w-[30%] rounded-xl px-4 py-3 ${year === selectedYear ? 'bg-muted' : ''}`}
+          onPress={() => onSelect(year)}
+          textClassName={year === selectedYear ? '' : 'font-normal text-muted-foreground'}
+          label={year.toString()}
+        />
+      ))}
+    </View>
   );
 }
 
@@ -251,7 +275,7 @@ function MonthBody({
   onChangeMonth: (m: number) => void;
 }) {
   return (
-    <BottomSheetScrollView>
+    <View>
       <YearNavRow year={year} onChangeYear={onChangeYear} />
       <View className="mt-3 flex-row flex-wrap justify-evenly gap-2">
         {MONTH_LABELS.map((label, i) => {
@@ -268,7 +292,7 @@ function MonthBody({
           );
         })}
       </View>
-    </BottomSheetScrollView>
+    </View>
   );
 }
 
@@ -277,40 +301,20 @@ function WeekBody({
   week,
   onChangeYear,
   onChangeWeek,
+  onSelectedLayoutY,
 }: {
   year: number;
   week: number;
   onChangeYear: (y: number) => void;
   onChangeWeek: (w: number) => void;
+  onSelectedLayoutY: (y: number) => void;
 }) {
   const weeks = React.useMemo(() => getWeeksInYear(year), [year]);
-  const scrollRef = React.useRef<React.ComponentRef<typeof BottomSheetScrollView>>(null);
-  const selectedYRef = React.useRef<number | null>(null);
-  const containerReadyRef = React.useRef(false);
-
-  // Reset when year/week changes so we re-scroll
-  React.useEffect(() => {
-    selectedYRef.current = null;
-    containerReadyRef.current = false;
-  }, [year, week]);
-
-  const tryScroll = React.useCallback(() => {
-    if (containerReadyRef.current && selectedYRef.current !== null) {
-      scrollRef.current?.scrollTo({ y: Math.max(0, selectedYRef.current - 80), animated: false });
-    }
-  }, []);
 
   return (
-    <View className="flex-1">
+    <View>
       <YearNavRow year={year} onChangeYear={onChangeYear} />
-      <BottomSheetScrollView
-        ref={scrollRef}
-        className="mt-2"
-        onLayout={() => {
-          containerReadyRef.current = true;
-          tryScroll();
-        }}
-      >
+      <View className="mt-2 gap-2">
         {weeks.map(({ week: w, start, end }) => {
           const selected = w === week;
           return (
@@ -318,8 +322,7 @@ function WeekBody({
               key={w}
               onLayout={selected
                 ? (e) => {
-                    selectedYRef.current = e.nativeEvent.layout.y;
-                    tryScroll();
+                    onSelectedLayoutY(e.nativeEvent.layout.y);
                   }
                 : undefined}
             >
@@ -333,7 +336,7 @@ function WeekBody({
             </View>
           );
         })}
-      </BottomSheetScrollView>
+      </View>
     </View>
   );
 }

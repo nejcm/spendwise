@@ -1,6 +1,5 @@
-github: nejcm
-
 # External funding platforms
+github: [nejcm]
 # patreon: USERNAME
 # open_collective: USERNAME
 # ko_fi: USERNAME
@@ -10,7 +9,7 @@ github: nejcm
 # issuehunt: USERNAME
 # polar: USERNAME
 # buy_me_a_coffee: USERNAME
-# thanks_dev: u/gh/USERNAME
+thanks_dev: u/gh/nejcm
 
 # Custom sponsorship URLs
 # custom: ["https://example.com/sponsor"]

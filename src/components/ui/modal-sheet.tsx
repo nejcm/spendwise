@@ -34,9 +34,11 @@ export function useModalSheet<T>() {
   return { ref, present, close };
 }
 
+const defaultSnapPoints = ['66%'];
+
 export function ModalSheet<T>({
   ref,
-  snapPoints,
+  snapPoints = defaultSnapPoints,
   title,
   detached = false,
   bottomInset: providedBottomInset,
@@ -67,6 +69,7 @@ export function ModalSheet<T>({
       backgroundStyle={theme.dark ? defaultStyles.backgroundDark : defaultStyles.background}
       ref={modal.ref}
       snapPoints={snapPoints}
+      enableDynamicSizing={false}
       bottomInset={sheetBottomInset}
       backdropComponent={props.backdropComponent || renderBackdrop}
       handleComponent={renderHandleComponent}

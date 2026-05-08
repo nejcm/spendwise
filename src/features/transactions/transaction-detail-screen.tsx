@@ -13,6 +13,7 @@ import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { centsToAmount } from '../formatting/helpers';
 import { useDeleteTransaction, useTransaction } from './api';
+import { MerchantLogo } from './components/merchant-logo';
 import { TransactionForm } from './components/transaction-form';
 
 export function TransactionDetailScreen() {
@@ -95,13 +96,19 @@ export function TransactionDetailScreen() {
       },
     });
   };
+  const logo = transaction.merchant_logo_slug ? <MerchantLogo slug={transaction.merchant_logo_slug} size={56} withBg={false} /> : null;
 
   return (
     <>
       <ScreenHeader title={translate('transactions.detail_title')} />
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1" contentContainerClassName="flex-grow px-4 pt-8 pb-4">
+      <ScrollView className="flex-1" contentContainerClassName="flex-grow px-4 pt-7 pb-4">
         <View className="flex-1">
+          {!!logo && (
+            <View className="mb-6 flex-row justify-center gap-2">
+              {logo}
+            </View>
+          )}
           <View className="items-center pb-6">
             <FormattedCurrency
               value={transaction.amount}
@@ -118,7 +125,6 @@ export function TransactionDetailScreen() {
               />
             )}
           </View>
-
           <DetailsSection
             className="mb-4"
             growSide="right"

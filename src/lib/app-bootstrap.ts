@@ -7,6 +7,7 @@ import { useCallback } from 'react';
 import { ensureAndroidChannel } from '@/features/notifications/notifications';
 import { syncDueScheduledTransactions } from '@/features/scheduled-transactions/api';
 import { migrateDb } from '@/lib/sqlite';
+import { logger } from './logger';
 
 const BOOTSTRAP_TIMEOUT_MS = 15_000;
 
@@ -37,13 +38,13 @@ async function bootstrapAppInternal(
   db: SQLiteDatabase,
   queryClient: QueryClient,
 ): Promise<void> {
-  console.log('[bootstrap] starting...');
+  logger.withEnv('production')?.info('[bootstrap] starting...');
   try {
     await migrateDb(db);
-    console.log('[bootstrap] migrations complete');
+    logger.withEnv('production')?.info('[bootstrap] migrations complete');
   }
   catch (e) {
-    console.error('[bootstrap] migration failed', e);
+    logger.withEnv('production')?.error('[bootstrap] migration failed', e);
     throw e;
   }
 
@@ -52,10 +53,10 @@ async function bootstrapAppInternal(
       ensureAndroidChannel(),
       syncDueScheduledTransactions(db, queryClient),
     ]);
-    console.log('[bootstrap] post-migration tasks complete');
+    logger.withEnv('production')?.info('[bootstrap] post-migration tasks complete');
   }
   catch (e) {
-    console.error('[bootstrap] post-migration task failed', e);
+    logger.withEnv('production')?.error('[bootstrap] post-migration task failed', e);
     throw e;
   }
 }

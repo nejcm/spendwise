@@ -621,6 +621,7 @@
     "location": "Location",
     "location_placeholder": "📍 Location",
     "make_recurring": "Make recurring",
+    "merchant_logo": "Merchant logo",
     "merchant_name": "Merchant Name",
     "merchant_name_placeholder": "🏪 Merchant Name",
     "no_transactions": "No transactions yet",

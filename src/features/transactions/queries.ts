@@ -96,8 +96,8 @@ function buildTransactionsBatchInsert(
   chunk: TransactionInsertData[],
   ids: string[],
 ): { sql: string; params: (string | number | null)[] } {
-  const rowPlaceholders = chunk.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ');
-  const sql = `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note, merchant_name, location)
+  const rowPlaceholders = chunk.map(() => '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)').join(', ');
+  const sql = `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note, merchant_name, merchant_logo_slug, location)
     VALUES ${rowPlaceholders}`;
   const params: (string | number | null)[] = [];
   for (let i = 0; i < chunk.length; i++) {
@@ -115,6 +115,7 @@ function buildTransactionsBatchInsert(
       data.date,
       data.note || null,
       data.merchant_name,
+      data.merchant_logo_slug,
       data.location,
     );
   }
@@ -128,9 +129,9 @@ export async function createTransaction(
   const id = generateId();
 
   await db.runAsync(
-    `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note, merchant_name, location)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [id, data.account_id, data.category_id, data.type, data.amount, data.currency, data.baseAmount, data.baseCurrency, data.date, data.note || null, data.merchant_name, data.location],
+    `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note, merchant_name, merchant_logo_slug, location)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [id, data.account_id, data.category_id, data.type, data.amount, data.currency, data.baseAmount, data.baseCurrency, data.date, data.note || null, data.merchant_name, data.merchant_logo_slug, data.location],
   );
 
   return id;
@@ -166,9 +167,9 @@ export async function updateTransaction(
 ): Promise<void> {
   await db.runAsync(
     `UPDATE transactions
-     SET account_id = ?, category_id = ?, type = ?, amount = ?, currency = ?, baseAmount = ?, baseCurrency = ?, date = ?, note = ?, merchant_name = ?, location = ?, updated_at = strftime('%s','now')
+     SET account_id = ?, category_id = ?, type = ?, amount = ?, currency = ?, baseAmount = ?, baseCurrency = ?, date = ?, note = ?, merchant_name = ?, merchant_logo_slug = ?, location = ?, updated_at = strftime('%s','now')
      WHERE id = ?`,
-    [data.account_id, data.category_id, data.type, data.amount, data.currency, data.baseAmount, data.baseCurrency, data.date, data.note || null, data.merchant_name, data.location, id],
+    [data.account_id, data.category_id, data.type, data.amount, data.currency, data.baseAmount, data.baseCurrency, data.date, data.note || null, data.merchant_name, data.merchant_logo_slug, data.location, id],
   );
 }
 

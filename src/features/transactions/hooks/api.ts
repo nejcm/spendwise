@@ -17,8 +17,9 @@ import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
 
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '../../../lib/store/store';
+import { useAppStore } from '@/lib/store/store';
 import { amountToCents } from '../../formatting/helpers';
+import { inferMerchantLogoSlug } from '../merchant-logo/infer';
 import * as queries from '../queries';
 
 // ─── Read Hooks ───
@@ -111,6 +112,7 @@ function prepareTransactionData(
     baseAmount: amount === 0 ? 0 : (item.baseAmount ? amountToCents(item.baseAmount) : computeBaseAmount(amountToCents(amount), item.currency, baseCurrency, rates ?? {})),
     baseCurrency,
     merchant_name: item.merchant_name?.trim() || null,
+    merchant_logo_slug: inferMerchantLogoSlug({ merchant_name: item.merchant_name, note: item.note }),
     location: item.location?.trim() || null,
   };
 }

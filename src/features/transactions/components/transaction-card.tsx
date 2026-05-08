@@ -9,6 +9,7 @@ import { FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
 import { formatShortDate } from '@/features/formatting/helpers';
 import { useAppStore } from '@/lib/store/store';
 import { hexWithOpacity } from '@/lib/theme/colors';
+import { MerchantLogo } from './merchant-logo';
 
 export type TransactionCardProps = {
   transaction: TransactionWithCategory;
@@ -21,17 +22,20 @@ export const TransactionCard = React.memo(({ transaction, className }: Transacti
   const isIncome = transaction.type === 'income';
   const displayName = transaction.merchant_name || transaction.category_name || 'Unknown';
   const showConverted = transaction.currency !== currency;
+  const logo = transaction.merchant_logo_slug ? <MerchantLogo slug={transaction.merchant_logo_slug} /> : null;
 
   return (
     <Pressable className={cn('flex-row items-center gap-3 p-3', className)} style={getPressedStyle} onPress={() => router.push(`/transactions/${transaction.id}`)}>
-      <View
-        className="size-10 items-center justify-center rounded-lg"
-        style={{ backgroundColor: hexWithOpacity(transaction.category_color ?? DEFAULT_COLOR, 36) }}
-      >
-        <Text className="text-xl font-medium">
-          {(transaction.category_icon || '?')}
-        </Text>
-      </View>
+      {logo || (
+        <View
+          className="size-10 items-center justify-center rounded-lg"
+          style={{ backgroundColor: hexWithOpacity(transaction.category_color ?? DEFAULT_COLOR, 36) }}
+        >
+          <Text className="text-xl font-medium">
+            {(transaction.category_icon || '?')}
+          </Text>
+        </View>
+      )}
       <View className="flex-1">
         <Text className="text-base font-medium" numberOfLines={1}>
           {displayName}

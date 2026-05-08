@@ -1,17 +1,14 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
+import { logger } from '../logger';
 import { seedDefaults } from './seed';
-
-export const DATABASE_VERSION = 4;
 
 /**
  * Runs on first open. Sets WAL mode and runs schema migrations via PRAGMA user_version.
- * Bump DATABASE_VERSION and add a migration block when you change the schema.
  */
 export async function migrateDb(db: SQLiteDatabase): Promise<void> {
   const row = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
   const currentDbVersion = row?.user_version ?? 0;
-
-  if (currentDbVersion >= DATABASE_VERSION) return;
+  logger.withEnv('production')?.info('DB version: ', currentDbVersion);
 
   await db.execAsync('PRAGMA journal_mode = \'wal\'');
   await db.execAsync('PRAGMA foreign_keys = ON');
@@ -139,5 +136,12 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
       ALTER TABLE transactions ADD COLUMN location TEXT;
     `);
     await db.execAsync(`PRAGMA user_version = 3`);
+  }
+
+  if (currentDbVersion < 4) {
+    await db.execAsync(`
+      ALTER TABLE transactions ADD COLUMN merchant_logo_slug TEXT;
+    `);
+    await db.execAsync(`PRAGMA user_version = 4`);
   }
 }

@@ -6,7 +6,7 @@ import Env from 'env';
 import * as React from 'react';
 import { GhostButton, ModalSheet, Text, View } from '@/components/ui';
 import { translate } from '@/lib/i18n';
-import { DATABASE_VERSION, useSQLiteContext } from '@/lib/sqlite';
+import { useSQLiteContext } from '@/lib/sqlite';
 import { updateAppState } from '@/lib/store/store';
 
 export function AppInfoSheet({ modal }: { modal: ReturnType<typeof useModalSheet> }) {
@@ -25,9 +25,6 @@ export function AppInfoSheet({ modal }: { modal: ReturnType<typeof useModalSheet
       };
     },
   });
-
-  const dbUserVersionDisplay = data ? String(data.dbUserVersion) : '—';
-  const sqliteVersionDisplay = data?.sqliteVersion ?? '—';
 
   return (
     <ModalSheet
@@ -50,17 +47,12 @@ export function AppInfoSheet({ modal }: { modal: ReturnType<typeof useModalSheet
 
           <View className="flex-row items-center justify-between">
             <Text className="text-sm text-muted-foreground">{translate('settings.sqlite_version')}</Text>
-            <Text className="text-sm text-foreground">{sqliteVersionDisplay}</Text>
+            <Text className="text-sm text-foreground">{data?.sqliteVersion ?? '-'}</Text>
           </View>
 
           <View className="flex-row items-center justify-between">
             <Text className="text-sm text-muted-foreground">{translate('settings.db_version')}</Text>
-            <Text className="text-sm text-foreground">{dbUserVersionDisplay}</Text>
-          </View>
-
-          <View className="flex-row items-center justify-between">
-            <Text className="text-sm text-muted-foreground">{translate('settings.db_schema_version')}</Text>
-            <Text className="text-sm text-foreground">{String(DATABASE_VERSION)}</Text>
+            <Text className="text-sm text-foreground">{data?.dbUserVersion ?? '-'}</Text>
           </View>
 
           <View className="flex-row items-center justify-between">

@@ -24,15 +24,16 @@ export function TransactionFilterBar({ filters, hasActiveFilters, updateFilters 
 
   return (
     <>
-      <View className="flex-row items-center px-4">
-        <View className="relative min-h-0 flex-1">
+      <View className="flex-row items-stretch px-4">
+        <View className="relative flex-1">
           <ScrollView
             style={defaultStyles.transparentBg}
             horizontal
             showsHorizontalScrollIndicator={false}
             className="flex-1"
+            contentContainerStyle={{ paddingVertical: 12, paddingRight: 24 }}
           >
-            <View className="flex-row items-center gap-1 py-3 pr-6">
+            <View className="flex-row items-center gap-1">
               <SolidButton
                 className="items-center rounded-2xl px-4"
                 color={!filters.categoryId ? 'default' : 'secondary'}
@@ -67,11 +68,11 @@ export function TransactionFilterBar({ filters, hasActiveFilters, updateFilters 
           />
         </View>
 
-        <View className="bg-background pl-2">
+        <View className="justify-center bg-background pl-2">
           <IconButton
             onPress={filterSheet.present}
             hitSlop={8}
-            className="relative py-3"
+            className="relative"
             accessibilityLabel={translate('common.filters')}
             accessibilityRole="button"
             size="sm"

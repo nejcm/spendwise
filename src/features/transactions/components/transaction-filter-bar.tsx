@@ -1,6 +1,8 @@
 import type { FilterState } from '../types';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
-import { ScrollView, View } from 'react-native';
+import { I18nManager, ScrollView, View } from 'react-native';
+import { useCSSVariable } from 'uniwind';
 import { IconButton, SolidButton, useModalSheet } from '@/components/ui';
 import { SlidersHorizontal } from '@/components/ui/icon';
 import { useCategories } from '@/features/categories/api';
@@ -17,38 +19,55 @@ export type TransactionFilterBarProps = {
 export function TransactionFilterBar({ filters, hasActiveFilters, updateFilters }: TransactionFilterBarProps) {
   const filterSheet = useModalSheet();
   const { data: categories = [] } = useCategories();
+  const background = String(useCSSVariable('--color-background') ?? '#fcfcfc');
+  const rtl = I18nManager.isRTL;
 
   return (
     <>
       <View className="flex-row items-center px-4">
-        <ScrollView
-          style={defaultStyles.transparentBg}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          className="flex-1"
-        >
-          <View className="flex-row items-center gap-1 py-3">
-            <SolidButton
-              className="items-center rounded-2xl px-4"
-              color={!filters.categoryId ? 'default' : 'secondary'}
-              size="xs"
-              label={translate('transactions.all')}
-              onPress={() => updateFilters({ categoryId: null })}
-            />
-            {categories.map((cat) => (
+        <View className="relative min-h-0 flex-1">
+          <ScrollView
+            style={defaultStyles.transparentBg}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            className="flex-1"
+          >
+            <View className="flex-row items-center gap-1 py-3 pr-6">
               <SolidButton
-                key={cat.id}
-                className="items-center rounded-2xl px-3"
-                color={filters.categoryId === cat.id ? 'default' : 'secondary'}
+                className="items-center rounded-2xl px-4"
+                color={!filters.categoryId ? 'default' : 'secondary'}
                 size="xs"
-                label={cat.name}
-                onPress={() => updateFilters({ categoryId: filters.categoryId === cat.id ? null : cat.id })}
+                label={translate('transactions.all')}
+                onPress={() => updateFilters({ categoryId: null })}
               />
-            ))}
-          </View>
-        </ScrollView>
+              {categories.map((cat) => (
+                <SolidButton
+                  key={cat.id}
+                  className="items-center rounded-2xl px-3"
+                  color={filters.categoryId === cat.id ? 'default' : 'secondary'}
+                  size="xs"
+                  label={cat.name}
+                  onPress={() => updateFilters({ categoryId: filters.categoryId === cat.id ? null : cat.id })}
+                />
+              ))}
+            </View>
+          </ScrollView>
+          <LinearGradient
+            pointerEvents="none"
+            colors={['transparent', background]}
+            start={{ x: rtl ? 1 : 0, y: 0 }}
+            end={{ x: rtl ? 0 : 1, y: 0 }}
+            style={{
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              width: 24,
+              ...(rtl ? { left: 0 } : { right: 0 }),
+            }}
+          />
+        </View>
 
-        <View className="pl-2 shadow-[-5px_0px_12px_1px_rgba(0,0,0,0.4)]">
+        <View className="bg-background pl-2">
           <IconButton
             onPress={filterSheet.present}
             hitSlop={8}

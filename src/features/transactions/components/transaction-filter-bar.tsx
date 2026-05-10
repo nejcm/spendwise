@@ -32,24 +32,26 @@ export function TransactionFilterBar({ filters, hasActiveFilters, updateFilters 
             showsHorizontalScrollIndicator={false}
             className="flex-1"
           >
-            <View className="flex-row items-center gap-1 pr-4">
-              <SolidButton
-                className="items-center rounded-2xl px-4"
-                color={!filters.categoryId ? 'default' : 'secondary'}
-                size="xs"
-                label={translate('transactions.all')}
-                onPress={() => updateFilters({ categoryId: null })}
-              />
-              {categories.map((cat) => (
+            <View className="flex-1">
+              <View className="flex-row items-center gap-1 py-3 pr-4">
                 <SolidButton
-                  key={cat.id}
-                  className="items-center rounded-2xl px-3"
-                  color={filters.categoryId === cat.id ? 'default' : 'secondary'}
+                  className="items-center rounded-2xl px-4"
+                  color={!filters.categoryId ? 'default' : 'secondary'}
                   size="xs"
-                  label={cat.name}
-                  onPress={() => updateFilters({ categoryId: filters.categoryId === cat.id ? null : cat.id })}
+                  label={translate('transactions.all')}
+                  onPress={() => updateFilters({ categoryId: null })}
                 />
-              ))}
+                {categories.map((cat) => (
+                  <SolidButton
+                    key={cat.id}
+                    className="items-center rounded-2xl px-3"
+                    color={filters.categoryId === cat.id ? 'default' : 'secondary'}
+                    size="xs"
+                    label={cat.name}
+                    onPress={() => updateFilters({ categoryId: filters.categoryId === cat.id ? null : cat.id })}
+                  />
+                ))}
+              </View>
             </View>
           </ScrollView>
           <LinearGradient
@@ -61,13 +63,13 @@ export function TransactionFilterBar({ filters, hasActiveFilters, updateFilters 
               position: 'absolute',
               top: 0,
               bottom: 0,
-              width: 24,
+              width: 20,
               ...(rtl ? { left: 0 } : { right: 0 }),
             }}
           />
         </View>
 
-        <View className="justify-center bg-background pl-2">
+        <View className="justify-center bg-background py-3 pl-2">
           <IconButton
             onPress={filterSheet.present}
             hitSlop={8}
@@ -78,7 +80,7 @@ export function TransactionFilterBar({ filters, hasActiveFilters, updateFilters 
           >
             <SlidersHorizontal size={20} colorClassName="accent-background" />
             {hasActiveFilters && (
-              <View className="absolute top-0.5 right-0.5 size-2 rounded-full bg-red-600" />
+              <View className="absolute top-0 right-0 size-2.5 rounded-full bg-red-600" />
             )}
           </IconButton>
         </View>

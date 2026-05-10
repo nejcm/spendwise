@@ -59,7 +59,9 @@ export async function clearSelectedDataDb(
     await db.execAsync('COMMIT;');
   }
   catch (error) {
-    await db.execAsync('ROLLBACK;');
+    if (await db.isInTransactionAsync()) {
+      await db.execAsync('ROLLBACK;');
+    }
     throw error;
   }
 }

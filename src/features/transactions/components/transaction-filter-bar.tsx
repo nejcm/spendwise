@@ -31,9 +31,8 @@ export function TransactionFilterBar({ filters, hasActiveFilters, updateFilters 
             horizontal
             showsHorizontalScrollIndicator={false}
             className="flex-1"
-            contentContainerStyle={{ paddingVertical: 12, paddingRight: 24 }}
           >
-            <View className="flex-row items-center gap-1">
+            <View className="flex-row items-center gap-1 pr-4">
               <SolidButton
                 className="items-center rounded-2xl px-4"
                 color={!filters.categoryId ? 'default' : 'secondary'}

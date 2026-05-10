@@ -16,7 +16,7 @@ export function PeriodSwipeContainer({ selection, children }: PeriodSwipeContain
   const opacity = useSharedValue(1);
 
   const gesture = Gesture.Pan()
-    .activeOffsetX([-20, 20])
+    .activeOffsetX([-40, 40])
     .failOffsetY([-10, 10])
     .runOnJS(true)
     .onUpdate((event) => {
@@ -28,10 +28,10 @@ export function PeriodSwipeContainer({ selection, children }: PeriodSwipeContain
       translateX.value = withSpring(0, { damping: 20, stiffness: 300 });
       opacity.value = withTiming(1, { duration: 80 });
       if (isFixed) return;
-      if (event.translationX < -50) {
+      if (event.translationX < -90) {
         setPeriodSelection(navigatePeriod(selection, 1));
       }
-      else if (event.translationX > 50) {
+      else if (event.translationX > 90) {
         setPeriodSelection(navigatePeriod(selection, -1));
       }
     });

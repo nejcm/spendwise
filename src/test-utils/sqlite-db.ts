@@ -62,6 +62,10 @@ export async function createTestDb() {
       return cb();
     },
 
+    isInTransactionAsync(): Promise<boolean> {
+      return Promise.resolve(false);
+    },
+
     /** Direct access to the underlying better-sqlite3 instance for seeding. */
     _raw: sqlite,
   };

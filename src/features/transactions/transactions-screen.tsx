@@ -66,7 +66,7 @@ export function TransactionsScreen() {
   }, [transactions, debouncedSearch, categoryId, type, accountId]);
 
   return (
-    <PeriodSwipeContainer selection={selection}>
+    <>
       <FocusAwareStatusBar />
 
       <PeriodSelector selection={selection} />
@@ -98,9 +98,11 @@ export function TransactionsScreen() {
         hasActiveFilters={categoryId !== null || type !== null || accountId !== null}
         updateFilters={updateFilters}
       />
-      <View className="flex-1">
-        <TransactionList transactions={filtered} isLoading={isLoading} onRefresh={() => void refetch()} />
-      </View>
-    </PeriodSwipeContainer>
+      <PeriodSwipeContainer selection={selection}>
+        <View className="flex-1">
+          <TransactionList transactions={filtered} isLoading={isLoading} onRefresh={() => void refetch()} />
+        </View>
+      </PeriodSwipeContainer>
+    </>
   );
 }

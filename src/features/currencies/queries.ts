@@ -158,6 +158,17 @@ function findClosestDateRates(
 
 const TOLERANCE_SEC = 7 * 86400; // 7 days
 
+async function withTransactionUnlessNested(
+  db: SQLiteDatabase,
+  task: () => Promise<void>,
+): Promise<void> {
+  if (await db.isInTransactionAsync()) {
+    await task();
+    return;
+  }
+  await db.withTransactionAsync(task);
+}
+
 /** Saves all rates in a single transaction (INSERT OR IGNORE — idempotent). */
 export async function bulkSaveRates(
   db: SQLiteDatabase,
@@ -166,7 +177,7 @@ export async function bulkSaveRates(
   const entries = Object.entries(ratesByDate);
   if (entries.length === 0) return;
 
-  await db.withTransactionAsync(async () => {
+  await withTransactionUnlessNested(db, async () => {
     for (const [dateStr, rates] of entries) {
       const ts = Math.floor(new Date(`${dateStr}T00:00:00Z`).getTime() / 1000);
       for (const [quote, rate] of Object.entries(rates)) {
@@ -335,7 +346,7 @@ export async function saveRatesForDate(
   rateMap: RateMap,
   dayTimestamp: number,
 ): Promise<void> {
-  await db.withTransactionAsync(async () => {
+  await withTransactionUnlessNested(db, async () => {
     for (const [quote, rate] of Object.entries(rateMap)) {
       if (rate == null) continue;
       await db.runAsync(

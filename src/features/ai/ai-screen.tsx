@@ -1,7 +1,6 @@
 import { Link } from 'expo-router';
 import * as React from 'react';
 import { KeyboardStickyView } from 'react-native-keyboard-controller';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   FocusAwareStatusBar,
   Input,
@@ -79,7 +78,6 @@ function Empty({ hasKey, hasMessages, onSend }: EmptyProps) {
 }
 
 export function AiScreen() {
-  const insets = useSafeAreaInsets();
   const {
     hasKey,
     messages,

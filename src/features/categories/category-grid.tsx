@@ -22,90 +22,118 @@ export type CategoryGridProps = {
   editMode: boolean;
 };
 
-export const CategoryGrid = React.memo(({
-  categories,
-  onReorder,
-  onAddPress,
-  onPress,
-  onRefresh,
-  editMode,
-}: CategoryGridProps) => {
-  const currency = useAppStore.use.currency();
-  const periodSelection = useAppStore.use.periodSelection();
-  const scrollRef = useAnimatedRef<Animated.ScrollView>();
-  const [refreshing, setRefreshing] = useState(false);
-  const deleteCategory = useDeleteCategory();
+export const CategoryGrid = React.memo(
+  ({
+    categories,
+    onReorder,
+    onAddPress,
+    onPress,
+    onRefresh,
+    editMode,
+  }: CategoryGridProps) => {
+    const currency = useAppStore.use.currency();
+    const periodSelection = useAppStore.use.periodSelection();
+    const scrollRef = useAnimatedRef<Animated.ScrollView>();
+    const [refreshing, setRefreshing] = useState(false);
+    const deleteCategory = useDeleteCategory();
 
-  const handleRefresh = React.useCallback(async () => {
-    setRefreshing(true);
-    await onRefresh?.();
-    setRefreshing(false);
-  }, [onRefresh]);
+    const handleRefresh = React.useCallback(async () => {
+      setRefreshing(true);
+      await onRefresh?.();
+      setRefreshing(false);
+    }, [onRefresh]);
 
-  function handleDragEnd(params: { data: CategorySpend[] }) {
-    const updates = params.data.map((item, idx) => ({ id: item.category_id, sort_order: idx }));
-    onReorder(updates);
-  }
+    function handleDragEnd(params: { data: CategorySpend[] }) {
+      const updates = params.data.map((item, idx) => ({
+        id: item.category_id,
+        sort_order: idx,
+      }));
+      onReorder(updates);
+    }
 
-  const onDeletePress = React.useCallback((categoryId: string, name: string) => {
-    Alert.alert(translate('common.delete'), translate('categories.delete_confirm', { name }), [
-      { text: translate('common.cancel'), style: 'cancel' },
-      { text: translate('common.delete'), style: 'destructive', onPress: () => deleteCategory.mutate(categoryId) },
-    ]);
-  }, [deleteCategory]);
+    const onDeletePress = React.useCallback(
+      (categoryId: string, name: string) => {
+        Alert.alert(
+          translate('common.delete'),
+          translate('categories.delete_confirm', { name }),
+          [
+            { text: translate('common.cancel'), style: 'cancel' },
+            {
+              text: translate('common.delete'),
+              style: 'destructive',
+              onPress: () => deleteCategory.mutate(categoryId),
+            },
+          ],
+        );
+      },
+      [deleteCategory],
+    );
 
-  return (
-    <Animated.ScrollView ref={scrollRef} className="flex-1 bg-background" refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}>
-      <View className="px-4 pb-4">
-        {categories.length === 0
-          ? (
-              <NoDataCard onPress={onAddPress} label={translate('common.add')} />
-            )
-          : (
-              <Sortable.Grid
-                data={categories}
-                columns={2}
-                columnGap={10}
-                rowGap={10}
-                hapticsEnabled
-                sortEnabled={editMode}
-                scrollableRef={scrollRef}
-                dimensionsAnimationType="none"
-                itemEntering={null}
-                itemExiting={null}
-                itemsLayoutTransitionMode="reorder"
-                keyExtractor={(item) => item.category_id}
-                onDragEnd={handleDragEnd}
-                renderItem={({ item }) => (
-                  <CategoryCard
-                    item={item}
-                    currency={currency}
-                    periodSelection={periodSelection}
-                    onPress={onPress}
-                    onDeletePress={editMode ? onDeletePress : undefined}
-                  />
-                )}
-              />
-            )}
-        {editMode && (
-          <View className="mt-6 flex-row items-center justify-center gap-2">
-            <Lightbulb className="text-muted-foreground" size={14} />
-            <Text className="text-sm text-muted-foreground">
-              {translate('categories.sorting_tips')}
-            </Text>
+    return (
+      <Animated.ScrollView
+        ref={scrollRef}
+        className="flex-1 bg-background"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+      >
+        <View className="px-4 pb-4">
+          {categories.length === 0
+            ? (
+                <NoDataCard onPress={onAddPress} label={translate('common.add')} />
+              )
+            : (
+                <Sortable.Grid
+                  data={categories}
+                  columns={2}
+                  columnGap={10}
+                  rowGap={10}
+                  hapticsEnabled
+                  sortEnabled={editMode}
+                  scrollableRef={scrollRef}
+                  dimensionsAnimationType="none"
+                  itemEntering={null}
+                  itemExiting={null}
+                  itemsLayoutTransitionMode="reorder"
+                  keyExtractor={(item) => item.category_id}
+                  onDragEnd={handleDragEnd}
+                  renderItem={({ item }) => (
+                    <CategoryCard
+                      item={item}
+                      currency={currency}
+                      periodSelection={periodSelection}
+                      onPress={onPress}
+                      onDeletePress={editMode ? onDeletePress : undefined}
+                    />
+                  )}
+                />
+              )}
+          {editMode && (
+            <View className="mt-6 flex-row items-center justify-center gap-2">
+              <Lightbulb className="text-muted-foreground" size={14} />
+              <Text className="text-sm text-muted-foreground">
+                {translate('categories.sorting_tips')}
+              </Text>
+            </View>
+          )}
+          <View className="mt-6 mb-4 flex-row items-center justify-center">
+            <SolidButton
+              color="primary"
+              iconLeft={(
+                <Plus
+                  className="mr-1"
+                  colorClassName="accent-primary-foreground"
+                  size={20}
+                />
+              )}
+              label={translate('common.add')}
+              size="sm"
+              className="px-6"
+              onPress={onAddPress}
+            />
           </View>
-        )}
-        <View className="mt-6 flex-row items-center justify-center">
-          <SolidButton
-            color="primary"
-            iconLeft={<Plus className="mr-1" colorClassName="accent-primary-foreground" size={20} />}
-            label={translate('common.add')}
-            size="sm"
-            className="px-6"
-            onPress={onAddPress}
-          />
         </View>
-      </View>
-    </Animated.ScrollView>
-  );
-});
+      </Animated.ScrollView>
+    );
+  },
+);

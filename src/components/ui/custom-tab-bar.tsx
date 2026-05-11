@@ -3,11 +3,18 @@ import { usePathname, useRouter } from 'expo-router';
 
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
-import { Home, LayoutGrid, ListChecks, PieChart, PlusIcon } from '@/components/ui/icon';
+import {
+  Home,
+  LayoutGrid,
+  ListChecks,
+  PieChart,
+  PlusIcon,
+} from '@/components/ui/icon';
 import { triggerScan } from '@/lib/store/local-store';
 import { useAppStore } from '@/lib/store/store';
 import { SolidButton } from './solid-button';
 
+export const BOTTOM_BAR_HEIGHT = 60 as const;
 export const TAB_BAR_COLOR = '#f6f6f6' as const;
 export const TAB_BAR_DARK_COLOR = '#17191C' as const;
 const bgColor = `bg-gray-50`;
@@ -71,11 +78,20 @@ export function CustomTabBar() {
               <SolidButton
                 color="primary"
                 onPress={() => router.push('/transactions/new')}
-                onLongPress={() => triggerScan(longPressAction === 'pick_from_gallery' ? 'gallery' : 'camera')}
+                onLongPress={() =>
+                  triggerScan(
+                    longPressAction === 'pick_from_gallery'
+                      ? 'gallery'
+                      : 'camera',
+                  )}
                 delayLongPress={400}
                 className="size-12 items-center justify-center rounded-full p-0"
               >
-                <Icon colorClassName="accent-primary-foreground" size={24} strokeWidth={2} />
+                <Icon
+                  colorClassName="accent-primary-foreground"
+                  size={24}
+                  strokeWidth={2}
+                />
               </SolidButton>
             </View>
           );
@@ -89,7 +105,13 @@ export function CustomTabBar() {
             onPress={() => router.replace(tab.path as never)}
             className="flex-1 items-center justify-center gap-1"
           >
-            <Icon colorClassName={isActive ? 'accent-foreground' : 'accent-gray-500'} size={24} strokeWidth={2} />
+            <Icon
+              colorClassName={
+                isActive ? 'accent-foreground' : 'accent-gray-500'
+              }
+              size={24}
+              strokeWidth={2}
+            />
             {isActive && (
               <View className="size-1 rounded-full bg-black dark:bg-white" />
             )}

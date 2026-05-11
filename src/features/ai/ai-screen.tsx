@@ -1,7 +1,16 @@
 import { Link } from 'expo-router';
 import * as React from 'react';
-import { KeyboardAvoidingView, Platform } from 'react-native';
-import { FocusAwareStatusBar, Input, ScrollView, SolidButton, Text, View } from '@/components/ui';
+import { KeyboardStickyView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  FocusAwareStatusBar,
+  Input,
+  ScrollView,
+  SolidButton,
+  Text,
+  View,
+} from '@/components/ui';
+import { BOTTOM_BAR_HEIGHT } from '@/components/ui/custom-tab-bar';
 import { Brain, Plus, SendHorizonal } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import AssistantMessage from '@/features/ai/components/assistant-message';
@@ -34,7 +43,10 @@ function Empty({ hasKey, hasMessages, onSend }: EmptyProps) {
         <Text className="text-muted-foreground">
           {translate('ai.add_api_key_in')}
           {' '}
-          <Link href="/settings/ai" className="mx-1 font-medium text-foreground underline">
+          <Link
+            href="/settings/ai"
+            className="mx-1 font-medium text-foreground underline"
+          >
             {translate('ai.ai_setting')}
           </Link>
           {' '}
@@ -46,9 +58,7 @@ function Empty({ hasKey, hasMessages, onSend }: EmptyProps) {
   if (hasMessages) return null;
   return (
     <View className="py-6">
-      <Text className="mb-2 text-center">
-        {translate('ai.ask_prompt')}
-      </Text>
+      <Text className="mb-2 text-center">{translate('ai.ask_prompt')}</Text>
       <View className="mt-3 flex flex-col gap-y-2">
         {PRESET_QUESTIONS.map((q) => (
           <SolidButton
@@ -69,6 +79,7 @@ function Empty({ hasKey, hasMessages, onSend }: EmptyProps) {
 }
 
 export function AiScreen() {
+  const insets = useSafeAreaInsets();
   const {
     hasKey,
     messages,
@@ -84,10 +95,7 @@ export function AiScreen() {
 
   return (
     <>
-      <KeyboardAvoidingView
-        className="flex-1 bg-background"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      <View className="flex-1 bg-background">
         <FocusAwareStatusBar />
         <View className="flex-1">
           {hasKey && messages.length > 0 && (
@@ -96,7 +104,13 @@ export function AiScreen() {
                 color="primary"
                 size="xs"
                 label={translate('ai.new_chat')}
-                iconLeft={<Plus colorClassName="accent-primary-foreground" className="mr-1" size={15} />}
+                iconLeft={(
+                  <Plus
+                    colorClassName="accent-primary-foreground"
+                    className="mr-1"
+                    size={15}
+                  />
+                )}
                 onPress={actions.reset}
                 disabled={!messages.length}
               />
@@ -109,9 +123,14 @@ export function AiScreen() {
             contentContainerClassName="pb-8"
             style={defaultStyles.transparentBg}
           >
-            <Empty hasKey={hasKey} hasMessages={messages.length > 0} onSend={actions.send} />
+            <Empty
+              hasKey={hasKey}
+              hasMessages={messages.length > 0}
+              onSend={actions.send}
+            />
             {messages.map((m) => {
-              const { displayContent, isLiveStreaming } = getMessageRenderInfo(m);
+              const { displayContent, isLiveStreaming }
+                = getMessageRenderInfo(m);
               return (
                 <View
                   key={m.id}
@@ -126,9 +145,7 @@ export function AiScreen() {
                 >
                   {m.role === 'user'
                     ? (
-                        <Text className="text-sm text-background">
-                          {m.content}
-                        </Text>
+                        <Text className="text-sm text-background">{m.content}</Text>
                       )
                     : (
                         <MessageComponent
@@ -144,7 +161,9 @@ export function AiScreen() {
             {toolStatus && (
               <View className="my-1 flex-row items-center gap-1 px-1">
                 <Brain size={15} className="text-muted-foreground" />
-                <Text className="text-xs text-muted-foreground italic">{toolStatus}</Text>
+                <Text className="text-xs text-muted-foreground italic">
+                  {toolStatus}
+                </Text>
               </View>
             )}
             {errorMessage && (
@@ -152,37 +171,43 @@ export function AiScreen() {
                 <Text className="text-sm text-danger-500">{errorMessage}</Text>
               </View>
             )}
-            {scroll.shouldShowBottomFiller && <View style={{ height: scroll.bottomFillerHeight }} />}
+            {scroll.shouldShowBottomFiller && (
+              <View style={{ height: scroll.bottomFillerHeight }} />
+            )}
           </ScrollView>
 
-          <View className="bg-background px-4 pb-safe-offset-2">
-            <View className="relative">
-              <Input
-                variant="textarea"
-                value={draftQuestion}
-                onChangeText={actions.setDraft}
-                placeholder={translate('ai.input_placeholder')}
-                autoCapitalize="sentences"
-                autoCorrect
-                multiline
-                numberOfLines={2}
-                disabled={!hasKey}
-                className="min-h-[80] pr-12"
-              />
-              <IconButton
-                size="sm"
-                onPress={() => {
-                  void actions.send();
-                }}
-                disabled={isStreaming || !draftQuestion.trim() || !hasKey}
-                className="absolute right-2 bottom-2 rounded-full"
-              >
-                <SendHorizonal colorClassName="accent-background" size={20} />
-              </IconButton>
+          <KeyboardStickyView
+            offset={{ closed: 0, opened: BOTTOM_BAR_HEIGHT + 20 }}
+          >
+            <View className="bg-background px-4 pb-safe-offset-2">
+              <View className="relative">
+                <Input
+                  variant="textarea"
+                  value={draftQuestion}
+                  onChangeText={actions.setDraft}
+                  placeholder={translate('ai.input_placeholder')}
+                  autoCapitalize="sentences"
+                  autoCorrect
+                  multiline
+                  numberOfLines={2}
+                  disabled={!hasKey}
+                  className="min-h-[80] pr-12"
+                />
+                <IconButton
+                  size="sm"
+                  onPress={() => {
+                    void actions.send();
+                  }}
+                  disabled={isStreaming || !draftQuestion.trim() || !hasKey}
+                  className="absolute right-2 bottom-2 rounded-full"
+                >
+                  <SendHorizonal colorClassName="accent-background" size={20} />
+                </IconButton>
+              </View>
             </View>
-          </View>
+          </KeyboardStickyView>
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </>
   );
 }

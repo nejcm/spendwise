@@ -578,6 +578,7 @@
     "budget_used": "used",
     "budget_view_cards": "Cards",
     "budget_view_chart": "Chart",
+    "calendar": "Calendar",
     "global_budget_clear": "Clear budget",
     "global_budget_invalid": "Please enter a valid positive amount",
     "global_budget_label": "Global Budget",

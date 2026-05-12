@@ -11,6 +11,7 @@ import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { BudgetTab } from './components/budget-tab';
 import { CategoryBreakdown } from './components/category-breakdown';
+import { StatsCalendar } from './components/stats-calendar';
 import { StatsTabBar } from './components/stats-tab-bar';
 import { StatsTrend } from './components/stats-trend';
 import { Summary } from './components/summary';
@@ -23,48 +24,55 @@ export function StatsScreen() {
   const [activeTab, setActiveTab] = useState<StatsTab>('overview');
 
   return (
-    <PeriodSwipeContainer selection={selection}>
+    <View className="flex-1">
       <FocusAwareStatusBar />
-
       <StatsTabBar value={activeTab} onChange={setActiveTab} />
 
-      {activeTab === 'overview' && (
-        <>
-          <PeriodSelector selection={selection} />
-          <ScrollView className="flex-1" style={defaultStyles.transparentBg} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-            <View className="px-4 pt-4 pb-6">
-              <Summary startDate={startDate} endDate={endDate} currency={currency} />
+      {activeTab === 'calendar'
+        ? (
+            <StatsCalendar />
+          )
+        : (
+            <PeriodSwipeContainer selection={selection}>
+              {activeTab === 'overview' && (
+                <>
+                  <PeriodSelector selection={selection} />
+                  <ScrollView className="flex-1" style={defaultStyles.transparentBg} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+                    <View className="px-4 pt-4 pb-6">
+                      <Summary startDate={startDate} endDate={endDate} currency={currency} />
 
-              <StatsTrend
-                key={`${selection.mode}-${startDate}`}
-                period={selection.mode}
-                startDate={startDate}
-                endDate={endDate}
-              />
+                      <StatsTrend
+                        key={`${selection.mode}-${startDate}`}
+                        period={selection.mode}
+                        startDate={startDate}
+                        endDate={endDate}
+                      />
 
-              <CategoryBreakdown
-                startDate={startDate}
-                endDate={endDate}
-                currency={currency}
-                type="expense"
-                limit={10}
-              />
+                      <CategoryBreakdown
+                        startDate={startDate}
+                        endDate={endDate}
+                        currency={currency}
+                        type="expense"
+                        limit={10}
+                      />
 
-              <CategoryBreakdown
-                startDate={startDate}
-                endDate={endDate}
-                currency={currency}
-                type="income"
-                limit={8}
-              />
-            </View>
-          </ScrollView>
-        </>
-      )}
+                      <CategoryBreakdown
+                        startDate={startDate}
+                        endDate={endDate}
+                        currency={currency}
+                        type="income"
+                        limit={8}
+                      />
+                    </View>
+                  </ScrollView>
+                </>
+              )}
 
-      {activeTab === 'budget' && (
-        <BudgetTab currency={currency} />
-      )}
-    </PeriodSwipeContainer>
+              {activeTab === 'budget' && (
+                <BudgetTab currency={currency} />
+              )}
+            </PeriodSwipeContainer>
+          )}
+    </View>
   );
 }

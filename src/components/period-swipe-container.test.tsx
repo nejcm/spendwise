@@ -135,7 +135,7 @@ describe('periodSwipeContainer', () => {
 
     renderContainer(selection);
 
-    expect(() => endPan({ translationX: -60 })).not.toThrow();
+    expect(() => endPan({ translationX: -100 })).not.toThrow();
 
     expect(latestPanGesture?.runOnJS).toHaveBeenCalledWith(true);
     expect(mockNavigatePeriod).toHaveBeenCalledWith(selection, 1);
@@ -147,7 +147,7 @@ describe('periodSwipeContainer', () => {
 
     renderContainer(selection);
 
-    expect(() => endPan({ translationX: 60 })).not.toThrow();
+    expect(() => endPan({ translationX: 100 })).not.toThrow();
 
     expect(latestPanGesture?.runOnJS).toHaveBeenCalledWith(true);
     expect(mockNavigatePeriod).toHaveBeenCalledWith(selection, -1);
@@ -167,7 +167,7 @@ describe('periodSwipeContainer', () => {
 
   it('ignores swipes when all-time mode is selected', () => {
     renderContainer({ mode: 'all' });
-    endPan({ translationX: -60 });
+    endPan({ translationX: -100 });
 
     expect(latestPanGesture?.runOnJS).toHaveBeenCalledWith(true);
     expect(mockNavigatePeriod).not.toHaveBeenCalled();
@@ -176,7 +176,7 @@ describe('periodSwipeContainer', () => {
 
   it('ignores swipes when today mode is selected', () => {
     renderContainer({ mode: 'today' });
-    endPan({ translationX: -60 });
+    endPan({ translationX: -100 });
 
     expect(mockNavigatePeriod).not.toHaveBeenCalled();
     expect(mockSetPeriodSelection).not.toHaveBeenCalled();
@@ -185,7 +185,7 @@ describe('periodSwipeContainer', () => {
   it('navigates forward on left swipe when this-week mode is selected', () => {
     const selection: PeriodSelection = { mode: 'this-week' };
     renderContainer(selection);
-    endPan({ translationX: -60 });
+    endPan({ translationX: -100 });
 
     expect(mockNavigatePeriod).toHaveBeenCalledWith(selection, 1);
     expect(mockSetPeriodSelection).toHaveBeenCalled();
@@ -194,7 +194,7 @@ describe('periodSwipeContainer', () => {
   it('navigates backward on right swipe when this-month mode is selected', () => {
     const selection: PeriodSelection = { mode: 'this-month' };
     renderContainer(selection);
-    endPan({ translationX: 60 });
+    endPan({ translationX: 100 });
 
     expect(mockNavigatePeriod).toHaveBeenCalledWith(selection, -1);
     expect(mockSetPeriodSelection).toHaveBeenCalled();
@@ -203,7 +203,7 @@ describe('periodSwipeContainer', () => {
   it('navigates forward on left swipe when this-year mode is selected', () => {
     const selection: PeriodSelection = { mode: 'this-year' };
     renderContainer(selection);
-    endPan({ translationX: -60 });
+    endPan({ translationX: -100 });
 
     expect(mockNavigatePeriod).toHaveBeenCalledWith(selection, 1);
     expect(mockSetPeriodSelection).toHaveBeenCalled();

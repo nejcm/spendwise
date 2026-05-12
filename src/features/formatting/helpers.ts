@@ -3,6 +3,7 @@ import type { CurrencyFormat, NumberFormat } from './constants';
 import { format, isToday, isYesterday } from 'date-fns';
 import { translate } from '@/lib/i18n';
 import { DEFAULT_DATE_FORMAT, DEFAULT_USER_CURRENCY } from '../../config';
+import { shortenNumberString } from '../../lib/number';
 import { CURRENCIES_MAP } from '../currencies';
 
 const TRAILING_DECIMAL_ZEROS = /\.?0+$/;
@@ -37,14 +38,14 @@ const NUMBER_FORMAT_MAP: Record<NumberFormat, [string, Intl.NumberFormatOptions]
   'comma': ['de-DE', { useGrouping: false }],
   'comma-space': ['de-DE', { useGrouping: true }],
 } as const;
-export function formatNumber(value: number | string, numberFormat: NumberFormat): string {
+export function formatNumber(value: number | string, numberFormat: NumberFormat, fractionDigits = 2): string {
   const number = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(number)) return String(value);
 
   const [locale, opts] = NUMBER_FORMAT_MAP[numberFormat];
   return new Intl.NumberFormat(locale, {
     useGrouping: true,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: fractionDigits,
     ...opts,
   }).format(number);
 }
@@ -53,15 +54,33 @@ export function formatNumber(value: number | string, numberFormat: NumberFormat)
  * Format cents as a currency string using the given number and currency format.
  * e.g., 123456, 'EUR', 'comma-space', 'symbol-before' -> "€\u00a01.234,56"
  */
-export function formatCurrency(value: number | string, currency: CurrencyKey, numberFormat: NumberFormat = 'comma', currencyFormat: CurrencyFormat = 'symbol-before'): string {
+export function formatCurrency(
+  value: number | string,
+  currency: CurrencyKey,
+  options: {
+    numberFormat: NumberFormat;
+    currencyFormat: CurrencyFormat;
+    shorten?: boolean;
+    negativeSymbol?: boolean;
+    fractionDigits?: number;
+  } = {
+    numberFormat: 'comma',
+    currencyFormat: 'symbol-before',
+    fractionDigits: 2,
+  },
+): string {
+  const { numberFormat, currencyFormat, negativeSymbol = true, shorten = false, fractionDigits = 2 } = options;
   const number = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(number)) return String(value);
   const curr = currency?.length ? currency : DEFAULT_USER_CURRENCY;
 
-  const isNegative = number < 0;
+  const adjustedNumber = negativeSymbol ? number : Math.abs(number);
+  const isNegative = adjustedNumber < 0;
   const isCurrencyBeforeNumber = currencyFormat === 'symbol-before' || currencyFormat === 'code-before';
-  const numberForFormatting = isNegative && isCurrencyBeforeNumber ? Math.abs(number) : number;
-  const formattedNumber = formatNumber(centsToAmount(numberForFormatting), numberFormat);
+  const numberForFormatting = isNegative && isCurrencyBeforeNumber ? Math.abs(adjustedNumber) : adjustedNumber;
+  const formattedNumber = shorten
+    ? shortenNumberString(centsToAmount(numberForFormatting), 1000, fractionDigits)
+    : formatNumber(centsToAmount(numberForFormatting), numberFormat, fractionDigits);
   const isCode = currencyFormat === 'code-before' || currencyFormat === 'code-after';
   const currencyTxt = isCode ? curr : CURRENCIES_MAP[curr]?.symbol ?? DEFAULT_USER_CURRENCY;
   const space = isCode ? ' ' : '';

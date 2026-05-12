@@ -41,8 +41,8 @@ export function HomeScreen() {
             </View>
           </View>
           <Summary />
-          <AccountsOverview />
           <HomeRecommendations />
+          <AccountsOverview />
           <CategoriesOverview />
           <ScreensLinksGrid />
           <TransactionsList />

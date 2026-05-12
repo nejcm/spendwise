@@ -24,6 +24,9 @@ export type CurrencyProps = BaseProps & {
   format?: NumberFormat;
   currency: CurrencyKey;
   prefix?: string;
+  shorten?: boolean;
+  negativeSymbol?: boolean;
+  fractionDigits?: number;
 };
 
 export function FormattedNumber({ value, format, prefix = '', ...textProps }: NumberProps) {
@@ -36,13 +39,13 @@ export function FormattedNumber({ value, format, prefix = '', ...textProps }: Nu
   );
 }
 
-export function FormattedCurrency({ value, format, currency, prefix = '', ...textProps }: CurrencyProps) {
+export function FormattedCurrency({ value, format, currency, prefix = '', shorten = false, negativeSymbol = true, fractionDigits = 2, ...textProps }: CurrencyProps) {
   const effectiveFormat = useAppStore.use.numberFormat();
   const effectiveCurrencyFormat = useAppStore.use.currencyFormat();
   return (
     <Text {...textProps}>
       {prefix}
-      {formatCurrency(value, currency, format ?? effectiveFormat, effectiveCurrencyFormat)}
+      {formatCurrency(value, currency, { numberFormat: format ?? effectiveFormat, currencyFormat: effectiveCurrencyFormat, shorten, negativeSymbol, fractionDigits })}
     </Text>
   );
 }

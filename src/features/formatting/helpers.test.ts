@@ -41,7 +41,7 @@ describe('formatting helpers', () => {
 
   it('uses symbol display for symbol currency formats', () => {
     for (const currencyFormat of ['symbol-after', 'symbol-before'] as CurrencyFormat[]) {
-      const result = formatCurrency(cents, 'USD', 'comma-space', currencyFormat);
+      const result = formatCurrency(cents, 'USD', { numberFormat: 'comma-space', currencyFormat });
       expect(result).toContain('$');
       expect(result).not.toContain('USD');
     }
@@ -49,7 +49,7 @@ describe('formatting helpers', () => {
 
   it('uses code display for code currency formats', () => {
     for (const currencyFormat of ['code-after', 'code-before'] as CurrencyFormat[]) {
-      const result = (formatCurrency(cents, 'USD', 'comma-space', currencyFormat));
+      const result = (formatCurrency(cents, 'USD', { numberFormat: 'comma-space', currencyFormat }));
       expect(result).toContain('USD');
       expect(result).not.toContain('$');
     }
@@ -63,9 +63,9 @@ describe('formatting helpers', () => {
       'code-before': 'USD 1.234,56',
     };
 
-    for (const numberFormat of Object.keys(expectedNumbers) as CurrencyFormat[]) {
-      const result = formatCurrency(cents, 'USD', 'comma-space', numberFormat);
-      expect(result).toBe(expectedNumbers[numberFormat]);
+    for (const currencyFormat of Object.keys(expectedNumbers) as CurrencyFormat[]) {
+      const result = formatCurrency(cents, 'USD', { numberFormat: 'comma-space', currencyFormat });
+      expect(result).toBe(expectedNumbers[currencyFormat]);
     }
   });
 
@@ -77,9 +77,56 @@ describe('formatting helpers', () => {
       'code-before': '-USD 1.234,56',
     };
 
-    for (const numberFormat of Object.keys(expectedNumbers) as CurrencyFormat[]) {
-      const result = formatCurrency(negativeCents, 'USD', 'comma-space', numberFormat);
-      expect(result).toBe(expectedNumbers[numberFormat]);
+    for (const currencyFormat of Object.keys(expectedNumbers) as CurrencyFormat[]) {
+      const result = formatCurrency(negativeCents, 'USD', { numberFormat: 'comma-space', currencyFormat });
+      expect(result).toBe(expectedNumbers[currencyFormat]);
     }
+  });
+
+  it('shortens the numeric part when shorten is true', () => {
+    expect(
+      formatCurrency(cents, 'USD', {
+        numberFormat: 'comma-space',
+        currencyFormat: 'symbol-before',
+        shorten: true,
+      }),
+    ).toBe('$1.2k');
+    expect(
+      formatCurrency(50_000, 'USD', {
+        numberFormat: 'comma-space',
+        currencyFormat: 'symbol-before',
+        shorten: true,
+      }),
+    ).toBe('$500');
+  });
+
+  it('prefixes minus before currency for negative symbol-before when negativeSymbol is true', () => {
+    expect(
+      formatCurrency(negativeCents, 'USD', {
+        numberFormat: 'comma-space',
+        currencyFormat: 'symbol-before',
+        shorten: true,
+        negativeSymbol: true,
+      }),
+    ).toBe('-$1.2k');
+  });
+
+  it('omits leading minus for symbol-before negatives when negativeSymbol is false', () => {
+    expect(
+      formatCurrency(negativeCents, 'USD', {
+        numberFormat: 'comma-space',
+        currencyFormat: 'symbol-before',
+        shorten: true,
+        negativeSymbol: false,
+      }),
+    ).toBe('$1.2k');
+    expect(
+      formatCurrency(negativeCents, 'USD', {
+        numberFormat: 'comma-space',
+        currencyFormat: 'code-before',
+        shorten: true,
+        negativeSymbol: false,
+      }),
+    ).toBe('USD 1.2k');
   });
 });

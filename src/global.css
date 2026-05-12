@@ -169,4 +169,7 @@
   .text-balance {
     text-wrap: balance;
   }
+  .text-2xs {
+    font-size: 10px;
+  }
 }

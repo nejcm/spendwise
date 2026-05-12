@@ -13,7 +13,7 @@ import {
 } from 'date-fns';
 import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
-import { FormattedCurrency, Pressable, ScrollView, Text, View } from '@/components/ui';
+import { FormattedCurrency, getPressedStyle, Pressable, ScrollView, Text, View } from '@/components/ui';
 import { ChevronLeft, ChevronRight } from '@/components/ui/icon';
 import { SkeletonBox } from '@/components/ui/skeleton';
 import { trendByRangeQueryOptions, useTrendByRange } from '@/features/insights/api';
@@ -37,6 +37,8 @@ type DayCell = {
   income: number;
   expense: number;
 };
+
+const baseDayCls = 'm-0.5 flex-1 items-center justify-center rounded-lg px-0.5 py-1';
 
 export function StatsCalendar() {
   const queryClient = useQueryClient();
@@ -102,9 +104,9 @@ export function StatsCalendar() {
   const rows = Math.ceil(days.length / 7);
 
   return (
-    <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}>
-      <View className="rounded-2xl bg-card p-4">
-        <View className="mb-3 flex-row items-center justify-between">
+    <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 32, paddingBottom: 24 }}>
+      <View>
+        <View className="mb-8 flex-row items-center justify-between">
           <Pressable onPress={goPrev} hitSlop={12} className="p-1">
             <ChevronLeft className="text-foreground" size={20} />
           </Pressable>
@@ -133,7 +135,7 @@ export function StatsCalendar() {
                     {days.slice(rowIdx * 7, rowIdx * 7 + 7).map((day) => {
                       const key = isoDateKey(day.date);
                       const isSelected = selectedKey === key;
-                      const hasData = day.income > 0 || day.expense > 0;
+                      const diff = (day.income || 0) - (day.expense || 0);
                       return (
                         <Pressable
                           key={key}
@@ -141,24 +143,24 @@ export function StatsCalendar() {
                             if (!day.isCurrentMonth) return;
                             setSelectedKey(isSelected ? null : key);
                           }}
-                          style={{ minHeight: 52 }}
-                          className={`my-0.5 flex-1 items-center justify-center rounded-lg px-0.5 py-1 ${isSelected ? 'border border-primary' : day.isToday ? 'border border-muted' : ''}`}
+                          style={getPressedStyle}
+                          className={`${baseDayCls} border ${isSelected ? 'border-primary' : day.isToday ? 'border-gray-500' : 'border-transparent'} ${day.isCurrentMonth ? '' : 'opacity-50'} min-h-13 bg-muted/40`}
                         >
-                          <Text className={`text-xs ${day.isCurrentMonth ? 'text-foreground' : 'text-muted-foreground/40'}`}>
+                          <Text className="text-xs text-muted-foreground">
                             {day.date.getDate()}
                           </Text>
-                          {day.isCurrentMonth && hasData
-                            ? (
-                                <View className="mt-0.5 items-center">
-                                  {day.income > 0
-                                    ? <FormattedCurrency value={day.income} currency={currency} numberOfLines={1} style={{ color: incomeColor, fontSize: 9 }} />
-                                    : null}
-                                  {day.expense > 0
-                                    ? <FormattedCurrency value={day.expense} currency={currency} prefix="-" numberOfLines={1} style={{ color: expenseColor, fontSize: 9 }} />
-                                    : null}
-                                </View>
-                              )
-                            : null}
+                          {day.isCurrentMonth && (
+                            <FormattedCurrency
+                              value={diff}
+                              currency={currency}
+                              numberOfLines={1}
+                              className="text-2xs mt-0.5 items-center font-semibold"
+                              style={{ color: diff > 0 ? incomeColor : expenseColor }}
+                              shorten
+                              negativeSymbol={false}
+                              fractionDigits={1}
+                            />
+                          )}
                         </Pressable>
                       );
                     })}

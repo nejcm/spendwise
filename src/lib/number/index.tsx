@@ -7,7 +7,7 @@ export function toNumber<TFallback extends number | undefined>(
   return Number.isNaN(num) ? fallback as TFallback : num;
 }
 
-export function shortenNumber(val: number, above = 1_000_000, round = 1): [number, string] {
+export function shortenNumber(val: number, above = 1_000, round = 1): [number, string] {
   if (Math.abs(val) < above) return [val, ''];
   const isNegative = val < 0;
   if (isNegative ? val > -1000 : val < 1000) return [Number(val.toFixed(round)), ''];
@@ -22,7 +22,7 @@ export function shortenNumber(val: number, above = 1_000_000, round = 1): [numbe
 
 export function shortenNumberString<T extends number | undefined>(
   val: T,
-  above = 1_000_000,
+  above = 1_000,
   round = 1,
   format?: (val: number) => number | string,
 ): string | T {

@@ -12,7 +12,7 @@ import { translate } from '@/lib/i18n';
 
 export const TransactionsList = React.memo(() => {
   const router = useRouter();
-  const { data = [], isLoading } = useRecentTransactions(15);
+  const { data = [], isLoading } = useRecentTransactions(10);
   const hasTransactions = data.length > 0;
 
   return (

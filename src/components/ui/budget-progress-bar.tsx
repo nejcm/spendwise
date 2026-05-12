@@ -42,7 +42,7 @@ export function BudgetProgressBar({
   const ratio = budget > 0 ? spent / budget : 0;
   const percentage = Math.min(ratio * 100, 100);
   const monthlyHint = showValues && monthlyBudget != null && currency != null
-    ? ` (${formatCurrency(monthlyBudget, currency, numberFormat, currencyFormat)}/m)`
+    ? ` (${formatCurrency(monthlyBudget, currency, { numberFormat, currencyFormat })}/m)`
     : null;
 
   return (

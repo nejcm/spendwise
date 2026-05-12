@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import { FormattedCurrency, Text } from '@/components/ui';
+import { FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { SkeletonGrid } from '@/components/ui/skeleton';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
@@ -38,6 +38,7 @@ export const AccountsOverview = React.memo(() => {
                       key={account.id}
                       onPress={() => router.push(`/accounts/${account.id}`)}
                       className="w-34 rounded-xl bg-card px-3 py-2"
+                      style={getPressedStyle}
                     >
                       <Text className="text-2xl">
                         {account.icon || '💵'}

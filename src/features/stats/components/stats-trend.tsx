@@ -99,11 +99,11 @@ export function StatsTrend({ period, startDate, endDate }: StatsTrendProps) {
         spacing={spacing}
         initialSpacing={0}
         barBorderRadius={6}
-        hideRules
         xAxisThickness={0}
         yAxisThickness={0}
         yAxisTextStyle={{ color: labelColor, fontSize: 10 }}
         noOfSections={3}
+        hideRules
         isAnimated
         disablePress
       />

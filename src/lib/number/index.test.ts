@@ -29,8 +29,8 @@ describe('shortenNumber', () => {
     it('returns raw value with empty suffix when |val| is below default above', () => {
       expect(shortenNumber(0)).toEqual([0, '']);
       expect(shortenNumber(42.3)).toEqual([42.3, '']);
-      expect(shortenNumber(999_999)).toEqual([999_999, '']);
-      expect(shortenNumber(-500_000)).toEqual([-500_000, '']);
+      expect(shortenNumber(999)).toEqual([999, '']);
+      expect(shortenNumber(-500)).toEqual([-500, '']);
     });
 
     it('shortens only when |val| >= above', () => {
@@ -85,8 +85,8 @@ describe('shortenNumberString', () => {
   });
 
   it('with default above, leaves sub-million values unshortened', () => {
-    expect(shortenNumberString(1500)).toBe('1500');
-    expect(shortenNumberString(-2000)).toBe('-2000');
+    expect(shortenNumberString(1500, 10000)).toBe('1500');
+    expect(shortenNumberString(-2000, 10000)).toBe('-2000');
   });
 
   it('concatenates shortened value and suffix when |val| >= above', () => {

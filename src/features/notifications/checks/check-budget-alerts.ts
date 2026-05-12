@@ -39,7 +39,7 @@ export async function checkBudgetAlerts(
       if (storage.getString(key80) !== '1') {
         await send(
           translate('notifications.budget_alert_title'),
-          translate('notifications.budget_approaching', { name: cat.name, percent: Math.round(pct) } as never),
+          translate('notifications.budget_approaching', { name: cat.name, percent: Math.round(pct) }),
         );
         storage.set(key80, '1');
       }
@@ -50,7 +50,7 @@ export async function checkBudgetAlerts(
       if (storage.getString(key100) !== '1') {
         await send(
           translate('notifications.budget_alert_title'),
-          translate('notifications.budget_exceeded', { name: cat.name } as never),
+          translate('notifications.budget_exceeded', { name: cat.name }),
         );
         storage.set(key100, '1');
       }
@@ -71,8 +71,8 @@ export async function checkBudgetAlerts(
         await send(
           translate('notifications.budget_alert_title'),
           isYearly
-            ? translate('notifications.global_budget_approaching_yearly', { percent: Math.round(pct) } as never)
-            : translate('notifications.global_budget_approaching', { percent: Math.round(pct) } as never),
+            ? translate('notifications.global_budget_approaching_yearly', { percent: Math.round(pct) })
+            : translate('notifications.global_budget_approaching', { percent: Math.round(pct) }),
         );
         storage.set(key80, '1');
       }

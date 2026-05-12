@@ -43,7 +43,7 @@ describe('getRecommendations', () => {
        ('rule_2', 'acc_sub', 'cat_apps', 'expense', 4000, 'USD', 'Cloud Storage', 'monthly', 1735689600, 1744934400, 1)`,
     );
 
-    const recommendations = await getRecommendations(db as never, new Date('2025-04-15T00:00:00Z'));
+    const recommendations = await getRecommendations(db as any, new Date('2025-04-15T00:00:00Z'));
 
     expect(recommendations.map((recommendation) => recommendation.kind)).toEqual(
       expect.arrayContaining([

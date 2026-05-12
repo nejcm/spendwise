@@ -39,7 +39,7 @@ export async function checkWeeklyDigest(
     translate('notifications.weekly_digest_body', {
       expense: formatAmount(summary.expense),
       income: formatAmount(summary.income),
-    } as never),
+    }),
   );
   storage.set(key, '1');
 }

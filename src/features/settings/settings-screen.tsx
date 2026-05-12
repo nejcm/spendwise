@@ -81,12 +81,12 @@ export function SettingsScreen() {
             <SettingsItem
               icon={<RefreshCcw colorClassName={iconColor} size={20} />}
               text="settings.scheduled"
-              onPress={() => router.push('/scheduled' as never)}
+              onPress={() => router.push('/scheduled')}
             />
             <SettingsItem
               icon={<BotMessageSquare colorClassName={iconColor} size={20} />}
               text="settings.ai_chat"
-              onPress={() => router.push('/ai' as never)}
+              onPress={() => router.push('/ai')}
             />
             <SettingsItem
               icon={<ScanLine colorClassName={iconColor} size={20} />}

@@ -47,7 +47,7 @@ export function getRecommendationCopy(recommendation: Recommendation, currency: 
           amount: formatMoney(recommendation.amountCents, recommendationCurrency),
           label: recommendation.label ?? recommendation.categoryName ?? translate('transactions.title'),
           multiple: formatRatio(recommendation.ratio),
-        } as never),
+        }),
         actionLabel: getPrimaryActionLabel(recommendation.primaryTarget),
         askAiLabel: translate('recommendations.actions.ask_ai'),
       };
@@ -55,13 +55,13 @@ export function getRecommendationCopy(recommendation: Recommendation, currency: 
       return {
         title: translate('recommendations.upcoming_cashflow.title', {
           account: recommendation.accountName ?? translate('accounts.total_balance'),
-        } as never),
+        }),
         summary: translate('recommendations.upcoming_cashflow.summary', {
           amount: formatMoney(recommendation.amountCents, recommendationCurrency),
           balance: formatMoney(recommendation.comparisonAmountCents, recommendationCurrency),
           count: recommendation.count ?? 0,
           days: recommendation.days ?? 0,
-        } as never),
+        }),
         actionLabel: getPrimaryActionLabel(recommendation.primaryTarget),
         askAiLabel: translate('recommendations.actions.ask_ai'),
       };
@@ -69,11 +69,11 @@ export function getRecommendationCopy(recommendation: Recommendation, currency: 
       return {
         title: translate('recommendations.category_anomaly.title', {
           category: recommendation.categoryName ?? translate('common.category'),
-        } as never),
+        }),
         summary: translate('recommendations.category_anomaly.summary', {
           amount: formatMoney(recommendation.amountCents, currency),
           average: formatMoney(recommendation.comparisonAmountCents, currency),
-        } as never),
+        }),
         actionLabel: getPrimaryActionLabel(recommendation.primaryTarget),
         askAiLabel: translate('recommendations.actions.ask_ai'),
       };
@@ -81,12 +81,12 @@ export function getRecommendationCopy(recommendation: Recommendation, currency: 
       return {
         title: translate('recommendations.subscription_reminder.title', {
           name: recommendation.label ?? recommendation.categoryName ?? translate('scheduled.this_rule'),
-        } as never),
+        }),
         summary: translate('recommendations.subscription_reminder.summary', {
           amount: formatMoney(recommendation.amountCents, recommendationCurrency),
           date: recommendation.dueDate ? formatDate(recommendation.dueDate) : '-',
           count: recommendation.count ?? 1,
-        } as never),
+        }),
         actionLabel: getPrimaryActionLabel(recommendation.primaryTarget),
         askAiLabel: translate('recommendations.actions.ask_ai'),
       };
@@ -94,10 +94,10 @@ export function getRecommendationCopy(recommendation: Recommendation, currency: 
       return {
         title: translate('recommendations.budget_suggestion.title', {
           category: recommendation.categoryName ?? translate('common.category'),
-        } as never),
+        }),
         summary: translate('recommendations.budget_suggestion.summary', {
           amount: formatMoney(recommendation.amountCents, currency),
-        } as never),
+        }),
         actionLabel: getPrimaryActionLabel(recommendation.primaryTarget),
         askAiLabel: translate('recommendations.actions.ask_ai'),
       };

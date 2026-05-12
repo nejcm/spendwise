@@ -20,13 +20,7 @@ export const TAB_BAR_DARK_COLOR = '#17191C' as const;
 const bgColor = `bg-gray-50`;
 const darkBgColor = `dark:bg-[#17191C]`;
 
-type TabConfig = {
-  name: string;
-  path: string;
-  icon: typeof Home;
-};
-
-const TABS: TabConfig[] = [
+const TABS = [
   {
     name: 'index',
     path: '/',
@@ -52,9 +46,11 @@ const TABS: TabConfig[] = [
     path: '/stats',
     icon: PieChart,
   },
-];
+] as const;
 
-export function CustomTabBar() {
+type TabConfig = (typeof TABS)[number];
+
+export function NavTabBar() {
   const router = useRouter();
   const pathname = usePathname() || '';
   const longPressAction = useAppStore.use.longPressAction();
@@ -102,13 +98,11 @@ export function CustomTabBar() {
         return (
           <Pressable
             key={tab.name}
-            onPress={() => router.replace(tab.path as never)}
+            onPress={() => isActive ? undefined : router.replace(tab.path)}
             className="flex-1 items-center justify-center gap-1"
           >
             <Icon
-              colorClassName={
-                isActive ? 'accent-foreground' : 'accent-gray-500'
-              }
+              colorClassName={isActive ? 'accent-foreground' : 'accent-gray-500'}
               size={24}
               strokeWidth={2}
             />

@@ -21,8 +21,8 @@ const PAIR_GAP = 2;
 
 export function StatsTrend({ period, startDate, endDate }: StatsTrendProps) {
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
   const { width: screenWidth } = useWindowDimensions();
+  const isDark = colorScheme === 'dark';
   const labelColor = isDark ? '#9ca3af' : '#6b7280';
 
   const { data, isLoading } = useTrendByRange(startDate, endDate);
@@ -98,7 +98,7 @@ export function StatsTrend({ period, startDate, endDate }: StatsTrendProps) {
         barWidth={barWidth}
         spacing={spacing}
         initialSpacing={0}
-        roundedTop
+        barBorderRadius={6}
         hideRules
         xAxisThickness={0}
         yAxisThickness={0}

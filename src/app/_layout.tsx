@@ -14,7 +14,11 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppErrorBoundary } from '@/components/app-error-boundary';
 import { GlobalScanManager } from '@/components/global-scan-manager';
 import { SafeAreaView, View } from '@/components/ui';
-import { CustomTabBar, TAB_BAR_COLOR, TAB_BAR_DARK_COLOR } from '@/components/ui/custom-tab-bar';
+import {
+  NavTabBar,
+  TAB_BAR_COLOR,
+  TAB_BAR_DARK_COLOR,
+} from '@/components/ui/nav-tab-bar';
 import { DB_NAME } from '@/config';
 import { useCurrencyRates } from '@/features/currencies/api';
 import { AutoBackupProcessor } from '@/features/imports-export/auto-backup-processor';
@@ -28,7 +32,10 @@ import { IS_WEB } from '@/lib/base';
 import { getShouldShowPersistentTabBar } from '@/lib/navigation/persistent-tab-bar';
 import { DatabaseErrorBoundary, OpfsCleaner } from '@/lib/sqlite';
 import { loadSelectedColorTheme } from '@/lib/theme/use-selected-color-theme';
-import { loadSelectedTheme, useSelectedTheme } from '@/lib/theme/use-selected-theme';
+import {
+  loadSelectedTheme,
+  useSelectedTheme,
+} from '@/lib/theme/use-selected-theme';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 // Import  global CSS file
 import '../global.css';
@@ -58,7 +65,7 @@ setTimeout(() => {
 function PersistentTabBar() {
   const pathname = usePathname();
   if (!getShouldShowPersistentTabBar(pathname)) return null;
-  return <CustomTabBar />;
+  return <NavTabBar />;
 }
 
 function CurrencyRatesInitializer() {
@@ -136,7 +143,10 @@ function Providers({ children }: { children: React.ReactNode }) {
                                 {children}
                               </SafeAreaView>
                             </View>
-                            <FlashMessage position="top" style={flashListStyle} />
+                            <FlashMessage
+                              position="top"
+                              style={flashListStyle}
+                            />
                             {__DEV__ && IS_WEB && <DevThemeToggle />}
                           </BottomSheetModalProvider>
                         </FontLoader>
@@ -158,7 +168,11 @@ export default function RootLayout() {
   const { dark } = useThemeConfig();
   return (
     <Providers>
-      <Stack screenOptions={{ navigationBarColor: dark ? TAB_BAR_DARK_COLOR : TAB_BAR_COLOR }}>
+      <Stack
+        screenOptions={{
+          navigationBarColor: dark ? TAB_BAR_DARK_COLOR : TAB_BAR_COLOR,
+        }}
+      >
         <Stack.Screen name="(app)" options={hiddenHeader} />
         <Stack.Screen name="onboarding" options={hiddenHeader} />
       </Stack>

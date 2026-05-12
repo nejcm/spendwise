@@ -30,8 +30,8 @@ const { getGlobalBudget, getGlobalBudgetSpend } = jest.requireMock(
 
 const { send } = jest.requireMock('../send') as { send: jest.Mock };
 
-const SETTINGS = { budgetAlerts: true } as never;
-const MOCK_DB = {} as never;
+const SETTINGS = { budgetAlerts: true };
+const MOCK_DB = {} as any;
 
 const MONTHLY_BUDGET: GlobalBudget = { amountCents: 100_000, type: 'monthly' };
 const YEARLY_BUDGET: GlobalBudget = { amountCents: 1_200_000, type: 'yearly' };
@@ -111,7 +111,7 @@ describe('checkBudgetAlerts — global budget', () => {
     getGlobalBudget.mockResolvedValue(MONTHLY_BUDGET);
     getGlobalBudgetSpend.mockResolvedValue(100_000);
 
-    await checkBudgetAlerts(MOCK_DB, { budgetAlerts: false } as never);
+    await checkBudgetAlerts(MOCK_DB, { budgetAlerts: false });
 
     expect(send).not.toHaveBeenCalled();
     expect(getGlobalBudget).not.toHaveBeenCalled();

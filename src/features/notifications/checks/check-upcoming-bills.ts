@@ -49,8 +49,8 @@ export async function checkUpcomingBills(
       const name = rule.category_name ?? translate('notifications.bill_default_name');
       const isToday = dueStr === todayStr;
       const body = isToday
-        ? translate('notifications.bill_due_today', { name } as never)
-        : translate('notifications.bill_due_on', { name, date: dueStr } as never);
+        ? translate('notifications.bill_due_today', { name })
+        : translate('notifications.bill_due_on', { name, date: dueStr });
       await send(translate('notifications.upcoming_bills'), body);
       storage.set(key, '1');
     }

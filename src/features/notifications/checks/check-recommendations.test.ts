@@ -47,8 +47,8 @@ describe('checkRecommendations', () => {
       },
     ]);
 
-    await checkRecommendations({} as never, { recommendations: true });
-    await checkRecommendations({} as never, { recommendations: true });
+    await checkRecommendations({} as any, { recommendations: true });
+    await checkRecommendations({} as any, { recommendations: true });
 
     expect(send).toHaveBeenCalledTimes(1);
   });

@@ -9,9 +9,9 @@ import {
   Text,
   View,
 } from '@/components/ui';
-import { BOTTOM_BAR_HEIGHT } from '@/components/ui/custom-tab-bar';
 import { Brain, Plus, SendHorizonal } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
+import { BOTTOM_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
 import AssistantMessage from '@/features/ai/components/assistant-message';
 import AssistantMessageWeb from '@/features/ai/components/assistant-message.web';
 import { IS_WEB } from '@/lib/base';

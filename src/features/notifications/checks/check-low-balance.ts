@@ -27,7 +27,7 @@ export async function checkLowBalance(
       if (storage.getString(key) !== '1') {
         await send(
           translate('notifications.low_balance_title'),
-          translate('notifications.low_balance_body', { name: account.name } as never),
+          translate('notifications.low_balance_body', { name: account.name }),
         );
         storage.set(key, '1');
       }

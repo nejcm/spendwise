@@ -13,7 +13,7 @@ import {
 } from 'date-fns';
 import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
-import { FormattedCurrency, Pressable, Text, View } from '@/components/ui';
+import { FormattedCurrency, Pressable, ScrollView, Text, View } from '@/components/ui';
 import { ChevronLeft, ChevronRight } from '@/components/ui/icon';
 import { SkeletonBox } from '@/components/ui/skeleton';
 import { trendByRangeQueryOptions, useTrendByRange } from '@/features/insights/api';
@@ -102,7 +102,7 @@ export function StatsCalendar() {
   const rows = Math.ceil(days.length / 7);
 
   return (
-    <View className="flex-1 px-4 pt-4 pb-6">
+    <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 24 }}>
       <View className="rounded-2xl bg-card p-4">
         <View className="mb-3 flex-row items-center justify-between">
           <Pressable onPress={goPrev} hitSlop={12} className="p-1">
@@ -141,7 +141,8 @@ export function StatsCalendar() {
                             if (!day.isCurrentMonth) return;
                             setSelectedKey(isSelected ? null : key);
                           }}
-                          className={`my-0.5 flex-1 items-center justify-center rounded-lg py-1.5 ${isSelected ? 'border border-primary' : day.isToday ? 'border border-muted' : ''}`}
+                          style={{ minHeight: 52 }}
+                          className={`my-0.5 flex-1 items-center justify-center rounded-lg px-0.5 py-1 ${isSelected ? 'border border-primary' : day.isToday ? 'border border-muted' : ''}`}
                         >
                           <Text className={`text-xs ${day.isCurrentMonth ? 'text-foreground' : 'text-muted-foreground/40'}`}>
                             {day.date.getDate()}
@@ -176,6 +177,6 @@ export function StatsCalendar() {
           onClose={() => setSelectedKey(null)}
         />
       )}
-    </View>
+    </ScrollView>
   );
 }

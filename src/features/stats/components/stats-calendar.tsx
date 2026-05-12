@@ -154,7 +154,7 @@ export function StatsCalendar() {
                               value={diff}
                               currency={currency}
                               numberOfLines={1}
-                              className="text-2xs mt-0.5 items-center font-medium"
+                              className="text-2xs mt-0.5 items-center font-bold"
                               style={{ color: diff > 0 ? incomeColor : diff === 0 ? '' : expenseColor }}
                               shorten
                               negativeSymbol={false}

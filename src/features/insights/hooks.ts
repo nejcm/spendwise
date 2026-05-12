@@ -25,12 +25,15 @@ export function useCategorySpendByRange(startDate: number | undefined, endDate: 
   return useQuery(categorySpendByRangeQueryOptions(db, startDate, endDate));
 }
 
-export function useTrendByRange(startDate: number | undefined, endDate: number | undefined) {
-  const db = useSQLiteContext();
-  return useQuery({
+export function trendByRangeQueryOptions(db: SQLiteDatabase, startDate: number | undefined, endDate: number | undefined) {
+  return {
     queryKey: queryKeys.insights.trendRange(startDate, endDate),
     queryFn: () => queries.getTrendByRange(db, startDate, endDate),
-  });
+  };
+}
+export function useTrendByRange(startDate: number | undefined, endDate: number | undefined) {
+  const db = useSQLiteContext();
+  return useQuery(trendByRangeQueryOptions(db, startDate, endDate));
 }
 
 export function useMonthlyTrend(numMonths: number = 6) {

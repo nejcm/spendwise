@@ -38,7 +38,7 @@ type DayCell = {
   expense: number;
 };
 
-const baseDayCls = 'm-0.5 flex-1 items-center justify-center rounded-lg px-0.5 py-1';
+const baseDayCls = 'm-0.5 flex-1 items-center justify-center rounded-lg px-0.25 py-1';
 
 export function StatsCalendar() {
   const queryClient = useQueryClient();

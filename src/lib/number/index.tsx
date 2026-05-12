@@ -8,7 +8,7 @@ export function toNumber<TFallback extends number | undefined>(
 }
 
 export function shortenNumber(val: number, above = 1_000, round = 1): [number, string] {
-  if (Math.abs(val) < above) return [val, ''];
+  if (Math.abs(val) < above) return [Number(val.toFixed(round)), ''];
   const isNegative = val < 0;
   if (isNegative ? val > -1000 : val < 1000) return [Number(val.toFixed(round)), ''];
   if (isNegative ? val > -1000000 : val < 1000000) {

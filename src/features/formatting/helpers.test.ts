@@ -35,6 +35,59 @@ describe('formatting helpers', () => {
     }
   });
 
+  it('respects fractionDigits as maximum fractional digits in formatNumber', () => {
+    const value = 1234.567;
+    const expected0: Record<NumberFormat, string> = {
+      'stop': '1235',
+      'stop-space': '1,235',
+      'comma': '1235',
+      'comma-space': '1.235',
+    };
+    const expected3: Record<NumberFormat, string> = {
+      'stop': '1234.567',
+      'stop-space': '1,234.567',
+      'comma': '1234,567',
+      'comma-space': '1.234,567',
+    };
+
+    for (const numberFormat of Object.keys(expected0) as NumberFormat[]) {
+      expect(formatNumber(value, numberFormat, 0)).toBe(expected0[numberFormat]);
+      expect(formatNumber(value, numberFormat, 3)).toBe(expected3[numberFormat]);
+    }
+  });
+
+  it('respects fractionDigits in formatCurrency when not shortened', () => {
+    const expected0: Record<CurrencyFormat, string> = {
+      'symbol-after': '1.235$',
+      'symbol-before': '$1.235',
+      'code-after': '1.235\u00A0USD',
+      'code-before': 'USD\u00A01.235',
+    };
+    const expected1: Record<CurrencyFormat, string> = {
+      'symbol-after': '1.234,6$',
+      'symbol-before': '$1.234,6',
+      'code-after': '1.234,6\u00A0USD',
+      'code-before': 'USD\u00A01.234,6',
+    };
+
+    for (const currencyFormat of Object.keys(expected0) as CurrencyFormat[]) {
+      expect(
+        formatCurrency(cents, 'USD', {
+          numberFormat: 'comma-space',
+          currencyFormat,
+          fractionDigits: 0,
+        }),
+      ).toBe(expected0[currencyFormat]);
+      expect(
+        formatCurrency(cents, 'USD', {
+          numberFormat: 'comma-space',
+          currencyFormat,
+          fractionDigits: 1,
+        }),
+      ).toBe(expected1[currencyFormat]);
+    }
+  });
+
   it('returns the original value as string for non-finite input', () => {
     expect(formatCurrency('not-a-number', 'USD')).toBe('not-a-number');
   });

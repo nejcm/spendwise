@@ -74,7 +74,7 @@ describe('shortenNumber', () => {
     });
 
     it('ignores round when |val| is below above (returns raw value)', () => {
-      expect(shortenNumber(999.456, DEFAULT_ABOVE, 2)).toEqual([999.456, '']);
+      expect(shortenNumber(999.456, DEFAULT_ABOVE, 2)).toEqual([999.46, '']);
     });
   });
 });

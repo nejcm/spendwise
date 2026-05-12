@@ -13,10 +13,20 @@ import {
 } from 'date-fns';
 import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
-import { FormattedCurrency, getPressedStyle, Pressable, ScrollView, Text, View } from '@/components/ui';
+import {
+  FormattedCurrency,
+  getPressedStyle,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from '@/components/ui';
 import { ChevronLeft, ChevronRight } from '@/components/ui/icon';
 import { SkeletonBox } from '@/components/ui/skeleton';
-import { trendByRangeQueryOptions, useTrendByRange } from '@/features/insights/api';
+import {
+  trendByRangeQueryOptions,
+  useTrendByRange,
+} from '@/features/insights/api';
 import { dateToUnix } from '@/lib/date/helpers';
 import { useAppStore } from '@/lib/store/store';
 import { expenseColor, incomeColor } from '@/lib/theme/colors';
@@ -38,17 +48,23 @@ type DayCell = {
   expense: number;
 };
 
-const baseDayCls = 'm-0.5 flex-1 items-center justify-center rounded-lg px-0.25 py-1';
+const baseDayCls
+  = 'm-0.5 flex-1 items-center justify-center rounded-lg px-0.25 py-1';
 
 export function StatsCalendar() {
   const queryClient = useQueryClient();
   const db = useSQLiteContext();
   const currency = useAppStore.use.currency();
 
-  const [currentMonth, setCurrentMonth] = React.useState<Date>(() => startOfMonth(new Date()));
+  const [currentMonth, setCurrentMonth] = React.useState<Date>(() =>
+    startOfMonth(new Date()),
+  );
   const [selectedKey, setSelectedKey] = React.useState<string | null>(null);
 
-  const [monthStartUnix, monthEndUnix] = React.useMemo(() => monthRange(currentMonth), [currentMonth]);
+  const [monthStartUnix, monthEndUnix] = React.useMemo(
+    () => monthRange(currentMonth),
+    [currentMonth],
+  );
   const { data, isLoading } = useTrendByRange(monthStartUnix, monthEndUnix);
 
   // Prefetch prev/next month for instant stepping.
@@ -71,7 +87,11 @@ export function StatsCalendar() {
     const gridStart = startOfISOWeek(currentMonth);
     const gridEnd = endOfISOWeek(endOfMonth(currentMonth));
     const result: DayCell[] = [];
-    for (let cursor = gridStart; cursor <= gridEnd; cursor = addDays(cursor, 1)) {
+    for (
+      let cursor = gridStart;
+      cursor <= gridEnd;
+      cursor = addDays(cursor, 1)
+    ) {
       const totals = totalsByKey.get(isoDateKey(cursor));
       result.push({
         date: cursor,
@@ -84,7 +104,9 @@ export function StatsCalendar() {
     return result;
   }, [currentMonth, totalsByKey]);
 
-  const selectedDay = selectedKey ? days.find((d) => isoDateKey(d.date) === selectedKey) ?? null : null;
+  const selectedDay = selectedKey
+    ? (days.find((d) => isoDateKey(d.date) === selectedKey) ?? null)
+    : null;
 
   const goPrev = React.useCallback(() => {
     setSelectedKey(null);
@@ -98,19 +120,30 @@ export function StatsCalendar() {
   const weekdayLabels = React.useMemo(() => {
     // 5 Jan 2026 is a Monday — use that week to format weekday short labels.
     const monday = new Date(2026, 0, 5);
-    return Array.from({ length: 7 }).map((_, i) => format(addDays(monday, i), 'EEEEEE').toUpperCase());
+    return Array.from({ length: 7 }).map((_, i) =>
+      format(addDays(monday, i), 'EEEEEE').toUpperCase(),
+    );
   }, []);
 
   const rows = Math.ceil(days.length / 7);
 
   return (
-    <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 32, paddingBottom: 24 }}>
+    <ScrollView
+      className="flex-1"
+      contentContainerStyle={{
+        paddingHorizontal: 16,
+        paddingTop: 32,
+        paddingBottom: 24,
+      }}
+    >
       <View>
         <View className="mb-8 flex-row items-center justify-between">
           <Pressable onPress={goPrev} hitSlop={12} className="p-1">
             <ChevronLeft className="text-foreground" size={20} />
           </Pressable>
-          <Text className="text-base font-medium">{format(currentMonth, 'MMMM yyyy')}</Text>
+          <Text className="text-base font-medium">
+            {format(currentMonth, 'MMMM yyyy')}
+          </Text>
           <Pressable onPress={goNext} hitSlop={12} className="p-1">
             <ChevronRight className="text-foreground" size={20} />
           </Pressable>
@@ -154,8 +187,15 @@ export function StatsCalendar() {
                               value={diff}
                               currency={currency}
                               numberOfLines={1}
-                              className="text-2xs mt-0.5 items-center font-bold"
-                              style={{ color: diff > 0 ? incomeColor : diff === 0 ? '' : expenseColor }}
+                              className="mt-0.5 items-center text-[10px] font-bold"
+                              style={{
+                                color:
+                              diff > 0
+                                ? incomeColor
+                                : diff === 0
+                                  ? ''
+                                  : expenseColor,
+                              }}
                               shorten
                               negativeSymbol={false}
                               fractionDigits={1}

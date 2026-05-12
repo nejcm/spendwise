@@ -1,4 +1,4 @@
-import type { LayoutChangeEvent, ScrollView as RNScrollView } from 'react-native';
+import type { FlatList, LayoutChangeEvent } from 'react-native';
 import type { MarkdownStyle } from 'react-native-enriched-markdown';
 import type { ChatMessage, UseChatReturn } from '@/features/ai/types';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -48,7 +48,7 @@ export function useChat(): UseChatReturn {
   const abortControllerRef = React.useRef<AbortController | null>(null);
   const isMountedRef = React.useRef(true);
   const [chatState, setChatState] = React.useState<ChatState>(initialState);
-  const scrollViewRef = React.useRef<RNScrollView>(null);
+  const scrollViewRef = React.useRef<FlatList<ChatMessage>>(null);
   const messageLayoutsRef = React.useRef<Record<string, { y: number; height: number }>>({});
   const pendingScrollUserMessageIdRef = React.useRef<string | null>(null);
 
@@ -214,8 +214,8 @@ export function useChat(): UseChatReturn {
   const scrollUserMessageToTop = React.useCallback((messageId: string) => {
     const targetY = messageLayoutsRef.current[messageId]?.y;
     if (targetY === undefined) return;
-    scrollViewRef.current?.scrollTo({
-      y: Math.max(0, targetY - TOP_OFFSET),
+    scrollViewRef.current?.scrollToOffset({
+      offset: Math.max(0, targetY - TOP_OFFSET),
       animated: true,
     });
     pendingScrollUserMessageIdRef.current = null;

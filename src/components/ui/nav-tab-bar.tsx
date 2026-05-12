@@ -14,7 +14,7 @@ import { triggerScan } from '@/lib/store/local-store';
 import { useAppStore } from '@/lib/store/store';
 import { SolidButton } from './solid-button';
 
-export const BOTTOM_BAR_HEIGHT = 60 as const;
+export const NAV_BAR_HEIGHT = 66 as const;
 export const TAB_BAR_COLOR = '#f6f6f6' as const;
 export const TAB_BAR_DARK_COLOR = '#17191C' as const;
 const bgColor = `bg-gray-50`;
@@ -62,7 +62,7 @@ export function NavTabBar() {
   return (
     <View
       className={`flex-row border-t border-gray-200 p-2 dark:border-gray-800 ${bgColor} ${darkBgColor}`}
-      style={{ elevation: 0 }}
+      style={{ elevation: 0, minHeight: NAV_BAR_HEIGHT }}
     >
       {TABS.map((tab) => {
         const isAddButton = tab.name === '__add__';

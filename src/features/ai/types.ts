@@ -1,5 +1,5 @@
 import type { RefObject } from 'react';
-import type { LayoutChangeEvent, ScrollView as RNScrollView } from 'react-native';
+import type { FlatList, LayoutChangeEvent } from 'react-native';
 import type { MarkdownStyle } from 'react-native-enriched-markdown';
 
 export type AiProviderType = 'openai' | 'anthropic';
@@ -22,7 +22,7 @@ export type ChatActions = {
 };
 
 export type ChatScrollHandlers = {
-  readonly scrollViewRef: RefObject<RNScrollView | null>;
+  readonly scrollViewRef: RefObject<FlatList<ChatMessage> | null>;
   readonly onScrollViewLayout: (event: LayoutChangeEvent) => void;
   readonly onMessageLayout: (messageId: string, event: LayoutChangeEvent) => void;
   readonly shouldShowBottomFiller: boolean;

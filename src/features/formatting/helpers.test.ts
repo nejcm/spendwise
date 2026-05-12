@@ -90,7 +90,7 @@ describe('formatting helpers', () => {
         currencyFormat: 'symbol-before',
         shorten: true,
       }),
-    ).toBe('$1.2k');
+    ).toBe('$1.23k');
     expect(
       formatCurrency(50_000, 'USD', {
         numberFormat: 'comma-space',
@@ -108,7 +108,7 @@ describe('formatting helpers', () => {
         shorten: true,
         negativeSymbol: true,
       }),
-    ).toBe('-$1.2k');
+    ).toBe('-$1.23k');
   });
 
   it('omits leading minus for symbol-before negatives when negativeSymbol is false', () => {
@@ -118,6 +118,7 @@ describe('formatting helpers', () => {
         currencyFormat: 'symbol-before',
         shorten: true,
         negativeSymbol: false,
+        fractionDigits: 1,
       }),
     ).toBe('$1.2k');
     expect(
@@ -126,6 +127,7 @@ describe('formatting helpers', () => {
         currencyFormat: 'code-before',
         shorten: true,
         negativeSymbol: false,
+        fractionDigits: 1,
       }),
     ).toBe('USD 1.2k');
   });

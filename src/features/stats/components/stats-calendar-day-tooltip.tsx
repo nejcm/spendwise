@@ -39,7 +39,7 @@ export function StatsCalendarDayTooltip({ date, income, expense, currency, onClo
 
         <View className="mt-1 flex-row items-center justify-between border-t border-muted pt-2">
           <Text className="text-sm text-muted-foreground">{translate('common.net')}</Text>
-          <FormattedCurrency value={net} currency={currency} className="text-sm font-semibold" />
+          <FormattedCurrency value={net} currency={currency} className="text-sm font-medium" />
         </View>
       </View>
     </Pressable>

@@ -4,7 +4,7 @@ import type { OptionType, SelectProps } from '@/components/ui';
 import * as React from 'react';
 import { View } from 'react-native';
 import { Select, Text } from '@/components/ui';
-import { SkeletonBox } from '@/components/ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useCategories } from '@/features/categories/api';
 import { translate } from '@/lib/i18n';
 import { hexWithOpacity } from '../../lib/theme/colors';
@@ -70,7 +70,7 @@ export function CategoryPicker({ selectedId, onSelect, label, error, ...props }:
   );
 
   if (isLoading) {
-    return <SkeletonBox height={44} />;
+    return <Skeleton height={44} />;
   }
   return (
     <Select

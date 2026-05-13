@@ -6,6 +6,7 @@ import { centsToAmount } from '@/features/formatting/helpers';
 import { getCategorySpendByRange, getSummaryByRange, getTrendByRange } from '@/features/insights/queries';
 import { getTransactionsSample } from '@/features/transactions/queries';
 import { dateToUnix, unixToISODate } from '@/lib/date/helpers';
+import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 
 const MAX_TRANSACTION_LIMIT = 20;
@@ -107,26 +108,34 @@ export async function executeToolCall(
     return JSON.stringify({ error: `Unknown tool: ${toolName}` });
   }
 
-  const result = await executor(db, args);
-  return JSON.stringify(result);
+  try {
+    const result = await executor(db, args);
+    return JSON.stringify(result);
+  }
+  catch (err) {
+    const message = err instanceof Error ? err.message : 'Tool execution failed';
+    return JSON.stringify({ error: message });
+  }
 }
 
 /** Build a human-readable status message for a tool call. */
 export function getToolStatusMessage(toolName: string, args: ToolArgs): string {
   const startDate = String(args.start_date ?? '');
   const endDate = String(args.end_date ?? '');
-  const range = startDate && endDate ? ` (${startDate} to ${endDate})` : '';
+  const range = startDate && endDate
+    ? translate('ai.tool_status_range', { startDate, endDate })
+    : '';
 
   switch (toolName) {
     case 'get_summary':
-      return `Looking up your financial summary${range}...`;
+      return translate('ai.tool_status_summary', { range });
     case 'get_category_spending':
-      return `Looking up category spending${range}...`;
+      return translate('ai.tool_status_category_spending', { range });
     case 'get_transactions':
-      return `Looking up transactions${range}...`;
+      return translate('ai.tool_status_transactions', { range });
     case 'get_trends':
-      return `Looking up spending trends${range}...`;
+      return translate('ai.tool_status_trends', { range });
     default:
-      return 'Looking up your data...';
+      return translate('ai.tool_status_default');
   }
 }

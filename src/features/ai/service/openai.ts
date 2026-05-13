@@ -1,4 +1,5 @@
 import type { ProviderChatMessage, StreamResponse, ToolCall } from '../types';
+import { fetch as expoFetch } from 'expo/fetch';
 import { OPEN_AI_API_URL, OPEN_AI_MODEL } from '@/config';
 import { streamSseEventsFromResponse } from './streaming';
 import { TOOL_DEFINITIONS_OPENAI } from './tools';
@@ -19,6 +20,15 @@ export type OpenAiSendInput = {
   systemPrompt: string;
   messages: readonly OpenAiRequestMessage[];
 };
+
+function parseToolArguments(raw: string): Record<string, unknown> {
+  try {
+    return raw ? JSON.parse(raw) as Record<string, unknown> : {};
+  }
+  catch {
+    return {};
+  }
+}
 
 export function buildOpenAiMessages(
   systemPrompt: string,
@@ -65,7 +75,7 @@ export async function askOpenAI(apiKey: string, messages: readonly OpenAiRequest
     tools: TOOL_DEFINITIONS_OPENAI,
   };
 
-  const res = await fetch(OPEN_AI_API_URL, {
+  const res = await expoFetch(OPEN_AI_API_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -86,7 +96,7 @@ export async function askOpenAI(apiKey: string, messages: readonly OpenAiRequest
     const calls: ToolCall[] = (message.tool_calls as OpenAiToolCallPayload[]).map((tc) => ({
       id: tc.id,
       name: tc.function.name,
-      arguments: JSON.parse(tc.function.arguments) as Record<string, unknown>,
+      arguments: parseToolArguments(tc.function.arguments),
     }));
 
     return {
@@ -113,7 +123,7 @@ export async function streamAskOpenAI(
     stream: true,
   };
 
-  const res = await fetch(OPEN_AI_API_URL, {
+  const res = await expoFetch(OPEN_AI_API_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -190,7 +200,7 @@ export async function streamAskOpenAI(
     const calls: ToolCall[] = Object.values(toolCallAccumulator).map((tc) => ({
       id: tc.id,
       name: tc.name,
-      arguments: JSON.parse(tc.args) as Record<string, unknown>,
+      arguments: parseToolArguments(tc.args),
     }));
     return { type: 'tool_calls', content: fullContent, calls };
   }

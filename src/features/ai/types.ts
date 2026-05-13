@@ -23,6 +23,7 @@ export type ChatActions = {
 
 export type ChatScrollHandlers = {
   readonly scrollViewRef: RefObject<FlatList<ChatMessage> | null>;
+  readonly onContentSizeChange: () => void;
   readonly onScrollViewLayout: (event: LayoutChangeEvent) => void;
   readonly onMessageLayout: (messageId: string, event: LayoutChangeEvent) => void;
   readonly shouldShowBottomFiller: boolean;
@@ -34,6 +35,7 @@ export type UseChatReturn = {
   readonly messages: readonly ChatMessage[];
   readonly draftQuestion: string;
   readonly isStreaming: boolean;
+  readonly streamedAssistantContent: string;
   readonly errorMessage: string | null;
   readonly toolStatus: string | null;
   readonly actions: ChatActions;

@@ -6,7 +6,7 @@ import { SolidButton, Text, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { AlertTriangle, Bell, BrainCircuit, Lightbulb, TrendingUp, X } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
-import { SkeletonBox, SkeletonGrid } from '@/components/ui/skeleton';
+import { Skeleton, SkeletonGrid } from '@/components/ui/skeleton';
 import { setAiDraftQuestion } from '@/features/ai/store';
 import { translate } from '@/lib/i18n';
 import { selectIsAiEnabled, useAppStore } from '@/lib/store/store';
@@ -130,7 +130,7 @@ function HomeRecommendationsBody() {
   if (isLoading) {
     return (
       <View className="gap-2">
-        <SkeletonBox height={26} width={120} />
+        <Skeleton height={26} width={120} />
         <SkeletonGrid rows={1} cols={2} heights={[140, 140]} />
       </View>
     );

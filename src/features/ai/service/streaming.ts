@@ -95,12 +95,6 @@ export async function streamSseEventsFromResponse(
 
       const shouldStop = await onEvent(event);
       if (shouldStop) {
-        try {
-          await reader.cancel();
-        }
-        catch {
-          // ignore
-        }
         return;
       }
     }

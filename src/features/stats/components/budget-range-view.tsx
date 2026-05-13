@@ -2,7 +2,7 @@ import type { MonthBudgetResult } from '../hooks';
 import type { BudgetPeriodSelection, BudgetViewMode } from '../types';
 import type { CurrencyKey } from '@/features/currencies';
 import { ScrollView, SolidButton, View } from '@/components/ui';
-import { SkeletonBox } from '@/components/ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { translate } from '@/lib/i18n';
 import { defaultStyles } from '@/lib/theme/styles';
 import { BudgetMonthCardList } from './budget-month-card';
@@ -29,7 +29,7 @@ const translations = {
 
 export function BudgetRangeView({ months, totalBudget, totalSpent, currency, isLoading, viewMode, onViewModeChange, selection }: BudgetRangeViewProps) {
   if (isLoading) {
-    return <SkeletonBox height={200} className="mx-4 mt-4" />;
+    return <Skeleton height={200} className="mx-4 mt-4" />;
   }
   return (
     <View className="flex-1">

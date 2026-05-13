@@ -1,4 +1,5 @@
 import type { ProviderChatMessage, StreamResponse, ToolCall } from '../types';
+import { fetch as expoFetch } from 'expo/fetch';
 import { ANTHROPIC_API_URL, ANTHROPIC_MAX_TOKENS, ANTHROPIC_MODEL } from '@/config';
 import { streamSseEventsFromResponse } from './streaming';
 import { TOOL_DEFINITIONS_ANTHROPIC } from './tools';
@@ -51,6 +52,15 @@ export type AnthropicSendInput = {
   systemPrompt: string;
   messages: readonly AnthropicRequestMessage[];
 };
+
+function parseToolArguments(raw: string): Record<string, unknown> {
+  try {
+    return raw ? JSON.parse(raw) as Record<string, unknown> : {};
+  }
+  catch {
+    return {};
+  }
+}
 
 export function buildAnthropicMessages(
   providerMessages: readonly ProviderChatMessage[],
@@ -126,7 +136,7 @@ export async function askAnthropic(
     tools: TOOL_DEFINITIONS_ANTHROPIC,
   };
 
-  const res = await fetch(ANTHROPIC_API_URL, {
+  const res = await expoFetch(ANTHROPIC_API_URL, {
     method: 'POST',
     headers: buildHeaders(apiKey),
     body: JSON.stringify(body),
@@ -185,7 +195,7 @@ export async function streamAskAnthropic({
     stream: true,
   };
 
-  const res = await fetch(ANTHROPIC_API_URL, {
+  const res = await expoFetch(ANTHROPIC_API_URL, {
     method: 'POST',
     headers: { ...buildHeaders(apiKey), Accept: 'text/event-stream' },
     body: JSON.stringify(body),
@@ -272,7 +282,7 @@ export async function streamAskAnthropic({
     const calls: ToolCall[] = toolBlocks.map((tb) => ({
       id: tb.id,
       name: tb.name,
-      arguments: (tb.inputJson ? JSON.parse(tb.inputJson) : {}) as Record<string, unknown>,
+      arguments: parseToolArguments(tb.inputJson),
     }));
     return { type: 'tool_calls', content: fullContent, calls };
   }

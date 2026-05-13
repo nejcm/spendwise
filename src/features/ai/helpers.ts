@@ -8,13 +8,13 @@ export function getMarkdownStyle(isDark: Theme['dark']): MarkdownStyle {
   const muted = isDark ? '#393c49' : '#e9eaec';
   return {
     paragraph: { fontFamily: 'Inter', fontSize: 14, color: colors.text, marginTop: 0, marginBottom: 4, lineHeight: Math.round(14 * 1.33) },
-    h1: { fontFamily: 'Inter-Bold', fontSize: 19, color: colors.text, marginBottom: 6, lineHeight: Math.round(19 * 1.33) },
-    h2: { fontFamily: 'Inter-Bold', fontSize: 18, color: colors.text, marginBottom: 4, lineHeight: Math.round(18 * 1.33) },
-    h3: { fontFamily: 'Inter-Bold', fontSize: 16, color: colors.text, marginBottom: 4, lineHeight: Math.round(16 * 1.33) },
-    h4: { fontFamily: 'Inter-Bold', fontSize: 15, color: colors.text, lineHeight: Math.round(15 * 1.33) },
-    h5: { fontFamily: 'Inter-Bold', fontSize: 14, color: colors.text, lineHeight: Math.round(14 * 1.33) },
-    h6: { fontFamily: 'Inter-Bold', fontSize: 14, color: colors.text, lineHeight: Math.round(14 * 1.33) },
-    strong: { fontFamily: 'Inter-Bold' },
+    h1: { fontFamily: 'Inter-Bold', fontSize: 19, fontWeight: 'bold', color: colors.text, marginBottom: 6, lineHeight: Math.round(19 * 1.33) },
+    h2: { fontFamily: 'Inter-Bold', fontSize: 18, fontWeight: 'bold', color: colors.text, marginBottom: 4, lineHeight: Math.round(18 * 1.33) },
+    h3: { fontFamily: 'Inter-Bold', fontSize: 16, fontWeight: 'bold', color: colors.text, marginBottom: 4, lineHeight: Math.round(16 * 1.33) },
+    h4: { fontFamily: 'Inter-Bold', fontSize: 15, fontWeight: 'bold', color: colors.text, lineHeight: Math.round(15 * 1.33) },
+    h5: { fontFamily: 'Inter-Bold', fontSize: 14, fontWeight: 'bold', color: colors.text, lineHeight: Math.round(14 * 1.33) },
+    h6: { fontFamily: 'Inter-Bold', fontSize: 14, fontWeight: 'bold', color: colors.text, lineHeight: Math.round(14 * 1.33) },
+    strong: { fontFamily: 'Inter-Medium', fontWeight: 'medium' as any },
     em: { fontStyle: 'italic' },
     blockquote: {
       fontFamily: 'Inter',
@@ -32,8 +32,8 @@ export function getMarkdownStyle(isDark: Theme['dark']): MarkdownStyle {
       color: colors.text,
       bulletColor: mutedForeground,
       bulletSize: 5,
-      marginLeft: 16,
-      gapWidth: 4,
+      gapWidth: 8,
+      marginLeft: 20,
       lineHeight: Math.round(14 * 1.33),
     },
     codeBlock: {

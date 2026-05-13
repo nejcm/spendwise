@@ -15,6 +15,7 @@ import { getMarkdownStyle } from './helpers';
 
 const TOP_OFFSET = 8;
 const FALLBACK_FILLER_RATIO = 0.7;
+const STREAM_FLUSH_INTERVAL_MS = 50;
 
 export type ChatState = {
   isStreaming: boolean;
@@ -38,6 +39,62 @@ function initialState(): ChatState {
   };
 }
 
+function useStreamedContentFlush(
+  setChatState: React.Dispatch<React.SetStateAction<ChatState>>,
+) {
+  const streamedAssistantContentRef = React.useRef('');
+  const lastStreamFlushAtRef = React.useRef(0);
+  const streamFlushTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearStreamFlushTimeout = React.useCallback(() => {
+    if (!streamFlushTimeoutRef.current) return;
+    clearTimeout(streamFlushTimeoutRef.current);
+    streamFlushTimeoutRef.current = null;
+  }, []);
+
+  const flushStreamedContent = React.useCallback(() => {
+    lastStreamFlushAtRef.current = Date.now();
+    streamFlushTimeoutRef.current = null;
+    setChatState((prev) => ({
+      ...prev,
+      toolStatus: null,
+      streamedAssistantContent: streamedAssistantContentRef.current,
+    }));
+  }, [setChatState]);
+
+  const scheduleStreamFlush = React.useCallback(() => {
+    if (streamFlushTimeoutRef.current) return;
+
+    const elapsed = Date.now() - lastStreamFlushAtRef.current;
+    if (elapsed >= STREAM_FLUSH_INTERVAL_MS) {
+      flushStreamedContent();
+      return;
+    }
+
+    streamFlushTimeoutRef.current = setTimeout(
+      flushStreamedContent,
+      STREAM_FLUSH_INTERVAL_MS - elapsed,
+    );
+  }, [flushStreamedContent]);
+
+  const resetStreamedContent = React.useCallback(() => {
+    clearStreamFlushTimeout();
+    streamedAssistantContentRef.current = '';
+    lastStreamFlushAtRef.current = 0;
+  }, [clearStreamFlushTimeout]);
+
+  const appendStreamToken = React.useCallback((token: string) => {
+    streamedAssistantContentRef.current += token;
+    scheduleStreamFlush();
+  }, [scheduleStreamFlush]);
+
+  return {
+    appendStreamToken,
+    clearStreamFlushTimeout,
+    resetStreamedContent,
+  };
+}
+
 export function useChat(): UseChatReturn {
   const db = useSQLiteContext();
   const theme = useThemeConfig();
@@ -50,12 +107,17 @@ export function useChat(): UseChatReturn {
   const [chatState, setChatState] = React.useState<ChatState>(initialState);
   const scrollViewRef = React.useRef<FlatList<ChatMessage>>(null);
   const messageLayoutsRef = React.useRef<Record<string, { y: number; height: number }>>({});
-  const pendingScrollUserMessageIdRef = React.useRef<string | null>(null);
+  const pendingInitialScrollToEndRef = React.useRef(true);
+  const pendingScrollToEndRef = React.useRef(false);
+  const {
+    appendStreamToken,
+    clearStreamFlushTimeout,
+    resetStreamedContent,
+  } = useStreamedContentFlush(setChatState);
 
   const reset = React.useCallback(() => {
     abortControllerRef.current?.abort();
     abortControllerRef.current = null;
-
     inFlightRequestRef.current = false;
     setChatState((prev) => ({
       ...initialState(),
@@ -68,13 +130,14 @@ export function useChat(): UseChatReturn {
     return () => {
       isMountedRef.current = false;
       abortControllerRef.current?.abort();
+      clearStreamFlushTimeout();
     };
-  }, []);
+  }, [clearStreamFlushTimeout]);
 
   const send = React.useCallback((presetQuestion?: string) => {
     const sourceQuestion = presetQuestion ?? draftQuestion;
-    const trimmed = sourceQuestion.trim();
-    if (!trimmed || chatState.isStreaming || inFlightRequestRef.current) return;
+    const trimmed = sourceQuestion?.trim();
+    if (!trimmed.length || chatState.isStreaming || inFlightRequestRef.current) return;
 
     const existingMessages = useAiChatStore.getState().messages;
     const userMessage: ChatMessage = {
@@ -95,6 +158,7 @@ export function useChat(): UseChatReturn {
     abortControllerRef.current = controller;
 
     inFlightRequestRef.current = true;
+    resetStreamedContent();
     setChatState((prev) => ({
       ...prev,
       errorMessage: null,
@@ -105,6 +169,8 @@ export function useChat(): UseChatReturn {
       isStreaming: true,
     }));
 
+    pendingInitialScrollToEndRef.current = false;
+    pendingScrollToEndRef.current = true;
     setAiMessages(currentMessages);
     setAiDraftQuestion('');
 
@@ -115,11 +181,7 @@ export function useChat(): UseChatReturn {
           db,
           onToken: (token) => {
             if (!isMountedRef.current) return;
-            setChatState((prev) => ({
-              ...prev,
-              toolStatus: null,
-              streamedAssistantContent: prev.streamedAssistantContent + token,
-            }));
+            appendStreamToken(token);
           },
           onToolStatus: (status) => {
             if (!isMountedRef.current) return;
@@ -129,6 +191,7 @@ export function useChat(): UseChatReturn {
         });
 
         if (!isMountedRef.current) return;
+        clearStreamFlushTimeout();
 
         const finalMessages = currentMessages.map((m) => (
           m.id === assistantPlaceholder.id
@@ -159,6 +222,7 @@ export function useChat(): UseChatReturn {
         if (abortControllerRef.current === controller) {
           inFlightRequestRef.current = false;
           abortControllerRef.current = null;
+          clearStreamFlushTimeout();
 
           if (isMountedRef.current) {
             setChatState((prev) => ({
@@ -172,7 +236,15 @@ export function useChat(): UseChatReturn {
         }
       }
     })();
-  }, [db, chatState.isStreaming, draftQuestion, setChatState]);
+  }, [
+    appendStreamToken,
+    clearStreamFlushTimeout,
+    db,
+    chatState.isStreaming,
+    draftQuestion,
+    resetStreamedContent,
+    setChatState,
+  ]);
 
   const markdownStyle = React.useMemo<MarkdownStyle>(
     () => getMarkdownStyle(theme.dark),
@@ -196,10 +268,7 @@ export function useChat(): UseChatReturn {
 
   // Scroll management
   const lastMessage = messages.at(-1);
-  const lastAssistant = lastMessage?.role === 'assistant' ? lastMessage : null;
-  const shouldShowBottomFiller
-    = lastMessage?.role === 'user'
-      || (Boolean(lastAssistant) && chatState.isStreaming && lastAssistant?.id === chatState.streamingAssistantId);
+  const shouldShowBottomFiller = lastMessage?.role === 'user';
   const fillerAnchorMessageId = shouldShowBottomFiller ? lastMessage?.id : null;
   const measuredAnchorHeight = fillerAnchorMessageId
     ? messageLayoutsRef.current[fillerAnchorMessageId]?.height
@@ -211,21 +280,23 @@ export function useChat(): UseChatReturn {
         : fallbackBottomFillerHeight)
     : 0;
 
-  const scrollUserMessageToTop = React.useCallback((messageId: string) => {
-    const targetY = messageLayoutsRef.current[messageId]?.y;
-    if (targetY === undefined) return;
-    scrollViewRef.current?.scrollToOffset({
-      offset: Math.max(0, targetY - TOP_OFFSET),
-      animated: true,
+  const scrollToEnd = React.useCallback((animated: boolean) => {
+    requestAnimationFrame(() => {
+      scrollViewRef.current?.scrollToEnd({ animated });
     });
-    pendingScrollUserMessageIdRef.current = null;
   }, []);
 
-  React.useEffect(() => {
-    if (!chatState.lastSubmittedUserMessageId) return;
-    pendingScrollUserMessageIdRef.current = chatState.lastSubmittedUserMessageId;
-    scrollUserMessageToTop(chatState.lastSubmittedUserMessageId);
-  }, [chatState.lastSubmittedUserMessageId, scrollUserMessageToTop]);
+  const onContentSizeChange = React.useCallback(() => {
+    const shouldScrollToInitialMessages = pendingInitialScrollToEndRef.current && messages.length > 0;
+    const shouldScrollToSentMessages = pendingScrollToEndRef.current;
+    if (!shouldScrollToInitialMessages && !shouldScrollToSentMessages) return;
+
+    pendingInitialScrollToEndRef.current = false;
+    if (shouldScrollToSentMessages) {
+      pendingScrollToEndRef.current = false;
+    }
+    scrollToEnd(!shouldScrollToInitialMessages);
+  }, [messages.length, scrollToEnd]);
 
   const onScrollViewLayout = React.useCallback((event: LayoutChangeEvent) => {
     const height = event.nativeEvent.layout.height;
@@ -237,10 +308,7 @@ export function useChat(): UseChatReturn {
       y: event.nativeEvent.layout.y,
       height: event.nativeEvent.layout.height,
     };
-    if (pendingScrollUserMessageIdRef.current === messageId) {
-      scrollUserMessageToTop(messageId);
-    }
-  }, [scrollUserMessageToTop]);
+  }, []);
 
   return {
     hasKey: isAiEnabled,
@@ -254,6 +322,7 @@ export function useChat(): UseChatReturn {
     },
     scroll: {
       scrollViewRef,
+      onContentSizeChange,
       onScrollViewLayout,
       onMessageLayout,
       shouldShowBottomFiller,

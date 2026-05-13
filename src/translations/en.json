@@ -49,11 +49,19 @@
     "input_placeholder": "Ask the AI about your spending or budgets...",
     "new_chat": "New chat",
     "preset_groceries": "How much did I spend on groceries last month?",
+    "preset_largest_expenses": "What were my largest expenses this month?",
     "preset_monthly_budget": "Help me create a monthly budget based on my recent transactions.",
     "preset_overspending": "Where am I overspending compared to my budget?",
     "preset_overview": "Give me an overview of my spending this month.",
+    "preset_spending_trend": "How has my spending changed over the last three months?",
     "preset_subscriptions": "What subscriptions could I cancel to save money?",
-    "to_start_chatting": "to start chatting with the assistant."
+    "to_start_chatting": "to start chatting with the assistant.",
+    "tool_status_category_spending": "Looking up category spending{{range}}...",
+    "tool_status_default": "Looking up your data...",
+    "tool_status_range": " ({{startDate}} to {{endDate}})",
+    "tool_status_summary": "Looking up your financial summary{{range}}...",
+    "tool_status_transactions": "Looking up transactions{{range}}...",
+    "tool_status_trends": "Looking up spending trends{{range}}..."
   },
   "auth": {
     "email": "Email",

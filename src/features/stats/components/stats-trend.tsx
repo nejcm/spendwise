@@ -4,7 +4,7 @@ import { useColorScheme, useWindowDimensions } from 'react-native';
 
 import { BarChart } from 'react-native-gifted-charts';
 import { Text, View } from '@/components/ui';
-import { SkeletonBox } from '@/components/ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { useTrendByRange } from '@/features/insights/api';
 import { buildTrendSeries } from '@/features/insights/trend';
@@ -76,7 +76,7 @@ export function StatsTrend({ period, startDate, endDate }: StatsTrendProps) {
   }, [period, trendData, labelColor, screenWidth]);
 
   if (isLoading) {
-    return <SkeletonBox height={160} className="mb-6" />;
+    return <Skeleton height={160} className="mb-6" />;
   }
   if (data === undefined || barData.length === 0) return null;
 

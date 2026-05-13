@@ -22,7 +22,7 @@ import {
   View,
 } from '@/components/ui';
 import { ChevronLeft, ChevronRight } from '@/components/ui/icon';
-import { SkeletonBox } from '@/components/ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   trendByRangeQueryOptions,
   useTrendByRange,
@@ -159,7 +159,7 @@ export function StatsCalendar() {
 
         {isLoading && totalsByKey.size === 0
           ? (
-              <SkeletonBox height={300} />
+              <Skeleton height={300} />
             )
           : (
               <View>

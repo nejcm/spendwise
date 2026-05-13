@@ -1,14 +1,14 @@
-import type { Skeleton as MotiSkeleton } from 'moti/skeleton';
+import type { Skeleton as TMSkeleton } from 'moti/skeleton';
 import type { DimensionValue } from 'react-native';
 import { MotiView, View } from 'moti';
-import { Skeleton } from 'moti/skeleton';
+import { Skeleton as MSkeleton } from 'moti/skeleton';
 import { memo } from 'react';
 import { cn } from 'tailwind-variants';
 import { useThemeConfig } from '../../lib/theme/use-theme-config';
 
 export type SkeletonContainerProps = {
   className?: string;
-  children: (props: Parameters<typeof MotiSkeleton>[0]) => React.ReactNode;
+  children: (props: Parameters<typeof TMSkeleton>[0]) => React.ReactNode;
 };
 
 const darkGradient = ['#31343b', '#4b4f59', '#31343b'];
@@ -41,10 +41,10 @@ export type SkeletonBoxProps = {
   className?: string;
 };
 
-export function SkeletonBox({ height, width, className }: SkeletonBoxProps) {
+export function Skeleton({ height, width, className }: SkeletonBoxProps) {
   return (
     <SkeletonWrapper className={className}>
-      {(props) => <View style={{ width }}><Skeleton {...props} height={height} width="100%" /></View>}
+      {(props) => <View style={{ width }}><MSkeleton {...props} height={height} width="100%" /></View>}
     </SkeletonWrapper>
   );
 }
@@ -67,7 +67,7 @@ export function SkeletonRows({ count = 3, dimensions = rowDefault, className }: 
             const [width, height, cls] = dimensions[i % dimensions.length];
             return (
               <View key={i} style={{ width }} className={cls}>
-                <Skeleton key={i} {...props} height={height} width="100%" />
+                <MSkeleton key={i} {...props} height={height} width="100%" />
               </View>
             );
           })}
@@ -92,7 +92,7 @@ export function SkeletonGrid({ cols = 2, rows = 3, className, heights = gridDefa
         <>
           {Array.from({ length: cols * rows }, (_, i) => (
             <View key={i} style={{ width: `${(100 / cols) - 1}%` }}>
-              <Skeleton key={i} {...props} height={heights[i % heights.length]} width="100%" />
+              <MSkeleton key={i} {...props} height={heights[i % heights.length]} width="100%" />
             </View>
           ))}
         </>

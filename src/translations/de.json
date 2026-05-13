@@ -49,11 +49,19 @@
     "input_placeholder": "Frage die KI zu deinen Ausgaben oder Budgets...",
     "new_chat": "Neuer Chat",
     "preset_groceries": "Wie viel habe ich letzten Monat für Lebensmittel ausgegeben?",
+    "preset_largest_expenses": "Was waren meine größten Ausgaben in diesem Monat?",
     "preset_monthly_budget": "Hilf mir, auf Basis meiner letzten Transaktionen ein Monatsbudget zu erstellen.",
     "preset_overspending": "Wo gebe ich im Vergleich zu meinem Budget zu viel aus?",
     "preset_overview": "Gib mir einen Überblick über meine Ausgaben in diesem Monat.",
+    "preset_spending_trend": "Wie haben sich meine Ausgaben in den letzten drei Monaten verändert?",
     "preset_subscriptions": "Welche Abos könnte ich kündigen, um Geld zu sparen?",
-    "to_start_chatting": "um mit dem Assistenten zu chatten."
+    "to_start_chatting": "um mit dem Assistenten zu chatten.",
+    "tool_status_category_spending": "Kategorieausgaben werden gesucht{{range}}...",
+    "tool_status_default": "Deine Daten werden gesucht...",
+    "tool_status_range": " ({{startDate}} bis {{endDate}})",
+    "tool_status_summary": "Finanzübersicht wird gesucht{{range}}...",
+    "tool_status_transactions": "Transaktionen werden gesucht{{range}}...",
+    "tool_status_trends": "Ausgabentrends werden gesucht{{range}}..."
   },
   "auth": {
     "email": "E-Mail",

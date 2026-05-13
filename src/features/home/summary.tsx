@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
-import { SkeletonBox, SkeletonGrid } from '@/components/ui/skeleton';
+import { Skeleton, SkeletonGrid } from '@/components/ui/skeleton';
 import { useMonthSummary, useMonthTrend } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
@@ -27,7 +27,7 @@ export default function Summary() {
         </View>
         <View className="items-end">
           {isLoading
-            ? <SkeletonBox height={32} width={120} />
+            ? <Skeleton height={32} width={120} />
             : <FormattedCurrency className="mt-1 text-2xl font-bold" value={data?.balance ?? 0} currency={currency} />}
         </View>
       </View>

@@ -1,4 +1,4 @@
-import type { MarkdownStyle } from 'react-native-enriched-markdown';
+import type { LinkPressEvent, MarkdownStyle } from 'react-native-enriched-markdown';
 import * as React from 'react';
 import { Linking } from 'react-native';
 import { EnrichedMarkdownText } from 'react-native-enriched-markdown';
@@ -9,6 +9,10 @@ export type AssistantMessageProps = {
   markdownStyle?: MarkdownStyle;
 };
 
+function openLink({ url }: LinkPressEvent) {
+  Linking.openURL(url);
+}
+
 export default function AssistantMessage({ content, streaming, markdownStyle }: AssistantMessageProps) {
   return (
     <EnrichedMarkdownText
@@ -16,7 +20,7 @@ export default function AssistantMessage({ content, streaming, markdownStyle }: 
       markdownStyle={markdownStyle}
       flavor="github"
       streamingAnimation={streaming}
-      onLinkPress={({ url }) => Linking.openURL(url)}
+      onLinkPress={openLink}
     />
   );
 }

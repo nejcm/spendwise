@@ -14,7 +14,7 @@ export function getMarkdownStyle(isDark: Theme['dark']): MarkdownStyle {
     h4: { fontFamily: 'Inter-Bold', fontSize: 15, fontWeight: 'bold', color: colors.text, lineHeight: Math.round(15 * 1.33) },
     h5: { fontFamily: 'Inter-Bold', fontSize: 14, fontWeight: 'bold', color: colors.text, lineHeight: Math.round(14 * 1.33) },
     h6: { fontFamily: 'Inter-Bold', fontSize: 14, fontWeight: 'bold', color: colors.text, lineHeight: Math.round(14 * 1.33) },
-    strong: { fontFamily: 'Inter-Medium', fontWeight: 'medium' as any },
+    strong: { fontFamily: 'Inter-Medium', fontWeight: 'bold' },
     em: { fontStyle: 'italic' },
     blockquote: {
       fontFamily: 'Inter',

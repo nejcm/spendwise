@@ -13,7 +13,7 @@ export default function WelcomeStep({ onNext, currentStep }: WelcomeStepProps) {
   return (
     <>
       <View className="flex-1 bg-gray-200 px-6 pt-12 pb-16 dark:bg-gray-50">
-        <View className="mb-10 flex-row items-center justify-center gap-3">
+        <View className="mb-8 flex-row items-center justify-center gap-3 xs:mb-10">
           <Text className="text-3xl font-bold tracking-tight text-gray-900">{translate('onboarding.title')}</Text>
         </View>
 
@@ -29,10 +29,10 @@ export default function WelcomeStep({ onNext, currentStep }: WelcomeStepProps) {
       <View className="shrink-0 justify-between bg-background px-6 py-8">
         <View>
           <IntroNav current={currentStep} />
-          <Text className="mb-4 text-center text-[1.75rem] font-bold text-black dark:text-white">
+          <Text className="mb-4 text-center text-2xl font-bold text-black xs:text-[1.75rem] dark:text-white">
             {translate('onboarding.welcome_headline')}
           </Text>
-          <Text className="text-center text-lg/snug text-gray-500 dark:text-gray-400">
+          <Text className="text-center text-base/snug text-gray-500 xs:text-lg/snug dark:text-gray-400">
             {translate('onboarding.welcome_copy')}
           </Text>
         </View>

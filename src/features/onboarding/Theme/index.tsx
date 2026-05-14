@@ -34,7 +34,7 @@ export default function ThemeStep({ onBack, onNext, currentStep }: ThemeStepProp
       <OnboardingLayout
         currentStep={currentStep}
         title={translate('onboarding.settings')}
-        className="my-auto"
+        className="my-auto py-4"
         footer={(
           <>
             <GhostButton

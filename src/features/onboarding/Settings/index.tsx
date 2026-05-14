@@ -44,7 +44,7 @@ export default function SettingsStep({ onBack, onNext, currentStep }: SettingsSt
       <OnboardingLayout
         currentStep={currentStep}
         title={translate('onboarding.settings')}
-        className="my-auto"
+        className="my-auto py-4"
         footer={(
           <>
             <GhostButton

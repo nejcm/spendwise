@@ -330,32 +330,39 @@ export function AiScreen() {
               hasNewChat={hasKey && messages.length > 0}
               onNewChat={reset}
             />
-            <FlatList
-              ref={scrollViewRef}
-              data={messages}
-              extraData={streamedAssistantContent}
-              renderItem={renderMessage}
-              keyExtractor={(message) => message.id}
-              onContentSizeChange={onContentSizeChange}
-              onLayout={onScrollViewLayout}
-              keyboardShouldPersistTaps="handled"
-              ListEmptyComponent={listEmpty}
-              contentContainerStyle={styles.listContent}
-              style={styles.list}
-            />
-            <ChatFooter
-              bottomFillerHeight={bottomFillerHeight}
-              draftQuestion={draftQuestion}
-              errorMessage={errorMessage}
-              hasKey={hasKey}
-              inputRef={inputRef}
-              isStreaming={isStreaming}
-              onComposerLayout={onComposerLayout}
-              onDraftChange={setDraft}
-              onSend={sendDraft}
-              shouldShowBottomFiller={shouldShowBottomFiller}
-              toolStatus={toolStatus}
-            />
+            {hasKey
+              ? (
+                  <>
+
+                    <FlatList
+                      ref={scrollViewRef}
+                      data={messages}
+                      extraData={streamedAssistantContent}
+                      renderItem={renderMessage}
+                      keyExtractor={(message) => message.id}
+                      onContentSizeChange={onContentSizeChange}
+                      onLayout={onScrollViewLayout}
+                      keyboardShouldPersistTaps="handled"
+                      ListEmptyComponent={listEmpty}
+                      contentContainerStyle={styles.listContent}
+                      style={styles.list}
+                    />
+                    <ChatFooter
+                      bottomFillerHeight={bottomFillerHeight}
+                      draftQuestion={draftQuestion}
+                      errorMessage={errorMessage}
+                      hasKey={hasKey}
+                      inputRef={inputRef}
+                      isStreaming={isStreaming}
+                      onComposerLayout={onComposerLayout}
+                      onDraftChange={setDraft}
+                      onSend={sendDraft}
+                      shouldShowBottomFiller={shouldShowBottomFiller}
+                      toolStatus={toolStatus}
+                    />
+                  </>
+                )
+              : listEmpty}
           </KeyboardGestureArea>
         </KeyboardAvoidingView>
       </View>

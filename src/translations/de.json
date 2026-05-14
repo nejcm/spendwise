@@ -327,36 +327,37 @@
     "enter_name": "Gib deinen Namen ein",
     "finish_setup": "Einrichtung abschließen",
     "get_started": "Loslegen",
-    "guidance": {
+    "highlights": {
       "items": {
+        "accounts": {
+          "body": "Sieh Salden, Konten, Kategorien und Transaktionsverlauf in einem klaren Arbeitsbereich.",
+          "title": "Jedes Konto verfolgen"
+        },
         "ai": {
-          "body": "KI-Chat und Belegscan benötigen deinen eigenen OpenAI- oder Anthropic-API-Schlüssel. Die Nutzung beim Anbieter kann Kosten verursachen.",
-          "title": "KI braucht deinen API-Schlüssel"
+          "body": "Stelle Fragen zu deinem Geld und verwandle Belegfotos in prüfbereite Transaktionen.\n⚠️ AI-Funktionalität und Rechnungs-Scanning benötigen deine eigene API-Schlüssel.",
+          "title": "Schneller mit AI"
         },
-        "backup": {
-          "body": "Deine Daten sind lokal gespeichert. Nutze Import/Export, um Daten auf ein anderes Gerät zu übertragen oder ein Backup wiederherzustellen.",
-          "title": "Lokale Daten sichern"
+        "data": {
+          "body": "Behalte Finanzen lokal, verschiebe Daten per CSV-Import/Export und stelle JSON-Backups wieder her.",
+          "title": "Deine Daten gehören dir"
         },
-        "currency": {
-          "body": "Beim Ändern der Anzeigewährung werden Summen mit historischen Wechselkursen neu berechnet. Das kann einen Moment dauern.",
-          "title": "Währungswechsel berechnet Summen neu"
+        "insights": {
+          "body": "Nutze Statistiken, Trends, Kategorieauswertungen und Empfehlungen, um Veränderungen zu erkennen.",
+          "title": "Ausgaben verstehen"
         },
-        "privacy": {
-          "body": "Finanzdaten bleiben auf diesem Gerät, außer du nutzt KI. Dann werden relevante Kontextdaten oder Belegbilder an den gewählten Anbieter gesendet.",
-          "title": "Lokale Privatsphäre"
-        },
-        "scan": {
-          "body": "Der Belegscan nutzt den Schlüssel deines aktiven KI-Anbieters, um Belegfotos zu lesen und eine Transaktion vorzubereiten.",
-          "title": "Belegscan nutzt KI"
+        "recurring": {
+          "body": "Plane wiederkehrende Transaktionen, verfolge anstehende Rechnungen und erhalte rechtzeitig Erinnerungen.",
+          "title": "Wiederkehrendes Geld planen"
         }
       },
-      "subtitle": "Einige Funktionen benötigen Einrichtung oder haben wichtiges Datenverhalten.",
-      "title": "Gut zu wissen"
+      "subtitle": "Ein kurzer Blick darauf, wobei Spendwise dir im Alltag hilft.",
+      "title": "Was du tun kannst"
     },
     "name": "Name",
     "select_language": "Wähle deine Sprache",
     "select_theme": "Wähle dein Design",
     "settings": "Einstellungen",
+    "start_tracking": "Tracking starten",
     "subtitle": "Übernimm die Kontrolle über deine Finanzen",
     "tap_to_change": "Tippen zum Ändern",
     "title": "Spendwise",

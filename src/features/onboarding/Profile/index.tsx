@@ -24,7 +24,7 @@ export default function ProfileStep({ onBack, onNext, currentStep }: ProfileStep
       <OnboardingLayout
         title={translate('onboarding.create_profile')}
         currentStep={currentStep}
-        className="my-auto"
+        className="my-auto py-4"
         footer={(
           <>
             <GhostButton

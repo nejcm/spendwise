@@ -34,10 +34,11 @@ jest.mock('@/components/screen-header', () => ({
 }));
 
 jest.mock('react-native-safe-area-context', () => ({
+  // eslint-disable-next-line react/no-unnecessary-use-prefix
   useSafeAreaInsets: () => ({ bottom: 0, left: 0, right: 0, top: 0 }),
 }));
 
-const useChatMock = useChat as jest.MockedFunction<typeof useChat>;
+const chatHookMock = useChat as jest.MockedFunction<typeof useChat>;
 const AssistantMessageMock = AssistantMessage as jest.MockedFunction<typeof AssistantMessage>;
 
 function mockChat(overrides: Partial<UseChatReturn> = {}) {
@@ -69,7 +70,7 @@ function mockChat(overrides: Partial<UseChatReturn> = {}) {
     markdownStyle: {},
   };
 
-  useChatMock.mockReturnValue({ ...base, ...overrides });
+  chatHookMock.mockReturnValue({ ...base, ...overrides });
 }
 
 describe('ai screen', () => {
@@ -89,7 +90,7 @@ describe('ai screen', () => {
 
   it('renders live assistant content as raw text while streaming', () => {
     mockChat({
-      hasKey: false,
+      hasKey: true,
       messages: [{ id: 'assistant-1', role: 'assistant', content: '' }],
       isStreaming: true,
       streamedAssistantContent: 'hello **world**',

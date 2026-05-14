@@ -249,7 +249,10 @@ export function setAnthropicApiKey(anthropicApiKey: string | undefined) {
 }
 
 export function selectIsAiEnabled(state: AppState) {
-  return Boolean(state.openaiApiKey) || Boolean(state.anthropicApiKey);
+  const key = state.aiProvider === 'anthropic'
+    ? state.anthropicApiKey
+    : state.openaiApiKey;
+  return Boolean(key?.trim());
 }
 
 // Security actions

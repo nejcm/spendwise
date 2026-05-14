@@ -36,17 +36,19 @@ function Empty({ hasKey, hasMessages, onSend }: EmptyProps) {
   if (!hasKey) {
     return (
       <View className="mb-4 rounded-xl bg-card p-4">
-        <Text className="text-muted-foreground">
-          {translate('ai.add_api_key_in')}
-          {' '}
+        <Text className="mb-2 font-medium text-foreground">
+          {translate('ai.setup_required_title')}
+        </Text>
+        <Text className="mb-3 text-sm/snug text-muted-foreground">
+          {translate('ai.setup_required_body')}
+        </Text>
+        <Text className="text-sm text-muted-foreground">
           <Link
             href="/settings/ai"
             className="mx-1 font-medium text-foreground underline"
           >
-            {translate('ai.ai_setting')}
+            {translate('ai.setup_required_action')}
           </Link>
-          {' '}
-          {translate('ai.to_start_chatting')}
         </Text>
       </View>
     );

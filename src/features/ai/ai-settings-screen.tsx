@@ -23,6 +23,9 @@ export function AiSettingsScreen() {
   const openaiApiKey = useAppStore.use.openaiApiKey();
   const anthropicApiKey = useAppStore.use.anthropicApiKey();
   const [dirty, setDirty] = React.useState(false);
+  const activeProviderHasKey = aiProvider === 'anthropic'
+    ? Boolean(anthropicApiKey?.trim())
+    : Boolean(openaiApiKey?.trim());
 
   const openaiInputRef = React.useRef<string | undefined>(openaiApiKey);
   const anthropicInputRef = React.useRef<string | undefined>(anthropicApiKey);
@@ -37,7 +40,7 @@ export function AiSettingsScreen() {
       duration: 2500,
       icon: 'success',
     });
-  }, []);
+  }, [setDirty]);
 
   return (
     <>
@@ -55,6 +58,11 @@ export function AiSettingsScreen() {
             onSelect={setAiProvider}
             testID="ai-provider-select"
           />
+          {!activeProviderHasKey && (
+            <Text className="mt-3 text-sm/snug text-muted-foreground">
+              {translate('settings.ai_provider_missing_key')}
+            </Text>
+          )}
         </View>
 
         <View

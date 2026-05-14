@@ -77,6 +77,16 @@ describe('ai screen', () => {
     jest.clearAllMocks();
   });
 
+  it('explains that AI chat requires a user-provided provider key', () => {
+    mockChat({ hasKey: false });
+
+    render(<AiScreen />);
+
+    expect(screen.getByText('AI setup required')).toBeTruthy();
+    expect(screen.getByText('AI chat needs your own OpenAI or Anthropic API key. Provider usage may cost money.')).toBeTruthy();
+    expect(screen.getByText('Open AI settings')).toBeTruthy();
+  });
+
   it('renders live assistant content as raw text while streaming', () => {
     mockChat({
       hasKey: false,

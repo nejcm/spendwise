@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { FocusAwareStatusBar, View } from '@/components/ui';
 import { setIsFirstTime } from '@/lib/store/store';
+import GuidanceStep from './Guidance';
 import ProfileStep from './Profile';
 import SettingsStep from './Settings';
 import ThemeStep from './Theme';
@@ -24,7 +25,8 @@ export function OnboardingScreen() {
       {step === 0 && <WelcomeStep onNext={() => setStep(1)} currentStep={0} />}
       {step === 1 && <SettingsStep onBack={() => setStep(0)} onNext={() => setStep(2)} currentStep={1} />}
       {step === 2 && <ProfileStep onBack={() => setStep(1)} onNext={() => setStep(3)} currentStep={2} />}
-      {step === 3 && <ThemeStep onBack={() => setStep(2)} onNext={onFinish} currentStep={3} />}
+      {step === 3 && <ThemeStep onBack={() => setStep(2)} onNext={() => setStep(4)} currentStep={3} />}
+      {step === 4 && <GuidanceStep onBack={() => setStep(3)} onNext={onFinish} currentStep={4} />}
     </View>
   );
 }

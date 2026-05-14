@@ -46,7 +46,7 @@ export default function ThemeStep({ onBack, onNext, currentStep }: ThemeStepProp
             />
             <SolidButton
               color="primary"
-              label={translate('onboarding.finish_setup')}
+              label={translate('common.next')}
               onPress={onNext}
               className="flex-1"
               size="lg"

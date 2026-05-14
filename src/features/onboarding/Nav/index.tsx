@@ -1,6 +1,6 @@
 import { View } from '@/components/ui';
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 5;
 
 export type IntroNavProps = {
   current: number;

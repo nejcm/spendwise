@@ -324,6 +324,32 @@
     "enter_name": "Gib deinen Namen ein",
     "finish_setup": "Einrichtung abschließen",
     "get_started": "Loslegen",
+    "guidance": {
+      "items": {
+        "ai": {
+          "body": "KI-Chat und Belegscan benötigen deinen eigenen OpenAI- oder Anthropic-API-Schlüssel. Die Nutzung beim Anbieter kann Kosten verursachen.",
+          "title": "KI braucht deinen API-Schlüssel"
+        },
+        "backup": {
+          "body": "Deine Daten sind lokal gespeichert. Nutze Import/Export, um Daten auf ein anderes Gerät zu übertragen oder ein Backup wiederherzustellen.",
+          "title": "Lokale Daten sichern"
+        },
+        "currency": {
+          "body": "Beim Ändern der Anzeigewährung werden Summen mit historischen Wechselkursen neu berechnet. Das kann einen Moment dauern.",
+          "title": "Währungswechsel berechnet Summen neu"
+        },
+        "privacy": {
+          "body": "Finanzdaten bleiben auf diesem Gerät, außer du nutzt KI. Dann werden relevante Kontextdaten oder Belegbilder an den gewählten Anbieter gesendet.",
+          "title": "Lokale Privatsphäre"
+        },
+        "scan": {
+          "body": "Der Belegscan nutzt den Schlüssel deines aktiven KI-Anbieters, um Belegfotos zu lesen und eine Transaktion vorzubereiten.",
+          "title": "Belegscan nutzt KI"
+        }
+      },
+      "subtitle": "Einige Funktionen benötigen Einrichtung oder haben wichtiges Datenverhalten.",
+      "title": "Gut zu wissen"
+    },
     "name": "Name",
     "select_language": "Wähle deine Sprache",
     "select_theme": "Wähle dein Design",

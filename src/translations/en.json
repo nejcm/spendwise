@@ -324,6 +324,32 @@
     "enter_name": "Enter your name",
     "finish_setup": "Finish Setup",
     "get_started": "Get Started",
+    "guidance": {
+      "items": {
+        "ai": {
+          "body": "AI chat and receipt scanning need your own OpenAI or Anthropic API key. Provider usage may cost money.",
+          "title": "AI needs your API key"
+        },
+        "backup": {
+          "body": "Your data is local-first. Use Import/Export to move data to another device or restore a backup.",
+          "title": "Back up local data"
+        },
+        "currency": {
+          "body": "Changing the display currency recalculates totals with historical exchange rates and can take a moment.",
+          "title": "Currency changes recalculate totals"
+        },
+        "privacy": {
+          "body": "Finance data stays on this device unless you use AI. Then relevant context or receipt images are sent to the selected provider.",
+          "title": "Local-first privacy"
+        },
+        "scan": {
+          "body": "Receipt scanning uses your active AI provider key to read receipt photos and prepare a transaction.",
+          "title": "Receipt scanning uses AI"
+        }
+      },
+      "subtitle": "A few features need setup or have important data behavior.",
+      "title": "Good to know"
+    },
     "name": "Name",
     "select_language": "Select your language",
     "select_theme": "Select your theme",

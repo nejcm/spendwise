@@ -74,6 +74,8 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
         CREATE INDEX IF NOT EXISTS idx_transactions_date_category_ie_cover
           ON transactions(date, category_id, type, baseAmount)
           WHERE type IN ('income','expense');
+        CREATE INDEX IF NOT EXISTS idx_transactions_account_date_balance
+          ON transactions(account_id, date, type, amount, baseAmount, baseCurrency);
 
         CREATE TABLE IF NOT EXISTS currency_rates (
           base TEXT NOT NULL,
@@ -115,6 +117,8 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
           ON recurring_rules(is_active, next_due_date, created_at);
         CREATE INDEX IF NOT EXISTS idx_recurring_rules_active_type_due
           ON recurring_rules(is_active, type, next_due_date);
+        CREATE INDEX IF NOT EXISTS idx_recurring_rules_list_order
+          ON recurring_rules(is_active DESC, next_due_date ASC, created_at DESC);
 
         CREATE INDEX IF NOT EXISTS idx_recurring_rule_runs_rule_date
           ON recurring_rule_runs(rule_id, scheduled_for_date);
@@ -143,5 +147,15 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
       ALTER TABLE transactions ADD COLUMN merchant_logo_slug TEXT;
     `);
     await db.execAsync(`PRAGMA user_version = 4`);
+  }
+
+  if (currentDbVersion < 5) {
+    await db.execAsync(`
+      CREATE INDEX IF NOT EXISTS idx_transactions_account_date_balance
+        ON transactions(account_id, date, type, amount, baseAmount, baseCurrency);
+      CREATE INDEX IF NOT EXISTS idx_recurring_rules_list_order
+        ON recurring_rules(is_active DESC, next_due_date ASC, created_at DESC);
+    `);
+    await db.execAsync(`PRAGMA user_version = 5`);
   }
 }

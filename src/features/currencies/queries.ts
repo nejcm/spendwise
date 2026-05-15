@@ -157,6 +157,7 @@ function findClosestDateRates(
 }
 
 const TOLERANCE_SEC = 7 * 86400; // 7 days
+const MAX_CURRENCY_RATE_ROWS_PER_BATCH = 300;
 
 async function withTransactionUnlessNested(
   db: SQLiteDatabase,
@@ -169,6 +170,27 @@ async function withTransactionUnlessNested(
   await db.withTransactionAsync(task);
 }
 
+async function insertCurrencyRateRows(
+  db: SQLiteDatabase,
+  rows: Array<{ date: number; quote: string; rate: number }>,
+): Promise<void> {
+  for (let offset = 0; offset < rows.length; offset += MAX_CURRENCY_RATE_ROWS_PER_BATCH) {
+    const chunk = rows.slice(offset, offset + MAX_CURRENCY_RATE_ROWS_PER_BATCH);
+    const placeholders = chunk.map(() => `('EUR', ?, ?, ?)`).join(', ');
+    const params: Array<number | string> = [];
+
+    for (const row of chunk) {
+      params.push(row.quote, row.rate, row.date);
+    }
+
+    await db.runAsync(
+      `INSERT OR IGNORE INTO currency_rates (base, quote, rate, date)
+       VALUES ${placeholders}`,
+      params,
+    );
+  }
+}
+
 /** Saves all rates in a single transaction (INSERT OR IGNORE — idempotent). */
 export async function bulkSaveRates(
   db: SQLiteDatabase,
@@ -178,17 +200,17 @@ export async function bulkSaveRates(
   if (entries.length === 0) return;
 
   await withTransactionUnlessNested(db, async () => {
+    const rows: Array<{ date: number; quote: string; rate: number }> = [];
+
     for (const [dateStr, rates] of entries) {
       const ts = Math.floor(new Date(`${dateStr}T00:00:00Z`).getTime() / 1000);
       for (const [quote, rate] of Object.entries(rates)) {
         if (rate == null) continue;
-        await db.runAsync(
-          `INSERT OR IGNORE INTO currency_rates (base, quote, rate, date)
-           VALUES ('EUR', ?, ?, ?)`,
-          [quote, rate, ts],
-        );
+        rows.push({ date: ts, quote, rate });
       }
     }
+
+    await insertCurrencyRateRows(db, rows);
   });
 }
 
@@ -347,14 +369,14 @@ export async function saveRatesForDate(
   dayTimestamp: number,
 ): Promise<void> {
   await withTransactionUnlessNested(db, async () => {
+    const rows: Array<{ date: number; quote: string; rate: number }> = [];
+
     for (const [quote, rate] of Object.entries(rateMap)) {
       if (rate == null) continue;
-      await db.runAsync(
-        `INSERT OR IGNORE INTO currency_rates (base, quote, rate, date)
-         VALUES ('EUR', ?, ?, ?)`,
-        [quote, rate, dayTimestamp],
-      );
+      rows.push({ date: dayTimestamp, quote, rate });
     }
+
+    await insertCurrencyRateRows(db, rows);
   });
 }
 

@@ -1,5 +1,6 @@
 import {
   getCategorySpendByRange,
+  getMonthlyTrend,
   getSummaryByRange,
   getTrendByRange,
 } from './queries';
@@ -172,5 +173,35 @@ describe('getTrendByRange', () => {
     db.getAllAsync.mockResolvedValueOnce([]);
     const trend = await getTrendByRange(db as any, MAR_START, APR_START);
     expect(trend).toEqual([]);
+  });
+});
+
+// ─── getMonthlyTrend ──────────────────────────────────────────────────────────
+
+describe('getMonthlyTrend', () => {
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date(2026, 4, 15));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('loads all requested months with one aggregate query and fills gaps', async () => {
+    const db = createMockDb();
+    db.getAllAsync.mockResolvedValueOnce([
+      { month: '2026-03', income: 300000, expense: 120000 },
+      { month: '2026-05', income: 500000, expense: 200000 },
+    ]);
+
+    const trend = await getMonthlyTrend(db as any, 3);
+
+    expect(db.getAllAsync).toHaveBeenCalledTimes(1);
+    expect(db.getFirstAsync).not.toHaveBeenCalled();
+    expect(trend).toEqual([
+      { month: '2026-03', income: 300000, expense: 120000 },
+      { month: '2026-04', income: 0, expense: 0 },
+      { month: '2026-05', income: 500000, expense: 200000 },
+    ]);
   });
 });

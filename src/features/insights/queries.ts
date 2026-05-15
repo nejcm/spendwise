@@ -3,7 +3,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import type { MonthSummary } from '../transactions/types';
 import type { CategorySpend, DailyTrendTotal, MonthlyTotals } from './types';
 
-import { subMonths } from 'date-fns';
+import { addMonths, startOfMonth, subMonths } from 'date-fns';
 import { dateToUnix } from '@/lib/date/helpers';
 
 // ─── Read Queries ───
@@ -150,26 +150,34 @@ export async function getMonthlyTrend(
   db: SQLiteDatabase,
   numMonths: number,
 ): Promise<MonthlyTotals[]> {
+  if (numMonths <= 0) return [];
+
   const now = new Date();
+  const firstMonth = startOfMonth(subMonths(now, numMonths - 1));
+  const afterLastMonth = startOfMonth(addMonths(now, 1));
+  const startDate = dateToUnix(firstMonth);
+  const endDate = dateToUnix(afterLastMonth);
+
+  const rows = await db.getAllAsync<MonthlyTotals>(
+    `SELECT
+       strftime('%Y-%m', date, 'unixepoch', 'localtime') as month,
+       COALESCE(SUM(CASE WHEN type = 'income' THEN baseAmount ELSE 0 END), 0) as income,
+       COALESCE(SUM(CASE WHEN type = 'expense' THEN baseAmount ELSE 0 END), 0) as expense
+     FROM transactions
+     WHERE date >= ? AND date < ?
+     GROUP BY month
+     ORDER BY month ASC`,
+    [startDate, endDate],
+  );
+
+  const totalsByMonth = new Map(rows.map((row) => [row.month, row]));
   const result: MonthlyTotals[] = [];
 
-  for (let i = numMonths - 1; i >= 0; i--) {
-    const date = subMonths(now, i);
+  for (let i = 0; i < numMonths; i++) {
+    const date = addMonths(firstMonth, i);
     const year = date.getFullYear();
-    const month = date.getMonth(); // 0-based
-    const startDate = dateToUnix(new Date(year, month, 1));
-    const endDate = dateToUnix(new Date(year, month + 1, 1));
-    const monthLabel = `${year}-${String(month + 1).padStart(2, '0')}`;
-
-    const row = await db.getFirstAsync<{ income: number; expense: number }>(
-      `SELECT
-         COALESCE(SUM(CASE WHEN type = 'income' THEN baseAmount ELSE 0 END), 0) as income,
-         COALESCE(SUM(CASE WHEN type = 'expense' THEN baseAmount ELSE 0 END), 0) as expense
-       FROM transactions
-       WHERE date >= ? AND date < ?`,
-      [startDate, endDate],
-    );
-
+    const monthLabel = `${year}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const row = totalsByMonth.get(monthLabel);
     result.push({ month: monthLabel, income: row?.income ?? 0, expense: row?.expense ?? 0 });
   }
 

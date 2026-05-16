@@ -19,13 +19,15 @@ export type TransactionCardProps = {
 export const TransactionCard = React.memo(({ transaction, className }: TransactionCardProps) => {
   const router = useRouter();
   const currency = useAppStore.use.currency();
+  const density = useAppStore.use.density();
+  const isCompact = density === 'compact';
   const isIncome = transaction.type === 'income';
   const displayName = transaction.merchant_name || transaction.category_name || 'Unknown';
   const showConverted = transaction.currency !== currency;
   const logo = transaction.merchant_logo_slug ? <MerchantLogo slug={transaction.merchant_logo_slug} /> : null;
 
   return (
-    <Pressable className={cn('flex-row items-center gap-3 p-3', className)} style={getPressedStyle} onPress={() => router.push(`/transactions/${transaction.id}`)}>
+    <Pressable className={cn('flex-row items-center', isCompact ? 'gap-2 px-3 py-1.5' : 'gap-3 p-3', className)} style={getPressedStyle} onPress={() => router.push(`/transactions/${transaction.id}`)}>
       {logo || (
         <View
           className="size-10 items-center justify-center rounded-lg"

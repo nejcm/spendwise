@@ -3,6 +3,7 @@ import type { CategorySpend } from '@/features/insights/types';
 import type { PeriodSelection } from '@/lib/store/store';
 import * as React from 'react';
 import { Pressable } from 'react-native';
+import { cn } from 'tailwind-variants';
 
 import { DEFAULT_COLOR } from '@/components/color-selector';
 import { FormattedCurrency, Text, View } from '@/components/ui';
@@ -10,6 +11,7 @@ import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
 import { TrashIcon } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { scaleBudgetForPeriod } from '@/lib/date/helpers';
+import { useAppStore } from '@/lib/store/store';
 import { hexWithOpacity } from '@/lib/theme/colors';
 
 export type CategoryCardProps = {
@@ -21,6 +23,8 @@ export type CategoryCardProps = {
 };
 
 export default function CategoryCard({ item, currency, periodSelection, onPress, onDeletePress }: CategoryCardProps) {
+  const density = useAppStore.use.density();
+  const isCompact = density === 'compact';
   const emoji = item.category_icon && item.category_icon.trim() ? item.category_icon : item.category_name.charAt(0).toUpperCase();
   const showBudget = item.category_budget != null && item.category_budget > 0;
   const monthlyBudget = item.category_budget ?? 0;
@@ -28,7 +32,7 @@ export default function CategoryCard({ item, currency, periodSelection, onPress,
   const isMonthView = periodSelection.mode === 'month';
 
   return (
-    <View className="min-h-[66] flex-1 justify-center rounded-xl bg-card">
+    <View className={`flex-1 justify-center rounded-xl bg-card ${isCompact ? 'min-h-[60]' : 'min-h-[66]'}`}>
       {onDeletePress && (
         <IconButton
           size="sm"
@@ -40,22 +44,22 @@ export default function CategoryCard({ item, currency, periodSelection, onPress,
           <TrashIcon colorClassName="accent-muted-foreground" size={15} />
         </IconButton>
       )}
-      <Pressable onPress={() => onPress(item)} className="flex-1 flex-row items-center gap-2 px-2 py-1">
+      <Pressable onPress={() => onPress(item)} className={cn('flex-1 flex-row items-center', isCompact ? 'gap-1.5 px-1.5 py-0.5' : 'gap-2 px-2 py-1')}>
         <View
-          className="size-9 items-center justify-center rounded-lg 3xs:size-10 2xs:size-12"
+          className={`size-9 items-center justify-center rounded-lg 3xs:size-10 ${isCompact ? '' : '2xs:size-12'}`}
           style={{ backgroundColor: hexWithOpacity(item.category_color ?? DEFAULT_COLOR, 36) }}
         >
           <Text className="text-2xl">{emoji}</Text>
         </View>
         <View className="min-w-0 flex-1">
-          <Text className="text-sm text-muted-foreground" numberOfLines={1}>
+          <Text className={`text-muted-foreground ${isCompact ? 'text-xs' : 'text-sm'}`} numberOfLines={1}>
             {item.category_name}
           </Text>
           {item.total !== undefined && (
             <FormattedCurrency
               value={item.total}
               currency={currency}
-              className={`text-sm font-medium sm:text-base ${item.total > 100_000_000 ? '' : '2xs:text-base'}`}
+              className={`text-sm font-medium ${isCompact ? '' : 'sm:text-base'} ${item.total > 100_000_000 || isCompact ? '' : '2xs:text-base'}`}
               numberOfLines={1}
             />
           )}

@@ -8,6 +8,7 @@ import NoData from '@/components/no-data';
 import { ActivityIndicator, Text, View } from '@/components/ui';
 import { formatDate } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
+import { useAppStore } from '@/lib/store/store';
 import { TransactionCard } from './transaction-card';
 
 export type TransactionListProps = {
@@ -18,6 +19,8 @@ export type TransactionListProps = {
 
 export function TransactionList({ transactions, isLoading, onRefresh }: TransactionListProps) {
   const [refreshing, setRefreshing] = useState(false);
+  const density = useAppStore.use.density();
+  const isCompact = density === 'compact';
 
   const handleRefresh = React.useCallback(async () => {
     setRefreshing(true);
@@ -43,14 +46,14 @@ export function TransactionList({ transactions, isLoading, onRefresh }: Transact
     ({ item }: { item: number | TransactionWithCategory }) => {
       if (typeof item === 'number') {
         return (
-          <View className="mt-4 px-4 py-2">
+          <View className={`px-4 ${isCompact ? 'mt-2 py-1' : 'mt-4 py-2'}`}>
             <Text className="text-sm font-medium text-gray-500">{formatDate(item)}</Text>
           </View>
         );
       }
       return <TransactionCard transaction={item} />;
     },
-    [],
+    [isCompact],
   );
 
   if (!isLoading && transactions.length === 0) {

@@ -33,6 +33,8 @@ export const CategoryGrid = React.memo(
   }: CategoryGridProps) => {
     const currency = useAppStore.use.currency();
     const periodSelection = useAppStore.use.periodSelection();
+    const density = useAppStore.use.density();
+    const gridGap = density === 'compact' ? 6 : 10;
     const scrollRef = useAnimatedRef<Animated.ScrollView>();
     const [refreshing, setRefreshing] = useState(false);
     const deleteCategory = useDeleteCategory();
@@ -86,8 +88,8 @@ export const CategoryGrid = React.memo(
                 <Sortable.Grid
                   data={categories}
                   columns={2}
-                  columnGap={10}
-                  rowGap={10}
+                  columnGap={gridGap}
+                  rowGap={gridGap}
                   hapticsEnabled
                   sortEnabled={editMode}
                   scrollableRef={scrollRef}

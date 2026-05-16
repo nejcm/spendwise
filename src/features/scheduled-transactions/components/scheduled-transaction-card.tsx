@@ -6,6 +6,7 @@ import { Pressable, View } from 'react-native';
 import { FormattedCurrency, PauseIcon, Text } from '@/components/ui';
 import { formatDateFull } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
+import { useAppStore } from '@/lib/store/store';
 
 export default function ScheduledTransactionCard({
   item,
@@ -13,10 +14,12 @@ export default function ScheduledTransactionCard({
   item: ScheduledTransactionWithDetails;
 }) {
   const router = useRouter();
+  const density = useAppStore.use.density();
+  const isCompact = density === 'compact';
   return (
     <Pressable
       key={item.id}
-      className={`mb-3 rounded-xl bg-card p-4 ${!item.is_active ? 'opacity-60' : ''}`}
+      className={`rounded-xl bg-card ${isCompact ? 'mb-2 p-2.5' : 'mb-3 p-4'} ${!item.is_active ? 'opacity-60' : ''}`}
       onPress={() => router.push(`/scheduled/${item.id}`)}
     >
       <View className="flex-row items-start justify-between gap-2">

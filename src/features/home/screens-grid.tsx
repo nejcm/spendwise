@@ -6,7 +6,8 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { getPressedStyle, Text } from '@/components/ui';
 import { Banknote, BotIcon, Calendar, ScanLine, Settings } from '@/components/ui/icon';
 import { translate } from '@/lib/i18n';
-import { triggerScanPicker } from '../../lib/store/local-store';
+import { triggerScanPicker } from '@/lib/store/local-store';
+import { useAppStore } from '@/lib/store/store';
 
 type Destination = {
   key: string;
@@ -28,6 +29,8 @@ const DESTINATIONS: Destination[] = [
 
 export const ScreensLinksGrid = React.memo(() => {
   const router = useRouter();
+  const density = useAppStore.use.density();
+  const isCompact = density === 'compact';
 
   return (
     <View>
@@ -37,7 +40,7 @@ export const ScreensLinksGrid = React.memo(() => {
           <Pressable
             key={key}
             onPress={href ? () => router.push(href) : onPress}
-            className="w-24 items-center gap-1.5 rounded-xl bg-card px-2 py-3"
+            className={`items-center gap-1.5 rounded-xl bg-card ${isCompact ? 'w-32 flex-row px-2 py-1.5' : 'w-24 px-2 py-3'}`}
             style={getPressedStyle}
           >
             <Icon size={26} strokeWidth={2} colorClassName="accent-foreground" className="my-1" />

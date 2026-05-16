@@ -18,6 +18,8 @@ import { mmkvStorage } from '../storage';
 
 export type LongPressActionType = 'scan_receipt' | 'pick_from_gallery';
 
+export type DensityType = 'default' | 'compact';
+
 export type PeriodMode = 'year' | 'month' | 'week' | 'custom' | 'all' | 'today' | 'this-week' | 'this-month' | 'this-year';
 
 export type PeriodSelectionYear = { mode: 'year'; year: number };
@@ -69,6 +71,7 @@ export type AppState = {
   openTxOnCreate: boolean;
   longPressAction: LongPressActionType;
   recommendationsEnabled: boolean;
+  density: DensityType;
 
   // Security
   lockEnabled: boolean;
@@ -114,6 +117,7 @@ function getDefaultState(): AppState {
     openTxOnCreate: true,
     longPressAction: 'scan_receipt',
     recommendationsEnabled: true,
+    density: 'default',
     lockEnabled: false,
     lockTimeoutMinutes: 1,
     isLocked: false,
@@ -208,6 +212,10 @@ export function setTheme(theme: ThemeType) {
 
 export function setAccentColor(colorTheme: AccentType) {
   return updateAppState({ colorTheme });
+}
+
+export function setDensity(density: DensityType) {
+  return updateAppState({ density });
 }
 
 export function setIsFirstTime(isFirstTime: boolean) {

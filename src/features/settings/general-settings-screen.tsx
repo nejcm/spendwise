@@ -1,4 +1,4 @@
-import type { LongPressActionType } from '@/lib/store/store';
+import type { DensityType, LongPressActionType } from '@/lib/store/store';
 import * as React from 'react';
 import DetailsSection from '@/components/details';
 import { FocusAwareStatusBar, ScrollView, Select, Switch } from '@/components/ui';
@@ -11,12 +11,14 @@ import { SettingsContainer } from './components/settings-container';
 import { ThemeItem } from './components/theme-item';
 
 const LONG_PRESS_ACTION_OPTIONS: LongPressActionType[] = ['scan_receipt', 'pick_from_gallery'];
+const DENSITY_OPTIONS: DensityType[] = ['default', 'compact'];
 
 export function GeneralSettingsScreen() {
   const saveOnScan = useAppStore.use.saveOnScan();
   const openTransactionDetailOnCreate = useAppStore.use.openTxOnCreate();
   const longPressAction = useAppStore.use.longPressAction();
   const recommendationsEnabled = useAppStore.use.recommendationsEnabled();
+  const density = useAppStore.use.density();
 
   return (
     <>
@@ -57,6 +59,24 @@ export function GeneralSettingsScreen() {
                 checked={!!recommendationsEnabled}
                 onChange={(checked) => {
                   updateAppState({ recommendationsEnabled: checked });
+                }}
+              />
+            ),
+          }, {
+            label: translate('settings.density'),
+            description: translate('settings.density_description'),
+            value: (
+              <Select
+                options={DENSITY_OPTIONS.map((option) => ({
+                  label: translate(`settings.density_options.${option}`),
+                  value: option,
+                }))}
+                size="sm"
+                containerClassName="w-36"
+                value={density}
+                selectedItemTextProps={{ numberOfLines: 1 }}
+                onSelect={(option) => {
+                  updateAppState({ density: option });
                 }}
               />
             ),

@@ -9,6 +9,7 @@ import { CategoriesOverview } from '@/features/home/categories-overview';
 import { ScreensLinksGrid } from '@/features/home/screens-grid';
 import { HomeRecommendations } from '@/features/recommendations/components/home-recommendations';
 import { useRefresh } from '@/lib/hooks/use-refresh';
+import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import Summary from './summary';
@@ -17,11 +18,13 @@ import { TransactionsList } from './transactions-list';
 export function HomeScreen() {
   const theme = useThemeConfig();
   const { refreshing, onRefresh } = useRefresh();
+  const density = useAppStore.use.density();
+  const isCompact = density === 'compact';
 
   return (
     <>
       <ScrollView className="flex-1" style={defaultStyles.transparentBg} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-        <View className="flex-col gap-8 p-4">
+        <View className={`flex-col p-4 ${isCompact ? 'gap-5' : 'gap-8'}`}>
           <View className="flex-row items-center justify-between gap-2">
             <Image
               source={theme.dark ? require('../../../assets/spendwise-white.svg') : require('../../../assets/spendwise.svg')}

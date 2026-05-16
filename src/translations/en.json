@@ -515,6 +515,12 @@
     "delete_data_sheet_error": "Could not delete selected data right now.",
     "delete_data_sheet_locked_note": "Transactions and recurring rules are always selected.",
     "delete_data_sheet_title": "Delete data",
+    "density": "Density",
+    "density_description": "Controls spacing and size of list cards.",
+    "density_options": {
+      "compact": "Compact",
+      "default": "Default"
+    },
     "dev": "Development",
     "dump_db": "Dump DB tables",
     "english": "English",

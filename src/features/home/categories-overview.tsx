@@ -21,6 +21,8 @@ export const CategoriesOverview = React.memo(() => {
   const filtered = React.useMemo(() => data.filter((item) => item.total > 0), [data]);
   const visibleCategories = filtered.length ? filtered : data.slice(0, 5);
   const hasCategories = visibleCategories.length > 0;
+  const density = useAppStore.use.density();
+  const isCompact = density === 'compact';
 
   return (
     <View>
@@ -43,10 +45,17 @@ export const CategoriesOverview = React.memo(() => {
                 {visibleCategories.map((item) => (
                   <View
                     key={item.category_id}
-                    className="w-34 rounded-xl bg-card px-3 py-2"
+                    className={`rounded-xl bg-card ${isCompact ? 'w-38 px-2 py-1.5' : 'w-34 px-3 py-2'}`}
                   >
-                    <Text className="text-2xl">{item.category_icon || '?'}</Text>
-                    <Text className="mt-2 text-xs font-medium text-muted-foreground" numberOfLines={1}>{item.category_name}</Text>
+                    <View className={`gap-2 ${isCompact ? 'flex-row items-center' : ''}`}>
+                      <Text className={isCompact ? 'text-xl' : 'text-2xl'}>{item.category_icon || '?'}</Text>
+                      <Text
+                        className="text-xs font-medium text-muted-foreground"
+                        numberOfLines={isCompact ? 2 : 1}
+                      >
+                        {item.category_name}
+                      </Text>
+                    </View>
                     <FormattedCurrency value={item.total} currency={currency} className="mt-1 text-base font-medium" />
                   </View>
                 ))}

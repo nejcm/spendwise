@@ -1,9 +1,12 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { Recommendation } from './types';
+import type { CurrencyKey } from '@/features/currencies';
 
 import { addDays, format, startOfMonth, subMonths } from 'date-fns';
 import { getAccountsWithBalance } from '@/features/accounts/queries';
+import { computeBaseAmount } from '@/features/currencies/conversion';
+import { getRatesForDate } from '@/features/currencies/queries';
 import { getCategorySpendByRange } from '@/features/insights/queries';
 import { getTransactions } from '@/features/transactions/queries';
 import { dateToUnix } from '@/lib/date/helpers';
@@ -96,9 +99,10 @@ async function detectUpcomingCashflow(
 ): Promise<Recommendation | null> {
   const todayUnix = dateToUnix(today);
   const windowEndUnix = dateToUnix(addDays(today, UPCOMING_WINDOW_DAYS));
-  const [accounts, rules] = await Promise.all([
+  const [accounts, rules, rates] = await Promise.all([
     getAccountsWithBalance(db),
     getDueExpenseRules(db, todayUnix, windowEndUnix),
+    getRatesForDate(db, todayUnix),
   ]);
 
   const rulesByAccount = new Map<string, DueRuleRow[]>();
@@ -111,12 +115,20 @@ async function detectUpcomingCashflow(
   let best: Recommendation | null = null;
 
   for (const account of accounts) {
-    const dueRules = (rulesByAccount.get(account.id) ?? [])
-      .filter((rule) => rule.account_currency === rule.currency);
+    const dueRules = rulesByAccount.get(account.id) ?? [];
     if (dueRules.length === 0) continue;
 
-    const dueTotal = dueRules.reduce((sum, rule) => sum + rule.amount, 0);
-    const balance = account.balance ?? 0;
+    const displayCurrency = (account.baseCurrency ?? account.currency) as CurrencyKey;
+    const dueTotal = dueRules.reduce(
+      (sum, rule) => sum + computeBaseAmount(
+        rule.amount,
+        rule.currency as CurrencyKey,
+        displayCurrency,
+        rates,
+      ),
+      0,
+    );
+    const balance = account.baseBalance ?? account.balance ?? 0;
     const ratio = balance <= 0 ? 99 : dueTotal / balance;
 
     if (!(balance <= 0 || dueTotal >= balance || ratio >= 0.8)) {
@@ -132,7 +144,7 @@ async function detectUpcomingCashflow(
       accountName: account.name,
       amountCents: dueTotal,
       comparisonAmountCents: balance,
-      currency: account.currency,
+      currency: displayCurrency,
       count: dueRules.length,
       days: UPCOMING_WINDOW_DAYS,
       dueDate: dueRules[0]?.next_due_date ?? null,

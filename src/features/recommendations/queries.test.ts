@@ -55,4 +55,42 @@ describe('getRecommendations', () => {
       ]),
     );
   });
+
+  it('uses baseBalance for upcoming cashflow when account has foreign-currency transactions', async () => {
+    const db = await createTestDb();
+    const today = new Date('2025-04-15T00:00:00Z');
+
+    await db.runAsync(
+      `INSERT INTO accounts (id, name, type, currency, icon, color)
+       VALUES ('acc_main', 'Main', 'checking', 'EUR', '🏦', '#000000')`,
+    );
+
+    await db.runAsync(
+      `INSERT INTO categories (id, name, color, sort_order)
+       VALUES ('cat_bills', 'Bills', '#ff0000', 1)`,
+    );
+
+    await db.runAsync(
+      `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note)
+       VALUES
+       ('tx_income', 'acc_main', 'cat_bills', 'income', 100000, 'EUR', 100000, 'EUR', 1744416000, 'Paycheck'),
+       ('tx_usd', 'acc_main', 'cat_bills', 'expense', 100000000, 'USD', 920000, 'EUR', 1744502400, 'USD purchase')`,
+    );
+
+    await db.runAsync(
+      `INSERT INTO recurring_rules (id, account_id, category_id, type, amount, currency, note, frequency, start_date, next_due_date, is_active)
+       VALUES ('rule_rent', 'acc_main', 'cat_bills', 'expense', 85000, 'EUR', 'Rent', 'monthly', 1735689600, 1744848000, 1)`,
+    );
+
+    const recommendations = await getRecommendations(db as any, today);
+    const cashflow = recommendations.find((recommendation) => recommendation.kind === 'upcoming_cashflow');
+
+    expect(cashflow).toMatchObject({
+      accountName: 'Main',
+      amountCents: 85000,
+      comparisonAmountCents: -820000,
+      currency: 'EUR',
+      severity: 'high',
+    });
+  });
 });

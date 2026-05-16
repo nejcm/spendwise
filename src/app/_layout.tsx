@@ -31,7 +31,7 @@ import { useAppBootstrapOnInit } from '@/lib/app-bootstrap';
 import { IS_WEB } from '@/lib/base';
 import { getShouldShowPersistentTabBar } from '@/lib/navigation/persistent-tab-bar';
 import { DatabaseErrorBoundary, OpfsCleaner } from '@/lib/sqlite';
-import { loadSelectedColorTheme } from '@/lib/theme/use-selected-color-theme';
+import { loadSelectedAccentColor } from '@/lib/theme/use-selected-accent';
 import {
   loadSelectedTheme,
   useSelectedTheme,
@@ -48,7 +48,7 @@ export const unstable_settings = {
 };
 
 loadSelectedTheme();
-loadSelectedColorTheme();
+loadSelectedAccentColor();
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 // Set the animation options. This is optional.

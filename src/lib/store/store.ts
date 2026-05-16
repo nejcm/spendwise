@@ -8,31 +8,14 @@ import type { NotificationSettings } from '@/features/notifications/types';
 
 import type { ThemeType } from '@/features/settings/theme';
 import type { Transaction } from '@/features/transactions/types';
+import type { AccentType } from '@/lib/theme/accent';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { DEFAULT_DATE_FORMAT, DEFAULT_USER_CURRENCY } from '@/config';
 import { currentPeriodSelection } from '@/lib/date/helpers';
 import { createSelectors } from '@/lib/utils';
-import { DEFAULT_DATE_FORMAT, DEFAULT_USER_CURRENCY } from '../../config';
 import { mmkvStorage } from '../storage';
 
-export type ColorThemeType
-  = | 'black'
-    | 'mist'
-    | 'stone'
-    | 'clay'
-    | 'meadow'
-    | 'ocean'
-    | 'wave'
-    | 'grass'
-    | 'pink'
-    | 'reflection'
-    | 'crimson'
-    | 'gold'
-    | 'lime'
-    | 'coffee'
-    | 'saltwater'
-    | 'purple'
-;
 export type LongPressActionType = 'scan_receipt' | 'pick_from_gallery';
 
 export type PeriodMode = 'year' | 'month' | 'week' | 'custom' | 'all' | 'today' | 'this-week' | 'this-month' | 'this-year';
@@ -77,7 +60,7 @@ export type AppState = {
   numberFormat: NumberFormat;
   monthStartDay: number;
   theme: ThemeType;
-  colorTheme: ColorThemeType;
+  colorTheme: AccentType;
   isFirstTime: boolean;
   language: Language | undefined;
   notifications: NotificationSettings;
@@ -223,7 +206,7 @@ export function setTheme(theme: ThemeType) {
   return updateAppState({ theme });
 }
 
-export function setColorTheme(colorTheme: ColorThemeType) {
+export function setAccentColor(colorTheme: AccentType) {
   return updateAppState({ colorTheme });
 }
 

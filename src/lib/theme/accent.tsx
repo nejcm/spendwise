@@ -1,9 +1,30 @@
 import type { TxKeyPath } from '@/lib/i18n';
-import type { ColorThemeType } from '@/lib/store/store';
 import { View } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 
-export type ColorThemeVariables = {
+export type AccentType
+  = | 'black'
+    | 'mist'
+    | 'stone'
+    | 'clay'
+    | 'meadow'
+    | 'ocean'
+    | 'wave'
+    | 'grass'
+    | 'pink'
+    | 'reflection'
+    | 'crimson'
+    | 'gold'
+    | 'lime'
+    | 'coffee'
+    | 'saltwater'
+    | 'purple'
+    | 'coral'
+    | 'slate'
+    | 'berry'
+    | 'amber';
+
+export type AccentVariables = {
   bg: string;
   light: {
     accent: string;
@@ -15,7 +36,7 @@ export type ColorThemeVariables = {
   };
 };
 
-export const COLOR_THEMES: ColorThemeType[] = [
+export const ACCENTS: AccentType[] = [
   'black',
   'mist',
   'stone',
@@ -32,10 +53,14 @@ export const COLOR_THEMES: ColorThemeType[] = [
   'coffee',
   'saltwater',
   'purple',
+  'coral',
+  'slate',
+  'berry',
+  'amber',
 ];
 
-const prefix = 'settings.color_theme';
-export const COLOR_THEME_LABEL_KEYS: Record<ColorThemeType, TxKeyPath> = {
+const prefix = 'settings.accent';
+export const ACCENT_LABEL_KEYS: Record<AccentType, TxKeyPath> = {
   black: `${prefix}.black`,
   mist: `${prefix}.mist`,
   stone: `${prefix}.stone`,
@@ -52,9 +77,13 @@ export const COLOR_THEME_LABEL_KEYS: Record<ColorThemeType, TxKeyPath> = {
   coffee: `${prefix}.coffee`,
   saltwater: `${prefix}.saltwater`,
   purple: `${prefix}.purple`,
+  coral: `${prefix}.coral`,
+  slate: `${prefix}.slate`,
+  berry: `${prefix}.berry`,
+  amber: `${prefix}.amber`,
 };
 
-export const COLOR_THEME_VARIABLES: Record<ColorThemeType, ColorThemeVariables> = {
+export const ACCENT_VARIABLES: Record<AccentType, AccentVariables> = {
   black: {
     bg: 'bg-[#111827] dark:bg-[#e5e7eb]',
     light: { accent: '#111827', accentForeground: '#f9fafb' },
@@ -135,10 +164,30 @@ export const COLOR_THEME_VARIABLES: Record<ColorThemeType, ColorThemeVariables> 
     light: { accent: '#471396', accentForeground: '#f5f3ff' },
     dark: { accent: '#471396', accentForeground: '#f5f3ff' },
   },
+  coral: {
+    bg: 'bg-[#E07A5F] dark:bg-[#E07A5F]',
+    light: { accent: '#E07A5F', accentForeground: '#3d1410' },
+    dark: { accent: '#E07A5F', accentForeground: '#3d1410' },
+  },
+  slate: {
+    bg: 'bg-[#64748B] dark:bg-[#64748B]',
+    light: { accent: '#64748B', accentForeground: '#f8fafc' },
+    dark: { accent: '#64748B', accentForeground: '#f8fafc' },
+  },
+  berry: {
+    bg: 'bg-[#8B3A62] dark:bg-[#8B3A62]',
+    light: { accent: '#8B3A62', accentForeground: '#fdf2f8' },
+    dark: { accent: '#8B3A62', accentForeground: '#fdf2f8' },
+  },
+  amber: {
+    bg: 'bg-[#D97706] dark:bg-[#D97706]',
+    light: { accent: '#D97706', accentForeground: '#451a03' },
+    dark: { accent: '#D97706', accentForeground: '#451a03' },
+  },
 };
 
-export const COLOR_THEME_OPTIONS = COLOR_THEMES.map((value) => ({
+export const ACCENT_OPTIONS = ACCENTS.map((value) => ({
   value,
-  label: translate(COLOR_THEME_LABEL_KEYS[value]),
-  prefix: <View className={`mr-4 size-8 rounded-full ${COLOR_THEME_VARIABLES[value].bg}`} />,
+  label: translate(ACCENT_LABEL_KEYS[value]),
+  prefix: <View className={`mr-4 size-8 rounded-full ${ACCENT_VARIABLES[value].bg}`} />,
 }));

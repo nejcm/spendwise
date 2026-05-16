@@ -29,8 +29,8 @@ import { triggerScanPicker } from '@/lib/store/local-store';
 import { selectProfile, useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { getAvatar } from '../profile';
+import { AccentItem } from './components/accent-item';
 import { AppInfoTrigger } from './components/app-info-trigger';
-import { ColorThemeItem } from './components/color-theme-item';
 import { CurrencyItem } from './components/currency-item';
 import { DeleteDataSheet } from './components/delete-data-sheet';
 import DevSection from './components/dev-section';
@@ -139,7 +139,7 @@ export function SettingsScreen() {
             <LanguageItem />
             <CurrencyItem />
             <ThemeItem />
-            <ColorThemeItem />
+            <AccentItem />
           </SettingsContainer>
 
           <SettingsContainer title="settings.links">

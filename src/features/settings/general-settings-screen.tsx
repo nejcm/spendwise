@@ -5,6 +5,10 @@ import { FocusAwareStatusBar, ScrollView, Select, Switch } from '@/components/ui
 import { translate } from '@/lib/i18n';
 import { updateAppState, useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
+import { AccentItem } from './components/accent-item';
+import { CurrencyItem } from './components/currency-item';
+import { SettingsContainer } from './components/settings-container';
+import { ThemeItem } from './components/theme-item';
 
 const LONG_PRESS_ACTION_OPTIONS: LongPressActionType[] = ['scan_receipt', 'pick_from_gallery'];
 
@@ -76,6 +80,12 @@ export function GeneralSettingsScreen() {
             ),
           }]}
         />
+        <SettingsContainer>
+
+          <CurrencyItem />
+          <ThemeItem />
+          <AccentItem />
+        </SettingsContainer>
       </ScrollView>
     </>
   );

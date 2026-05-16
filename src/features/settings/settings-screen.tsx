@@ -29,15 +29,12 @@ import { triggerScanPicker } from '@/lib/store/local-store';
 import { selectProfile, useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { getAvatar } from '../profile';
-import { AccentItem } from './components/accent-item';
 import { AppInfoTrigger } from './components/app-info-trigger';
-import { CurrencyItem } from './components/currency-item';
 import { DeleteDataSheet } from './components/delete-data-sheet';
 import DevSection from './components/dev-section';
 import { LanguageItem } from './components/language-item';
 import { SettingsContainer } from './components/settings-container';
 import { SettingsItem } from './components/settings-item';
-import { ThemeItem } from './components/theme-item';
 
 const iconColor = 'accent-foreground';
 
@@ -137,9 +134,6 @@ export function SettingsScreen() {
               onPress={() => deleteModal.present()}
             />
             <LanguageItem />
-            <CurrencyItem />
-            <ThemeItem />
-            <AccentItem />
           </SettingsContainer>
 
           <SettingsContainer title="settings.links">

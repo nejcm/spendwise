@@ -42,6 +42,7 @@ export function CategoryBreakdown({
   }, [categories, type, limit]);
 
   const maxTotal = filtered[0]?.total ?? 1;
+  console.log(maxTotal);
   const title = type === 'expense' ? translate('stats.top_expenses') : translate('stats.top_income');
   const chartData = React.useMemo(() => {
     let i = 0;

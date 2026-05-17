@@ -12,7 +12,7 @@ import { IconButton } from '@/components/ui/icon-button';
 import { currentISOWeek, getWeeksInYear, isDynamicPeriodMode } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 
-import { setPeriodSelection } from '@/lib/store/store';
+import { setPeriodSelection, useAppStore } from '@/lib/store/store';
 import { todayISO } from '../features/formatting/helpers';
 import { GhostButton } from './ui/ghost-button';
 
@@ -65,6 +65,7 @@ export function PeriodSelectorModal({
   selection,
 }: PeriodSelectorModalProps & { ref?: React.RefObject<BottomSheetModal | null> }) {
   const modal = useModalSheet();
+  const isCompact = useAppStore.use.density() === 'compact';
 
   const [draft, setDraft] = React.useState<PeriodSelection>(() => defaultDraftFor(selection));
   const scrollRef = React.useRef<React.ComponentRef<typeof BottomSheetScrollView>>(null);
@@ -147,7 +148,7 @@ export function PeriodSelectorModal({
   }, [draft.mode, weekYear, weekWeek]);
 
   return (
-    <ModalSheet ref={modal.ref} title="Select Period" snapPoints={['75%']}>
+    <ModalSheet ref={modal.ref} title="Select Period" snapPoints={['78%']}>
       <View className="flex-1">
         <BottomSheetScrollView
           ref={scrollRef}
@@ -167,6 +168,7 @@ export function PeriodSelectorModal({
                   textProps={{ adjustsFontSizeToFit: true, minimumFontScale: 0.85, numberOfLines: 1 }}
                   fullWidth
                   label={label}
+                  size={isCompact ? 'sm' : 'md'}
                   onPress={() => switchMode(key)}
                 />
               </View>

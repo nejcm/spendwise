@@ -7,6 +7,7 @@ import { DEFAULT_COLOR } from '@/components/color-selector';
 import { FormattedCurrency, Text, View } from '@/components/ui';
 import { CircleDollarSign } from '@/components/ui/icon';
 import { translate } from '@/lib/i18n';
+import { useAppStore } from '@/lib/store/store';
 import { hexWithOpacity } from '@/lib/theme/colors';
 import { BudgetProgressBar } from '../../../components/ui/budget-progress-bar';
 
@@ -17,6 +18,7 @@ type Props = {
 
 export function BudgetCategoryList({ categories, currency }: Props) {
   const router = useRouter();
+  const isCompact = useAppStore.use.density() === 'compact';
 
   if (categories.length === 0) {
     return (
@@ -52,7 +54,7 @@ export function BudgetCategoryList({ categories, currency }: Props) {
 
           return (
             <View key={category.id}>
-              <View className="flex-row items-center gap-3 p-3 2xs:px-4">
+              <View className={`flex-row items-center gap-3 2xs:px-4 ${isCompact ? 'px-3 py-1.5' : 'p-3'}`}>
                 <View
                   className="size-9 items-center justify-center rounded-lg 2xs:size-10"
                   style={{ backgroundColor: hexWithOpacity(category.color ?? DEFAULT_COLOR, 36) }}

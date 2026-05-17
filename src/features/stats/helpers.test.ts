@@ -1,7 +1,7 @@
 import type { GlobalBudget } from './global-budget-queries';
 import { getMonthBoundaries } from '@/lib/date/helpers';
 
-import { getBudgetSelectionBoundaries, scaleGlobalBudget } from './helpers';
+import { budgetPeriodLabel, getBudgetSelectionBoundaries, scaleGlobalBudget } from './helpers';
 
 const MONTHLY: GlobalBudget = { amountCents: 100_000, type: 'monthly' };
 const YEARLY: GlobalBudget = { amountCents: 1_200_000, type: 'yearly' };
@@ -9,6 +9,12 @@ const YEARLY: GlobalBudget = { amountCents: 1_200_000, type: 'yearly' };
 // ─── getBudgetSelectionBoundaries ─────────────────────────────────────────────
 
 describe('getBudgetSelectionBoundaries', () => {
+  it('day mode: spans one selected local calendar day', () => {
+    const [start, end] = getBudgetSelectionBoundaries({ mode: 'day', date: '2026-03-15' });
+    expect(start).toBe(new Date(2026, 2, 15).getTime() / 1000);
+    expect(end).toBe(new Date(2026, 2, 16).getTime() / 1000);
+  });
+
   it('month mode: returns start and end of the given month', () => {
     const [start, end] = getBudgetSelectionBoundaries({ mode: 'month', year: 2026, month: 3 });
     const [expectedStart, expectedEnd] = getMonthBoundaries(2026, 3);
@@ -66,6 +72,11 @@ describe('getBudgetSelectionBoundaries', () => {
 
 describe('scaleGlobalBudget', () => {
   describe('monthly budget', () => {
+    it('day mode: prorates by days in the selected month', () => {
+      expect(scaleGlobalBudget({ amountCents: 310_000, type: 'monthly' }, { mode: 'day', date: '2026-03-15' })).toBe(10_000);
+      expect(scaleGlobalBudget({ amountCents: 280_000, type: 'monthly' }, { mode: 'day', date: '2026-02-15' })).toBe(10_000);
+    });
+
     it('month mode: returns the budget unchanged (×1)', () => {
       expect(scaleGlobalBudget(MONTHLY, { mode: 'month', year: 2026, month: 3 })).toBe(100_000);
     });
@@ -107,6 +118,11 @@ describe('scaleGlobalBudget', () => {
   });
 
   describe('yearly budget', () => {
+    it('day mode: prorates by days in the selected year', () => {
+      expect(scaleGlobalBudget({ amountCents: 366_000, type: 'yearly' }, { mode: 'day', date: '2024-03-15' })).toBe(1_000);
+      expect(scaleGlobalBudget({ amountCents: 365_000, type: 'yearly' }, { mode: 'day', date: '2025-03-15' })).toBe(1_000);
+    });
+
     it('month mode: pro-rates to 1/12 of yearly amount', () => {
       expect(scaleGlobalBudget(YEARLY, { mode: 'month', year: 2026, month: 3 })).toBe(100_000);
     });
@@ -125,5 +141,13 @@ describe('scaleGlobalBudget', () => {
         endMonth: 4,
       })).toBe(300_000);
     });
+  });
+});
+
+// ─── budgetPeriodLabel ───────────────────────────────────────────────────────
+
+describe('budgetPeriodLabel', () => {
+  it('day mode: formats the selected day', () => {
+    expect(budgetPeriodLabel({ mode: 'day', date: '2026-03-15' })).toBe('Mar 15, 2026');
   });
 });

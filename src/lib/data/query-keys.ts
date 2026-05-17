@@ -78,6 +78,8 @@ export const queryKeys = {
   budgetStats: {
     byMonth: (year: number, month: number) =>
       ['budget-stats', 'by-month', year, month] as const,
+    byPeriod: (startDate: number, endDate: number) =>
+      ['budget-stats', 'by-period', startDate, endDate] as const,
   },
 
   // ─── Recommendations ───

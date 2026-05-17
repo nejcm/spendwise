@@ -1,5 +1,5 @@
 import type { GlobalBudget } from './global-budget-queries';
-import type { MonthSlice } from './types';
+import type { BudgetPeriodSelection, MonthSlice } from './types';
 import type { CategoryBudgetRow } from '@/features/notifications/queries';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -8,6 +8,7 @@ import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
 import { getMonthBoundaries } from '@/lib/date/helpers';
 import { getGlobalBudget, getGlobalBudgetSpend, setGlobalBudget } from './global-budget-queries';
+import { getBudgetSelectionBoundaries, scaleGlobalBudget } from './helpers';
 
 export type MonthBudgetResult = {
   year: number;
@@ -17,7 +18,7 @@ export type MonthBudgetResult = {
   totalSpent: number;
 };
 
-type MonthSelection = { year: number; month: number };
+type SingleBudgetSelection = Extract<BudgetPeriodSelection, { mode: 'day' | 'month' }>;
 
 function sortBySpendRatio(rows: CategoryBudgetRow[]): CategoryBudgetRow[] {
   return [...rows].sort((a, b) => {
@@ -56,18 +57,25 @@ export function useGlobalBudgetSpend(startDate: number, endDate: number, enabled
   });
 }
 
-export function useBudgetStats(monthSel?: MonthSelection, enabled = true) {
+function scaleCategoryBudgetRows(rows: CategoryBudgetRow[], selection: SingleBudgetSelection): CategoryBudgetRow[] {
+  if (selection.mode === 'month') return rows;
+  return rows.map((row) => ({
+    ...row,
+    budget: scaleGlobalBudget({ amountCents: row.budget, type: 'monthly' }, selection),
+  }));
+}
+
+export function useBudgetStats(selection?: SingleBudgetSelection, enabled = true) {
   const db = useSQLiteContext();
   const now = new Date();
-  const year = monthSel?.year ?? now.getFullYear();
-  const month = monthSel?.month ?? (now.getMonth() + 1);
+  const period = selection ?? { mode: 'month', year: now.getFullYear(), month: now.getMonth() + 1 };
+  const [start, end] = getBudgetSelectionBoundaries(period);
 
   return useQuery({
-    queryKey: queryKeys.budgetStats.byMonth(year, month),
+    queryKey: queryKeys.budgetStats.byPeriod(start, end),
     enabled,
     queryFn: async () => {
-      const [start, end] = getMonthBoundaries(year, month);
-      const rows = await getBudgetSpendForMonth(db, start, end);
+      const rows = scaleCategoryBudgetRows(await getBudgetSpendForMonth(db, start, end), period);
 
       return {
         categories: sortBySpendRatio(rows),

@@ -21,7 +21,7 @@ export function BudgetTab({ currency }: Props) {
   );
   const [viewMode, setViewMode] = React.useState<BudgetViewMode>('cards');
 
-  const isMultiMonth = selection.mode !== 'month';
+  const isMultiMonth = selection.mode === 'year' || selection.mode === 'range';
   const slices = React.useMemo(() => expandToMonthSlices(selection), [selection]);
 
   const { data: singleData } = useBudgetStats(

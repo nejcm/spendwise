@@ -4,8 +4,10 @@ import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import * as React from 'react';
 import { View } from 'react-native';
 import { GhostButton, ModalSheet, OutlineButton, SolidButton, Text, useModalSheet } from '@/components/ui';
+import { DateInput } from '@/components/ui/date-input';
 import { ArrowLeftIcon, ArrowRightIcon, ChevronRight } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
+import { todayISO } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { budgetPeriodLabel, defaultBudgetPeriodSelection } from '../helpers';
 
@@ -66,13 +68,16 @@ function BudgetPeriodSelectorModal({ ref, selection, onApply }: ModalProps) {
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth() + 1;
 
-    if (mode === 'month') {
-      const year = draft.mode === 'range' ? draft.startYear : draft.year;
+    if (mode === 'day') {
+      setDraft({ mode: 'day', date: draft.mode === 'day' ? draft.date : todayISO() });
+    }
+    else if (mode === 'month') {
+      const year = draft.mode === 'range' ? draft.startYear : 'year' in draft ? draft.year : currentYear;
       const month = draft.mode === 'month' ? draft.month : currentMonth;
       setDraft({ mode: 'month', year, month });
     }
     else if (mode === 'year') {
-      const year = draft.mode === 'range' ? draft.startYear : draft.year;
+      const year = draft.mode === 'range' ? draft.startYear : 'year' in draft ? draft.year : currentYear;
       setDraft({ mode: 'year', year });
     }
     else {
@@ -96,6 +101,7 @@ function BudgetPeriodSelectorModal({ ref, selection, onApply }: ModalProps) {
 
   const BUDGET_MODES: { key: BudgetPeriodSelection['mode']; label: string }[] = [
     { key: 'month', label: translate('common.month') },
+    { key: 'day', label: translate('common.day') },
     { key: 'year', label: translate('common.year') },
     { key: 'range', label: translate('stats.budget_range') },
   ];
@@ -130,6 +136,12 @@ function BudgetPeriodSelectorModal({ ref, selection, onApply }: ModalProps) {
               month={draft.month}
               onChangeYear={(year) => setDraft({ ...draft, year })}
               onChangeMonth={(month) => setDraft({ ...draft, month })}
+            />
+          )}
+          {draft.mode === 'day' && (
+            <DayBody
+              date={draft.date}
+              onChangeDate={(date) => setDraft({ mode: 'day', date })}
             />
           )}
           {draft.mode === 'range' && (
@@ -225,6 +237,14 @@ function YearBody({ selectedYear, onSelect }: { selectedYear: number; onSelect: 
         ))}
       </View>
     </BottomSheetScrollView>
+  );
+}
+
+function DayBody({ date, onChangeDate }: { date: string; onChangeDate: (d: string) => void }) {
+  return (
+    <View className="pt-2">
+      <DateInput label={translate('common.day')} value={date} onChange={onChangeDate} size="lg" />
+    </View>
   );
 }
 

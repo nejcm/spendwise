@@ -1,4 +1,4 @@
-minimumReleaseAge: 14400 # 10 days
+minimumReleaseAge: 4320 # 3 days
 shellEmulator: true
 
 trustPolicy: no-downgrade

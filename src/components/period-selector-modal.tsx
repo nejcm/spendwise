@@ -38,6 +38,7 @@ const MODES: { key: PeriodMode; label: string }[] = [
   { key: 'year', label: 'Year' },
   { key: 'month', label: 'Month' },
   { key: 'week', label: 'Week' },
+  { key: 'day', label: translate('common.day') },
   { key: 'custom', label: 'Custom' },
   { key: 'all', label: 'All' },
 ];
@@ -114,6 +115,9 @@ export function PeriodSelectorModal({
       }
       case 'custom':
         setDraft({ mode: 'custom', startDate: todayISO(), endDate: todayISO() });
+        break;
+      case 'day':
+        setDraft({ mode: 'day', date: draft.mode === 'day' ? draft.date : todayISO() });
         break;
       case 'all':
         setDraft({ mode: 'all' });
@@ -200,6 +204,12 @@ export function PeriodSelectorModal({
               endDate={draft.endDate}
               onChangeStart={(startDate) => setDraft({ ...draft, startDate })}
               onChangeEnd={(endDate) => setDraft({ ...draft, endDate })}
+            />
+          )}
+          {draft.mode === 'day' && (
+            <DayBody
+              date={draft.date}
+              onChangeDate={(date) => setDraft({ mode: 'day', date })}
             />
           )}
           {draft.mode === 'all' && (
@@ -361,6 +371,14 @@ function CustomBody({
       <View className="flex-1">
         <DateInput label={translate('common.end_date')} value={endDate} onChange={onChangeEnd} size="lg" />
       </View>
+    </View>
+  );
+}
+
+function DayBody({ date, onChangeDate }: { date: string; onChangeDate: (d: string) => void }) {
+  return (
+    <View className="pt-2">
+      <DateInput label={translate('common.day')} value={date} onChange={onChangeDate} size="lg" />
     </View>
   );
 }

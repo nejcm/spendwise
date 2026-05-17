@@ -28,7 +28,7 @@ const mockSetPeriodSelection = jest.fn();
 
 jest.mock('@/lib/date/helpers', () => ({
   navigatePeriod: (...args: unknown[]) => mockNavigatePeriod(...args),
-  isNavigablePeriodMode: (mode: string) => mode !== 'all' && mode !== 'custom' && mode !== 'today',
+  isNavigablePeriodMode: (mode: string) => mode !== 'all' && mode !== 'custom',
 }));
 
 jest.mock('@/lib/store/store', () => ({
@@ -116,11 +116,19 @@ describe('periodSwipeContainer', () => {
         throw new Error('navigatePeriod must run on JS');
       }
 
-      if (selection.mode !== 'month') {
-        return selection;
+      if (selection.mode === 'month') {
+        return { mode: 'month', year: selection.year, month: selection.month + direction };
       }
 
-      return { mode: 'month', year: selection.year, month: selection.month + direction };
+      if (selection.mode === 'today') {
+        return { mode: 'day', date: direction === 1 ? '2026-03-16' : '2026-03-14' };
+      }
+
+      if (selection.mode === 'day') {
+        return { mode: 'day', date: direction === 1 ? '2026-03-16' : '2026-03-14' };
+      }
+
+      return selection;
     });
 
     mockSetPeriodSelection.mockImplementation((selection: PeriodSelection) => {
@@ -174,12 +182,22 @@ describe('periodSwipeContainer', () => {
     expect(mockSetPeriodSelection).not.toHaveBeenCalled();
   });
 
-  it('ignores swipes when today mode is selected', () => {
-    renderContainer({ mode: 'today' });
+  it('navigates forward on left swipe when today mode is selected', () => {
+    const selection: PeriodSelection = { mode: 'today' };
+    renderContainer(selection);
     endPan({ translationX: -100 });
 
-    expect(mockNavigatePeriod).not.toHaveBeenCalled();
-    expect(mockSetPeriodSelection).not.toHaveBeenCalled();
+    expect(mockNavigatePeriod).toHaveBeenCalledWith(selection, 1);
+    expect(mockSetPeriodSelection).toHaveBeenCalledWith({ mode: 'day', date: '2026-03-16' });
+  });
+
+  it('navigates backward on right swipe when day mode is selected', () => {
+    const selection: PeriodSelection = { mode: 'day', date: '2026-03-15' };
+    renderContainer(selection);
+    endPan({ translationX: 100 });
+
+    expect(mockNavigatePeriod).toHaveBeenCalledWith(selection, -1);
+    expect(mockSetPeriodSelection).toHaveBeenCalledWith({ mode: 'day', date: '2026-03-14' });
   });
 
   it('navigates forward on left swipe when this-week mode is selected', () => {

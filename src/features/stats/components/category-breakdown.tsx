@@ -10,8 +10,8 @@ import { ChevronRight } from '@/components/ui/icon';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { useCategorySpendByRange } from '@/features/insights/api';
 import { translate } from '@/lib/i18n';
-import { chartColors } from '../../../lib/theme/colors';
-import { useThemeConfig } from '../../../lib/theme/use-theme-config';
+import { chartColors } from '@/lib/theme/colors';
+import { useThemeConfig } from '@/lib/theme/use-theme-config';
 
 export type CategoryBreakdownProps = {
   startDate: number | undefined;
@@ -41,8 +41,8 @@ export function CategoryBreakdown({
       .slice(0, limit);
   }, [categories, type, limit]);
 
-  const maxTotal = filtered[0]?.total ?? 1;
-  console.log(maxTotal);
+  const total = filtered.reduce((acc, curr) => acc + curr.total, 0);
+
   const title = type === 'expense' ? translate('stats.top_expenses') : translate('stats.top_income');
   const chartData = React.useMemo(() => {
     let i = 0;
@@ -94,9 +94,9 @@ export function CategoryBreakdown({
 
         {viewMode === 'list'
           ? (
-              <View className="gap-3">
+              <View className="gap-4">
                 {filtered.map((category) => {
-                  const itemBarWidth = maxTotal > 0 ? (category.total / maxTotal) * 100 : 0;
+                  const itemBarWidth = total > 0 ? (category.total / total) * 100 : 0;
                   return (
                     <Pressable
                       key={category.category_id}

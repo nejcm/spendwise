@@ -1,5 +1,5 @@
 import type { PeriodSelection } from '@/lib/store/store';
-import { endOfISOWeek, format, setISOWeek, startOfISOWeek, startOfYear } from 'date-fns';
+import { endOfISOWeek, format, isToday, isTomorrow, isYesterday, parseISO, setISOWeek, startOfISOWeek, startOfYear } from 'date-fns';
 import { translate } from '../i18n';
 
 export function getPeriodLabel(selection: PeriodSelection): string {
@@ -7,7 +7,14 @@ export function getPeriodLabel(selection: PeriodSelection): string {
 
   switch (selection.mode) {
     case 'today':
-      return format(now, 'MMM d, yyyy');
+      return translate('common.today');
+    case 'day': {
+      const day = parseISO(selection.date);
+      if (isToday(day)) return translate('common.today');
+      if (isYesterday(day)) return translate('common.yesterday');
+      if (isTomorrow(day)) return translate('common.tomorrow');
+      return format(day, 'MMM d, yyyy');
+    }
     case 'this-week': {
       const weekStart = startOfISOWeek(now);
       const weekEnd = endOfISOWeek(now);

@@ -20,7 +20,7 @@ export type LongPressActionType = 'scan_receipt' | 'pick_from_gallery';
 
 export type DensityType = 'default' | 'compact';
 
-export type PeriodMode = 'year' | 'month' | 'week' | 'custom' | 'all' | 'today' | 'this-week' | 'this-month' | 'this-year';
+export type PeriodMode = 'year' | 'month' | 'week' | 'custom' | 'all' | 'today' | 'day' | 'this-week' | 'this-month' | 'this-year';
 
 export type PeriodSelectionYear = { mode: 'year'; year: number };
 export type PeriodSelectionMonth = { mode: 'month'; year: number; month: number };
@@ -28,6 +28,7 @@ export type PeriodSelectionWeek = { mode: 'week'; year: number; week: number };
 export type PeriodSelectionCustom = { mode: 'custom'; startDate: string; endDate: string };
 export type PeriodSelectionAll = { mode: 'all' };
 export type PeriodSelectionToday = { mode: 'today' };
+export type PeriodSelectionDay = { mode: 'day'; date: string };
 export type PeriodSelectionThisWeek = { mode: 'this-week' };
 export type PeriodSelectionThisMonth = { mode: 'this-month' };
 export type PeriodSelectionThisYear = { mode: 'this-year' };
@@ -38,6 +39,7 @@ export type PeriodSelection
     | PeriodSelectionCustom
     | PeriodSelectionAll
     | PeriodSelectionToday
+    | PeriodSelectionDay
     | PeriodSelectionThisWeek
     | PeriodSelectionThisMonth
     | PeriodSelectionThisYear;

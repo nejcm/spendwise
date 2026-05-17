@@ -121,6 +121,7 @@ function buildBuckets(period: PeriodMode, startDate: string, endDate: string): T
     case 'this-week':
       return buildDailyBuckets(startDate, endDate, true);
     case 'today':
+    case 'day':
       return buildDailyBuckets(startDate, endDate, false);
     case 'custom':
       if (rangeDays <= 7) return buildDailyBuckets(startDate, endDate, false);

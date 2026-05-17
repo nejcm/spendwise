@@ -12,6 +12,7 @@ import {
   getISOWeek,
   getISOWeeksInYear,
   parse,
+  parseISO,
   setISOWeek,
   startOfDay,
   startOfISOWeek,
@@ -22,7 +23,7 @@ import { DYNAMIC_PERIOD_MODES } from '@/lib/date/period-modes';
 
 export const isDynamicPeriodMode = (mode: PeriodMode): mode is DynamicPeriodMode => DYNAMIC_PERIOD_MODES.includes(mode as DynamicPeriodMode);
 
-export const isNavigablePeriodMode = (mode: PeriodMode) => mode !== 'all' && mode !== 'custom' && mode !== 'today';
+export const isNavigablePeriodMode = (mode: PeriodMode) => mode !== 'all' && mode !== 'custom';
 
 /** Convert a Date or yyyy-MM-dd string to Unix seconds (UTC). */
 export function dateToUnix(date: Date | string): number {
@@ -112,6 +113,11 @@ export function getPeriodRange(selection: PeriodSelection): [number | undefined,
       const end = addDays(start, 1);
       return [dateToUnix(start), dateToUnix(end)];
     }
+    case 'day': {
+      const start = startOfDay(parseISO(selection.date));
+      const end = addDays(start, 1);
+      return [dateToUnix(start), dateToUnix(end)];
+    }
     case 'this-week': {
       const now = new Date();
       const start = startOfISOWeek(now);
@@ -164,8 +170,15 @@ export function navigatePeriod(selection: PeriodSelection, dir: -1 | 1): PeriodS
       };
     }
     case 'all':
-    case 'today':
       return selection;
+    case 'today': {
+      const day = addDays(startOfDay(new Date()), dir);
+      return { mode: 'day', date: format(day, 'yyyy-MM-dd') };
+    }
+    case 'day': {
+      const day = addDays(parseISO(selection.date), dir);
+      return { mode: 'day', date: format(day, 'yyyy-MM-dd') };
+    }
     case 'this-week': {
       const { year, week } = currentISOWeek();
       return navigatePeriod({ mode: 'week', year, week }, dir);
@@ -221,6 +234,7 @@ export function scaleBudgetForPeriod(monthlyBudget: number, selection: PeriodSel
       daysInMonth = daysInPeriod / 12;
       break;
     case 'week':
+    case 'day':
       daysInMonth = getDaysInMonth(unixToDate(startUnix));
       break;
     case 'custom': {

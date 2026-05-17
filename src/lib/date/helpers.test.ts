@@ -112,6 +112,12 @@ describe('splitBy', () => {
 // ─── getPeriodRange ───────────────────────────────────────────────────────────
 
 describe('getPeriodRange', () => {
+  it('day mode: spans one local calendar day', () => {
+    const [start, end] = getPeriodRange({ mode: 'day', date: '2026-03-15' }) as [number, number];
+    expect(start).toBe(new Date(2026, 2, 15).getTime() / 1000);
+    expect(end).toBe(new Date(2026, 2, 16).getTime() / 1000);
+  });
+
   it('year mode: spans full calendar year', () => {
     const [start, end] = getPeriodRange({ mode: 'year', year: 2026 }) as [number, number];
     expect(end - start).toBe(365 * 86400); // 2026 is not a leap year
@@ -154,6 +160,30 @@ describe('getPeriodRange', () => {
 // ─── navigatePeriod ───────────────────────────────────────────────────────────
 
 describe('navigatePeriod', () => {
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date(2026, 2, 15, 12));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('today mode: previous period becomes yesterday as a fixed day', () => {
+    expect(navigatePeriod({ mode: 'today' }, -1)).toEqual({ mode: 'day', date: '2026-03-14' });
+  });
+
+  it('today mode: next period becomes tomorrow as a fixed day', () => {
+    expect(navigatePeriod({ mode: 'today' }, 1)).toEqual({ mode: 'day', date: '2026-03-16' });
+  });
+
+  it('day mode: increments by one calendar day', () => {
+    expect(navigatePeriod({ mode: 'day', date: '2026-03-15' }, 1)).toEqual({ mode: 'day', date: '2026-03-16' });
+  });
+
+  it('day mode: decrements by one calendar day', () => {
+    expect(navigatePeriod({ mode: 'day', date: '2026-03-15' }, -1)).toEqual({ mode: 'day', date: '2026-03-14' });
+  });
+
   it('year mode: increments year by 1', () => {
     expect(navigatePeriod({ mode: 'year', year: 2026 }, 1)).toEqual({ mode: 'year', year: 2027 });
   });
@@ -205,6 +235,11 @@ describe('navigatePeriod', () => {
 // ─── scaleBudgetForPeriod ─────────────────────────────────────────────────────
 
 describe('scaleBudgetForPeriod', () => {
+  it('day mode: scales down to a one-day budget', () => {
+    const result = scaleBudgetForPeriod(310_000, { mode: 'day', date: '2026-03-15' });
+    expect(result).toBe(10_000);
+  });
+
   it('month mode: returns budget unchanged', () => {
     expect(scaleBudgetForPeriod(100_000, { mode: 'month', year: 2026, month: 3 })).toBe(100_000);
   });

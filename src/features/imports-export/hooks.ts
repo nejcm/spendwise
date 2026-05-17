@@ -16,6 +16,7 @@ import { documentPickerTypeForJson, pickValidatedFile } from '@/features/imports
 import { IS_WEB } from '@/lib/base';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { translate } from '@/lib/i18n';
+import { goBackOrFallback } from '@/lib/routing';
 import { setCurrency, useAppStore } from '@/lib/store/store';
 import { useAccounts } from '../accounts/hooks';
 import { useCategories } from '../categories/hooks';
@@ -43,7 +44,7 @@ export function useImportTransactions() {
       translate('import-export.complete_title'),
       translate('import-export.complete_message', { count: data?.length }),
       [
-        { onPress: () => router.back(), text: translate('common.ok') },
+        { onPress: () => goBackOrFallback(router), text: translate('common.ok') },
       ],
     );
   };

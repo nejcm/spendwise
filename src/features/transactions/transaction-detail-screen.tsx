@@ -11,6 +11,7 @@ import { Alert, FocusAwareStatusBar, FormattedCurrency, FormattedDate, GhostButt
 import { useAccounts } from '@/features/accounts/api';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
+import { goBackOrFallback } from '@/lib/routing';
 import { centsToAmount } from '../formatting/helpers';
 import { useDeleteTransaction, useTransaction } from './api';
 import { MerchantLogo } from './components/merchant-logo';
@@ -72,7 +73,7 @@ export function TransactionDetailScreen() {
         onPress: async () => {
           if (id) {
             await deleteMut.mutateAsync(id);
-            router.back();
+            goBackOrFallback(router);
           }
         },
       },
@@ -175,7 +176,7 @@ export function TransactionDetailScreen() {
           <View className="mt-auto flex-row gap-2">
             <GhostButton
               label={translate('common.back')}
-              onPress={() => router.back()}
+              onPress={() => goBackOrFallback(router)}
             />
             <SolidButton
               color="primary"

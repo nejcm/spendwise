@@ -41,7 +41,7 @@ export const AccountsOverview = React.memo(() => {
                     <Pressable
                       key={account.id}
                       onPress={() => router.push(`/accounts/${account.id}`)}
-                      className={cn('rounded-xl bg-card', isCompact ? 'w-38 px-2 py-1.5' : 'w-34 px-3 py-2')}
+                      className={cn('rounded-xl bg-card', isCompact ? 'w-38 px-2.5 py-1.5' : 'w-34 px-3 py-2')}
                       style={getPressedStyle}
                     >
                       <View className={`gap-2 ${isCompact ? 'flex-row items-center' : ''}`}>

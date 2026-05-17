@@ -31,6 +31,7 @@ export function useTransactionForm({ initialValues, onSuccess }: UseTransactionF
   const { data: accounts = [] } = useAccounts();
   const id = initialValues?.id;
   const preferredCurrency = useAppStore.use.currency();
+  const isCompact = useAppStore.use.density() === 'compact';
   const createTransaction = useCreateTransaction(onSuccess);
   const updateTransaction = useUpdateTransaction(onSuccess);
   const lastUsedCurrencies = useAppStore(selectLastUsedCurrencies);
@@ -79,6 +80,7 @@ export function useTransactionForm({ initialValues, onSuccess }: UseTransactionF
   return {
     form,
     accounts,
+    isCompact,
     createTransaction,
     updateTransaction,
     baseAmountIsManual,

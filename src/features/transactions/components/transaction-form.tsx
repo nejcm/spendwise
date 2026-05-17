@@ -25,6 +25,7 @@ export type TransactionFormBaseProps = UseTransactionFormProps & {
 
 type TransactionFormBodyProps = {
   form: UseTransactionFormReturnType['form'];
+  isCompact: boolean;
   accounts: Account[];
   baseAmountIsManual: boolean;
   onBaseDriversChanged: () => void;
@@ -35,6 +36,7 @@ type TransactionFormBodyProps = {
 
 function TransactionFormBody({
   form,
+  isCompact,
   accounts,
   baseAmountIsManual,
   onBaseDriversChanged,
@@ -42,6 +44,7 @@ function TransactionFormBody({
   preferredCurrency,
   setBaseAmountIsManual,
 }: TransactionFormBodyProps) {
+  const inputSize = isCompact ? 'md' : 'lg';
   return (
     <>
       <form.Subscribe
@@ -75,7 +78,7 @@ function TransactionFormBody({
                   if (!value) return;
                   field.handleChange(String(value) as CurrencyKey);
                 }}
-                size="lg"
+                size={inputSize}
                 showChevron={false}
                 containerClassName="w-[105]"
                 selectedItemTextProps={{ className: 'text-xl/tight' }}
@@ -93,7 +96,7 @@ function TransactionFormBody({
                 onBlur={field.handleBlur}
                 onChangeText={field.handleChange}
                 placeholder="0.00"
-                size="lg"
+                size={inputSize}
                 keyboardType="decimal-pad"
                 testID="amount-input"
                 error={getFieldError(field)}
@@ -126,7 +129,7 @@ function TransactionFormBody({
                       field.handleChange(t);
                     }}
                     placeholder="0.00"
-                    size="lg"
+                    size={inputSize}
                     readOnly={selectedCurrency === preferredCurrency}
                     keyboardType="decimal-pad"
                     testID="base-amount-input"
@@ -145,7 +148,7 @@ function TransactionFormBody({
           name="date"
           children={(field) => (
             <DateInput
-              size="lg"
+              size={inputSize}
               containerClassName="flex-1 min-w-[45%]"
               className="px-3"
               value={field.state.value}
@@ -159,7 +162,7 @@ function TransactionFormBody({
           name="category_id"
           children={(field) => (
             <CategoryPicker
-              size="lg"
+              size={inputSize}
               containerClassName="flex-1 min-w-[45%]"
               inputClassName="px-3"
               showChevron={false}
@@ -227,7 +230,7 @@ function TransactionFormBody({
         children={(field) => (
           <Input
             value={field.state.value || ''}
-            size="lg"
+            size={inputSize}
             className="mt-2 text-base/snug"
             onBlur={field.handleBlur}
             onChangeText={field.handleChange}
@@ -242,7 +245,7 @@ function TransactionFormBody({
         children={(field) => (
           <Input
             value={field.state.value || ''}
-            size="lg"
+            size={inputSize}
             className="text-base/snug"
             onBlur={field.handleBlur}
             onChangeText={field.handleChange}
@@ -257,7 +260,7 @@ function TransactionFormBody({
         children={(field) => (
           <Input
             value={field.state.value || ''}
-            size="lg"
+            size={inputSize}
             className="text-base/snug"
             onBlur={field.handleBlur}
             onChangeText={field.handleChange}
@@ -277,6 +280,7 @@ export function TransactionForm({
 }: TransactionFormBaseProps) {
   const {
     form,
+    isCompact,
     accounts,
     createTransaction,
     updateTransaction,
@@ -290,16 +294,18 @@ export function TransactionForm({
   const isLoading = createTransaction.isPending || updateTransaction.isPending;
   const insets = useSafeAreaInsets();
   const stickyFooterPadding = 56 + insets.bottom;
+  const buttonSize = isCompact ? 'sm' : 'md';
 
   return (
     <>
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: 12, paddingBottom: 8 + stickyFooterPadding, paddingHorizontal: 16, paddingTop: 32 }}
+        contentContainerStyle={{ gap: isCompact ? 8 : 12, paddingBottom: 8 + stickyFooterPadding, paddingHorizontal: 16, paddingTop: 32 }}
         keyboardShouldPersistTaps="handled"
       >
         <TransactionFormBody
           form={form}
+          isCompact={isCompact}
           accounts={accounts}
           baseAmountIsManual={baseAmountIsManual}
           onBaseDriversChanged={onBaseDriversChanged}
@@ -316,12 +322,16 @@ export function TransactionForm({
               <>
                 {onCancel && (
                   <GhostButton
+                    size={buttonSize}
+                    textClassName="text-base/tight"
                     label={translate('common.cancel')}
                     onPress={onCancel}
                   />
                 )}
                 <SolidButton
                   color="primary"
+                  size={buttonSize}
+                  textClassName="text-base/tight"
                   label={translate('common.save')}
                   onPress={form.handleSubmit}
                   loading={(!!state.isSubmitting) || isLoading}

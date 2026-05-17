@@ -1,17 +1,18 @@
 import { useRouter } from 'expo-router';
 import * as React from 'react';
 import ScreenHeader from '@/components/screen-header';
-import { AccountFormModal } from '@/features/accounts/components/account-form';
+import { AccountForm } from '@/features/accounts/components/account-form';
 import { translate } from '@/lib/i18n';
+import { goBackOrFallback } from '@/lib/routing';
 
 export default function NewAccountRoute() {
   const router = useRouter();
-  const onBack = () => router.back();
+  const onBack = () => goBackOrFallback(router);
 
   return (
     <>
       <ScreenHeader title={translate('accounts.add')} />
-      <AccountFormModal onSuccess={onBack} onCancel={onBack} />
+      <AccountForm onSuccess={onBack} onCancel={onBack} />
     </>
   );
 }

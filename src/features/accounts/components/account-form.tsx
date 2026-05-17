@@ -36,7 +36,7 @@ const defaultValues: AccountFormData = {
   budget: null,
 };
 
-export type AccountFormProps = {
+export type AccountFormBaseProps = {
   initialData?: AccountFormData;
   accountId?: string;
   onSuccess?: () => void;
@@ -53,6 +53,7 @@ function useAccountForm(
   const createAccount = useCreateAccount();
   const updateAccount = useUpdateAccount();
   const preferredCurrency = useAppStore.use.currency();
+  const isCompact = useAppStore.use.density() === 'compact';
   const archiveAccount = useArchiveAccountConfirmation(onDeleteSuccess);
   const accountFormPrefs = useAppStore(selectAccountFormPrefs);
 
@@ -87,20 +88,22 @@ function useAccountForm(
     },
   });
 
-  return { form, createAccount, updateAccount, archiveAccount, preferredCurrency };
+  return { form, createAccount, updateAccount, archiveAccount, preferredCurrency, isCompact };
 }
 
 type UseAccountFormReturn = ReturnType<typeof useAccountForm>;
 
 type AccountFormBodyProps = {
   form: UseAccountFormReturn['form'];
+  isCompact: boolean;
   preferredCurrency: CurrencyKey;
   archiveAccount: UseAccountFormReturn['archiveAccount'];
   accountId?: string;
   initialData?: AccountFormData;
 };
 
-function AccountFormBody({ form, preferredCurrency, archiveAccount, accountId, initialData }: AccountFormBodyProps) {
+function AccountFormBody({ form, preferredCurrency, archiveAccount, accountId, initialData, isCompact }: AccountFormBodyProps) {
+  const inputSize = isCompact ? 'md' : 'lg';
   return (
     <>
       <View className="mb-2 flex-row items-center justify-center gap-3">
@@ -111,7 +114,7 @@ function AccountFormBody({ form, preferredCurrency, archiveAccount, accountId, i
               value={field.state.value ?? 'bg-sky-600'}
               onSelect={(value) => field.handleChange(String(value))}
               stackBehavior="push"
-              size="2xl"
+              size={isCompact ? 'xl' : '2xl'}
             />
           )}
         />
@@ -129,7 +132,7 @@ function AccountFormBody({ form, preferredCurrency, archiveAccount, accountId, i
               placeholder={translate('accounts.icon_placeholder')}
               containerClassName="w-[100]"
               className="px-0.5 text-center text-3xl"
-              size="2xl"
+              size={isCompact ? 'xl' : '2xl'}
             />
           )}
         />
@@ -139,7 +142,7 @@ function AccountFormBody({ form, preferredCurrency, archiveAccount, accountId, i
         name="name"
         children={(field) => (
           <Input
-            size="lg"
+            size={inputSize}
             value={field.state.value}
             onBlur={field.handleBlur}
             onChangeText={field.handleChange}
@@ -153,7 +156,7 @@ function AccountFormBody({ form, preferredCurrency, archiveAccount, accountId, i
         name="description"
         children={(field) => (
           <Input
-            size="lg"
+            size={inputSize}
             value={field.state.value ?? ''}
             onBlur={field.handleBlur}
             onChangeText={(v) => field.handleChange(v.trim() || null)}
@@ -197,7 +200,7 @@ function AccountFormBody({ form, preferredCurrency, archiveAccount, accountId, i
             <Input
               value={field.state.value ?? ''}
               onBlur={field.handleBlur}
-              size="lg"
+              size={inputSize}
               onChangeText={field.handleChange}
               placeholder={translate('accounts.budget_placeholder')}
               keyboardType="decimal-pad"
@@ -223,59 +226,15 @@ function AccountFormBody({ form, preferredCurrency, archiveAccount, accountId, i
   );
 }
 
-export function AccountForm({ initialData, accountId, onSuccess, onDeleteSuccess, onCancel }: AccountFormProps) {
-  const { form, createAccount, updateAccount, archiveAccount, preferredCurrency } = useAccountForm(
-    initialData,
-    accountId,
-    onSuccess,
-    onDeleteSuccess,
-  );
-
-  return (
-    <View className="flex-1 gap-3">
-      <AccountFormBody
-        form={form}
-        preferredCurrency={preferredCurrency}
-        archiveAccount={archiveAccount}
-        accountId={accountId}
-        initialData={initialData}
-      />
-      <View className="mt-auto flex-row gap-3 pt-4">
-        <form.Subscribe
-          selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
-          children={(state) => (
-            <>
-              {onCancel && (
-                <GhostButton
-                  label={translate('common.cancel')}
-                  onPress={onCancel}
-                />
-              )}
-              <SolidButton
-                color="primary"
-                label={translate('common.save')}
-                onPress={form.handleSubmit}
-                loading={(!!state.isSubmitting) || createAccount.isPending || updateAccount.isPending || archiveAccount.mutation.isPending}
-                disabled={!schema.safeParse(state.values).success}
-                className="flex-1"
-              />
-            </>
-          )}
-        />
-      </View>
-    </View>
-  );
-}
-
-export type AccountFormModalProps = AccountFormProps;
-export function AccountFormModal({
+export type AccountFormProps = AccountFormBaseProps;
+export function AccountForm({
   initialData,
   accountId,
   onSuccess,
   onDeleteSuccess,
   onCancel,
-}: AccountFormModalProps) {
-  const { form, createAccount, updateAccount, archiveAccount, preferredCurrency } = useAccountForm(
+}: AccountFormProps) {
+  const { form, createAccount, updateAccount, archiveAccount, preferredCurrency, isCompact } = useAccountForm(
     initialData,
     accountId,
     onSuccess,
@@ -285,16 +244,18 @@ export function AccountFormModal({
   const isLoading = createAccount.isPending || updateAccount.isPending || archiveAccount.mutation.isPending;
   const insets = useSafeAreaInsets();
   const stickyFooterPadding = 56 + insets.bottom;
+  const buttonSize = isCompact ? 'sm' : 'md';
 
   return (
     <>
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: 12, paddingBottom: 8 + stickyFooterPadding, paddingHorizontal: 16, paddingTop: 32 }}
+        contentContainerStyle={{ gap: isCompact ? 8 : 12, paddingBottom: 8 + stickyFooterPadding, paddingHorizontal: 16, paddingTop: 32 }}
         keyboardShouldPersistTaps="handled"
       >
         <AccountFormBody
           form={form}
+          isCompact={isCompact}
           preferredCurrency={preferredCurrency}
           archiveAccount={archiveAccount}
           accountId={accountId}
@@ -309,11 +270,15 @@ export function AccountFormModal({
               <>
                 {onCancel && (
                   <GhostButton
+                    size={buttonSize}
+                    textClassName="text-base/tight"
                     label={translate('common.cancel')}
                     onPress={onCancel}
                   />
                 )}
                 <SolidButton
+                  size={buttonSize}
+                  textClassName="text-base/tight"
                   label={translate('common.save')}
                   onPress={form.handleSubmit}
                   loading={(!!state.isSubmitting) || isLoading}

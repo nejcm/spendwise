@@ -24,7 +24,7 @@ const schema = z.object({
 
 export type CategoryInitialValues = (Partial<CategoryFormData> & { id: undefined }) | (CategoryFormData & { id: Category['id'] });
 
-export type CategoryManageModalProps = {
+export type CategoryFormBaseProps = {
   initialValues?: CategoryInitialValues;
   onSuccess?: () => void;
   onCancel?: () => void;
@@ -41,6 +41,7 @@ function useCategoryForm(initialValues?: CategoryInitialValues, onSuccess?: () =
   const id = initialValues?.id;
   const { data: categories = [] } = useCategories();
   const preferredCurrency = useAppStore.use.currency();
+  const isCompact = useAppStore.use.density() === 'compact';
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory();
   const deleteCategory = useDeleteCategory(onSuccess);
@@ -64,12 +65,13 @@ function useCategoryForm(initialValues?: CategoryInitialValues, onSuccess?: () =
     },
   });
 
-  return { form, createCategory, updateCategory, deleteCategory, preferredCurrency, id };
+  return { form, createCategory, updateCategory, deleteCategory, preferredCurrency, id, isCompact };
 }
 
 type UseCategoryFormReturn = ReturnType<typeof useCategoryForm>;
 
 type CategoryFormBodyProps = {
+  isCompact: boolean;
   form: UseCategoryFormReturn['form'];
   preferredCurrency: UseCategoryFormReturn['preferredCurrency'];
   deleteCategory: UseCategoryFormReturn['deleteCategory'];
@@ -77,13 +79,14 @@ type CategoryFormBodyProps = {
   initialValues?: CategoryInitialValues;
 };
 
-function CategoryFormBody({ form, preferredCurrency, deleteCategory, id, initialValues }: CategoryFormBodyProps) {
+function CategoryFormBody({ form, preferredCurrency, deleteCategory, id, initialValues, isCompact }: CategoryFormBodyProps) {
   const onDeletePress = (categoryId: string, name: string) => {
     Alert.alert(translate('common.delete'), translate('categories.delete_confirm', { name }), [
       { text: translate('common.cancel'), style: 'cancel' },
       { text: translate('common.delete'), style: 'destructive', onPress: () => deleteCategory.mutate(categoryId) },
     ]);
   };
+  const inputSize = isCompact ? 'md' : 'lg';
 
   return (
     <>
@@ -95,7 +98,7 @@ function CategoryFormBody({ form, preferredCurrency, deleteCategory, id, initial
               value={field.state.value}
               onSelect={(value) => field.handleChange(String(value))}
               stackBehavior="push"
-              size="2xl"
+              size={isCompact ? 'xl' : '2xl'}
             />
           )}
         />
@@ -113,7 +116,7 @@ function CategoryFormBody({ form, preferredCurrency, deleteCategory, id, initial
               placeholder={translate('categories.icon_placeholder')}
               containerClassName="w-[100]"
               className="px-0.5 text-center text-3xl"
-              size="2xl"
+              size={isCompact ? 'xl' : '2xl'}
             />
           )}
         />
@@ -128,7 +131,7 @@ function CategoryFormBody({ form, preferredCurrency, deleteCategory, id, initial
             placeholder={translate('categories.name_placeholder')}
             onChangeText={field.handleChange}
             error={getFieldError(field)}
-            size="lg"
+            size={inputSize}
           />
         )}
       />
@@ -150,7 +153,7 @@ function CategoryFormBody({ form, preferredCurrency, deleteCategory, id, initial
               placeholder={translate('categories.budget_placeholder')}
               keyboardType="decimal-pad"
               containerClassName="flex-1"
-              size="lg"
+              size={inputSize}
               error={getFieldError(field)}
             />
           )}
@@ -172,55 +175,13 @@ function CategoryFormBody({ form, preferredCurrency, deleteCategory, id, initial
   );
 }
 
-export function CategoryForm({ initialValues, onSuccess, onCancel }: CategoryManageModalProps) {
-  const { form, createCategory, updateCategory, deleteCategory, preferredCurrency, id } = useCategoryForm(
-    initialValues,
-    onSuccess,
-  );
-
-  return (
-    <View className="flex-1 gap-3">
-      <CategoryFormBody
-        form={form}
-        preferredCurrency={preferredCurrency}
-        deleteCategory={deleteCategory}
-        id={id}
-        initialValues={initialValues}
-      />
-      <View className="mt-auto flex-row gap-3 pt-4">
-        <form.Subscribe
-          selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
-          children={(state) => (
-            <>
-              {onCancel && (
-                <GhostButton
-                  label={translate('common.cancel')}
-                  onPress={onCancel}
-                />
-              )}
-              <SolidButton
-                color="primary"
-                label={translate('common.save')}
-                onPress={form.handleSubmit}
-                loading={(!!state.isSubmitting) || createCategory.isPending || updateCategory.isPending}
-                disabled={!schema.safeParse(state.values).success}
-                className="flex-1"
-              />
-            </>
-          )}
-        />
-      </View>
-    </View>
-  );
-}
-
-export type CategoryFormModalProps = CategoryManageModalProps;
-export function CategoryFormModal({
+export type CategoryFormProps = CategoryFormBaseProps;
+export function CategoryForm({
   initialValues,
   onSuccess,
   onCancel,
-}: CategoryFormModalProps) {
-  const { form, createCategory, updateCategory, deleteCategory, preferredCurrency, id } = useCategoryForm(
+}: CategoryFormProps) {
+  const { form, createCategory, updateCategory, deleteCategory, preferredCurrency, id, isCompact } = useCategoryForm(
     initialValues,
     onSuccess,
   );
@@ -228,16 +189,18 @@ export function CategoryFormModal({
   const isLoading = createCategory.isPending || updateCategory.isPending;
   const insets = useSafeAreaInsets();
   const stickyFooterPadding = 56 + insets.bottom;
+  const buttonSize = isCompact ? 'sm' : 'md';
 
   return (
     <>
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: 12, paddingBottom: 8 + stickyFooterPadding, paddingHorizontal: 16, paddingTop: 32 }}
+        contentContainerStyle={{ gap: isCompact ? 8 : 12, paddingBottom: 8 + stickyFooterPadding, paddingHorizontal: 16, paddingTop: 32 }}
         keyboardShouldPersistTaps="handled"
       >
         <CategoryFormBody
           form={form}
+          isCompact={isCompact}
           preferredCurrency={preferredCurrency}
           deleteCategory={deleteCategory}
           id={id}
@@ -252,12 +215,16 @@ export function CategoryFormModal({
               <>
                 {onCancel && (
                   <GhostButton
+                    size={buttonSize}
+                    textClassName="text-base/tight"
                     label={translate('common.cancel')}
                     onPress={onCancel}
                   />
                 )}
                 <SolidButton
                   color="primary"
+                  size={buttonSize}
+                  textClassName="text-base/tight"
                   label={translate('common.save')}
                   onPress={form.handleSubmit}
                   loading={(!!state.isSubmitting) || isLoading}

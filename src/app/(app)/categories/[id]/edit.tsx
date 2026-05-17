@@ -4,16 +4,17 @@ import { View } from 'react-native';
 import ScreenHeader from '@/components/screen-header';
 import { GhostButton, Text } from '@/components/ui';
 import { useCategories } from '@/features/categories/api';
-import { CategoryFormModal } from '@/features/categories/category-form';
+import { CategoryForm } from '@/features/categories/category-form';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
+import { goBackOrFallback } from '@/lib/routing';
 
 export default function EditCategoryRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { data: categories = [], isLoading } = useCategories();
   const category = React.useMemo(() => categories.find((item) => item.id === id), [categories, id]);
-  const onBack = () => router.back();
+  const onBack = () => goBackOrFallback(router);
 
   if (isLoading) {
     return (
@@ -32,7 +33,7 @@ export default function EditCategoryRoute() {
         <ScreenHeader title={translate('categories.edit')} />
         <View className="flex-1 items-center justify-center gap-4 bg-background px-4">
           <Text className="text-center text-muted-foreground">{translate('categories.not_found')}</Text>
-          <GhostButton color="secondary" label={translate('common.back')} onPress={() => router.back()} />
+          <GhostButton color="secondary" label={translate('common.back')} onPress={onBack} />
         </View>
       </>
     );
@@ -41,7 +42,7 @@ export default function EditCategoryRoute() {
   return (
     <>
       <ScreenHeader title={translate('categories.edit')} />
-      <CategoryFormModal
+      <CategoryForm
         initialValues={{
           id: category.id,
           name: category.name,

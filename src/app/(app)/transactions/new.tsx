@@ -5,6 +5,7 @@ import { IconButton, ScanLine } from '@/components/ui';
 import { TransactionForm } from '@/features/transactions/components/transaction-form';
 import { parseTransactionFormInitialValues } from '@/features/transactions/form-route-params';
 import { translate } from '@/lib/i18n';
+import { goBackOrFallback } from '@/lib/routing';
 import { triggerScanPicker } from '@/lib/store/local-store';
 import { useAppStore } from '@/lib/store/store';
 
@@ -13,7 +14,7 @@ export default function NewTransactionRoute() {
   const params = useLocalSearchParams();
   const openTxDetails = useAppStore.use.openTxOnCreate();
   const initialValues = React.useMemo(() => parseTransactionFormInitialValues(params), [params]);
-  const onBack = () => router.back();
+  const onBack = () => goBackOrFallback(router);
 
   return (
     <>
@@ -35,7 +36,7 @@ export default function NewTransactionRoute() {
             router.replace(`/transactions/${transactionId}`);
             return;
           }
-          router.back();
+          onBack();
         }}
         onCancel={onBack}
       />

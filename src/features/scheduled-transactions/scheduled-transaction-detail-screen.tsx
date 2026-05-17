@@ -9,6 +9,7 @@ import { GhostButton } from '@/components/ui/ghost-button';
 import { formatDate } from '@/features/formatting/helpers';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
+import { goBackOrFallback } from '@/lib/routing';
 import {
   useDeleteScheduledTransaction,
   useScheduledTransaction,
@@ -48,21 +49,17 @@ export function ScheduledTransactionDetailScreen() {
 
   if (isEditing) {
     return (
-      <>
-        <ScrollView className="flex-1" contentContainerClassName="px-4 py-8">
-          <ScheduledTransactionForm
-            initialValues={{
-              ...rule,
-              amount: rule.amount / 100,
-              is_active: Boolean(rule.is_active),
-              start_date: unixToISODate(rule.start_date),
-              end_date: rule.end_date ? unixToISODate(rule.end_date) : null,
-            }}
-            onSuccess={() => setIsEditing(false)}
-            onCancel={() => setIsEditing(false)}
-          />
-        </ScrollView>
-      </>
+      <ScheduledTransactionForm
+        initialValues={{
+          ...rule,
+          amount: rule.amount / 100,
+          is_active: Boolean(rule.is_active),
+          start_date: unixToISODate(rule.start_date),
+          end_date: rule.end_date ? unixToISODate(rule.end_date) : null,
+        }}
+        onSuccess={() => setIsEditing(false)}
+        onCancel={() => setIsEditing(false)}
+      />
     );
   }
 
@@ -78,7 +75,7 @@ export function ScheduledTransactionDetailScreen() {
           onPress: async () => {
             if (id) {
               await deleteMut.mutateAsync(id);
-              router.back();
+              goBackOrFallback(router);
             }
           },
         },
@@ -148,7 +145,7 @@ export function ScheduledTransactionDetailScreen() {
         <View className="flex-row gap-2">
           <GhostButton
             label={translate('common.back')}
-            onPress={() => router.back()}
+            onPress={() => goBackOrFallback(router)}
           />
           <SolidButton
             color="primary"

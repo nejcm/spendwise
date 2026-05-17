@@ -4,16 +4,17 @@ import { View } from 'react-native';
 import ScreenHeader from '@/components/screen-header';
 import { GhostButton, Text } from '@/components/ui';
 import { useAccounts } from '@/features/accounts/api';
-import { AccountFormModal } from '@/features/accounts/components/account-form';
+import { AccountForm } from '@/features/accounts/components/account-form';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
+import { goBackOrFallback } from '@/lib/routing';
 
 export default function EditAccountRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { data: accounts = [], isLoading } = useAccounts();
   const account = React.useMemo(() => accounts.find((item) => item.id === id), [accounts, id]);
-  const onBack = () => router.back();
+  const onBack = () => goBackOrFallback(router);
 
   if (isLoading) {
     return (
@@ -32,7 +33,7 @@ export default function EditAccountRoute() {
         <ScreenHeader title={translate('accounts.edit')} />
         <View className="flex-1 items-center justify-center gap-4 bg-background px-4">
           <Text className="text-center text-muted-foreground">{translate('accounts.not_found')}</Text>
-          <GhostButton color="secondary" label={translate('common.back')} onPress={() => router.back()} />
+          <GhostButton color="secondary" label={translate('common.back')} onPress={onBack} />
         </View>
       </>
     );
@@ -41,7 +42,7 @@ export default function EditAccountRoute() {
   return (
     <>
       <ScreenHeader title={translate('accounts.edit')} />
-      <AccountFormModal
+      <AccountForm
         accountId={account.id}
         initialData={{
           name: account.name,

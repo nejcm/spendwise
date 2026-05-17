@@ -6,6 +6,7 @@ import { Text } from '@/components/ui';
 import { GlobalBudgetForm } from '@/features/stats/components/global-budget-form';
 import { useGlobalBudget } from '@/features/stats/hooks';
 import { translate } from '@/lib/i18n';
+import { goBackOrFallback } from '@/lib/routing';
 
 export default function GlobalBudgetRoute() {
   const router = useRouter();
@@ -22,13 +23,14 @@ export default function GlobalBudgetRoute() {
     );
   }
 
+  const onBack = () => goBackOrFallback(router);
   return (
     <>
       <ScreenHeader title={translate('stats.global_budget_label')} />
       <GlobalBudgetForm
         currentBudget={currentBudget}
-        onSuccess={() => router.back()}
-        onCancel={() => router.back()}
+        onSuccess={onBack}
+        onCancel={onBack}
       />
     </>
   );

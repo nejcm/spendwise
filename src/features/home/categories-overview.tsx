@@ -45,7 +45,7 @@ export const CategoriesOverview = React.memo(() => {
                 {visibleCategories.map((item) => (
                   <View
                     key={item.category_id}
-                    className={`rounded-xl bg-card ${isCompact ? 'w-38 px-2 py-1.5' : 'w-34 px-3 py-2'}`}
+                    className={`rounded-xl bg-card ${isCompact ? 'w-38 px-2.5 py-1.5' : 'w-34 px-3 py-2'}`}
                   >
                     <View className={`gap-2 ${isCompact ? 'flex-row items-center' : ''}`}>
                       <Text className={isCompact ? 'text-xl' : 'text-2xl'}>{item.category_icon || '?'}</Text>

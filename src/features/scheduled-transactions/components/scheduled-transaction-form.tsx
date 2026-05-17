@@ -95,7 +95,7 @@ const defaultValues = {
   is_active: true,
 } satisfies FormValues;
 
-export type ScheduledTransactionFormProps = {
+export type ScheduledTransactionFormBaseProps = {
   initialValues?: ScheduledTransactionInitialValues;
   onCancel?: () => void;
   onSuccess?: () => void;
@@ -112,6 +112,7 @@ function useScheduledTransactionForm(
 
   const transactionFormPrefs = useAppStore(selectTransactionFormPrefs);
   const lastUsedCurrencies = useAppStore(selectLastUsedCurrencies);
+  const isCompact = useAppStore.use.density() === 'compact';
   const orderedCurrencies = React.useMemo(
     () => mergeCurrencyArrays(lastUsedCurrencies, CURRENCY_OPTIONS),
     [lastUsedCurrencies],
@@ -158,6 +159,7 @@ function useScheduledTransactionForm(
 
   return {
     form,
+    isCompact,
     accounts,
     createScheduledTransaction,
     updateScheduledTransaction,
@@ -169,11 +171,13 @@ type UseScheduledTransactionFormReturn = ReturnType<typeof useScheduledTransacti
 
 type ScheduledTransactionFormBodyProps = {
   form: UseScheduledTransactionFormReturn['form'];
+  isCompact: boolean;
   accounts: UseScheduledTransactionFormReturn['accounts'];
   orderedCurrencies: UseScheduledTransactionFormReturn['orderedCurrencies'];
 };
 
-function ScheduledTransactionFormBody({ form, accounts, orderedCurrencies }: ScheduledTransactionFormBodyProps) {
+function ScheduledTransactionFormBody({ form, isCompact, accounts, orderedCurrencies }: ScheduledTransactionFormBodyProps) {
+  const inputSize = isCompact ? 'md' : 'lg';
   return (
     <>
       <View className="mb-4 flex-row gap-3">
@@ -188,7 +192,7 @@ function ScheduledTransactionFormBody({ form, accounts, orderedCurrencies }: Sch
                 if (!value) return;
                 field.handleChange(String(value) as CurrencyKey);
               }}
-              size="xl"
+              size={isCompact ? 'lg' : 'xl'}
               showChevron={false}
               containerClassName="w-[100]"
               inputClassName="px-2"
@@ -204,7 +208,7 @@ function ScheduledTransactionFormBody({ form, accounts, orderedCurrencies }: Sch
               onBlur={field.handleBlur}
               onChangeText={field.handleChange}
               placeholder="0.00"
-              size="xl"
+              size={isCompact ? 'lg' : 'xl'}
               keyboardType="decimal-pad"
               error={getFieldError(field)}
               containerClassName="flex-1"
@@ -268,7 +272,7 @@ function ScheduledTransactionFormBody({ form, accounts, orderedCurrencies }: Sch
         name="category_id"
         children={(field) => (
           <CategoryPicker
-            size="lg"
+            size={inputSize}
             selectedId={field.state.value}
             onSelect={(category) => field.handleChange(category.id)}
             error={getFieldError(field)}
@@ -284,7 +288,7 @@ function ScheduledTransactionFormBody({ form, accounts, orderedCurrencies }: Sch
             options={FREQUENCY_OPTIONS}
             onSelect={(value) => field.handleChange(String(value) as FormValues['frequency'])}
             stackBehavior="push"
-            size="lg"
+            size={inputSize}
           />
         )}
       />
@@ -300,7 +304,7 @@ function ScheduledTransactionFormBody({ form, accounts, orderedCurrencies }: Sch
                 error={getFieldError(field)}
                 placeholder={translate('common.start_date')}
                 modalProps={{ stackBehavior: 'push' }}
-                size="lg"
+                size={inputSize}
               />
             </View>
           )}
@@ -316,7 +320,7 @@ function ScheduledTransactionFormBody({ form, accounts, orderedCurrencies }: Sch
                 error={getFieldError(field)}
                 placeholder={translate('common.end_date')}
                 modalProps={{ stackBehavior: 'push' }}
-                size="lg"
+                size={inputSize}
               />
               {field.state.value && (
                 <GhostButton
@@ -340,7 +344,7 @@ function ScheduledTransactionFormBody({ form, accounts, orderedCurrencies }: Sch
             onChangeText={field.handleChange}
             placeholder={translate('common.note')}
             error={getFieldError(field)}
-            size="lg"
+            size={inputSize}
           />
         )}
       />
@@ -362,60 +366,15 @@ function ScheduledTransactionFormBody({ form, accounts, orderedCurrencies }: Sch
   );
 }
 
-export function ScheduledTransactionForm({ initialValues, onCancel, onSuccess }: ScheduledTransactionFormProps) {
-  const {
-    form,
-    accounts,
-    createScheduledTransaction,
-    updateScheduledTransaction,
-    orderedCurrencies,
-  } = useScheduledTransactionForm(initialValues, onSuccess);
-
-  return (
-    <View className="flex-1 gap-3">
-      <ScheduledTransactionFormBody
-        form={form}
-        accounts={accounts}
-        orderedCurrencies={orderedCurrencies}
-      />
-      <View className="mt-auto flex-row gap-3 pt-4">
-        <form.Subscribe
-          selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
-          children={(state) => (
-            <>
-              {onCancel && (
-                <GhostButton
-                  label={translate('common.cancel')}
-                  onPress={onCancel}
-                />
-              )}
-              <SolidButton
-                label={translate('common.save')}
-                onPress={form.handleSubmit}
-                loading={
-                  (!!state.isSubmitting)
-                  || createScheduledTransaction.isPending
-                  || updateScheduledTransaction.isPending
-                }
-                disabled={!schema.safeParse(state.values).success}
-                className="flex-1"
-              />
-            </>
-          )}
-        />
-      </View>
-    </View>
-  );
-}
-
-export type ScheduledTransactionFormModalProps = ScheduledTransactionFormProps;
-export function ScheduledTransactionFormModal({
+export type ScheduledTransactionFormProps = ScheduledTransactionFormBaseProps;
+export function ScheduledTransactionForm({
   initialValues,
   onCancel,
   onSuccess,
-}: ScheduledTransactionFormModalProps) {
+}: ScheduledTransactionFormProps) {
   const {
     form,
+    isCompact,
     accounts,
     createScheduledTransaction,
     updateScheduledTransaction,
@@ -425,6 +384,7 @@ export function ScheduledTransactionFormModal({
   const isLoading = createScheduledTransaction.isPending || updateScheduledTransaction.isPending;
   const insets = useSafeAreaInsets();
   const stickyFooterPadding = 56 + insets.bottom;
+  const buttonSize = isCompact ? 'sm' : 'md';
 
   return (
     <>
@@ -434,6 +394,7 @@ export function ScheduledTransactionFormModal({
         keyboardShouldPersistTaps="handled"
       >
         <ScheduledTransactionFormBody
+          isCompact={isCompact}
           form={form}
           accounts={accounts}
           orderedCurrencies={orderedCurrencies}
@@ -447,11 +408,15 @@ export function ScheduledTransactionFormModal({
               <>
                 {onCancel && (
                   <GhostButton
+                    size={buttonSize}
+                    textClassName="text-base/tight"
                     label={translate('common.cancel')}
                     onPress={onCancel}
                   />
                 )}
                 <SolidButton
+                  size={buttonSize}
+                  textClassName="text-base/tight"
                   color="primary"
                   label={translate('common.save')}
                   onPress={form.handleSubmit}

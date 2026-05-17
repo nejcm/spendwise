@@ -12,6 +12,7 @@ import { getBudgetSelectionBoundaries, scaleGlobalBudget } from '../helpers';
 import { useGlobalBudget, useGlobalBudgetSpend } from '../hooks';
 
 function getPeriodBudgetLabel(selection: BudgetPeriodSelection): string {
+  if (selection.mode === 'day') return translate('stats.global_budget_period_day');
   if (selection.mode === 'year') return translate('stats.global_budget_period_annual');
   if (selection.mode === 'range') return translate('stats.global_budget_period_range');
   return translate('stats.global_budget_period_month');

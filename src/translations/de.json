@@ -634,6 +634,7 @@
     "global_budget_invalid": "Bitte gib einen gültigen positiven Betrag ein",
     "global_budget_label": "Gesamtbudget",
     "global_budget_period_annual": "Jahresbudget",
+    "global_budget_period_day": "Tagesbudget",
     "global_budget_period_month": "Monatsbudget",
     "global_budget_period_range": "Zeitraumbudget",
     "global_budget_placeholder": "Betrag",

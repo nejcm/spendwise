@@ -1,6 +1,7 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { BudgetPeriodSelection } from '../types';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
+import { parseISO } from 'date-fns';
 import * as React from 'react';
 import { View } from 'react-native';
 import { GhostButton, ModalSheet, OutlineButton, SolidButton, Text, useModalSheet } from '@/components/ui';
@@ -9,12 +10,19 @@ import { ArrowLeftIcon, ArrowRightIcon, ChevronRight } from '@/components/ui/ico
 import { IconButton } from '@/components/ui/icon-button';
 import { todayISO } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
+import { useAppStore } from '@/lib/store/store';
 import { budgetPeriodLabel, defaultBudgetPeriodSelection } from '../helpers';
 
 // TODO: consolidate with period-selector.tsx
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEAR_LIST = Array.from({ length: CURRENT_YEAR + 5 - 1989 }, (_, i) => CURRENT_YEAR + 5 - i);
+const BUDGET_MODES: { key: BudgetPeriodSelection['mode']; label: string }[] = [
+  { key: 'day', label: translate('common.day') },
+  { key: 'month', label: translate('common.month') },
+  { key: 'year', label: translate('common.year') },
+  { key: 'range', label: translate('stats.budget_range') },
+];
 
 const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -51,6 +59,7 @@ type ModalProps = {
 
 function BudgetPeriodSelectorModal({ ref, selection, onApply }: ModalProps) {
   const modal = useModalSheet();
+  const isCompact = useAppStore.use.density() === 'compact';
   const [draft, setDraft] = React.useState<BudgetPeriodSelection>(selection);
 
   const handlePresent = React.useCallback(() => {
@@ -72,12 +81,14 @@ function BudgetPeriodSelectorModal({ ref, selection, onApply }: ModalProps) {
       setDraft({ mode: 'day', date: draft.mode === 'day' ? draft.date : todayISO() });
     }
     else if (mode === 'month') {
-      const year = draft.mode === 'range' ? draft.startYear : 'year' in draft ? draft.year : currentYear;
-      const month = draft.mode === 'month' ? draft.month : currentMonth;
+      const day = draft.mode === 'day' ? parseISO(draft.date) : null;
+      const year = draft.mode === 'range' ? draft.startYear : 'year' in draft ? draft.year : (day?.getFullYear() ?? currentYear);
+      const month = draft.mode === 'month' ? draft.month : day != null ? day.getMonth() + 1 : currentMonth;
       setDraft({ mode: 'month', year, month });
     }
     else if (mode === 'year') {
-      const year = draft.mode === 'range' ? draft.startYear : 'year' in draft ? draft.year : currentYear;
+      const day = draft.mode === 'day' ? parseISO(draft.date) : null;
+      const year = draft.mode === 'range' ? draft.startYear : 'year' in draft ? draft.year : (day?.getFullYear() ?? currentYear);
       setDraft({ mode: 'year', year });
     }
     else {
@@ -99,25 +110,21 @@ function BudgetPeriodSelectorModal({ ref, selection, onApply }: ModalProps) {
     modal.close();
   }, [onApply, modal]);
 
-  const BUDGET_MODES: { key: BudgetPeriodSelection['mode']; label: string }[] = [
-    { key: 'month', label: translate('common.month') },
-    { key: 'day', label: translate('common.day') },
-    { key: 'year', label: translate('common.year') },
-    { key: 'range', label: translate('stats.budget_range') },
-  ];
+  const buttonSize = isCompact ? 'sm' : 'md';
 
   return (
     <ModalSheet ref={modal.ref} title={translate('stats.budget_select_period')} snapPoints={['75%']}>
       <View className="flex-1 px-4 pt-2">
-        <View className="mb-6 flex-row gap-2">
+        <View className="mb-6 flex-row flex-wrap gap-2">
           {BUDGET_MODES.map(({ key, label }) => (
-            <View key={key} className="flex-1">
+            <View key={key} className="min-w-[45%] flex-1">
               <OutlineButton
                 className={`items-center px-1 ${draft.mode === key ? '' : 'border-border'}`}
                 textClassName={`text-sm ${draft.mode === key ? '' : 'text-muted-foreground'}`}
                 fullWidth
                 label={label}
                 onPress={() => switchMode(key)}
+                size={buttonSize}
               />
             </View>
           ))}

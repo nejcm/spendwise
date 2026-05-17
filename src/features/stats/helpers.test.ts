@@ -147,7 +147,21 @@ describe('scaleGlobalBudget', () => {
 // ─── budgetPeriodLabel ───────────────────────────────────────────────────────
 
 describe('budgetPeriodLabel', () => {
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date(2026, 2, 15, 12));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('day mode: labels nearby days relatively', () => {
+    expect(budgetPeriodLabel({ mode: 'day', date: '2026-03-14' })).toBe('Yesterday');
+    expect(budgetPeriodLabel({ mode: 'day', date: '2026-03-15' })).toBe('Today');
+    expect(budgetPeriodLabel({ mode: 'day', date: '2026-03-16' })).toBe('Tomorrow');
+  });
+
   it('day mode: formats the selected day', () => {
-    expect(budgetPeriodLabel({ mode: 'day', date: '2026-03-15' })).toBe('Mar 15, 2026');
+    expect(budgetPeriodLabel({ mode: 'day', date: '2026-03-20' })).toBe('Mar 20, 2026');
   });
 });

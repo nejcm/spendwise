@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 import ScreenHeader from '@/components/screen-header';
 import { IconButton, ScanLine } from '@/components/ui';
-import { TransactionFormModal } from '@/features/transactions/components/transaction-form';
+import { TransactionForm } from '@/features/transactions/components/transaction-form';
 import { parseTransactionFormInitialValues } from '@/features/transactions/form-route-params';
 import { translate } from '@/lib/i18n';
 import { triggerScanPicker } from '@/lib/store/local-store';
@@ -28,7 +28,7 @@ export default function NewTransactionRoute() {
           <ScanLine className="text-foreground" size={16} />
         </IconButton>
       </ScreenHeader>
-      <TransactionFormModal
+      <TransactionForm
         initialValues={initialValues}
         onSuccess={(transactionId) => {
           if (openTxDetails && transactionId) {

@@ -19,7 +19,7 @@ import {
 import { translate } from '@/lib/i18n';
 import { useTransactionForm } from '../hooks/form';
 
-export type TransactionFormProps = UseTransactionFormProps & {
+export type TransactionFormBaseProps = UseTransactionFormProps & {
   onCancel?: () => void;
 };
 
@@ -270,63 +270,11 @@ function TransactionFormBody({
   );
 }
 
-export function TransactionForm({ initialValues, onSuccess, onCancel }: TransactionFormProps) {
-  const {
-    form,
-    accounts,
-    createTransaction,
-    updateTransaction,
-    baseAmountIsManual,
-    onBaseDriversChanged,
-    orderedCurrencies,
-    preferredCurrency,
-    setBaseAmountIsManual,
-  } = useTransactionForm({ initialValues, onSuccess });
-
-  return (
-    <View className="flex-1 gap-3">
-      <TransactionFormBody
-        form={form}
-        accounts={accounts}
-        baseAmountIsManual={baseAmountIsManual}
-        onBaseDriversChanged={onBaseDriversChanged}
-        orderedCurrencies={orderedCurrencies}
-        preferredCurrency={preferredCurrency}
-        setBaseAmountIsManual={setBaseAmountIsManual}
-      />
-      <View className="mt-auto flex-row gap-3 pt-4">
-        <form.Subscribe
-          selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
-          children={(state) => (
-            <>
-              {onCancel && (
-                <GhostButton
-                  label={translate('common.cancel')}
-                  onPress={onCancel}
-                />
-              )}
-              <SolidButton
-                color="primary"
-                label={translate('common.save')}
-                onPress={form.handleSubmit}
-                loading={(!!state.isSubmitting) || createTransaction.isPending || updateTransaction.isPending}
-                disabled={!transactionFormSchema.safeParse(state.values).success}
-                className="flex-1"
-              />
-            </>
-          )}
-        />
-      </View>
-    </View>
-  );
-}
-
-export type TransactionFormModalProps = TransactionFormProps;
-export function TransactionFormModal({
+export function TransactionForm({
   initialValues,
   onSuccess,
   onCancel,
-}: TransactionFormModalProps) {
+}: TransactionFormBaseProps) {
   const {
     form,
     accounts,

@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import type { PressableProps, PressableStateCallbackType, StyleProp, View, ViewStyle } from 'react-native';
+import type { PressableProps, PressableStateCallbackType, StyleProp, TextProps, View, ViewStyle } from 'react-native';
 import * as React from 'react';
 import { ActivityIndicator, Pressable, Text } from 'react-native';
 import { tv } from 'tailwind-variants';
@@ -126,6 +126,7 @@ export type ButtonProps = {
   className?: string;
   indicatorClassName?: string;
   textClassName?: string;
+  textProps?: TextProps;
   indicatorSize?: 'small' | 'large' | number;
 } & PressableProps;
 
@@ -137,6 +138,7 @@ export function Button({
   loading = false,
   testID,
   textClassName = '',
+  textProps,
   indicatorClassName = '',
   indicatorSize = 'small',
   style,
@@ -167,6 +169,7 @@ export function Button({
                   <Text
                     testID={testID ? `${testID}-label` : undefined}
                     className={textClassName}
+                    {...textProps}
                   >
                     {text}
                   </Text>

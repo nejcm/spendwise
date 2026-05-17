@@ -1,4 +1,4 @@
-import type { PressableProps, View } from 'react-native';
+import type { PressableProps, TextProps, View } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
 import * as React from 'react';
 import { tv } from 'tailwind-variants';
@@ -68,6 +68,7 @@ export type OutlineButtonProps = {
   iconRight?: React.ReactNode;
   className?: string;
   textClassName?: string;
+  textProps?: TextProps;
 } & ButtonVariants
 & Omit<PressableProps, 'disabled' | 'color' | 'size'>;
 

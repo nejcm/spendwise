@@ -1,3 +1,4 @@
+import type { StyleProp, ViewStyle } from 'react-native';
 import type { GlobalBudget, GlobalBudgetType } from '../global-budget-queries';
 import { useForm } from '@tanstack/react-form';
 import { View } from 'react-native';
@@ -26,6 +27,7 @@ type GlobalBudgetFormProps = {
   currentBudget: GlobalBudget | null;
   onSuccess: () => void;
   onCancel: () => void;
+  style?: StyleProp<ViewStyle>;
 };
 
 type GlobalBudgetFormData = {
@@ -38,7 +40,7 @@ const defaultValues: GlobalBudgetFormData = {
   type: 'monthly',
 };
 
-export function GlobalBudgetForm({ currentBudget, onSuccess, onCancel }: GlobalBudgetFormProps) {
+export function GlobalBudgetForm({ currentBudget, onSuccess, onCancel, style }: GlobalBudgetFormProps) {
   const insets = useSafeAreaInsets();
   const setGlobalBudget = useSetGlobalBudget();
   const stickyFooterPadding = 56 + insets.bottom;
@@ -65,7 +67,7 @@ export function GlobalBudgetForm({ currentBudget, onSuccess, onCancel }: GlobalB
 
   return (
     <>
-      <KeyboardAwareScrollView style={{ flex: 1 }}>
+      <KeyboardAwareScrollView style={{ flex: 1, ...style }}>
         <View className="gap-6 px-4" style={{ paddingBottom: 16 + stickyFooterPadding }}>
           <form.Field
             name="type"

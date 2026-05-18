@@ -5,9 +5,10 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
-import { BudgetProgressBar, getColorClass } from '@/components/ui/budget-progress-bar';
-import { ChevronRight, PlusIcon } from '@/components/ui/icon';
-import { Skeleton, SkeletonGrid } from '@/components/ui/skeleton';
+import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
+import { ChevronRight } from '@/components/ui/icon';
+import { Label } from '@/components/ui/label';
+import { SkeletonGrid } from '@/components/ui/skeleton';
 import { getBudgetSelectionBoundaries, scaleGlobalBudget } from '@/features/stats/helpers';
 import { useGlobalBudget, useGlobalBudgetSpend } from '@/features/stats/hooks';
 import { useMonthSummary, useMonthTrend } from '@/features/transactions/api';
@@ -37,85 +38,77 @@ type HomeGlobalBudgetProps = {
 
 function HomeGlobalBudget({ currency, selection }: HomeGlobalBudgetProps) {
   const router = useRouter();
-  const { data: budget, isLoading } = useGlobalBudget();
+  const { data: budget } = useGlobalBudget();
   const [startDate, endDate] = React.useMemo(
     () => getBudgetSelectionBoundaries(selection),
     [selection],
   );
   const scaledBudget = budget != null ? scaleGlobalBudget(budget, selection) : 0;
   const { data: spent = 0 } = useGlobalBudgetSpend(startDate, endDate, budget != null);
-
-  const handlePress = React.useCallback(() => {
+  const onPress = () => {
     router.push('/stats/global-budget');
-  }, [router]);
+  };
 
-  if (isLoading) {
-    return <Skeleton className="mt-3" height={68} />;
-  }
-
-  if (budget == null) {
+  if (!budget) {
     return (
-      <Pressable
-        className="mt-3 flex-row items-center gap-3 rounded-xl border border-dashed border-border bg-card/60 px-4 py-3"
-        style={getPressedStyle}
-        onPress={handlePress}
-      >
-        <PlusIcon size={20} colorClassName="accent-muted-foreground" />
-        <View className="flex-1">
-          <Text className="text-sm font-medium text-foreground">{translate('stats.global_budget_set')}</Text>
-          <Text className="text-xs text-muted-foreground">{translate('stats.global_budget_prompt')}</Text>
+      <Pressable style={getPressedStyle} onPress={onPress}>
+        <View className="flex-row items-center gap-1 self-start rounded-md border border-dashed border-border px-3 py-1.5">
+          <Text className="text-xs text-muted-foreground">{translate('home.set_budget')}</Text>
+          <ChevronRight size={16} colorClassName="accent-muted-foreground" />
         </View>
-        <ChevronRight size={18} colorClassName="accent-muted-foreground" />
       </Pressable>
     );
   }
 
   const remaining = scaledBudget - spent;
   const ratio = scaledBudget > 0 ? spent / scaledBudget : 0;
-  const colorClass = getColorClass(ratio)[1];
-
+  const percentage = Math.min(ratio * 100, 100);
   return (
-    <Pressable
-      className="mt-3 rounded-xl bg-card px-4 py-3"
-      style={getPressedStyle}
-      onPress={handlePress}
-    >
-      <View className="flex-row items-center justify-between gap-3">
-        <View className="flex-1">
-          <Text className="text-sm font-medium text-foreground">{translate('stats.global_budget_label')}</Text>
-          <View className="mt-0.5 flex-row items-center gap-1">
-            <FormattedCurrency value={spent} currency={currency} className="text-xs text-muted-foreground" />
+    <>
+      <Pressable style={getPressedStyle} onPress={onPress} className="mt-3 flex gap-2">
+        <View className="flex-row items-center justify-between gap-1">
+          <View className="flex-row items-center gap-1">
+            <Text className="text-xs text-muted-foreground">
+              {translate('home.budget_label')}
+              :
+            </Text>
+            <FormattedCurrency value={spent} currency={currency} fractionDigits={0} className="text-xs text-muted-foreground" />
             <Text className="text-xs text-muted-foreground">/</Text>
-            <FormattedCurrency value={scaledBudget} currency={currency} className="text-xs text-muted-foreground" />
+            <FormattedCurrency value={scaledBudget} currency={currency} fractionDigits={0} className="text-xs text-muted-foreground" />
           </View>
+          <Text className="text-xs text-muted-foreground">{`${percentage.toFixed(0)}%`}</Text>
         </View>
-        <View className="items-end">
+        <BudgetProgressBar
+          spent={spent}
+          budget={scaledBudget}
+          showPercentage={false}
+          className="h-2"
+          bg="bg-muted"
+        />
+        <View className="flex-row gap-1">
           <FormattedCurrency
             value={Math.abs(remaining)}
             currency={currency}
-            className={`text-sm font-semibold ${colorClass}`}
+            fractionDigits={0}
+            className="text-xs text-muted-foreground"
           />
           <Text className="text-xs text-muted-foreground">
             {remaining < 0 ? translate('stats.budget_overspent') : translate('stats.budget_remaining')}
           </Text>
         </View>
-      </View>
-      <BudgetProgressBar
-        spent={spent}
-        budget={scaledBudget}
-        className="h-2"
-        containerClassName="mt-3"
-        bg="bg-muted"
-      />
-    </Pressable>
+      </Pressable>
+    </>
   );
 }
 
+const textBaseCls = 'rounded-3xl px-2 py-0.5 text-xs font-medium';
+const textSuccessCls = `bg-success-600/10 text-success-600`;
+const textDangerCls = `bg-danger-500/10 text-danger-500`;
+
 export default function Summary() {
   const router = useRouter();
+  const isCompact = useAppStore.use.density() === 'compact';
   const currency = useAppStore.use.currency();
-  const profile = useAppStore.use.profile();
-  const name = profile?.name?.trim() || translate('common.there');
   const monthSelection = React.useMemo(() => currentMonthSelection(), []);
   const currentYearMonth = React.useMemo(
     () => format(new Date(monthSelection.year, monthSelection.month - 1, 1), 'yyyy-MM'),
@@ -126,60 +119,51 @@ export default function Summary() {
 
   return (
     <View>
-      <View className="flex-row items-center justify-between gap-2">
-        <View>
-          <Text className="text-lg font-medium text-foreground">{translate('home.hi', { name })}</Text>
-          <Text className="text-sm text-muted-foreground">{translate('home.available_balance')}</Text>
-        </View>
-        <View className="items-end">
-          {isLoading
-            ? <Skeleton height={32} width={120} />
-            : <FormattedCurrency className="mt-1 text-2xl font-bold" value={data?.balance ?? 0} currency={currency} />}
-        </View>
-      </View>
-      <View className="mt-4 flex-row gap-2">
-        {isLoading
-          ? (
-              <SkeletonGrid cols={2} rows={1} heights={[76, 76]} />
-            )
-          : (
-              <>
-                <Pressable className="flex-1" style={getPressedStyle} onPress={() => router.push('/stats')}>
-                  <View className="gap-0.5 rounded-xl bg-success-500/8 px-4 py-3 dark:bg-success-700/10">
-                    <View className="flex-row items-baseline justify-between gap-2">
-                      <Text className="text-sm text-foreground">{translate('home.income')}</Text>
-                      {trend.incomeDeltaPct !== null && trend.incomeDeltaPct !== 0 && (
-                        <Text className={`text-xs font-medium ${trend.incomeDeltaPct >= 0 ? 'text-success-600' : 'text-danger-500'}`}>
-                          {trend.incomeDeltaPct >= 0 ? '↑' : '↓'}
-                          {' '}
-                          {Math.abs(trend.incomeDeltaPct)}
-                          %
-                        </Text>
-                      )}
-                    </View>
-                    <FormattedCurrency className="text-lg font-bold text-success-600" value={data?.income ?? 0} currency={currency} prefix="+" />
+      {isLoading
+        ? (
+            <SkeletonGrid cols={2} rows={2} heights={[76, 76]} className="mt-4" />
+          )
+        : (
+            <>
+              <View className={`mb-2 rounded-xl bg-card p-3 3xs:p-5 ${isCompact ? 'gap-1' : 'gap-2 2xs:p-6'}`}>
+                <Pressable className="flex-1 gap-4" style={getPressedStyle} onPress={() => router.push('/stats')}>
+                  <View>
+                    <Label className="mb-1 text-muted-foreground">
+                      {translate('home.balance')}
+                    </Label>
+                    <FormattedCurrency className="text-2xl font-bold" value={data?.balance ?? 0} currency={currency} />
                   </View>
                 </Pressable>
-                <Pressable className="flex-1" style={getPressedStyle} onPress={() => router.push('/stats')}>
-                  <View className="gap-0.5 rounded-xl bg-danger-500/8 px-4 py-3 dark:bg-danger-600/6">
-                    <View className="flex-row items-baseline justify-between gap-2">
-                      <Text className="text-sm text-foreground">{translate('home.expenses')}</Text>
-                      {trend.expenseDeltaPct !== null && trend.expenseDeltaPct !== 0 && (
-                        <Text className={`text-xs font-medium ${trend.expenseDeltaPct <= 0 ? 'text-success-600' : 'text-danger-500'}`}>
-                          {trend.expenseDeltaPct >= 0 ? '↑' : '↓'}
-                          {' '}
-                          {Math.abs(trend.expenseDeltaPct)}
-                          %
-                        </Text>
-                      )}
-                    </View>
-                    <FormattedCurrency className="text-lg font-bold text-danger-500" value={data?.expense ?? 0} currency={currency} prefix="-" />
-                  </View>
-                </Pressable>
-              </>
-            )}
-      </View>
-      <HomeGlobalBudget currency={currency} selection={monthSelection} />
+                <HomeGlobalBudget currency={currency} selection={monthSelection} />
+              </View>
+              <View className="flex-row gap-2">
+                <View className={`flex-1 items-start rounded-xl bg-card ${isCompact ? 'px-3 py-2.5' : 'gap-0.5 px-4 py-3'}`}>
+                  <Label className="text-muted-foreground">{translate('home.income')}</Label>
+                  <FormattedCurrency className="text-lg font-bold" value={data?.income ?? 0} currency={currency} prefix="+" />
+                  {trend.incomeDeltaPct !== null && trend.incomeDeltaPct !== 0 && (
+                    <Text className={`${textBaseCls} ${trend.incomeDeltaPct >= 0 ? textSuccessCls : textDangerCls}`}>
+                      {trend.incomeDeltaPct >= 0 ? '↑' : '↓'}
+                      {' '}
+                      {Math.abs(trend.incomeDeltaPct)}
+                      %
+                    </Text>
+                  )}
+                </View>
+                <View className={`flex-1 items-start rounded-xl bg-card ${isCompact ? 'px-3 py-2.5' : 'gap-0.5 px-4 py-3'}`}>
+                  <Label className="text-muted-foreground">{translate('home.expenses')}</Label>
+                  <FormattedCurrency className="text-lg font-bold" value={data?.expense ?? 0} currency={currency} prefix="-" />
+                  {trend.expenseDeltaPct !== null && trend.expenseDeltaPct !== 0 && (
+                    <Text className={`${textBaseCls} ${trend.expenseDeltaPct <= 0 ? textSuccessCls : textDangerCls}`}>
+                      {trend.expenseDeltaPct >= 0 ? '↑' : '↓'}
+                      {' '}
+                      {Math.abs(trend.expenseDeltaPct)}
+                      %
+                    </Text>
+                  )}
+                </View>
+              </View>
+            </>
+          )}
     </View>
   );
 }

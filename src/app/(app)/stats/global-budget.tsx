@@ -1,8 +1,8 @@
 import { useRouter } from 'expo-router';
 import * as React from 'react';
-import { View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import ScreenHeader from '@/components/screen-header';
-import { Text } from '@/components/ui';
+import { Text, View } from '@/components/ui';
 import { GlobalBudgetForm } from '@/features/stats/components/global-budget-form';
 import { useGlobalBudget } from '@/features/stats/hooks';
 import { translate } from '@/lib/i18n';
@@ -31,7 +31,14 @@ export default function GlobalBudgetRoute() {
         currentBudget={currentBudget}
         onSuccess={onBack}
         onCancel={onBack}
+        style={styles.form}
       />
     </>
   );
 }
+
+const styles = StyleSheet.create({
+  form: {
+    paddingTop: 16,
+  },
+});

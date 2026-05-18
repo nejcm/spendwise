@@ -56,7 +56,7 @@
     "preset_spending_trend": "How has my spending changed over the last three months?",
     "preset_subscriptions": "What subscriptions could I cancel to save money?",
     "setup_required_action": "Open AI settings",
-    "setup_required_body": "AI chat needs your own OpenAI or Anthropic API key. Provider usage may cost money.",
+    "setup_required_body": "AI is optional. Spendwise is free, but AI chat needs your own OpenAI or Anthropic API key and provider usage may cost money.",
     "setup_required_title": "AI setup required",
     "to_start_chatting": "to start chatting with the assistant.",
     "tool_status_category_spending": "Looking up category spending{{range}}...",
@@ -199,7 +199,7 @@
     "add_category": "Add Category",
     "add_category_description": "Create categories to track your spending by where it goes.",
     "add_transaction": "Add Transaction",
-    "available_balance": "Your balance for this month",
+    "available_balance": "Balance for this month",
     "expenses": "Expenses",
     "hi": "Hi {{name}}",
     "income": "Income",
@@ -336,11 +336,11 @@
           "title": "Track every account"
         },
         "ai": {
-          "body": "Ask questions about your money and turn receipt photos into ready-to-review transactions.\n⚠️ AI functionality requires your own API key.",
+          "body": "Ask questions about your local data and turn receipt photos into ready-to-review transactions.\nAI is optional and uses your own API key.",
           "title": "Move faster with AI"
         },
         "data": {
-          "body": "Keep finances local-first, move data with CSV import/export, and restore from JSON backups.",
+          "body": "Use Spendwise for free with offline local data, CSV import/export, and JSON backups you control.",
           "title": "Own your data"
         },
         "insights": {
@@ -360,7 +360,7 @@
     "select_theme": "Select your theme",
     "settings": "Settings",
     "start_tracking": "Start tracking",
-    "subtitle": "Take control of your finances",
+    "subtitle": "Free, private, local-first finance tracking",
     "tap_to_change": "Tap to change",
     "title": "Spendwise",
     "welcome_copy": "Track spending, manage budgets, and build better money habits in one place.",
@@ -487,7 +487,7 @@
     "ai_chat": "AI Chat",
     "ai_provider": "AI Provider",
     "ai_provider_active": "Active provider",
-    "ai_provider_desc": "Choose OpenAI or Anthropic, then enter your own API key for that provider. Keys stay on this device; AI requests go directly to the selected provider and may incur provider costs.",
+    "ai_provider_desc": "Choose OpenAI or Anthropic, then enter your own API key for that provider. Spendwise is free; keys stay on this device, and optional AI requests go directly to the selected provider and may incur provider costs.",
     "ai_provider_missing_key": "AI chat and receipt scanning will stay unavailable until the active provider has an API key.",
     "anthropic_api_key": "Anthropic API key",
     "anthropic_api_key_help": "Sign in to the Anthropic Console and create a key under API keys.",

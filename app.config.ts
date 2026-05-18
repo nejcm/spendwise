@@ -51,7 +51,7 @@ export default ({ config }: ConfigContext): ExpoConfig =>
   withJvmArgs({
     ...config,
     name: Env.EXPO_PUBLIC_NAME,
-    description: `${Env.EXPO_PUBLIC_NAME} Mobile App`,
+    description: `${Env.EXPO_PUBLIC_NAME} is a free, local-first finance app with private on-device data and optional AI features.`,
     owner: EXPO_ACCOUNT_OWNER,
     scheme: Env.EXPO_PUBLIC_SCHEME,
     slug: 'spendwise',

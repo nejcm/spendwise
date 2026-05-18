@@ -84,7 +84,7 @@ describe('ai screen', () => {
     render(<AiScreen />);
 
     expect(screen.getByText('AI setup required')).toBeTruthy();
-    expect(screen.getByText('AI chat needs your own OpenAI or Anthropic API key. Provider usage may cost money.')).toBeTruthy();
+    expect(screen.getByText('AI is optional. Spendwise is free, but AI chat needs your own OpenAI or Anthropic API key and provider usage may cost money.')).toBeTruthy();
     expect(screen.getByText('Open AI settings')).toBeTruthy();
   });
 

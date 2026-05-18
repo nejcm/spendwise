@@ -1,20 +1,126 @@
-import { format } from 'date-fns';
+import type { CurrencyKey } from '@/features/currencies';
 
+import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
+import { BudgetProgressBar, getColorClass } from '@/components/ui/budget-progress-bar';
+import { ChevronRight, PlusIcon } from '@/components/ui/icon';
 import { Skeleton, SkeletonGrid } from '@/components/ui/skeleton';
+import { getBudgetSelectionBoundaries, scaleGlobalBudget } from '@/features/stats/helpers';
+import { useGlobalBudget, useGlobalBudgetSpend } from '@/features/stats/hooks';
 import { useMonthSummary, useMonthTrend } from '@/features/transactions/api';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
+
+type MonthSelection = {
+  mode: 'month';
+  year: number;
+  month: number;
+};
+
+function currentMonthSelection(): MonthSelection {
+  const now = new Date();
+
+  return {
+    mode: 'month',
+    year: now.getFullYear(),
+    month: now.getMonth() + 1,
+  };
+}
+
+type HomeGlobalBudgetProps = {
+  currency: CurrencyKey;
+  selection: MonthSelection;
+};
+
+function HomeGlobalBudget({ currency, selection }: HomeGlobalBudgetProps) {
+  const router = useRouter();
+  const { data: budget, isLoading } = useGlobalBudget();
+  const [startDate, endDate] = React.useMemo(
+    () => getBudgetSelectionBoundaries(selection),
+    [selection],
+  );
+  const scaledBudget = budget != null ? scaleGlobalBudget(budget, selection) : 0;
+  const { data: spent = 0 } = useGlobalBudgetSpend(startDate, endDate, budget != null);
+
+  const handlePress = React.useCallback(() => {
+    router.push('/stats/global-budget');
+  }, [router]);
+
+  if (isLoading) {
+    return <Skeleton className="mt-3" height={68} />;
+  }
+
+  if (budget == null) {
+    return (
+      <Pressable
+        className="mt-3 flex-row items-center gap-3 rounded-xl border border-dashed border-border bg-card/60 px-4 py-3"
+        style={getPressedStyle}
+        onPress={handlePress}
+      >
+        <PlusIcon size={20} colorClassName="accent-muted-foreground" />
+        <View className="flex-1">
+          <Text className="text-sm font-medium text-foreground">{translate('stats.global_budget_set')}</Text>
+          <Text className="text-xs text-muted-foreground">{translate('stats.global_budget_prompt')}</Text>
+        </View>
+        <ChevronRight size={18} colorClassName="accent-muted-foreground" />
+      </Pressable>
+    );
+  }
+
+  const remaining = scaledBudget - spent;
+  const ratio = scaledBudget > 0 ? spent / scaledBudget : 0;
+  const colorClass = getColorClass(ratio)[1];
+
+  return (
+    <Pressable
+      className="mt-3 rounded-xl bg-card px-4 py-3"
+      style={getPressedStyle}
+      onPress={handlePress}
+    >
+      <View className="flex-row items-center justify-between gap-3">
+        <View className="flex-1">
+          <Text className="text-sm font-medium text-foreground">{translate('stats.global_budget_label')}</Text>
+          <View className="mt-0.5 flex-row items-center gap-1">
+            <FormattedCurrency value={spent} currency={currency} className="text-xs text-muted-foreground" />
+            <Text className="text-xs text-muted-foreground">/</Text>
+            <FormattedCurrency value={scaledBudget} currency={currency} className="text-xs text-muted-foreground" />
+          </View>
+        </View>
+        <View className="items-end">
+          <FormattedCurrency
+            value={Math.abs(remaining)}
+            currency={currency}
+            className={`text-sm font-semibold ${colorClass}`}
+          />
+          <Text className="text-xs text-muted-foreground">
+            {remaining < 0 ? translate('stats.budget_overspent') : translate('stats.budget_remaining')}
+          </Text>
+        </View>
+      </View>
+      <BudgetProgressBar
+        spent={spent}
+        budget={scaledBudget}
+        className="h-2"
+        containerClassName="mt-3"
+        bg="bg-muted"
+      />
+    </Pressable>
+  );
+}
 
 export default function Summary() {
   const router = useRouter();
   const currency = useAppStore.use.currency();
   const profile = useAppStore.use.profile();
   const name = profile?.name?.trim() || translate('common.there');
-  const currentYearMonth = format(new Date(), 'yyyy-MM');
+  const monthSelection = React.useMemo(() => currentMonthSelection(), []);
+  const currentYearMonth = React.useMemo(
+    () => format(new Date(monthSelection.year, monthSelection.month - 1, 1), 'yyyy-MM'),
+    [monthSelection],
+  );
   const { data, isLoading } = useMonthSummary(currentYearMonth);
   const trend = useMonthTrend(currentYearMonth);
 
@@ -73,6 +179,7 @@ export default function Summary() {
               </>
             )}
       </View>
+      <HomeGlobalBudget currency={currency} selection={monthSelection} />
     </View>
   );
 }

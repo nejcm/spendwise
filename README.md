@@ -1,6 +1,6 @@
 # Spendwise
 
-Spendwise is a personal finance app built with Expo and React Native. The app is local-first: core financial data lives on-device.
+Spendwise is a free personal finance app built with Expo and React Native. It is local-first and offline-friendly: core financial data lives on-device, with optional AI features that use your own provider key.
 
 <img src="screenshot.jpg" alt="Spendwise app" width="198" height="420" />
 
@@ -26,9 +26,9 @@ Spendwise is a personal finance app built with Expo and React Native. The app is
   - Low balance alerts
   - Weekly spending digest
 - Security: optional app lock using device authentication (biometrics/PIN)
-- Optional:
-  - AI chat (OpenAI/Anthropic) using user-provided API keys stored on-device
-  - Receipt scanning (requires AI key)
+- Optional AI:
+  - AI chat (OpenAI/Anthropic) using your own provider key stored on-device
+  - Receipt scanning with your own provider key
 
 ## Stack
 
@@ -140,8 +140,9 @@ App startup happens in `src/app/_layout.tsx`, where the app initializes SQLite, 
 
 - Financial records are stored locally in SQLite on the device.
 - Preferences and lightweight persisted state are stored in MMKV.
-- AI provider keys are configured in-app and stored locally in persisted state.
-- AI requests are sent directly from the client to the selected provider.
+- Spendwise is free to use; configured AI providers may charge for usage under your own account.
+- AI provider keys are configured in-app and stored locally on your device.
+- AI features are optional. When used, requests are sent directly from your device to the selected provider.
 
 ## Documentation
 

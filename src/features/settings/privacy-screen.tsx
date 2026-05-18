@@ -13,7 +13,7 @@ export function PrivacyScreen() {
         </Text>
 
         <Text className="mb-4 text-sm text-muted-foreground">
-          This privacy policy applies to the Spendwise app (hereby referred to as &quot;Application&quot;) for
+          This privacy policy applies to the free Spendwise app (hereby referred to as &quot;Application&quot;) for
           mobile devices that was created by Nejc (hereby referred to as &quot;Service Provider&quot;) as an
           Open Source service. This service is intended for use &quot;AS IS&quot;.
         </Text>
@@ -46,30 +46,31 @@ export function PrivacyScreen() {
         </Text>
 
         <Text className="mb-4 text-sm text-muted-foreground">
-          The Application uses Artificial Intelligence (AI) technologies to enhance user experience and provide certain
-          features. The AI components may process user data to deliver personalized content, recommendations, or
-          automated functionalities. All AI processing is performed in accordance with this privacy policy and applicable
-          laws. If you have questions about the AI features or data processing, please contact the Service Provider.
+          Spendwise stores financial records locally on your device and is designed to work offline for core budgeting
+          and tracking features. The Service Provider does not operate a Spendwise cloud account or server that stores a
+          copy of your financial database.
         </Text>
 
         <Text className="mb-4 text-sm text-muted-foreground">
-          The Service Provider may use the information you provide to contact you from time to time to provide you with
-          important information, required notices and marketing promotions.
+          The Application includes optional Artificial Intelligence (AI) features. If you choose to use AI chat or
+          receipt scanning, requests are sent directly from your device to the AI provider you configure, using your own
+          provider API key stored on your device. Spendwise is free to use, but your selected AI provider may charge your
+          provider account for usage.
         </Text>
 
         <Text className="mb-4 text-sm text-muted-foreground">
-          For a better experience, while using the Application, the Service Provider may require you to provide certain
-          personally identifiable information. The information that the Service Provider requests will be retained by
-          them and used as described in this privacy policy.
+          The Application does not require you to provide a Spendwise account for core use. Any profile, finance, backup,
+          or preference data you enter is stored locally on your device unless you export, share, back up, or send it to
+          an optional provider feature yourself.
         </Text>
 
         <Text className="mb-2 text-base font-semibold text-foreground">
           Third Party Access
         </Text>
         <Text className="mb-4 text-sm text-muted-foreground">
-          Only aggregated, anonymized data is periodically transmitted to external services to aid the Service Provider
-          in improving the Application and their service. The Service Provider may share your information with third
-          parties in the ways that are described in this privacy statement.
+          Core financial data is not periodically transmitted to external Spendwise services. Third-party access may
+          occur only through platform services, optional AI provider requests you initiate, or files you export/share
+          yourself. The Service Provider may disclose information in the ways described in this privacy statement.
         </Text>
 
         <Text className="mb-2 text-sm font-semibold text-foreground">

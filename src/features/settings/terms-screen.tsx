@@ -15,7 +15,7 @@ export function TermsScreen() {
         <Text className="mb-4 text-sm text-muted-foreground">
           These terms and conditions apply to the Spendwise app (hereby referred to as
           &quot;Application&quot;) for mobile devices that was created by Nejc (hereby
-          referred to as &quot;Service Provider&quot;) as an Open Source service.
+          referred to as &quot;Service Provider&quot;) as a free Open Source service.
         </Text>
 
         <Text className="mb-4 text-sm text-muted-foreground">
@@ -27,14 +27,15 @@ export function TermsScreen() {
         <Text className="mb-4 text-sm text-muted-foreground">
           The Service Provider is dedicated to ensuring that the Application is as
           beneficial and efficient as possible. As such, they reserve the right to
-          modify the Application or charge for their services at any time and for any
-          reason. The Service Provider assures you that any charges for the Application
-          or its services will be clearly communicated to you.
+          modify the Application at any time and for any reason. Spendwise is free to
+          use. Optional third-party AI providers may charge your provider account when
+          you configure and use your own API key.
         </Text>
 
         <Text className="mb-4 text-sm text-muted-foreground">
-          The Application stores and processes personal data that you have provided to
-          the Service Provider in order to provide the Service. It is your
+          The Application stores and processes personal data locally on your device in
+          order to provide the Service. Core finance data is not stored in a Spendwise
+          cloud account. It is your
           responsibility to maintain the security of your phone and access to the
           Application. The Service Provider strongly advise against jailbreaking or
           rooting your phone, which involves removing software restrictions and
@@ -97,11 +98,11 @@ export function TermsScreen() {
         </Text>
 
         <Text className="mb-4 text-sm text-muted-foreground">
-          The Application incorporates Artificial Intelligence (AI) technologies to
-          provide certain features or services. By using the Application, you
-          acknowledge and agree that AI may be used to process data and deliver
-          functionalities. The Service Provider ensures that all AI usage complies with
-          applicable laws and is designed to benefit the user experience.
+          The Application includes optional Artificial Intelligence (AI) features. If
+          you configure AI with your own provider API key, selected data may be sent
+          directly from your device to that provider to answer questions or scan
+          receipts. You are responsible for reviewing the provider&apos;s terms, privacy
+          policy, and usage charges.
         </Text>
 
         <Text className="mb-4 text-sm text-muted-foreground">

@@ -56,7 +56,7 @@
     "preset_spending_trend": "Wie haben sich meine Ausgaben in den letzten drei Monaten verändert?",
     "preset_subscriptions": "Welche Abos könnte ich kündigen, um Geld zu sparen?",
     "setup_required_action": "KI-Einstellungen öffnen",
-    "setup_required_body": "KI-Chat benötigt deinen eigenen OpenAI- oder Anthropic-API-Schlüssel. Die Nutzung beim Anbieter kann Kosten verursachen.",
+    "setup_required_body": "KI ist optional. Spendwise ist kostenlos, aber KI-Chat benötigt deinen eigenen OpenAI- oder Anthropic-API-Schlüssel und die Nutzung beim Anbieter kann Kosten verursachen.",
     "setup_required_title": "KI-Einrichtung erforderlich",
     "to_start_chatting": "um mit dem Assistenten zu chatten.",
     "tool_status_category_spending": "Kategorieausgaben werden gesucht{{range}}...",
@@ -199,7 +199,7 @@
     "add_category": "Kategorie hinzufügen",
     "add_category_description": "Erstelle Kategorien, um deine Ausgaben danach zu verfolgen, wohin dein Geld fließt.",
     "add_transaction": "Transaktion hinzufügen",
-    "available_balance": "Dein Kontostand für diesen Monat",
+    "available_balance": "Kontostand für diesen Monat",
     "expenses": "Ausgaben",
     "hi": "Hallo {{name}}",
     "income": "Einnahmen",
@@ -336,11 +336,11 @@
           "title": "Jedes Konto verfolgen"
         },
         "ai": {
-          "body": "Stelle Fragen zu deinem Geld und verwandle Belegfotos in prüfbereite Transaktionen.\n⚠️ AI-Funktionalität und Rechnungs-Scanning benötigen deine eigene API-Schlüssel.",
-          "title": "Schneller mit AI"
+          "body": "Stelle Fragen zu deinen lokalen Daten und verwandle Belegfotos in prüfbereite Transaktionen.\nKI ist optional und nutzt deinen eigenen API-Schlüssel.",
+          "title": "Schneller mit KI"
         },
         "data": {
-          "body": "Behalte Finanzen lokal, verschiebe Daten per CSV-Import/Export und stelle JSON-Backups wieder her.",
+          "body": "Nutze Spendwise kostenlos mit lokalen Offline-Daten, CSV-Import/Export und JSON-Backups unter deiner Kontrolle.",
           "title": "Deine Daten gehören dir"
         },
         "insights": {
@@ -360,7 +360,7 @@
     "select_theme": "Wähle dein Design",
     "settings": "Einstellungen",
     "start_tracking": "Tracking starten",
-    "subtitle": "Übernimm die Kontrolle über deine Finanzen",
+    "subtitle": "Kostenloses, privates, lokales Finanztracking",
     "tap_to_change": "Tippen zum Ändern",
     "title": "Spendwise",
     "welcome_copy": "Verfolge Ausgaben, verwalte Budgets und entwickle bessere Geldgewohnheiten an einem Ort.",
@@ -487,7 +487,7 @@
     "ai_chat": "AI-Chat",
     "ai_provider": "AI-Anbieter",
     "ai_provider_active": "Aktiver Anbieter",
-    "ai_provider_desc": "Wähle OpenAI oder Anthropic und gib deinen eigenen API-Schlüssel für diesen Anbieter ein. Schlüssel bleiben auf diesem Gerät; KI-Anfragen gehen direkt an den gewählten Anbieter und können dort Kosten verursachen.",
+    "ai_provider_desc": "Wähle OpenAI oder Anthropic und gib deinen eigenen API-Schlüssel für diesen Anbieter ein. Spendwise ist kostenlos; Schlüssel bleiben auf diesem Gerät, und optionale KI-Anfragen gehen direkt an den gewählten Anbieter und können dort Kosten verursachen.",
     "ai_provider_missing_key": "KI-Chat und Belegscan bleiben nicht verfügbar, bis der aktive Anbieter einen API-Schlüssel hat.",
     "anthropic_api_key": "Anthropic-API-Schlüssel",
     "anthropic_api_key_help": "Melde dich in der Anthropic Console an und erstelle unter API-Schlüsseln einen Schlüssel.",

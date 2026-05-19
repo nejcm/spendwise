@@ -6,6 +6,7 @@ import { SolidButton, Text, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { AlertTriangle, Bell, BrainCircuit, Lightbulb, TrendingUp, X } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
+import { Label } from '@/components/ui/label';
 import { Skeleton, SkeletonGrid } from '@/components/ui/skeleton';
 import { setAiDraftQuestion } from '@/features/ai/store';
 import { translate } from '@/lib/i18n';
@@ -84,11 +85,10 @@ function RecommendationCard({
           <RecommendationIcon kind={recommendation.kind} />
           <View className="min-w-0 flex-1">
             <Text className="mb-0.5 text-sm/tight font-medium text-foreground">{copy.title}</Text>
-            <Text className="text-xs/snug font-medium tracking-[0.03rem] text-muted-foreground uppercase">
+            <Label className="text-muted-foreground">
               {translate(`recommendations.severity.${recommendation.severity}` as const)}
               {' '}
-              <Text className="text-xs/snug font-medium tracking-[0.03rem] text-muted-foreground uppercase"></Text>
-            </Text>
+            </Label>
           </View>
         </View>
         <IconButton size="xs" color="none" onPress={() => onDismiss(recommendation.id)} className="size-6 self-start rounded-full bg-black/15 px-0">

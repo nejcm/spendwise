@@ -6,7 +6,7 @@ export type LabelProps = {
   children: React.ReactNode;
 };
 
-const labelDefaults = 'font-family-sans text-xs/snug font-medium tracking-[0.03rem] uppercase';
+const labelDefaults = 'font-family-sans text-[11px]/snug font-medium tracking-[0.045rem] uppercase';
 
 export function Label({ className, children }: LabelProps) {
   return (

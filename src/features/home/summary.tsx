@@ -114,24 +114,29 @@ export default function Summary() {
     () => format(new Date(monthSelection.year, monthSelection.month - 1, 1), 'yyyy-MM'),
     [monthSelection],
   );
-  const { data, isLoading } = useMonthSummary(currentYearMonth);
+  const { data, isPending } = useMonthSummary(currentYearMonth);
   const trend = useMonthTrend(currentYearMonth);
 
   return (
     <View>
-      {isLoading
+      {isPending
         ? (
             <SkeletonGrid cols={2} rows={2} heights={[76, 76]} className="mt-4" />
           )
         : (
             <>
               <View className={`mb-2 rounded-xl bg-card p-3 3xs:p-5 ${isCompact ? 'gap-1' : 'gap-2 2xs:p-6'}`}>
-                <Pressable className="flex-1 gap-4" style={getPressedStyle} onPress={() => router.push('/stats')}>
+                <Pressable style={getPressedStyle} onPress={() => router.push('/stats')}>
                   <View>
                     <Label className="mb-1 text-muted-foreground">
                       {translate('home.balance')}
                     </Label>
-                    <FormattedCurrency className="text-2xl font-bold" value={data?.balance ?? 0} currency={currency} />
+                    <FormattedCurrency
+                      className="text-2xl font-bold"
+                      value={data?.balance ?? 0}
+                      currency={currency}
+                      numberOfLines={1}
+                    />
                   </View>
                 </Pressable>
                 <HomeGlobalBudget currency={currency} selection={monthSelection} />

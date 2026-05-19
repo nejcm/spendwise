@@ -12,6 +12,7 @@ import { useAccounts } from '@/features/accounts/api';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { goBackOrFallback } from '@/lib/routing';
+import { useAppStore } from '@/lib/store/store';
 import { centsToAmount } from '../formatting/helpers';
 import { useDeleteTransaction, useTransaction } from './api';
 import { MerchantLogo } from './components/merchant-logo';
@@ -20,6 +21,7 @@ import { TransactionForm } from './components/transaction-form';
 export function TransactionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const isCompact = useAppStore.use.density() === 'compact';
 
   const { data: transaction, isLoading } = useTransaction(id ?? '');
   const deleteMut = useDeleteTransaction();
@@ -97,6 +99,7 @@ export function TransactionDetailScreen() {
     });
   };
   const logo = transaction.merchant_logo_slug ? <MerchantLogo slug={transaction.merchant_logo_slug} size={56} withBg={false} /> : null;
+  const buttonSize = isCompact ? 'sm' : 'md';
 
   return (
     <>
@@ -174,20 +177,24 @@ export function TransactionDetailScreen() {
               ]}
             />
           )}
-          <View className="mt-auto flex-row gap-2">
-            <GhostButton
-              label={translate('common.back')}
-              onPress={() => goBackOrFallback(router)}
-            />
-            <SolidButton
-              color="primary"
-              className="flex-1"
-              label={translate('common.edit')}
-              onPress={() => setIsEditing(true)}
-            />
-          </View>
         </View>
       </ScrollView>
+      <View className="flex-row gap-2 px-4 py-2">
+        <GhostButton
+          label={translate('common.back')}
+          onPress={() => goBackOrFallback(router)}
+          textClassName="text-base/tight"
+          size={buttonSize}
+        />
+        <SolidButton
+          color="primary"
+          className="flex-1"
+          label={translate('common.edit')}
+          onPress={() => setIsEditing(true)}
+          textClassName="text-base/tight"
+          size={buttonSize}
+        />
+      </View>
     </>
   );
 }

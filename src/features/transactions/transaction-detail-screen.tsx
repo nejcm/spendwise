@@ -6,7 +6,7 @@ import { ScrollView } from 'react-native';
 import DetailsSection, { DetailsRow } from '@/components/details';
 import ScreenHeader from '@/components/screen-header';
 
-import { Alert, FocusAwareStatusBar, FormattedCurrency, FormattedDate, GhostButton, SolidButton, Text, TrashIcon, View } from '@/components/ui';
+import { Alert, FocusAwareStatusBar, FormattedCurrency, FormattedDate, GhostButton, OverflowMenu, RepeatIcon, SolidButton, Text, TrashIcon, View } from '@/components/ui';
 
 import { useAccounts } from '@/features/accounts/api';
 import { unixToISODate } from '@/lib/date/helpers';
@@ -48,6 +48,7 @@ export function TransactionDetailScreen() {
           initialValues={{ ...transaction, date: unixToISODate(transaction.date) }}
           onSuccess={() => setIsEditing(false)}
           onCancel={() => setIsEditing(false)}
+          bottomMenuOffset={0}
         />
       </>
     );
@@ -99,7 +100,26 @@ export function TransactionDetailScreen() {
 
   return (
     <>
-      <ScreenHeader title={translate('transactions.detail_title')} />
+      <ScreenHeader title={translate('transactions.detail_title')}>
+        <OverflowMenu
+          className="-mr-2 ml-auto"
+          accessibilityLabel={translate('settings.more')}
+          items={[
+            {
+              label: translate('transactions.make_recurring'),
+              onPress: handleMakeRecurring,
+              hidden: transaction.type === 'transfer',
+              icon: <RepeatIcon size={16} colorClassName="accent-foreground" className="mr-2" />,
+            },
+            {
+              label: translate('common.delete'),
+              onPress: handleDelete,
+              className: 'text-danger-600',
+              icon: <TrashIcon size={16} colorClassName="accent-danger-600" className="mr-2" />,
+            },
+          ]}
+        />
+      </ScreenHeader>
       <FocusAwareStatusBar />
       <ScrollView className="flex-1" contentContainerClassName="flex-grow px-4 pt-7 pb-4">
         <View className="flex-1">
@@ -154,25 +174,6 @@ export function TransactionDetailScreen() {
               ]}
             />
           )}
-          <View className="mb-4 flex-row items-center justify-center gap-2">
-            {transaction.type !== 'transfer' && (
-              <GhostButton
-                label={translate('transactions.make_recurring')}
-                onPress={handleMakeRecurring}
-                className="flex-1"
-                textClassName="underline"
-              />
-            )}
-            <GhostButton
-              label={translate('common.delete')}
-              color="danger"
-              onPress={handleDelete}
-              className="flex-1"
-              textClassName="underline"
-              iconLeft={<TrashIcon size={16} colorClassName="accent-danger-600" className="mr-2" />}
-            />
-          </View>
-
           <View className="mt-auto flex-row gap-2">
             <GhostButton
               label={translate('common.back')}

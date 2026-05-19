@@ -18,6 +18,7 @@ export * from './list';
 export * from './modal';
 export * from './modal-sheet';
 export * from './outline-button';
+export * from './overflow-menu';
 export * from './progress-bar';
 export * from './select';
 export * from './solid-button';

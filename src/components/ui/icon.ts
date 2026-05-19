@@ -33,6 +33,7 @@ import {
   DatabaseZap as LucideDatabaseZap,
   DecimalsArrowRight as LucideDecimalsArrowRight,
   Download as LucideDownload,
+  EllipsisVertical as LucideEllipsisVertical,
   Euro as LucideEuro,
   FileWarning as LucideFileWarning,
   HelpCircle as LucideHelpCircle,
@@ -52,6 +53,7 @@ import {
   PlusIcon as LucidePlusIcon,
   Printer as LucidePrinter,
   RefreshCcw as LucideRefreshCcw,
+  RepeatIcon as LucideRepeatIcon,
   ScanLine as LucideScanLine,
   SendHorizonal as LucideSendHorizonal,
   Settings as LucideSettings,
@@ -116,6 +118,7 @@ export const DatabaseSearch = createIcon(LucideDatabaseSearch);
 export const DatabaseZap = createIcon(LucideDatabaseZap);
 export const DecimalsArrowRight = createIcon(LucideDecimalsArrowRight);
 export const Download = createIcon(LucideDownload);
+export const EllipsisVertical = createIcon(LucideEllipsisVertical);
 export const Euro = createIcon(LucideEuro);
 export const FileWarning = createIcon(LucideFileWarning);
 export const HelpCircle = createIcon(LucideHelpCircle);
@@ -152,3 +155,4 @@ export const Paintbrush = createIcon(LucidePaintbrush);
 export const ChevronRight = createIcon(LucideChevronRight);
 export const ChevronLeft = createIcon(LucideChevronLeft);
 export const ChevronUp = createIcon(LucideChevronUp);
+export const RepeatIcon = createIcon(LucideRepeatIcon);

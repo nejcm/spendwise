@@ -20,6 +20,7 @@ import { translate } from '@/lib/i18n';
 import { useTransactionForm } from '../hooks/form';
 
 export type TransactionFormBaseProps = UseTransactionFormProps & {
+  bottomMenuOffset?: number;
   onCancel?: () => void;
 };
 
@@ -277,6 +278,7 @@ export function TransactionForm({
   initialValues,
   onSuccess,
   onCancel,
+  bottomMenuOffset = 56,
 }: TransactionFormBaseProps) {
   const {
     form,
@@ -293,7 +295,7 @@ export function TransactionForm({
 
   const isLoading = createTransaction.isPending || updateTransaction.isPending;
   const insets = useSafeAreaInsets();
-  const stickyFooterPadding = 56 + insets.bottom;
+  const stickyFooterPadding = bottomMenuOffset + insets.bottom;
   const buttonSize = isCompact ? 'sm' : 'md';
 
   return (

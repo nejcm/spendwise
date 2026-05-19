@@ -7,8 +7,7 @@ import { RefreshControl, View } from 'react-native';
 import NoData from '@/components/no-data';
 import { PeriodSelector } from '@/components/period-selector';
 import { PeriodSwipeContainer } from '@/components/period-swipe-container';
-import { FocusAwareStatusBar, FormattedCurrency, ScrollView, SolidButton, Text } from '@/components/ui';
-import { Plus } from '@/components/ui/icon';
+import { FocusAwareStatusBar, FormattedCurrency, ScrollView, Text } from '@/components/ui';
 import { SkeletonRows } from '@/components/ui/skeleton';
 import { accountsWithBalanceForRangeQueryOptions, useAccountsWithBalanceForRange } from '@/features/accounts/api';
 import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
@@ -18,6 +17,7 @@ import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { AccountCard } from './components/account-card';
+import { AddAccountCard } from './components/add-account-card';
 
 export function AccountsScreen() {
   const router = useRouter();
@@ -53,7 +53,6 @@ export function AccountsScreen() {
             <Text className="text-sm text-muted-foreground">{translate('accounts.total_balance')}</Text>
             <FormattedCurrency value={totalBalance} currency={currency} className="text-3xl font-bold" />
           </View>
-
           {isLoading
             ? <SkeletonRows count={3} />
             : accounts.length === 0
@@ -71,17 +70,7 @@ export function AccountsScreen() {
                   ))
                 )}
 
-          <View className="mt-4 flex-row items-center justify-center">
-            <SolidButton
-              color="primary"
-              iconLeft={<Plus className="mr-1" colorClassName="accent-primary-foreground" size={20} />}
-              label={translate('common.add')}
-              size="sm"
-              className="px-6"
-              onPress={openCreateAccountForm}
-            />
-          </View>
-
+          <AddAccountCard onPress={openCreateAccountForm} />
         </View>
       </ScrollView>
     </PeriodSwipeContainer>

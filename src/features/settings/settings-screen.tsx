@@ -16,6 +16,7 @@ import {
   LayoutGrid,
   Link,
   ListChecks,
+  Paintbrush,
   PieChart,
   RefreshCcw,
   ScanLine,
@@ -102,6 +103,11 @@ export function SettingsScreen() {
               icon={<Settings colorClassName={iconColor} size={20} />}
               text="settings.general"
               onPress={() => router.push('/settings/general')}
+            />
+            <SettingsItem
+              icon={<Paintbrush colorClassName={iconColor} size={20} />}
+              text="settings.appearance"
+              onPress={() => router.push('/settings/appearance')}
             />
             <SettingsItem
               icon={<Bot colorClassName={iconColor} size={20} />}

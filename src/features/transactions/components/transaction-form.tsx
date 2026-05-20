@@ -278,7 +278,7 @@ export function TransactionForm({
   initialValues,
   onSuccess,
   onCancel,
-  bottomMenuOffset = 56,
+  bottomMenuOffset = 0,
 }: TransactionFormBaseProps) {
   const {
     form,
@@ -295,7 +295,7 @@ export function TransactionForm({
 
   const isLoading = createTransaction.isPending || updateTransaction.isPending;
   const insets = useSafeAreaInsets();
-  const stickyFooterPadding = bottomMenuOffset + insets.bottom;
+  const stickyFooterPadding = 56 + insets.bottom;
   const buttonSize = isCompact ? 'sm' : 'md';
 
   return (
@@ -316,7 +316,7 @@ export function TransactionForm({
           setBaseAmountIsManual={setBaseAmountIsManual}
         />
       </KeyboardAwareScrollView>
-      <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>
+      <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom + bottomMenuOffset }}>
         <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
           <form.Subscribe
             selector={({ isSubmitting, values }) => ({ isSubmitting, values })}

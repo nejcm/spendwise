@@ -8,6 +8,7 @@ import ScreenHeader from '@/components/screen-header';
 
 import { Alert, FocusAwareStatusBar, FormattedCurrency, FormattedDate, GhostButton, OverflowMenu, RepeatIcon, SolidButton, Text, TrashIcon, View } from '@/components/ui';
 
+import { NAV_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
 import { useAccounts } from '@/features/accounts/api';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
@@ -50,7 +51,7 @@ export function TransactionDetailScreen() {
           initialValues={{ ...transaction, date: unixToISODate(transaction.date) }}
           onSuccess={() => setIsEditing(false)}
           onCancel={() => setIsEditing(false)}
-          bottomMenuOffset={0}
+          bottomMenuOffset={NAV_BAR_HEIGHT}
         />
       </>
     );

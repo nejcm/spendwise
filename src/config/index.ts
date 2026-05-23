@@ -10,7 +10,7 @@ export const config = {
     iosApp: 'TODO',
     bugs: `${github}/issues` as const,
     featureSuggestions: `${github}/issues/new?template=feature-request.yml` as const,
-    support: github,
+    support: 'https://thanks.dev/u/gh/nejcm',
   },
 } as const;
 

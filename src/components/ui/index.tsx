@@ -19,7 +19,7 @@ export * from './modal';
 export * from './modal-sheet';
 export * from './outline-button';
 export * from './overflow-menu';
-export * from './progress-bar';
+export * from './progress-bar-animated';
 export * from './select';
 export * from './solid-button';
 export * from './text';

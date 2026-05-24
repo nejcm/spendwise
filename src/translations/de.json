@@ -615,7 +615,7 @@
     "version": "Version"
   },
   "stats": {
-    "breakdown_view_chart": "Kreisdiagramm",
+    "breakdown_view_chart": "Diagramm",
     "breakdown_view_list": "Liste",
     "budget": "Ausgabenlimit",
     "budget_go_to_categories": "Zu Kategorien",

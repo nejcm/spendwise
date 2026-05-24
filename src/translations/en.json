@@ -615,7 +615,7 @@
     "version": "Version"
   },
   "stats": {
-    "breakdown_view_chart": "Pie chart",
+    "breakdown_view_chart": "Chart",
     "breakdown_view_list": "List",
     "budget": "Budget",
     "budget_go_to_categories": "Go to Categories",

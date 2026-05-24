@@ -163,6 +163,10 @@ export function isHexColor(value: Maybe<string>) {
   return !!value?.startsWith('#');
 }
 
+export function isBgColor(value: Maybe<string>) {
+  return !!value?.startsWith('bg-');
+}
+
 /**
  * Converts a hex color to a hex color with a given opacity.
  * @param hex - The hex color to convert (#4a6df3).

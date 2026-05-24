@@ -63,8 +63,8 @@ describe('category breakdown', () => {
     mockCategorySpend(categories);
   });
 
-  it('renders the horizontal breakdown in chart mode', async () => {
-    const { user } = setup(
+  it('renders category percentages', () => {
+    render(
       <CategoryBreakdown
         startDate={1}
         endDate={2}
@@ -73,7 +73,19 @@ describe('category breakdown', () => {
       />,
     );
 
-    await user.press(screen.getByText('Chart'));
+    expect(screen.getByText('98%')).toBeOnTheScreen();
+    expect(screen.getByText('2%')).toBeOnTheScreen();
+  });
+
+  it('renders the horizontal breakdown', () => {
+    render(
+      <CategoryBreakdown
+        startDate={1}
+        endDate={2}
+        currency="USD"
+        type="expense"
+      />,
+    );
 
     expect(screen.getByTestId('category-horizontal-breakdown')).toBeOnTheScreen();
     expect(screen.getByText('Rent and utilities')).toBeOnTheScreen();
@@ -91,7 +103,6 @@ describe('category breakdown', () => {
       />,
     );
 
-    await user.press(screen.getByText('Chart'));
     await user.press(screen.getByText('Groceries'));
 
     expect(mockRouterPush).toHaveBeenCalledWith('/transactions?categoryId=groceries');

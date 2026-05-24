@@ -1,11 +1,9 @@
 /* eslint-disable react-refresh/only-export-components */
 import type { CurrencyKey } from '@/features/currencies';
 import * as React from 'react';
-import { View } from 'react-native';
-import { cn } from 'tailwind-variants';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { useAppStore } from '@/lib/store/store';
-import { Text } from './text';
+import { ProgressBar } from './progress-bar';
 
 export type BudgetProgressBarProps = {
   spent: number; // cents (for the current period)
@@ -46,19 +44,14 @@ export function BudgetProgressBar({
     : null;
 
   return (
-    <View className={cn('flex-row items-center gap-1', containerClassName)}>
-      <View className={cn('h-1.5 flex-1 overflow-hidden rounded-full', bg, className)}>
-        <View
-          className={cn('h-full rounded-full', getColorClass(ratio)[0])}
-          style={{ width: `${percentage}%` }}
-        />
-      </View>
-      {(!!showPercentage || !!showValues) && (
-        <Text className="text-xs/snug text-muted-foreground">
-          {!!showPercentage && `${percentage.toFixed(0)}%`}
-          {monthlyHint}
-        </Text>
-      )}
-    </View>
+    <ProgressBar
+      value={percentage}
+      color={getColorClass(ratio)[0]}
+      showPercentage={showPercentage}
+      children={showValues ? monthlyHint : undefined}
+      bg={bg}
+      className={className}
+      containerClassName={containerClassName}
+    />
   );
 }

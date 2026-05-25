@@ -65,36 +65,38 @@ function HomeGlobalBudget({ currency, selection }: HomeGlobalBudgetProps) {
   const percentage = Math.min(ratio * 100, 100);
   return (
     <>
-      <Pressable style={getPressedStyle} onPress={onPress} className="mt-3 flex gap-2">
-        <View className="flex-row items-center justify-between gap-1">
-          <View className="flex-row items-center gap-1">
-            <Text className="text-xs text-muted-foreground">
-              {translate('home.budget_label')}
-              :
-            </Text>
-            <FormattedCurrency value={spent} currency={currency} fractionDigits={0} className="text-xs text-muted-foreground" />
-            <Text className="text-xs text-muted-foreground">/</Text>
-            <FormattedCurrency value={scaledBudget} currency={currency} fractionDigits={0} className="text-xs text-muted-foreground" />
+      <Pressable style={getPressedStyle} onPress={onPress} className="mt-3">
+        <View className="flex-col gap-2">
+          <View className="flex-row items-center justify-between gap-1">
+            <View className="flex-row items-center gap-1">
+              <Text className="text-xs text-muted-foreground">
+                {translate('home.budget_label')}
+                :
+              </Text>
+              <FormattedCurrency value={spent} currency={currency} fractionDigits={0} className="text-xs text-muted-foreground" />
+              <Text className="text-xs text-muted-foreground">/</Text>
+              <FormattedCurrency value={scaledBudget} currency={currency} fractionDigits={0} className="text-xs text-muted-foreground" />
+            </View>
+            <Text className="text-xs text-muted-foreground">{`${percentage.toFixed(0)}%`}</Text>
           </View>
-          <Text className="text-xs text-muted-foreground">{`${percentage.toFixed(0)}%`}</Text>
-        </View>
-        <BudgetProgressBar
-          spent={spent}
-          budget={scaledBudget}
-          showPercentage={false}
-          className="h-2"
-          bg="bg-muted"
-        />
-        <View className="flex-row gap-1">
-          <FormattedCurrency
-            value={Math.abs(remaining)}
-            currency={currency}
-            fractionDigits={0}
-            className="text-xs text-muted-foreground"
+          <BudgetProgressBar
+            spent={spent}
+            budget={scaledBudget}
+            showPercentage={false}
+            className="h-2"
+            bg="bg-muted"
           />
-          <Text className="text-xs text-muted-foreground">
-            {remaining < 0 ? translate('stats.budget_overspent') : translate('stats.budget_remaining')}
-          </Text>
+          <View className="flex-row gap-1">
+            <FormattedCurrency
+              value={Math.abs(remaining)}
+              currency={currency}
+              fractionDigits={0}
+              className="text-xs text-muted-foreground"
+            />
+            <Text className="text-xs text-muted-foreground">
+              {remaining < 0 ? translate('stats.budget_overspent') : translate('stats.budget_remaining')}
+            </Text>
+          </View>
         </View>
       </Pressable>
     </>

@@ -69,7 +69,7 @@ export function CategoryBreakdown({
       </Text>
       <View className="rounded-xl bg-card p-4">
         <View className="gap-5" testID="category-horizontal-breakdown">
-          <View className="h-10 flex-row gap-0.5 overflow-hidden rounded-lg">
+          <View className="h-12 flex-row gap-0.5 overflow-hidden rounded-lg">
             {breakdownItems.map((category) => (
               <View
                 key={category.category_id}

@@ -94,6 +94,13 @@ Do not move transactional finance records into Zustand.
 - Primary visible tabs are home, transactions, categories, and stats
 - `/transactions` is the shared route for seeded transaction drill-downs via search, filter, and date-range params
 - Additional routed flows include accounts, transactions, budgets, import, insights, onboarding, and settings subpages
+- SDK 55 native tabs are deferred because the app uses a custom persistent tab bar with a central add/scan action. Keep route transitions simple unless a screen has a clear native affordance.
+
+## Expo SDK 55
+
+- EAS Update uses Hermes bytecode diffing through `updates.enableBsdiffPatchSupport`.
+- The React Native New Architecture is always used on SDK 55; do not add `newArchEnabled` to app config.
+- `expo-widgets`, Live Activities, and Expo UI are deferred until their APIs are stable enough for production use in this app.
 
 ## Feature Layout
 

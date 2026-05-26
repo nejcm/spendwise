@@ -59,8 +59,8 @@ export default ({ config }: ConfigContext): ExpoConfig =>
     orientation: 'portrait',
     icon: './assets/icon/spendwise.png',
     userInterfaceStyle: 'automatic',
-    newArchEnabled: true,
     updates: {
+      enableBsdiffPatchSupport: true,
       fallbackToCacheTimeout: 0,
       url: 'https://u.expo.dev/c19931e0-c086-4d69-9a71-c64aea5c6f5a',
     },

@@ -25,6 +25,11 @@ export type RatesMap = Record<string, number>;
 
 const STALE_SECONDS = 24 * 60 * 60; // 24 hours
 
+type GetRatesForDateOptions = {
+  currency?: CurrencyKey;
+  fetchIfMissing?: boolean;
+};
+
 /**
  * Picks the stored rate snapshot date nearest to `?` using sargable MAX/MIN on
  * `date` (same bind repeated 6×). Tie → earlier snapshot (`d_before`).
@@ -89,7 +94,13 @@ export async function getLastFetchedAt(db: SQLiteDatabase): Promise<number | nul
  * and saves them before returning. Falls back to the oldest available rates only
  * if the historical fetch also fails.
  */
-export async function getRatesForDate(db: SQLiteDatabase, dateUnix: number, currency?: CurrencyKey): Promise<RatesMap> {
+export async function getRatesForDate(
+  db: SQLiteDatabase,
+  dateUnix: number,
+  options?: CurrencyKey | GetRatesForDateOptions,
+): Promise<RatesMap> {
+  const currency = typeof options === 'string' ? options : options?.currency;
+  const fetchIfMissing = typeof options === 'object' ? options.fetchIfMissing !== false : true;
   const params = currency ? [currency, dateUnix] : [dateUnix];
   const rows = await db.getAllAsync<{ quote: string; rate: number }>(
     `SELECT quote, rate
@@ -106,19 +117,25 @@ export async function getRatesForDate(db: SQLiteDatabase, dateUnix: number, curr
     if (!hasMissingCurrencies(cached)) return cached;
   }
 
-  // No local rates found or missing currencies — try fetching historical rates for that specific date
   const dayTimestamp = dateUnix - (dateUnix % 86400);
-  const dateStr = new Date(dayTimestamp * 1000).toISOString().slice(0, 10);
-  const fetched = await fetchRatesForDate(dateStr);
-  if (fetched) {
-    await saveRatesForDate(db, fetched.rates, dayTimestamp);
-    const freshMap = toRatesMap(
-      Object.entries(fetched.rates)
-        .filter(([, v]) => v != null)
-        .map(([quote, rate]) => ({ quote, rate: rate as number })),
-    );
-    // note: fetching fresh rates still might have missing currencies
-    if (!currency || freshMap[currency]) return freshMap;
+  if (fetchIfMissing) {
+    try {
+      const dateStr = new Date(dayTimestamp * 1000).toISOString().slice(0, 10);
+      const fetched = await fetchRatesForDate(dateStr);
+      if (fetched) {
+        await saveRatesForDate(db, fetched.rates, dayTimestamp);
+        const freshMap = toRatesMap(
+          Object.entries(fetched.rates)
+            .filter(([, v]) => v != null)
+            .map(([quote, rate]) => ({ quote, rate: rate as number })),
+        );
+        // note: fetching fresh rates still might have missing currencies
+        if (!currency || freshMap[currency]) return freshMap;
+      }
+    }
+    catch {
+      // Fall through to cached closest-date rates so offline reads still work.
+    }
   }
 
   // Final fallback: use rates from the closest available date

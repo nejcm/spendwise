@@ -1,7 +1,21 @@
 import { createTestDb } from '@/test-utils/sqlite-db';
 import { getRecommendations } from './queries';
 
+jest.mock('@/features/currencies/service', () => ({
+  fetchRates: jest.fn(),
+  fetchRatesForDate: jest.fn().mockRejectedValue(new Error('offline')),
+  fetchRatesForDateRange: jest.fn(),
+}));
+
+const { fetchRatesForDate } = jest.requireMock('@/features/currencies/service') as {
+  fetchRatesForDate: jest.Mock;
+};
+
 describe('getRecommendations', () => {
+  beforeEach(() => {
+    fetchRatesForDate.mockClear();
+  });
+
   it('returns the main recommendation kinds from current data', async () => {
     const db = await createTestDb();
 
@@ -85,6 +99,7 @@ describe('getRecommendations', () => {
     const recommendations = await getRecommendations(db as any, today);
     const cashflow = recommendations.find((recommendation) => recommendation.kind === 'upcoming_cashflow');
 
+    expect(fetchRatesForDate).not.toHaveBeenCalled();
     expect(cashflow).toMatchObject({
       accountName: 'Main',
       amountCents: 85000,

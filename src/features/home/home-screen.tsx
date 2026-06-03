@@ -9,6 +9,8 @@ import { AccountsOverview } from '@/features/home/accounts-overview';
 import { CategoriesOverview } from '@/features/home/categories-overview';
 import { ScreensLinksGrid } from '@/features/home/screens-grid';
 import { HomeRecommendations } from '@/features/recommendations/components/home-recommendations';
+import { queryKeys } from '@/lib/data/query-keys';
+import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
@@ -19,7 +21,18 @@ import { TransactionsList } from './transactions-list';
 
 export function HomeScreen() {
   const theme = useThemeConfig();
-  const { refreshing, onRefresh } = useRefresh();
+  const currentYearMonth = React.useMemo(() => format(new Date(), 'yyyy-MM'), []);
+  const [monthStart, monthEnd] = React.useMemo(() => getCurrentMonthRange(currentYearMonth), [currentYearMonth]);
+  const refreshKeys = React.useMemo(() => [
+    queryKeys.monthSummary.all,
+    queryKeys.accounts.withBalanceForRange(monthStart, monthEnd),
+    queryKeys.insights.categorySpendRange(monthStart, monthEnd),
+    queryKeys.transactions.recent(10),
+    queryKeys.globalBudget.all,
+    queryKeys.globalBudget.spend(monthStart, monthEnd),
+    queryKeys.recommendations.home,
+  ] as const, [monthEnd, monthStart]);
+  const { refreshing, onRefresh } = useRefresh(refreshKeys);
   const density = useAppStore.use.density();
   const isCompact = density === 'compact';
   const profile = useAppStore.use.profile();

@@ -19,6 +19,10 @@ jest.mock('expo-crypto', () => ({
   randomUUID: jest.fn(() => 'test-uuid-1234'),
 }));
 
+const { fetchRatesForDate } = jest.requireMock('./service') as {
+  fetchRatesForDate: jest.Mock;
+};
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 async function seedRate(
@@ -97,6 +101,16 @@ describe('getRatesForDate', () => {
   it('returns { EUR: 1 } when currency_rates is empty', async () => {
     const db = await createTestDb();
     const rates = await getRatesForDate(db as any, 1_777_766_400);
+    expect(rates).toEqual({ EUR: 1 });
+  });
+
+  it('does not fetch missing rates when fetchIfMissing is false', async () => {
+    const db = await createTestDb();
+    fetchRatesForDate.mockClear();
+
+    const rates = await getRatesForDate(db as any, 1_777_766_400, { fetchIfMissing: false });
+
+    expect(fetchRatesForDate).not.toHaveBeenCalled();
     expect(rates).toEqual({ EUR: 1 });
   });
 

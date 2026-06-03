@@ -102,7 +102,7 @@ async function detectUpcomingCashflow(
   const [accounts, rules, rates] = await Promise.all([
     getAccountsWithBalance(db),
     getDueExpenseRules(db, todayUnix, windowEndUnix),
-    getRatesForDate(db, todayUnix),
+    getRatesForDate(db, todayUnix, { fetchIfMissing: false }),
   ]);
 
   const rulesByAccount = new Map<string, DueRuleRow[]>();

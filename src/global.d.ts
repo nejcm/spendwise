@@ -34,3 +34,18 @@ declare type IsNever<T> = [T] extends [never] ? never : T;
 declare type OrPromise<T> = T | Promise<T>;
 
 declare type SetTimeout = ReturnType<typeof setTimeout>;
+
+/* eslint-disable ts/consistent-type-imports, ts/no-redeclare */
+type JestFn = <T extends (...args: any[]) => any = (...args: any[]) => any>(
+  implementation?: T,
+) => jest.Mock<T>;
+
+declare const jest: Omit<typeof import('@jest/globals')['jest'], 'fn'> & {
+  fn: JestFn;
+};
+
+declare namespace jest {
+  type Mock<T extends (...args: any[]) => any = (...args: any[]) => any> = import('jest-mock').Mock<T>;
+  type MockedFunction<T extends (...args: any[]) => any> = import('jest-mock').MockedFunction<T>;
+}
+/* eslint-enable ts/consistent-type-imports, ts/no-redeclare */

@@ -1,4 +1,4 @@
-import type { Router } from 'expo-router';
+import type { ImperativeRouter } from 'expo-router';
 import type { IconButtonProps } from './ui';
 import { useRouter } from 'expo-router';
 import { goBackOrFallback } from '@/lib/routing';
@@ -8,7 +8,7 @@ export type ScreenHeaderProps = {
   title: string;
   back?: boolean;
   /** Used when there is no navigation history (e.g. deep link); avoids unhandled GO_BACK. */
-  backHref?: Parameters<Router['replace']>[0];
+  backHref?: Parameters<ImperativeRouter['replace']>[0];
   children?: React.ReactNode;
 };
 

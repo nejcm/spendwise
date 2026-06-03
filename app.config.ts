@@ -56,7 +56,6 @@ export default ({ config }: ConfigContext): ExpoConfig =>
     scheme: Env.EXPO_PUBLIC_SCHEME,
     slug: 'spendwise',
     version: Env.EXPO_PUBLIC_VERSION.toString(),
-    orientation: 'portrait',
     icon: './assets/icon/spendwise.png',
     userInterfaceStyle: 'automatic',
     updates: {

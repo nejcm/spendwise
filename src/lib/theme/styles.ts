@@ -1,5 +1,5 @@
-import type { Theme } from '@react-navigation/native';
-import { DarkTheme as _DarkTheme, DefaultTheme } from '@react-navigation/native';
+import type { Theme } from 'expo-router/react-navigation';
+import { DarkTheme as _DarkTheme, DefaultTheme } from 'expo-router/react-navigation';
 import { StyleSheet } from 'react-native';
 
 export const defaultStyles = StyleSheet.create({
@@ -14,7 +14,7 @@ export const defaultStyles = StyleSheet.create({
   },
 });
 
-export const LightTheme: Theme = {
+export const LightTheme = {
   ...DefaultTheme,
   colors: {
     primary: '#3965cc',
@@ -24,9 +24,9 @@ export const LightTheme: Theme = {
     border: '#e5e5e5',
     notification: '#f7f0e9',
   },
-};
+} satisfies Theme;
 
-export const DarkTheme: Theme = {
+export const DarkTheme = {
   ..._DarkTheme,
   colors: {
     primary: '#3965cc',
@@ -36,4 +36,4 @@ export const DarkTheme: Theme = {
     border: '#1f222d',
     notification: '#63605d',
   },
-};
+} satisfies Theme;

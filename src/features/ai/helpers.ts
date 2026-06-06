@@ -1,8 +1,7 @@
-import type { Theme } from '@react-navigation/native';
 import type { MarkdownStyle } from 'react-native-enriched-markdown';
 import { DarkTheme, LightTheme } from '@/lib/theme/styles';
 
-export function getMarkdownStyle(isDark: Theme['dark']): MarkdownStyle {
+export function getMarkdownStyle(isDark: boolean): MarkdownStyle {
   const colors = isDark ? DarkTheme.colors : LightTheme.colors;
   const mutedForeground = isDark ? '#6b7280' : '#9ca3af';
   const muted = isDark ? '#393c49' : '#e9eaec';

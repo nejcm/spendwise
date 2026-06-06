@@ -45,7 +45,7 @@ export function AccountSummary({ accountId, startDate, endDate }: AccountSummary
         accessibilityLabel={translate('accounts.view_currency')}
         className="mb-2 flex-row items-center justify-center gap-1 self-center rounded-md px-2 py-1"
       >
-        <Text className="text-sm font-medium text-muted-foreground">{viewCurrency}</Text>
+        <Text className="text-sm text-muted-foreground">{viewCurrency}</Text>
         <ChevronDown className="text-muted-foreground" size={16} />
       </Pressable>
       {showSkeleton

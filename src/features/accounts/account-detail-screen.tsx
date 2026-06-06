@@ -25,12 +25,14 @@ const loaderDimensions: LoaderDimensions = [['100%', 75, 'mb-8'], ['100%', 25], 
 export function AccountDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const currency = useAppStore.use.currency();
+  const preferredCurrency = useAppStore.use.currency();
   const selection = useAppStore.use.periodSelection();
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
   const refreshKeys = useMemo(() => [
     queryKeys.accounts.withBalanceForRange(startDate, endDate),
     queryKeys.accounts.summaryForRange(id, startDate, endDate),
+    queryKeys.accounts.summaryNativeForRange(id, startDate, endDate),
+    queryKeys.currencyRates.all,
     queryKeys.transactions.list(`${startDate}/${endDate}`),
   ] as const, [endDate, id, startDate]);
   const { refreshing, onRefresh } = useRefresh(refreshKeys);
@@ -83,10 +85,10 @@ export function AccountDetailScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           <AccountSummary
+            key={`${id}-${preferredCurrency}`}
             accountId={id}
             startDate={startDate}
             endDate={endDate}
-            currency={currency}
           />
 
           <TransactionList

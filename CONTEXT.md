@@ -24,6 +24,14 @@ _Avoid_: Day
 A stored spending cap used to compare spending against a **Period**.
 _Avoid_: Budget amount, spending target
 
+**Preferred Currency**:
+The global display currency chosen in Settings; used to normalize stored transaction totals across the app.
+_Avoid_: Default currency, base currency
+
+**View Currency**:
+An ephemeral, screen-local currency for account summary display; may differ from **Preferred Currency** and uses the latest exchange rates when it does.
+_Avoid_: Display currency, selected currency
+
 ## Relationships
 
 - **Today** represents exactly one current local calendar **Day**

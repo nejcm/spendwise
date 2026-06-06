@@ -26,12 +26,13 @@ export function useRatesForDate(dateUnix: number | null) {
   });
 }
 
-export function useCurrencyRates() {
+export function useCurrencyRates(options?: { enabled?: boolean }) {
   const db = useSQLiteContext();
   return useQuery({
     queryKey: queryKeys.currencyRates.all,
     queryFn: () => queries.loadOrFetchRates(db),
     staleTime: STALE_MS,
+    enabled: options?.enabled ?? true,
   });
 }
 

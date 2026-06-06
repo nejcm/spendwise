@@ -30,6 +30,10 @@ export const queryKeys = {
       ['total-balance', yearMonth] as const,
     summaryForRange: (accountId: string | undefined, startDate: number | undefined, endDate: number | undefined) =>
       ['accounts', 'summary-range', accountId, startDate, endDate] as const,
+    summaryNativeForRange: (accountId: string | undefined, startDate: number | undefined, endDate: number | undefined) =>
+      ['accounts', 'summary-native-range', accountId, startDate, endDate] as const,
+    summaryAll: ['accounts', 'summary-range'] as const,
+    summaryNativeAll: ['accounts', 'summary-native-range'] as const,
   },
 
   // ─── Categories ───

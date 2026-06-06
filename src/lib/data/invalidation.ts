@@ -20,6 +20,8 @@ const INVALIDATION_RULES = {
   transaction: [
     queryKeys.transactions.all,
     queryKeys.accounts.withBalance,
+    queryKeys.accounts.summaryAll,
+    queryKeys.accounts.summaryNativeAll,
     queryKeys.accounts.totalBalance,
     queryKeys.monthSummary.all,
     queryKeys.insights.all,

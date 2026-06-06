@@ -4,6 +4,7 @@ import {
   archiveAccount,
   createAccount,
   getAccounts,
+  getAccountSummaryNativeByRange,
   getAccountsWithBalance,
   getAccountsWithBalanceForMonth,
   getAccountsWithBalanceForRange,
@@ -252,6 +253,48 @@ describe('getTotalBalance', () => {
 
     const result = await getTotalBalance(db as any);
     expect(result).toBe(100_000);
+  });
+});
+
+// ─── getAccountSummaryNativeByRange ───────────────────────────────────────────
+
+describe('getAccountSummaryNativeByRange', () => {
+  it('aggregates income and expense by native currency', async () => {
+    const db = await createTestDb();
+    await seedAccount(db);
+    await seedTransaction(db, { id: 'txn_1', type: 'income', amount: 10_000, currency: 'EUR', date: MAR_MID });
+    await seedTransaction(db, { id: 'txn_2', type: 'expense', amount: 3000, currency: 'EUR', date: MAR_MID });
+    await seedTransaction(db, { id: 'txn_3', type: 'income', amount: 5000, currency: 'USD', date: MAR_MID });
+
+    const rows = await getAccountSummaryNativeByRange(db as any, 'acc_1', undefined, undefined);
+
+    expect(rows).toEqual(expect.arrayContaining([
+      { type: 'income', currency: 'EUR', total: 10_000 },
+      { type: 'expense', currency: 'EUR', total: 3000 },
+      { type: 'income', currency: 'USD', total: 5000 },
+    ]));
+    expect(rows).toHaveLength(3);
+  });
+
+  it('filters by date range', async () => {
+    const db = await createTestDb();
+    await seedAccount(db);
+    await seedTransaction(db, { id: 'txn_1', type: 'expense', amount: 1000, currency: 'EUR', date: MAR_MID });
+    await seedTransaction(db, { id: 'txn_2', type: 'expense', amount: 2000, currency: 'EUR', date: APR_MID });
+
+    const rows = await getAccountSummaryNativeByRange(db as any, 'acc_1', MAR_START, APR_START);
+
+    expect(rows).toEqual([{ type: 'expense', currency: 'EUR', total: 1000 }]);
+  });
+
+  it('ignores transfers', async () => {
+    const db = await createTestDb();
+    await seedAccount(db);
+    await seedTransaction(db, { id: 'txn_1', type: 'transfer', amount: 5000, currency: 'EUR', date: MAR_MID });
+
+    const rows = await getAccountSummaryNativeByRange(db as any, 'acc_1', undefined, undefined);
+
+    expect(rows).toEqual([]);
   });
 });
 

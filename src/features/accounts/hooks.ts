@@ -1,17 +1,21 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { AccountFormData } from './types';
+import type { CurrencyKey } from '@/features/currencies';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Alert } from '@/components/ui';
+import { useCurrencyRates } from '@/features/currencies/hooks';
 import { captureError } from '@/lib/analytics';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
 
 import { translate } from '@/lib/i18n';
+import { useAppStore } from '@/lib/store/store';
 import * as queries from './queries';
+import { computeAccountSummaryForViewCurrency } from './summary-conversion';
 
 // ─── Read Hooks ───
 
@@ -46,13 +50,63 @@ export function useAccountSummaryByRange(
   accountId: string | undefined,
   startDate: number | undefined,
   endDate: number | undefined,
+  options?: { enabled?: boolean },
 ) {
   const db = useSQLiteContext();
   return useQuery({
     queryKey: queryKeys.accounts.summaryForRange(accountId, startDate, endDate),
     queryFn: () => queries.getAccountSummaryByRange(db, accountId!, startDate, endDate),
-    enabled: !!accountId,
+    enabled: (options?.enabled ?? true) && !!accountId,
   });
+}
+
+export function useAccountSummaryNativeByRange(
+  accountId: string | undefined,
+  startDate: number | undefined,
+  endDate: number | undefined,
+  options?: { enabled?: boolean },
+) {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: queryKeys.accounts.summaryNativeForRange(accountId, startDate, endDate),
+    queryFn: () => queries.getAccountSummaryNativeByRange(db, accountId!, startDate, endDate),
+    enabled: (options?.enabled ?? true) && !!accountId,
+  });
+}
+
+export function useAccountSummaryDisplay(
+  accountId: string | undefined,
+  startDate: number | undefined,
+  endDate: number | undefined,
+  viewCurrency: CurrencyKey,
+) {
+  const preferredCurrency = useAppStore.use.currency();
+  const isPreferredView = viewCurrency === preferredCurrency;
+
+  const preferredQuery = useAccountSummaryByRange(accountId, startDate, endDate, {
+    enabled: isPreferredView,
+  });
+  const nativeQuery = useAccountSummaryNativeByRange(accountId, startDate, endDate, {
+    enabled: !isPreferredView,
+  });
+  const ratesQuery = useCurrencyRates({ enabled: !isPreferredView });
+  const ratesReady = !ratesQuery.isLoading && !ratesQuery.isPending;
+
+  const data = useMemo(() => {
+    if (isPreferredView) return preferredQuery.data;
+    if (!nativeQuery.data || !ratesReady) return undefined;
+    return computeAccountSummaryForViewCurrency(nativeQuery.data, viewCurrency, ratesQuery.data ?? {});
+  }, [isPreferredView, nativeQuery.data, preferredQuery.data, ratesQuery.data, ratesReady, viewCurrency]);
+
+  const isLoading = isPreferredView
+    ? preferredQuery.isLoading
+    : nativeQuery.isLoading || !ratesReady;
+
+  const isError = isPreferredView
+    ? preferredQuery.isError
+    : nativeQuery.isError || ratesQuery.isError;
+
+  return { data, isLoading, isError };
 }
 
 export function useTotalBalance(yearMonth?: string) {

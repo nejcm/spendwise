@@ -1,6 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import type { MonthSummary } from '../transactions/types';
+import type { CurrencyKey } from '../currencies';
+import type { MonthSummary, TransactionType } from '../transactions/types';
 import type { Account, AccountFormData, AccountWithBalance } from './types';
 
 import { parseToCents } from '@/lib/data/money';
@@ -158,6 +159,29 @@ export async function getAccountSummaryByRange(
   const income = row?.income ?? 0;
   const expense = row?.expense ?? 0;
   return { income, expense, balance: income - expense };
+}
+
+export type AccountSummaryNativeRow = {
+  type: Extract<TransactionType, 'income' | 'expense'>;
+  currency: CurrencyKey;
+  total: number;
+};
+
+export async function getAccountSummaryNativeByRange(
+  db: SQLiteDatabase,
+  accountId: string,
+  startDate: number | undefined,
+  endDate: number | undefined,
+): Promise<AccountSummaryNativeRow[]> {
+  const hasRange = !!startDate && !!endDate;
+  return db.getAllAsync<AccountSummaryNativeRow>(
+    `SELECT type, currency, SUM(amount) AS total
+     FROM transactions
+     WHERE account_id = ? AND type IN ('income', 'expense')
+     ${hasRange ? 'AND date >= ? AND date < ?' : ''}
+     GROUP BY type, currency`,
+    hasRange ? [accountId, startDate, endDate] : [accountId],
+  );
 }
 
 // ─── Write Queries ───

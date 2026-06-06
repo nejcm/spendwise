@@ -31,7 +31,8 @@
       "investment": "Investment",
       "other": "Other",
       "savings": "Savings"
-    }
+    },
+    "view_currency": "View currency"
   },
   "ai": {
     "add_api_key_in": "Add an API key in",

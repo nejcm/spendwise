@@ -31,7 +31,8 @@
       "investment": "Investment",
       "other": "Sonstiges",
       "savings": "Sparkonto"
-    }
+    },
+    "view_currency": "Anzeigewährung"
   },
   "ai": {
     "add_api_key_in": "API-Schlüssel hinzufügen in",

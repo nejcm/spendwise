@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 import { useMemo } from 'react';
 
-import { ScrollView, View } from 'react-native';
+import { RefreshControl, ScrollView, View } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
 import { PeriodSwipeContainer } from '@/components/period-swipe-container';
 import ScreenHeader from '@/components/screen-header';
@@ -11,9 +11,12 @@ import { FocusAwareStatusBar, IconButton, Pencil } from '@/components/ui';
 import { SkeletonRows } from '@/components/ui/skeleton';
 import { useTransactions } from '@/features/transactions/api';
 import { TransactionList } from '@/features/transactions/components/transaction-list';
+import { queryKeys } from '@/lib/data/query-keys';
 import { getPeriodRange } from '@/lib/date/helpers';
+import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
+import { defaultStyles } from '@/lib/theme/styles';
 import { useAccountsWithBalanceForRange } from './api';
 import { AccountSummary } from './components/account-summary';
 
@@ -25,6 +28,12 @@ export function AccountDetailScreen() {
   const currency = useAppStore.use.currency();
   const selection = useAppStore.use.periodSelection();
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
+  const refreshKeys = useMemo(() => [
+    queryKeys.accounts.withBalanceForRange(startDate, endDate),
+    queryKeys.accounts.summaryForRange(id, startDate, endDate),
+    queryKeys.transactions.list(`${startDate}/${endDate}`),
+  ] as const, [endDate, id, startDate]);
+  const { refreshing, onRefresh } = useRefresh(refreshKeys);
 
   const { data: accounts = [], isLoading: accountsLoading } = useAccountsWithBalanceForRange(startDate, endDate);
   const account = useMemo(() => accounts.find((a) => a.id === id), [accounts, id]);
@@ -67,7 +76,12 @@ export function AccountDetailScreen() {
 
         <PeriodSelector selection={selection} />
 
-        <ScrollView className="flex-1" contentContainerClassName="pt-4 pb-6">
+        <ScrollView
+          className="flex-1"
+          style={defaultStyles.transparentBg}
+          contentContainerClassName="pt-4 pb-6"
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        >
           <AccountSummary
             accountId={id}
             startDate={startDate}

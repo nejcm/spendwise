@@ -147,7 +147,7 @@ export default function Summary() {
                 <View className={`flex-1 items-start rounded-xl bg-card ${isCompact ? 'px-3 py-2.5' : 'gap-0.5 px-4 py-3'}`}>
                   <Label className="text-muted-foreground">{translate('home.income')}</Label>
                   <FormattedCurrency className="text-lg font-bold" value={data?.income ?? 0} currency={currency} prefix="+" />
-                  {trend.incomeDeltaPct !== null && trend.incomeDeltaPct !== 0 && (
+                  {trend.incomeDeltaPct !== null && (
                     <Text className={`${textBaseCls} ${trend.incomeDeltaPct >= 0 ? textSuccessCls : textDangerCls}`}>
                       {trend.incomeDeltaPct >= 0 ? '↑' : '↓'}
                       {' '}
@@ -159,7 +159,7 @@ export default function Summary() {
                 <View className={`flex-1 items-start rounded-xl bg-card ${isCompact ? 'px-3 py-2.5' : 'gap-0.5 px-4 py-3'}`}>
                   <Label className="text-muted-foreground">{translate('home.expenses')}</Label>
                   <FormattedCurrency className="text-lg font-bold" value={data?.expense ?? 0} currency={currency} prefix="-" />
-                  {trend.expenseDeltaPct !== null && trend.expenseDeltaPct !== 0 && (
+                  {trend.expenseDeltaPct !== null && (
                     <Text className={`${textBaseCls} ${trend.expenseDeltaPct <= 0 ? textSuccessCls : textDangerCls}`}>
                       {trend.expenseDeltaPct >= 0 ? '↑' : '↓'}
                       {' '}

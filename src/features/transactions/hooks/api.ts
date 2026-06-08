@@ -66,9 +66,8 @@ export type MonthTrend = {
 };
 
 export function calcDeltaPct(current: number, prior: number): number | null {
-  if (prior === 0) return null;
-  const pct = Math.round(((current - prior) / prior) * 100);
-  return pct === 0 ? null : pct;
+  if (prior === 0) return current === 0 ? 0 : null;
+  return Math.round(((current - prior) / prior) * 100);
 }
 
 export function useMonthTrend(currentYearMonth: string): MonthTrend {

@@ -1,16 +1,16 @@
 import { calcDeltaPct } from './api';
 
 describe('calcDeltaPct', () => {
-  it('returns null when prior is 0 (avoid division by zero)', () => {
+  it('returns null when prior is 0 and current is non-zero (percent change is undefined)', () => {
     expect(calcDeltaPct(100, 0)).toBeNull();
   });
 
-  it('returns null when both are 0', () => {
-    expect(calcDeltaPct(0, 0)).toBeNull();
+  it('returns 0 when both are 0', () => {
+    expect(calcDeltaPct(0, 0)).toBe(0);
   });
 
-  it('returns null when values are identical (zero delta is not meaningful)', () => {
-    expect(calcDeltaPct(500, 500)).toBeNull();
+  it('returns 0 when values are identical (zero delta is still a value)', () => {
+    expect(calcDeltaPct(500, 500)).toBe(0);
   });
 
   it('returns positive percent when current is higher than prior', () => {

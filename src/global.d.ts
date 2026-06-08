@@ -33,6 +33,12 @@ declare type IsNever<T> = [T] extends [never] ? never : T;
 
 declare type OrPromise<T> = T | Promise<T>;
 
+// Side-effect CSS imports (e.g. `import '../global.css'`) only resolve via the
+// `expo/types` reference inside the gitignored, dev-server-generated
+// `expo-env.d.ts` — which never exists in CI. Declare it explicitly here so
+// `tsc` works on a clean checkout.
+declare module '*.css';
+
 declare type SetTimeout = ReturnType<typeof setTimeout>;
 
 /* eslint-disable ts/consistent-type-imports, ts/no-redeclare */

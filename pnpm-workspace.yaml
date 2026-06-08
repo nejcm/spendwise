@@ -1,4 +1,6 @@
-minimumReleaseAge: 4320 # 3 days
+minimumReleaseAge: 2880 # 2 days
 shellEmulator: true
 
 trustPolicy: no-downgrade
+trustPolicyExclude:
+  - semver@6.3.1 # false-positive cross-major trust downgrade vs semver@7.x provenance, see pnpm/pnpm#10622

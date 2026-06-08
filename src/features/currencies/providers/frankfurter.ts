@@ -1,7 +1,7 @@
 import type { CurrencyRatesProvider, DateRangeRatesResult, FetchRatesResult, RateMap } from './types';
 
 import { CURRENCY_VALUES } from '../index';
-import { fetchRatesWithBackoff, filterSupportedRates } from './utils';
+import { fetchRatesWithBackoff, fetchWithTimeout, filterSupportedRates } from './utils';
 
 const FRANKFURTER_SYMBOLS = CURRENCY_VALUES.filter((c) => c !== 'EUR').join(',');
 const FRANKFURTER_RATES_URL = 'https://api.frankfurter.dev/v2/rates';
@@ -37,7 +37,7 @@ function parseRates(data: unknown): RateMap | null {
 async function fetchLatestImpl(): Promise<FetchRatesResult | null> {
   return fetchRatesWithBackoff(
     () =>
-      fetch(buildRatesUrl({ base: 'EUR', quotes: FRANKFURTER_SYMBOLS })),
+      fetchWithTimeout(buildRatesUrl({ base: 'EUR', quotes: FRANKFURTER_SYMBOLS })),
     (data) => {
       const rates = parseRates(data);
       if (!rates) return null;
@@ -49,7 +49,7 @@ async function fetchLatestImpl(): Promise<FetchRatesResult | null> {
 async function fetchHistoricalImpl(dateStr: string): Promise<FetchRatesResult | null> {
   return fetchRatesWithBackoff(
     () =>
-      fetch(buildRatesUrl({ base: 'EUR', quotes: FRANKFURTER_SYMBOLS, date: dateStr })),
+      fetchWithTimeout(buildRatesUrl({ base: 'EUR', quotes: FRANKFURTER_SYMBOLS, date: dateStr })),
     (data) => {
       const rates = parseRates(data);
       if (!rates) return null;
@@ -89,7 +89,7 @@ async function fetchRangeImpl(
 ): Promise<DateRangeRatesResult | null> {
   return fetchRatesWithBackoff(
     () =>
-      fetch(buildRatesUrl({ base: 'EUR', quotes: FRANKFURTER_SYMBOLS, from: startDate, to: endDate })),
+      fetchWithTimeout(buildRatesUrl({ base: 'EUR', quotes: FRANKFURTER_SYMBOLS, from: startDate, to: endDate })),
     (data) => {
       const ratesByDate = parseRangeSegment(data);
       return ratesByDate ? { ratesByDate, source: 'frankfurter-range' } : null;

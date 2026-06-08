@@ -9,6 +9,10 @@ const RATE_FETCH_MAX_ATTEMPTS = 3;
 const RATE_FETCH_INITIAL_BACKOFF_MS = 400;
 export const RATE_FETCH_TIMEOUT_MS = 12_000;
 export const HISTORICAL_DATE_WALKBACK_DAYS = 5;
+/** Overall wall-clock budget for one historical lookup across walkback dates + providers. */
+export const HISTORICAL_WALKBACK_BUDGET_MS = 30_000;
+/** Tighter budget when a local SQLite cache can recover, so offline reads fall through fast. */
+export const HISTORICAL_WALKBACK_CACHE_BUDGET_MS = 8_000;
 
 function sleepMs(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -30,24 +34,24 @@ export function isRetryableHttpStatus(status: number): boolean {
   );
 }
 
-function withFetchTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
-      const err = new Error('The operation was aborted');
-      err.name = 'AbortError';
-      reject(err);
-    }, ms);
-    promise.then(
-      (value) => {
-        clearTimeout(timer);
-        resolve(value);
-      },
-      (error: unknown) => {
-        clearTimeout(timer);
-        reject(error);
-      },
-    );
-  });
+/**
+ * Fetches `url` with a hard timeout. On timeout the in-flight request is
+ * cancelled via `AbortController` (no leaked sockets / timers) and the rejection
+ * surfaces to the caller. Each HTTP call is bounded individually — never a whole
+ * mirror chain under one shared clock.
+ */
+export async function fetchWithTimeout(
+  url: string,
+  ms: number = RATE_FETCH_TIMEOUT_MS,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(url, { signal: controller.signal });
+  }
+  finally {
+    clearTimeout(timer);
+  }
 }
 
 /** Returns `dateStr` then up to `maxPriorDays` prior calendar dates (UTC). */
@@ -63,6 +67,9 @@ export function priorCalendarDates(dateStr: string, maxPriorDays: number): strin
 /**
  * Fetches JSON from `doRequest`, with exponential backoff retries when the
  * server signals rate limits / overload or the request fails transiently.
+ *
+ * `doRequest` is expected to bound its own network I/O (see `fetchWithTimeout`);
+ * a thrown/aborted request is treated as a transient failure and retried.
  */
 export async function fetchRatesWithBackoff<T extends { source: string }>(
   doRequest: () => Promise<Response>,
@@ -70,7 +77,7 @@ export async function fetchRatesWithBackoff<T extends { source: string }>(
 ): Promise<T | null> {
   for (let attempt = 0; attempt < RATE_FETCH_MAX_ATTEMPTS; attempt++) {
     try {
-      const response = await withFetchTimeout(doRequest(), RATE_FETCH_TIMEOUT_MS);
+      const response = await doRequest();
       if (isRetryableHttpStatus(response.status)) {
         if (attempt < RATE_FETCH_MAX_ATTEMPTS - 1) {
           await sleepMs(rateFetchBackoffDelayMs(attempt));

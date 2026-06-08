@@ -190,6 +190,61 @@ describe('fetchRatesForDate', () => {
     expect(frankfurterUrls.some((url) => url.includes('date=2026-06-02'))).toBe(true);
   });
 
+  it('walks back every prior date then falls through to the next provider', async () => {
+    const fetchMock = globalThis.fetch as jest.MockedFunction<typeof fetch>;
+    fetchMock.mockImplementation((input) => {
+      const url = String(input);
+      // frankfurter has no data for any walkback date
+      if (url.includes('api.frankfurter.dev')) {
+        return Promise.resolve(createMockResponse({ status: 404 }));
+      }
+      // fawazahmed0 mirror resolves
+      return Promise.resolve(createMockResponse({
+        status: 200,
+        body: { eur: { usd: 1.07 } },
+      }));
+    });
+
+    const promise = fetchRatesForDate('2026-06-08');
+    await jest.runAllTimersAsync();
+    const result = await promise;
+
+    expect(result.source).toBe('fawazahmed0-historical');
+
+    const frankfurterDates = new Set(
+      fetchMock.mock.calls
+        .map(([url]) => String(url))
+        .filter((url) => url.includes('api.frankfurter.dev'))
+        .map((url) => new URL(url).searchParams.get('date')),
+    );
+    // HISTORICAL_DATE_WALKBACK_DAYS (5) prior days + the anchor = 6 distinct dates.
+    expect(frankfurterDates.size).toBe(6);
+  });
+
+  it('stops after the anchor date when the time budget is already spent', async () => {
+    const fetchMock = globalThis.fetch as jest.MockedFunction<typeof fetch>;
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    fetchMock.mockResolvedValue(createMockResponse({ status: 404 }));
+
+    const promise = fetchRatesForDate('2026-06-03', { budgetMs: 0, reportToAnalytics: false });
+    const rejection = expect(promise).rejects.toThrow(
+      'Historical currency rate providers failed for date 2026-06-03',
+    );
+    await jest.runAllTimersAsync();
+    await rejection;
+
+    const frankfurterDates = new Set(
+      fetchMock.mock.calls
+        .map(([url]) => String(url))
+        .filter((url) => url.includes('api.frankfurter.dev'))
+        .map((url) => new URL(url).searchParams.get('date')),
+    );
+    // Budget of 0 ⇒ break after the anchor; no walkback to prior days.
+    expect(frankfurterDates).toEqual(new Set(['2026-06-03']));
+    expect(captureError).not.toHaveBeenCalled();
+    errorSpy.mockRestore();
+  });
+
   it('skips captureError when reportToAnalytics is false', async () => {
     const fetchMock = globalThis.fetch as jest.MockedFunction<typeof fetch>;
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});

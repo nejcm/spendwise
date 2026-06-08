@@ -6,6 +6,7 @@ import type { RateMap } from './service';
 import { findClosestDateBinary, unixToISODate } from '@/lib/date/helpers';
 import { CURRENCY_VALUES } from './';
 
+import { HISTORICAL_WALKBACK_CACHE_BUDGET_MS } from './providers/utils';
 import { fetchRates, fetchRatesForDate, fetchRatesForDateRange } from './service';
 
 // ─── Types ───
@@ -121,7 +122,12 @@ export async function getRatesForDate(
   if (fetchIfMissing) {
     try {
       const dateStr = new Date(dayTimestamp * 1000).toISOString().slice(0, 10);
-      const fetched = await fetchRatesForDate(dateStr, { reportToAnalytics: false });
+      // Recoverable: a cached closest-date row below can satisfy the read, so keep
+      // the network attempt short and quiet rather than blocking offline reads.
+      const fetched = await fetchRatesForDate(dateStr, {
+        reportToAnalytics: false,
+        budgetMs: HISTORICAL_WALKBACK_CACHE_BUDGET_MS,
+      });
       if (fetched) {
         await saveRatesForDate(db, fetched.rates, dayTimestamp);
         const freshMap = toRatesMap(

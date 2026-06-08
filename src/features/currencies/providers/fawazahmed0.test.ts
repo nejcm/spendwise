@@ -1,4 +1,9 @@
-import { fawazahmed0Provider } from './fawazahmed0';
+import {
+  buildMirrorUrls,
+  dateTagsForHistorical,
+  fawazahmed0Provider,
+  isWithinLastDays,
+} from './fawazahmed0';
 
 type MockResponseInit = {
   status: number;
@@ -60,5 +65,41 @@ describe('fawazahmed0Provider', () => {
     expect(urls[0]).toContain('2020-01-15');
     expect(urls[0]).toContain('cdn.jsdelivr.net');
     expect(urls[1]).toContain('2020-01-15.currency-api.pages.dev');
+  });
+});
+
+describe('fawazahmed0 date-tag helpers', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    // Fixed UTC midnight anchor so day-boundary math is deterministic.
+    jest.setSystemTime(new Date('2026-06-08T00:00:00Z'));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('isWithinLastDays includes the exact boundary and excludes beyond it', () => {
+    expect(isWithinLastDays('2026-06-08', 7)).toBe(true); // same day
+    expect(isWithinLastDays('2026-06-01', 7)).toBe(true); // exactly 7 days prior
+    expect(isWithinLastDays('2026-05-31', 7)).toBe(false); // 8 days prior
+  });
+
+  it('isWithinLastDays excludes future dates', () => {
+    expect(isWithinLastDays('2026-06-09', 7)).toBe(false);
+  });
+
+  it('dateTagsForHistorical adds the "latest" tag only for recent dates', () => {
+    expect(dateTagsForHistorical('2026-06-05')).toEqual(['2026-06-05', 'latest']);
+    expect(dateTagsForHistorical('2020-01-15')).toEqual(['2020-01-15']);
+  });
+
+  it('buildMirrorUrls returns jsDelivr then pages.dev for a tag', () => {
+    const urls = buildMirrorUrls('2020-01-15');
+    expect(urls).toHaveLength(2);
+    expect(urls[0]).toBe(
+      'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@2020-01-15/v1/currencies/eur.json',
+    );
+    expect(urls[1]).toBe('https://2020-01-15.currency-api.pages.dev/v1/currencies/eur.json');
   });
 });

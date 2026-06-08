@@ -1,9 +1,9 @@
 import type { CurrencyRatesProvider, DateRangeRatesResult, FetchRatesResult } from './types';
-import { fetchRatesWithBackoff, filterSupportedRates } from './utils';
+import { fetchRatesWithBackoff, fetchWithTimeout, filterSupportedRates } from './utils';
 
 async function fetchLatestImpl(): Promise<FetchRatesResult | null> {
   return fetchRatesWithBackoff(
-    () => fetch('https://open.er-api.com/v6/latest/EUR'),
+    () => fetchWithTimeout('https://open.er-api.com/v6/latest/EUR'),
     (data) => {
       const d = data as { result?: string; rates?: Record<string, number> };
       if (d.result !== 'success' || !d.rates) return null;

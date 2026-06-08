@@ -5,12 +5,18 @@ import { splitBy } from '@/lib/date/helpers';
 import { fawazahmed0Provider } from './providers/fawazahmed0';
 import { frankfurterProvider } from './providers/frankfurter';
 import { openErApiProvider } from './providers/open-er-api';
-import { HISTORICAL_DATE_WALKBACK_DAYS, priorCalendarDates } from './providers/utils';
+import {
+  HISTORICAL_DATE_WALKBACK_DAYS,
+  HISTORICAL_WALKBACK_BUDGET_MS,
+  priorCalendarDates,
+} from './providers/utils';
 
 export type { CurrencyRatesProvider, DateRangeRatesResult, FetchRatesResult, RateMap };
 
 export type FetchRatesOptions = {
   reportToAnalytics?: boolean;
+  /** Overall wall-clock budget (ms) across walkback dates + providers. Defaults to {@link HISTORICAL_WALKBACK_BUDGET_MS}. */
+  budgetMs?: number;
 };
 
 /**
@@ -52,10 +58,14 @@ async function tryProviders<T>(
 async function tryHistoricalWithWalkback(
   provider: CurrencyRatesProvider,
   dateStr: string,
+  deadlineMs: number,
 ): Promise<FetchRatesResult | null> {
   for (const tryDate of priorCalendarDates(dateStr, HISTORICAL_DATE_WALKBACK_DAYS)) {
     const result = await provider.historical(tryDate);
     if (result) return result;
+    // Always attempt the anchor date; bail before walking further once the
+    // shared budget is spent so a degraded network can't stall reads for minutes.
+    if (Date.now() >= deadlineMs) break;
   }
   return null;
 }
@@ -74,9 +84,10 @@ export async function fetchRates() {
 }
 
 export async function fetchRatesForDate(dateStr: string, options?: FetchRatesOptions) {
+  const deadlineMs = Date.now() + (options?.budgetMs ?? HISTORICAL_WALKBACK_BUDGET_MS);
   const { result, failedProviders } = await tryProviders(
     historicalProviders,
-    (p) => tryHistoricalWithWalkback(p, dateStr),
+    (p) => tryHistoricalWithWalkback(p, dateStr, deadlineMs),
   );
 
   if (!result) {

@@ -3,9 +3,9 @@ import { eachDayOfInterval } from 'date-fns';
 
 import {
   fetchRatesWithBackoff,
+  fetchWithTimeout,
   priorCalendarDates,
   RANGE_HISTORICAL_MAX_FETCHES,
-  RATE_FETCH_TIMEOUT_MS,
   subsampleOrderedToMaxCount,
 } from './utils';
 
@@ -26,7 +26,54 @@ describe('priorCalendarDates', () => {
   });
 });
 
-describe('fetchRatesWithBackoff timeout', () => {
+describe('fetchWithTimeout', () => {
+  const originalFetch = globalThis.fetch;
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    globalThis.fetch = originalFetch;
+    jest.restoreAllMocks();
+  });
+
+  it('aborts the in-flight request and leaves no dangling timer on timeout', async () => {
+    let receivedSignal: AbortSignal | undefined;
+    globalThis.fetch = jest.fn((_url: RequestInfo | URL, init?: RequestInit) => {
+      receivedSignal = init?.signal ?? undefined;
+      return new Promise<Response>((_resolve, reject) => {
+        init?.signal?.addEventListener('abort', () => {
+          const err = new Error('The operation was aborted');
+          err.name = 'AbortError';
+          reject(err);
+        });
+      });
+    }) as typeof fetch;
+
+    const promise = fetchWithTimeout('https://example.test/rates', 5_000);
+    const rejection = expect(promise).rejects.toThrow();
+    await jest.advanceTimersByTimeAsync(5_000);
+    await rejection;
+
+    expect(receivedSignal?.aborted).toBe(true);
+    expect(jest.getTimerCount()).toBe(0);
+  });
+
+  it('clears the timeout once the request resolves in time', async () => {
+    globalThis.fetch = jest.fn(() =>
+      Promise.resolve({ ok: true, status: 200 } as Response),
+    ) as typeof fetch;
+
+    const result = await fetchWithTimeout('https://example.test/rates', 5_000);
+
+    expect(result.status).toBe(200);
+    expect(jest.getTimerCount()).toBe(0);
+  });
+});
+
+describe('fetchRatesWithBackoff', () => {
   beforeEach(() => {
     jest.useFakeTimers();
   });
@@ -35,34 +82,31 @@ describe('fetchRatesWithBackoff timeout', () => {
     jest.useRealTimers();
   });
 
-  it(
-    'retries when doRequest exceeds the fetch timeout',
-    async () => {
-      let calls = 0;
-      const promise = fetchRatesWithBackoff(
-        () => {
-          calls += 1;
-          if (calls === 1) {
-            return new Promise<Response>(() => {});
-          }
-          return Promise.resolve({
-            ok: true,
-            status: 200,
-            json: async () => ({ ok: true }),
-          } as Response);
-        },
-        (data) => ((data as { ok?: boolean }).ok ? { source: 'test' } : null),
-      );
+  it('retries with backoff when a bounded request rejects, then succeeds', async () => {
+    let calls = 0;
+    const promise = fetchRatesWithBackoff(
+      () => {
+        calls += 1;
+        if (calls === 1) {
+          const err = new Error('The operation was aborted');
+          err.name = 'AbortError';
+          return Promise.reject(err);
+        }
+        return Promise.resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ ok: true }),
+        } as Response);
+      },
+      (data) => ((data as { ok?: boolean }).ok ? { source: 'test' } : null),
+    );
 
-      await jest.advanceTimersByTimeAsync(RATE_FETCH_TIMEOUT_MS);
-      await jest.advanceTimersByTimeAsync(500);
-      const result = await promise;
+    await jest.runAllTimersAsync();
+    const result = await promise;
 
-      expect(result).toEqual({ source: 'test' });
-      expect(calls).toBe(2);
-    },
-    RATE_FETCH_TIMEOUT_MS + 2_000,
-  );
+    expect(result).toEqual({ source: 'test' });
+    expect(calls).toBe(2);
+  });
 });
 
 describe('subsampleOrderedToMaxCount', () => {

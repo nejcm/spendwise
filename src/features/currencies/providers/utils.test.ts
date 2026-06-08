@@ -1,7 +1,13 @@
 import { UTCDate } from '@date-fns/utc';
 import { eachDayOfInterval } from 'date-fns';
 
-import { RANGE_HISTORICAL_MAX_FETCHES, subsampleOrderedToMaxCount } from './utils';
+import {
+  fetchRatesWithBackoff,
+  priorCalendarDates,
+  RANGE_HISTORICAL_MAX_FETCHES,
+  RATE_FETCH_TIMEOUT_MS,
+  subsampleOrderedToMaxCount,
+} from './utils';
 
 /** Same expansion as `fawazahmed0` range fetches: inclusive UTC calendar days → `YYYY-MM-DD`. */
 function isoDatesInRange(startDate: string, endDate: string): string[] {
@@ -9,6 +15,55 @@ function isoDatesInRange(startDate: string, endDate: string): string[] {
   const end = new UTCDate(`${endDate}T00:00:00Z`);
   return eachDayOfInterval({ start, end }).map((d) => d.toISOString().slice(0, 10));
 }
+
+describe('priorCalendarDates', () => {
+  it('returns anchor date then prior calendar days', () => {
+    expect(priorCalendarDates('2026-06-03', 2)).toEqual([
+      '2026-06-03',
+      '2026-06-02',
+      '2026-06-01',
+    ]);
+  });
+});
+
+describe('fetchRatesWithBackoff timeout', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it(
+    'retries when doRequest exceeds the fetch timeout',
+    async () => {
+      let calls = 0;
+      const promise = fetchRatesWithBackoff(
+        () => {
+          calls += 1;
+          if (calls === 1) {
+            return new Promise<Response>(() => {});
+          }
+          return Promise.resolve({
+            ok: true,
+            status: 200,
+            json: async () => ({ ok: true }),
+          } as Response);
+        },
+        (data) => ((data as { ok?: boolean }).ok ? { source: 'test' } : null),
+      );
+
+      await jest.advanceTimersByTimeAsync(RATE_FETCH_TIMEOUT_MS);
+      await jest.advanceTimersByTimeAsync(500);
+      const result = await promise;
+
+      expect(result).toEqual({ source: 'test' });
+      expect(calls).toBe(2);
+    },
+    RATE_FETCH_TIMEOUT_MS + 2_000,
+  );
+});
 
 describe('subsampleOrderedToMaxCount', () => {
   it('returns empty for empty items or maxCount < 1', () => {

@@ -1,10 +1,14 @@
 import type { RateMap } from './types';
+import { UTCDate } from '@date-fns/utc';
+import { subDays } from 'date-fns';
 
 import { CURRENCY_VALUES } from '../index';
 
 /** Attempts per provider before giving up (handles rate limits / transient errors). */
 const RATE_FETCH_MAX_ATTEMPTS = 3;
 const RATE_FETCH_INITIAL_BACKOFF_MS = 400;
+export const RATE_FETCH_TIMEOUT_MS = 12_000;
+export const HISTORICAL_DATE_WALKBACK_DAYS = 5;
 
 function sleepMs(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -16,7 +20,7 @@ function rateFetchBackoffDelayMs(attemptIndex: number): number {
   return exponential + jitter;
 }
 
-function isRetryableHttpStatus(status: number): boolean {
+export function isRetryableHttpStatus(status: number): boolean {
   return (
     status === 408
     || status === 429
@@ -24,6 +28,36 @@ function isRetryableHttpStatus(status: number): boolean {
     || status === 503
     || status === 504
   );
+}
+
+function withFetchTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      const err = new Error('The operation was aborted');
+      err.name = 'AbortError';
+      reject(err);
+    }, ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error: unknown) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
+
+/** Returns `dateStr` then up to `maxPriorDays` prior calendar dates (UTC). */
+export function priorCalendarDates(dateStr: string, maxPriorDays: number): string[] {
+  const dates = [dateStr];
+  const anchor = new UTCDate(`${dateStr}T00:00:00Z`);
+  for (let i = 1; i <= maxPriorDays; i++) {
+    dates.push(subDays(anchor, i).toISOString().slice(0, 10));
+  }
+  return dates;
 }
 
 /**
@@ -36,7 +70,7 @@ export async function fetchRatesWithBackoff<T extends { source: string }>(
 ): Promise<T | null> {
   for (let attempt = 0; attempt < RATE_FETCH_MAX_ATTEMPTS; attempt++) {
     try {
-      const response = await doRequest();
+      const response = await withFetchTimeout(doRequest(), RATE_FETCH_TIMEOUT_MS);
       if (isRetryableHttpStatus(response.status)) {
         if (attempt < RATE_FETCH_MAX_ATTEMPTS - 1) {
           await sleepMs(rateFetchBackoffDelayMs(attempt));

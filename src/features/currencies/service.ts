@@ -5,8 +5,13 @@ import { splitBy } from '@/lib/date/helpers';
 import { fawazahmed0Provider } from './providers/fawazahmed0';
 import { frankfurterProvider } from './providers/frankfurter';
 import { openErApiProvider } from './providers/open-er-api';
+import { HISTORICAL_DATE_WALKBACK_DAYS, priorCalendarDates } from './providers/utils';
 
 export type { CurrencyRatesProvider, DateRangeRatesResult, FetchRatesResult, RateMap };
+
+export type FetchRatesOptions = {
+  reportToAnalytics?: boolean;
+};
 
 /**
  * Other services
@@ -15,64 +20,90 @@ export type { CurrencyRatesProvider, DateRangeRatesResult, FetchRatesResult, Rat
  * - https://www.exchangerate-api.com/
  */
 
-const defaultProviderOrder: readonly CurrencyRatesProvider[] = [
+const latestProviders: readonly CurrencyRatesProvider[] = [
   frankfurterProvider,
   fawazahmed0Provider,
   openErApiProvider,
 ] as const;
 
-export async function fetchRates() {
-  let result: FetchRatesResult | null | undefined;
-  for (const p of defaultProviderOrder) {
-    result = await p.latest();
-    if (result) break;
+const historicalProviders: readonly CurrencyRatesProvider[] = [
+  frankfurterProvider,
+  fawazahmed0Provider,
+] as const;
+
+const rangeProviders: readonly CurrencyRatesProvider[] = [
+  frankfurterProvider,
+  fawazahmed0Provider,
+] as const;
+
+async function tryProviders<T>(
+  providers: readonly CurrencyRatesProvider[],
+  fn: (provider: CurrencyRatesProvider) => Promise<T | null>,
+): Promise<{ result: T | null; failedProviders: string[] }> {
+  const failedProviders: string[] = [];
+  for (const provider of providers) {
+    const result = await fn(provider);
+    if (result) return { result, failedProviders };
+    failedProviders.push(provider.id);
   }
+  return { result: null, failedProviders };
+}
+
+async function tryHistoricalWithWalkback(
+  provider: CurrencyRatesProvider,
+  dateStr: string,
+): Promise<FetchRatesResult | null> {
+  for (const tryDate of priorCalendarDates(dateStr, HISTORICAL_DATE_WALKBACK_DAYS)) {
+    const result = await provider.historical(tryDate);
+    if (result) return result;
+  }
+  return null;
+}
+
+export async function fetchRates() {
+  const { result, failedProviders } = await tryProviders(latestProviders, (p) => p.latest());
 
   if (!result) {
     const err = new Error('All currency rate providers failed');
     console.error(err.message);
-    captureError(err);
+    captureError(err, { failedProviders });
     throw err;
   }
 
   return result;
 }
 
-export async function fetchRatesForDate(dateStr: string) {
-  let result: FetchRatesResult | null | undefined;
-  for (const p of defaultProviderOrder) {
-    result = await p.historical(dateStr);
-    if (result) break;
-  }
+export async function fetchRatesForDate(dateStr: string, options?: FetchRatesOptions) {
+  const { result, failedProviders } = await tryProviders(
+    historicalProviders,
+    (p) => tryHistoricalWithWalkback(p, dateStr),
+  );
 
   if (!result) {
     const err = new Error(`Historical currency rate providers failed for date ${dateStr}`);
     console.error(err.message);
-    captureError(err, { date: dateStr });
+    if (options?.reportToAnalytics !== false) {
+      captureError(err, { date: dateStr, failedProviders });
+    }
     throw err;
   }
 
   return result;
 }
 
-// Historical (date range)
 export async function fetchRatesForDateRange(
   startDate: string,
   endDate: string,
 ) {
   const segments = splitBy(startDate, endDate, 3);
   if (segments.length === 0) {
-    // fallback to single segment
     segments.push({ start: startDate, end: endDate });
   }
 
   const results = await Promise.allSettled(
     segments.map(async (seg) => {
-      for (const p of defaultProviderOrder) {
-        const value = await p.range(seg.start, seg.end);
-        if (value) return value;
-      }
-      return null;
+      const { result } = await tryProviders(rangeProviders, (p) => p.range(seg.start, seg.end));
+      return result;
     }),
   );
 

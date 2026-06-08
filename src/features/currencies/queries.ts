@@ -121,7 +121,7 @@ export async function getRatesForDate(
   if (fetchIfMissing) {
     try {
       const dateStr = new Date(dayTimestamp * 1000).toISOString().slice(0, 10);
-      const fetched = await fetchRatesForDate(dateStr);
+      const fetched = await fetchRatesForDate(dateStr, { reportToAnalytics: false });
       if (fetched) {
         await saveRatesForDate(db, fetched.rates, dayTimestamp);
         const freshMap = toRatesMap(

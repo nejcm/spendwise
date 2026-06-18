@@ -302,6 +302,9 @@ export function TransactionForm({
     <>
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
+        bottomOffset={stickyFooterPadding + bottomMenuOffset}
+        extraKeyboardSpace={stickyFooterPadding + bottomMenuOffset}
+        mode="layout"
         contentContainerStyle={{ gap: isCompact ? 8 : 12, paddingBottom: 8 + stickyFooterPadding, paddingHorizontal: 16, paddingTop: 32 }}
         keyboardShouldPersistTaps="handled"
       >

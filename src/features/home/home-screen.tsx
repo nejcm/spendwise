@@ -15,13 +15,11 @@ import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
-import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import { getAvatar } from '../profile';
 import Summary from './summary';
 import { TransactionsList } from './transactions-list';
 
 export function HomeScreen() {
-  const theme = useThemeConfig();
   const currentYearMonth = React.useMemo(() => format(new Date(), 'yyyy-MM'), []);
   const [monthStart, monthEnd] = React.useMemo(() => getCurrentMonthRange(currentYearMonth), [currentYearMonth]);
   const refreshKeys = React.useMemo(() => [
@@ -62,7 +60,7 @@ export function HomeScreen() {
               </Link>
             </View>
           </View> */}
-          <View className="flex-row items-center gap-4 py-2">
+          <View className="flex-row items-center gap-4 pt-2">
             <Image source={getAvatar(avatar)} className="size-12 rounded-full" />
             <View>
               <Text className="text-xl/tight font-medium text-foreground">{translate('home.hi', { name })}</Text>

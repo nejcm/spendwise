@@ -41,7 +41,7 @@ export const ScreensLinksGrid = React.memo(() => {
             className="items-center gap-1.5 p-1"
             style={getPressedStyle}
           >
-            <View className={`items-center justify-center rounded-xl bg-card ${isCompact ? 'size-18' : 'size-14'}`}>
+            <View className={`items-center justify-center rounded-xl bg-card ${isCompact ? 'size-14' : 'size-15'}`}>
               <Icon size={26} strokeWidth={2} colorClassName="accent-foreground" className="my-1" />
             </View>
             <Text className="text-center text-sm text-foreground" numberOfLines={1}>

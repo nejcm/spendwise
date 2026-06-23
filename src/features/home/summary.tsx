@@ -54,14 +54,14 @@ function HomeGlobalBudget({ currency, selection, isCompact, balance }: HomeGloba
   const ratio = scaledBudget > 0 ? spent / scaledBudget : 0;
   const percentage = Math.min(ratio * 100, 100);
   return (
-    <View className={`mb-3 rounded-xl border border-muted dark:border-muted/40 ${isCompact ? 'gap-1 p-3' : 'gap-2 p-4'} ${!budget ? 'flex-row justify-between' : 'flex-col'}`}>
+    <View className={`mb-3 rounded-xl border border-muted dark:border-muted/40 ${isCompact ? 'gap-3 p-4' : 'gap-5 p-5'} ${!budget ? 'flex-row justify-between' : 'flex-col'}`}>
       <Pressable style={getPressedStyle} onPress={() => router.push('/stats')}>
         <View>
           <Text className="mb-px text-xs/snug text-muted-foreground">
             {translate('home.balance')}
           </Text>
           <FormattedCurrency
-            className="text-2xl font-bold"
+            className="text-3xl font-bold"
             value={balance}
             currency={currency}
             numberOfLines={1}

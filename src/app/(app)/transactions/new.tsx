@@ -1,7 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 import ScreenHeader from '@/components/screen-header';
-import { IconButton, ScanLine } from '@/components/ui';
+import { ScanLine, SolidButton } from '@/components/ui';
 import { TransactionForm } from '@/features/transactions/components/transaction-form';
 import { parseTransactionFormInitialValues } from '@/features/transactions/form-route-params';
 import { translate } from '@/lib/i18n';
@@ -19,15 +19,15 @@ export default function NewTransactionRoute() {
   return (
     <>
       <ScreenHeader title={translate('transactions.add')}>
-        <IconButton
-          className="ml-auto"
-          size="sm"
-          color="secondary"
+        <SolidButton
+          className="ml-auto rounded-4xl px-3"
+          size="2xs"
+          color="default"
           accessibilityLabel={translate('scan.button_label')}
           onPress={triggerScanPicker}
-        >
-          <ScanLine className="text-foreground" size={16} />
-        </IconButton>
+          label={translate('common.scan')}
+          iconRight={<ScanLine colorClassName="accent-background" className="mt-px ml-2" size={15} />}
+        />
       </ScreenHeader>
       <TransactionForm
         initialValues={initialValues}

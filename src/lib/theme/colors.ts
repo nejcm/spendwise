@@ -2,8 +2,8 @@
 
 import type { OptionType } from '@/components/ui';
 
-export const expenseColor = 'rgba(248, 60, 78, 0.75)';
-export const incomeColor = 'rgba(37, 174, 94, 0.75)';
+export const expenseColor = 'rgba(248, 60, 78, 0.88)';
+export const incomeColor = 'rgba(37, 174, 94, 0.88)';
 
 export const chartColors = [
   expenseColor,

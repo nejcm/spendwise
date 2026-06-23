@@ -16,6 +16,7 @@ import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
+import { getAvatar } from '../profile';
 import Summary from './summary';
 import { TransactionsList } from './transactions-list';
 
@@ -37,12 +38,13 @@ export function HomeScreen() {
   const isCompact = density === 'compact';
   const profile = useAppStore.use.profile();
   const name = profile?.name?.trim() || translate('common.there');
+  const avatar = profile?.avatar;
 
   return (
     <>
       <ScrollView className="flex-1" style={defaultStyles.transparentBg} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <View className={`flex-col p-4 ${isCompact ? 'gap-5' : 'gap-8'}`}>
-          <View className="flex-row items-center justify-between gap-2">
+          {/* <View className="flex-row items-center justify-between gap-2">
             <Image
               source={theme.dark ? require('../../../assets/spendwise-white.svg') : require('../../../assets/spendwise.svg')}
               className="h-[26] w-[132]"
@@ -59,13 +61,24 @@ export function HomeScreen() {
                 </IconButton>
               </Link>
             </View>
-          </View>
-          <View className="flex-row items-center justify-between gap-2">
+          </View> */}
+          <View className="flex-row items-center gap-4 py-2">
+            <Image source={getAvatar(avatar)} className="size-12 rounded-full" />
             <View>
               <Text className="text-xl/tight font-medium text-foreground">{translate('home.hi', { name })}</Text>
               <Text className="text-sm text-muted-foreground">{format(new Date(), 'MMMM yyyy')}</Text>
             </View>
-            <View className="items-end">
+            <View className="ml-auto flex-row items-center gap-2">
+              <Link href="/ai" asChild>
+                <IconButton size="md" color="secondary">
+                  <BotIcon size={20} colorClassName="accent-subtle-5" />
+                </IconButton>
+              </Link>
+              <Link href="/settings" asChild>
+                <IconButton size="md" color="secondary">
+                  <Settings size={20} colorClassName="accent-subtle-5" />
+                </IconButton>
+              </Link>
             </View>
           </View>
           <Summary />

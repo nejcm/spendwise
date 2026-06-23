@@ -89,7 +89,7 @@ export function CategoryBreakdown({
               return (
                 <Pressable
                   key={category.category_id}
-                  className="gap-1"
+                  className="gap-px"
                   style={getPressedStyle}
                   onPress={() => router.push(`/transactions?categoryId=${category.category_id}`)}
                   accessibilityRole="button"

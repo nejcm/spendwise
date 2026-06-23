@@ -84,7 +84,10 @@ function ChatHeader({ hasNewChat, onNewChat }: ChatHeaderProps) {
   return (
     <View>
       <View className="flex-row items-center justify-between gap-2 border-b border-border px-4 py-2">
-        <BackButton size="sm" />
+        <View className="flex-row items-center gap-2">
+          <BackButton size="sm" />
+          <Text>{translate('ai.header_title')}</Text>
+        </View>
         {hasNewChat && (
           <SolidButton
             color="primary"

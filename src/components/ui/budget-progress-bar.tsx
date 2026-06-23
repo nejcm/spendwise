@@ -17,10 +17,10 @@ export type BudgetProgressBarProps = {
   bg?: string;
 };
 
-export function getColorClass(ratio: number): [string, string] {
-  if (ratio >= 1) return ['bg-danger-600', 'text-danger-600'];
-  if (ratio >= 0.8) return ['bg-warning-600', 'text-warning-600'];
-  return ['bg-foreground', 'text-foreground'];
+export function getColorClass(ratio: number): [string, string | undefined, string] {
+  if (ratio >= 1) return ['bg-danger-600', 'bg-danger-600/20', 'text-danger-600'];
+  if (ratio >= 0.8) return ['bg-warning-500', 'bg-warning-500/20', 'text-warning-600'];
+  return ['bg-foreground', undefined, 'text-foreground'];
 }
 
 export function BudgetProgressBar({
@@ -32,7 +32,7 @@ export function BudgetProgressBar({
   containerClassName,
   showValues = false,
   showPercentage = true,
-  bg = 'bg-gray-300 dark:bg-gray-700',
+  bg,
 }: BudgetProgressBarProps) {
   const numberFormat = useAppStore.use.numberFormat();
   const currencyFormat = useAppStore.use.currencyFormat();
@@ -42,14 +42,15 @@ export function BudgetProgressBar({
   const monthlyHint = showValues && monthlyBudget != null && currency != null
     ? ` (${formatCurrency(monthlyBudget, currency, { numberFormat, currencyFormat })}/m)`
     : null;
+  const colors = getColorClass(ratio);
 
   return (
     <ProgressBar
       value={percentage}
-      color={getColorClass(ratio)[0]}
+      color={colors[0]}
       showPercentage={showPercentage}
       children={showValues ? monthlyHint : undefined}
-      bg={bg}
+      bg={colors[1] || bg || 'bg-gray-300 dark:bg-gray-700'}
       className={className}
       containerClassName={containerClassName}
     />

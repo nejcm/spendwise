@@ -124,7 +124,7 @@ export function GlobalBudgetCard({ selection, currency }: GlobalBudgetCardProps)
               <FormattedCurrency
                 value={Math.abs(remaining)}
                 currency={currency}
-                className={cn('text-base font-semibold', colorClass[1])}
+                className={cn('text-base font-semibold', colorClass[2])}
               />
               <Text className="text-xs text-muted-foreground">
                 {isOver
@@ -134,7 +134,7 @@ export function GlobalBudgetCard({ selection, currency }: GlobalBudgetCardProps)
             </View>
 
             <View className="flex-1 items-center py-3">
-              <Text className={cn('text-base font-semibold', colorClass[1])}>
+              <Text className={cn('text-base font-semibold', colorClass[2])}>
                 {(ratio * 100).toFixed(0)}
                 %
               </Text>
@@ -149,7 +149,7 @@ export function GlobalBudgetCard({ selection, currency }: GlobalBudgetCardProps)
               <FormattedCurrency
                 value={projectedSpend}
                 currency={currency}
-                className={cn('text-base font-semibold', projectionColorClass[1])}
+                className={cn('text-base font-semibold', projectionColorClass[2])}
               />
               <Text className="text-xs text-muted-foreground">
                 {translate('stats.budget_projected')}
@@ -157,7 +157,7 @@ export function GlobalBudgetCard({ selection, currency }: GlobalBudgetCardProps)
             </View>
 
             <View className="flex-1 items-center py-3">
-              <Text className={cn('text-base font-semibold', projectionColorClass[1])}>
+              <Text className={cn('text-base font-semibold', projectionColorClass[2])}>
                 {(projectedRatio * 100).toFixed(0)}
                 %
               </Text>

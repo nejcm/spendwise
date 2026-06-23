@@ -98,7 +98,8 @@ export function StatsTrend({ period, startDate, endDate }: StatsTrendProps) {
         barWidth={barWidth}
         spacing={spacing}
         initialSpacing={0}
-        barBorderRadius={6}
+        barBorderTopRightRadius={5}
+        barBorderTopLeftRadius={5}
         xAxisThickness={0}
         yAxisThickness={0}
         yAxisTextStyle={{ color: labelColor, fontSize: 10 }}

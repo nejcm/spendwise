@@ -53,7 +53,7 @@ export function BudgetSummary({ totalBudget, totalSpent, currency, label }: Prop
           <FormattedCurrency
             value={Math.abs(remaining)}
             currency={currency}
-            className={cn('text-base font-semibold', colorClass[1])}
+            className={cn('text-base font-semibold', colorClass[2])}
           />
           <Text className="text-xs text-muted-foreground">
             {isOver
@@ -63,7 +63,7 @@ export function BudgetSummary({ totalBudget, totalSpent, currency, label }: Prop
         </View>
 
         <View className="flex-1 items-center py-3">
-          <Text className={cn('text-base font-semibold', colorClass[1])}>
+          <Text className={cn('text-base font-semibold', colorClass[2])}>
             {(ratio * 100).toFixed(0)}
             %
           </Text>

@@ -21,7 +21,7 @@ export function BudgetMonthCard({ data, currency, isExpanded, onToggle, isLast }
   const { year, month, totalBudget, totalSpent, categories } = data;
   const monthLabel = format(new Date(year, month - 1, 1), 'MMMM yyyy');
   const ratio = totalBudget > 0 ? totalSpent / totalBudget : 0;
-  const [, textColorClass] = getColorClass(ratio);
+  const [,, textColorClass] = getColorClass(ratio);
 
   const ChevronIcon = isExpanded ? ChevronUp : ChevronDown;
 

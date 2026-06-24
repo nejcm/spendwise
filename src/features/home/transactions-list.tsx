@@ -17,7 +17,7 @@ export const TransactionsList = React.memo(() => {
 
   return (
     <View>
-      <View className="mb-2 flex-row items-center justify-between">
+      <View className="mb-1 flex-row items-center justify-between">
         <Text className="text-lg font-medium">{translate('home.recent_transactions')}</Text>
         {hasTransactions && (
           <GhostButton size="sm" className="px-0" onPress={() => router.push('/(app)/transactions')}>

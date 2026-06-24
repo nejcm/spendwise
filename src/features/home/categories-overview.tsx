@@ -26,7 +26,7 @@ export const CategoriesOverview = React.memo(() => {
 
   return (
     <View>
-      <View className="mb-2 flex-row items-center justify-between">
+      <View className="mb-1 flex-row items-center justify-between">
         <Text className="text-lg font-medium">{translate('common.categories')}</Text>
         {hasCategories && (
           <GhostButton size="sm" className="px-0" onPress={() => router.push('/categories')}>

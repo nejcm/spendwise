@@ -32,7 +32,7 @@ export const ScreensLinksGrid = React.memo(() => {
 
   return (
     <View>
-      <Text className="mb-2 text-lg font-medium">{translate('home.links')}</Text>
+      <Text className="mb-1 text-lg font-medium">{translate('home.links')}</Text>
       <View className="flex-row justify-between gap-2 md:justify-start md:gap-5">
         {DESTINATIONS.map(({ key, href, onPress, labelKey, Icon }) => (
           <Pressable

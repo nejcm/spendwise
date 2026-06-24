@@ -112,13 +112,8 @@ function TransactionFormBody({
         <form.Subscribe
           selector={(s) => [s.values.currency]}
           children={([selectedCurrency]) => selectedCurrency !== preferredCurrency && (
-            <View className="mb-2 flex-row items-center gap-2">
-              <View className="w-[105] flex-row items-center justify-center gap-2 px-2">
-                <Image source={CURRENCY_IMAGES[preferredCurrency]} className="size-6 rounded-full" />
-                <Text className="border-none bg-transparent">
-                  {preferredCurrency}
-                </Text>
-              </View>
+            <View className="mb-2 flex-row items-center pt-px pl-31">
+              <Text className="mt-px text-sm/tight">{preferredCurrency}</Text>
               <form.Field
                 name="baseAmount"
                 children={(field) => (
@@ -130,13 +125,13 @@ function TransactionFormBody({
                       field.handleChange(t);
                     }}
                     placeholder="0.00"
-                    size={inputSize}
+                    size="xs"
                     readOnly={selectedCurrency === preferredCurrency}
                     keyboardType="decimal-pad"
                     testID="base-amount-input"
                     error={getFieldError(field)}
                     containerClassName="min-w-[72] flex-1"
-                    className="border-0 bg-transparent px-3"
+                    className="border-0 bg-transparent px-2 text-sm"
                   />
                 )}
               />

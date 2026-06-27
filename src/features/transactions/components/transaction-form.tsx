@@ -2,15 +2,13 @@ import type { UseTransactionFormProps, UseTransactionFormReturnType } from '../h
 import type { OptionType } from '@/components/ui';
 import type { Account } from '@/features/accounts/types';
 import type { CurrencyKey } from '@/features/currencies';
-import * as React from 'react';
 import { ScrollView, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { GhostButton, Image, Input, Select, SolidButton, Text } from '@/components/ui';
+import { GhostButton, Input, Select, SolidButton, Text } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
 import { CategoryPicker } from '@/features/categories/category-picker';
-import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { TransactionBaseAmountSync } from '@/features/transactions/components/transaction-base-amount-sync';
 import {
   TRANSACTION_TYPE_OPTIONS,

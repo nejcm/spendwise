@@ -143,7 +143,8 @@ export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInp
             { writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr' },
             { outlineStyle: 'solid' as const },
             { outlineWidth: 0 },
-            { textAlignVertical: variant === 'textarea' ? 'top' : undefined },
+            { textAlignVertical: variant === 'textarea' ? 'top' : 'center' },
+            ...(variant !== 'textarea' ? [{ includeFontPadding: false }] : []),
             inputProps.style,
           ])}
         />
@@ -154,7 +155,7 @@ export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInp
         )}
       </View>
       {error && !!showErrorMessage && (
-        <View className="absolute top-full left-0 mt-0.25">
+        <View className="absolute top-full left-0 mt-px">
           <Text testID={testID ? `${testID}-error` : undefined} className="text-[9px] text-danger-500">
             {error}
           </Text>

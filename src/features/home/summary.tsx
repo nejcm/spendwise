@@ -6,7 +6,7 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { FormattedCurrency, getPressedStyle, OutlineButton, Text } from '@/components/ui';
 import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
-import { ChevronRight } from '@/components/ui/icon';
+import { ArrowDownRight, ArrowUpRight, ChevronRight } from '@/components/ui/icon';
 import { SkeletonGrid } from '@/components/ui/skeleton';
 import { getBudgetSelectionBoundaries, scaleGlobalBudget } from '@/features/stats/helpers';
 import { useGlobalBudget, useGlobalBudgetSpend } from '@/features/stats/hooks';
@@ -120,9 +120,10 @@ function HomeGlobalBudget({ currency, selection, isCompact, balance }: HomeGloba
   );
 }
 
-const textBaseCls = 'rounded-3xl px-2 py-0.5 text-xs font-medium';
-const textSuccessCls = `bg-success-600/10 text-success-600`;
-const textDangerCls = `bg-danger-500/10 text-danger-500`;
+const bgSuccessCls = `bg-success-600/10`;
+const bgDangerCls = `bg-danger-500/10`;
+const textSuccessCls = `text-success-600`;
+const textDangerCls = `text-danger-500`;
 
 export default function Summary() {
   const isCompact = useAppStore.use.density() === 'compact';
@@ -149,24 +150,30 @@ export default function Summary() {
                   <Text className="text-xs text-muted-foreground">{translate('home.income')}</Text>
                   <FormattedCurrency className="text-lg font-bold" value={data?.income ?? 0} currency={currency} prefix="+" />
                   {trend.incomeDeltaPct !== null && (
-                    <Text className={`${textBaseCls} ${trend.incomeDeltaPct >= 0 ? textSuccessCls : textDangerCls}`}>
-                      {trend.incomeDeltaPct >= 0 ? '↑' : '↓'}
-                      {' '}
-                      {Math.abs(trend.incomeDeltaPct)}
-                      %
-                    </Text>
+                    <View className={`flex-row gap-1 rounded-3xl px-1.5 py-0.5 ${trend.incomeDeltaPct <= 0 ? bgDangerCls : bgSuccessCls}`}>
+                      {trend.incomeDeltaPct >= 0
+                        ? <ArrowUpRight size={16} colorClassName="accent-green-800" />
+                        : <ArrowDownRight size={16} colorClassName="accent-red-800" />}
+                      <Text className={`text-xs font-medium ${trend.incomeDeltaPct >= 0 ? textSuccessCls : textDangerCls}`}>
+                        {Math.abs(trend.incomeDeltaPct)}
+                        %
+                      </Text>
+                    </View>
                   )}
                 </View>
                 <View className={`flex-1 items-start rounded-xl bg-card ${isCompact ? 'px-3 py-2.5' : 'gap-0.5 px-4 py-3'}`}>
                   <Text className="text-xs text-muted-foreground">{translate('home.expenses')}</Text>
                   <FormattedCurrency className="text-lg font-bold" value={data?.expense ?? 0} currency={currency} prefix="-" />
                   {trend.expenseDeltaPct !== null && (
-                    <Text className={`${textBaseCls} ${trend.expenseDeltaPct <= 0 ? textSuccessCls : textDangerCls}`}>
-                      {trend.expenseDeltaPct >= 0 ? '↑' : '↓'}
-                      {' '}
-                      {Math.abs(trend.expenseDeltaPct)}
-                      %
-                    </Text>
+                    <View className={`flex-row gap-1 rounded-3xl px-1.5 py-0.5 ${trend.expenseDeltaPct <= 0 ? bgSuccessCls : bgDangerCls}`}>
+                      {trend.expenseDeltaPct >= 0
+                        ? <ArrowUpRight size={16} colorClassName="accent-red-800" />
+                        : <ArrowDownRight size={16} colorClassName="accent-green-800" />}
+                      <Text className={`text-xs font-medium ${trend.expenseDeltaPct <= 0 ? textSuccessCls : textDangerCls}`}>
+                        {Math.abs(trend.expenseDeltaPct)}
+                        %
+                      </Text>
+                    </View>
                   )}
                 </View>
               </View>

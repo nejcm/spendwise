@@ -8,10 +8,12 @@ import {
   ALargeSmall as LucideALargeSmall,
   AlertTriangle as LucideAlertTriangle,
   ArrowDown as LucideArrowDown,
+  ArrowDownRight as LucideArrowDownRight,
   ArrowLeftIcon as LucideArrowLeftIcon,
   ArrowRight as LucideArrowRight,
   ArrowRightIcon as LucideArrowRightIcon,
   ArrowUp as LucideArrowUp,
+  ArrowUpRight as LucideArrowUpRight,
   Banknote as LucideBanknote,
   Bell as LucideBell,
   Bot as LucideBot,
@@ -156,3 +158,5 @@ export const ChevronRight = createIcon(LucideChevronRight);
 export const ChevronLeft = createIcon(LucideChevronLeft);
 export const ChevronUp = createIcon(LucideChevronUp);
 export const RepeatIcon = createIcon(LucideRepeatIcon);
+export const ArrowUpRight = createIcon(LucideArrowUpRight);
+export const ArrowDownRight = createIcon(LucideArrowDownRight);

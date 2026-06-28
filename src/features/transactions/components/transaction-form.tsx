@@ -5,10 +5,11 @@ import type { CurrencyKey } from '@/features/currencies';
 import { ScrollView, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { GhostButton, Input, Select, SolidButton, Text } from '@/components/ui';
+import { GhostButton, Image, Input, Select, SolidButton, Text } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
 import { CategoryPicker } from '@/features/categories/category-picker';
+import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { TransactionBaseAmountSync } from '@/features/transactions/components/transaction-base-amount-sync';
 import {
   TRANSACTION_TYPE_OPTIONS,
@@ -110,8 +111,13 @@ function TransactionFormBody({
         <form.Subscribe
           selector={(s) => [s.values.currency]}
           children={([selectedCurrency]) => selectedCurrency !== preferredCurrency && (
-            <View className="mb-2 flex-row items-center pt-px pl-31">
-              <Text className="mt-px text-sm/tight">{preferredCurrency}</Text>
+            <View className="mb-4 flex-row items-center gap-2">
+              <View className="w-[105] flex-row items-center justify-center gap-2 p-2">
+                <Image source={CURRENCY_IMAGES[preferredCurrency]} className="size-6 rounded-full" />
+                <Text className="border-none bg-transparent">
+                  {preferredCurrency}
+                </Text>
+              </View>
               <form.Field
                 name="baseAmount"
                 children={(field) => (
@@ -123,13 +129,13 @@ function TransactionFormBody({
                       field.handleChange(t);
                     }}
                     placeholder="0.00"
-                    size="xs"
+                    size="sm"
                     readOnly={selectedCurrency === preferredCurrency}
                     keyboardType="decimal-pad"
                     testID="base-amount-input"
                     error={getFieldError(field)}
                     containerClassName="min-w-[72] flex-1"
-                    className="border-0 bg-transparent px-2 text-sm"
+                    className="border-0 bg-transparent px-3"
                   />
                 )}
               />

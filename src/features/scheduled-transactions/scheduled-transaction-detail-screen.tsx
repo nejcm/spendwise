@@ -50,6 +50,7 @@ export function ScheduledTransactionDetailScreen() {
   if (isEditing) {
     return (
       <ScheduledTransactionForm
+        hasNav
         initialValues={{
           ...rule,
           amount: rule.amount / 100,

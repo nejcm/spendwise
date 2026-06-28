@@ -68,7 +68,7 @@ export const inputTv = tv({
     },
     error: {
       true: {
-        input: 'border-danger-600 focus:border-danger-600 dark:border-danger-600',
+        input: 'border-danger-600 focus:border-danger-600 dark:border-danger-600 dark:focus:border-danger-600',
       },
     },
     disabled: {
@@ -96,7 +96,7 @@ export type InputProps = {
 } & Omit<VariantProps<typeof inputTv>, 'error'> & Omit<TextInputProps, 'size'>;
 
 export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInput | null> }) {
-  const { label, error, size = 'md', value, color = 'default', testID, onBlur: onBlurProp, onFocus: onFocusProp, containerClassName, rightSection, className, variant, showErrorMessage = true, ...inputProps } = props;
+  const { label, error, size = 'md', value, color = 'default', testID, onBlur: onBlurProp, onFocus: onFocusProp, containerClassName, rightSection, className, variant, showErrorMessage, ...inputProps } = props;
   const [isFocussed, setIsFocussed] = React.useState(false);
 
   const onBlur = React.useCallback(
@@ -144,7 +144,6 @@ export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInp
             { outlineStyle: 'solid' as const },
             { outlineWidth: 0 },
             { textAlignVertical: variant === 'textarea' ? 'top' : 'center' },
-            ...(variant !== 'textarea' ? [{ includeFontPadding: false }] : []),
             inputProps.style,
           ])}
         />

@@ -16,6 +16,7 @@ import {
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
 import { GhostButton } from '@/components/ui/ghost-button';
+import { NAV_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
 import { useAccounts } from '@/features/accounts/api';
 import { CategoryPicker } from '@/features/categories/category-picker';
 import { CURRENCY_VALUES } from '@/features/currencies';
@@ -96,6 +97,7 @@ const defaultValues = {
 } satisfies FormValues;
 
 export type ScheduledTransactionFormBaseProps = {
+  hasNav: boolean;
   initialValues?: ScheduledTransactionInitialValues;
   onCancel?: () => void;
   onSuccess?: () => void;
@@ -368,6 +370,7 @@ function ScheduledTransactionFormBody({ form, isCompact, accounts, orderedCurren
 
 export type ScheduledTransactionFormProps = ScheduledTransactionFormBaseProps;
 export function ScheduledTransactionForm({
+  hasNav,
   initialValues,
   onCancel,
   onSuccess,
@@ -383,14 +386,15 @@ export function ScheduledTransactionForm({
 
   const isLoading = createScheduledTransaction.isPending || updateScheduledTransaction.isPending;
   const insets = useSafeAreaInsets();
-  const stickyFooterPadding = 56 + insets.bottom;
+  const bottomNavPadding = hasNav ? NAV_BAR_HEIGHT : 0;
+  const stickyFooterPadding = bottomNavPadding + insets.bottom;
   const buttonSize = isCompact ? 'sm' : 'md';
 
   return (
     <>
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: 12, paddingBottom: 8 + stickyFooterPadding, paddingHorizontal: 16, paddingTop: 32 }}
+        contentContainerStyle={{ gap: 12, paddingBottom: insets.bottom, paddingHorizontal: 16, paddingTop: 32 }}
         keyboardShouldPersistTaps="handled"
       >
         <ScheduledTransactionFormBody
@@ -400,7 +404,7 @@ export function ScheduledTransactionForm({
           orderedCurrencies={orderedCurrencies}
         />
       </KeyboardAwareScrollView>
-      <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>
+      <KeyboardStickyView offset={{ closed: 0, opened: stickyFooterPadding }}>
         <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
           <form.Subscribe
             selector={({ isSubmitting, values }) => ({ isSubmitting, values })}

@@ -16,6 +16,7 @@ export default function NewScheduledTransactionRoute() {
     <>
       <ScreenHeader title={translate('scheduled.add')} />
       <ScheduledTransactionForm
+        hasNav={false}
         initialValues={initialValues}
         onSuccess={onBack}
         onCancel={onBack}

@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
 import {
   Input,
+  OutlineButton,
   Select,
   SolidButton,
   Switch,
@@ -295,7 +296,7 @@ function ScheduledTransactionFormBody({ form, isCompact, accounts, orderedCurren
         )}
       />
 
-      <View className="flex-row items-center gap-2">
+      <View className="flex-row items-start gap-2">
         <form.Field
           name="start_date"
           children={(field) => (
@@ -311,11 +312,11 @@ function ScheduledTransactionFormBody({ form, isCompact, accounts, orderedCurren
             </View>
           )}
         />
-        <Text>-</Text>
+        <Text className="py-3">-</Text>
         <form.Field
           name="end_date"
           children={(field) => (
-            <View className="flex-1 gap-2">
+            <View className="flex-1 gap-1">
               <DateInput
                 value={field.state.value || ''}
                 onChange={field.handleChange}
@@ -325,9 +326,11 @@ function ScheduledTransactionFormBody({ form, isCompact, accounts, orderedCurren
                 size={inputSize}
               />
               {field.state.value && (
-                <GhostButton
+                <OutlineButton
                   color="secondary"
-                  size="sm"
+                  size="2xs"
+                  className="rounded-3xl"
+                  textClassName="text-xs"
                   label={translate('scheduled.clear_end_date')}
                   onPress={() => field.handleChange(null)}
                 />

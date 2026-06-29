@@ -51,6 +51,7 @@ import {
   Pencil as LucidePencil,
   PencilOff as LucidePencilOff,
   PieChart as LucidePieChart,
+  Play as LucidePlay,
   Plus as LucidePlus,
   PlusIcon as LucidePlusIcon,
   Printer as LucidePrinter,
@@ -134,6 +135,7 @@ export const ListChecks = createIcon(LucideListChecks);
 export const Pencil = createIcon(LucidePencil);
 export const PencilOff = createIcon(LucidePencilOff);
 export const PieChart = createIcon(LucidePieChart);
+export const PlayIcon = createIcon(LucidePlay);
 export const Plus = createIcon(LucidePlus);
 export const PlusIcon = createIcon(LucidePlusIcon);
 export const Printer = createIcon(LucidePrinter);

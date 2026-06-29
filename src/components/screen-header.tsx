@@ -10,6 +10,7 @@ export type ScreenHeaderProps = {
   /** Used when there is no navigation history (e.g. deep link); avoids unhandled GO_BACK. */
   backHref?: Parameters<ImperativeRouter['replace']>[0];
   children?: React.ReactNode;
+  prefix?: React.ReactNode;
 };
 
 export function BackButton({ size, backHref }: { size?: IconButtonProps['size']; backHref?: ScreenHeaderProps['backHref'] }) {
@@ -26,11 +27,13 @@ export default function ScreenHeader({
   back = true,
   backHref = '/settings',
   children,
+  prefix,
 }: ScreenHeaderProps) {
   return (
     <View className="w-full flex-row items-center justify-start gap-1 border-b border-border bg-muted px-4 dark:bg-gray-900">
       {back && <BackButton backHref={backHref} />}
-      <Text className="py-3 text-center text-lg font-medium text-foreground">{title}</Text>
+      {prefix}
+      <Text className="min-w-0 py-3 text-center text-lg font-medium text-foreground" numberOfLines={1}>{title}</Text>
       {children}
     </View>
   );

@@ -22,7 +22,7 @@ export default function ScheduledTransactionCard({
       className={`rounded-xl bg-card ${isCompact ? 'mb-2 p-3' : 'mb-3 p-4'} ${!item.is_active ? 'opacity-55' : ''}`}
       onPress={() => router.push(`/scheduled/${item.id}`)}
     >
-      <View className="flex-row items-start justify-between gap-2">
+      <View className="mb-2 flex-row items-start justify-between gap-2">
         <View className="flex-1 flex-row items-center gap-2">
           {!item.is_active && (
             <View

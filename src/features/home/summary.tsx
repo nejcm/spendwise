@@ -150,7 +150,7 @@ export default function Summary() {
                   <Text className="text-xs text-muted-foreground">{translate('home.income')}</Text>
                   <FormattedCurrency className="text-lg font-bold" value={data?.income ?? 0} currency={currency} prefix="+" />
                   {trend.incomeDeltaPct !== null && (
-                    <View className={`flex-row gap-1 rounded-3xl px-1.5 py-0.5 ${trend.incomeDeltaPct <= 0 ? bgDangerCls : bgSuccessCls}`}>
+                    <View className={`flex-row gap-1 rounded-3xl px-1.5 py-0.5 ${trend.incomeDeltaPct >= 0 ? bgSuccessCls : bgDangerCls}`}>
                       {trend.incomeDeltaPct >= 0
                         ? <ArrowUpRight size={16} colorClassName="accent-green-800" />
                         : <ArrowDownRight size={16} colorClassName="accent-red-800" />}

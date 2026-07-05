@@ -54,7 +54,7 @@ function HomeGlobalBudget({ currency, selection, isCompact, balance }: HomeGloba
   const ratio = scaledBudget > 0 ? spent / scaledBudget : 0;
   const percentage = Math.min(ratio * 100, 100);
   return (
-    <View className={`mb-4 px-1 ${isCompact ? 'gap-3 py-4' : 'gap-5 py-5'} ${!budget ? 'flex-row justify-between' : 'flex-col'}`}>
+    <View className={`px-1 ${isCompact ? 'gap-3 py-4' : 'gap-5 py-5'} ${!budget ? 'flex-row justify-between' : 'flex-col'}`}>
       <Pressable style={getPressedStyle} onPress={() => router.push('/stats')}>
         <View>
           <Text className="mb-px text-xs/snug text-muted-foreground">
@@ -110,8 +110,7 @@ function HomeGlobalBudget({ currency, selection, isCompact, balance }: HomeGloba
               style={getPressedStyle}
               onPress={onPress}
               size="2xs"
-              className="rounded-4xl"
-              color="secondary-alt"
+              className="rounded-4xl border-muted pl-3"
               textClassName="text-muted-foreground"
               iconRight={<ChevronRight size={16} colorClassName="accent-muted-foreground" className="ml-1" />}
             />
@@ -145,38 +144,41 @@ export default function Summary() {
         : (
             <>
               <HomeGlobalBudget currency={currency} selection={monthSelection} isCompact={isCompact} balance={data?.balance ?? 0} />
-              <View className="flex-row gap-2">
-                <View className={`flex-1 items-start rounded-xl bg-card ${isCompact ? 'px-3 py-2.5' : 'gap-0.5 px-4 py-3'}`}>
-                  <Text className="text-xs text-muted-foreground">{translate('home.income')}</Text>
-                  <FormattedCurrency className="text-lg font-bold" value={data?.income ?? 0} currency={currency} prefix="+" />
-                  {trend.incomeDeltaPct !== null && (
-                    <View className={`flex-row gap-1 rounded-3xl px-1.5 py-0.5 ${trend.incomeDeltaPct >= 0 ? bgSuccessCls : bgDangerCls}`}>
-                      {trend.incomeDeltaPct >= 0
-                        ? <ArrowUpRight size={16} colorClassName="accent-green-800" />
-                        : <ArrowDownRight size={16} colorClassName="accent-red-800" />}
-                      <Text className={`text-xs font-medium ${trend.incomeDeltaPct >= 0 ? textSuccessCls : textDangerCls}`}>
-                        {Math.abs(trend.incomeDeltaPct)}
-                        %
-                      </Text>
+              {!!data?.balance
+                && (
+                  <View className="mt-4 flex-row gap-2">
+                    <View className={`flex-1 items-start rounded-xl bg-card ${isCompact ? 'px-3 py-2.5' : 'gap-0.5 px-4 py-3'}`}>
+                      <Text className="text-xs text-muted-foreground">{translate('home.income')}</Text>
+                      <FormattedCurrency className="text-lg font-bold" value={data?.income ?? 0} currency={currency} prefix="+" />
+                      {trend.incomeDeltaPct !== null && (
+                        <View className={`flex-row gap-1 rounded-3xl px-1.5 py-0.5 ${trend.incomeDeltaPct >= 0 ? bgSuccessCls : bgDangerCls}`}>
+                          {trend.incomeDeltaPct >= 0
+                            ? <ArrowUpRight size={16} colorClassName="accent-green-800" />
+                            : <ArrowDownRight size={16} colorClassName="accent-red-800" />}
+                          <Text className={`text-xs font-medium ${trend.incomeDeltaPct >= 0 ? textSuccessCls : textDangerCls}`}>
+                            {Math.abs(trend.incomeDeltaPct)}
+                            %
+                          </Text>
+                        </View>
+                      )}
                     </View>
-                  )}
-                </View>
-                <View className={`flex-1 items-start rounded-xl bg-card ${isCompact ? 'px-3 py-2.5' : 'gap-0.5 px-4 py-3'}`}>
-                  <Text className="text-xs text-muted-foreground">{translate('home.expenses')}</Text>
-                  <FormattedCurrency className="text-lg font-bold" value={data?.expense ?? 0} currency={currency} prefix="-" />
-                  {trend.expenseDeltaPct !== null && (
-                    <View className={`flex-row gap-1 rounded-3xl px-1.5 py-0.5 ${trend.expenseDeltaPct <= 0 ? bgSuccessCls : bgDangerCls}`}>
-                      {trend.expenseDeltaPct >= 0
-                        ? <ArrowUpRight size={16} colorClassName="accent-red-800" />
-                        : <ArrowDownRight size={16} colorClassName="accent-green-800" />}
-                      <Text className={`text-xs font-medium ${trend.expenseDeltaPct <= 0 ? textSuccessCls : textDangerCls}`}>
-                        {Math.abs(trend.expenseDeltaPct)}
-                        %
-                      </Text>
+                    <View className={`flex-1 items-start rounded-xl bg-card ${isCompact ? 'px-3 py-2.5' : 'gap-0.5 px-4 py-3'}`}>
+                      <Text className="text-xs text-muted-foreground">{translate('home.expenses')}</Text>
+                      <FormattedCurrency className="text-lg font-bold" value={data?.expense ?? 0} currency={currency} prefix="-" />
+                      {trend.expenseDeltaPct !== null && (
+                        <View className={`flex-row gap-1 rounded-3xl px-1.5 py-0.5 ${trend.expenseDeltaPct <= 0 ? bgSuccessCls : bgDangerCls}`}>
+                          {trend.expenseDeltaPct <= 0
+                            ? <ArrowDownRight size={16} colorClassName="accent-green-800" />
+                            : <ArrowUpRight size={16} colorClassName="accent-red-800" />}
+                          <Text className={`text-xs font-medium ${trend.expenseDeltaPct <= 0 ? textSuccessCls : textDangerCls}`}>
+                            {Math.abs(trend.expenseDeltaPct)}
+                            %
+                          </Text>
+                        </View>
+                      )}
                     </View>
-                  )}
-                </View>
-              </View>
+                  </View>
+                ) }
             </>
           )}
     </View>

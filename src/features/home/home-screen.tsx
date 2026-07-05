@@ -42,24 +42,6 @@ export function HomeScreen() {
     <>
       <ScrollView className="flex-1" style={defaultStyles.transparentBg} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <View className={`flex-col p-4 ${isCompact ? 'gap-5' : 'gap-8'}`}>
-          {/* <View className="flex-row items-center justify-between gap-2">
-            <Image
-              source={theme.dark ? require('../../../assets/spendwise-white.svg') : require('../../../assets/spendwise.svg')}
-              className="h-[26] w-[132]"
-            />
-            <View className="flex-row items-center gap-2">
-              <Link href="/ai" asChild>
-                <IconButton size="sm" color="secondary">
-                  <BotIcon size={21} colorClassName="accent-muted-foreground" />
-                </IconButton>
-              </Link>
-              <Link href="/settings" asChild>
-                <IconButton size="sm" color="secondary">
-                  <Settings size={21} colorClassName="accent-muted-foreground" />
-                </IconButton>
-              </Link>
-            </View>
-          </View> */}
           <View className="flex-row items-center gap-4 pt-2">
             <Image source={getAvatar(avatar)} className="size-12 rounded-full" />
             <View>

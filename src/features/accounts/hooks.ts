@@ -153,6 +153,23 @@ export function useUpdateAccount() {
   });
 }
 
+export function useUpdateAccountOrder() {
+  const db = useSQLiteContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (items: Array<{ id: string; sort_order: number }>) =>
+      queries.updateAccountOrder(db, items),
+    onSuccess: () => {
+      invalidateFor(queryClient, 'account');
+    },
+    onError: (error) => {
+      onError(error);
+      invalidateFor(queryClient, 'account');
+    },
+  });
+}
+
 export function useArchiveAccount(onSuccess?: () => void) {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();

@@ -10,6 +10,7 @@ import {
   getAccountsWithBalanceForRange,
   getTotalBalance,
   updateAccount,
+  updateAccountOrder,
 } from './queries';
 
 jest.mock('expo-crypto', () => ({
@@ -97,6 +98,22 @@ describe('getAccounts', () => {
     const result = await getAccounts(db as any);
     expect(result[0].id).toBe('acc_1');
     expect(result[1].id).toBe('acc_2');
+  });
+
+  it('uses the persisted order for plain and balance queries', async () => {
+    const db = await createTestDb();
+    await seedAccount(db, { id: 'acc_1', sort_order: 0 });
+    await seedAccount(db, { id: 'acc_2', sort_order: 1 });
+
+    await updateAccountOrder(db as any, [
+      { id: 'acc_2', sort_order: 0 },
+      { id: 'acc_1', sort_order: 1 },
+    ]);
+
+    const accounts = await getAccounts(db as any);
+    const accountsWithBalance = await getAccountsWithBalance(db as any);
+    expect(accounts.map((account) => account.id)).toEqual(['acc_2', 'acc_1']);
+    expect(accountsWithBalance.map((account) => account.id)).toEqual(['acc_2', 'acc_1']);
   });
 });
 
@@ -358,6 +375,52 @@ describe('createAccount', () => {
       `SELECT description FROM accounts LIMIT 1`,
     );
     expect(row!.description).toBeNull();
+  });
+
+  it('appends after active and archived accounts', async () => {
+    const db = await createTestDb();
+    await seedAccount(db, { id: 'acc_active', sort_order: 2 });
+    await seedAccount(db, { id: 'acc_archived', is_archived: 1, sort_order: 8 });
+
+    await createAccount(db as any, {
+      name: 'New account',
+      description: null,
+      type: 'checking',
+      currency: 'EUR',
+      budget: null,
+      icon: null,
+      color: null,
+    });
+
+    const row = await db.getFirstAsync<{ sort_order: number }>(
+      `SELECT sort_order FROM accounts WHERE id = ?`,
+      ['test-uuid-1234'],
+    );
+    expect(row!.sort_order).toBe(9);
+  });
+});
+
+describe('updateAccountOrder', () => {
+  it('persists every supplied position', async () => {
+    const db = await createTestDb();
+    await seedAccount(db, { id: 'acc_1', sort_order: 0 });
+    await seedAccount(db, { id: 'acc_2', sort_order: 1 });
+    await seedAccount(db, { id: 'acc_3', sort_order: 2 });
+
+    await updateAccountOrder(db as any, [
+      { id: 'acc_3', sort_order: 0 },
+      { id: 'acc_1', sort_order: 1 },
+      { id: 'acc_2', sort_order: 2 },
+    ]);
+
+    const rows = await db.getAllAsync<{ id: string; sort_order: number }>(
+      `SELECT id, sort_order FROM accounts ORDER BY sort_order`,
+    );
+    expect(rows).toEqual([
+      { id: 'acc_3', sort_order: 0 },
+      { id: 'acc_1', sort_order: 1 },
+      { id: 'acc_2', sort_order: 2 },
+    ]);
   });
 });
 

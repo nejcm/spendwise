@@ -194,8 +194,8 @@ export async function createAccount(
   const budgetCents = parseToCents(data.budget);
 
   await db.runAsync(
-    `INSERT INTO accounts (id, name, description, type, currency, budget, icon, color)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO accounts (id, name, description, type, currency, budget, icon, color, sort_order)
+     SELECT ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(MAX(sort_order), -1) + 1 FROM accounts`,
     [id, data.name, data.description ?? null, data.type, data.currency, budgetCents, data.icon, data.color],
   );
 
@@ -224,4 +224,15 @@ export async function archiveAccount(
     `UPDATE accounts SET is_archived = 1, updated_at = strftime('%s','now') WHERE id = ?`,
     [id],
   );
+}
+
+export async function updateAccountOrder(
+  db: SQLiteDatabase,
+  items: Array<{ id: string; sort_order: number }>,
+): Promise<void> {
+  await db.withTransactionAsync(async () => {
+    for (const item of items) {
+      await db.runAsync('UPDATE accounts SET sort_order = ? WHERE id = ?', [item.sort_order, item.id]);
+    }
+  });
 }

@@ -4,12 +4,15 @@ import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
 import { useMemo } from 'react';
 import { RefreshControl, View } from 'react-native';
+import Animated, { useAnimatedRef } from 'react-native-reanimated';
+import Sortable from 'react-native-sortables';
 import NoData from '@/components/no-data';
 import { PeriodSelector } from '@/components/period-selector';
 import { PeriodSwipeContainer } from '@/components/period-swipe-container';
-import { FocusAwareStatusBar, FormattedCurrency, ScrollView, Text } from '@/components/ui';
+import { FocusAwareStatusBar, FormattedCurrency, Text } from '@/components/ui';
+import { Lightbulb } from '@/components/ui/icon';
 import { SkeletonRows } from '@/components/ui/skeleton';
-import { accountsWithBalanceForRangeQueryOptions, useAccountsWithBalanceForRange } from '@/features/accounts/api';
+import { accountsWithBalanceForRangeQueryOptions, useAccountsWithBalanceForRange, useUpdateAccountOrder } from '@/features/accounts/api';
 import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { useRefresh } from '@/lib/hooks/use-refresh';
@@ -21,11 +24,13 @@ import { AddAccountCard } from './components/add-account-card';
 
 export function AccountsScreen() {
   const router = useRouter();
+  const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const currency = useAppStore.use.currency();
   const selection = useAppStore.use.periodSelection();
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
 
   const { data: accounts = [], isLoading } = useAccountsWithBalanceForRange(startDate, endDate);
+  const updateOrder = useUpdateAccountOrder();
 
   const db = useSQLiteContext();
   usePrefetchAdjacentPeriods(selection, (start, end) => accountsWithBalanceForRangeQueryOptions(db, start, end));
@@ -37,9 +42,12 @@ export function AccountsScreen() {
     router.push('/accounts/new');
   }, [router]);
 
-  const openEditAccountForm = React.useCallback((account: AccountWithBalance) => {
-    router.push({ pathname: '/accounts/[id]/edit', params: { id: account.id } });
-  }, [router]);
+  const handleDragEnd = React.useCallback((params: { data: AccountWithBalance[] }) => {
+    updateOrder.mutate(params.data.map((account, index) => ({
+      id: account.id,
+      sort_order: index,
+    })));
+  }, [updateOrder]);
 
   return (
     <PeriodSwipeContainer selection={selection}>
@@ -47,7 +55,12 @@ export function AccountsScreen() {
 
       <PeriodSelector selection={selection} />
 
-      <ScrollView className="flex-1" style={defaultStyles.transparentBg} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+      <Animated.ScrollView
+        ref={scrollRef}
+        className="flex-1"
+        style={defaultStyles.transparentBg}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
         <View className="px-4 pb-6">
           <View className="flex-col items-center justify-between gap-2 px-4 pt-4 pb-6">
             <Text className="text-sm text-muted-foreground">{translate('accounts.total_balance')}</Text>
@@ -60,19 +73,37 @@ export function AccountsScreen() {
                   <NoData title={translate('accounts.no_accounts')} className="mt-6" />
                 )
               : (
-                  accounts.map((account) => (
-                    <AccountCard
-                      key={account.id}
-                      account={account}
-                      onPress={() => router.push(`/accounts/${account.id}`)}
-                      onLongPress={() => openEditAccountForm(account)}
+                  <>
+                    <Sortable.Grid
+                      data={accounts}
+                      columns={1}
+                      hapticsEnabled
+                      scrollableRef={scrollRef}
+                      dimensionsAnimationType="none"
+                      itemEntering={null}
+                      itemExiting={null}
+                      itemsLayoutTransitionMode="reorder"
+                      keyExtractor={(account) => account.id}
+                      onDragEnd={handleDragEnd}
+                      renderItem={({ item: account }) => (
+                        <AccountCard
+                          account={account}
+                          onPress={() => router.push(`/accounts/${account.id}`)}
+                        />
+                      )}
                     />
-                  ))
+                    <View className="mt-3 mb-5 flex-row items-center justify-center gap-2">
+                      <Lightbulb className="text-muted-foreground" size={14} />
+                      <Text className="text-sm text-muted-foreground">
+                        {translate('accounts.sorting_tips')}
+                      </Text>
+                    </View>
+                  </>
                 )}
 
           <AddAccountCard onPress={openCreateAccountForm} />
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </PeriodSwipeContainer>
   );
 }

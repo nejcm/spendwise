@@ -32,12 +32,17 @@ _Avoid_: Default currency, base currency
 An ephemeral, screen-local currency for account summary display; may differ from **Preferred Currency** and uses the latest exchange rates when it does.
 _Avoid_: Display currency, selected currency
 
+**Account Order**:
+The user-defined sequence in which active accounts appear consistently throughout Spendwise.
+_Avoid_: Account screen order, local account order
+
 ## Relationships
 
 - **Today** represents exactly one current local calendar **Day**
 - Navigating from **Today** produces a fixed **Day**
 - A **Custom Period** may span one or more **Days**, but it remains a **Custom Period**
 - A **Budget Limit** can be prorated to a selected **Period**, including a fixed **Day**
+- **Account Order** applies consistently wherever active accounts are listed or selected
 
 ## Example Dialogue
 

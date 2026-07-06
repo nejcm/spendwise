@@ -15,10 +15,9 @@ import { ACCOUNT_TYPE_LABELS } from '../types';
 export type AccountCardProps = {
   account: AccountWithBalance;
   onPress?: () => void;
-  onLongPress?: () => void;
 };
 
-export function AccountCard({ account, onPress, onLongPress }: AccountCardProps) {
+export function AccountCard({ account, onPress }: AccountCardProps) {
   const userCurrency = useAppStore.use.currency();
   const periodSelection = useAppStore.use.periodSelection();
   const density = useAppStore.use.density();
@@ -29,7 +28,6 @@ export function AccountCard({ account, onPress, onLongPress }: AccountCardProps)
   return (
     <Pressable
       onPress={onPress}
-      onLongPress={onLongPress}
       className={cn('rounded-xl bg-card', isCompact ? 'mb-2 p-2' : 'mb-3 p-4')}
       style={getPressedStyle}
     >

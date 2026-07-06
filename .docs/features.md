@@ -33,7 +33,7 @@
 
 ### Core Finance
 
-- `accounts`: account CRUD, account balances
+- `accounts`: account CRUD, account balances, and user-defined ordering across account lists
 - `categories`: category CRUD, ordering, picker/grid UI
 - `transactions`: list, detail, form, summaries, filters, and balance updates
 

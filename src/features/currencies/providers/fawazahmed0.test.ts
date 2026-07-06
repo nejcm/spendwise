@@ -11,6 +11,8 @@ type MockResponseInit = {
   body?: unknown;
 };
 
+type FetchMock = jest.MockedFunction<typeof fetch>;
+
 function createMockResponse({ status, ok = status >= 200 && status < 300, body }: MockResponseInit): Response {
   return {
     status,
@@ -32,7 +34,7 @@ describe('fawazahmed0Provider', () => {
   });
 
   it('falls back from jsDelivr to pages.dev for latest', async () => {
-    const fetchMock = globalThis.fetch as jest.MockedFunction<typeof fetch>;
+    const fetchMock = globalThis.fetch as FetchMock;
     fetchMock
       .mockResolvedValueOnce(createMockResponse({ status: 404 }))
       .mockResolvedValueOnce(createMockResponse({
@@ -41,7 +43,9 @@ describe('fawazahmed0Provider', () => {
       }));
 
     const result = await fawazahmed0Provider.latest();
-    const urls = fetchMock.mock.calls.map(([url]) => String(url));
+    const urls = fetchMock.mock.calls.map(
+      ([url]: [RequestInfo | URL, RequestInit?]) => String(url),
+    );
 
     expect(result?.source).toBe('fawazahmed0');
     expect(result?.rates).toMatchObject({ EUR: 1, USD: 1.1, GBP: 0.86 });
@@ -50,7 +54,7 @@ describe('fawazahmed0Provider', () => {
   });
 
   it('falls back from jsDelivr to pages.dev for historical', async () => {
-    const fetchMock = globalThis.fetch as jest.MockedFunction<typeof fetch>;
+    const fetchMock = globalThis.fetch as FetchMock;
     fetchMock
       .mockResolvedValueOnce(createMockResponse({ status: 404 }))
       .mockResolvedValueOnce(createMockResponse({
@@ -59,7 +63,9 @@ describe('fawazahmed0Provider', () => {
       }));
 
     const result = await fawazahmed0Provider.historical('2020-01-15');
-    const urls = fetchMock.mock.calls.map(([url]) => String(url));
+    const urls = fetchMock.mock.calls.map(
+      ([url]: [RequestInfo | URL, RequestInit?]) => String(url),
+    );
 
     expect(result?.source).toBe('fawazahmed0-historical');
     expect(urls[0]).toContain('2020-01-15');

@@ -37,45 +37,47 @@ export function AccountSummary({ accountId, startDate, endDate }: AccountSummary
   const showSkeleton = isLoading || (isError && !summary);
 
   return (
-    <View className="mb-6 px-4">
-      <Pressable
-        style={getPressedStyle}
-        onPress={modal.present}
-        accessibilityRole="button"
-        accessibilityLabel={translate('accounts.view_currency')}
-        className="mb-2 flex-row items-center justify-center gap-1 self-center rounded-md px-2 py-1"
-      >
-        <Text className="text-sm text-muted-foreground">{viewCurrency}</Text>
-        <ChevronDown className="text-muted-foreground" size={16} />
-      </Pressable>
-      {showSkeleton
-        ? (
-            <SkeletonRows count={2} dimensions={loaderDimensions} className="items-center justify-center" />
-          )
-        : summary
+    <View className="mb-4 px-4">
+      <View className="rounded-xl bg-card p-4">
+        <Pressable
+          style={getPressedStyle}
+          onPress={modal.present}
+          accessibilityRole="button"
+          accessibilityLabel={translate('accounts.view_currency')}
+          className="mb-2 flex-row items-center justify-center gap-1 self-center rounded-md px-2 py-1"
+        >
+          <Text className="text-sm text-muted-foreground">{viewCurrency}</Text>
+          <ChevronDown className="text-muted-foreground" size={16} />
+        </Pressable>
+        {showSkeleton
           ? (
-              <>
-                <FormattedCurrency value={summary.balance} currency={viewCurrency} className="pb-6 text-center text-3xl font-medium" />
-                <View className="flex-row gap-2 rounded-xl bg-card p-4">
-                  <View className="flex-1">
-                    <View className="mb-1 flex-row items-center justify-center gap-2">
-                      <TrendingUp className="text-muted-foreground" size={16} />
-                      <Text className="text-center text-sm text-muted-foreground">{translate('common.income')}</Text>
-                    </View>
-                    <FormattedCurrency value={summary.income} currency={viewCurrency} className="text-center text-lg font-medium" numberOfLines={1} />
-                  </View>
-                  <View className="flex-1">
-                    <View className="mb-1 flex-row items-center justify-center gap-2">
-                      <TrendingDown className="text-muted-foreground" size={16} />
-                      <Text className="text-center text-sm text-muted-foreground">{translate('common.expenses')}</Text>
-                    </View>
-                    <FormattedCurrency value={summary.expense} currency={viewCurrency} prefix="- " className="text-center text-lg font-medium" numberOfLines={1} />
-                  </View>
-                </View>
-              </>
+              <SkeletonRows count={2} dimensions={loaderDimensions} className="items-center justify-center" />
             )
-          : null}
-      <Options ref={modal.ref} options={CURRENCY_OPTIONS} onSelect={onSelectCurrency} value={viewCurrency} />
+          : summary
+            ? (
+                <>
+                  <FormattedCurrency value={summary.balance} currency={viewCurrency} className="pb-4 text-center text-3xl font-medium" />
+                  <View className="flex-row gap-2 border-t border-border pt-4">
+                    <View className="flex-1">
+                      <View className="mb-1 flex-row items-center justify-center gap-2">
+                        <TrendingUp className="text-muted-foreground" size={16} />
+                        <Text className="text-center text-sm text-muted-foreground">{translate('common.income')}</Text>
+                      </View>
+                      <FormattedCurrency value={summary.income} currency={viewCurrency} className="text-center text-lg font-medium" numberOfLines={1} />
+                    </View>
+                    <View className="flex-1">
+                      <View className="mb-1 flex-row items-center justify-center gap-2">
+                        <TrendingDown className="text-muted-foreground" size={16} />
+                        <Text className="text-center text-sm text-muted-foreground">{translate('common.expenses')}</Text>
+                      </View>
+                      <FormattedCurrency value={summary.expense} currency={viewCurrency} prefix="- " className="text-center text-lg font-medium" numberOfLines={1} />
+                    </View>
+                  </View>
+                </>
+              )
+            : null}
+        <Options ref={modal.ref} options={CURRENCY_OPTIONS} onSelect={onSelectCurrency} value={viewCurrency} />
+      </View>
     </View>
   );
 }

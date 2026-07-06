@@ -3,7 +3,6 @@ import type { RenderOptions } from '@testing-library/react-native';
 
 import type { ReactElement } from 'react';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { NavigationContainer } from '@react-navigation/native';
 import { render, userEvent } from '@testing-library/react-native';
 import * as React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -17,9 +16,7 @@ const TEST_SAFE_AREA_METRICS = {
 function createAppWrapper() {
   return ({ children }: { children: React.ReactNode }) => (
     <SafeAreaProvider initialMetrics={TEST_SAFE_AREA_METRICS}>
-      <BottomSheetModalProvider>
-        <NavigationContainer>{children}</NavigationContainer>
-      </BottomSheetModalProvider>
+      <BottomSheetModalProvider>{children}</BottomSheetModalProvider>
     </SafeAreaProvider>
   );
 }

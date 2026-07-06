@@ -20,7 +20,7 @@ export function AddAccountCard({ onPress }: AddAccountCardProps) {
       onPress={onPress}
       className={cn(
         'rounded-xl border-2 border-dashed border-border',
-        isCompact ? 'p-2' : 'p-4',
+        isCompact ? 'p-1' : 'p-3',
       )}
       style={getPressedStyle}
     >

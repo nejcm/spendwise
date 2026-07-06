@@ -6,14 +6,14 @@ import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboa
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
 import ColorSelector from '@/components/color-selector';
-import { GhostButton, Image, Input, SolidButton, Text, TrashIcon } from '@/components/ui';
+import { GhostButton, Image, Input, SolidButton, Text } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import { CURRENCY_VALUES } from '@/features/currencies';
 import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { translate } from '@/lib/i18n';
 import { addLastUsedCurrency, selectAccountFormPrefs, setAccountFormPrefs, useAppStore } from '@/lib/store/store';
 import { getRandomColor } from '@/lib/theme/colors';
-import { useArchiveAccountConfirmation, useCreateAccount, useUpdateAccount } from '../api';
+import { useCreateAccount, useUpdateAccount } from '../api';
 import { ACCOUNT_TYPE_LABELS, ACCOUNT_TYPES } from '../types';
 
 const schema = z.object({
@@ -40,7 +40,6 @@ export type AccountFormBaseProps = {
   initialData?: AccountFormData;
   accountId?: string;
   onSuccess?: () => void;
-  onDeleteSuccess?: () => void;
   onCancel?: () => void;
 };
 
@@ -48,13 +47,11 @@ function useAccountForm(
   initialData?: AccountFormData,
   accountId?: string,
   onSuccess?: () => void,
-  onDeleteSuccess?: () => void,
 ) {
   const createAccount = useCreateAccount();
   const updateAccount = useUpdateAccount();
   const preferredCurrency = useAppStore.use.currency();
   const isCompact = useAppStore.use.density() === 'compact';
-  const archiveAccount = useArchiveAccountConfirmation(onDeleteSuccess);
   const accountFormPrefs = useAppStore(selectAccountFormPrefs);
 
   const form = useForm({
@@ -88,7 +85,7 @@ function useAccountForm(
     },
   });
 
-  return { form, createAccount, updateAccount, archiveAccount, preferredCurrency, isCompact };
+  return { form, createAccount, updateAccount, preferredCurrency, isCompact };
 }
 
 type UseAccountFormReturn = ReturnType<typeof useAccountForm>;
@@ -97,12 +94,9 @@ type AccountFormBodyProps = {
   form: UseAccountFormReturn['form'];
   isCompact: boolean;
   preferredCurrency: CurrencyKey;
-  archiveAccount: UseAccountFormReturn['archiveAccount'];
-  accountId?: string;
-  initialData?: AccountFormData;
 };
 
-function AccountFormBody({ form, preferredCurrency, archiveAccount, accountId, initialData, isCompact }: AccountFormBodyProps) {
+function AccountFormBody({ form, preferredCurrency, isCompact }: AccountFormBodyProps) {
   const inputSize = isCompact ? 'md' : 'lg';
   return (
     <>
@@ -211,17 +205,6 @@ function AccountFormBody({ form, preferredCurrency, archiveAccount, accountId, i
         />
       </View>
 
-      {!!accountId && (
-        <GhostButton
-          label={translate('common.delete')}
-          color="danger"
-          className="mt-6"
-          fullWidth
-          textClassName="underline"
-          iconLeft={<TrashIcon size={16} colorClassName="accent-danger-600" className="mr-2" />}
-          onPress={() => archiveAccount.submit(accountId, initialData?.name)}
-        />
-      )}
     </>
   );
 }
@@ -231,17 +214,15 @@ export function AccountForm({
   initialData,
   accountId,
   onSuccess,
-  onDeleteSuccess,
   onCancel,
 }: AccountFormProps) {
-  const { form, createAccount, updateAccount, archiveAccount, preferredCurrency, isCompact } = useAccountForm(
+  const { form, createAccount, updateAccount, preferredCurrency, isCompact } = useAccountForm(
     initialData,
     accountId,
     onSuccess,
-    onDeleteSuccess,
   );
 
-  const isLoading = createAccount.isPending || updateAccount.isPending || archiveAccount.mutation.isPending;
+  const isLoading = createAccount.isPending || updateAccount.isPending;
   const insets = useSafeAreaInsets();
   const stickyFooterPadding = 56 + insets.bottom;
   const buttonSize = isCompact ? 'sm' : 'md';
@@ -257,9 +238,6 @@ export function AccountForm({
           form={form}
           isCompact={isCompact}
           preferredCurrency={preferredCurrency}
-          archiveAccount={archiveAccount}
-          accountId={accountId}
-          initialData={initialData}
         />
       </KeyboardAwareScrollView>
       <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>

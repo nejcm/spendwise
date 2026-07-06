@@ -42,14 +42,20 @@ describe('input component ', () => {
   });
 
   it('should render the error message correctly ', () => {
-    render(<Input testID="input" error="This is an error message" />);
+    render(<Input testID="input" error="This is an error message" showErrorMessage />);
     expect(screen.getByTestId('input')).toBeOnTheScreen();
 
     expect(screen.getByTestId('input-error')).toHaveTextContent('This is an error message');
   });
   it('should render the label, error message & placeholder correctly ', () => {
     render(
-      <Input testID="input" label="Username" placeholder="Enter your username" error="This is an error message" />,
+      <Input
+        testID="input"
+        label="Username"
+        placeholder="Enter your username"
+        error="This is an error message"
+        showErrorMessage
+      />,
     );
     expect(screen.getByTestId('input')).toBeOnTheScreen();
 

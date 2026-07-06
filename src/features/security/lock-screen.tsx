@@ -34,7 +34,6 @@ export function LockScreen({ visible, onUnlock }: Props) {
   }, [onUnlock]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (visible) void authenticate();
   }, [visible, authenticate]);
 

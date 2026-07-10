@@ -1,4 +1,4 @@
-import { selectIsAiEnabled, useAppStore } from './store';
+import { selectIsAiEnabled, setLastPrimaryTabPath, useAppStore } from './store';
 
 describe('app store selectors', () => {
   it('enables AI only when the active provider has a saved key', () => {
@@ -22,5 +22,12 @@ describe('app store selectors', () => {
       openaiApiKey: 'sk-openai',
       anthropicApiKey: '   ',
     })).toBe(false);
+  });
+});
+
+describe('app store actions', () => {
+  it('stores the last primary tab path', () => {
+    setLastPrimaryTabPath('/transactions');
+    expect(useAppStore.getState().lastPrimaryTabPath).toBe('/transactions');
   });
 });

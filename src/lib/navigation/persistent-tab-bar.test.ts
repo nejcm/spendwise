@@ -1,4 +1,4 @@
-import { getShouldShowPersistentTabBar } from './persistent-tab-bar';
+import { getPersistablePrimaryTabPath, getShouldShowPersistentTabBar } from './persistent-tab-bar';
 
 describe('getShouldShowPersistentTabBar', () => {
   it('hides the tab bar on full-screen modal routes', () => {
@@ -15,5 +15,24 @@ describe('getShouldShowPersistentTabBar', () => {
     expect(getShouldShowPersistentTabBar('/')).toBe(true);
     expect(getShouldShowPersistentTabBar('/transactions')).toBe(true);
     expect(getShouldShowPersistentTabBar('/accounts/acc_1')).toBe(true);
+  });
+});
+
+describe('getPersistablePrimaryTabPath', () => {
+  it('returns only exact primary tab routes', () => {
+    expect(getPersistablePrimaryTabPath('')).toBe('/');
+    expect(getPersistablePrimaryTabPath('/')).toBe('/');
+    expect(getPersistablePrimaryTabPath('/transactions')).toBe('/transactions');
+    expect(getPersistablePrimaryTabPath('/stats')).toBe('/stats');
+    expect(getPersistablePrimaryTabPath('/categories')).toBe('/categories');
+  });
+
+  it('does not return nested or non-primary routes', () => {
+    expect(getPersistablePrimaryTabPath('/transactions/new')).toBeUndefined();
+    expect(getPersistablePrimaryTabPath('/transactions/tx_1')).toBeUndefined();
+    expect(getPersistablePrimaryTabPath('/stats/global-budget')).toBeUndefined();
+    expect(getPersistablePrimaryTabPath('/categories/cat_1/edit')).toBeUndefined();
+    expect(getPersistablePrimaryTabPath('/accounts')).toBeUndefined();
+    expect(getPersistablePrimaryTabPath('/settings')).toBeUndefined();
   });
 });

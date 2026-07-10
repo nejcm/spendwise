@@ -8,6 +8,7 @@ import type { NotificationSettings } from '@/features/notifications/types';
 
 import type { ThemeType } from '@/features/settings/theme';
 import type { Transaction } from '@/features/transactions/types';
+import type { PrimaryTabPath } from '@/lib/navigation/persistent-tab-bar';
 import type { AccentType } from '@/lib/theme/accent';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
@@ -74,6 +75,7 @@ export type AppState = {
   longPressAction: LongPressActionType;
   recommendationsEnabled: boolean;
   density: DensityType;
+  lastPrimaryTabPath: PrimaryTabPath;
 
   // Security
   lockEnabled: boolean;
@@ -120,6 +122,7 @@ function getDefaultState(): AppState {
     longPressAction: 'scan_receipt',
     recommendationsEnabled: true,
     density: 'default',
+    lastPrimaryTabPath: '/',
     lockEnabled: false,
     lockTimeoutMinutes: 1,
     isLocked: false,
@@ -218,6 +221,10 @@ export function setAccentColor(colorTheme: AccentType) {
 
 export function setDensity(density: DensityType) {
   return updateAppState({ density });
+}
+
+export function setLastPrimaryTabPath(lastPrimaryTabPath: PrimaryTabPath) {
+  return updateAppState({ lastPrimaryTabPath });
 }
 
 export function setIsFirstTime(isFirstTime: boolean) {

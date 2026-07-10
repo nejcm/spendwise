@@ -1,5 +1,21 @@
+export type PrimaryTabPath = '/' | '/transactions' | '/stats' | '/categories';
+
+const PERSISTABLE_PRIMARY_TAB_PATHS = new Set<string>([
+  '/',
+  '/transactions',
+  '/stats',
+  '/categories',
+]);
+
 export function getShouldShowPersistentTabBar(pathname: string): boolean {
   return pathname !== '/onboarding' && !isModalPath(pathname);
+}
+
+export function getPersistablePrimaryTabPath(pathname: string): PrimaryTabPath | undefined {
+  const normalizedPathname = pathname === '' ? '/' : pathname;
+  return PERSISTABLE_PRIMARY_TAB_PATHS.has(normalizedPathname)
+    ? normalizedPathname as PrimaryTabPath
+    : undefined;
 }
 
 function isEditRoute(pathname: string, base: string): boolean {

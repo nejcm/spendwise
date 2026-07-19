@@ -15,9 +15,21 @@ export type TransactionListProps = {
   transactions: TransactionWithCategory[];
   isLoading: boolean;
   onRefresh?: () => Promise<void> | void;
+  selectionMode?: boolean;
+  selectedIds?: Set<string>;
+  onSelect?: (id: string) => void;
+  onStartSelection?: (id: string) => void;
 };
 
-export function TransactionList({ transactions, isLoading, onRefresh }: TransactionListProps) {
+export function TransactionList({
+  transactions,
+  isLoading,
+  onRefresh,
+  selectionMode = false,
+  selectedIds,
+  onSelect,
+  onStartSelection,
+}: TransactionListProps) {
   const [refreshing, setRefreshing] = useState(false);
   const density = useAppStore.use.density();
   const isCompact = density === 'compact';
@@ -51,9 +63,17 @@ export function TransactionList({ transactions, isLoading, onRefresh }: Transact
           </View>
         );
       }
-      return <TransactionCard transaction={item} />;
+      return (
+        <TransactionCard
+          transaction={item}
+          selectionMode={selectionMode}
+          selected={selectedIds?.has(item.id)}
+          onSelect={onSelect}
+          onStartSelection={onStartSelection}
+        />
+      );
     },
-    [isCompact],
+    [isCompact, onSelect, onStartSelection, selectedIds, selectionMode],
   );
 
   if (!isLoading && transactions.length === 0) {

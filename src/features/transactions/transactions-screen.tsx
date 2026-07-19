@@ -9,13 +9,13 @@ import { Pressable, View } from 'react-native';
 import { cn } from 'tailwind-variants';
 import { PeriodSelector } from '@/components/period-selector';
 import { PeriodSwipeContainer } from '@/components/period-swipe-container';
-import { FocusAwareStatusBar, Input, inputDefaultDefaults, inputDefaults } from '@/components/ui';
-import { X } from '@/components/ui/icon';
+import { Alert, FocusAwareStatusBar, IconButton, Input, inputDefaultDefaults, inputDefaults, OverflowMenu, Text, TrashIcon } from '@/components/ui';
+import { EllipsisVertical, X } from '@/components/ui/icon';
 import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
-import { transactionsQueryOptions, useTransactions } from './api';
+import { transactionsQueryOptions, useDeleteTransactions, useTransactions } from './api';
 import { TransactionFilterBar } from './components/transaction-filter-bar';
 import { TransactionList } from './components/transaction-list';
 import { parseTransactionsRouteSeed } from './route-params';
@@ -32,6 +32,8 @@ export function TransactionsScreen() {
   const selection = useAppStore.use.periodSelection();
   const [search, setSearch] = useState(initialRouteSeed.search);
   const [filters, setFilters] = useState<FilterState>(initialRouteSeed.filters);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const [debouncedSearch] = useDebouncedValue(search, debounceSettings);
   const { categoryId, type, accountId } = filters;
   const updateFilters = React.useCallback((newFilters: Partial<FilterState>) => {
@@ -39,6 +41,10 @@ export function TransactionsScreen() {
   }, [setFilters]);
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
   const { data: transactions = [], isLoading, refetch } = useTransactions(startDate, endDate);
+  const deleteTransactions = useDeleteTransactions(() => {
+    setSelectedIds(new Set());
+    setSelectionMode(false);
+  });
 
   const db = useSQLiteContext();
   usePrefetchAdjacentPeriods(selection, (start, end) => transactionsQueryOptions(db, start, end));
@@ -65,8 +71,44 @@ export function TransactionsScreen() {
     return transactions;
   }, [transactions, debouncedSearch, categoryId, type, accountId]);
 
+  const toggleSelection = React.useCallback((id: string) => {
+    setSelectedIds((previous) => {
+      const next = new Set(previous);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const startSelection = React.useCallback((id: string) => {
+    setSelectionMode(true);
+    setSelectedIds(new Set([id]));
+  }, []);
+
+  const currentTransactionIds = useMemo(() => new Set(transactions.map((transaction) => transaction.id)), [transactions]);
+  const currentSelectedIds = useMemo(
+    () => [...selectedIds].filter((id) => currentTransactionIds.has(id)),
+    [currentTransactionIds, selectedIds],
+  );
+  const selectedCount = currentSelectedIds.length;
+  const handleDeleteSelected = React.useCallback(() => {
+    if (selectedCount === 0) return;
+    Alert.alert(
+      translate('common.delete'),
+      translate('transactions.delete_selected_confirmation', { count: selectedCount }),
+      [
+        { text: translate('common.cancel'), style: 'cancel' },
+        {
+          text: translate('common.delete'),
+          style: 'destructive',
+          onPress: () => deleteTransactions.mutate(currentSelectedIds),
+        },
+      ],
+    );
+  }, [currentSelectedIds, deleteTransactions, selectedCount]);
+
   return (
-    <>
+    <View className="flex-1">
       <FocusAwareStatusBar />
 
       <PeriodSelector selection={selection} />
@@ -100,9 +142,49 @@ export function TransactionsScreen() {
       />
       <PeriodSwipeContainer selection={selection}>
         <View className="flex-1">
-          <TransactionList transactions={filtered} isLoading={isLoading} onRefresh={() => void refetch()} />
+          <TransactionList
+            transactions={filtered}
+            isLoading={isLoading}
+            onRefresh={() => void refetch()}
+            selectionMode={selectionMode}
+            selectedIds={selectedIds}
+            onSelect={toggleSelection}
+            onStartSelection={startSelection}
+          />
         </View>
       </PeriodSwipeContainer>
-    </>
+      {selectionMode && (
+        <View className="absolute inset-x-4 bottom-3 flex-row items-center rounded-xl border border-border/50 bg-background/90 px-3 py-1 shadow-lg dark:bg-background/95">
+          <Text className="flex-1 font-medium">
+            {translate('transactions.selected_count', { count: selectedCount })}
+          </Text>
+          <IconButton
+            color="none"
+            onPress={() => {
+              setSelectedIds(new Set());
+              setSelectionMode(false);
+            }}
+            size="md"
+          >
+            <X className="size-5 text-muted-foreground" />
+          </IconButton>
+          <OverflowMenu
+            accessibilityLabel={translate('settings.more')}
+            className="-mr-2"
+            containerClassName="py-0"
+            placement="above"
+            icon={<EllipsisVertical className="text-muted-foreground" size={18} />}
+            items={selectedCount > 0
+              ? [{
+                  label: translate('common.delete'),
+                  onPress: handleDeleteSelected,
+                  className: 'text-danger-600',
+                  icon: <TrashIcon size={16} colorClassName="accent-danger-600" className="mr-2" />,
+                }]
+              : []}
+          />
+        </View>
+      )}
+    </View>
   );
 }

@@ -204,3 +204,17 @@ export function useDeleteTransaction() {
     onError,
   });
 }
+
+export function useDeleteTransactions(onSuccess?: () => void) {
+  const db = useSQLiteContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (ids: string[]) => queries.deleteTransactions(db, ids),
+    onSuccess: () => {
+      invalidateFor(queryClient, 'transaction');
+      onSuccess?.();
+    },
+    onError,
+  });
+}

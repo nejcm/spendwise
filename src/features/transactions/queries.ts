@@ -179,3 +179,22 @@ export async function deleteTransaction(
 ): Promise<void> {
   await db.runAsync('DELETE FROM transactions WHERE id = ?', [id]);
 }
+
+export async function deleteTransactions(
+  db: SQLiteDatabase,
+  ids: string[],
+): Promise<void> {
+  if (ids.length === 0) return;
+
+  // Keep well below SQLite's usual 999 bind-variable limit.
+  const chunkSize = 500;
+  await db.withTransactionAsync(async () => {
+    for (let offset = 0; offset < ids.length; offset += chunkSize) {
+      const chunk = ids.slice(offset, offset + chunkSize);
+      await db.runAsync(
+        `DELETE FROM transactions WHERE id IN (${chunk.map(() => '?').join(', ')})`,
+        chunk,
+      );
+    }
+  });
+}

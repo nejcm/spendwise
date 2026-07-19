@@ -11,7 +11,8 @@ import { useCSSVariable } from 'uniwind';
 import { Text } from './text';
 
 const checkboxSizes = {
-  sm: 18,
+  xs: 16,
+  sm: 19,
   md: 22,
   lg: 26,
 } as const;

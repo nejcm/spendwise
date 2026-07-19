@@ -5,6 +5,7 @@ import {
   createTransaction,
   createTransactions,
   deleteTransaction,
+  deleteTransactions,
   getMonthSummary,
   getRecentTransactions,
   getTransactionById,
@@ -487,5 +488,30 @@ describe('deleteTransaction', () => {
 
     const result = await deleteTransaction(db as any, 'txn_1');
     expect(result).toBeUndefined();
+  });
+});
+
+describe('deleteTransactions', () => {
+  it('removes the selected rows and leaves the rest intact', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    await seedTransaction(db, { id: 'txn_1' });
+    await seedTransaction(db, { id: 'txn_2' });
+    await seedTransaction(db, { id: 'txn_3' });
+
+    await deleteTransactions(db as any, ['txn_1', 'txn_3']);
+
+    expect(await getTransactionById(db as any, 'txn_1')).toBeNull();
+    expect(await getTransactionById(db as any, 'txn_2')).not.toBeNull();
+    expect(await getTransactionById(db as any, 'txn_3')).toBeNull();
+  });
+
+  it('does nothing for an empty selection', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    await seedTransaction(db);
+
+    await expect(deleteTransactions(db as any, [])).resolves.toBeUndefined();
+    expect(await getTransactionById(db as any, 'txn_1')).not.toBeNull();
   });
 });

@@ -679,6 +679,7 @@
     "date_required": "Datum ist erforderlich",
     "delete_confirmation": "Möchtest du diese Transaktion wirklich löschen?",
     "detail_title": "Transaktion Details",
+    "duplicate": "Duplizieren",
     "edit_title": "Transaktion bearbeiten",
     "expense": "Ausgabe",
     "income": "Einnahme",

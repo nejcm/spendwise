@@ -6,7 +6,7 @@ import { ScrollView } from 'react-native';
 import DetailsSection, { DetailsRow } from '@/components/details';
 import ScreenHeader from '@/components/screen-header';
 
-import { Alert, FocusAwareStatusBar, FormattedCurrency, FormattedDate, GhostButton, OverflowMenu, RepeatIcon, SolidButton, Text, TrashIcon, View } from '@/components/ui';
+import { Alert, Copy, FocusAwareStatusBar, FormattedCurrency, FormattedDate, GhostButton, OverflowMenu, RepeatIcon, SolidButton, Text, TrashIcon, View } from '@/components/ui';
 
 import { NAV_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
 import { useAccounts } from '@/features/accounts/api';
@@ -15,7 +15,7 @@ import { translate } from '@/lib/i18n';
 import { goBackOrFallback } from '@/lib/routing';
 import { useAppStore } from '@/lib/store/store';
 import { centsToAmount } from '../formatting/helpers';
-import { useDeleteTransaction, useTransaction } from './api';
+import { useCreateTransaction, useDeleteTransaction, useTransaction } from './api';
 import { MerchantLogo } from './components/merchant-logo';
 import { TransactionForm } from './components/transaction-form';
 
@@ -25,6 +25,7 @@ export function TransactionDetailScreen() {
   const isCompact = useAppStore.use.density() === 'compact';
 
   const { data: transaction, isLoading } = useTransaction(id ?? '');
+  const createMut = useCreateTransaction();
   const deleteMut = useDeleteTransaction();
   const { data: accounts = [] } = useAccounts();
   const [isEditing, setIsEditing] = useState(false);
@@ -99,6 +100,24 @@ export function TransactionDetailScreen() {
       },
     });
   };
+
+  const handleDuplicate = () => {
+    createMut.mutate({
+      account_id: transaction.account_id,
+      category_id: transaction.category_id,
+      type: transaction.type,
+      amount: centsToAmount(transaction.amount),
+      baseAmount: centsToAmount(transaction.baseAmount),
+      currency: transaction.currency,
+      date: transaction.date,
+      note: transaction.note,
+      merchant_name: transaction.merchant_name,
+      location: transaction.location,
+    }, {
+      onSuccess: (duplicateId) => router.replace({ pathname: '/transactions/[id]', params: { id: duplicateId } }),
+    });
+  };
+
   const logo = transaction.merchant_logo_slug ? <MerchantLogo slug={transaction.merchant_logo_slug} size={56} withBg={false} /> : null;
   const buttonSize = isCompact ? 'sm' : 'md';
 
@@ -109,6 +128,11 @@ export function TransactionDetailScreen() {
           className="-mr-2 ml-auto"
           accessibilityLabel={translate('settings.more')}
           items={[
+            {
+              label: translate('transactions.duplicate'),
+              onPress: handleDuplicate,
+              icon: <Copy size={16} colorClassName="accent-foreground" className="mr-2" />,
+            },
             {
               label: translate('transactions.make_recurring'),
               onPress: handleMakeRecurring,

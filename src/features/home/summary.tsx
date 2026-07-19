@@ -54,7 +54,7 @@ function HomeGlobalBudget({ currency, selection, isCompact, balance }: HomeGloba
   const ratio = scaledBudget > 0 ? spent / scaledBudget : 0;
   const percentage = Math.min(ratio * 100, 100);
   return (
-    <View className={`px-1 ${isCompact ? 'gap-3 py-4' : 'gap-5 py-5'} ${!budget ? 'flex-row justify-between' : 'flex-col'}`}>
+    <View className={`px-1 ${isCompact ? 'gap-1 py-4' : 'gap-2 py-5'} ${!budget ? 'flex-row justify-between' : 'flex-col'}`}>
       <Pressable style={getPressedStyle} onPress={() => router.push('/stats')}>
         <View>
           <Text className="mb-px text-xs/snug text-muted-foreground">

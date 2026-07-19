@@ -679,6 +679,7 @@
     "date_required": "Date is required",
     "delete_confirmation": "Are you sure you want to delete this transaction?",
     "detail_title": "Transaction Details",
+    "duplicate": "Duplicate",
     "edit_title": "Edit Transaction",
     "expense": "Expense",
     "income": "Income",

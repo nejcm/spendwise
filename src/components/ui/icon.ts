@@ -29,6 +29,7 @@ import {
   ChevronRight as LucideChevronRight,
   ChevronUp as LucideChevronUp,
   CircleDollarSign as LucideCircleDollarSign,
+  Copy as LucideCopy,
   Database as LucideDatabase,
   DatabaseBackupIcon as LucideDatabaseBackupIcon,
   DatabaseSearch as LucideDatabaseSearch,
@@ -115,6 +116,7 @@ export const Camera = createIcon(LucideCamera);
 export const Check = createIcon(LucideCheck);
 export const ChevronDown = createIcon(LucideChevronDown);
 export const CircleDollarSign = createIcon(LucideCircleDollarSign);
+export const Copy = createIcon(LucideCopy);
 export const Database = createIcon(LucideDatabase);
 export const DatabaseBackupIcon = createIcon(LucideDatabaseBackupIcon);
 export const DatabaseSearch = createIcon(LucideDatabaseSearch);

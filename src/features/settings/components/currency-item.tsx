@@ -1,18 +1,19 @@
 import type { OptionType } from '@/components/ui';
 import type { CurrencyKey } from '@/features/currencies';
 import * as React from 'react';
-import { Euro, Options, Text, useModalSheet, View } from '@/components/ui';
-import { useLastCurrencyRatesFetchedAt } from '@/features/currencies/hooks';
+import { Alert, Euro, Options, Text, useModalSheet, View } from '@/components/ui';
+import { useChangeCurrency, useLastCurrencyRatesFetchedAt } from '@/features/currencies/hooks';
 import { CURRENCY_OPTIONS } from '@/features/currencies/images';
 import { formatDate } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
-import { setCurrency, useAppStore } from '@/lib/store/store';
+import { useAppStore } from '@/lib/store/store';
 import { SettingsItem } from './settings-item';
 
 export function CurrencyItem() {
   const modal = useModalSheet();
   const currency = useAppStore.use.currency();
   const dateFormat = useAppStore.use.dateFormat();
+  const changeCurrency = useChangeCurrency();
   const { data: lastFetchedAt } = useLastCurrencyRatesFetchedAt();
   const lastRefreshed = lastFetchedAt
     ? formatDate(lastFetchedAt, dateFormat)
@@ -20,10 +21,26 @@ export function CurrencyItem() {
 
   const onSelect = React.useCallback(
     (option: OptionType) => {
-      setCurrency(option.value as CurrencyKey);
+      const newCurrency = option.value as CurrencyKey;
+
       modal.close();
+      if (newCurrency === currency) return;
+
+      Alert.alert(
+        translate('settings.changeCurrencyTitle'),
+        translate('settings.changeCurrencyWarning'),
+        [
+          { text: translate('common.cancel'), style: 'cancel' },
+          {
+            text: translate('common.confirm'),
+            onPress: () => {
+              changeCurrency.mutate(newCurrency);
+            },
+          },
+        ],
+      );
     },
-    [modal],
+    [changeCurrency, currency, modal],
   );
 
   return (

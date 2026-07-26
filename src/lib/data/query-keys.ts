@@ -67,6 +67,7 @@ export const queryKeys = {
   // ─── Currency Rates ───
   currencyRates: {
     all: ['currency-rates'] as const,
+    lastFetchedAt: ['currency-rates', 'last-fetched-at'] as const,
     forDate: (unixSeconds: number) =>
       ['currency-rates', 'for-date', unixSeconds] as const,
   },

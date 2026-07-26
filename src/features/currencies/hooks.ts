@@ -36,6 +36,15 @@ export function useCurrencyRates(options?: { enabled?: boolean }) {
   });
 }
 
+export function useLastCurrencyRatesFetchedAt() {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: queryKeys.currencyRates.lastFetchedAt,
+    queryFn: () => queries.getLastFetchedAt(db),
+    staleTime: STALE_MS,
+  });
+}
+
 function onError(error: unknown) {
   Alert.alert(translate('common.error'), error instanceof Error ? error.message : translate('common.error_description'));
 }

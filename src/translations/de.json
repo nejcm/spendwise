@@ -516,6 +516,8 @@
     "currencyBackupFailedMessage": "Vor dem Ändern der Währung konnte kein Backup erstellt werden. Du kannst trotzdem fortfahren, aber exportiere am besten vorher ein Backup unter Einstellungen → Import/Export.",
     "currencyBackupFailedTitle": "Backup nicht verfügbar",
     "currency_format": "Währungsformat",
+    "currency_rates_last_refreshed": "Wechselkurse zuletzt aktualisiert: {{date}}",
+    "currency_rates_never_refreshed": "Nie",
     "date_format": "Datumsformat",
     "db_schema_version": "Datenbankschema",
     "db_version": "Datenbankversion",

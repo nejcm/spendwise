@@ -7,7 +7,6 @@ import { BotIcon, Settings } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { AccountsOverview } from '@/features/home/accounts-overview';
 import { CategoriesOverview } from '@/features/home/categories-overview';
-import { ScreensLinksGrid } from '@/features/home/screens-grid';
 import { HomeRecommendations } from '@/features/recommendations/components/home-recommendations';
 import { queryKeys } from '@/lib/data/query-keys';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
@@ -65,7 +64,6 @@ export function HomeScreen() {
           <HomeRecommendations />
           <AccountsOverview />
           <CategoriesOverview />
-          <ScreensLinksGrid />
           <TransactionsList />
         </View>
       </ScrollView>

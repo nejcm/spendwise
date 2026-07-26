@@ -516,6 +516,8 @@
     "currencyBackupFailedMessage": "Could not create a backup before changing currency. You can still continue, but consider exporting a backup from Settings → Import/Export.",
     "currencyBackupFailedTitle": "Backup unavailable",
     "currency_format": "Currency format",
+    "currency_rates_last_refreshed": "Rates last refreshed: {{date}}",
+    "currency_rates_never_refreshed": "Never",
     "date_format": "Date format",
     "db_schema_version": "Database schema",
     "db_version": "Database version",

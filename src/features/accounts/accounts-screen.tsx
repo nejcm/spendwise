@@ -8,7 +8,6 @@ import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import Sortable from 'react-native-sortables';
 import NoData from '@/components/no-data';
 import { PeriodSelector } from '@/components/period-selector';
-import { PeriodSwipeContainer } from '@/components/period-swipe-container';
 import { FocusAwareStatusBar, FormattedCurrency, Text } from '@/components/ui';
 import { Lightbulb } from '@/components/ui/icon';
 import { SkeletonRows } from '@/components/ui/skeleton';
@@ -50,7 +49,7 @@ export function AccountsScreen() {
   }, [updateOrder]);
 
   return (
-    <PeriodSwipeContainer selection={selection}>
+    <>
       <FocusAwareStatusBar />
 
       <PeriodSelector selection={selection} />
@@ -104,6 +103,6 @@ export function AccountsScreen() {
           <AddAccountCard onPress={openCreateAccountForm} />
         </View>
       </Animated.ScrollView>
-    </PeriodSwipeContainer>
+    </>
   );
 }

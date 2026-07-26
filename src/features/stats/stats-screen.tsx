@@ -3,7 +3,6 @@ import * as React from 'react';
 import { useMemo, useState } from 'react';
 import { RefreshControl } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
-import { PeriodSwipeContainer } from '@/components/period-swipe-container';
 import { FocusAwareStatusBar, ScrollView, View } from '@/components/ui';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { useRefresh } from '@/lib/hooks/use-refresh';
@@ -33,7 +32,7 @@ export function StatsScreen() {
             <StatsCalendar />
           )
         : (
-            <PeriodSwipeContainer selection={selection}>
+            <>
               {activeTab === 'overview' && (
                 <>
                   <PeriodSelector selection={selection} />
@@ -71,7 +70,7 @@ export function StatsScreen() {
               {activeTab === 'budget' && (
                 <BudgetTab currency={currency} />
               )}
-            </PeriodSwipeContainer>
+            </>
           )}
     </View>
   );

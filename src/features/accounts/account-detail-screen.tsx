@@ -5,7 +5,6 @@ import { useMemo } from 'react';
 
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
-import { PeriodSwipeContainer } from '@/components/period-swipe-container';
 import ScreenHeader from '@/components/screen-header';
 import { FocusAwareStatusBar, OverflowMenu, Pencil, TrashIcon } from '@/components/ui';
 import { SkeletonRows } from '@/components/ui/skeleton';
@@ -71,48 +70,46 @@ export function AccountDetailScreen() {
   return (
     <>
       <FocusAwareStatusBar />
-      <PeriodSwipeContainer selection={selection}>
-        <ScreenHeader title={`${account.icon ?? ''} ${account.name}`}>
-          <OverflowMenu
-            className="-mr-2 ml-auto"
-            accessibilityLabel={translate('settings.more')}
-            items={[
-              {
-                label: translate('common.edit'),
-                onPress: openEditForm,
-                icon: <Pencil size={16} colorClassName="accent-foreground" className="mr-2" />,
-              },
-              {
-                label: translate('common.delete'),
-                onPress: () => archiveAccount.submit(account.id, account.name),
-                className: 'text-danger-600',
-                icon: <TrashIcon size={16} colorClassName="accent-danger-600" className="mr-2" />,
-              },
-            ]}
-          />
-        </ScreenHeader>
+      <ScreenHeader title={`${account.icon ?? ''} ${account.name}`}>
+        <OverflowMenu
+          className="-mr-2 ml-auto"
+          accessibilityLabel={translate('settings.more')}
+          items={[
+            {
+              label: translate('common.edit'),
+              onPress: openEditForm,
+              icon: <Pencil size={16} colorClassName="accent-foreground" className="mr-2" />,
+            },
+            {
+              label: translate('common.delete'),
+              onPress: () => archiveAccount.submit(account.id, account.name),
+              className: 'text-danger-600',
+              icon: <TrashIcon size={16} colorClassName="accent-danger-600" className="mr-2" />,
+            },
+          ]}
+        />
+      </ScreenHeader>
 
-        <PeriodSelector selection={selection} />
+      <PeriodSelector selection={selection} />
 
-        <ScrollView
-          className="flex-1"
-          style={defaultStyles.transparentBg}
-          contentContainerClassName="pb-4"
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        >
-          <AccountSummary
-            key={`${id}-${preferredCurrency}`}
-            accountId={id}
-            startDate={startDate}
-            endDate={endDate}
-          />
+      <ScrollView
+        className="flex-1"
+        style={defaultStyles.transparentBg}
+        contentContainerClassName="pb-4"
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+      >
+        <AccountSummary
+          key={`${id}-${preferredCurrency}`}
+          accountId={id}
+          startDate={startDate}
+          endDate={endDate}
+        />
 
-          <TransactionList
-            transactions={transactions}
-            isLoading={txLoading}
-          />
-        </ScrollView>
-      </PeriodSwipeContainer>
+        <TransactionList
+          transactions={transactions}
+          isLoading={txLoading}
+        />
+      </ScrollView>
     </>
   );
 }

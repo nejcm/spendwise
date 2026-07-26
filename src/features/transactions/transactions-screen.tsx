@@ -8,7 +8,6 @@ import { useMemo, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { cn } from 'tailwind-variants';
 import { PeriodSelector } from '@/components/period-selector';
-import { PeriodSwipeContainer } from '@/components/period-swipe-container';
 import { Alert, FocusAwareStatusBar, IconButton, Input, inputDefaultDefaults, inputDefaults, OverflowMenu, Text, TrashIcon } from '@/components/ui';
 import { EllipsisVertical, X } from '@/components/ui/icon';
 import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
@@ -140,19 +139,17 @@ export function TransactionsScreen() {
         hasActiveFilters={categoryId !== null || type !== null || accountId !== null}
         updateFilters={updateFilters}
       />
-      <PeriodSwipeContainer selection={selection}>
-        <View className="flex-1">
-          <TransactionList
-            transactions={filtered}
-            isLoading={isLoading}
-            onRefresh={() => void refetch()}
-            selectionMode={selectionMode}
-            selectedIds={selectedIds}
-            onSelect={toggleSelection}
-            onStartSelection={startSelection}
-          />
-        </View>
-      </PeriodSwipeContainer>
+      <View className="flex-1">
+        <TransactionList
+          transactions={filtered}
+          isLoading={isLoading}
+          onRefresh={() => void refetch()}
+          selectionMode={selectionMode}
+          selectedIds={selectedIds}
+          onSelect={toggleSelection}
+          onStartSelection={startSelection}
+        />
+      </View>
       {selectionMode && (
         <View className="absolute inset-x-4 bottom-3 flex-row items-center rounded-xl border border-border/50 bg-background/90 px-3 py-1 shadow-lg dark:bg-background/95">
           <Text className="flex-1 font-medium">

@@ -52,7 +52,7 @@ function HomeGlobalBudget({ currency, selection, isCompact, balance }: HomeGloba
 
   const remaining = scaledBudget - spent;
   const ratio = scaledBudget > 0 ? spent / scaledBudget : 0;
-  const percentage = Math.min(ratio * 100, 100);
+  const percentage = ratio * 100;
   return (
     <View className={`px-1 ${isCompact ? 'gap-1 py-4' : 'gap-2 py-5'} ${!budget ? 'flex-row justify-between' : 'flex-col'}`}>
       <Pressable style={getPressedStyle} onPress={() => router.push('/stats')}>

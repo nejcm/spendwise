@@ -53,9 +53,11 @@ describe('monthly expense trend card', () => {
   it('renders six monthly expense bars and highlights the current month', () => {
     render(<MonthlyExpenseTrendCard />);
 
-    expect(screen.getByText('25% lower than last month')).toBeOnTheScreen();
+    expect(screen.queryByText('25% lower than last month')).not.toBeOnTheScreen();
+    expect(screen.queryByText('750$')).not.toBeOnTheScreen();
     expect(screen.getByTestId('monthly-expense-trend-chart')).toBeOnTheScreen();
     expect(mockBarChart).toHaveBeenCalledWith(expect.objectContaining({
+      height: 96,
       data: [
         expect.objectContaining({ label: 'Feb', value: 800 }),
         expect.objectContaining({ label: 'Mar', value: 900 }),

@@ -15,7 +15,8 @@ import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { getAvatar } from '../profile';
-import { MonthlyExpenseTrendCard } from './monthly-expense-trend-card';
+import { HomeScreenChart } from './home-screen-chart';
+import { MONTHLY_TREND_MONTHS } from './monthly-expense-trend';
 import Summary from './summary';
 import { TransactionsList } from './transactions-list';
 
@@ -26,7 +27,7 @@ export function HomeScreen() {
     queryKeys.monthSummary.all,
     queryKeys.accounts.withBalanceForRange(monthStart, monthEnd),
     queryKeys.insights.categorySpendRange(monthStart, monthEnd),
-    queryKeys.insights.all,
+    queryKeys.insights.monthlyTrend(MONTHLY_TREND_MONTHS),
     queryKeys.transactions.recent(10),
     queryKeys.globalBudget.all,
     queryKeys.globalBudget.spend(monthStart, monthEnd),
@@ -63,7 +64,7 @@ export function HomeScreen() {
             </View>
           </View>
           <Summary />
-          <MonthlyExpenseTrendCard />
+          <HomeScreenChart />
           <HomeRecommendations />
           <AccountsOverview />
           <CategoriesOverview />

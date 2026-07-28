@@ -1,5 +1,6 @@
 import { useMonthlyTrend } from '@/features/insights/api';
 import { fireEvent, render, screen } from '@/lib/test-utils';
+import { getMonthlyTrendChartGeometry } from './monthly-expense-trend';
 import { MonthlyExpenseTrendCard } from './monthly-expense-trend-card';
 
 const mockBarChart = jest.fn();
@@ -52,13 +53,22 @@ describe('monthly expense trend card', () => {
 
   it('renders monthly expense bars centered in their columns and highlights the current month', () => {
     render(<MonthlyExpenseTrendCard />);
+    fireEvent(
+      screen.getByTestId('monthly-expense-trend-chart-container'),
+      'layout',
+      { nativeEvent: { layout: { width: 300, height: 96, x: 0, y: 0 } } },
+    );
 
-    expect(useMonthlyTrendMock).toHaveBeenCalledWith(12);
+    expect(useMonthlyTrendMock).toHaveBeenCalledWith(6);
     expect(screen.queryByText('25% lower than last month')).not.toBeOnTheScreen();
     expect(screen.queryByText('750$')).not.toBeOnTheScreen();
     expect(screen.getByTestId('monthly-expense-trend-chart')).toBeOnTheScreen();
     expect(mockBarChart).toHaveBeenCalledWith(expect.objectContaining({
+      barWidth: 27,
+      disableScroll: true,
       height: 96,
+      width: 300,
+      spacing: 138 / 7,
       data: [
         expect.objectContaining({
           label: 'Feb',
@@ -71,9 +81,24 @@ describe('monthly expense trend card', () => {
         expect.objectContaining({ label: 'Jun', value: 1000 }),
         expect.objectContaining({ label: 'Jul', value: 750, frontColor: 'rgba(248, 60, 78, 0.88)' }),
       ],
-      initialSpacing: expect.any(Number),
-      endSpacing: expect.any(Number),
+      initialSpacing: 69 / 7,
+      endSpacing: 69 / 7,
     }));
+  });
+
+  it('keeps chart geometry centered without negative spacing at narrow widths', () => {
+    expect(getMonthlyTrendChartGeometry(12, 6)).toEqual({
+      chartWidth: 12,
+      barWidth: 1,
+      spacing: 6 / 7,
+      edgeSpacing: 3 / 7,
+    });
+    expect(getMonthlyTrendChartGeometry(3, 6)).toEqual({
+      chartWidth: 3,
+      barWidth: 0.5,
+      spacing: 0,
+      edgeSpacing: 0,
+    });
   });
 
   it('renders loading and empty states', () => {
@@ -86,7 +111,7 @@ describe('monthly expense trend card', () => {
       { month: '2026-07', income: 0, expense: 0 },
     ]);
     rerender(<MonthlyExpenseTrendCard />);
-    expect(screen.getByText('No expenses in the last twelve months.')).toBeOnTheScreen();
+    expect(screen.getByText('No expenses in the last six months.')).toBeOnTheScreen();
   });
 
   it('opens stats when pressed', () => {

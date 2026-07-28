@@ -1,7 +1,7 @@
 import type { CurrencyKey } from '../currencies';
 import type { CurrencyFormat, NumberFormat } from './constants';
 import { format, isToday, isYesterday } from 'date-fns';
-import { calendarDateToUnix, unixToCalendarDate } from '@/lib/date/helpers';
+import { calendarDateToUnix, unixToCalendarDate, unixToDate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { DEFAULT_DATE_FORMAT, DEFAULT_USER_CURRENCY } from '../../config';
 import { shortenNumberString } from '../../lib/number';
@@ -92,20 +92,37 @@ export function formatCurrency(
   return `${formattedNumber}${space}${currencyTxt}`;
 }
 
-/**
- * Format a Unix seconds timestamp for display.
- * Shows "Today", "Yesterday", or the formatted date using the
- * user's preferred date format from the store, unless an
- * explicit format override is provided.
- */
-export function formatDate(unix: number, displayFormat?: string): string {
-  const date = unixToCalendarDate(unix);
+function formatRelativeOrDate(date: Date, displayFormat?: string): string {
   if (isToday(date)) return translate('common.today');
   if (isYesterday(date)) return translate('common.yesterday');
   return format(date, displayFormat || DEFAULT_DATE_FORMAT);
 }
+
+/**
+ * Format a calendar-date Unix timestamp (UTC midnight) for display.
+ * Shows "Today", "Yesterday", or the formatted date using the
+ * user's preferred date format from the store, unless an
+ * explicit format override is provided.
+ *
+ * Use {@link formatInstant} for real timestamps (e.g. created_at).
+ */
+export function formatDate(unix: number, displayFormat?: string): string {
+  return formatRelativeOrDate(unixToCalendarDate(unix), displayFormat);
+}
 export function formatDateFull(unix: number, displayFormat?: string): string {
   return format(unixToCalendarDate(unix), displayFormat || DEFAULT_DATE_FORMAT);
+}
+
+/**
+ * Format an instant (a real Unix seconds timestamp, e.g. created_at) in the
+ * device's local time zone. Unlike {@link formatDate}, the value is not
+ * treated as a UTC-midnight calendar date.
+ */
+export function formatInstant(unix: number, displayFormat?: string): string {
+  return formatRelativeOrDate(unixToDate(unix), displayFormat);
+}
+export function formatInstantFull(unix: number, displayFormat?: string): string {
+  return format(unixToDate(unix), displayFormat || DEFAULT_DATE_FORMAT);
 }
 
 /**

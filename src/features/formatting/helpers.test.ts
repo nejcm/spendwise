@@ -1,5 +1,5 @@
 import type { CurrencyFormat, NumberFormat } from './constants';
-import { formatCurrency, formatDateFull, formatNumber } from './helpers';
+import { formatCurrency, formatDateFull, formatInstantFull, formatNumber } from './helpers';
 
 const number = 1234.56;
 const negativeNumber = -1234.56;
@@ -9,6 +9,13 @@ const negativeCents = -cents;
 describe('formatting helpers', () => {
   it('keeps UTC-midnight date-only epochs on their stored calendar day', () => {
     expect(formatDateFull(Date.UTC(2026, 6, 1) / 1000, 'yyyy-MM-dd')).toBe('2026-07-01');
+  });
+
+  it('formats instants in local time instead of as calendar dates', () => {
+    // 2026-07-01T02:00Z is still 2026-06-30 in America/Los_Angeles (test TZ).
+    const instant = Date.UTC(2026, 6, 1, 2, 0) / 1000;
+    expect(formatInstantFull(instant, 'yyyy-MM-dd')).toBe('2026-06-30');
+    expect(formatDateFull(instant, 'yyyy-MM-dd')).toBe('2026-07-01');
   });
 
   it('formats a number correctly', () => {

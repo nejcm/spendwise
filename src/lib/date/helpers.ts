@@ -8,15 +8,12 @@ import {
   differenceInDays,
   endOfISOWeek,
   format,
-  getDaysInMonth,
   getISOWeek,
   getISOWeeksInYear,
-  parse,
   parseISO,
   setISOWeek,
   startOfDay,
   startOfISOWeek,
-  startOfMonth,
   startOfYear,
 } from 'date-fns';
 import { DYNAMIC_PERIOD_MODES } from '@/lib/date/period-modes';
@@ -31,14 +28,25 @@ export function dateToUnix(date: Date | string): number {
   return Math.floor(date.getTime() / 1000);
 }
 
+/** Convert the local calendar fields of a Date to a UTC-midnight Unix timestamp. */
+export function calendarDateToUnix(date: Date): number {
+  return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 1000;
+}
+
 /** Convert Unix seconds to a Date object. */
 export function unixToDate(seconds: number): Date {
   return new Date(seconds * 1000);
 }
 
+/** Convert a UTC date-only Unix timestamp to the same calendar day locally. */
+export function unixToCalendarDate(seconds: number): Date {
+  const date = unixToDate(seconds);
+  return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+}
+
 /** Convert Unix seconds to a yyyy-MM-dd ISO date string. */
 export function unixToISODate(seconds: number): string {
-  return format(new Date(seconds * 1000), 'yyyy-MM-dd');
+  return unixToDate(seconds).toISOString().slice(0, 10);
 }
 
 export function splitBy(
@@ -72,11 +80,12 @@ export function splitBy(
  * @returns An array with the start (inclusive) and end (exclusive) Unix seconds.
  */
 export function getCurrentMonthRange(yearMonth: string): [number, number] {
-  const parsed = parse(yearMonth, 'yyyy-MM', new Date());
-  const monthStart = startOfMonth(parsed);
-  const nextMonthStart = addMonths(monthStart, 1);
+  const [year, month] = yearMonth.split('-').map(Number);
 
-  return [dateToUnix(monthStart), dateToUnix(nextMonthStart)];
+  return [
+    Date.UTC(year, month - 1, 1) / 1000,
+    Date.UTC(year, month, 1) / 1000,
+  ];
 }
 
 export function currentPeriodSelection(): PeriodSelection {
@@ -87,54 +96,48 @@ export function currentPeriodSelection(): PeriodSelection {
 export function getPeriodRange(selection: PeriodSelection): [number | undefined, number | undefined] {
   switch (selection.mode) {
     case 'year': {
-      const start = startOfYear(new Date(selection.year, 0, 1));
-      const end = startOfYear(addYears(start, 1));
-      return [dateToUnix(start), dateToUnix(end)];
+      return [
+        Date.UTC(selection.year, 0, 1) / 1000,
+        Date.UTC(selection.year + 1, 0, 1) / 1000,
+      ];
     }
     case 'month': {
-      const monthStart = startOfMonth(new Date(selection.year, selection.month - 1, 1));
-      const nextMonthStart = addMonths(monthStart, 1);
-      return [dateToUnix(monthStart), dateToUnix(nextMonthStart)];
+      return getMonthBoundaries(selection.year, selection.month);
     }
     case 'week': {
       const weekStart = startOfISOWeek(setISOWeek(startOfYear(new Date(selection.year, 0, 4)), selection.week));
-      const weekEnd = addDays(endOfISOWeek(weekStart), 1);
-      return [dateToUnix(weekStart), dateToUnix(weekEnd)];
+      const start = calendarDateToUnix(weekStart);
+      return [start, start + 7 * 86400];
     }
     case 'custom': {
-      const end = addDays(new Date(selection.endDate), 1);
-      return [dateToUnix(new Date(selection.startDate)), dateToUnix(end)];
+      return [dateToUnix(selection.startDate), dateToUnix(selection.endDate) + 86400];
     }
     case 'all':
       return [undefined, undefined];
     case 'today': {
       const now = new Date();
-      const start = startOfDay(now);
-      const end = addDays(start, 1);
-      return [dateToUnix(start), dateToUnix(end)];
+      const start = calendarDateToUnix(now);
+      return [start, start + 86400];
     }
     case 'day': {
-      const start = startOfDay(parseISO(selection.date));
-      const end = addDays(start, 1);
-      return [dateToUnix(start), dateToUnix(end)];
+      const start = dateToUnix(selection.date);
+      return [start, start + 86400];
     }
     case 'this-week': {
       const now = new Date();
-      const start = startOfISOWeek(now);
-      const end = addDays(endOfISOWeek(now), 1);
-      return [dateToUnix(start), dateToUnix(end)];
+      const start = calendarDateToUnix(startOfISOWeek(now));
+      return [start, start + 7 * 86400];
     }
     case 'this-month': {
       const now = new Date();
-      const start = startOfMonth(now);
-      const end = addMonths(start, 1);
-      return [dateToUnix(start), dateToUnix(end)];
+      return getMonthBoundaries(now.getFullYear(), now.getMonth() + 1);
     }
     case 'this-year': {
       const now = new Date();
-      const start = startOfYear(now);
-      const end = startOfYear(addYears(start, 1));
-      return [dateToUnix(start), dateToUnix(end)];
+      return [
+        Date.UTC(now.getFullYear(), 0, 1) / 1000,
+        Date.UTC(now.getFullYear() + 1, 0, 1) / 1000,
+      ];
     }
   }
 }
@@ -160,9 +163,11 @@ export function navigatePeriod(selection: PeriodSelection, dir: -1 | 1): PeriodS
       return { ...selection, week: nextWeek };
     }
     case 'custom': {
-      const days = differenceInDays(new Date(selection.endDate), new Date(selection.startDate)) + 1;
-      const newStart = addDays(new Date(selection.startDate), dir * days);
-      const newEnd = addDays(new Date(selection.endDate), dir * days);
+      const start = parseISO(selection.startDate);
+      const end = parseISO(selection.endDate);
+      const days = differenceInDays(end, start) + 1;
+      const newStart = addDays(start, dir * days);
+      const newEnd = addDays(end, dir * days);
       return {
         mode: 'custom',
         startDate: format(newStart, 'yyyy-MM-dd'),
@@ -211,6 +216,11 @@ export function currentISOWeek(): { year: number; week: number } {
 
 const AVERAGE_DAYS_PER_MONTH = 365.25 / 12;
 
+function getDaysInUTCMonth(unix: number): number {
+  const date = unixToDate(unix);
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();
+}
+
 /**
  * Scale a monthly budget amount to match the given period selection.
  * Returns the prorated budget in the same unit (cents) as the input.
@@ -220,7 +230,7 @@ export function scaleBudgetForPeriod(monthlyBudget: number, selection: PeriodSel
   if ((DYNAMIC_PERIOD_MODES).includes(selection.mode as DynamicPeriodMode)) {
     const [startUnix, endUnix] = getPeriodRange(selection) as [number, number];
     const daysInPeriod = (endUnix - startUnix) / 86400;
-    const daysInMonth = getDaysInMonth(unixToDate(startUnix));
+    const daysInMonth = getDaysInUTCMonth(startUnix);
     return Math.round(monthlyBudget * daysInPeriod / daysInMonth);
   }
   if (selection.mode === 'month') return monthlyBudget;
@@ -235,13 +245,11 @@ export function scaleBudgetForPeriod(monthlyBudget: number, selection: PeriodSel
       break;
     case 'week':
     case 'day':
-      daysInMonth = getDaysInMonth(unixToDate(startUnix));
+      daysInMonth = getDaysInUTCMonth(startUnix);
       break;
     case 'custom': {
-      const s = new Date(selection.startDate);
-      const e = new Date(selection.endDate);
-      const sameMonth = s.getFullYear() === e.getFullYear() && s.getMonth() === e.getMonth();
-      daysInMonth = sameMonth ? getDaysInMonth(s) : AVERAGE_DAYS_PER_MONTH;
+      const sameMonth = selection.startDate.slice(0, 7) === selection.endDate.slice(0, 7);
+      daysInMonth = sameMonth ? getDaysInUTCMonth(startUnix) : AVERAGE_DAYS_PER_MONTH;
       break;
     }
   }
@@ -292,23 +300,23 @@ export function findClosestDateBinary(
 
 /** Returns [monthStartUnix, nextMonthStartUnix] for an arbitrary year/month (1-indexed). */
 export function getMonthBoundaries(year: number, month: number): [number, number] {
-  const monthStart = startOfMonth(new Date(year, month - 1, 1));
-  return [dateToUnix(monthStart), dateToUnix(addMonths(monthStart, 1))];
+  return [
+    Date.UTC(year, month - 1, 1) / 1000,
+    Date.UTC(year, month, 1) / 1000,
+  ];
 }
 
 /** Returns [monthStartUnix, nextMonthStartUnix] for the current calendar month. */
 export function currentMonthRange(): [number, number] {
   const now = new Date();
-  const monthStart = startOfMonth(now);
-  const nextMonthStart = new Date(monthStart);
-  nextMonthStart.setMonth(nextMonthStart.getMonth() + 1);
-  return [dateToUnix(monthStart), dateToUnix(nextMonthStart)];
+  return getMonthBoundaries(now.getFullYear(), now.getMonth() + 1);
 }
 
 /** Returns [yearStartUnix, nextYearStartUnix] for the current calendar year. */
 export function currentYearRange(): [number, number] {
   const now = new Date();
-  const yearStart = new Date(now.getFullYear(), 0, 1);
-  const nextYearStart = new Date(now.getFullYear() + 1, 0, 1);
-  return [dateToUnix(yearStart), dateToUnix(nextYearStart)];
+  return [
+    Date.UTC(now.getFullYear(), 0, 1) / 1000,
+    Date.UTC(now.getFullYear() + 1, 0, 1) / 1000,
+  ];
 }

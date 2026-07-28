@@ -36,8 +36,8 @@ export function getPeriodLabel(selection: PeriodSelection): string {
       return `${format(weekStart, 'MMM d')} – ${format(weekEnd, 'MMM d')}`;
     }
     case 'custom': {
-      const start = new Date(selection.startDate);
-      const end = new Date(selection.endDate);
+      const start = parseISO(selection.startDate);
+      const end = parseISO(selection.endDate);
       if (start.getFullYear() === end.getFullYear()) {
         return `${format(start, 'MMM d')} – ${format(end, 'MMM d')}`;
       }

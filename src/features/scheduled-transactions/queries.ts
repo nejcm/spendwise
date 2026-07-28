@@ -7,7 +7,7 @@ import type {
 
 import { amountToCents } from '@/features/formatting/helpers';
 import { generateId } from '@/lib/sqlite';
-import { getFirstDueOnOrAfter, isoDateToUnix, unixToISODate } from './scheduler';
+import { getFirstDueOnOrAfter, isoDateToUnix, todayISODate, unixToISODate } from './scheduler';
 
 function normalizeText(value?: string | null): string | null {
   const normalized = value?.trim();
@@ -20,7 +20,7 @@ function deriveScheduleState(
     'end_date' | 'frequency' | 'is_active' | 'start_date'
   >,
 ) {
-  const todayStr = unixToISODate(Math.floor(Date.now() / 1000));
+  const todayStr = todayISODate();
   const nextDueDateStr = getFirstDueOnOrAfter({
     startDate: unixToISODate(data.start_date),
     frequency: data.frequency,

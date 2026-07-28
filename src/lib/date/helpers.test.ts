@@ -1,5 +1,6 @@
 import type { PeriodSelectionWeek } from '../store/store';
 import {
+  calendarDateToUnix,
   dateToUnix,
   findClosestDateBinary,
   getCurrentMonthRange,
@@ -7,21 +8,22 @@ import {
   navigatePeriod,
   scaleBudgetForPeriod,
   splitBy,
+  unixToCalendarDate,
   unixToDate,
   unixToISODate,
 } from '@/lib/date/helpers';
 
 describe('getCurrentMonthRange', () => {
   it('returns start of month and start of next month', () => {
-    expect(getCurrentMonthRange('2026-03')).toEqual([new Date(2026, 2, 1).getTime() / 1000, new Date(2026, 3, 1).getTime() / 1000]);
+    expect(getCurrentMonthRange('2026-03')).toEqual([Date.UTC(2026, 2, 1) / 1000, Date.UTC(2026, 3, 1) / 1000]);
   });
 
   it('pads next month with leading zero', () => {
-    expect(getCurrentMonthRange('2026-09')).toEqual([new Date(2026, 8, 1).getTime() / 1000, new Date(2026, 9, 1).getTime() / 1000]);
+    expect(getCurrentMonthRange('2026-09')).toEqual([Date.UTC(2026, 8, 1) / 1000, Date.UTC(2026, 9, 1) / 1000]);
   });
 
   it('rolls over to next year for December', () => {
-    expect(getCurrentMonthRange('2026-12')).toEqual([new Date(2026, 11, 1).getTime() / 1000, new Date(2027, 0, 1).getTime() / 1000]);
+    expect(getCurrentMonthRange('2026-12')).toEqual([Date.UTC(2026, 11, 1) / 1000, Date.UTC(2027, 0, 1) / 1000]);
   });
 });
 
@@ -52,10 +54,25 @@ describe('unixToDate', () => {
   });
 });
 
+describe('utc date-only conversion', () => {
+  it('stores local calendar fields at UTC midnight', () => {
+    expect(calendarDateToUnix(new Date(2026, 6, 1, 12))).toBe(Date.UTC(2026, 6, 1) / 1000);
+  });
+
+  it('renders a production UTC-midnight epoch as the same local calendar day', () => {
+    const storedEpoch = Date.UTC(2026, 6, 1) / 1000;
+    expect(new Date(storedEpoch * 1000).getDate()).toBe(30);
+
+    const date = unixToCalendarDate(storedEpoch);
+    expect([date.getFullYear(), date.getMonth(), date.getDate()]).toEqual([2026, 6, 1]);
+  });
+});
+
 const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
 describe('unixToISODate', () => {
-  it('returns a yyyy-MM-dd formatted string', () => {
-    const unix = dateToUnix(new Date('2026-03-15T00:00:00.000Z'));
+  it('returns the UTC calendar date in yyyy-MM-dd format', () => {
+    const unix = Date.UTC(2026, 2, 15) / 1000;
+    expect(unixToISODate(unix)).toBe('2026-03-15');
     expect(unixToISODate(unix)).toMatch(isoDateRegex);
   });
 });
@@ -112,10 +129,10 @@ describe('splitBy', () => {
 // ─── getPeriodRange ───────────────────────────────────────────────────────────
 
 describe('getPeriodRange', () => {
-  it('day mode: spans one local calendar day', () => {
+  it('day mode: spans one UTC date-only calendar day', () => {
     const [start, end] = getPeriodRange({ mode: 'day', date: '2026-03-15' }) as [number, number];
-    expect(start).toBe(new Date(2026, 2, 15).getTime() / 1000);
-    expect(end).toBe(new Date(2026, 2, 16).getTime() / 1000);
+    expect(start).toBe(Date.UTC(2026, 2, 15) / 1000);
+    expect(end).toBe(Date.UTC(2026, 2, 16) / 1000);
   });
 
   it('year mode: spans full calendar year', () => {
@@ -133,12 +150,10 @@ describe('getPeriodRange', () => {
     expect((end - start) / 86400).toBe(31);
   });
 
-  it('week mode: spans approximately 7 days', () => {
+  it('week mode: spans exactly 7 UTC date-only days', () => {
     const [start, end] = getPeriodRange({ mode: 'week', year: 2026, week: 10 }) as [number, number];
     const days = (end - start) / 86400;
-    // Implementation uses endOfISOWeek (23:59:59) + addDays(1), yielding ~8 days - 1s
-    expect(days).toBeGreaterThan(7);
-    expect(days).toBeLessThan(8);
+    expect(days).toBe(7);
   });
 
   it('custom mode: spans startDate to endDate inclusive', () => {

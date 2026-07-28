@@ -30,7 +30,7 @@ export function TransactionBaseAmountSync({
   const prevDriversRef = React.useRef({ amount, currency, date });
   const applyAutoAfterDriverChangeRef = React.useRef(false);
 
-  const dateUnix = React.useMemo(() => dateToUnix(new Date(date)), [date]);
+  const dateUnix = React.useMemo(() => dateToUnix(date), [date]);
 
   const { data: rates } = useRatesForDate(Number.isFinite(dateUnix) ? dateUnix : null);
 

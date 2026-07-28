@@ -1,6 +1,7 @@
 import type { CurrencyKey } from '../currencies';
 import type { CurrencyFormat, NumberFormat } from './constants';
 import { format, isToday, isYesterday } from 'date-fns';
+import { calendarDateToUnix, unixToCalendarDate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { DEFAULT_DATE_FORMAT, DEFAULT_USER_CURRENCY } from '../../config';
 import { shortenNumberString } from '../../lib/number';
@@ -98,13 +99,13 @@ export function formatCurrency(
  * explicit format override is provided.
  */
 export function formatDate(unix: number, displayFormat?: string): string {
-  const date = new Date(unix * 1000);
+  const date = unixToCalendarDate(unix);
   if (isToday(date)) return translate('common.today');
   if (isYesterday(date)) return translate('common.yesterday');
   return format(date, displayFormat || DEFAULT_DATE_FORMAT);
 }
 export function formatDateFull(unix: number, displayFormat?: string): string {
-  return format(new Date(unix * 1000), displayFormat || DEFAULT_DATE_FORMAT);
+  return format(unixToCalendarDate(unix), displayFormat || DEFAULT_DATE_FORMAT);
 }
 
 /**
@@ -112,7 +113,7 @@ export function formatDateFull(unix: number, displayFormat?: string): string {
  * e.g., "Mar 9"
  */
 export function formatShortDate(unix: number): string {
-  return format(new Date(unix * 1000), 'MMM d');
+  return format(unixToCalendarDate(unix), 'MMM d');
 }
 
 /**
@@ -123,8 +124,8 @@ export function todayISO(): string {
 }
 
 /**
- * Get today as Unix seconds (local midnight).
+ * Get today as a UTC-midnight date-only Unix timestamp.
  */
 export function todayUnix(): number {
-  return Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
+  return calendarDateToUnix(new Date());
 }

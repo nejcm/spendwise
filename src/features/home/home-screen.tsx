@@ -15,6 +15,7 @@ import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { getAvatar } from '../profile';
+import { SpendingPaceCard } from './spending-pace-card';
 import Summary from './summary';
 import { TransactionsList } from './transactions-list';
 
@@ -25,6 +26,7 @@ export function HomeScreen() {
     queryKeys.monthSummary.all,
     queryKeys.accounts.withBalanceForRange(monthStart, monthEnd),
     queryKeys.insights.categorySpendRange(monthStart, monthEnd),
+    queryKeys.insights.all,
     queryKeys.transactions.recent(10),
     queryKeys.globalBudget.all,
     queryKeys.globalBudget.spend(monthStart, monthEnd),
@@ -61,6 +63,7 @@ export function HomeScreen() {
             </View>
           </View>
           <Summary />
+          <SpendingPaceCard />
           <HomeRecommendations />
           <AccountsOverview />
           <CategoriesOverview />

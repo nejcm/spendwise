@@ -207,7 +207,7 @@
     "balance": "Balance",
     "budget_label": "Budget",
     "expense_trend": "Expense trend",
-    "expense_trend_empty": "No expenses in the last six months.",
+    "expense_trend_empty": "No expenses in the last twelve months.",
     "expenses": "Expenses",
     "hi": "Hi, {{name}}",
     "income": "Income",

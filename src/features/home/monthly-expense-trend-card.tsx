@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import * as React from 'react';
-import { Pressable, useColorScheme } from 'react-native';
+import { Pressable, useColorScheme, useWindowDimensions } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
 import { getPressedStyle, Text, View } from '@/components/ui';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -33,9 +33,10 @@ function getMonthLabel(month: string) {
 
 export function MonthlyExpenseTrendCard() {
   const router = useRouter();
-  const { data, isLoading } = useMonthlyTrend(6);
+  const { data, isLoading } = useMonthlyTrend(12);
   const density = useAppStore.use.density();
   const colorScheme = useColorScheme();
+  const { width: screenWidth } = useWindowDimensions();
 
   if (isLoading) {
     return (
@@ -49,9 +50,11 @@ export function MonthlyExpenseTrendCard() {
   const hasExpenses = months.some((item) => item.expense > 0);
   const labelColor = colorScheme === 'dark' ? '#9ca3af' : '#6b7280';
   const previousBarColor = colorScheme === 'dark' ? '#52525b' : '#d4d4d8';
-  const barWidth = 24;
-  const spacing = 14;
-  const chartWidth = barWidth * months.length + spacing * Math.max(months.length - 1, 0);
+  const chartWidth = Math.max(screenWidth - 64, 240);
+  const columnWidth = chartWidth / Math.max(months.length, 1);
+  const barWidth = Math.min(14, Math.floor(columnWidth / 2));
+  const spacing = columnWidth - barWidth;
+  const edgeSpacing = spacing / 2;
 
   return (
     <Pressable style={getPressedStyle} onPress={() => router.push('/stats')}>
@@ -65,21 +68,22 @@ export function MonthlyExpenseTrendCard() {
                   data={months.map((item, index) => ({
                     value: centsToAmount(item.expense),
                     label: getMonthLabel(item.month),
+                    labelWidth: barWidth,
+                    labelTextStyle: { color: labelColor, fontSize: 9, textAlign: 'center' as const },
                     frontColor: index === months.length - 1 ? expenseColor : previousBarColor,
                   }))}
                   width={chartWidth}
                   height={density === 'compact' ? 80 : 96}
                   barWidth={barWidth}
                   spacing={spacing}
-                  initialSpacing={0}
-                  endSpacing={0}
+                  initialSpacing={edgeSpacing}
+                  endSpacing={edgeSpacing}
                   barBorderTopLeftRadius={5}
                   barBorderTopRightRadius={5}
                   hideYAxisText
                   yAxisLabelWidth={0}
                   yAxisThickness={0}
                   xAxisThickness={0}
-                  xAxisLabelTextStyle={{ color: labelColor, fontSize: 10 }}
                   hideRules
                   disablePress
                   isAnimated

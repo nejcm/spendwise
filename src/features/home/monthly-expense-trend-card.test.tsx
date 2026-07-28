@@ -50,22 +50,29 @@ describe('monthly expense trend card', () => {
     ]);
   });
 
-  it('renders six monthly expense bars and highlights the current month', () => {
+  it('renders monthly expense bars centered in their columns and highlights the current month', () => {
     render(<MonthlyExpenseTrendCard />);
 
+    expect(useMonthlyTrendMock).toHaveBeenCalledWith(12);
     expect(screen.queryByText('25% lower than last month')).not.toBeOnTheScreen();
     expect(screen.queryByText('750$')).not.toBeOnTheScreen();
     expect(screen.getByTestId('monthly-expense-trend-chart')).toBeOnTheScreen();
     expect(mockBarChart).toHaveBeenCalledWith(expect.objectContaining({
       height: 96,
       data: [
-        expect.objectContaining({ label: 'Feb', value: 800 }),
+        expect.objectContaining({
+          label: 'Feb',
+          value: 800,
+          labelTextStyle: expect.objectContaining({ textAlign: 'center' }),
+        }),
         expect.objectContaining({ label: 'Mar', value: 900 }),
         expect.objectContaining({ label: 'Apr', value: 700 }),
         expect.objectContaining({ label: 'May', value: 1100 }),
         expect.objectContaining({ label: 'Jun', value: 1000 }),
         expect.objectContaining({ label: 'Jul', value: 750, frontColor: 'rgba(248, 60, 78, 0.88)' }),
       ],
+      initialSpacing: expect.any(Number),
+      endSpacing: expect.any(Number),
     }));
   });
 
@@ -79,7 +86,7 @@ describe('monthly expense trend card', () => {
       { month: '2026-07', income: 0, expense: 0 },
     ]);
     rerender(<MonthlyExpenseTrendCard />);
-    expect(screen.getByText('No expenses in the last six months.')).toBeOnTheScreen();
+    expect(screen.getByText('No expenses in the last twelve months.')).toBeOnTheScreen();
   });
 
   it('opens stats when pressed', () => {

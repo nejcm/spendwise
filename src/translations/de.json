@@ -207,7 +207,7 @@
     "balance": "Kontostand",
     "budget_label": "Budget",
     "expense_trend": "Ausgabentrend",
-    "expense_trend_empty": "Keine Ausgaben in den letzten sechs Monaten.",
+    "expense_trend_empty": "Keine Ausgaben in den letzten zwölf Monaten.",
     "expenses": "Ausgaben",
     "hi": "Hallo, {{name}}",
     "income": "Einnahmen",

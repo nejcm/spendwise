@@ -15,7 +15,7 @@ import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { getAvatar } from '../profile';
-import { SpendingPaceCard } from './spending-pace-card';
+import { MonthlyExpenseTrendCard } from './monthly-expense-trend-card';
 import Summary from './summary';
 import { TransactionsList } from './transactions-list';
 
@@ -63,7 +63,7 @@ export function HomeScreen() {
             </View>
           </View>
           <Summary />
-          <SpendingPaceCard />
+          <MonthlyExpenseTrendCard />
           <HomeRecommendations />
           <AccountsOverview />
           <CategoriesOverview />

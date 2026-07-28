@@ -9,7 +9,7 @@ import { computeBaseAmount } from '@/features/currencies/conversion';
 import { getRatesForDate } from '@/features/currencies/queries';
 import { getCategorySpendByRange } from '@/features/insights/queries';
 import { getTransactions } from '@/features/transactions/queries';
-import { dateToUnix } from '@/lib/date/helpers';
+import { calendarDateToUnix } from '@/lib/date/helpers';
 
 const LOOKBACK_MONTHS = 3;
 const UPCOMING_WINDOW_DAYS = 7;
@@ -53,15 +53,15 @@ function recommendationId(kind: Recommendation['kind'], ...parts: Array<string |
 }
 
 function startOfCurrentMonthUnix(today: Date) {
-  return dateToUnix(startOfMonth(today));
+  return calendarDateToUnix(startOfMonth(today));
 }
 
 function startOfNextMonthUnix(today: Date) {
-  return dateToUnix(startOfMonth(addDays(new Date(today.getFullYear(), today.getMonth() + 1, 1), 0)));
+  return Date.UTC(today.getFullYear(), today.getMonth() + 1, 1) / 1000;
 }
 
 function startOfHistoryUnix(today: Date) {
-  return dateToUnix(startOfMonth(subMonths(today, LOOKBACK_MONTHS)));
+  return calendarDateToUnix(startOfMonth(subMonths(today, LOOKBACK_MONTHS)));
 }
 
 async function getDueExpenseRules(
@@ -97,8 +97,8 @@ async function detectUpcomingCashflow(
   db: SQLiteDatabase,
   today: Date,
 ): Promise<Recommendation | null> {
-  const todayUnix = dateToUnix(today);
-  const windowEndUnix = dateToUnix(addDays(today, UPCOMING_WINDOW_DAYS));
+  const todayUnix = calendarDateToUnix(today);
+  const windowEndUnix = calendarDateToUnix(addDays(today, UPCOMING_WINDOW_DAYS));
   const [accounts, rules, rates] = await Promise.all([
     getAccountsWithBalance(db),
     getDueExpenseRules(db, todayUnix, windowEndUnix),
@@ -164,8 +164,8 @@ async function detectSubscriptionReminder(
   db: SQLiteDatabase,
   today: Date,
 ): Promise<Recommendation | null> {
-  const todayUnix = dateToUnix(today);
-  const windowEndUnix = dateToUnix(addDays(today, UPCOMING_WINDOW_DAYS));
+  const todayUnix = calendarDateToUnix(today);
+  const windowEndUnix = calendarDateToUnix(addDays(today, UPCOMING_WINDOW_DAYS));
   const dueRules = await getDueExpenseRules(db, todayUnix, windowEndUnix);
   const nextRule = dueRules[0];
 
@@ -195,13 +195,13 @@ async function detectCategoryAnomaly(
   today: Date,
 ): Promise<Recommendation | null> {
   const monthStart = startOfMonth(today);
-  const monthStartUnix = dateToUnix(monthStart);
-  const nextMonthStartUnix = dateToUnix(new Date(today.getFullYear(), today.getMonth() + 1, 1));
+  const monthStartUnix = calendarDateToUnix(monthStart);
+  const nextMonthStartUnix = Date.UTC(today.getFullYear(), today.getMonth() + 1, 1) / 1000;
   const previousRanges = Array.from({ length: LOOKBACK_MONTHS }, (_, index) => {
     const rangeStart = startOfMonth(subMonths(today, index + 1));
     return {
-      start: dateToUnix(rangeStart),
-      end: dateToUnix(new Date(rangeStart.getFullYear(), rangeStart.getMonth() + 1, 1)),
+      start: calendarDateToUnix(rangeStart),
+      end: Date.UTC(rangeStart.getFullYear(), rangeStart.getMonth() + 1, 1) / 1000,
     };
   });
 
@@ -321,8 +321,8 @@ async function detectBudgetSuggestion(
   const previousRanges = Array.from({ length: LOOKBACK_MONTHS }, (_, index) => {
     const rangeStart = startOfMonth(subMonths(today, index + 1));
     return {
-      start: dateToUnix(rangeStart),
-      end: dateToUnix(new Date(rangeStart.getFullYear(), rangeStart.getMonth() + 1, 1)),
+      start: calendarDateToUnix(rangeStart),
+      end: Date.UTC(rangeStart.getFullYear(), rangeStart.getMonth() + 1, 1) / 1000,
     };
   });
 

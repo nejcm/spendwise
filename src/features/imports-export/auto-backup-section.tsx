@@ -6,7 +6,7 @@ import { useState } from 'react';
 import DetailsSection from '@/components/details';
 
 import { getPressedStyle, ModalSheet, Pressable, Select, SolidButton, Switch, Text, useModalSheet, View } from '@/components/ui';
-import { formatDate } from '@/features/formatting/helpers';
+import { formatInstant } from '@/features/formatting/helpers';
 import { IS_AUTO_BACKUP_SUPPORTED, listAutoBackupFiles } from '@/features/imports-export/backup-file';
 import { useRestoreAutoBackup } from '@/features/imports-export/hooks';
 import { translate } from '@/lib/i18n';
@@ -45,7 +45,7 @@ export default function AutoBackupSection() {
   }
 
   const lastDisplay = autoBackup.lastAutoBackupAt
-    ? formatDate(Math.floor(new Date(autoBackup.lastAutoBackupAt).getTime() / 1000), dateFormat)
+    ? formatInstant(Math.floor(new Date(autoBackup.lastAutoBackupAt).getTime() / 1000), dateFormat)
     : translate('import-export.auto_backup_never');
 
   const openBackups = () => {
@@ -123,7 +123,7 @@ export default function AutoBackupSection() {
             : (
                 <View className="gap-2 py-2">
                   {backups.map((entry: AutoBackupFileEntry) => {
-                    const display = formatDate(Math.floor(entry.ts / 1000), dateFormat);
+                    const display = formatInstant(Math.floor(entry.ts / 1000), dateFormat);
                     const isSelected = selectedUri === entry.uri;
                     const isLoading = restoreAutoBackup.isPending && isSelected;
 

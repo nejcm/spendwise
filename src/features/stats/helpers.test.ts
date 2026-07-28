@@ -11,8 +11,8 @@ const YEARLY: GlobalBudget = { amountCents: 1_200_000, type: 'yearly' };
 describe('getBudgetSelectionBoundaries', () => {
   it('day mode: spans one selected local calendar day', () => {
     const [start, end] = getBudgetSelectionBoundaries({ mode: 'day', date: '2026-03-15' });
-    expect(start).toBe(new Date(2026, 2, 15).getTime() / 1000);
-    expect(end).toBe(new Date(2026, 2, 16).getTime() / 1000);
+    expect(start).toBe(Date.UTC(2026, 2, 15) / 1000);
+    expect(end).toBe(Date.UTC(2026, 2, 16) / 1000);
   });
 
   it('month mode: returns start and end of the given month', () => {

@@ -179,8 +179,8 @@ export function TransactionDetailScreen() {
           >
             {showAuditTimestamps && (
               <View className="gap-3">
-                <DetailsRow label={translate('transactions.created_at')} value={<FormattedDate value={transaction.created_at} className="text-foreground" />} />
-                <DetailsRow label={translate('transactions.updated_at')} value={<FormattedDate value={transaction.updated_at} className="text-foreground" />} />
+                <DetailsRow label={translate('transactions.created_at')} value={<FormattedDate instant value={transaction.created_at} className="text-foreground" />} />
+                <DetailsRow label={translate('transactions.updated_at')} value={<FormattedDate instant value={transaction.updated_at} className="text-foreground" />} />
               </View>
             )}
             <View>

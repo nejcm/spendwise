@@ -7,6 +7,7 @@ import { RefreshControl } from 'react-native';
 import NoData from '@/components/no-data';
 import { ActivityIndicator, Text, View } from '@/components/ui';
 import { formatDate } from '@/features/formatting/helpers';
+import { dateToUnix, unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { TransactionCard } from './transaction-card';
@@ -101,7 +102,7 @@ function groupByDate(transactions: TransactionWithCategory[]): DateGroup[] {
   const groups: Map<number, TransactionWithCategory[]> = new Map();
 
   for (const t of transactions) {
-    const dayKey = new Date(t.date * 1000).setHours(0, 0, 0, 0) / 1000;
+    const dayKey = dateToUnix(unixToISODate(t.date));
     const existing = groups.get(dayKey);
     groups.set(dayKey, existing ? [...existing, t] : [t]);
   }

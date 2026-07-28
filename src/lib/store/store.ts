@@ -21,6 +21,8 @@ export type LongPressActionType = 'scan_receipt' | 'pick_from_gallery';
 
 export type DensityType = 'default' | 'compact';
 
+export type HomeScreenChartType = 'none' | 'monthly_spending' | 'category_spending';
+
 export type PeriodMode = 'year' | 'month' | 'week' | 'custom' | 'all' | 'today' | 'day' | 'this-week' | 'this-month' | 'this-year';
 
 export type PeriodSelectionYear = { mode: 'year'; year: number };
@@ -75,6 +77,7 @@ export type AppState = {
   longPressAction: LongPressActionType;
   recommendationsEnabled: boolean;
   density: DensityType;
+  homeScreenChart: HomeScreenChartType;
   lastPrimaryTabPath: PrimaryTabPath;
 
   // Security
@@ -122,6 +125,7 @@ function getDefaultState(): AppState {
     longPressAction: 'scan_receipt',
     recommendationsEnabled: true,
     density: 'default',
+    homeScreenChart: 'monthly_spending',
     lastPrimaryTabPath: '/',
     lockEnabled: false,
     lockTimeoutMinutes: 1,

@@ -1,7 +1,6 @@
 import type { GlobalBudget } from './global-budget-queries';
 import type { BudgetPeriodSelection, MonthSlice } from './types';
 import {
-  addDays,
   format,
   getDaysInMonth,
   getDaysInYear,
@@ -9,7 +8,6 @@ import {
   isTomorrow,
   isYesterday,
   parseISO,
-  startOfDay,
 } from 'date-fns';
 import { dateToUnix, getMonthBoundaries } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
@@ -45,8 +43,8 @@ export function expandToMonthSlices(selection: BudgetPeriodSelection): MonthSlic
 /** Returns [startUnix, endUnix] for the full span of a BudgetPeriodSelection. */
 export function getBudgetSelectionBoundaries(selection: BudgetPeriodSelection): [number, number] {
   if (selection.mode === 'day') {
-    const start = startOfDay(parseISO(selection.date));
-    return [dateToUnix(start), dateToUnix(addDays(start, 1))];
+    const start = dateToUnix(selection.date);
+    return [start, start + 86400];
   }
   if (selection.mode === 'month') {
     return getMonthBoundaries(selection.year, selection.month);

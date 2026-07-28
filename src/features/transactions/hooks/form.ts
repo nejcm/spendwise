@@ -63,7 +63,7 @@ export function useTransactionForm({ initialValues, onSuccess }: UseTransactionF
         ...value,
         amount: toNumber(value.amount) ?? 0,
         baseAmount: toNumber(value.baseAmount) ?? 0,
-        date: dateToUnix(new Date(value.date)),
+        date: dateToUnix(value.date),
       };
       if (id) updateTransaction.mutate({ id, data });
       else createTransaction.mutate(data);

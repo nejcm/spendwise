@@ -187,8 +187,8 @@ export function ScheduledTransactionDetailScreen() {
           >
             {showAuditTimestamps && (
               <View className="gap-3">
-                <DetailsRow label={translate('transactions.created_at')} value={<FormattedDate value={rule.created_at} className="text-foreground" />} />
-                <DetailsRow label={translate('transactions.updated_at')} value={<FormattedDate value={rule.updated_at} className="text-foreground" />} />
+                <DetailsRow label={translate('transactions.created_at')} value={<FormattedDate instant value={rule.created_at} className="text-foreground" />} />
+                <DetailsRow label={translate('transactions.updated_at')} value={<FormattedDate instant value={rule.updated_at} className="text-foreground" />} />
               </View>
             )}
             <View>

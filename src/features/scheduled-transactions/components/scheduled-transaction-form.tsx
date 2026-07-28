@@ -137,8 +137,8 @@ function useScheduledTransactionForm(
         ...value,
         amount: toNumber(value.amount) ?? 0,
         note: value.note || null,
-        start_date: dateToUnix(new Date(value.start_date)),
-        end_date: value.end_date ? dateToUnix(new Date(value.end_date)) : null,
+        start_date: dateToUnix(value.start_date),
+        end_date: value.end_date ? dateToUnix(value.end_date) : null,
       };
 
       if (id) {

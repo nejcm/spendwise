@@ -4,7 +4,7 @@ import type { MonthSummary } from '../transactions/types';
 import type { CategorySpend, DailyTrendTotal, MonthlyTotals } from './types';
 
 import { addMonths, startOfMonth, subMonths } from 'date-fns';
-import { dateToUnix } from '@/lib/date/helpers';
+import { calendarDateToUnix } from '@/lib/date/helpers';
 
 // ─── Read Queries ───
 
@@ -89,8 +89,8 @@ export async function getYearlySummary(
   db: SQLiteDatabase,
   year: number,
 ): Promise<MonthSummary> {
-  const startDate = dateToUnix(new Date(year, 0, 1));
-  const endDate = dateToUnix(new Date(year + 1, 0, 1));
+  const startDate = Date.UTC(year, 0, 1) / 1000;
+  const endDate = Date.UTC(year + 1, 0, 1) / 1000;
 
   const row = await db.getFirstAsync<{ income: number; expense: number }>(
     `SELECT
@@ -110,8 +110,8 @@ export async function getCategorySpendForYear(
   db: SQLiteDatabase,
   year: number,
 ): Promise<CategorySpend[]> {
-  const startDate = dateToUnix(new Date(year, 0, 1));
-  const endDate = dateToUnix(new Date(year + 1, 0, 1));
+  const startDate = Date.UTC(year, 0, 1) / 1000;
+  const endDate = Date.UTC(year + 1, 0, 1) / 1000;
 
   const rows = await db.getAllAsync<Omit<CategorySpend, 'percentage'>>(
     `SELECT
@@ -155,12 +155,12 @@ export async function getMonthlyTrend(
   const now = new Date();
   const firstMonth = startOfMonth(subMonths(now, numMonths - 1));
   const afterLastMonth = startOfMonth(addMonths(now, 1));
-  const startDate = dateToUnix(firstMonth);
-  const endDate = dateToUnix(afterLastMonth);
+  const startDate = calendarDateToUnix(firstMonth);
+  const endDate = calendarDateToUnix(afterLastMonth);
 
   const rows = await db.getAllAsync<MonthlyTotals>(
     `SELECT
-       strftime('%Y-%m', date, 'unixepoch', 'localtime') as month,
+       strftime('%Y-%m', date, 'unixepoch') as month,
        COALESCE(SUM(CASE WHEN type = 'income' THEN baseAmount ELSE 0 END), 0) as income,
        COALESCE(SUM(CASE WHEN type = 'expense' THEN baseAmount ELSE 0 END), 0) as expense
      FROM transactions

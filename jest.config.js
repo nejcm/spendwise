@@ -1,3 +1,7 @@
+// Exercise date-only storage in a negative-UTC timezone where UTC/local mixing
+// otherwise shifts midnight epochs to the previous calendar day.
+process.env.TZ = 'America/Los_Angeles';
+
 module.exports = {
   preset: 'jest-expo',
   setupFilesAfterEnv: ['<rootDir>/jest-setup.ts'],

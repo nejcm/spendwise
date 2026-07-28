@@ -1,4 +1,4 @@
-import type { LongPressActionType } from '@/lib/store/store';
+import type { HomeScreenChartType, LongPressActionType } from '@/lib/store/store';
 import * as React from 'react';
 import DetailsSection from '@/components/details';
 import { FocusAwareStatusBar, ScrollView, Select, Switch } from '@/components/ui';
@@ -9,12 +9,14 @@ import { CurrencyItem } from './components/currency-item';
 import { SettingsContainer } from './components/settings-container';
 
 const LONG_PRESS_ACTION_OPTIONS: LongPressActionType[] = ['scan_receipt', 'pick_from_gallery'];
+const HOME_SCREEN_CHART_OPTIONS: HomeScreenChartType[] = ['none', 'monthly_spending', 'category_spending'];
 
 export function GeneralSettingsScreen() {
   const saveOnScan = useAppStore.use.saveOnScan();
   const openTransactionDetailOnCreate = useAppStore.use.openTxOnCreate();
   const longPressAction = useAppStore.use.longPressAction();
   const recommendationsEnabled = useAppStore.use.recommendationsEnabled();
+  const homeScreenChart = useAppStore.use.homeScreenChart();
 
   return (
     <>
@@ -55,6 +57,24 @@ export function GeneralSettingsScreen() {
                 checked={!!recommendationsEnabled}
                 onChange={(checked) => {
                   updateAppState({ recommendationsEnabled: checked });
+                }}
+              />
+            ),
+          }, {
+            label: translate('settings.home_screen_chart'),
+            description: translate('settings.home_screen_chart_description'),
+            value: (
+              <Select
+                options={HOME_SCREEN_CHART_OPTIONS.map((option) => ({
+                  label: translate(`settings.home_screen_chart_options.${option}`),
+                  value: option,
+                }))}
+                size="sm"
+                containerClassName="w-44"
+                value={homeScreenChart}
+                selectedItemTextProps={{ numberOfLines: 1 }}
+                onSelect={(option) => {
+                  updateAppState({ homeScreenChart: option });
                 }}
               />
             ),

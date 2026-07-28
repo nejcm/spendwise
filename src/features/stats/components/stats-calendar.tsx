@@ -27,7 +27,7 @@ import {
   trendByRangeQueryOptions,
   useTrendByRange,
 } from '@/features/insights/api';
-import { dateToUnix } from '@/lib/date/helpers';
+import { getMonthBoundaries, unixToISODate } from '@/lib/date/helpers';
 import { useAppStore } from '@/lib/store/store';
 import { expenseColor, incomeColor } from '@/lib/theme/colors';
 import { StatsCalendarDayTooltip } from './stats-calendar-day-tooltip';
@@ -37,7 +37,7 @@ function isoDateKey(date: Date) {
 }
 
 function monthRange(monthStart: Date): [number, number] {
-  return [dateToUnix(monthStart), dateToUnix(addMonths(monthStart, 1))];
+  return getMonthBoundaries(monthStart.getFullYear(), monthStart.getMonth() + 1);
 }
 
 type DayCell = {
@@ -78,7 +78,7 @@ export function StatsCalendar() {
   const totalsByKey = React.useMemo(() => {
     const map = new Map<string, DailyTrendTotal>();
     for (const entry of data ?? []) {
-      map.set(format(new Date(entry.date * 1000), 'yyyy-MM-dd'), entry);
+      map.set(unixToISODate(entry.date), entry);
     }
     return map;
   }, [data]);

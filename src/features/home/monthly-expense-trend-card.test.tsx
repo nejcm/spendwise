@@ -17,7 +17,12 @@ jest.mock('react-native-gifted-charts', () => {
   return {
     BarChart: (props: unknown) => {
       mockBarChart(props);
-      return React.createElement(View, { testID: 'monthly-expense-trend-chart' });
+      const data = (props as { data?: { topLabelComponent?: () => React.ReactNode }[] }).data ?? [];
+      return React.createElement(
+        View,
+        { testID: 'monthly-expense-trend-chart' },
+        data.map((item, index) => React.createElement(React.Fragment, { key: index }, item.topLabelComponent?.())),
+      );
     },
   };
 });
@@ -30,6 +35,12 @@ jest.mock('@/components/ui/skeleton', () => {
 
 jest.mock('@/features/insights/api', () => ({
   useMonthlyTrend: jest.fn(),
+}));
+
+jest.mock('uniwind', () => ({
+  ...jest.requireActual('uniwind'),
+  // eslint-disable-next-line react/no-unnecessary-use-prefix
+  useCSSVariable: () => '#336B87',
 }));
 
 const useMonthlyTrendMock = useMonthlyTrend as jest.MockedFunction<typeof useMonthlyTrend>;
@@ -51,7 +62,7 @@ describe('monthly expense trend card', () => {
     ]);
   });
 
-  it('renders monthly expense bars centered in their columns and highlights the current month', () => {
+  it('renders monthly expense bars centered in their columns using the selected accent color', () => {
     render(<MonthlyExpenseTrendCard />);
     fireEvent(
       screen.getByTestId('monthly-expense-trend-chart-container'),
@@ -61,28 +72,36 @@ describe('monthly expense trend card', () => {
 
     expect(useMonthlyTrendMock).toHaveBeenCalledWith(6);
     expect(screen.queryByText('25% lower than last month')).not.toBeOnTheScreen();
-    expect(screen.queryByText('750$')).not.toBeOnTheScreen();
+    expect(screen.getByTestId('monthly-expense-value-2026-07')).toHaveTextContent('750$');
     expect(screen.getByTestId('monthly-expense-trend-chart')).toBeOnTheScreen();
     expect(mockBarChart).toHaveBeenCalledWith(expect.objectContaining({
       barWidth: 27,
       disableScroll: true,
-      height: 96,
+      height: 90,
+      maxValue: 1100 / 0.85,
       width: 300,
       spacing: 138 / 7,
       data: [
         expect.objectContaining({
           label: 'Feb',
           value: 800,
+          frontColor: '#336B87',
           labelTextStyle: expect.objectContaining({ textAlign: 'center' }),
+          topLabelComponent: expect.any(Function),
+          topLabelContainerStyle: {
+            left: -69 / 7,
+            paddingBottom: 2,
+            width: 27 + 138 / 7,
+          },
         }),
-        expect.objectContaining({ label: 'Mar', value: 900 }),
-        expect.objectContaining({ label: 'Apr', value: 700 }),
-        expect.objectContaining({ label: 'May', value: 1100 }),
-        expect.objectContaining({ label: 'Jun', value: 1000 }),
-        expect.objectContaining({ label: 'Jul', value: 750, frontColor: 'rgba(248, 60, 78, 0.88)' }),
+        expect.objectContaining({ label: 'Mar', value: 900, frontColor: '#336B87' }),
+        expect.objectContaining({ label: 'Apr', value: 700, frontColor: '#336B87' }),
+        expect.objectContaining({ label: 'May', value: 1100, frontColor: '#336B87' }),
+        expect.objectContaining({ label: 'Jun', value: 1000, frontColor: '#336B87' }),
+        expect.objectContaining({ label: 'Jul', value: 750, frontColor: '#336B87' }),
       ],
       initialSpacing: 69 / 7,
-      endSpacing: 69 / 7,
+      endSpacing: 0,
     }));
   });
 
@@ -91,13 +110,15 @@ describe('monthly expense trend card', () => {
       chartWidth: 12,
       barWidth: 1,
       spacing: 6 / 7,
-      edgeSpacing: 3 / 7,
+      initialSpacing: 3 / 7,
+      endSpacing: 0,
     });
     expect(getMonthlyTrendChartGeometry(3, 6)).toEqual({
       chartWidth: 3,
       barWidth: 0.5,
       spacing: 0,
-      edgeSpacing: 0,
+      initialSpacing: 0,
+      endSpacing: 0,
     });
   });
 

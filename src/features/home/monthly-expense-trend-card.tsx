@@ -3,13 +3,13 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, useColorScheme } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
-import { getPressedStyle, Text, View } from '@/components/ui';
+import { useCSSVariable } from 'uniwind';
+import { FormattedCurrency, getPressedStyle, Text, View } from '@/components/ui';
 import { Skeleton } from '@/components/ui/skeleton';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { useMonthlyTrend } from '@/features/insights/api';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
-import { expenseColor } from '@/lib/theme/colors';
 import { getMonthlyTrendChartGeometry, MONTHLY_TREND_MONTHS } from './monthly-expense-trend';
 
 const MONTH_KEYS = [
@@ -27,6 +27,8 @@ const MONTH_KEYS = [
   'date.months.m12',
 ] as const;
 
+const TOP_LABEL_HEADROOM_RATIO = 0.15;
+
 function getMonthLabel(month: string) {
   const monthNumber = Number(month.slice(5, 7));
   const key = MONTH_KEYS[monthNumber - 1];
@@ -37,7 +39,11 @@ export function MonthlyExpenseTrendCard() {
   const router = useRouter();
   const { data, isLoading } = useMonthlyTrend(MONTHLY_TREND_MONTHS);
   const density = useAppStore.use.density();
+  const currency = useAppStore.use.currency();
   const colorScheme = useColorScheme();
+  const barColor = String(
+    useCSSVariable('--color-primary') ?? (colorScheme === 'dark' ? '#fafafa' : '#0a0a0a'),
+  );
   const [chartWidth, setChartWidth] = React.useState(0);
   const handleChartLayout = React.useCallback((event: LayoutChangeEvent) => {
     setChartWidth(event.nativeEvent.layout.width);
@@ -46,7 +52,7 @@ export function MonthlyExpenseTrendCard() {
   if (isLoading) {
     return (
       <View testID="monthly-expense-trend-loading">
-        <Skeleton height={density === 'compact' ? 145 : 160} />
+        <Skeleton height={density === 'compact' ? 140 : 150} />
       </View>
     );
   }
@@ -54,8 +60,9 @@ export function MonthlyExpenseTrendCard() {
   const months = data ?? [];
   const hasExpenses = months.some((item) => item.expense > 0);
   const labelColor = colorScheme === 'dark' ? '#9ca3af' : '#6b7280';
-  const previousBarColor = colorScheme === 'dark' ? '#52525b' : '#d4d4d8';
   const chartGeometry = getMonthlyTrendChartGeometry(chartWidth, months.length);
+  const chartMaxValue = Math.max(...months.map((item) => centsToAmount(item.expense)), 0)
+    / (1 - TOP_LABEL_HEADROOM_RATIO);
 
   return (
     <Pressable style={getPressedStyle} onPress={() => router.push('/stats')}>
@@ -67,21 +74,38 @@ export function MonthlyExpenseTrendCard() {
               <View testID="monthly-expense-trend-chart-container" className="items-center" onLayout={handleChartLayout}>
                 {chartWidth > 0 && (
                   <BarChart
-                    data={months.map((item, index) => ({
+                    data={months.map((item) => ({
                       value: centsToAmount(item.expense),
                       label: getMonthLabel(item.month),
                       labelWidth: chartGeometry.barWidth,
-                      labelTextStyle: { color: labelColor, fontSize: 9, textAlign: 'center' as const },
-                      frontColor: index === months.length - 1 ? expenseColor : previousBarColor,
+                      labelTextStyle: { color: labelColor, fontSize: 11, textAlign: 'center' as const },
+                      frontColor: barColor,
+                      topLabelComponent: () => (
+                        <FormattedCurrency
+                          testID={`monthly-expense-value-${item.month}`}
+                          value={item.expense}
+                          currency={currency}
+                          shorten
+                          fractionDigits={1}
+                          numberOfLines={1}
+                          className="text-[10px] font-medium text-foreground"
+                        />
+                      ),
+                      topLabelContainerStyle: {
+                        left: -chartGeometry.spacing / 2,
+                        paddingBottom: 2,
+                        width: chartGeometry.barWidth + chartGeometry.spacing,
+                      },
                     }))}
                     width={chartGeometry.chartWidth}
-                    height={density === 'compact' ? 80 : 96}
+                    height={density === 'compact' ? 75 : 90}
+                    maxValue={chartMaxValue}
                     barWidth={chartGeometry.barWidth}
                     spacing={chartGeometry.spacing}
-                    initialSpacing={chartGeometry.edgeSpacing}
-                    endSpacing={chartGeometry.edgeSpacing}
-                    barBorderTopLeftRadius={5}
-                    barBorderTopRightRadius={5}
+                    initialSpacing={chartGeometry.initialSpacing}
+                    endSpacing={chartGeometry.endSpacing}
+                    barBorderTopLeftRadius={9}
+                    barBorderTopRightRadius={9}
                     hideYAxisText
                     yAxisLabelWidth={0}
                     yAxisThickness={0}

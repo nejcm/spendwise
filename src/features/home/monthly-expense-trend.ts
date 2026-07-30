@@ -11,7 +11,8 @@ export function getMonthlyTrendChartGeometry(containerWidth: number, monthCount:
     chartWidth,
     barWidth,
     spacing,
-    initialSpacing: spacing / 2,
+    initialSpacing: spacing,
+    webInitialSpacing: spacing / 2,
     endSpacing: 0,
   };
 }

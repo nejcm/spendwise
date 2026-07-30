@@ -1,7 +1,7 @@
 import type { LayoutChangeEvent } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
-import { Pressable, useColorScheme } from 'react-native';
+import { Platform, Pressable, useColorScheme } from 'react-native';
 import { BarChart } from 'react-native-gifted-charts';
 import { useCSSVariable } from 'uniwind';
 import { FormattedCurrency, getPressedStyle, Text, View } from '@/components/ui';
@@ -102,7 +102,9 @@ export function MonthlyExpenseTrendCard() {
                     maxValue={chartMaxValue}
                     barWidth={chartGeometry.barWidth}
                     spacing={chartGeometry.spacing}
-                    initialSpacing={chartGeometry.initialSpacing}
+                    initialSpacing={Platform.OS === 'web'
+                      ? chartGeometry.webInitialSpacing
+                      : chartGeometry.initialSpacing}
                     endSpacing={chartGeometry.endSpacing}
                     barBorderTopLeftRadius={9}
                     barBorderTopRightRadius={9}

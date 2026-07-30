@@ -100,7 +100,7 @@ describe('monthly expense trend card', () => {
         expect.objectContaining({ label: 'Jun', value: 1000, frontColor: '#336B87' }),
         expect.objectContaining({ label: 'Jul', value: 750, frontColor: '#336B87' }),
       ],
-      initialSpacing: 69 / 7,
+      initialSpacing: 138 / 7,
       endSpacing: 0,
     }));
   });
@@ -110,7 +110,8 @@ describe('monthly expense trend card', () => {
       chartWidth: 12,
       barWidth: 1,
       spacing: 6 / 7,
-      initialSpacing: 3 / 7,
+      initialSpacing: 6 / 7,
+      webInitialSpacing: 3 / 7,
       endSpacing: 0,
     });
     expect(getMonthlyTrendChartGeometry(3, 6)).toEqual({
@@ -118,6 +119,7 @@ describe('monthly expense trend card', () => {
       barWidth: 0.5,
       spacing: 0,
       initialSpacing: 0,
+      webInitialSpacing: 0,
       endSpacing: 0,
     });
   });

@@ -72,35 +72,32 @@ export function AccountsScreen() {
                   <NoData title={translate('accounts.no_accounts')} className="mt-6" />
                 )
               : (
-                  <>
-                    <Sortable.Grid
-                      data={accounts}
-                      columns={1}
-                      hapticsEnabled
-                      scrollableRef={scrollRef}
-                      dimensionsAnimationType="none"
-                      itemEntering={null}
-                      itemExiting={null}
-                      itemsLayoutTransitionMode="reorder"
-                      keyExtractor={(account) => account.id}
-                      onDragEnd={handleDragEnd}
-                      renderItem={({ item: account }) => (
-                        <AccountCard
-                          account={account}
-                          onPress={() => router.push(`/accounts/${account.id}`)}
-                        />
-                      )}
-                    />
-                    <View className="mt-3 mb-5 flex-row items-center justify-center gap-2">
-                      <Lightbulb className="text-muted-foreground" size={14} />
-                      <Text className="text-sm text-muted-foreground">
-                        {translate('accounts.sorting_tips')}
-                      </Text>
-                    </View>
-                  </>
+                  <Sortable.Grid
+                    data={accounts}
+                    columns={1}
+                    hapticsEnabled
+                    scrollableRef={scrollRef}
+                    dimensionsAnimationType="none"
+                    itemEntering={null}
+                    itemExiting={null}
+                    itemsLayoutTransitionMode="reorder"
+                    keyExtractor={(account) => account.id}
+                    onDragEnd={handleDragEnd}
+                    renderItem={({ item: account }) => (
+                      <AccountCard
+                        account={account}
+                        onPress={() => router.push(`/accounts/${account.id}`)}
+                      />
+                    )}
+                  />
                 )}
-
           <AddAccountCard onPress={openCreateAccountForm} />
+          <View className="my-4 flex-row items-center justify-center gap-2">
+            <Lightbulb className="text-muted-foreground" size={14} />
+            <Text className="text-sm text-muted-foreground">
+              {translate('accounts.sorting_tips')}
+            </Text>
+          </View>
         </View>
       </Animated.ScrollView>
     </>

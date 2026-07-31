@@ -10,6 +10,8 @@ import { FocusAwareStatusBar, OverflowMenu, Pencil, TrashIcon } from '@/componen
 import { SkeletonRows } from '@/components/ui/skeleton';
 import { useTransactions } from '@/features/transactions/api';
 import { TransactionList } from '@/features/transactions/components/transaction-list';
+import { TransactionSelectionToolbar } from '@/features/transactions/components/transaction-selection-toolbar';
+import { useTransactionSelection } from '@/features/transactions/hooks/selection';
 import { queryKeys } from '@/lib/data/query-keys';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { useRefresh } from '@/lib/hooks/use-refresh';
@@ -46,6 +48,15 @@ export function AccountDetailScreen() {
     () => allTransactions.filter((t) => t.account_id === id),
     [allTransactions, id],
   );
+  const {
+    selectionMode,
+    selectedIds,
+    selectedCount,
+    toggleSelection,
+    startSelection,
+    clearSelection,
+    deleteSelected,
+  } = useTransactionSelection(transactions);
 
   const openEditForm = React.useCallback(() => {
     if (!account) return;
@@ -92,24 +103,37 @@ export function AccountDetailScreen() {
 
       <PeriodSelector selection={selection} />
 
-      <ScrollView
-        className="flex-1"
-        style={defaultStyles.transparentBg}
-        contentContainerClassName="pb-4"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-        <AccountSummary
-          key={`${id}-${preferredCurrency}`}
-          accountId={id}
-          startDate={startDate}
-          endDate={endDate}
-        />
+      <View className="flex-1">
+        <ScrollView
+          className="flex-1"
+          style={defaultStyles.transparentBg}
+          contentContainerClassName="pb-8"
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        >
+          <AccountSummary
+            key={`${id}-${preferredCurrency}`}
+            accountId={id}
+            startDate={startDate}
+            endDate={endDate}
+          />
 
-        <TransactionList
-          transactions={transactions}
-          isLoading={txLoading}
-        />
-      </ScrollView>
+          <TransactionList
+            transactions={transactions}
+            isLoading={txLoading}
+            selectionMode={selectionMode}
+            selectedIds={selectedIds}
+            onSelect={toggleSelection}
+            onStartSelection={startSelection}
+          />
+        </ScrollView>
+        {selectionMode && (
+          <TransactionSelectionToolbar
+            selectedCount={selectedCount}
+            onClear={clearSelection}
+            onDelete={deleteSelected}
+          />
+        )}
+      </View>
     </>
   );
 }

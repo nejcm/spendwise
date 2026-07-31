@@ -20,6 +20,7 @@ export type TransactionListProps = {
   selectedIds?: Set<string>;
   onSelect?: (id: string) => void;
   onStartSelection?: (id: string) => void;
+  containerClassName?: string;
 };
 
 export function TransactionList({
@@ -30,6 +31,7 @@ export function TransactionList({
   selectedIds,
   onSelect,
   onStartSelection,
+  containerClassName,
 }: TransactionListProps) {
   const [refreshing, setRefreshing] = useState(false);
   const density = useAppStore.use.density();
@@ -83,11 +85,11 @@ export function TransactionList({
 
   return (
     <FlashList
-      className="pb-6"
       data={flatData}
       renderItem={renderItem}
       keyExtractor={(item) => (typeof item === 'number' ? `header-${item}` : `tx-${item.id}`)}
       getItemType={(item) => (typeof item === 'number' ? 'header' : 'row')}
+      contentContainerClassName={containerClassName || 'pb-6'}
       ListEmptyComponent={isLoading ? <ActivityIndicator /> : <NoData className="py-16" title={translate('transactions.no_transactions')} />}
       refreshControl={
         onRefresh

@@ -7,7 +7,7 @@ import 'tsx/cjs';
 // eslint-disable-next-line perfectionist/sort-imports
 import Env from './env';
 // eslint-disable-next-line perfectionist/sort-imports
-import { withGradleProperties } from '@expo/config-plugins';
+import { withGradleProperties } from 'expo/config-plugins';
 
 const EXPO_ACCOUNT_OWNER = 'ncncm';
 const EAS_PROJECT_ID = 'c19931e0-c086-4d69-9a71-c64aea5c6f5a';

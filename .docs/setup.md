@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Node.js 20+
+- Node.js 22.13+ or 24+
 - `pnpm`
 - Expo tooling for local device/web development
 - EAS CLI for cloud builds
@@ -29,22 +29,24 @@ Copy-Item .env.example .env
 
 Current env schema lives in `env.ts`.
 
-### Required values
+### Schema values
 
 ```dotenv
 EXPO_PUBLIC_APP_ENV=development
-EXPO_PUBLIC_API_URL=https://example.com
-EXPO_PUBLIC_VAR_NUMBER=0
-EXPO_PUBLIC_VAR_BOOL=false
 ```
+
+`EXPO_PUBLIC_APP_ENV` is optional and falls back to `development` when unset or invalid.
 
 ### Optional values
 
+Read by `src/lib/analytics/posthog.tsx`, not by the `env.ts` schema:
+
 ```dotenv
-APP_BUILD_ONLY_VAR=
+EXPO_PUBLIC_POSTHOG_API_KEY=
+EXPO_PUBLIC_POSTHOG_HOST=https://us.i.posthog.com
 ```
 
-If `EXPO_PUBLIC_ASSOCIATED_DOMAIN` is not used, leave it out entirely. Do not set it to an empty string because strict env validation expects either a valid URL or no value.
+Analytics stay disabled while `EXPO_PUBLIC_POSTHOG_API_KEY` is empty.
 
 ### Derived values
 
@@ -96,7 +98,7 @@ pnpm knip:check
 
 ## Notes
 
-- The app is local-first, but the env schema still requires `EXPO_PUBLIC_API_URL`.
+- The app is local-first; the env schema requires no network endpoints.
 - AI provider keys are not configured through `.env`; users enter them in-app and they are stored locally.
 - `pnpm install-maestro` uses a shell installer and may need a Bash-compatible environment.
 

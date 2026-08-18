@@ -15,12 +15,20 @@
 ### Secondary Routes
 
 - `src/app/onboarding.tsx`
+- `src/app/(app)/accounts/new.tsx`
 - `src/app/(app)/accounts/[id].tsx`
+- `src/app/(app)/accounts/[id]/edit.tsx`
+- `src/app/(app)/categories/new.tsx`
+- `src/app/(app)/categories/[id]/edit.tsx`
+- `src/app/(app)/transactions/new.tsx`
 - `src/app/(app)/transactions/[id].tsx`
+- `src/app/(app)/stats/global-budget.tsx`
 - `src/app/(app)/scheduled/index.tsx`
+- `src/app/(app)/scheduled/new.tsx`
 - `src/app/(app)/scheduled/[id].tsx`
 - `src/app/(app)/settings/profile.tsx`
 - `src/app/(app)/settings/general.tsx`
+- `src/app/(app)/settings/appearance.tsx`
 - `src/app/(app)/settings/formatting.tsx`
 - `src/app/(app)/settings/import-export.tsx`
 - `src/app/(app)/settings/notifications.tsx`
@@ -33,6 +41,7 @@
 
 ### Core Finance
 
+- `home`: dashboard summary, overview cards, and spending/trend charts
 - `accounts`: account CRUD, account balances, and user-defined ordering across account lists
 - `categories`: category CRUD, ordering, picker/grid UI
 - `transactions`: list, detail, form, summaries, filters, and balance updates
@@ -41,6 +50,7 @@
 
 - `stats`: high-level summaries, trends, category breakdowns
 - `insights`: deeper trend and monthly analytics
+- `recommendations`: derived spending/cashflow suggestions and anomaly hints
 - `scheduled-transactions`: recurring rules, due-date tracking, and processing
 
 ### Utility Flows

@@ -32,8 +32,8 @@ Spendwise is a free personal finance app built with Expo and React Native. It is
 
 ## Stack
 
-- Expo SDK 54 with React Native 0.81
-- Expo Router 6 for file-based navigation
+- Expo SDK 56 with React Native 0.85
+- Expo Router 56 for file-based navigation
 - SQLite for primary app data
 - Zustand + MMKV for persisted preferences and lightweight app state
 - React Query for async queries/mutations over local data and network tasks
@@ -45,7 +45,7 @@ Spendwise is a free personal finance app built with Expo and React Native. It is
 
 ### Requirements
 
-- Node.js 20+
+- Node.js 22.13+ or 24+
 - `pnpm`
 - Expo / EAS tooling as needed for device builds
 
@@ -69,15 +69,14 @@ On Windows PowerShell, use:
 Copy-Item .env.example .env
 ```
 
-At minimum, the current env schema expects:
+The env schema in `env.ts` only expects:
 
-- `EXPO_PUBLIC_APP_ENV`
-- `EXPO_PUBLIC_API_URL`
-- `EXPO_PUBLIC_VAR_NUMBER`
-- `EXPO_PUBLIC_VAR_BOOL`
-- `APP_BUILD_ONLY_VAR` (optional)
+- `EXPO_PUBLIC_APP_ENV` (optional; defaults to `development` when unset or invalid)
 
-If `EXPO_PUBLIC_ASSOCIATED_DOMAIN` is not used, omit it entirely instead of leaving it blank.
+Optional analytics values, read by `src/lib/analytics/posthog.tsx`:
+
+- `EXPO_PUBLIC_POSTHOG_API_KEY` (analytics are disabled when empty)
+- `EXPO_PUBLIC_POSTHOG_HOST` (defaults to `https://us.i.posthog.com`)
 
 `EXPO_PUBLIC_NAME`, `EXPO_PUBLIC_SCHEME`, `EXPO_PUBLIC_BUNDLE_ID`, `EXPO_PUBLIC_PACKAGE`, and `EXPO_PUBLIC_VERSION` are derived in `env.ts`.
 

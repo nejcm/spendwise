@@ -14,15 +14,19 @@ Core layers:
 
 ## App Startup
 
-`src/app/_layout.tsx` is the runtime entry point. On startup it:
+`src/app/_layout.tsx` is the runtime entry point. It mounts app-wide providers around `SQLiteProvider`, whose `onInit` runs `bootstrapApp` (`src/lib/app-bootstrap.ts`, 15 s timeout, splash hidden when it settles):
 
-1. Mounts app-wide providers
-2. Initializes the SQLite database
-3. Runs schema migrations
-4. Sets up notifications
-5. Checks budget alerts and upcoming bills
-6. Initializes currency rates
-7. Mounts the global security lock
+1. Runs schema migrations (`migrateDb`)
+2. Ensures the Android notification channel
+3. Syncs due scheduled transactions
+
+The provider tree then mounts the background workers and gates:
+
+- `CurrencyRatesInitializer` — fetches/refreshes rates
+- `ScheduledTransactionsProcessor` — reprocesses due rules and runs all notification checks (upcoming bills, budget alerts, low balance, weekly digest, recommendations) on launch, foreground resume, and daily
+- `AutoBackupProcessor`
+- `SecurityLock` — global app lock gate
+- `PersistentTabBar`
 
 ## Data Layers
 
@@ -33,12 +37,11 @@ SQLite is the source of truth for core finance entities:
 - `accounts`
 - `categories`
 - `transactions`
-- `budgets`
-- `budget_lines`
 - `recurring_rules`
+- `recurring_rule_runs`
 - `currency_rates`
 
-Schema and migrations live in `src/lib/sqlite`.
+Plus `_meta`, an internal bookkeeping table. Schema and migrations live in `src/lib/sqlite`.
 
 ### React Query
 
@@ -54,7 +57,7 @@ Feature data modules expose `useQuery` / `useMutation` hooks backed by SQLite. E
 |------|---------|
 | `query-keys.ts` | Single source of truth for all React Query cache keys. Import `queryKeys` instead of defining local key objects. |
 | `invalidation.ts` | Entity-based invalidation rules. Call `invalidateFor(queryClient, 'transaction')` instead of manually listing query key arrays. |
-| `money.ts` | Unified money module: `amountToCents`, `centsToAmount`, `formatCurrency`, `convertAmount`, `parseToCents`. Single import path for all money operations. |
+| `money.ts` | Shared money helpers: `convertAmount` (re-exported from the currencies feature) and `parseToCents`. Cents conversion and currency formatting live in `src/features/formatting/helpers.ts`. |
 | `index.ts` | Barrel re-export of the above three modules. |
 
 Example mutation using the new patterns:
@@ -93,13 +96,13 @@ Do not move transactional finance records into Zustand.
 - Most route files should stay thin and delegate to feature screens
 - Primary visible tabs are home, transactions, categories, and stats
 - `/transactions` is the shared route for seeded transaction drill-downs via search, filter, and date-range params
-- Additional routed flows include accounts, transactions, budgets, import, insights, onboarding, and settings subpages
-- SDK 55 native tabs are deferred because the app uses a custom persistent tab bar with a central add/scan action. Keep route transitions simple unless a screen has a clear native affordance.
+- Additional routed flows include accounts, transactions, categories, scheduled transactions, global budget, AI, onboarding, and settings subpages
+- SDK 56 native tabs are deferred because the app uses a custom persistent tab bar with a central add/scan action. Keep route transitions simple unless a screen has a clear native affordance.
 
-## Expo SDK 55
+## Expo SDK 56
 
 - EAS Update uses Hermes bytecode diffing through `updates.enableBsdiffPatchSupport`.
-- The React Native New Architecture is always used on SDK 55; do not add `newArchEnabled` to app config.
+- The React Native New Architecture is always used on SDK 56; do not add `newArchEnabled` to app config.
 - `expo-widgets`, Live Activities, and Expo UI are deferred until their APIs are stable enough for production use in this app.
 
 ## Feature Layout

@@ -40,7 +40,7 @@ onSuccess: () => {
 
 // good — registry plus declarative rules
 import { invalidateFor, queryKeys } from '@/lib/data';
-useQuery({ queryKey: queryKeys.transactions.list(range), … });
+useQuery({ queryKey: queryKeys.transactions.list(range), ...opts });
 onSuccess: () => invalidateFor(queryClient, 'transaction');
 ```
 

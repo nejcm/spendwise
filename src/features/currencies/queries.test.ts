@@ -1,11 +1,13 @@
 import type { CurrencyKey } from '.';
 
 import { createTestDb } from '@/test-utils/sqlite-db';
+import { CURRENCY_VALUES } from '.';
 import {
   convertAmount,
   getLastFetchedAt,
   getLatestRates,
   getRatesForDate,
+  loadOrFetchRates,
   saveRates,
   toRatesMap,
 } from './queries';
@@ -19,9 +21,16 @@ jest.mock('expo-crypto', () => ({
   randomUUID: jest.fn(() => 'test-uuid-1234'),
 }));
 
-const { fetchRatesForDate } = jest.requireMock('./service') as {
+const { fetchRates, fetchRatesForDate } = jest.requireMock('./service') as {
+  fetchRates: jest.Mock;
   fetchRatesForDate: jest.Mock;
 };
+
+// Several tests freeze Date.now(); restore unconditionally so a failed
+// assertion cannot leak the frozen clock into later tests.
+afterEach(() => {
+  jest.restoreAllMocks();
+});
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -35,6 +44,20 @@ async function seedRate(
     `INSERT OR IGNORE INTO currency_rates (base, quote, rate, date) VALUES ('EUR', ?, ?, ?)`,
     [quote, rate, date],
   );
+}
+
+async function seedRateSnapshot(
+  db: Awaited<ReturnType<typeof createTestDb>>,
+  date: number,
+  usdRate: number,
+) {
+  for (const quote of CURRENCY_VALUES) {
+    await seedRate(db, quote, quote === 'USD' ? usdRate : 1, date);
+  }
+}
+
+function rateSnapshot(usdRate: number) {
+  return Object.fromEntries(CURRENCY_VALUES.map((quote) => [quote, quote === 'USD' ? usdRate : 1]));
 }
 
 // ─── toRatesMap ───────────────────────────────────────────────────────────────
@@ -128,7 +151,7 @@ describe('getRatesForDate', () => {
 describe('saveRates', () => {
   it('inserts rates keyed by day-truncated timestamp', async () => {
     const db = await createTestDb();
-    const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(1_762_345_678_000);
+    jest.spyOn(Date, 'now').mockReturnValue(1_762_345_678_000);
 
     await saveRates(db as any, { USD: 1.08, GBP: 0.86 });
 
@@ -139,24 +162,20 @@ describe('saveRates', () => {
     expect(rows.find((r) => r.quote === 'USD')!.rate).toBe(1.08);
     expect(rows.find((r) => r.quote === 'USD')!.date).toBe(1_762_300_800);
     expect(rows.find((r) => r.quote === 'GBP')!.rate).toBe(0.86);
-
-    dateNowSpy.mockRestore();
   });
 
-  it('is idempotent — repeated calls with same day do not duplicate rows', async () => {
+  it('upserts — a same-day refresh replaces the rate instead of duplicating rows', async () => {
     const db = await createTestDb();
-    const dateNowSpy = jest.spyOn(Date, 'now').mockReturnValue(1_762_345_678_000);
+    jest.spyOn(Date, 'now').mockReturnValue(1_762_345_678_000);
 
     await saveRates(db as any, { USD: 1.08 });
-    await saveRates(db as any, { USD: 1.99 }); // second call on same day — ignored
+    await saveRates(db as any, { USD: 1.99 }); // second call on same day — overwrites
 
     const rows = await db.getAllAsync<{ quote: string; rate: number }>(
       `SELECT quote, rate FROM currency_rates WHERE base = 'EUR' AND quote = 'USD'`,
     );
     expect(rows).toHaveLength(1);
-    expect(rows[0].rate).toBe(1.08); // original rate preserved
-
-    dateNowSpy.mockRestore();
+    expect(rows[0].rate).toBe(1.99); // latest rate wins
   });
 });
 
@@ -193,6 +212,82 @@ describe('getLastFetchedAt', () => {
     await seedRate(db, 'USD', 1.08, 1_770_000_000);
 
     expect(await getLastFetchedAt(db as any)).toBe(1_770_000_000);
+  });
+});
+
+describe('loadOrFetchRates', () => {
+  it('uses the current-day cache without fetching', async () => {
+    const db = await createTestDb();
+    const now = Date.UTC(2026, 7, 27, 12) / 1000;
+    const today = now - (now % 86400);
+    jest.spyOn(Date, 'now').mockReturnValue(now * 1000);
+    await seedRateSnapshot(db, today, 1.08);
+    fetchRates.mockClear();
+
+    await expect(loadOrFetchRates(db as any)).resolves.toMatchObject({ EUR: 1, USD: 1.08 });
+    expect(fetchRates).not.toHaveBeenCalled();
+  });
+
+  it('refreshes an incomplete current-day cache', async () => {
+    const db = await createTestDb();
+    const now = Date.UTC(2026, 7, 27, 12) / 1000;
+    const today = now - (now % 86400);
+    jest.spyOn(Date, 'now').mockReturnValue(now * 1000);
+    await seedRate(db, 'USD', 1.08, today);
+    fetchRates.mockClear();
+
+    fetchRates.mockResolvedValueOnce({ rates: rateSnapshot(1.09), source: 'test' });
+    const rates = await loadOrFetchRates(db as any);
+    expect(Object.keys(rates ?? {})).toEqual(expect.arrayContaining(CURRENCY_VALUES));
+    expect(fetchRates).toHaveBeenCalledTimes(1);
+  });
+
+  it('overwrites stale rates when refreshing an incomplete current-day cache', async () => {
+    const db = await createTestDb();
+    const now = Date.UTC(2026, 7, 27, 12) / 1000;
+    const today = now - (now % 86400);
+    jest.spyOn(Date, 'now').mockReturnValue(now * 1000);
+    await seedRate(db, 'USD', 1.08, today);
+    fetchRates.mockResolvedValueOnce({ rates: rateSnapshot(1.09), source: 'test' });
+
+    await expect(loadOrFetchRates(db as any)).resolves.toMatchObject({ EUR: 1, USD: 1.09 });
+
+    const saved = await db.getAllAsync<{ rate: number }>(
+      `SELECT rate FROM currency_rates WHERE quote = 'USD' AND date = ?`,
+      [today],
+    );
+    expect(saved).toEqual([{ rate: 1.09 }]);
+  });
+
+  it('refreshes an older cache', async () => {
+    const db = await createTestDb();
+    const now = Date.UTC(2026, 7, 27, 12) / 1000;
+    const today = now - (now % 86400);
+    jest.spyOn(Date, 'now').mockReturnValue(now * 1000);
+    await seedRate(db, 'USD', 1.08, today - 86400);
+
+    fetchRates.mockResolvedValueOnce({ rates: rateSnapshot(1.09), source: 'test' });
+    await expect(loadOrFetchRates(db as any)).resolves.toMatchObject({ EUR: 1, USD: 1.09 });
+
+    const saved = await db.getAllAsync<{ date: number; rate: number }>(
+      `SELECT date, rate FROM currency_rates WHERE quote = 'USD' AND date = ?`,
+      [today],
+    );
+    expect(saved).toEqual([{ date: today, rate: 1.09 }]);
+
+    fetchRates.mockClear();
+    await loadOrFetchRates(db as any);
+    expect(fetchRates).not.toHaveBeenCalled();
+  });
+
+  it('keeps an older cache when refresh fails', async () => {
+    const db = await createTestDb();
+    const now = Date.UTC(2026, 7, 27, 12) / 1000;
+    const today = now - (now % 86400);
+    jest.spyOn(Date, 'now').mockReturnValue(now * 1000);
+    await seedRateSnapshot(db, today - 86400, 1.08);
+    fetchRates.mockRejectedValueOnce(new Error('offline'));
+    await expect(loadOrFetchRates(db as any)).resolves.toMatchObject({ EUR: 1, USD: 1.08 });
   });
 });
 

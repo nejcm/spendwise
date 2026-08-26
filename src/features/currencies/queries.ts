@@ -24,8 +24,6 @@ export type CurrencyRate = {
 
 export type RatesMap = Record<string, number>;
 
-const STALE_SECONDS = 24 * 60 * 60; // 24 hours
-
 type GetRatesForDateOptions = {
   currency?: CurrencyKey;
   fetchIfMissing?: boolean;
@@ -106,7 +104,7 @@ export async function getRatesForDate(
   const rows = await db.getAllAsync<{ quote: string; rate: number }>(
     `SELECT quote, rate
     FROM currency_rates
-    WHERE base = 'EUR' 
+    WHERE base = 'EUR'
     ${currency ? `AND quote = ?` : ''}
     AND date = ?`,
     params,
@@ -151,7 +149,7 @@ export async function getRatesForDate(
   const fallback = await db.getAllAsync<{ quote: string; rate: number }>(
     `SELECT quote, rate
      FROM currency_rates
-     WHERE base = 'EUR' 
+     WHERE base = 'EUR'
       ${currency ? `AND quote = ?` : ''}
       AND date = (${CLOSEST_EUR_RATE_DATE_SQL})`,
     params2,
@@ -207,14 +205,15 @@ async function insertCurrencyRateRows(
     }
 
     await db.runAsync(
-      `INSERT OR IGNORE INTO currency_rates (base, quote, rate, date)
-       VALUES ${placeholders}`,
+      `INSERT INTO currency_rates (base, quote, rate, date)
+       VALUES ${placeholders}
+       ON CONFLICT(base, quote, date) DO UPDATE SET rate = excluded.rate`,
       params,
     );
   }
 }
 
-/** Saves all rates in a single transaction (INSERT OR IGNORE — idempotent). */
+/** Saves all rates in a single transaction (upsert — refetching a day overwrites its rates). */
 export async function bulkSaveRates(
   db: SQLiteDatabase,
   ratesByDate: Record<string, RateMap>,
@@ -375,7 +374,7 @@ export async function getRatesForDates(
 
 // ─── Write Queries ───
 
-/** Appends today's rates to the historical table (INSERT OR IGNORE — idempotent per day). */
+/** Writes today's rates to the historical table (upsert — a same-day refresh replaces them). */
 export async function saveRates(
   db: SQLiteDatabase,
   rateMap: RateMap,
@@ -385,7 +384,7 @@ export async function saveRates(
   await saveRatesForDate(db, rateMap, dayTimestamp);
 }
 
-/** Saves rates for a specific day-truncated Unix timestamp (INSERT OR IGNORE — idempotent per day). */
+/** Saves rates for a specific day-truncated Unix timestamp (upsert per day). */
 export async function saveRatesForDate(
   db: SQLiteDatabase,
   rateMap: RateMap,
@@ -414,15 +413,19 @@ export function toRatesMap(rows: Array<{ quote: string; rate: number }>): RatesM
 }
 
 export async function loadOrFetchRates(db: SQLiteDatabase): Promise<RatesMap | undefined> {
-  const lastFetched = await getLastFetchedAt(db);
-  const isStale = !lastFetched || Math.floor(Date.now() / 1000) - lastFetched > STALE_SECONDS;
+  const rows = await getLatestRates(db);
+  const cached = rows.length > 0 ? toRatesMap(rows) : undefined;
+  const now = Math.floor(Date.now() / 1000);
+  const today = now - (now % 86400);
 
-  if (!isStale) {
-    const rows = await getLatestRates(db);
-    if (rows.length > 0) return toRatesMap(rows);
+  if (rows[0]?.date === today && cached && !hasMissingCurrencies(cached)) return cached;
+
+  try {
+    return (await refreshRates(db)) ?? cached;
   }
-
-  return refreshRates(db);
+  catch {
+    return cached;
+  }
 }
 
 export async function refreshRates(db: SQLiteDatabase): Promise<RatesMap | undefined> {

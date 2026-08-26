@@ -6,14 +6,14 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { Alert } from '@/components/ui';
 import { writeAutoBackupFile } from '@/features/imports-export/backup-file';
 import { invalidateFor } from '@/lib/data/invalidation';
+import { queryTimes } from '@/lib/data/query-helpers';
 import { queryKeys } from '@/lib/data/query-keys';
+import { time } from '@/lib/date/constants';
+
 import { translate } from '@/lib/i18n';
 import { setCurrency } from '@/lib/store/store';
-
 import * as queries from './queries';
 import { recalculateAllBaseAmounts } from './recalculate';
-
-const STALE_MS = 24 * 60 * 60_000; // 24 hours
 
 /** Historical EUR-based rates for the closest stored day to `dateUnix` (for transaction-date conversion). */
 export function useRatesForDate(dateUnix: number | null) {
@@ -22,17 +22,20 @@ export function useRatesForDate(dateUnix: number | null) {
     queryKey: queryKeys.currencyRates.forDate(dateUnix ?? 0),
     queryFn: () => queries.getRatesForDate(db, dateUnix!),
     enabled: dateUnix != null && Number.isFinite(dateUnix),
-    staleTime: STALE_MS,
+    // Short: a missed fetch caches a closest-date fallback, which must not
+    // outlive the next chance to fetch the real rates for that day.
+    ...queryTimes(time['1h']),
   });
 }
 
 export function useCurrencyRates(options?: { enabled?: boolean }) {
   const db = useSQLiteContext();
+
   return useQuery({
     queryKey: queryKeys.currencyRates.all,
     queryFn: () => queries.loadOrFetchRates(db),
-    staleTime: STALE_MS,
     enabled: options?.enabled ?? true,
+    ...queryTimes(time['8h']),
   });
 }
 
@@ -41,7 +44,7 @@ export function useLastCurrencyRatesFetchedAt() {
   return useQuery({
     queryKey: queryKeys.currencyRates.lastFetchedAt,
     queryFn: () => queries.getLastFetchedAt(db),
-    staleTime: STALE_MS,
+    ...queryTimes(time['8h']),
   });
 }
 

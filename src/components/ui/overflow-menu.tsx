@@ -65,7 +65,7 @@ export function OverflowMenu({ items, accessibilityLabel, className, containerCl
       >
         {icon || <EllipsisVertical className="text-muted-foreground" size={20} />}
       </IconButton>
-      <Modal visible={open} transparent animationType="fade" onRequestClose={close}>
+      <Modal visible={open} transparent animationType="fade" statusBarTranslucent onRequestClose={close}>
         <View className="flex-1">
           <Pressable className="absolute inset-0" onPress={close} />
           <View

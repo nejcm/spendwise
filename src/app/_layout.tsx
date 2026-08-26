@@ -1,4 +1,5 @@
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { useQueryClient } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { Stack, usePathname } from 'expo-router';
 import { ThemeProvider } from 'expo-router/react-navigation';
@@ -6,7 +7,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteProvider } from 'expo-sqlite';
 import * as React from 'react';
 import { useEffect } from 'react';
-import { StyleSheet } from 'react-native';
+import { AppState, StyleSheet } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
@@ -29,6 +30,7 @@ import { PosthogProviderWrapper } from '@/lib/analytics/posthog';
 import { APIProvider } from '@/lib/api';
 import { useAppBootstrapOnInit } from '@/lib/app-bootstrap';
 import { IS_WEB } from '@/lib/base';
+import { invalidateFor } from '@/lib/data/invalidation';
 import { getShouldShowPersistentTabBar } from '@/lib/navigation/persistent-tab-bar';
 import { DatabaseErrorBoundary, OpfsCleaner } from '@/lib/sqlite';
 import { loadSelectedAccentColor } from '@/lib/theme/use-selected-accent';
@@ -69,7 +71,17 @@ function PersistentTabBar() {
 }
 
 function CurrencyRatesInitializer() {
+  const queryClient = useQueryClient();
   useCurrencyRates();
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      // Invalidate the whole `currency-rates` prefix, not just the latest-rates
+      // query: historical per-date entries may hold an offline fallback that
+      // should be re-resolved now that the app is foregrounded.
+      if (state === 'active') invalidateFor(queryClient, 'currencyRates');
+    });
+    return () => subscription.remove();
+  }, [queryClient]);
   return null;
 }
 

@@ -182,6 +182,21 @@ export default antfu(
     },
   },
 
+  // Fenced code blocks in Markdown are illustrative snippets, not real modules:
+  // they omit surrounding scope and are intentionally incomplete.
+  {
+    files: ['**/*.md/**'],
+    rules: {
+      'import/first': 'off',
+      'import/newline-after-import': 'off',
+      'react-hooks/rules-of-hooks': 'off',
+      'style/semi': 'off',
+      'ts/no-unused-vars': 'off',
+      'unicorn/filename-case': 'off',
+      'unused-imports/no-unused-vars': 'off',
+    },
+  },
+
   // Testing Library rules
   {
     files: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],

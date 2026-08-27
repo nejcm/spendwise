@@ -49,6 +49,15 @@ export function unixToISODate(seconds: number): string {
   return unixToDate(seconds).toISOString().slice(0, 10);
 }
 
+/** Commit a native date-picker change only when the user confirms. */
+export function commitPickerDate(
+  event: { type: string },
+  selectedDate?: Date,
+): string | null {
+  if (event.type !== 'set' || !selectedDate) return null;
+  return format(selectedDate, 'yyyy-MM-dd');
+}
+
 export function splitBy(
   startDate: string,
   endDate: string,

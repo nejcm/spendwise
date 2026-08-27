@@ -161,11 +161,11 @@ export function PeriodSelectorModal({
         >
           <View className="mb-8 flex-row flex-wrap gap-2">
             {MODE_BUTTONS.map(({ key, label }) => (
-              <View className="grow basis-[45%]" key={key}>
+              <View className="grow basis-[48%] 2xs:basis-[31%]" key={key}>
                 <OutlineButton
                   className={`items-center px-1 ${draft.mode === key ? '' : 'border-border'}`}
                   textClassName={`text-sm ${draft.mode === key ? '' : 'text-muted-foreground'}`}
-                  textProps={{ adjustsFontSizeToFit: true, minimumFontScale: 0.85, numberOfLines: 1 }}
+                  textProps={{ adjustsFontSizeToFit: true, minimumFontScale: 0.8, numberOfLines: 2 }}
                   fullWidth
                   label={label}
                   size={isCompact ? 'sm' : 'md'}

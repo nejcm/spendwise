@@ -1,6 +1,7 @@
 import type { PeriodSelectionWeek } from '../store/store';
 import {
   calendarDateToUnix,
+  commitPickerDate,
   dateToUnix,
   findClosestDateBinary,
   getCurrentMonthRange,
@@ -74,6 +75,22 @@ describe('unixToISODate', () => {
     const unix = Date.UTC(2026, 2, 15) / 1000;
     expect(unixToISODate(unix)).toBe('2026-03-15');
     expect(unixToISODate(unix)).toMatch(isoDateRegex);
+  });
+});
+
+describe('commitPickerDate', () => {
+  const date = new Date(2020, 5, 16);
+
+  it('returns yyyy-MM-dd on set', () => {
+    expect(commitPickerDate({ type: 'set' }, date)).toBe('2020-06-16');
+  });
+
+  it('returns null on dismissed even when a date is present', () => {
+    expect(commitPickerDate({ type: 'dismissed' }, date)).toBeNull();
+  });
+
+  it('returns null on set without a date', () => {
+    expect(commitPickerDate({ type: 'set' })).toBeNull();
   });
 });
 

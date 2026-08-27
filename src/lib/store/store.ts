@@ -101,7 +101,7 @@ export type AppState = {
     accountForm: Partial<Pick<Account, 'type' | 'currency'>>;
   };
 
-  // UI state (not persisted)
+  // Period preference
   periodSelection: PeriodSelection;
 };
 
@@ -167,7 +167,7 @@ const _useAppStore = create<AppState>()(
       name: 'app-storage',
       version: 1,
       storage: createJSONStorage(() => mmkvStorage),
-      partialize: ({ isLocked: _, periodSelection: __, ...rest }) => rest as AppState,
+      partialize: ({ isLocked: _, ...rest }) => rest as AppState,
     },
   ),
 );

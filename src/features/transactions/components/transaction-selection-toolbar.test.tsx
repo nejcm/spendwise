@@ -14,8 +14,8 @@ function mockNativeMeasurement() {
   let probe: View | null = null;
   render(<View ref={(node) => void (probe = node)} />);
   // oxlint-disable-next-line no-unsafe-optional-chaining
-  ((probe as View | null)?.measureInWindow as jest.Mock).mockImplementation(
-    (callback: (x: number, y: number, width: number, height: number) => void) => callback(0, 700, 40, 40),
+  ((probe as View | null)?.measure as jest.Mock).mockImplementation(
+    (callback: (...frame: [number, number, number, number, number, number]) => void) => callback(0, 0, 40, 40, 300, 700),
   );
 }
 

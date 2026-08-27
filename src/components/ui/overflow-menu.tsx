@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Modal, Pressable, View } from 'react-native';
+import { Modal, Pressable, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { cn } from 'tailwind-variants';
 import { getPressedStyle } from './button';
@@ -27,9 +27,10 @@ type OverflowMenuProps = {
 
 export function OverflowMenu({ items, accessibilityLabel, className, containerClassName, icon, placement = 'top' }: OverflowMenuProps) {
   const [open, setOpen] = React.useState(false);
-  const [triggerY, setTriggerY] = React.useState<number>();
+  const [triggerFrame, setTriggerFrame] = React.useState<{ x: number; y: number; width: number }>();
   const triggerRef = React.useRef<View>(null);
   const insets = useSafeAreaInsets();
+  const window = useWindowDimensions();
   const visibleItems = items.filter((item) => !item.hidden);
 
   const close = React.useCallback(() => setOpen(false), []);
@@ -44,8 +45,8 @@ export function OverflowMenu({ items, accessibilityLabel, className, containerCl
       return;
     }
 
-    triggerRef.current.measureInWindow((_, y) => {
-      setTriggerY(y);
+    triggerRef.current.measure((...[, , width, , pageX, pageY]) => {
+      setTriggerFrame({ x: pageX, y: pageY, width });
       setOpen(true);
     });
   }, [placement]);
@@ -65,16 +66,17 @@ export function OverflowMenu({ items, accessibilityLabel, className, containerCl
       >
         {icon || <EllipsisVertical className="text-muted-foreground" size={20} />}
       </IconButton>
-      <Modal visible={open} transparent animationType="fade" statusBarTranslucent onRequestClose={close}>
+      <Modal visible={open} transparent animationType="fade" onRequestClose={close}>
         <View className="flex-1">
           <Pressable className="absolute inset-0" onPress={close} />
           <View
             className={cn(`absolute right-4 min-w-48 overflow-hidden rounded-lg border border-border bg-background py-1 shadow-lg`, containerClassName ?? '')}
-            style={{
-              top: placement === 'above' && triggerY !== undefined
-                ? Math.max(insets.top + 8, triggerY - (visibleItems.length * 48) - 16)
-                : insets.top + 48,
-            }}
+            style={placement === 'above' && triggerFrame
+              ? {
+                  right: window.width - triggerFrame.x - triggerFrame.width,
+                  bottom: window.height - triggerFrame.y + 4,
+                }
+              : { top: insets.top + 48 }}
           >
             {visibleItems.map((item) => (
               <GhostButton

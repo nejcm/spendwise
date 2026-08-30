@@ -12,3 +12,5 @@ trustPolicy: no-downgrade
 trustPolicyExclude:
   - semver@6.3.1 # false-positive cross-major trust downgrade vs semver@7.x provenance, see pnpm/pnpm#10622
   - ua-parser-js@1.0.41 # false-positive trust downgrade; legit current release (real compromise was 0.7.29/0.8.0/1.0.0 in 2021)
+patchedDependencies:
+  eslint-plugin-i18n-json@4.0.1: patches/eslint-plugin-i18n-json@4.0.1.patch

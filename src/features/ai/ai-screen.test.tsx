@@ -34,7 +34,6 @@ jest.mock('@/components/screen-header', () => ({
 }));
 
 jest.mock('react-native-safe-area-context', () => ({
-  // eslint-disable-next-line react/no-unnecessary-use-prefix
   useSafeAreaInsets: () => ({ bottom: 0, left: 0, right: 0, top: 0 }),
 }));
 

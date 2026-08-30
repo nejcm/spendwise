@@ -1,0 +1,7 @@
+diff --git a/src/util/get-translation-file-source.js b/src/util/get-translation-file-source.js
+index 121fe2e0e2db2f07840714c16b8cea72de71c142..cdfdef8fb13acb10d03ac087a0a694575ef3eade 100644
+--- a/src/util/get-translation-file-source.js
++++ b/src/util/get-translation-file-source.js
+@@ -3 +3 @@
+-const isJSONFile = context => path.extname(context.getFilename()) === '.json';
++const isJSONFile = context => path.extname(context.filename) === '.json';

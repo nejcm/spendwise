@@ -165,7 +165,7 @@ export function PeriodSelectorModal({
                 <OutlineButton
                   className={`items-center px-1 ${draft.mode === key ? '' : 'border-border'}`}
                   textClassName={`text-sm ${draft.mode === key ? '' : 'text-muted-foreground'}`}
-                  textProps={{ adjustsFontSizeToFit: true, minimumFontScale: 0.8, numberOfLines: 2 }}
+                  textProps={{ adjustsFontSizeToFit: true, minimumFontScale: 0.8, numberOfLines: 1 }}
                   fullWidth
                   label={label}
                   size={isCompact ? 'sm' : 'md'}

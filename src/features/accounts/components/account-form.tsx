@@ -68,7 +68,7 @@ function useAccountForm(
         name: value.name,
         type: value.type,
         currency: value.currency,
-        description: value.description || null,
+        description: value.description?.trim() || null,
         icon: value.icon || null,
         color: value.color || null,
         budget: value.budget?.trim() ? value.budget : null,
@@ -153,7 +153,7 @@ function AccountFormBody({ form, preferredCurrency, isCompact }: AccountFormBody
             size={inputSize}
             value={field.state.value ?? ''}
             onBlur={field.handleBlur}
-            onChangeText={(v) => field.handleChange(v.trim() || null)}
+            onChangeText={field.handleChange}
             placeholder={translate('accounts.description_placeholder')}
             error={getFieldError(field)}
           />

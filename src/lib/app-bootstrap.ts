@@ -22,16 +22,22 @@ export async function bootstrapApp(
   db: SQLiteDatabase,
   queryClient: QueryClient,
 ): Promise<void> {
-  await Promise.race([
-    bootstrapAppInternal(db, queryClient),
-    new Promise<never>((_, reject) =>
-      setTimeout(
-        () => reject(new Error('[bootstrap] timed out after 15 s')),
-        BOOTSTRAP_TIMEOUT_MS,
-      ),
-    ),
-  ]);
-  await SplashScreen.hideAsync();
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  try {
+    await Promise.race([
+      bootstrapAppInternal(db, queryClient),
+      new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(
+          () => reject(new Error('[bootstrap] timed out after 15 s')),
+          BOOTSTRAP_TIMEOUT_MS,
+        );
+      }),
+    ]);
+    await SplashScreen.hideAsync();
+  }
+  finally {
+    if (timeoutId !== undefined) clearTimeout(timeoutId);
+  }
 }
 
 async function bootstrapAppInternal(

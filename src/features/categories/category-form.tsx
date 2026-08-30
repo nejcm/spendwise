@@ -167,7 +167,7 @@ function CategoryFormBody({ form, preferredCurrency, deleteCategory, id, initial
           className="mt-6"
           fullWidth
           textClassName="underline"
-          iconLeft={<TrashIcon size={16} colorClassName="accent-danger-600" className="mr-2" />}
+          iconLeft={<TrashIcon size={16} colorClassName="accent-red-600" className="mr-2" />}
           onPress={() => onDeletePress(id, initialValues?.name ?? '')}
         />
       )}

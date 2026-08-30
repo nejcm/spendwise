@@ -33,6 +33,7 @@ describe('bootstrapApp', () => {
   });
 
   it('runs startup steps in order', async () => {
+    jest.useFakeTimers();
     const order: string[] = [];
 
     (migrateDb as jest.Mock).mockImplementation(async () => {
@@ -45,12 +46,18 @@ describe('bootstrapApp', () => {
       order.push('sync');
     });
 
-    await bootstrapApp(db, qc);
+    try {
+      await bootstrapApp(db, qc);
 
-    expect(SplashScreen.hideAsync).toHaveBeenCalled();
-    expect(order).toEqual(['migrate', 'channel', 'sync']);
-    expect(migrateDb).toHaveBeenCalledWith(db);
-    expect(ensureAndroidChannel).toHaveBeenCalledWith();
-    expect(syncDueScheduledTransactions).toHaveBeenCalledWith(db, qc);
+      expect(SplashScreen.hideAsync).toHaveBeenCalled();
+      expect(order).toEqual(['migrate', 'channel', 'sync']);
+      expect(migrateDb).toHaveBeenCalledWith(db);
+      expect(ensureAndroidChannel).toHaveBeenCalledWith();
+      expect(syncDueScheduledTransactions).toHaveBeenCalledWith(db, qc);
+      expect(jest.getTimerCount()).toBe(0);
+    }
+    finally {
+      jest.useRealTimers();
+    }
   });
 });

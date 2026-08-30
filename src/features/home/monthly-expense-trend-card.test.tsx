@@ -7,7 +7,6 @@ const mockBarChart = jest.fn();
 const mockRouterPush = jest.fn();
 
 jest.mock('expo-router', () => ({
-  // eslint-disable-next-line react/no-unnecessary-use-prefix
   useRouter: () => ({ push: mockRouterPush }),
 }));
 
@@ -39,7 +38,6 @@ jest.mock('@/features/insights/api', () => ({
 
 jest.mock('uniwind', () => ({
   ...jest.requireActual('uniwind'),
-  // eslint-disable-next-line react/no-unnecessary-use-prefix
   useCSSVariable: () => '#336B87',
 }));
 

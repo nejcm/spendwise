@@ -43,5 +43,6 @@ module.exports = {
   coverageDirectory: '<rootDir>/coverage/',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^lucide-react-native$': require.resolve('lucide-react-native'),
   },
 };

@@ -61,12 +61,15 @@ export default antfu(
       'react/no-inline-styles': 'off',
       'react/destructuring-assignment': 'off',
       'react/no-array-index-key': 'off',
+      'react/jsx-no-children-prop': 'off',
+      'react/purity': 'off',
       'react/require-default-props': 'off',
       'react-refresh/only-export-components': 'warn', // Too strict for React Native
       'unicorn/filename-case': [
         'error',
         {
           case: 'kebabCase',
+          checkDirectories: false,
           ignore: [
             '/android',
             '/ios',
@@ -190,6 +193,7 @@ export default antfu(
       'import/first': 'off',
       'import/newline-after-import': 'off',
       'react-hooks/rules-of-hooks': 'off',
+      'react/rules-of-hooks': 'off',
       'style/semi': 'off',
       'ts/no-unused-vars': 'off',
       'unicorn/filename-case': 'off',

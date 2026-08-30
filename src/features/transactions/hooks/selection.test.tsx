@@ -9,7 +9,6 @@ const mockDeleteSuccess: { current: (() => void) | undefined } = { current: unde
 const mockAlert = jest.fn<(title: string, message: string, buttons: AlertButton[]) => void>();
 
 jest.mock('./api', () => ({
-  // eslint-disable-next-line react/no-unnecessary-use-prefix
   useDeleteTransactions: (onSuccess?: () => void) => {
     mockDeleteSuccess.current = onSuccess;
     return { mutate: mockMutate };

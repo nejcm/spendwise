@@ -7,7 +7,6 @@ import { CategoryBreakdown } from './category-breakdown';
 const mockRouterPush = jest.fn();
 
 jest.mock('expo-router', () => ({
-  // eslint-disable-next-line react/no-unnecessary-use-prefix
   useRouter: () => ({ push: mockRouterPush }),
 }));
 

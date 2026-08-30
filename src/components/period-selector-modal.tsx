@@ -164,8 +164,8 @@ export function PeriodSelectorModal({
               <View className="grow basis-[48%] 2xs:basis-[31%]" key={key}>
                 <OutlineButton
                   className={`items-center px-1 ${draft.mode === key ? '' : 'border-border'}`}
-                  textClassName={`text-sm ${draft.mode === key ? '' : 'text-muted-foreground'}`}
-                  textProps={{ adjustsFontSizeToFit: true, minimumFontScale: 0.8, numberOfLines: 1 }}
+                  textClassName={`shrink text-center text-xs 2xs:text-sm ${draft.mode === key ? '' : 'text-muted-foreground'}`}
+                  textProps={{ numberOfLines: 1, ellipsizeMode: 'tail' }}
                   fullWidth
                   label={label}
                   size={isCompact ? 'sm' : 'md'}

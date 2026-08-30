@@ -55,6 +55,7 @@ jobs:
         run: pnpm run lint
 
       - name: 🏃‍♂️ Run Tests
+        # ponytail: serialize native better-sqlite3 tests; revisit if worker crashes are resolved.
         run: pnpm run test:ci
 
       - name: Jest Coverage Comment

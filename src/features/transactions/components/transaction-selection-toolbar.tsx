@@ -29,7 +29,7 @@ export function TransactionSelectionToolbar({ selectedCount, onClear, onDelete }
               label: translate('common.delete'),
               onPress: onDelete,
               className: 'text-danger-600',
-              icon: <TrashIcon size={16} colorClassName="accent-danger-600" className="mr-2" />,
+              icon: <TrashIcon size={16} colorClassName="accent-red-600" className="mr-2" />,
             }]
           : []}
       />

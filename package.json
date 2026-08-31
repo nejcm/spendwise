@@ -2,7 +2,7 @@
   "name": "spendwise",
   "version": "1.4.9",
   "private": true,
-  "packageManager": "pnpm@11.10.0",
+  "packageManager": "pnpm@11.24.0",
   "engines": {
     "node": "^22.13.0 || >=24"
   },

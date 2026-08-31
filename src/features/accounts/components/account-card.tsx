@@ -45,6 +45,11 @@ export function AccountCard({ account, onPress }: AccountCardProps) {
           <Text className="text-sm text-muted-foreground">
             {ACCOUNT_TYPE_LABELS[account.type as keyof typeof ACCOUNT_TYPE_LABELS] || account.type}
           </Text>
+          {!!account.description && (
+            <Text className="text-sm/snug text-muted-foreground italic" numberOfLines={1}>
+              {account.description}
+            </Text>
+          )}
         </View>
         <View className="items-end">
           <FormattedCurrency value={account.baseBalance} currency={userCurrency} className={`font-bold ${isCompact ? 'text-base' : 'text-lg'}`} />

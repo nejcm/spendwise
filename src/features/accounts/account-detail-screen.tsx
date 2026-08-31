@@ -4,9 +4,10 @@ import * as React from 'react';
 import { useMemo } from 'react';
 
 import { RefreshControl, ScrollView, View } from 'react-native';
+import { DEFAULT_COLOR } from '@/components/color-selector';
 import { PeriodSelector } from '@/components/period-selector';
 import ScreenHeader from '@/components/screen-header';
-import { FocusAwareStatusBar, OverflowMenu, Pencil, TrashIcon } from '@/components/ui';
+import { FocusAwareStatusBar, OverflowMenu, Pencil, Text, TrashIcon } from '@/components/ui';
 import { SkeletonRows } from '@/components/ui/skeleton';
 import { useTransactions } from '@/features/transactions/api';
 import { TransactionList } from '@/features/transactions/components/transaction-list';
@@ -18,6 +19,7 @@ import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
 import { goBackOrFallback } from '@/lib/routing';
 import { useAppStore } from '@/lib/store/store';
+import { hexWithOpacity } from '@/lib/theme/colors';
 import { defaultStyles } from '@/lib/theme/styles';
 import { useAccountsWithBalanceForRange, useArchiveAccountConfirmation } from './api';
 import { AccountSummary } from './components/account-summary';
@@ -110,6 +112,26 @@ export function AccountDetailScreen() {
           contentContainerClassName="pb-8"
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
+
+          <View className="mx-4 mb-6 flex-row items-center gap-3 rounded-xl bg-card p-2">
+            {account.icon && (
+              <View
+                className="size-12 items-center justify-center rounded-lg"
+                style={{ backgroundColor: hexWithOpacity(account.color ?? DEFAULT_COLOR, 36) }}
+              >
+                <Text className="text-3xl">{account.icon}</Text>
+              </View>
+            )}
+            <View className="flex-1">
+              <Text className="text-base/snug">{account.name}</Text>
+              {!!account.description && (
+                <Text className="text-sm/snug text-muted-foreground">
+                  {account.description}
+                </Text>
+              )}
+            </View>
+          </View>
+
           <AccountSummary
             key={`${id}-${preferredCurrency}`}
             accountId={id}

@@ -2,8 +2,7 @@ import type { OptionType } from '@/components/ui';
 import type { LoaderDimensions } from '@/components/ui/skeleton';
 import type { CurrencyKey } from '@/features/currencies';
 import * as React from 'react';
-import { Pressable } from 'react-native';
-import { FormattedCurrency, getPressedStyle, Options, Text, useModalSheet, View } from '@/components/ui';
+import { FormattedCurrency, getPressedStyle, Options, SolidButton, Text, useModalSheet, View } from '@/components/ui';
 import { ChevronDown, TrendingDown, TrendingUp } from '@/components/ui/icon';
 import { SkeletonRows } from '@/components/ui/skeleton';
 import { useAccountSummaryDisplay } from '@/features/accounts/api';
@@ -37,47 +36,48 @@ export function AccountSummary({ accountId, startDate, endDate }: AccountSummary
   const showSkeleton = isLoading || (isError && !summary);
 
   return (
-    <View className="mb-4 px-4">
-      <View className="rounded-xl bg-card p-4">
-        <Pressable
+    <View className="mx-4 mb-6 rounded-2xl bg-card p-4 px-4">
+      <View className="mb-6">
+        <SolidButton
           style={getPressedStyle}
           onPress={modal.present}
-          accessibilityRole="button"
           accessibilityLabel={translate('accounts.view_currency')}
-          className="mb-2 flex-row items-center justify-center gap-1 self-center rounded-md px-2 py-1"
+          className="mb-2 gap-1 rounded-full px-3"
+          size="2xs"
+          color="secondary"
         >
           <Text className="text-sm text-muted-foreground">{viewCurrency}</Text>
           <ChevronDown className="text-muted-foreground" size={16} />
-        </Pressable>
+        </SolidButton>
         {showSkeleton
           ? (
               <SkeletonRows count={2} dimensions={loaderDimensions} className="items-center justify-center" />
             )
           : summary
             ? (
-                <>
-                  <FormattedCurrency value={summary.balance} currency={viewCurrency} className="pb-4 text-center text-3xl font-medium" />
-                  <View className="flex-row gap-2 border-t border-border pt-4">
-                    <View className="flex-1">
-                      <View className="mb-1 flex-row items-center justify-center gap-2">
-                        <TrendingUp className="text-muted-foreground" size={16} />
-                        <Text className="text-center text-sm text-muted-foreground">{translate('common.income')}</Text>
-                      </View>
-                      <FormattedCurrency value={summary.income} currency={viewCurrency} className="text-center text-lg font-medium" numberOfLines={1} />
-                    </View>
-                    <View className="flex-1">
-                      <View className="mb-1 flex-row items-center justify-center gap-2">
-                        <TrendingDown className="text-muted-foreground" size={16} />
-                        <Text className="text-center text-sm text-muted-foreground">{translate('common.expenses')}</Text>
-                      </View>
-                      <FormattedCurrency value={summary.expense} currency={viewCurrency} prefix="- " className="text-center text-lg font-medium" numberOfLines={1} />
-                    </View>
-                  </View>
-                </>
+                <FormattedCurrency value={summary.balance} currency={viewCurrency} className="text-center text-3xl font-medium" />
               )
             : null}
-        <Options ref={modal.ref} options={CURRENCY_OPTIONS} onSelect={onSelectCurrency} value={viewCurrency} />
       </View>
+      {summary && !showSkeleton && (
+        <View className="flex-row gap-2">
+          <View className="flex-1">
+            <View className="mb-1 flex-row items-center justify-center gap-2">
+              <TrendingUp colorClassName="accent-green-600" size={16} />
+              <Text className="text-center text-sm text-muted-foreground">{translate('common.income')}</Text>
+            </View>
+            <FormattedCurrency value={summary.income} currency={viewCurrency} className="text-center text-lg font-medium" numberOfLines={1} />
+          </View>
+          <View className="flex-1">
+            <View className="mb-1 flex-row items-center justify-center gap-2">
+              <TrendingDown colorClassName="accent-red-600" size={16} />
+              <Text className="text-center text-sm text-muted-foreground">{translate('common.expenses')}</Text>
+            </View>
+            <FormattedCurrency value={summary.expense} currency={viewCurrency} prefix="- " className="text-center text-lg font-medium" numberOfLines={1} />
+          </View>
+        </View>
+      )}
+      <Options ref={modal.ref} options={CURRENCY_OPTIONS} onSelect={onSelectCurrency} value={viewCurrency} />
     </View>
   );
 }

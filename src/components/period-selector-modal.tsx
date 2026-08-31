@@ -105,13 +105,13 @@ export function PeriodSelectorModal({
       case 'month':
         setDraft({
           mode: 'month',
-          year: 'year' in draft ? (draft as any).year : now.getFullYear(),
+          year: 'year' in draft ? draft.year : now.getFullYear(),
           month: draft.mode === 'month' ? draft.month : now.getMonth() + 1,
         });
         break;
       case 'week': {
         const { year, week } = currentISOWeek();
-        setDraft({ mode: 'week', year: 'year' in draft ? (draft as any).year : year, week });
+        setDraft({ mode: 'week', year: 'year' in draft ? draft.year : year, week });
         break;
       }
       case 'custom':
@@ -161,7 +161,7 @@ export function PeriodSelectorModal({
         >
           <View className="mb-8 flex-row flex-wrap gap-2">
             {MODE_BUTTONS.map(({ key, label }) => (
-              <View className="grow basis-[48%] 2xs:basis-[31%]" key={key}>
+              <View className="grow basis-[48%] 3xs:basis-[31%]" key={key}>
                 <OutlineButton
                   className={`items-center px-1 ${draft.mode === key ? '' : 'border-border'}`}
                   textClassName={`shrink text-center text-xs 2xs:text-sm ${draft.mode === key ? '' : 'text-muted-foreground'}`}

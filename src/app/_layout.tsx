@@ -11,15 +11,11 @@ import { AppState, StyleSheet } from 'react-native';
 import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppErrorBoundary } from '@/components/app-error-boundary';
 import { GlobalScanManager } from '@/components/global-scan-manager';
 import { SafeAreaView, View } from '@/components/ui';
-import {
-  NavTabBar,
-  TAB_BAR_COLOR,
-  TAB_BAR_DARK_COLOR,
-} from '@/components/ui/nav-tab-bar';
+import { NavTabBar } from '@/components/ui/nav-tab-bar';
 import { DB_NAME } from '@/config';
 import { useCurrencyRates } from '@/features/currencies/api';
 import { AutoBackupProcessor } from '@/features/imports-export/auto-backup-processor';
@@ -64,9 +60,17 @@ setTimeout(() => {
   SplashScreen.hideAsync().catch(() => {});
 }, 6_000);
 
+// The root SafeAreaView deliberately does not claim the bottom edge, so whatever
+// sits last in the column owns it and paints the Android navigation-bar gutter:
+// the tab bar extends its own background into it, and screens without a tab bar
+// fall back to a background-coloured spacer of the same height.
 function PersistentTabBar() {
   const pathname = usePathname();
-  if (!getShouldShowPersistentTabBar(pathname)) return null;
+  const insets = useSafeAreaInsets();
+
+  if (!getShouldShowPersistentTabBar(pathname)) {
+    return <View className="bg-background" style={{ height: insets.bottom }} />;
+  }
   return <NavTabBar />;
 }
 
@@ -128,6 +132,9 @@ function WebFontsLoader({ children }: { children?: React.ReactNode }) {
 }
 
 const flashListStyle = IS_WEB ? undefined : { paddingTop: 32 };
+// Bottom is owned by PersistentTabBar so the tab bar's background can extend
+// into the Android navigation-bar gutter.
+const SAFE_AREA_EDGES = ['top', 'left', 'right'] as const;
 
 function Providers({ children }: { children: React.ReactNode }) {
   const theme = useThemeConfig();
@@ -150,8 +157,8 @@ function Providers({ children }: { children: React.ReactNode }) {
                         <AutoBackupProcessor />
                         <FontLoader>
                           <BottomSheetModalProvider>
-                            <View className="flex-1 bg-white">
-                              <SafeAreaView className="flex-1 bg-background">
+                            <View className="flex-1 bg-background">
+                              <SafeAreaView edges={SAFE_AREA_EDGES} className="flex-1 bg-background">
                                 {children}
                               </SafeAreaView>
                             </View>
@@ -177,14 +184,9 @@ function Providers({ children }: { children: React.ReactNode }) {
 
 const hiddenHeader = { headerShown: false };
 export default function RootLayout() {
-  const { dark } = useThemeConfig();
   return (
     <Providers>
-      <Stack
-        screenOptions={{
-          navigationBarColor: dark ? TAB_BAR_DARK_COLOR : TAB_BAR_COLOR,
-        }}
-      >
+      <Stack>
         <Stack.Screen name="(app)" options={hiddenHeader} />
         <Stack.Screen name="onboarding" options={hiddenHeader} />
       </Stack>

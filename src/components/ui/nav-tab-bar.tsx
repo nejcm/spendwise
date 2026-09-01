@@ -3,6 +3,7 @@ import { usePathname, useRouter } from 'expo-router';
 
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Home,
   LayoutGrid,
@@ -15,10 +16,12 @@ import { useAppStore } from '@/lib/store/store';
 import { SolidButton } from './solid-button';
 
 export const NAV_BAR_HEIGHT = 66 as const;
-export const TAB_BAR_COLOR = '#f6f6f6' as const;
-export const TAB_BAR_DARK_COLOR = '#17191C' as const;
 const bgColor = `bg-gray-50`;
 const darkBgColor = `dark:bg-[#17191C]`;
+// Mirrors the `p-2` on the bar. The bottom safe-area inset is added on top of
+// it so the bar's own background paints the Android navigation-bar gutter —
+// the root SafeAreaView deliberately no longer claims that edge.
+const TAB_BAR_PADDING = 8;
 
 const TABS = [
   {
@@ -51,6 +54,7 @@ const TABS = [
 type TabConfig = (typeof TABS)[number];
 
 export function NavTabBar() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const pathname = usePathname() || '';
   const longPressAction = useAppStore.use.longPressAction();
@@ -62,7 +66,11 @@ export function NavTabBar() {
   return (
     <View
       className={`flex-row border-t border-gray-200 p-2 dark:border-gray-800 ${bgColor} ${darkBgColor}`}
-      style={{ elevation: 0, minHeight: NAV_BAR_HEIGHT }}
+      style={{
+        elevation: 0,
+        minHeight: NAV_BAR_HEIGHT + insets.bottom,
+        paddingBottom: TAB_BAR_PADDING + insets.bottom,
+      }}
     >
       {TABS.map((tab) => {
         const isAddButton = tab.name === '__add__';

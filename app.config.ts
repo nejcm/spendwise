@@ -1,13 +1,11 @@
 import type { ConfigContext, ExpoConfig } from '@expo/config';
 import type { AppIconBadgeConfig } from 'app-icon-badge/types';
 
+/* eslint-disable perfectionist/sort-imports -- tsx/cjs must be loaded before env.ts is imported */
 import 'tsx/cjs';
-
-// adding lint exception as we need to import tsx/cjs before env.ts is imported
-// eslint-disable-next-line perfectionist/sort-imports
 import Env from './env';
-// eslint-disable-next-line perfectionist/sort-imports
-import { withGradleProperties } from 'expo/config-plugins';
+import { withGradleProps, withR8Optimization } from './plugins/android-build';
+/* eslint-enable perfectionist/sort-imports */
 
 const EXPO_ACCOUNT_OWNER = 'ncncm';
 const EAS_PROJECT_ID = 'c19931e0-c086-4d69-9a71-c64aea5c6f5a';
@@ -30,25 +28,8 @@ const appIconBadgeConfig: AppIconBadgeConfig = {
   ],
 };
 
-function withJvmArgs(cfg: ExpoConfig): ExpoConfig {
-  return withGradleProperties(cfg, (gradleConfig) => {
-    const key = 'org.gradle.jvmargs';
-    const value = '-Xmx4096m -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError';
-    const existing = gradleConfig.modResults.find(
-      (item) => item.type === 'property' && item.key === key,
-    );
-    if (existing && existing.type === 'property') {
-      existing.value = value;
-    }
-    else {
-      gradleConfig.modResults.push({ type: 'property', key, value });
-    }
-    return gradleConfig;
-  });
-}
-
 export default ({ config }: ConfigContext): ExpoConfig =>
-  withJvmArgs({
+  withR8Optimization(withGradleProps({
     ...config,
     name: Env.EXPO_PUBLIC_NAME,
     description: `${Env.EXPO_PUBLIC_NAME} is a free, local-first finance app with private on-device data and optional AI features.`,
@@ -165,8 +146,10 @@ export default ({ config }: ConfigContext): ExpoConfig =>
         'react-native-edge-to-edge',
         {
           android: {
-          // Required for Stack `navigationBarColor` / window nav color to show under edge-to-edge.
-          // Without this, Android may apply a contrast scrim so the bar color looks unchanged.
+          // Keeps the three-button nav bar fully transparent. Without this, Android
+          // draws a contrast scrim over it and the app's own background stops showing
+          // through. (This does not relate to Stack's `navigationBarColor`, which
+          // react-native-screens implements as a no-op.)
             enforceNavigationBarContrast: false,
           },
         },
@@ -180,4 +163,4 @@ export default ({ config }: ConfigContext): ExpoConfig =>
     runtimeVersion: {
       policy: 'appVersion',
     },
-  } as ExpoConfig);
+  } as ExpoConfig));

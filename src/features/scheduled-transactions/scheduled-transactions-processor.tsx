@@ -4,6 +4,7 @@ import * as React from 'react';
 import { AppState } from 'react-native';
 import { todayISO } from '@/features/formatting/helpers';
 import { runAllNotificationChecks } from '@/features/notifications/notifications';
+import { captureError } from '@/lib/analytics';
 import { getAppState } from '@/lib/store/store';
 import { syncDueScheduledTransactions } from './api';
 
@@ -21,6 +22,9 @@ export function ScheduledTransactionsProcessor() {
       await syncDueScheduledTransactions(db, queryClient);
       await runAllNotificationChecks(db, getAppState().notifications);
       lastProcessedDateRef.current = todayISO();
+    }
+    catch (error) {
+      captureError(error instanceof Error ? error : new Error(String(error)));
     }
     finally {
       isProcessingRef.current = false;

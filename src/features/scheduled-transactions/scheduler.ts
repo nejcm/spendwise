@@ -114,41 +114,63 @@ type ScheduledRunRow = {
   scheduled_for_date: number;
 };
 
-export async function processDueScheduledTransactions(
-  db: SQLiteDatabase,
-  todayUnix: number,
-): Promise<ProcessResult> {
-  const rules = await db.getAllAsync<ScheduledTransaction>(
+function getDueRules(db: SQLiteDatabase, todayUnix: number): Promise<ScheduledTransaction[]> {
+  return db.getAllAsync<ScheduledTransaction>(
     `SELECT *
      FROM recurring_rules
      WHERE is_active = 1 AND next_due_date <= ?
      ORDER BY next_due_date ASC, created_at ASC`,
     [todayUnix],
   );
+}
+
+async function planRule(
+  db: SQLiteDatabase,
+  rule: ScheduledTransaction,
+  todayUnix: number,
+): Promise<ScheduledRunPlan> {
+  const existingRuns = await db.getAllAsync<ScheduledRunRow>(
+    `SELECT scheduled_for_date
+     FROM recurring_rule_runs
+     WHERE rule_id = ? AND scheduled_for_date <= ?`,
+    [rule.id, todayUnix],
+  );
+  return planScheduledRuns(
+    rule,
+    todayUnix,
+    new Set(existingRuns.map((run) => run.scheduled_for_date)),
+  );
+}
+
+export async function processDueScheduledTransactions(
+  db: SQLiteDatabase,
+  todayUnix: number,
+): Promise<ProcessResult> {
+  const prefetchRules = await getDueRules(db, todayUnix);
+  if (prefetchRules.length === 0) return { createdTransactions: 0, updatedRules: 0 };
+
+  // Rate lookups may hit the network, so resolve them before opening the write transaction.
+  const plans = await Promise.all(prefetchRules.map((rule) => planRule(db, rule, todayUnix)));
+  const dueDates = [...new Set(plans.flatMap((plan) => plan.dueDates))];
+  const ratesByDate = new Map(await Promise.all(
+    dueDates.map(async (date) => [date, await getRatesForDate(db, date)] as const),
+  ));
 
   let createdTransactions = 0;
   let updatedRules = 0;
 
   await db.withTransactionAsync(async () => {
+    // Re-read so edits or pauses made during the prefetch win over the stale snapshot.
+    const rules = await getDueRules(db, todayUnix);
     for (const rule of rules) {
-      const existingRuns = await db.getAllAsync<ScheduledRunRow>(
-        `SELECT scheduled_for_date
-         FROM recurring_rule_runs
-         WHERE rule_id = ? AND scheduled_for_date <= ?`,
-        [rule.id, todayUnix],
-      );
-
-      const plan = planScheduledRuns(
-        rule,
-        todayUnix,
-        new Set(existingRuns.map((run) => run.scheduled_for_date)),
-      );
+      const plan = await planRule(db, rule, todayUnix);
 
       const preferredCurrency = getAppState().currency;
       for (const dueDateUnix of plan.dueDates) {
         const transactionId = generateId();
         const transactionNote = buildGeneratedTransactionNote(rule.note);
-        const rates = await getRatesForDate(db, dueDateUnix);
+        const rates = ratesByDate.get(dueDateUnix)
+          ?? await getRatesForDate(db, dueDateUnix, { fetchIfMissing: false });
         const baseAmount = computeBaseAmount(rule.amount, rule.currency, preferredCurrency, rates);
 
         await db.runAsync(

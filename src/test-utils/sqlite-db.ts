@@ -30,10 +30,8 @@ export async function createTestDb() {
 
   const db = {
     /** Run a statement that returns nothing (INSERT / UPDATE / DELETE). */
-    runAsync(sql: string, params: unknown[] = []): Promise<void> {
-      return asyncify(() => {
-        sqlite.prepare(sql).run(params);
-      });
+    runAsync(sql: string, params: unknown[] = []): Promise<{ changes: number }> {
+      return asyncify(() => ({ changes: sqlite.prepare(sql).run(params).changes }));
     },
 
     /** Execute one or more raw SQL statements (no parameters). */

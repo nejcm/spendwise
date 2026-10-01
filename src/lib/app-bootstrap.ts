@@ -1,31 +1,25 @@
-import type { QueryClient } from '@tanstack/react-query';
 import type { SQLiteDatabase } from 'expo-sqlite';
-import { useQueryClient } from '@tanstack/react-query';
 
 import * as SplashScreen from 'expo-splash-screen';
 import { useCallback } from 'react';
 import { ensureAndroidChannel } from '@/features/notifications/notifications';
-import { syncDueScheduledTransactions } from '@/features/scheduled-transactions/api';
 import { migrateDb } from '@/lib/sqlite';
 import { logger } from './logger';
 
 const BOOTSTRAP_TIMEOUT_MS = 15_000;
 
 /**
- * Sequenced app startup after SQLite opens. Pass a `QueryClient` so cache
- * invalidation after scheduled sync is testable and explicit.
+ * Sequenced app startup after SQLite opens. Must stay offline: scheduled sync can
+ * fetch currency rates, so it runs in `ScheduledTransactionsProcessor` after mount.
  *
- * Races against a timeout so a hanging migration or network call
- * surfaces as a catchable error instead of freezing the splash screen.
+ * Races against a timeout so a hanging migration surfaces as a catchable error
+ * instead of freezing the splash screen.
  */
-export async function bootstrapApp(
-  db: SQLiteDatabase,
-  queryClient: QueryClient,
-): Promise<void> {
+export async function bootstrapApp(db: SQLiteDatabase): Promise<void> {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
   try {
     await Promise.race([
-      bootstrapAppInternal(db, queryClient),
+      bootstrapAppInternal(db),
       new Promise<never>((_, reject) => {
         timeoutId = setTimeout(
           () => reject(new Error('[bootstrap] timed out after 15 s')),
@@ -40,10 +34,7 @@ export async function bootstrapApp(
   }
 }
 
-async function bootstrapAppInternal(
-  db: SQLiteDatabase,
-  queryClient: QueryClient,
-): Promise<void> {
+async function bootstrapAppInternal(db: SQLiteDatabase): Promise<void> {
   logger.withEnv('production')?.info('[bootstrap] starting...');
   try {
     await migrateDb(db);
@@ -55,10 +46,7 @@ async function bootstrapAppInternal(
   }
 
   try {
-    await Promise.all([
-      ensureAndroidChannel(),
-      syncDueScheduledTransactions(db, queryClient),
-    ]);
+    await ensureAndroidChannel();
     logger.withEnv('production')?.info('[bootstrap] post-migration tasks complete');
   }
   catch (e) {
@@ -67,10 +55,7 @@ async function bootstrapAppInternal(
   }
 }
 
-/**
- * `SQLiteProvider` `onInit` handler when this hook runs under `QueryClientProvider`.
- */
+/** `SQLiteProvider` `onInit` handler. */
 export function useAppBootstrapOnInit(): (db: SQLiteDatabase) => Promise<void> {
-  const queryClient = useQueryClient();
-  return useCallback((db: SQLiteDatabase) => bootstrapApp(db, queryClient), [queryClient]);
+  return useCallback((db: SQLiteDatabase) => bootstrapApp(db), []);
 }

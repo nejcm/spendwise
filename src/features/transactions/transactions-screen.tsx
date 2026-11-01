@@ -14,7 +14,7 @@ import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { setPeriodSelection, useAppStore } from '@/lib/store/store';
-import { transactionsQueryOptions, useTransactions } from './api';
+import { isTransferInLeg, transactionsQueryOptions, useTransactions } from './api';
 import { TransactionFilterBar } from './components/transaction-filter-bar';
 import { TransactionList } from './components/transaction-list';
 import { TransactionSelectionToolbar } from './components/transaction-selection-toolbar';
@@ -59,23 +59,21 @@ export function TransactionsScreen() {
   const filtered = useMemo(() => {
     const q = debouncedSearch?.trim().toLowerCase();
     const hasQuery = q.length > 0;
-    if (hasQuery || categoryId || type || accountId) {
-      return transactions.filter(
-        (t) => {
-          if (categoryId && t.category_id !== categoryId) return false;
-          if (type && t.type !== type) return false;
-          if (accountId && t.account_id !== accountId) return false;
-          if (hasQuery) {
-            return t.note?.toLowerCase().includes(q)
-              || t.category_name?.toLowerCase().includes(q)
-              || t.merchant_name?.toLowerCase().includes(q)
-              || t.amount?.toString().includes(q);
-          }
-          return true;
-        },
-      );
-    }
-    return transactions;
+    return transactions.filter(
+      (t) => {
+        if (categoryId && t.category_id !== categoryId) return false;
+        if (type && t.type !== type) return false;
+        if (accountId ? t.account_id !== accountId : isTransferInLeg(t)) return false;
+        if (hasQuery) {
+          return t.note?.toLowerCase().includes(q)
+            || t.category_name?.toLowerCase().includes(q)
+            || t.merchant_name?.toLowerCase().includes(q)
+            || t.counter_account_name?.toLowerCase().includes(q)
+            || t.amount?.toString().includes(q);
+        }
+        return true;
+      },
+    );
   }, [transactions, debouncedSearch, categoryId, type, accountId]);
 
   return (

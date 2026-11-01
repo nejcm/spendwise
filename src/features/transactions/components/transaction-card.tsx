@@ -34,7 +34,11 @@ export const TransactionCard = React.memo(({
   const density = useAppStore.use.density();
   const isCompact = density === 'compact';
   const isIncome = transaction.type === 'income';
-  const displayName = transaction.merchant_name || transaction.category_name || 'Unknown';
+  const isTransfer = transaction.type === 'transfer';
+  const isInflow = isIncome || (isTransfer && transaction.amount > 0);
+  const displayName = transaction.counter_account_name
+    ? translate(transaction.amount < 0 ? 'transactions.transfer_to' : 'transactions.transfer_from', { account: transaction.counter_account_name })
+    : transaction.merchant_name || transaction.category_name || (isTransfer ? translate('transactions.transfer') : 'Unknown');
   const showConverted = transaction.currency !== currency;
   const logo = transaction.merchant_logo_slug ? <MerchantLogo slug={transaction.merchant_logo_slug} /> : null;
   const toggleSelection = React.useCallback(() => onSelect?.(transaction.id), [onSelect, transaction.id]);
@@ -58,7 +62,7 @@ export const TransactionCard = React.memo(({
           style={{ backgroundColor: hexWithOpacity(transaction.category_color ?? DEFAULT_COLOR, 36) }}
         >
           <Text className="text-xl font-medium">
-            {(transaction.category_icon || '?')}
+            {(transaction.category_icon || (isTransfer ? '⇄' : '?'))}
           </Text>
         </View>
       )}
@@ -68,19 +72,20 @@ export const TransactionCard = React.memo(({
         </Text>
         <Text className="text-sm text-muted-foreground" numberOfLines={1}>
           {formatShortDate(transaction.date)}
-          {transaction.merchant_name ? ` · ${transaction.category_name}` : ''}
+          {transaction.merchant_name && transaction.category_name ? ` · ${transaction.category_name}` : ''}
+          {isTransfer ? ` · ${translate('transactions.not_spending')}` : ''}
           {transaction.note ? ` · ${transaction.note}` : ''}
         </Text>
       </View>
       <View className="items-end">
         <FormattedCurrency
-          value={transaction.amount}
+          value={Math.abs(transaction.amount)}
           currency={transaction.currency}
-          prefix={isIncome ? '+' : '-'}
+          prefix={isInflow ? '+' : '-'}
           className={`text-base font-medium ${isIncome ? 'text-success-600' : ''}`}
         />
         {showConverted && (
-          <FormattedCurrency value={transaction.baseAmount} currency={transaction.baseCurrency} className="text-sm text-muted-foreground" />
+          <FormattedCurrency value={Math.abs(transaction.baseAmount)} currency={transaction.baseCurrency} className="text-sm text-muted-foreground" />
         )}
       </View>
     </Pressable>

@@ -11,10 +11,7 @@ import { getFieldError } from '@/components/ui/form-utils';
 import { CategoryPicker } from '@/features/categories/category-picker';
 import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { TransactionBaseAmountSync } from '@/features/transactions/components/transaction-base-amount-sync';
-import {
-  TRANSACTION_TYPE_OPTIONS,
-  transactionFormSchema,
-} from '@/features/transactions/components/transaction-form-schema';
+import { transactionFormSchema } from '@/features/transactions/components/transaction-form-schema';
 import { translate } from '@/lib/i18n';
 import { useTransactionForm } from '../hooks/form';
 
@@ -32,7 +29,37 @@ type TransactionFormBodyProps = {
   orderedCurrencies: OptionType[];
   preferredCurrency: CurrencyKey;
   setBaseAmountIsManual: (value: boolean) => void;
+  typeOptions: UseTransactionFormReturnType['typeOptions'];
 };
+
+function AccountChips({ label, accounts, value, onChange, error }: {
+  label: string;
+  accounts: Account[];
+  value: string | null;
+  onChange: (id: string) => void;
+  error?: string;
+}) {
+  return (
+    <View>
+      <Text className="mb-2 text-sm font-medium">{label}</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View className="flex-row gap-2">
+          {accounts.map((a) => (
+            <SolidButton
+              key={a.id}
+              size="sm"
+              className="items-center rounded-3xl"
+              color={value === a.id ? 'default' : 'secondary'}
+              label={a.icon ? `${a.icon} ${a.name}` : a.name}
+              onPress={() => onChange(a.id)}
+            />
+          ))}
+        </View>
+      </ScrollView>
+      {!!error && <Text className="mt-1 text-sm text-danger-600">{error}</Text>}
+    </View>
+  );
+}
 
 function TransactionFormBody({
   form,
@@ -43,6 +70,7 @@ function TransactionFormBody({
   orderedCurrencies,
   preferredCurrency,
   setBaseAmountIsManual,
+  typeOptions,
 }: TransactionFormBodyProps) {
   const inputSize = isCompact ? 'md' : 'lg';
   return (
@@ -175,28 +203,36 @@ function TransactionFormBody({
         />
       </View>
 
-      <form.Field
-        name="account_id"
-        children={(field) => (
-          <View>
-            <Text className="mb-2 text-sm font-medium">
-              {translate('transactions.account')}
-            </Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View className="flex-row gap-2">
-                {accounts.map((a) => (
-                  <SolidButton
-                    key={a.id}
-                    size="sm"
-                    className="items-center rounded-3xl"
-                    color={field.state.value === a.id ? 'default' : 'secondary'}
-                    label={`${a.icon} ${a.name}`}
-                    onPress={() => field.handleChange(a.id)}
+      <form.Subscribe
+        selector={(s) => s.values.type === 'transfer' && s.values.to_account_id !== null}
+        children={(isPairedTransfer) => (
+          <>
+            <form.Field
+              name="account_id"
+              children={(field) => (
+                <AccountChips
+                  label={translate(isPairedTransfer ? 'transactions.from_account' : 'transactions.account')}
+                  accounts={accounts}
+                  value={field.state.value}
+                  onChange={field.handleChange}
+                />
+              )}
+            />
+            {isPairedTransfer && (
+              <form.Field
+                name="to_account_id"
+                children={(field) => (
+                  <AccountChips
+                    label={translate('transactions.to_account')}
+                    accounts={accounts}
+                    value={field.state.value}
+                    onChange={field.handleChange}
+                    error={getFieldError(field)}
                   />
-                ))}
-              </View>
-            </ScrollView>
-          </View>
+                )}
+              />
+            )}
+          </>
         )}
       />
 
@@ -208,7 +244,7 @@ function TransactionFormBody({
               {translate('transactions.type')}
             </Text>
             <View className="flex-row gap-2">
-              {TRANSACTION_TYPE_OPTIONS.map((option) => (
+              {typeOptions.map((option) => (
                 <SolidButton
                   key={option.value}
                   size="sm"
@@ -290,6 +326,7 @@ export function TransactionForm({
     orderedCurrencies,
     preferredCurrency,
     setBaseAmountIsManual,
+    typeOptions,
   } = useTransactionForm({ initialValues, onSuccess });
 
   const isLoading = createTransaction.isPending || updateTransaction.isPending;
@@ -316,6 +353,7 @@ export function TransactionForm({
           orderedCurrencies={orderedCurrencies}
           preferredCurrency={preferredCurrency}
           setBaseAmountIsManual={setBaseAmountIsManual}
+          typeOptions={typeOptions}
         />
       </KeyboardAwareScrollView>
       <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom + bottomMenuOffset }}>

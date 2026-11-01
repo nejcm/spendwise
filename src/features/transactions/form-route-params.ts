@@ -16,6 +16,7 @@ type TransactionFormRouteParams = {
   location?: ParamValue;
   merchant_name?: ParamValue;
   note?: ParamValue;
+  to_account_id?: ParamValue;
   type?: ParamValue;
 };
 
@@ -58,6 +59,7 @@ const transactionFormRouteParamsSchema = z.object({
   location: nullableStringParamSchema,
   merchant_name: nullableStringParamSchema,
   note: nullableStringParamSchema,
+  to_account_id: singleParamSchema,
   type: singleParamSchema.pipe(z.enum(['expense', 'income', 'transfer'] satisfies TransactionType[]).optional()).catch(undefined),
 });
 const scheduledFormRouteParamsSchema = z.object({

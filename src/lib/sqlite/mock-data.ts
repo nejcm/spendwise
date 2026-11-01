@@ -82,11 +82,12 @@ export async function mockData(db: SQLiteDatabase): Promise<void> {
       ('tx_health_004', 'acc_main_checking', 'cat_healthcare', 'expense', 3990, 'EUR', 4167, 'USD', strftime('%s', date('now', '-37 days')), 'Dentist co-pay'),
       ('tx_personal_002', 'acc_cash_wallet', 'cat_personal', 'expense', 690, 'EUR', 745, 'USD', strftime('%s', date('now', '-8 days')), 'Toiletries'),
       ('tx_personal_003', 'acc_main_checking', 'cat_personal', 'expense', 2990, 'EUR', 3149, 'USD', strftime('%s', date('now', '-29 days')), 'Gym day pass'),
-      ('tx_personal_004', 'acc_main_checking', 'cat_personal', 'expense', 1590, 'EUR', 1743, 'USD', strftime('%s', date('now', '-31 days')), 'Skincare'),
+      ('tx_personal_004', 'acc_main_checking', 'cat_personal', 'expense', 1590, 'EUR', 1743, 'USD', strftime('%s', date('now', '-31 days')), 'Skincare');
 
-      -- Savings transfer (represented as two sides for now)
-      ('tx_transfer_out_savings', 'acc_main_checking', NULL, 'transfer', 50000, 'EUR', 51200, 'USD', strftime('%s', date('now', '-4 days')), 'Transfer to savings'),
-      ('tx_transfer_in_savings', 'acc_savings', NULL, 'transfer', 50000, 'EUR', 51300, 'USD', strftime('%s', date('now', '-4 days')), 'Transfer from checking');
+    INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note, transfer_id)
+    VALUES
+      ('tx_transfer_out_savings', 'acc_main_checking', NULL, 'transfer', -50000, 'EUR', 51200, 'USD', strftime('%s', date('now', '-4 days')), 'Monthly savings', 'tr_savings_001'),
+      ('tx_transfer_in_savings', 'acc_savings', NULL, 'transfer', 50000, 'EUR', 51200, 'USD', strftime('%s', date('now', '-4 days')), 'Monthly savings', 'tr_savings_001');
   `);
 
   // Sample recurring rules

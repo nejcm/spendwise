@@ -155,6 +155,30 @@ describe('getAccountsWithBalance', () => {
     expect(result[0].baseBalance).toBe(-10_000);
   });
 
+  it('out leg with a negative baseAmount (after a currency recalculation) still subtracts', async () => {
+    const db = await createTestDb();
+    await seedAccount(db);
+    await seedTransaction(db, { type: 'transfer', amount: -10_000, baseAmount: -10_000 });
+
+    const [withBalance] = await getAccountsWithBalance(db as any);
+    expect(withBalance.baseBalance).toBe(-10_000);
+    expect((await getAccountsWithBalanceForMonth(db as any, '2026-03'))[0].baseBalance).toBe(-10_000);
+    expect((await getAccountsWithBalanceForRange(db as any, MAR_START, APR_START))[0].baseBalance).toBe(-10_000);
+    expect(await getTotalBalance(db as any)).toBe(-10_000);
+  });
+
+  it('a transfer pair nets to zero in the total balance', async () => {
+    const db = await createTestDb();
+    await seedAccount(db, { id: 'acc_1' });
+    await seedAccount(db, { id: 'acc_2', sort_order: 1 });
+    await seedTransaction(db, { id: 'txn_out', account_id: 'acc_1', type: 'transfer', amount: -10_000, baseAmount: 10_000 });
+    await seedTransaction(db, { id: 'txn_in', account_id: 'acc_2', type: 'transfer', amount: 10_000, baseAmount: 10_000 });
+
+    const result = await getAccountsWithBalance(db as any);
+    expect(result.map((a) => a.baseBalance)).toEqual([-10_000, 10_000]);
+    expect(await getTotalBalance(db as any)).toBe(0);
+  });
+
   it('baseBalance uses baseAmount for multi-currency totals', async () => {
     const db = await createTestDb();
     await seedAccount(db);

@@ -8,7 +8,7 @@ import { Card, FocusAwareStatusBar, FormattedCurrency, GhostButton, IconButton, 
 import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
 import { SkeletonRows } from '@/components/ui/skeleton';
 import { useCategorySpendByRange } from '@/features/insights/api';
-import { useTransactions } from '@/features/transactions/api';
+import { isTransferInLeg, useTransactions } from '@/features/transactions/api';
 import { TransactionList } from '@/features/transactions/components/transaction-list';
 import { TransactionSelectionToolbar } from '@/features/transactions/components/transaction-selection-toolbar';
 import { useTransactionSelection } from '@/features/transactions/hooks/selection';
@@ -38,7 +38,7 @@ export function CategoryDetailScreen() {
 
   const { data: allTransactions = [], isLoading: txLoading } = useTransactions(startDate, endDate);
   const transactions = useMemo(
-    () => allTransactions.filter((t) => t.category_id === id),
+    () => allTransactions.filter((t) => t.category_id === id && !isTransferInLeg(t)),
     [allTransactions, id],
   );
   const {

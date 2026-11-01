@@ -261,7 +261,7 @@ function ScheduledTransactionFormBody({ form, isCompact, accounts, orderedCurren
                     size="sm"
                     className="items-center rounded-3xl"
                     color={field.state.value === account.id ? 'default' : 'secondary'}
-                    label={`${account.icon} ${account.name}`}
+                    label={account.icon ? `${account.icon} ${account.name}` : account.name}
                     onPress={() => field.handleChange(account.id)}
                   />
                 ))}

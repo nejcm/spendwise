@@ -15,9 +15,10 @@ import { translate } from '@/lib/i18n';
 import { goBackOrFallback } from '@/lib/routing';
 import { useAppStore } from '@/lib/store/store';
 import { centsToAmount } from '../formatting/helpers';
-import { useCreateTransaction, useDeleteTransaction, useTransaction } from './api';
+import { useCreateTransaction, useDeleteTransaction, useDuplicateTransfer, useTransaction } from './api';
 import { MerchantLogo } from './components/merchant-logo';
 import { TransactionForm } from './components/transaction-form';
+import { transactionToFormValues } from './components/transaction-form-schema';
 
 export function TransactionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -26,6 +27,7 @@ export function TransactionDetailScreen() {
 
   const { data: transaction, isLoading } = useTransaction(id ?? '');
   const createMut = useCreateTransaction();
+  const duplicateTransferMut = useDuplicateTransfer();
   const deleteMut = useDeleteTransaction();
   const { data: accounts = [] } = useAccounts();
   const [isEditing, setIsEditing] = useState(false);
@@ -49,7 +51,7 @@ export function TransactionDetailScreen() {
         <FocusAwareStatusBar />
         <ScreenHeader title={translate('transactions.edit_title')} />
         <TransactionForm
-          initialValues={{ ...transaction, date: unixToISODate(transaction.date) }}
+          initialValues={transactionToFormValues(transaction)}
           onSuccess={() => setIsEditing(false)}
           onCancel={() => setIsEditing(false)}
           bottomMenuOffset={NAV_BAR_HEIGHT}
@@ -59,12 +61,22 @@ export function TransactionDetailScreen() {
   }
 
   const isIncome = transaction.type === 'income';
+  const isTransfer = transaction.type === 'transfer';
+  const isInflow = isIncome || (isTransfer && transaction.amount > 0);
   const account = accounts.find((a) => a.id === transaction.account_id);
   const primaryDetails: DetailsRowProps[] = [
     { label: translate('transactions.date'), value: <FormattedDate value={transaction.date} className="text-foreground" /> },
-    { label: translate('transactions.category'), value: transaction ? `${transaction.category_icon} ${transaction.category_name}` : '-' },
-    { label: translate('transactions.account'), value: account ? `${account.icon} ${account.name}` : '-' },
-    { label: translate('transactions.type'), value: transaction.type, className: 'capitalize' },
+    ...(transaction.category_name ? [{ label: translate('transactions.category'), value: `${transaction.category_icon} ${transaction.category_name}` }] : []),
+    { label: translate('transactions.account'), value: account ? (account.icon ? `${account.icon} ${account.name}` : account.name) : '-' },
+    ...(transaction.counter_account_name
+      ? [{
+          label: translate(transaction.amount < 0 ? 'transactions.to_account' : 'transactions.from_account'),
+          value: `${transaction.counter_account_icon ?? ''} ${transaction.counter_account_name}`.trim(),
+        }]
+      : []),
+    isTransfer
+      ? { label: translate('transactions.type'), value: `${translate('transactions.transfer')} · ${translate('transactions.not_spending')}` }
+      : { label: translate('transactions.type'), value: transaction.type, className: 'capitalize' },
     ...(transaction.merchant_name ? [{ label: translate('transactions.merchant_name'), value: transaction.merchant_name }] : []),
     ...(transaction.location ? [{ label: translate('transactions.location'), value: transaction.location }] : []),
   ];
@@ -102,6 +114,11 @@ export function TransactionDetailScreen() {
   };
 
   const handleDuplicate = () => {
+    const onSuccess = (duplicateId: string) => router.replace({ pathname: '/transactions/[id]', params: { id: duplicateId } });
+    if (transaction.transfer_id) {
+      duplicateTransferMut.mutate(transaction.transfer_id, { onSuccess });
+      return;
+    }
     createMut.mutate({
       account_id: transaction.account_id,
       category_id: transaction.category_id,
@@ -113,9 +130,7 @@ export function TransactionDetailScreen() {
       note: transaction.note,
       merchant_name: transaction.merchant_name,
       location: transaction.location,
-    }, {
-      onSuccess: (duplicateId) => router.replace({ pathname: '/transactions/[id]', params: { id: duplicateId } }),
-    });
+    }, { onSuccess });
   };
 
   const logo = transaction.merchant_logo_slug ? <MerchantLogo slug={transaction.merchant_logo_slug} size={56} withBg={false} /> : null;
@@ -158,16 +173,16 @@ export function TransactionDetailScreen() {
           )}
           <View className="items-center pb-6">
             <FormattedCurrency
-              value={transaction.amount}
+              value={Math.abs(transaction.amount)}
               currency={transaction.currency}
-              prefix={isIncome ? '+' : '-'}
+              prefix={isInflow ? '+' : '-'}
               className={`text-3xl font-bold ${isIncome ? 'text-success-600' : ''}`}
             />
             {transaction.baseCurrency !== transaction.currency && (
               <FormattedCurrency
-                value={transaction.baseAmount}
+                value={Math.abs(transaction.baseAmount)}
                 currency={transaction.baseCurrency}
-                prefix={isIncome ? '+' : '-'}
+                prefix={isInflow ? '+' : '-'}
                 className="text-lg text-muted-foreground"
               />
             )}

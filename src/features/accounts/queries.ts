@@ -30,7 +30,7 @@ export async function getAccountsWithBalance(
        COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0)
        - COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0)
        + COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount > 0 THEN t.baseAmount ELSE 0 END), 0)
-       - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN t.baseAmount ELSE 0 END), 0)
+       - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN ABS(t.baseAmount) ELSE 0 END), 0)
        as baseBalance,
        t.baseCurrency as baseCurrency
      FROM accounts a
@@ -57,7 +57,7 @@ export async function getAccountsWithBalanceForMonth(
        COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0)
        - COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0)
        + COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount > 0 THEN t.baseAmount ELSE 0 END), 0)
-       - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN t.baseAmount ELSE 0 END), 0)
+       - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN ABS(t.baseAmount) ELSE 0 END), 0)
        as baseBalance,
        t.baseCurrency as baseCurrency
      FROM accounts a
@@ -86,7 +86,7 @@ export async function getAccountsWithBalanceForRange(
        COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0)
        - COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0)
        + COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount > 0 THEN t.baseAmount ELSE 0 END), 0)
-       - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN t.baseAmount ELSE 0 END), 0)
+       - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN ABS(t.baseAmount) ELSE 0 END), 0)
        as baseBalance,
        COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0)
        as monthlyExpense,
@@ -121,7 +121,7 @@ export async function getTotalBalance(
         COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0)
         - COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0)
         + COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount > 0 THEN t.baseAmount ELSE 0 END), 0)
-        - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN t.baseAmount ELSE 0 END), 0)
+        - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN ABS(t.baseAmount) ELSE 0 END), 0)
         AS account_balance,
         t.baseCurrency as baseCurrency
       FROM accounts a

@@ -54,7 +54,7 @@ export default function ScheduledTransactionCard({
               : translate('common.none')}
           </Text>
           <Text className="text-sm text-muted-foreground">
-            {`${item.account_icon} ${item.account_name}`}
+            {item.account_icon ? `${item.account_icon} ${item.account_name}` : item.account_name}
           </Text>
         </View>
         <View>

@@ -1,5 +1,5 @@
 import { createTestDb } from '@/test-utils/sqlite-db';
-import { getBudgetSpendForMonth } from './queries';
+import { getAccountBalances, getBudgetSpendForMonth } from './queries';
 
 const DAY_START = new Date(2026, 2, 15).getTime() / 1000;
 const NEXT_DAY_START = new Date(2026, 2, 16).getTime() / 1000;
@@ -42,5 +42,19 @@ describe('getBudgetSpendForMonth', () => {
         spent: 5000,
       },
     ]);
+  });
+});
+
+describe('getAccountBalances', () => {
+  it('subtracts an out leg even when its baseAmount is negative', async () => {
+    const db = await createTestDb();
+    await db.runAsync(`INSERT INTO accounts (id, name, type, currency) VALUES ('acc_1', 'Checking', 'checking', 'EUR')`, []);
+    await db.runAsync(
+      `INSERT INTO transactions (id, account_id, type, amount, currency, baseAmount, baseCurrency, date)
+       VALUES ('t_in', 'acc_1', 'income', 20000, 'EUR', 20000, 'EUR', ?), ('t_out', 'acc_1', 'transfer', -5000, 'EUR', -5000, 'EUR', ?)`,
+      [DAY_START, DAY_START],
+    );
+
+    expect(await getAccountBalances(db as any)).toEqual([{ id: 'acc_1', name: 'Checking', baseBalance: 15000 }]);
   });
 });

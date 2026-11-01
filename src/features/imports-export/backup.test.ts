@@ -1,4 +1,5 @@
 import { exportBackup, importBackup } from '@/features/imports-export/backup';
+import { deleteTransaction, getTransactionById } from '@/features/transactions/queries';
 import { createTestDb } from '@/test-utils/sqlite-db';
 
 async function seedBase(db: Awaited<ReturnType<typeof createTestDb>>) {
@@ -79,6 +80,25 @@ describe('backup v4', () => {
       { id: 'cat_1', kind: 'expense' },
       { id: 'cat_pay', kind: 'income' },
     ]);
+  });
+
+  it('restores a transfer pair that reads back as linked and deletes as one', async () => {
+    const sourceDb = await createTestDb();
+    await seedBase(sourceDb);
+    await sourceDb.runAsync(`INSERT INTO accounts (id, name, type, currency) VALUES ('acc_2', 'Savings', 'savings', 'EUR')`, []);
+    await sourceDb.runAsync(
+      `INSERT INTO transactions (id, account_id, type, amount, currency, baseAmount, baseCurrency, date, transfer_id)
+       VALUES ('leg_out', 'acc_1', 'transfer', -5000, 'EUR', 5000, 'EUR', 1772323200, 'tr_1'),
+              ('leg_in', 'acc_2', 'transfer', 5000, 'EUR', 5000, 'EUR', 1772323200, 'tr_1')`,
+      [],
+    );
+
+    const restoredDb = await createTestDb();
+    await importBackup(restoredDb as any, await exportBackup(sourceDb as any));
+
+    expect(await getTransactionById(restoredDb as any, 'leg_in')).toMatchObject({ amount: 5000, counter_account_id: 'acc_1', counter_amount: -5000 });
+    await deleteTransaction(restoredDb as any, 'leg_out');
+    expect(await restoredDb.getAllAsync('SELECT id FROM transactions')).toEqual([]);
   });
 
   it('restores a v3 backup with defaults and backfills category kind', async () => {

@@ -1,28 +1,48 @@
+import * as React from 'react';
+import { ArrowLeftIcon, IconButton, ScrollView, Text, View } from '@/components/ui';
 import { cn } from '@/lib/cn';
-import { Text, View } from '../../components/ui';
-import IntroNav from './Nav';
+import { translate } from '@/lib/i18n';
 
-export interface OnboardingLayoutProps {
+const TOTAL_STEPS = 4;
+
+export type OnboardingLayoutProps = {
+  step: number;
   title: string;
-  currentStep: number;
+  subtitle: string;
+  onBack: () => void;
   children: React.ReactNode;
   footer: React.ReactNode;
-  className?: string;
-}
+};
 
-export default function OnboardingLayout({ title, currentStep, children, footer, className }: OnboardingLayoutProps) {
+export default function OnboardingLayout({ step, title, subtitle, onBack, children, footer }: OnboardingLayoutProps) {
+  const stepLabel = translate('onboarding.step_of', { step, total: TOTAL_STEPS });
+
   return (
-    <View className="max-h-full flex-1">
-      <View className="flex-row items-center justify-center gap-3 p-6">
-        <Text className="text-2xl font-bold text-black dark:text-white">
-          {title}
-        </Text>
+    <View className="flex-1">
+      <View className="h-12 flex-row items-center gap-4 px-6">
+        <IconButton color="secondary" size="md" onPress={onBack} accessibilityLabel={translate('common.back')}>
+          <ArrowLeftIcon size={20} colorClassName="accent-foreground" />
+        </IconButton>
+        <View
+          accessibilityRole="progressbar"
+          accessibilityLabel={stepLabel}
+          accessibilityValue={{ min: 1, max: TOTAL_STEPS, now: step }}
+          className="flex-1 flex-row gap-1.5"
+        >
+          {Array.from({ length: TOTAL_STEPS }, (_, index) => (
+            <View key={index} className={cn('h-1 flex-1 rounded-full', index < step ? 'bg-accent' : 'bg-track')} />
+          ))}
+        </View>
+        <Text className="w-11 text-right text-sm text-muted-foreground">{stepLabel}</Text>
       </View>
-      <IntroNav current={currentStep} />
-      <View className={cn('px-6 pt-12 pb-4', className)}>
+
+      <ScrollView className="flex-1" contentContainerClassName="px-6 pt-9 pb-6" keyboardShouldPersistTaps="handled">
+        <Text accessibilityRole="header" className="text-page-title font-bold tracking-page-title">{title}</Text>
+        <Text className="pt-2 text-base text-foreground-2">{subtitle}</Text>
         {children}
-      </View>
-      <View className="mt-auto w-full flex-row items-center gap-2 px-6 pt-4 pb-6">
+      </ScrollView>
+
+      <View className="items-center gap-1.5 px-6 pt-2 pb-8">
         {footer}
       </View>
     </View>

@@ -66,6 +66,7 @@ import {
   Share as LucideShare,
   Shield as LucideShield,
   SlidersHorizontal as LucideSlidersHorizontal,
+  Sparkles as LucideSparkles,
   Sun as LucideSun,
   TrashIcon as LucideTrashIcon,
   TrendingDown as LucideTrendingDown,
@@ -160,6 +161,7 @@ export const UserIcon = createIcon(LucideUserIcon);
 export const X = createIcon(LucideX);
 export const Settings = createIcon(LucideSettings);
 export const SlidersHorizontal = createIcon(LucideSlidersHorizontal);
+export const Sparkles = createIcon(LucideSparkles);
 export const PauseIcon = createIcon(LucidePause);
 export const Paintbrush = createIcon(LucidePaintbrush);
 export const ChevronRight = createIcon(LucideChevronRight);

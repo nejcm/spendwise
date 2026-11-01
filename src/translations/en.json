@@ -345,47 +345,68 @@
     "weekly_digest_title": "Weekly Summary"
   },
   "onboarding": {
+    "account_default_name": "Main checking",
+    "account_emoji": "Account emoji",
+    "account_name": "Account name",
+    "account_subtitle": "Start with the account you use most. Cards and savings can come later.",
+    "account_title": "Where is your money now?",
+    "add_account": "Add account",
+    "amount_preview": "Amounts will look like {{amount}}",
+    "avatar_color": "Avatar colour",
+    "avatar_color_n": "Colour {{index}}",
     "choose_avatar": "Choose an avatar",
-    "create_profile": "Create your profile",
+    "continue": "Continue",
     "enter_name": "Enter your name",
-    "finish_setup": "Finish Setup",
-    "get_started": "Get Started",
-    "highlights": {
-      "items": {
-        "accounts": {
-          "body": "See balances, accounts, categories, and transaction history in one clear workspace.",
-          "title": "Track every account"
-        },
-        "ai": {
-          "body": "Ask questions about your local data and turn receipt photos into ready-to-review transactions.\nAI is optional and uses your own API key.",
-          "title": "Move faster with AI"
-        },
-        "data": {
-          "body": "Use Spendwise for free with offline local data, CSV import/export, and JSON backups you control.",
-          "title": "Own your data"
-        },
-        "insights": {
-          "body": "Use stats, trends, category breakdowns, and recommendations to spot what changed.",
-          "title": "Understand your spending"
-        },
-        "recurring": {
-          "body": "Schedule repeating transactions, track upcoming bills, and get reminders before they hit.",
-          "title": "Plan recurring money"
-        }
+    "features": {
+      "accounts": {
+        "body": "Cash, cards and savings, with a total that adds up.",
+        "title": "Every account in one view"
       },
-      "subtitle": "A quick look at what Spendwise helps you do every day.",
-      "title": "What you can do"
+      "ai": {
+        "body": "Optional AI chat and receipt scanning with your own key.",
+        "title": "Ask about your money"
+      },
+      "bills": {
+        "body": "Recurring rules post on time and remind you before they are due.",
+        "title": "Bills before they hit"
+      },
+      "budgets": {
+        "body": "Set a monthly cap per category and see it fill up.",
+        "title": "Budgets that warn early"
+      },
+      "privacy": {
+        "body": "Your money data stays on this phone. Only anonymous usage stats are shared.",
+        "title": "Private by design"
+      }
     },
-    "name": "Name",
-    "select_language": "Select your language",
-    "select_theme": "Select your theme",
-    "settings": "Settings",
+    "get_started": "Get started",
+    "import_csv": "Import transactions from CSV",
+    "main_currency": "Main currency",
+    "name_label": "Your name",
+    "prefs_subtitle": "You can change any of these later in Settings.",
+    "prefs_title": "Make it yours",
+    "preview": {
+      "ai_message": "Groceries are {{amount}} under budget with a day to go.",
+      "ai_title": "Spendwise AI",
+      "merchant": "Supermarket",
+      "merchant_meta": "Groceries · 18:12",
+      "total_balance": "Total balance"
+    },
+    "profile_subtitle": "Just a name for the greeting. It stays on this phone.",
+    "profile_title": "What should we call you?",
+    "ready_subtitle": "Here's what Spendwise does for you.",
+    "ready_title": "You're set, {{name}}",
+    "ready_title_anonymous": "You're set",
+    "reminders": "Bill and budget reminders",
+    "reminders_hint": "We'll ask your phone for permission next",
+    "restore_backup": "Restore from a backup",
+    "skip": "Skip for now",
     "start_tracking": "Start tracking",
-    "subtitle": "Free, private, local-first finance tracking",
-    "tap_to_change": "Tap to change",
+    "step_of": "{{step}} of {{total}}",
     "title": "Spendwise",
-    "welcome_copy": "Track spending, manage budgets, and build better money habits in one place.",
-    "welcome_headline": "Smart money management"
+    "use_illustrated_avatar": "Use an illustrated avatar",
+    "welcome_copy": "Accounts, budgets and bills in one calm place. Free, and your financial data stays on this phone.",
+    "welcome_headline": "Know where every cent goes"
   },
   "recommendations": {
     "actions": {

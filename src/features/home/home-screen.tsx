@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 import { Link } from 'expo-router';
 import * as React from 'react';
 import { RefreshControl, View } from 'react-native';
-import { Image, ScrollView, Text } from '@/components/ui';
+import { ScrollView, Text } from '@/components/ui';
 import { BotIcon, Settings } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { AccountsOverview } from '@/features/home/accounts-overview';
@@ -14,7 +14,7 @@ import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
-import { getAvatar } from '../profile';
+import { ProfileAvatar } from '../profile/profile-avatar';
 import { HomeScreenChart } from './home-screen-chart';
 import { MONTHLY_TREND_MONTHS } from './monthly-expense-trend';
 import Summary from './summary';
@@ -38,14 +38,13 @@ export function HomeScreen() {
   const isCompact = density === 'compact';
   const profile = useAppStore.use.profile();
   const name = profile?.name?.trim() || translate('common.there');
-  const avatar = profile?.avatar;
 
   return (
     <>
       <ScrollView className="flex-1" style={defaultStyles.transparentBg} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
         <View className={`flex-col p-4 ${isCompact ? 'gap-5' : 'gap-8'}`}>
           <View className="flex-row items-center gap-4 pt-2">
-            <Image source={getAvatar(avatar)} className="size-12 rounded-full" />
+            <ProfileAvatar size={48} />
             <View>
               <Text className="text-xl/tight font-medium text-foreground">{translate('home.hi', { name })}</Text>
               <Text className="text-sm text-muted-foreground">{format(new Date(), 'MMMM yyyy')}</Text>

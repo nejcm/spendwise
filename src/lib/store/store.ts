@@ -10,9 +10,11 @@ import type { ThemeType } from '@/features/settings/theme';
 import type { Transaction } from '@/features/transactions/types';
 import type { PrimaryTabPath } from '@/lib/navigation/persistent-tab-bar';
 import type { AccentType } from '@/lib/theme/accent';
+import { getLocales } from 'expo-localization';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { DEFAULT_DATE_FORMAT, DEFAULT_USER_CURRENCY } from '@/config';
+import { CURRENCIES_MAP } from '@/features/currencies';
 import { currentPeriodSelection } from '@/lib/date/helpers';
 import { createSelectors } from '@/lib/utils';
 import { mmkvStorage } from '../storage';
@@ -57,7 +59,9 @@ export type AppState = {
   // Profile
   profile: {
     name: string;
+    /** 0 = initials on `avatarColor`; otherwise an illustrated avatar id. */
     avatar: number;
+    avatarColor?: string;
   };
 
   // Preferences
@@ -105,13 +109,19 @@ export type AppState = {
   periodSelection: PeriodSelection;
 };
 
+function getLocaleCurrency(): CurrencyKey {
+  const code = getLocales()[0]?.currencyCode;
+  return code && code in CURRENCIES_MAP ? code as CurrencyKey : DEFAULT_USER_CURRENCY;
+}
+
 function getDefaultState(): AppState {
+  const currency = getLocaleCurrency();
   return {
     profile: {
       name: '',
-      avatar: 1,
+      avatar: 0,
     },
-    currency: DEFAULT_USER_CURRENCY,
+    currency,
     currencyFormat: 'symbol-after',
     dateFormat: DEFAULT_DATE_FORMAT,
     numberFormat: 'stop',
@@ -150,7 +160,7 @@ function getDefaultState(): AppState {
       lastAutoBackupAt: null,
     },
     lastUsed: {
-      currencies: [DEFAULT_USER_CURRENCY],
+      currencies: [currency],
     },
     formPrefs: {
       transactionForm: {},

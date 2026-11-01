@@ -36,6 +36,8 @@ export type AccountFormData = {
   color: string | null;
 };
 
+export type FirstAccountData = Pick<AccountFormData, 'name' | 'type' | 'currency' | 'icon'>;
+
 const baseNs = 'accounts.typeOptions';
 export const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {
   cash: translate(`${baseNs}.cash`),

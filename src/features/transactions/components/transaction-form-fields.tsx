@@ -3,7 +3,6 @@ import type { TransactionFormApi } from '../hooks/form';
 import type { OptionType } from '@/components/ui';
 import type { Account } from '@/features/accounts/types';
 import type { Category } from '@/features/categories/types';
-import type { CurrencyKey } from '@/features/currencies';
 import { useStore } from '@tanstack/react-form';
 import * as React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
@@ -14,6 +13,7 @@ import { ChevronDown, ChevronRight, CircleAlert } from '@/components/ui/icon';
 import { useCategories } from '@/features/categories/api';
 import { CategoryPicker } from '@/features/categories/category-picker';
 import { CURRENCIES_MAP } from '@/features/currencies';
+import { CurrencySheet } from '@/features/currencies/components/currency-sheet';
 import { formatDate } from '@/features/formatting/helpers';
 import { categoryTiles } from '@/features/transactions/helpers';
 import { cn } from '@/lib/cn';
@@ -47,10 +47,9 @@ export function RowLabel({ children }: { children: string }) {
   return <Text className="text-row text-muted-foreground">{children}</Text>;
 }
 
-export function AmountField({ form, amountRef, orderedCurrencies, signed = false }: {
+export function AmountField({ form, amountRef, signed = false }: {
   form: TransactionFormApi;
   amountRef: React.RefObject<TextInput | null>;
-  orderedCurrencies: OptionType[];
   /** Shows a sign toggle, for an opening balance. */
   signed?: boolean;
 }) {
@@ -109,16 +108,11 @@ export function AmountField({ form, amountRef, orderedCurrencies, signed = false
               );
             }}
           />
-          <Options
+          <CurrencySheet
             ref={currencyModal.ref}
-            options={orderedCurrencies}
             value={currencyField.state.value}
-            searchEnabled
             stackBehavior="push"
-            onSelect={(option: OptionType) => {
-              currencyModal.close();
-              currencyField.handleChange(option.value as CurrencyKey);
-            }}
+            onSelect={currencyField.handleChange}
           />
         </View>
       )}

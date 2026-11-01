@@ -89,6 +89,7 @@ export type AppState = {
   lockEnabled: boolean;
   lockTimeoutMinutes: number;
   isLocked: boolean; // runtime only — not persisted
+  analyticsEnabled?: boolean;
 
   // AI
   aiProvider: AiProviderType;
@@ -318,11 +319,6 @@ export function addLastUsedCurrency(currency: CurrencyKey) {
       },
     };
   });
-}
-export function selectLastUsedCurrencies(state: AppState) {
-  return state.lastUsed.currencies.length
-    ? state.lastUsed.currencies
-    : state.currency ? [state.currency] : undefined;
 }
 
 // Form preference actions

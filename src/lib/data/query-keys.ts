@@ -95,6 +95,9 @@ export const queryKeys = {
     home: ['recommendations', 'home'] as const,
   },
 
+  // ─── Settings › Delete data and row counts ───
+  dataCounts: ['data-counts'] as const,
+
   // ─── Global Budget ───
   globalBudget: {
     all: ['global-budget'] as const,

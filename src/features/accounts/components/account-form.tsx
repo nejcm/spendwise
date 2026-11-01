@@ -1,5 +1,4 @@
 import type { AccountFormData, AccountType } from '../types';
-import type { OptionType } from '@/components/ui';
 import type { CurrencyKey } from '@/features/currencies';
 import { useForm } from '@tanstack/react-form';
 import * as React from 'react';
@@ -8,11 +7,11 @@ import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboa
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
 import ColorSelector, { DEFAULT_COLOR } from '@/components/color-selector';
-import { Card, Chip, FlagCircle, GhostButton, Input, ListRow, Options, SolidButton, Text, useModalSheet } from '@/components/ui';
+import { Card, Chip, FlagCircle, GhostButton, Input, ListRow, SolidButton, Text, useModalSheet } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import { ChevronRight } from '@/components/ui/icon';
 import { CURRENCY_VALUES } from '@/features/currencies';
-import { CURRENCY_OPTIONS } from '@/features/currencies/images';
+import { CurrencySheet } from '@/features/currencies/components/currency-sheet';
 import { translate } from '@/lib/i18n';
 import { toNumber } from '@/lib/number';
 import { addLastUsedCurrency, selectAccountFormPrefs, setAccountFormPrefs, useAppStore } from '@/lib/store/store';
@@ -215,16 +214,7 @@ function DetailsCard({ form, isCreate }: { form: AccountFormApi; isCreate: boole
             />
           </Card>
           {isCreate && (
-            <Options
-              ref={currencyModal.ref}
-              options={CURRENCY_OPTIONS}
-              value={currencyField.state.value}
-              searchEnabled
-              onSelect={(option: OptionType) => {
-                currencyModal.close();
-                currencyField.handleChange(option.value as CurrencyKey);
-              }}
-            />
+            <CurrencySheet ref={currencyModal.ref} value={currencyField.state.value} onSelect={currencyField.handleChange} />
           )}
         </>
       )}

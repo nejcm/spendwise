@@ -24,6 +24,7 @@ import {
   BotMessageSquare as LucideBotMessageSquare,
   Brain as LucideBrain,
   BrainCircuit as LucideBrainCircuit,
+  Bug as LucideBug,
   Calendar as LucideCalendar,
   Camera as LucideCamera,
   ChartNoAxesColumn as LucideChartNoAxesColumn,
@@ -43,8 +44,11 @@ import {
   Download as LucideDownload,
   EllipsisVertical as LucideEllipsisVertical,
   Euro as LucideEuro,
+  FileText as LucideFileText,
   FileWarning as LucideFileWarning,
+  Globe as LucideGlobe,
   GripVertical as LucideGripVertical,
+  Heart as LucideHeart,
   HelpCircle as LucideHelpCircle,
   Home as LucideHome,
   Import as LucideImport,
@@ -56,6 +60,7 @@ import {
   List as LucideList,
   ListChecks as LucideListChecks,
   ListFilter as LucideListFilter,
+  Lock as LucideLock,
   Minus as LucideMinus,
   Paintbrush as LucidePaintbrush,
   Pause as LucidePause,
@@ -78,6 +83,7 @@ import {
   Sparkles as LucideSparkles,
   SquarePen as LucideSquarePen,
   Sun as LucideSun,
+  Timer as LucideTimer,
   TrashIcon as LucideTrashIcon,
   TrendingDown as LucideTrendingDown,
   TrendingUp as LucideTrendingUp,
@@ -190,3 +196,9 @@ export const ChevronUp = createIcon(LucideChevronUp);
 export const RepeatIcon = createIcon(LucideRepeatIcon);
 export const ArrowUpRight = createIcon(LucideArrowUpRight);
 export const ArrowDownRight = createIcon(LucideArrowDownRight);
+export const Bug = createIcon(LucideBug);
+export const Timer = createIcon(LucideTimer);
+export const FileText = createIcon(LucideFileText);
+export const Globe = createIcon(LucideGlobe);
+export const Heart = createIcon(LucideHeart);
+export const Lock = createIcon(LucideLock);

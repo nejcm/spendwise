@@ -6,8 +6,8 @@ import * as React from 'react';
 import { ActivityIndicator, Alert, View } from 'react-native';
 import { FocusAwareStatusBar, Options, ScrollView, useModalSheet } from '@/components/ui';
 import { Calendar, CircleDollarSign, DecimalsArrowRight, Euro } from '@/components/ui/icon';
+import { CurrencySheet } from '@/features/currencies/components/currency-sheet';
 import { useChangeCurrency } from '@/features/currencies/hooks';
-import { CURRENCY_OPTIONS } from '@/features/currencies/images';
 import { translate } from '@/lib/i18n';
 import { setCurrencyFormat, setDateFormat, setMonthStartDay, setNumberFormat, useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -18,7 +18,7 @@ import { SettingsItem } from './components/settings-item';
 const iconColor = 'accent-foreground';
 const baseNs = 'settings.formattingOptions' as const;
 
-type ModalType = 'currency' | 'currencyFormat' | 'dateFormat' | 'numberFormat' | 'monthStartDay';
+type ModalType = 'currencyFormat' | 'dateFormat' | 'numberFormat' | 'monthStartDay';
 
 export function FormattingSettingsScreen() {
   const currency = useAppStore.use.currency();
@@ -30,37 +30,23 @@ export function FormattingSettingsScreen() {
   const [modalType, setModalType] = React.useState<ModalType | undefined>();
   const changeCurrency = useChangeCurrency();
 
-  const handleCurrencySelect = React.useCallback((option: OptionType) => {
-    const newCurrency = option.value as CurrencyKey;
-    if (newCurrency === currency) {
-      close();
-      return;
-    }
-
-    close();
+  const currencyModal = useModalSheet();
+  const handleCurrencySelect = React.useCallback((newCurrency: CurrencyKey) => {
+    if (newCurrency === currency) return;
     Alert.alert(
       translate('settings.changeCurrencyTitle'),
       translate('settings.changeCurrencyWarning'),
       [
         { text: translate('common.cancel'), style: 'cancel' },
-        {
-          text: translate('common.confirm'),
-          onPress: () => {
-            changeCurrency.mutate(newCurrency);
-          },
-        },
+        { text: translate('common.confirm'), onPress: () => changeCurrency.mutate(newCurrency) },
       ],
     );
-  }, [currency, close, changeCurrency]);
+  }, [currency, changeCurrency]);
 
   const OptionsProps: Record<ModalType, {
     options: OptionType[];
     onSelect: (value: OptionType) => void;
   }> = React.useMemo(() => ({
-    currency: {
-      options: CURRENCY_OPTIONS,
-      onSelect: handleCurrencySelect,
-    },
     currencyFormat: {
       options: CURRENCY_FORMAT_OPTIONS.map((opt) => ({
         label: translate(`${baseNs}.currencyFormat.${opt}`),
@@ -102,7 +88,7 @@ export function FormattingSettingsScreen() {
         setMonthStartDay(parsed);
       },
     },
-  }), [handleCurrencySelect]);
+  }), []);
 
   const openModal = React.useCallback((type: ModalType) => {
     setModalType(type);
@@ -115,8 +101,7 @@ export function FormattingSettingsScreen() {
       ...opts,
       onSelect: (option: OptionType) => {
         opts.onSelect(option);
-        // Currency modal dismisses itself after confirming — don't double-dismiss
-        if (modalType !== 'currency') close();
+        close();
       },
     };
   }, [modalType, OptionsProps, close]);
@@ -135,7 +120,7 @@ export function FormattingSettingsScreen() {
             icon={<CircleDollarSign colorClassName={iconColor} size={20} />}
             text="settings.default_currency"
             value={currency}
-            onPress={() => openModal('currency')}
+            onPress={currencyModal.present}
           />
         </SettingsContainer>
         <SettingsContainer className="mb-2">
@@ -175,6 +160,7 @@ export function FormattingSettingsScreen() {
           ref={modal.ref}
           {...modalOptions}
         />
+        <CurrencySheet ref={currencyModal.ref} value={currency} onSelect={handleCurrencySelect} />
       </ScrollView>
     </>
   );

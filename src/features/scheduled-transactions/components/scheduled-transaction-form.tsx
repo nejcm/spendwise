@@ -1,5 +1,4 @@
 import type { ScheduledTransactionFormData, ScheduledTransactionFrequency } from '../types';
-import type { OptionType } from '@/components/ui';
 import type { CurrencyKey } from '@/features/currencies';
 import { useForm, useStore } from '@tanstack/react-form';
 import * as React from 'react';
@@ -8,7 +7,7 @@ import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboa
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
 import { HeaderButton, PageHeader } from '@/components/page-header';
-import { Card, Chip, FlagCircle, Input, ListRow, Options, SolidButton, Text, useModalSheet } from '@/components/ui';
+import { Card, Chip, FlagCircle, Input, ListRow, SolidButton, Text, useModalSheet } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
 import { ChevronDown, ChevronRight, X } from '@/components/ui/icon';
@@ -19,7 +18,7 @@ import { useCategories } from '@/features/categories/api';
 import { CategoryPicker } from '@/features/categories/category-picker';
 import { fitCategoryToType, fitsTransactionType, translateCount } from '@/features/categories/helpers';
 import { CURRENCIES_MAP, CURRENCY_VALUES } from '@/features/currencies';
-import { CURRENCY_OPTIONS } from '@/features/currencies/images';
+import { CurrencySheet } from '@/features/currencies/components/currency-sheet';
 import { formatDate, todayISO } from '@/features/formatting/helpers';
 import { FormDataGate } from '@/features/transactions/components/form-data-gate';
 import { AccountRow, RowError, RowLabel } from '@/features/transactions/components/transaction-form-fields';
@@ -29,12 +28,10 @@ import { translate } from '@/lib/i18n';
 import { toNumber } from '@/lib/number';
 import {
   addLastUsedCurrency,
-  selectLastUsedCurrencies,
   selectTransactionFormPrefs,
   setTransactionFormPrefs,
   useAppStore,
 } from '@/lib/store/store';
-import { mergeCurrencyArrays } from '../../currencies/helpers';
 import {
   useCreateScheduledTransaction,
   useUpdateScheduledTransaction,
@@ -117,11 +114,6 @@ function useScheduledTransactionForm(
   const id = initialValues?.id;
 
   const transactionFormPrefs = useAppStore(selectTransactionFormPrefs);
-  const lastUsedCurrencies = useAppStore(selectLastUsedCurrencies);
-  const orderedCurrencies = React.useMemo(
-    () => mergeCurrencyArrays(lastUsedCurrencies, CURRENCY_OPTIONS),
-    [lastUsedCurrencies],
-  );
 
   const preferredType = transactionFormPrefs?.type === 'income' ? 'income' : defaultValues.type;
   const startValues = {
@@ -170,7 +162,6 @@ function useScheduledTransactionForm(
     isEdit: !!id,
     accounts,
     isLoading: createScheduledTransaction.isPending || updateScheduledTransaction.isPending,
-    orderedCurrencies,
   };
 }
 
@@ -204,7 +195,7 @@ function FormHeader({ form, onClose }: { form: FormApi; onClose: () => void }) {
   );
 }
 
-function AmountAndName({ form, orderedCurrencies }: { form: FormApi; orderedCurrencies: OptionType[] }) {
+function AmountAndName({ form }: { form: FormApi }) {
   const currencyModal = useModalSheet();
   const submitted = useStore(form.store, selectSubmitted);
   return (
@@ -262,16 +253,11 @@ function AmountAndName({ form, orderedCurrencies }: { form: FormApi; orderedCurr
             <Text className="text-[13px] font-semibold">{currencyField.state.value}</Text>
             <ChevronDown size={14} colorClassName="accent-muted-foreground" />
           </Pressable>
-          <Options
+          <CurrencySheet
             ref={currencyModal.ref}
-            options={orderedCurrencies}
             value={currencyField.state.value}
-            searchEnabled
             stackBehavior="push"
-            onSelect={(option: OptionType) => {
-              currencyModal.close();
-              currencyField.handleChange(option.value as CurrencyKey);
-            }}
+            onSelect={currencyField.handleChange}
           />
         </View>
       )}
@@ -462,7 +448,7 @@ function ScheduledTransactionFormContent({
   onCancel,
   onSuccess,
 }: ScheduledTransactionFormProps) {
-  const { form, isEdit, accounts, isLoading, orderedCurrencies } = useScheduledTransactionForm(initialValues, onSuccess);
+  const { form, isEdit, accounts, isLoading } = useScheduledTransactionForm(initialValues, onSuccess);
   const insets = useSafeAreaInsets();
   const navOffset = hasNav ? NAV_BAR_HEIGHT : 0;
   const footerSpace = FOOTER_HEIGHT + insets.bottom + navOffset;
@@ -478,7 +464,7 @@ function ScheduledTransactionFormContent({
         contentContainerStyle={{ paddingBottom: footerSpace }}
         keyboardShouldPersistTaps="handled"
       >
-        <AmountAndName form={form} orderedCurrencies={orderedCurrencies} />
+        <AmountAndName form={form} />
         <FrequencyChips form={form} />
         <DetailsCard form={form} accounts={accounts} />
         <ScheduleHint form={form} isEdit={isEdit} />

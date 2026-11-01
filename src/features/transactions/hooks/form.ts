@@ -9,8 +9,6 @@ import { showSnackbar } from '@/components/ui/snackbar';
 import { useAccounts } from '@/features/accounts/api';
 import { useCategories } from '@/features/categories/api';
 import { fitCategoryToType } from '@/features/categories/helpers';
-import { mergeCurrencyArrays } from '@/features/currencies/helpers';
-import { CURRENCY_OPTIONS } from '@/features/currencies/images';
 import { todayISO } from '@/features/formatting/helpers';
 import { useCreateTransaction, useDeleteTransaction, useUpdateTransaction } from '@/features/transactions/api';
 import {
@@ -27,7 +25,6 @@ import { translate } from '@/lib/i18n';
 import { toNumber } from '@/lib/number';
 import {
   addLastUsedCurrency,
-  selectLastUsedCurrencies,
   selectTransactionFormPrefs,
   setTransactionFormPrefs,
   useAppStore,
@@ -79,8 +76,6 @@ export function useTransactionForm({ initialValues, onSaved, isAdjustment = fals
   const updateTransaction = useUpdateTransaction();
   const showSaved = useSavedSnackbar();
   const amountRef = React.useRef<TextInput>(null);
-  const lastUsedCurrencies = useAppStore(selectLastUsedCurrencies);
-  const orderedCurrencies = React.useMemo(() => mergeCurrencyArrays(lastUsedCurrencies, CURRENCY_OPTIONS), [lastUsedCurrencies]);
   const transactionFormPrefs = useAppStore(selectTransactionFormPrefs);
   // An edited row's stored baseAmount may be a manual correction; only re-derive once amount, currency or date change.
   const [baseAmountIsManual, setBaseAmountIsManual] = React.useState(!!id);
@@ -166,7 +161,6 @@ export function useTransactionForm({ initialValues, onSaved, isAdjustment = fals
     isLoading: createTransaction.isPending || updateTransaction.isPending,
     baseAmountIsManual,
     onBaseDriversChanged,
-    orderedCurrencies,
     preferredCurrency,
     setBaseAmountIsManual,
     typeOptions,

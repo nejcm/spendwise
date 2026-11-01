@@ -1,186 +1,213 @@
+import type { OptionType } from '@/components/ui';
+import type { UniwindLucideIcon } from '@/components/ui/icon';
+import type { Language } from '@/features/languages/types';
+import { useQuery } from '@tanstack/react-query';
 import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
-
-import { FocusAwareStatusBar, ScrollView, Text, useModalSheet, View } from '@/components/ui';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { HeaderButton, PageHeader } from '@/components/page-header';
+import { Card, FocusAwareStatusBar, IconTile, ListRow, Options, ScrollView, SectionHeader, Switch, Text, useModalSheet, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import {
   ALargeSmall,
   Banknote,
   Bell,
   Bot,
-  BotMessageSquare,
+  Bug,
+  ChevronLeft,
   DatabaseZap,
-  HelpCircle,
+  FileText,
+  Globe,
+  Heart,
   Import,
   LayoutGrid,
-  Link,
-  ListChecks,
+  Lightbulb,
+  Lock,
   Paintbrush,
-  PieChart,
   RefreshCcw,
-  ScanLine,
   Settings,
-  Share,
   Shield,
-  User,
+  Timer,
 } from '@/components/ui/icon';
+import { NAV_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
 import { config } from '@/config';
-import { triggerScanPicker } from '@/lib/store/local-store';
-import { selectProfile, useAppStore } from '@/lib/store/store';
+import { formatCurrency, formatInstant } from '@/features/formatting/helpers';
+import { LANGUAGES_OPTIONS } from '@/features/languages';
+import { notificationsQuery } from '@/features/notifications/notifications';
+import { LOCK_TIMEOUT_OPTIONS, toggleAppLock } from '@/features/security/app-lock';
+import { setAnalyticsEnabled } from '@/lib/analytics';
+import { cn } from '@/lib/cn';
+import { translate, useSelectedLanguage } from '@/lib/i18n';
+import { goBackOrFallback } from '@/lib/routing';
+import { selectIsAiEnabled, selectProfile, useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
+import { translateCount } from '../categories/helpers';
 import { ProfileAvatar } from '../profile/profile-avatar';
+import { useDataCounts } from './api';
 import { AppInfoTrigger } from './components/app-info-trigger';
 import { DeleteDataSheet } from './components/delete-data-sheet';
 import DevSection from './components/dev-section';
-import { LanguageItem } from './components/language-item';
-import { SettingsContainer } from './components/settings-container';
-import { SettingsItem } from './components/settings-item';
 
-const iconColor = 'accent-foreground';
+type Row = {
+  key: string;
+  icon: UniwindLucideIcon;
+  title: string;
+  meta?: string | null;
+  danger?: boolean;
+  trailing?: React.ReactNode;
+  onPress?: () => void;
+};
 
 export function SettingsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const profile = useAppStore(selectProfile);
+  const currency = useAppStore.use.currency();
+  const numberFormat = useAppStore.use.numberFormat();
+  const currencyFormat = useAppStore.use.currencyFormat();
+  const dateFormat = useAppStore.use.dateFormat();
+  const theme = useAppStore.use.theme();
+  const notifications = useAppStore.use.notifications();
+  const lockEnabled = useAppStore.use.lockEnabled();
+  const lockTimeoutMinutes = useAppStore.use.lockTimeoutMinutes();
+  const analyticsEnabled = useAppStore((s) => s.analyticsEnabled ?? true);
+  const aiEnabled = useAppStore(selectIsAiEnabled);
+  const aiProvider = useAppStore.use.aiProvider();
+  const lastBackupAt = useAppStore((s) => s.autoBackup.lastAutoBackupAt);
+  const { data: counts } = useDataCounts();
+  const { data: canNotify } = useQuery(notificationsQuery);
+  const { selected: language, setLanguage } = useSelectedLanguage();
   const deleteModal = useModalSheet();
+  const languageModal = useModalSheet();
+  const legalModal = useModalSheet();
+
+  const onSelectLanguage = (option: OptionType) => {
+    setLanguage(option.value as Language);
+    languageModal.close();
+  };
+  const legalOptions = [
+    { label: translate('settings.privacy'), value: '/settings/privacy' },
+    { label: translate('settings.terms'), value: '/settings/terms' },
+  ];
+  const onSelectLegal = (option: OptionType) => {
+    legalModal.close();
+    router.push(option.value as '/settings/privacy' | '/settings/terms');
+  };
+
+  const lastBackup = lastBackupAt ? formatInstant(Math.floor(Date.parse(lastBackupAt) / 1000), dateFormat) : null;
+  const lockTimeout = LOCK_TIMEOUT_OPTIONS.find((o) => o.value === lockTimeoutMinutes)?.label;
+
+  const groups: { title: string; rows: Row[] }[] = [
+    {
+      title: translate('settings.money'),
+      rows: [
+        { key: 'accounts', icon: Banknote, title: translate('settings.accounts'), meta: counts && translateCount('settings.open_count', counts.openAccounts), onPress: () => router.push('/accounts') },
+        { key: 'categories', icon: LayoutGrid, title: translate('settings.categories'), meta: counts && String(counts.categories), onPress: () => router.push('/categories') },
+        { key: 'recurring', icon: RefreshCcw, title: translate('settings.scheduled'), meta: counts && translate('settings.active_count', { count: counts.activeRules }), onPress: () => router.push('/scheduled') },
+      ],
+    },
+    {
+      title: translate('settings.preferences'),
+      rows: [
+        { key: 'general', icon: Settings, title: translate('settings.general'), onPress: () => router.push('/settings/general') },
+        { key: 'appearance', icon: Paintbrush, title: translate('settings.appearance'), meta: translate(`settings.theme.${theme}`), onPress: () => router.push('/settings/appearance') },
+        { key: 'formatting', icon: ALargeSmall, title: translate('settings.formatting'), meta: formatCurrency(123456, currency, { numberFormat, currencyFormat }), onPress: () => router.push('/settings/formatting') },
+        { key: 'notifications', icon: Bell, title: translate('settings.notifications'), meta: translate(notifications.global && canNotify ? 'common.on' : 'common.off'), onPress: () => router.push('/settings/notifications') },
+        { key: 'language', icon: Globe, title: translate('settings.language'), meta: language?.name, onPress: languageModal.present },
+      ],
+    },
+    {
+      title: translate('settings.privacy_data'),
+      rows: [
+        {
+          key: 'lock',
+          icon: Lock,
+          title: translate('settings.app_lock'),
+          trailing: <Switch accessibilityLabel={translate('settings.app_lock')} checked={lockEnabled} onChange={(on) => { void toggleAppLock(on); }} />,
+        },
+        ...(lockEnabled ? [{ key: 'lock-after', icon: Timer, title: translate('security.lock_after'), meta: lockTimeout, onPress: () => router.push('/settings/security') }] : []),
+        {
+          key: 'analytics',
+          icon: Shield,
+          title: translate('settings.usage_stats'),
+          meta: translate('settings.usage_stats_meta'),
+          trailing: <Switch accessibilityLabel={translate('settings.usage_stats')} checked={analyticsEnabled} onChange={setAnalyticsEnabled} />,
+        },
+        { key: 'import', icon: Import, title: translate('settings.import'), meta: lastBackup && translate('settings.last_backup', { date: lastBackup }), onPress: () => router.push('/settings/import-export') },
+        { key: 'delete', icon: DatabaseZap, title: translate('settings.delete_data'), danger: true, onPress: deleteModal.present },
+      ],
+    },
+    {
+      title: translate('settings.ai_section'),
+      rows: [
+        { key: 'ai', icon: Bot, title: translate('settings.spendwise_ai'), meta: aiEnabled ? translate(`settings.provider_${aiProvider}`) : translate('common.off'), onPress: () => router.push('/settings/ai') },
+      ],
+    },
+    {
+      title: translate('settings.about'),
+      rows: [
+        { key: 'legal', icon: FileText, title: translate('settings.privacy_terms'), onPress: legalModal.present },
+        { key: 'bug', icon: Bug, title: translate('settings.bug_report'), onPress: () => Linking.openURL(config.links.bugs) },
+        { key: 'feature', icon: Lightbulb, title: translate('settings.feature_suggestions'), onPress: () => Linking.openURL(config.links.featureSuggestions) },
+        { key: 'support', icon: Heart, title: translate('settings.support'), onPress: () => Linking.openURL(config.links.support) },
+      ],
+    },
+  ];
 
   return (
     <>
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1" style={defaultStyles.transparentBg}>
-        <View className="flex-1 px-4 pt-14 pb-8">
+      <ScrollView className="flex-1" style={defaultStyles.transparentBg} contentContainerStyle={{ paddingBottom: NAV_BAR_HEIGHT + insets.bottom + 16 }}>
+        <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[340px] bg-linear-to-b from-wash to-background" />
+        <View className="px-5 pt-2">
+          <PageHeader
+            title={translate('common.settings')}
+            left={<HeaderButton icon={ChevronLeft} label={translate('common.back')} onPress={() => goBackOrFallback(router, '/')} />}
+          />
+          <Card className="mt-5 flex-row items-center gap-3.5 p-[18px]">
+            <ProfileAvatar size={56} />
+            <View className="min-w-0 flex-1">
+              <Text className="text-lg font-semibold" numberOfLines={1}>{profile.name}</Text>
+              <Text className="text-meta text-muted-foreground" numberOfLines={2}>
+                {translate('settings.profile_meta', { currency, language: language?.name ?? '' })}
+              </Text>
+            </View>
+            <GhostButton accessibilityLabel={translate('settings.edit_profile')} label={translate('common.edit')} onPress={() => router.push('/settings/profile')} />
+          </Card>
 
-          <GhostButton className="mx-auto mb-8 h-auto flex-col justify-center" onPress={() => router.push('/settings/profile')}>
-            <ProfileAvatar size={88} className="mb-3" />
-            <Text className="text-center text-lg">{profile.name}</Text>
-          </GhostButton>
+          {groups.map((group) => (
+            <View key={group.title}>
+              <SectionHeader title={group.title} />
+              <Card className="px-[18px]">
+                {group.rows.map((row, index) => (
+                  <ListRow
+                    key={row.key}
+                    className={cn(index > 0 && 'border-t border-border')}
+                    icon={(
+                      <IconTile size="sm">
+                        <row.icon size={20} colorClassName={row.danger ? 'accent-negative' : 'accent-foreground'} />
+                      </IconTile>
+                    )}
+                    title={row.danger ? <Text className="text-row font-medium text-negative">{row.title}</Text> : row.title}
+                    meta={row.meta ?? undefined}
+                    trailing={row.trailing}
+                    chevron={!!row.onPress}
+                    onPress={row.onPress}
+                  />
+                ))}
+              </Card>
+            </View>
+          ))}
 
-          <SettingsContainer title="settings.finance">
-            <SettingsItem
-              icon={<Banknote colorClassName={iconColor} size={20} />}
-              text="settings.accounts"
-              onPress={() => router.push('/accounts')}
-            />
-            <SettingsItem
-              icon={<LayoutGrid colorClassName={iconColor} size={20} />}
-              text="settings.categories"
-              onPress={() => router.push({ pathname: '/categories' })}
-            />
-            <SettingsItem
-              icon={<PieChart colorClassName={iconColor} size={20} />}
-              text="settings.stats"
-              onPress={() => router.push({ pathname: '/stats' })}
-            />
-            <SettingsItem
-              icon={<ListChecks colorClassName={iconColor} size={20} />}
-              text="settings.transactions"
-              onPress={() => router.push('/transactions')}
-            />
-            <SettingsItem
-              icon={<RefreshCcw colorClassName={iconColor} size={20} />}
-              text="settings.scheduled"
-              onPress={() => router.push('/scheduled')}
-            />
-            <SettingsItem
-              icon={<BotMessageSquare colorClassName={iconColor} size={20} />}
-              text="settings.ai_chat"
-              onPress={() => router.push('/ai')}
-            />
-            <SettingsItem
-              icon={<ScanLine colorClassName={iconColor} size={20} />}
-              text="settings.scan"
-              onPress={triggerScanPicker}
-            />
-          </SettingsContainer>
-
-          <SettingsContainer title="common.settings">
-            <SettingsItem
-              icon={<User colorClassName={iconColor} size={20} />}
-              text="settings.profile"
-              onPress={() => router.push('/settings/profile')}
-            />
-            <SettingsItem
-              icon={<Settings colorClassName={iconColor} size={20} />}
-              text="settings.general"
-              onPress={() => router.push('/settings/general')}
-            />
-            <SettingsItem
-              icon={<Paintbrush colorClassName={iconColor} size={20} />}
-              text="settings.appearance"
-              onPress={() => router.push('/settings/appearance')}
-            />
-            <SettingsItem
-              icon={<Bot colorClassName={iconColor} size={20} />}
-              text="settings.ai"
-              onPress={() => router.push('/settings/ai')}
-            />
-            <SettingsItem
-              icon={<Bell colorClassName={iconColor} size={20} />}
-              text="settings.notifications"
-              onPress={() => router.push('/settings/notifications')}
-            />
-            <SettingsItem
-              icon={<Shield colorClassName={iconColor} size={20} />}
-              text="settings.security"
-              onPress={() => router.push('/settings/security')}
-            />
-            <SettingsItem
-              icon={<ALargeSmall colorClassName={iconColor} size={20} />}
-              text="settings.formatting"
-              onPress={() => router.push('/settings/formatting')}
-            />
-            <SettingsItem
-              icon={<Import colorClassName={iconColor} size={20} />}
-              text="settings.import"
-              onPress={() => router.push('/settings/import-export')}
-            />
-            <SettingsItem
-              text="settings.delete_data"
-              icon={<DatabaseZap colorClassName={iconColor} size={20} />}
-              onPress={() => deleteModal.present()}
-            />
-            <LanguageItem />
-          </SettingsContainer>
-
-          <SettingsContainer title="settings.links">
-            <SettingsItem
-              text="settings.privacy"
-              icon={<Link colorClassName={iconColor} size={20} />}
-              onPress={() => router.push('/settings/privacy')}
-            />
-            <SettingsItem
-              text="settings.terms"
-              icon={<Link colorClassName={iconColor} size={20} />}
-              onPress={() => router.push('/settings/terms')}
-            />
-            <SettingsItem
-              text="settings.bug_report"
-              icon={<Link colorClassName={iconColor} size={20} />}
-              onPress={() => Linking.openURL(config.links.bugs)}
-            />
-            <SettingsItem
-              text="settings.feature_suggestions"
-              icon={<Link colorClassName={iconColor} size={20} />}
-              onPress={() => Linking.openURL(config.links.featureSuggestions)}
-            />
-          </SettingsContainer>
-
-          <SettingsContainer title="settings.support_us">
-            <SettingsItem
-              text="settings.share"
-              icon={<Share colorClassName={iconColor} size={20} />}
-              onPress={() => Linking.openURL(config.links.support)}
-            />
-            <SettingsItem
-              text="settings.support"
-              icon={<HelpCircle colorClassName={iconColor} size={20} />}
-              onPress={() => Linking.openURL(config.links.support)}
-            />
-          </SettingsContainer>
           <DevSection />
-          <AppInfoTrigger />
+          <View className="items-center pt-6">
+            <AppInfoTrigger />
+          </View>
         </View>
       </ScrollView>
+      <Options ref={languageModal.ref} options={LANGUAGES_OPTIONS} onSelect={onSelectLanguage} value={language?.value} />
+      <Options ref={legalModal.ref} options={legalOptions} onSelect={onSelectLegal} />
       <DeleteDataSheet ref={deleteModal.ref} />
     </>
   );

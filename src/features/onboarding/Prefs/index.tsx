@@ -6,8 +6,8 @@ import * as React from 'react';
 
 import { Card, FlagCircle, ListRow, Options, Pressable, SolidButton, Switch, Text, useModalSheet, View } from '@/components/ui';
 import { CURRENCIES_MAP } from '@/features/currencies';
+import { CurrencySheet } from '@/features/currencies/components/currency-sheet';
 import { useChangeCurrency } from '@/features/currencies/hooks';
-import { CURRENCY_OPTIONS } from '@/features/currencies/images';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { LANGUAGES_OPTIONS } from '@/features/languages';
 import { canNotify, setupNotifications } from '@/features/notifications/notifications';
@@ -69,11 +69,6 @@ export default function PrefsStep({ onBack, onNext, onBeforeLanguageReload }: Pr
     if (option.value === language.value) return;
     onBeforeLanguageReload();
     setLanguage(option.value as Language);
-  };
-
-  const onSelectCurrency = (option: OptionType) => {
-    currencyModal.close();
-    setCurrency(option.value as CurrencyKey);
   };
 
   const onContinue = async () => {
@@ -165,7 +160,7 @@ export default function PrefsStep({ onBack, onNext, onBeforeLanguageReload }: Pr
       </Card>
 
       <Options ref={languageModal.ref} options={LANGUAGES_OPTIONS} onSelect={onSelectLanguage} value={language.value} />
-      <Options ref={currencyModal.ref} options={CURRENCY_OPTIONS} onSelect={onSelectCurrency} value={currency} searchEnabled />
+      <CurrencySheet ref={currencyModal.ref} value={currency} onSelect={setCurrency} />
     </OnboardingLayout>
   );
 }

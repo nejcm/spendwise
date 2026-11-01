@@ -115,7 +115,6 @@ function TransactionFormContent({ initialValues, onSaved, onClose, bottomMenuOff
     isLoading,
     baseAmountIsManual,
     onBaseDriversChanged,
-    orderedCurrencies,
     preferredCurrency,
     setBaseAmountIsManual,
     typeOptions,
@@ -147,7 +146,7 @@ function TransactionFormContent({ initialValues, onSaved, onClose, bottomMenuOff
         contentContainerStyle={{ paddingBottom: footerSpace }}
         keyboardShouldPersistTaps="handled"
       >
-        <AmountField form={form} amountRef={amountRef} orderedCurrencies={orderedCurrencies} signed={isAdjustment} />
+        <AmountField form={form} amountRef={amountRef} signed={isAdjustment} />
         {!isAdjustment && <CategorySection form={form} />}
         <form.Subscribe
           selector={(s) => s.values.currency !== preferredCurrency}

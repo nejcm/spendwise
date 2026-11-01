@@ -21,7 +21,6 @@ import { AutoBackupProcessor } from '@/features/imports-export/auto-backup-proce
 import { ScheduledTransactionsProcessor } from '@/features/scheduled-transactions/scheduled-transactions-processor';
 import { SecurityLock } from '@/features/security/security-lock';
 
-import { PosthogProviderWrapper } from '@/lib/analytics/posthog';
 import { APIProvider } from '@/lib/api';
 import { useAppBootstrapOnInit } from '@/lib/app-bootstrap';
 import { IS_WEB } from '@/lib/base';
@@ -144,38 +143,36 @@ function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <GestureHandlerRootView style={styles.container}>
-      <PosthogProviderWrapper>
-        <SafeAreaProvider>
-          <KeyboardProvider>
-            <ThemeProvider value={theme}>
-              <OpfsCleaner>
-                <DatabaseErrorBoundary>
-                  <APIProvider>
-                    <BootstrappedSQLite>
-                      <AppErrorBoundary>
-                        <CurrencyRatesInitializer />
-                        <ScheduledTransactionsProcessor />
-                        <AutoBackupProcessor />
-                        <FontLoader>
-                          <BottomSheetModalProvider>
-                            <View className="flex-1 bg-background">
-                              <SafeAreaView edges={SAFE_AREA_EDGES} className="flex-1 bg-background">
-                                {children}
-                              </SafeAreaView>
-                            </View>
-                            <SnackbarHost />
-                            {__DEV__ && IS_WEB && <DevThemeToggle />}
-                          </BottomSheetModalProvider>
-                        </FontLoader>
-                      </AppErrorBoundary>
-                    </BootstrappedSQLite>
-                  </APIProvider>
-                </DatabaseErrorBoundary>
-              </OpfsCleaner>
-            </ThemeProvider>
-          </KeyboardProvider>
-        </SafeAreaProvider>
-      </PosthogProviderWrapper>
+      <SafeAreaProvider>
+        <KeyboardProvider>
+          <ThemeProvider value={theme}>
+            <OpfsCleaner>
+              <DatabaseErrorBoundary>
+                <APIProvider>
+                  <BootstrappedSQLite>
+                    <AppErrorBoundary>
+                      <CurrencyRatesInitializer />
+                      <ScheduledTransactionsProcessor />
+                      <AutoBackupProcessor />
+                      <FontLoader>
+                        <BottomSheetModalProvider>
+                          <View className="flex-1 bg-background">
+                            <SafeAreaView edges={SAFE_AREA_EDGES} className="flex-1 bg-background">
+                              {children}
+                            </SafeAreaView>
+                          </View>
+                          <SnackbarHost />
+                          {__DEV__ && IS_WEB && <DevThemeToggle />}
+                        </BottomSheetModalProvider>
+                      </FontLoader>
+                    </AppErrorBoundary>
+                  </BootstrappedSQLite>
+                </APIProvider>
+              </DatabaseErrorBoundary>
+            </OpfsCleaner>
+          </ThemeProvider>
+        </KeyboardProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

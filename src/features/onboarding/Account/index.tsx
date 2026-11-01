@@ -1,13 +1,12 @@
-import type { OptionType } from '@/components/ui';
 import type { AccountType, FirstAccountData } from '@/features/accounts/types';
 import type { CurrencyKey } from '@/features/currencies';
 import * as React from 'react';
 
-import { Card, Chip, FlagCircle, Input, Options, Pressable, SolidButton, Text, useModalSheet, View } from '@/components/ui';
+import { Card, Chip, FlagCircle, Input, Pressable, SolidButton, Text, useModalSheet, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { useSetupFirstAccount } from '@/features/accounts/hooks';
 import { ACCOUNT_TYPE_LABELS, ACCOUNT_TYPES } from '@/features/accounts/types';
-import { CURRENCY_OPTIONS } from '@/features/currencies/images';
+import { CurrencySheet } from '@/features/currencies/components/currency-sheet';
 import { translate } from '@/lib/i18n';
 import { toNumber } from '@/lib/number';
 import { useAppStore } from '@/lib/store/store';
@@ -31,11 +30,6 @@ export default function AccountStep({ onBack, onNext }: AccountStepProps) {
 
   const submit = (data: FirstAccountData | null) => {
     setupFirstAccount.mutate({ data, preferredCurrency }, { onSuccess: onNext });
-  };
-
-  const onSelectCurrency = (option: OptionType) => {
-    currencyModal.close();
-    setCurrency(option.value as CurrencyKey);
   };
 
   return (
@@ -121,7 +115,7 @@ export default function AccountStep({ onBack, onNext }: AccountStepProps) {
         </Pressable>
       </Card>
 
-      <Options ref={currencyModal.ref} options={CURRENCY_OPTIONS} onSelect={onSelectCurrency} value={currency} searchEnabled />
+      <CurrencySheet ref={currencyModal.ref} value={currency} onSelect={setCurrency} />
     </OnboardingLayout>
   );
 }

@@ -1,9 +1,8 @@
-import type { OptionType } from '@/components/ui';
 import type { CurrencyKey } from '@/features/currencies';
 import * as React from 'react';
-import { Alert, Euro, Options, Text, useModalSheet, View } from '@/components/ui';
+import { Alert, Euro, Text, useModalSheet, View } from '@/components/ui';
+import { CurrencySheet } from '@/features/currencies/components/currency-sheet';
 import { useChangeCurrency, useLastCurrencyRatesFetchedAt } from '@/features/currencies/hooks';
-import { CURRENCY_OPTIONS } from '@/features/currencies/images';
 import { formatDate } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
@@ -20,10 +19,7 @@ export function CurrencyItem() {
     : translate('settings.currency_rates_never_refreshed');
 
   const onSelect = React.useCallback(
-    (option: OptionType) => {
-      const newCurrency = option.value as CurrencyKey;
-
-      modal.close();
+    (newCurrency: CurrencyKey) => {
       if (newCurrency === currency) return;
 
       Alert.alert(
@@ -40,7 +36,7 @@ export function CurrencyItem() {
         ],
       );
     },
-    [changeCurrency, currency, modal],
+    [changeCurrency, currency],
   );
 
   return (
@@ -51,7 +47,7 @@ export function CurrencyItem() {
           {translate('settings.currency_rates_last_refreshed', { date: lastRefreshed })}
         </Text>
       </View>
-      <Options ref={modal.ref} options={CURRENCY_OPTIONS} onSelect={onSelect} value={currency} />
+      <CurrencySheet ref={modal.ref} onSelect={onSelect} value={currency} />
     </>
   );
 }

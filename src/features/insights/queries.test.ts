@@ -1,3 +1,5 @@
+import { createTestDb } from '@/test-utils/sqlite-db';
+
 import {
   getCategorySpendByRange,
   getMonthlyTrend,
@@ -146,6 +148,26 @@ describe('getCategorySpendByRange', () => {
     const rows = await getCategorySpendByRange(db as any, MAR_START, APR_START);
     const food = rows.find((r) => r.category_id === 'cat_food')!;
     expect(food.expense_total).toBe(10000); // baseAmount, not amount
+  });
+
+  it('takes the category type from categories.kind and ignores adjustment rows', async () => {
+    const db = await createTestDb();
+    await db.execAsync(`
+      INSERT INTO accounts (id, name, type, currency) VALUES ('acc_1', 'Checking', 'checking', 'EUR');
+      INSERT INTO categories (id, name, color, kind, sort_order) VALUES ('cat_food', 'Food', '#f00', 'expense', 0), ('cat_salary', 'Salary', '#0f0', 'income', 1);
+      INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, is_adjustment) VALUES
+        ('t1', 'acc_1', 'cat_food', 'expense', 3000, 'EUR', 3000, 'EUR', ${MAR_15}, 0),
+        ('t2', 'acc_1', 'cat_food', 'income', 5000, 'EUR', 5000, 'EUR', ${MAR_15}, 0),
+        ('t3', 'acc_1', 'cat_salary', 'income', 4000, 'EUR', 4000, 'EUR', ${MAR_20}, 0),
+        ('t4', 'acc_1', NULL, 'transfer', 90000, 'EUR', 90000, 'EUR', ${MAR_15}, 1);
+    `);
+
+    const rows = await getCategorySpendByRange(db as any, MAR_START, APR_START);
+    expect(rows).toMatchObject([
+      { category_id: 'cat_food', category_type: 'expense', income_total: 5000, expense_total: 3000 },
+      { category_id: 'cat_salary', category_type: 'income', income_total: 4000, expense_total: 0 },
+    ]);
+    expect(await getSummaryByRange(db as any, MAR_START, APR_START)).toEqual({ income: 9000, expense: 3000, balance: 6000 });
   });
 });
 

@@ -34,9 +34,11 @@ export type AccountFormData = {
   budget?: string | null;
   icon: string | null;
   color: string | null;
+  /** Create only; signed major units in `currency`. */
+  opening_balance?: string | null;
 };
 
-export type FirstAccountData = Pick<AccountFormData, 'name' | 'type' | 'currency' | 'icon'>;
+export type FirstAccountData = Pick<AccountFormData, 'name' | 'type' | 'currency' | 'icon' | 'opening_balance'>;
 
 const baseNs = 'accounts.typeOptions';
 export const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {

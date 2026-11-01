@@ -88,6 +88,10 @@ export async function mockData(db: SQLiteDatabase): Promise<void> {
     VALUES
       ('tx_transfer_out_savings', 'acc_main_checking', NULL, 'transfer', -50000, 'EUR', 51200, 'USD', strftime('%s', date('now', '-4 days')), 'Monthly savings', 'tr_savings_001'),
       ('tx_transfer_in_savings', 'acc_savings', NULL, 'transfer', 50000, 'EUR', 51200, 'USD', strftime('%s', date('now', '-4 days')), 'Monthly savings', 'tr_savings_001');
+
+    INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note, is_adjustment)
+    VALUES
+      ('tx_opening_savings', 'acc_savings', NULL, 'transfer', 250000, 'EUR', 262000, 'USD', strftime('%s', date('now', '-60 days')), NULL, 1);
   `);
 
   // Sample recurring rules

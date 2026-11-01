@@ -36,9 +36,12 @@ export const TransactionCard = React.memo(({
   const isIncome = transaction.type === 'income';
   const isTransfer = transaction.type === 'transfer';
   const isInflow = isIncome || (isTransfer && transaction.amount > 0);
-  const displayName = transaction.counter_account_name
-    ? translate(transaction.amount < 0 ? 'transactions.transfer_to' : 'transactions.transfer_from', { account: transaction.counter_account_name })
-    : transaction.merchant_name || transaction.category_name || (isTransfer ? translate('transactions.transfer') : 'Unknown');
+  const isAdjustment = !!transaction.is_adjustment;
+  const displayName = isAdjustment
+    ? translate('accounts.opening_balance')
+    : transaction.counter_account_name
+      ? translate(transaction.amount < 0 ? 'transactions.transfer_to' : 'transactions.transfer_from', { account: transaction.counter_account_name })
+      : transaction.merchant_name || transaction.category_name || (isTransfer ? translate('transactions.transfer') : 'Unknown');
   const showConverted = transaction.currency !== currency;
   const logo = transaction.merchant_logo_slug ? <MerchantLogo slug={transaction.merchant_logo_slug} /> : null;
   const toggleSelection = React.useCallback(() => onSelect?.(transaction.id), [onSelect, transaction.id]);
@@ -73,7 +76,7 @@ export const TransactionCard = React.memo(({
         <Text className="text-sm text-muted-foreground" numberOfLines={1}>
           {formatShortDate(transaction.date)}
           {transaction.merchant_name && transaction.category_name ? ` · ${transaction.category_name}` : ''}
-          {isTransfer ? ` · ${translate('transactions.not_spending')}` : ''}
+          {isTransfer && !isAdjustment ? ` · ${translate('transactions.not_spending')}` : ''}
           {transaction.note ? ` · ${transaction.note}` : ''}
         </Text>
       </View>

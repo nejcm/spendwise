@@ -1,3 +1,4 @@
+import { todayUnix } from '@/features/formatting/helpers';
 import { SEED_ACCOUNT_ID } from '@/lib/sqlite/seed';
 import { createTestDb } from '@/test-utils/sqlite-db';
 
@@ -17,6 +18,11 @@ import {
 
 jest.mock('expo-crypto', () => ({
   randomUUID: jest.fn(() => 'test-uuid-1234'),
+}));
+
+jest.mock('@/features/currencies/queries', () => ({
+  ...jest.requireActual<object>('@/features/currencies/queries'),
+  getRatesForDate: jest.fn(async () => ({ GBP: 0.8, USD: 1.1 })),
 }));
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
@@ -355,7 +361,7 @@ describe('createAccount', () => {
       budget: '500',
       icon: 'piggy-bank',
       color: '#00FF00',
-    });
+    }, 'EUR');
 
     expect(typeof id).toBe('string');
     expect(id.length).toBeGreaterThan(0);
@@ -376,7 +382,7 @@ describe('createAccount', () => {
       budget: '100.50',
       icon: 'wallet',
       color: '#AAAAAA',
-    });
+    }, 'EUR');
 
     const row = await db.getFirstAsync<{ budget: number }>(
       `SELECT budget FROM accounts LIMIT 1`,
@@ -395,7 +401,7 @@ describe('createAccount', () => {
       budget: null,
       icon: 'wallet',
       color: '#AAAAAA',
-    });
+    }, 'EUR');
 
     const row = await db.getFirstAsync<{ description: string | null }>(
       `SELECT description FROM accounts LIMIT 1`,
@@ -416,13 +422,53 @@ describe('createAccount', () => {
       budget: null,
       icon: null,
       color: null,
-    });
+    }, 'EUR');
 
     const row = await db.getFirstAsync<{ sort_order: number }>(
       `SELECT sort_order FROM accounts WHERE id = ?`,
       ['test-uuid-1234'],
     );
     expect(row!.sort_order).toBe(9);
+  });
+
+  const getAdjustments = (db: Awaited<ReturnType<typeof createTestDb>>) =>
+    db.getAllAsync<{ account_id: string; type: string; category_id: string | null; transfer_id: string | null; is_adjustment: number; amount: number; currency: string; baseAmount: number; baseCurrency: string; date: number }>(
+      'SELECT account_id, type, category_id, transfer_id, is_adjustment, amount, currency, baseAmount, baseCurrency, date FROM transactions',
+    );
+  const walletForm = { name: 'Wallet', description: null, type: 'cash' as const, currency: 'EUR' as const, budget: null, icon: null, color: null };
+
+  it('writes no transaction without an opening balance', async () => {
+    const db = await createTestDb();
+    await createAccount(db as any, { ...walletForm, opening_balance: '0' }, 'EUR');
+    expect(await getAdjustments(db)).toEqual([]);
+  });
+
+  it('adds a dated adjustment row that the balance queries count', async () => {
+    const db = await createTestDb();
+    const id = await createAccount(db as any, { ...walletForm, opening_balance: '1500.25' }, 'EUR');
+
+    expect(await getAdjustments(db)).toEqual([{
+      account_id: id,
+      type: 'transfer',
+      category_id: null,
+      transfer_id: null,
+      is_adjustment: 1,
+      amount: 150025,
+      currency: 'EUR',
+      baseAmount: 150025,
+      baseCurrency: 'EUR',
+      date: todayUnix(),
+    }]);
+    expect((await getAccountsWithBalance(db as any))[0]).toMatchObject({ balance: 150025, baseBalance: 150025 });
+    expect(await getTotalBalance(db as any)).toBe(150025);
+  });
+
+  it('keeps a negative opening balance signed and converts baseAmount as a positive value', async () => {
+    const db = await createTestDb();
+    await createAccount(db as any, { ...walletForm, currency: 'GBP', opening_balance: '-100' }, 'USD');
+
+    expect(await getAdjustments(db)).toMatchObject([{ amount: -10000, currency: 'GBP', baseAmount: 13750, baseCurrency: 'USD' }]);
+    expect((await getAccountsWithBalance(db as any))[0]).toMatchObject({ balance: -10000, baseBalance: -13750 });
   });
 });
 
@@ -585,5 +631,36 @@ describe('setupFirstAccount', () => {
     await setupFirstAccount(db as any, null, 'USD');
 
     expect(await getAccounts(db as any)).toHaveLength(0);
+  });
+
+  it('adds the opening balance to the rewritten seed account', async () => {
+    const db = await createTestDb();
+    await seedAccount(db, { id: SEED_ACCOUNT_ID, name: 'Main Checking' });
+
+    await setupFirstAccount(db as any, { ...data, currency: 'USD', opening_balance: '250' }, 'USD');
+
+    const rows = await db.getAllAsync<{ account_id: string; amount: number; is_adjustment: number }>('SELECT account_id, amount, is_adjustment FROM transactions');
+    expect(rows).toEqual([{ account_id: SEED_ACCOUNT_ID, amount: 25000, is_adjustment: 1 }]);
+  });
+
+  it('writes no adjustment for a zero or empty opening balance', async () => {
+    const db = await createTestDb();
+    await seedAccount(db, { id: SEED_ACCOUNT_ID });
+
+    await setupFirstAccount(db as any, { ...data, opening_balance: '' }, 'USD');
+
+    expect(await db.getAllAsync('SELECT * FROM transactions')).toEqual([]);
+  });
+
+  it('never adds the opening balance to a seed account that already has transactions', async () => {
+    const db = await createTestDb();
+    await seedAccount(db, { id: SEED_ACCOUNT_ID });
+    await seedTransaction(db, { account_id: SEED_ACCOUNT_ID });
+
+    await setupFirstAccount(db as any, { ...data, currency: 'USD', opening_balance: '250' }, 'USD');
+
+    const adjustments = await db.getAllAsync<{ account_id: string }>('SELECT account_id FROM transactions WHERE is_adjustment = 1');
+    expect(adjustments).toHaveLength(1);
+    expect(adjustments[0]!.account_id).not.toBe(SEED_ACCOUNT_ID);
   });
 });

@@ -9,6 +9,7 @@ import { useSetupFirstAccount } from '@/features/accounts/hooks';
 import { ACCOUNT_TYPE_LABELS, ACCOUNT_TYPES } from '@/features/accounts/types';
 import { CURRENCY_OPTIONS } from '@/features/currencies/images';
 import { translate } from '@/lib/i18n';
+import { toNumber } from '@/lib/number';
 import { useAppStore } from '@/lib/store/store';
 import OnboardingLayout from '../layout';
 
@@ -23,6 +24,8 @@ export default function AccountStep({ onBack, onNext }: AccountStepProps) {
   const [icon, setIcon] = React.useState('💳');
   const [type, setType] = React.useState<AccountType>('checking');
   const [currency, setCurrency] = React.useState<CurrencyKey>(preferredCurrency);
+  const [balance, setBalance] = React.useState('');
+  const isBalanceValid = !balance.trim() || toNumber(balance) !== undefined;
   const setupFirstAccount = useSetupFirstAccount();
   const currencyModal = useModalSheet();
 
@@ -48,8 +51,8 @@ export default function AccountStep({ onBack, onNext }: AccountStepProps) {
             size="lg"
             fullWidth
             label={translate('onboarding.add_account')}
-            disabled={!name.trim() || setupFirstAccount.isPending}
-            onPress={() => submit({ name: name.trim(), icon: icon.trim() || null, type, currency })}
+            disabled={!name.trim() || !isBalanceValid || setupFirstAccount.isPending}
+            onPress={() => submit({ name: name.trim(), icon: icon.trim() || null, type, currency, opening_balance: balance.trim() || null })}
           />
           <GhostButton
             color="secondary"
@@ -95,8 +98,18 @@ export default function AccountStep({ onBack, onNext }: AccountStepProps) {
         ))}
       </View>
 
-      <Card className="mt-[18px] flex-row items-center justify-between p-4">
-        <Text className="text-meta text-muted-foreground">{translate('common.currency')}</Text>
+      <Card className="mt-[18px] flex-row items-center justify-between gap-3 p-4">
+        <View className="flex-1">
+          <Text className="text-meta text-muted-foreground">{translate('onboarding.account_balance')}</Text>
+          <Input
+            value={balance}
+            onChangeText={setBalance}
+            placeholder="0.00"
+            keyboardType="numbers-and-punctuation"
+            accessibilityLabel={translate('onboarding.account_balance')}
+            className="h-auto rounded-none border-0 bg-transparent px-0 text-[17px] font-medium"
+          />
+        </View>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={translate('common.currency')}

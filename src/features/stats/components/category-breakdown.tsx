@@ -31,7 +31,9 @@ export function CategoryBreakdown({
 
   const filtered = React.useMemo(() => {
     return (categories ?? [])
-      .filter((c) => c.category_type === type && c.total > 0)
+      .filter((c) => c.category_type === type)
+      .map((c) => ({ ...c, total: type === 'expense' ? c.expense_total : c.income_total }))
+      .filter((c) => c.total > 0)
       .sort((a, b) => b.total - a.total)
       .slice(0, limit);
   }, [categories, type, limit]);

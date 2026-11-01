@@ -17,6 +17,7 @@
     "no_accounts": "Noch keine Konten",
     "not_found": "Dieses Konto existiert nicht mehr.",
     "opening_balance": "Anfangssaldo",
+    "opening_balance_invalid": "Gib einen gültigen Betrag ein",
     "sorting_tips": "Gedrückt halten und ziehen, um Konten neu zu ordnen",
     "to_account": "Zu Konto",
     "to_required": "Zielkonto erforderlich",
@@ -93,6 +94,9 @@
     "exit_edit_mode": "Bearbeitungsmodus beenden",
     "icon": "Symbol",
     "icon_placeholder": "Emoji",
+    "kind": "Kategorietyp",
+    "kind_expense": "Ausgaben",
+    "kind_income": "Einnahmen",
     "name_placeholder": "z. B. Essen",
     "name_required": "Name ist erforderlich",
     "not_found": "Diese Kategorie existiert nicht mehr.",
@@ -345,6 +349,7 @@
     "weekly_digest_title": "Wochenzusammenfassung"
   },
   "onboarding": {
+    "account_balance": "Kontostand heute",
     "account_default_name": "Girokonto",
     "account_emoji": "Konto-Emoji",
     "account_name": "Kontoname",

@@ -1,5 +1,6 @@
 import type { Category } from './types';
 import type { OptionType, SelectProps } from '@/components/ui';
+import type { TransactionType } from '@/features/transactions/types';
 
 import * as React from 'react';
 import { View } from 'react-native';
@@ -14,14 +15,15 @@ type CategoryOption = OptionType<string> & { color: string; icon: string | null;
 export type CategoryPickerProps = Omit<SelectProps, 'value' | 'options' | 'onSelect'> & {
   selectedId: string | null;
   onSelect: (category: Category) => void;
+  type?: TransactionType;
   label?: string;
   error?: string;
 };
 
 const GRID_COLUMNS = 3;
 
-export function CategoryPicker({ selectedId, onSelect, label, error, ...props }: CategoryPickerProps) {
-  const { data: categories = [], isLoading } = useCategories();
+export function CategoryPicker({ selectedId, onSelect, type, label, error, ...props }: CategoryPickerProps) {
+  const { data: categories = [], isLoading } = useCategories(type);
 
   const options = React.useMemo<CategoryOption[]>(
     () =>

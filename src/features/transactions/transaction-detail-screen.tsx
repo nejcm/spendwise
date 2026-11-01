@@ -52,6 +52,7 @@ export function TransactionDetailScreen() {
         <ScreenHeader title={translate('transactions.edit_title')} />
         <TransactionForm
           initialValues={transactionToFormValues(transaction)}
+          isAdjustment={!!transaction.is_adjustment}
           onSuccess={() => setIsEditing(false)}
           onCancel={() => setIsEditing(false)}
           bottomMenuOffset={NAV_BAR_HEIGHT}
@@ -62,6 +63,7 @@ export function TransactionDetailScreen() {
 
   const isIncome = transaction.type === 'income';
   const isTransfer = transaction.type === 'transfer';
+  const isAdjustment = !!transaction.is_adjustment;
   const isInflow = isIncome || (isTransfer && transaction.amount > 0);
   const account = accounts.find((a) => a.id === transaction.account_id);
   const primaryDetails: DetailsRowProps[] = [
@@ -74,9 +76,11 @@ export function TransactionDetailScreen() {
           value: `${transaction.counter_account_icon ?? ''} ${transaction.counter_account_name}`.trim(),
         }]
       : []),
-    isTransfer
-      ? { label: translate('transactions.type'), value: `${translate('transactions.transfer')} · ${translate('transactions.not_spending')}` }
-      : { label: translate('transactions.type'), value: transaction.type, className: 'capitalize' },
+    isAdjustment
+      ? { label: translate('transactions.type'), value: translate('accounts.opening_balance') }
+      : isTransfer
+        ? { label: translate('transactions.type'), value: `${translate('transactions.transfer')} · ${translate('transactions.not_spending')}` }
+        : { label: translate('transactions.type'), value: transaction.type, className: 'capitalize' },
     ...(transaction.merchant_name ? [{ label: translate('transactions.merchant_name'), value: transaction.merchant_name }] : []),
     ...(transaction.location ? [{ label: translate('transactions.location'), value: transaction.location }] : []),
   ];
@@ -146,6 +150,7 @@ export function TransactionDetailScreen() {
             {
               label: translate('transactions.duplicate'),
               onPress: handleDuplicate,
+              hidden: isAdjustment,
               icon: <Copy size={16} colorClassName="accent-foreground" className="mr-2" />,
             },
             {

@@ -1,4 +1,5 @@
-import type { CategoryFormData } from './types';
+import type { Category, CategoryFormData } from './types';
+import type { TransactionType } from '@/features/transactions/types';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -9,13 +10,15 @@ import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
 import { translate } from '@/lib/i18n';
 
+import { fitsTransactionType } from './helpers';
 import * as queries from './queries';
 
-export function useCategories(_type?: 'income' | 'expense') {
+export function useCategories(type?: TransactionType) {
   const db = useSQLiteContext();
   return useQuery({
     queryKey: queryKeys.categories.all,
     queryFn: () => queries.getCategories(db),
+    select: type ? (categories: Category[]) => categories.filter((c) => fitsTransactionType(c, type)) : undefined,
   });
 }
 
@@ -43,7 +46,7 @@ export function useUpdateCategory(onSuccess?: () => void) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (params: { id: string; data: Pick<CategoryFormData, 'name' | 'icon' | 'color' | 'sort_order'> }) =>
+    mutationFn: (params: { id: string; data: CategoryFormData }) =>
       queries.updateCategory(db, params.id, params.data),
     onSuccess: () => {
       invalidateFor(queryClient, 'category');

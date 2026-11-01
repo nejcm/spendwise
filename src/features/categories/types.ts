@@ -13,6 +13,7 @@ export type CategoryFormData = {
   name: string;
   icon: string | null;
   color: string;
+  kind: Category['kind'];
   budget?: string | null;
   sort_order?: number | null;
 };

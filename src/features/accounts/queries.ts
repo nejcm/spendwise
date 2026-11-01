@@ -1,9 +1,13 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { CurrencyKey } from '../currencies';
-import type { MonthSummary, TransactionType } from '../transactions/types';
+import type { MonthSummary, TransactionInsertData, TransactionType } from '../transactions/types';
 import type { Account, AccountFormData, AccountWithBalance, FirstAccountData } from './types';
 
+import { computeBaseAmount } from '@/features/currencies/conversion';
+import { getRatesForDate } from '@/features/currencies/queries';
+import { todayUnix } from '@/features/formatting/helpers';
+import { createTransaction } from '@/features/transactions/queries';
 import { parseToCents } from '@/lib/data/money';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { generateId } from '@/lib/sqlite';
@@ -187,19 +191,52 @@ export async function getAccountSummaryNativeByRange(
 
 // ─── Write Queries ───
 
-export async function createAccount(
+/** A single dated `transfer` row flagged `is_adjustment`, signed in the account currency. */
+async function buildOpeningBalance(
   db: SQLiteDatabase,
-  data: AccountFormData,
-): Promise<string> {
-  const id = generateId();
-  const budgetCents = parseToCents(data.budget);
+  openingBalance: string | null | undefined,
+  currency: CurrencyKey,
+  baseCurrency: CurrencyKey,
+): Promise<Omit<TransactionInsertData, 'account_id'> | null> {
+  const amount = parseToCents(openingBalance);
+  if (!amount) return null;
+  const date = todayUnix();
+  const rates = currency === baseCurrency ? {} : await getRatesForDate(db, date);
+  return {
+    category_id: null,
+    type: 'transfer',
+    amount,
+    currency,
+    baseAmount: computeBaseAmount(Math.abs(amount), currency, baseCurrency, rates),
+    baseCurrency,
+    date,
+    note: null,
+    merchant_name: null,
+    merchant_logo_slug: null,
+    location: null,
+    is_adjustment: 1,
+  };
+}
 
+async function insertAccount(db: SQLiteDatabase, id: string, data: AccountFormData) {
   await db.runAsync(
     `INSERT INTO accounts (id, name, description, type, currency, budget, icon, color, sort_order)
      SELECT ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(MAX(sort_order), -1) + 1 FROM accounts`,
-    [id, data.name, data.description ?? null, data.type, data.currency, budgetCents, data.icon, data.color],
+    [id, data.name, data.description ?? null, data.type, data.currency, parseToCents(data.budget), data.icon, data.color],
   );
+}
 
+export async function createAccount(
+  db: SQLiteDatabase,
+  data: AccountFormData,
+  baseCurrency: CurrencyKey,
+): Promise<string> {
+  const id = generateId();
+  const opening = await buildOpeningBalance(db, data.opening_balance, data.currency, baseCurrency);
+  await db.withTransactionAsync(async () => {
+    await insertAccount(db, id, data);
+    if (opening) await createTransaction(db, { ...opening, account_id: id });
+  });
   return id;
 }
 
@@ -219,7 +256,7 @@ export async function updateAccount(
 
 const UNUSED_SEED_GUARD = `WHERE id = ? AND NOT EXISTS (SELECT 1 FROM transactions WHERE account_id = ?)`;
 
-/** Onboarding: rewrites the seeded account while it has no transactions; otherwise Add creates a new account and Skip is a no-op. */
+/** Onboarding: rewrites the seeded account while it has no transactions; otherwise Add creates a new account and Skip is a no-op. The opening balance lands on whichever account Add wrote. */
 export async function setupFirstAccount(
   db: SQLiteDatabase,
   data: FirstAccountData | null,
@@ -233,13 +270,16 @@ export async function setupFirstAccount(
     return;
   }
 
-  const { changes } = await db.runAsync(
-    `UPDATE accounts SET name = ?, icon = ?, type = ?, currency = ?, updated_at = strftime('%s','now') ${UNUSED_SEED_GUARD}`,
-    [data.name, data.icon, data.type, data.currency, SEED_ACCOUNT_ID, SEED_ACCOUNT_ID],
-  );
-  if (changes === 0) {
-    await createAccount(db, { ...data, description: null, budget: null, color: null });
-  }
+  const opening = await buildOpeningBalance(db, data.opening_balance, data.currency, preferredCurrency);
+  await db.withTransactionAsync(async () => {
+    const { changes } = await db.runAsync(
+      `UPDATE accounts SET name = ?, icon = ?, type = ?, currency = ?, updated_at = strftime('%s','now') ${UNUSED_SEED_GUARD}`,
+      [data.name, data.icon, data.type, data.currency, SEED_ACCOUNT_ID, SEED_ACCOUNT_ID],
+    );
+    const accountId = changes > 0 ? SEED_ACCOUNT_ID : generateId();
+    if (changes === 0) await insertAccount(db, accountId, { ...data, description: null, budget: null, color: null });
+    if (opening) await createTransaction(db, { ...opening, account_id: accountId });
+  });
 }
 
 export async function archiveAccount(

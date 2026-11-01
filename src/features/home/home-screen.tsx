@@ -25,6 +25,7 @@ const RECENT_LIMIT = 5;
 export function HomeScreen() {
   const { refreshing, onRefresh } = useRefresh();
   const homeScreenChart = useAppStore.use.homeScreenChart();
+  useAppStore.use.monthStartDay();
   const { data: accounts = [], isPending: accountsPending } = useAccountsWithBalance();
   const { data: recent = [], isPending: recentPending } = useRecentTransactions(RECENT_LIMIT);
   const { data: hasUserTransactions, isPending: existsPending } = useHasUserTransactions();
@@ -32,10 +33,7 @@ export function HomeScreen() {
 
   const total = accounts.reduce((sum, account) => sum + account.baseBalance, 0);
   const isEmpty = hasUserTransactions === false;
-  const nextBill = React.useMemo(
-    () => selectNextBill(rules, new Set(accounts.map((account) => account.id)), todayUnix()),
-    [rules, accounts],
-  );
+  const nextBill = selectNextBill(rules, new Set(accounts.map((account) => account.id)), todayUnix());
   const isLoading = accountsPending || recentPending || existsPending;
 
   return (

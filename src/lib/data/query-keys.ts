@@ -15,6 +15,7 @@ export const queryKeys = {
     list: (range: string) => ['transactions', 'list', range] as const,
     detail: (id: string) => ['transactions', 'detail', id] as const,
     recent: (limit: number) => ['transactions', 'recent', limit] as const,
+    exists: ['transactions', 'exists'] as const,
   },
 
   // ─── Accounts ───

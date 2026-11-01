@@ -2,6 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { HeaderButton, PageHeader } from '@/components/page-header';
+import { PeriodPill } from '@/components/period-pill';
 import { FocusAwareStatusBar, SolidButton, Text } from '@/components/ui';
 import { ArrowLeftRight, ChevronLeft, Pencil, Plus } from '@/components/ui/icon';
 import { SkeletonRows } from '@/components/ui/skeleton';
@@ -18,7 +19,6 @@ import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { useAccounts } from './api';
 import { AccountHero } from './components/account-hero';
-import { PeriodPill } from './components/period-pill';
 
 const REFRESH_KEYS = [queryKeys.accounts.all, queryKeys.transactions.all] as const;
 

@@ -10,6 +10,7 @@ import {
   Archive as LucideArchive,
   ArrowDown as LucideArrowDown,
   ArrowDownRight as LucideArrowDownRight,
+  ArrowDownUp as LucideArrowDownUp,
   ArrowLeftIcon as LucideArrowLeftIcon,
   ArrowLeftRight as LucideArrowLeftRight,
   ArrowRight as LucideArrowRight,
@@ -51,6 +52,7 @@ import {
   Link as LucideLink,
   List as LucideList,
   ListChecks as LucideListChecks,
+  ListFilter as LucideListFilter,
   Paintbrush as LucidePaintbrush,
   Pause as LucidePause,
   Pencil as LucidePencil,
@@ -63,6 +65,7 @@ import {
   RefreshCcw as LucideRefreshCcw,
   RepeatIcon as LucideRepeatIcon,
   ScanLine as LucideScanLine,
+  Search as LucideSearch,
   SendHorizonal as LucideSendHorizonal,
   Settings as LucideSettings,
   Share as LucideShare,
@@ -107,6 +110,7 @@ export const ALargeSmall = createIcon(LucideALargeSmall);
 export const AlertTriangle = createIcon(LucideAlertTriangle);
 export const Archive = createIcon(LucideArchive);
 export const ArrowDown = createIcon(LucideArrowDown);
+export const ArrowDownUp = createIcon(LucideArrowDownUp);
 export const ArrowLeftIcon = createIcon(LucideArrowLeftIcon);
 export const ArrowLeftRight = createIcon(LucideArrowLeftRight);
 export const ArrowRight = createIcon(LucideArrowRight);
@@ -140,6 +144,7 @@ export const Home = createIcon(LucideHome);
 export const Import = createIcon(LucideImport);
 export const Languages = createIcon(LucideLanguages);
 export const LayoutGrid = createIcon(LucideLayoutGrid);
+export const ListFilter = createIcon(LucideListFilter);
 export const Lightbulb = createIcon(LucideLightbulb);
 export const Link = createIcon(LucideLink);
 export const List = createIcon(LucideList);
@@ -153,6 +158,7 @@ export const PlusIcon = createIcon(LucidePlusIcon);
 export const Printer = createIcon(LucidePrinter);
 export const RefreshCcw = createIcon(LucideRefreshCcw);
 export const ScanLine = createIcon(LucideScanLine);
+export const Search = createIcon(LucideSearch);
 export const SendHorizonal = createIcon(LucideSendHorizonal);
 export const Share = createIcon(LucideShare);
 export const Shield = createIcon(LucideShield);

@@ -1,3 +1,4 @@
+import type { ActiveFilterChip } from './filters';
 import type { TransactionRouteParams } from './route-params';
 import type { FilterState } from './types';
 import { useDebouncedValue } from '@tanstack/react-pacer';
@@ -5,23 +6,25 @@ import { useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, View } from 'react-native';
-import { PeriodSelector } from '@/components/period-selector';
-import { FocusAwareStatusBar, Input, inputDefaultDefaults, inputDefaults } from '@/components/ui';
-import { X } from '@/components/ui/icon';
-import { cn } from '@/lib/cn';
+import { View } from 'react-native';
+import { PeriodPill } from '@/components/period-pill';
+import { EmptyState, FocusAwareStatusBar, GhostButton, Text, useModalSheet } from '@/components/ui';
+import { useAccounts } from '@/features/accounts/hooks';
+import { useCategories } from '@/features/categories/api';
+import { formatCurrency } from '@/features/formatting/helpers';
 import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { setPeriodSelection, useAppStore } from '@/lib/store/store';
-import { isTransferInLeg, transactionsQueryOptions, useTransactions } from './api';
-import { TransactionFilterBar } from './components/transaction-filter-bar';
+import { transactionsQueryOptions, useHasUserTransactions, useTransactions } from './api';
+import { ActiveFilters, FilterResultCard, InOutNetCard, SearchRow, TypeTabs } from './components/activity-controls';
+import { ActivityEmpty } from './components/activity-empty';
+import { TransactionFilterSheet } from './components/transaction-filter-sheet';
 import { TransactionList } from './components/transaction-list';
 import { TransactionSelectionToolbar } from './components/transaction-selection-toolbar';
+import { countActiveFilters, DEFAULT_FILTERS, filterTransactions, getActiveFilterChips, isDateSort, summarizeTransactions } from './filters';
 import { useTransactionSelection } from './hooks/selection';
 import { parseTransactionsRouteSeed } from './route-params';
-
-const inputClassNames = cn(inputDefaults, inputDefaultDefaults, 'min-w-0 flex-1 flex-row items-center p-0');
 
 const debounceSettings = {
   wait: 500,
@@ -31,18 +34,35 @@ export function TransactionsScreen() {
   const params = useLocalSearchParams<TransactionRouteParams>();
   const initialRouteSeed = useRef(parseTransactionsRouteSeed(params)).current;
   const selection = useAppStore.use.periodSelection();
+  const currency = useAppStore.use.currency();
+  const numberFormat = useAppStore.use.numberFormat();
+  const currencyFormat = useAppStore.use.currencyFormat();
   const [search, setSearch] = useState(initialRouteSeed.search);
   const [filters, setFilters] = useState<FilterState>(initialRouteSeed.filters);
   const [debouncedSearch] = useDebouncedValue(search, debounceSettings);
+  const filterSheet = useModalSheet();
   useEffect(() => {
     if (initialRouteSeed.periodSelection) setPeriodSelection(initialRouteSeed.periodSelection);
   }, [initialRouteSeed]);
-  const { categoryId, type, accountId } = filters;
-  const updateFilters = React.useCallback((newFilters: Partial<FilterState>) => {
-    setFilters((prev) => ({ ...prev, ...newFilters }));
-  }, [setFilters]);
+  const updateFilters = React.useCallback((patch: Partial<FilterState>) => setFilters((prev) => ({ ...prev, ...patch })), []);
+
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
   const { data: transactions = [], isLoading, refetch } = useTransactions(startDate, endDate);
+  const { data: accounts = [] } = useAccounts();
+  const { data: categories = [] } = useCategories();
+  const db = useSQLiteContext();
+  usePrefetchAdjacentPeriods(selection, (start, end) => transactionsQueryOptions(db, start, end));
+
+  const filtered = useMemo(() => filterTransactions(transactions, filters, debouncedSearch), [transactions, filters, debouncedSearch]);
+  const summary = useMemo(() => summarizeTransactions(filtered), [filtered]);
+  const countFor = React.useCallback((draft: FilterState) => filterTransactions(transactions, draft, debouncedSearch).length, [transactions, debouncedSearch]);
+  const filterCount = countActiveFilters(filters);
+  const chips = useMemo(
+    () => getActiveFilterChips(filters, { accounts, categories }, (cents) => formatCurrency(cents, currency, { numberFormat, currencyFormat, fractionDigits: cents % 100 === 0 ? 0 : 2 })),
+    [accounts, categories, currency, currencyFormat, filters, numberFormat],
+  );
+  const { data: hasAny = true } = useHasUserTransactions(!isLoading && transactions.length === 0);
+
   const {
     selectionMode,
     selectedIds,
@@ -51,76 +71,67 @@ export function TransactionsScreen() {
     startSelection,
     clearSelection,
     deleteSelected,
-  } = useTransactionSelection(transactions);
+  } = useTransactionSelection(filtered);
 
-  const db = useSQLiteContext();
-  usePrefetchAdjacentPeriods(selection, (start, end) => transactionsQueryOptions(db, start, end));
+  const clearAll = React.useCallback(() => {
+    setFilters((prev) => ({ ...DEFAULT_FILTERS, type: prev.type, sort: prev.sort }));
+    setSearch('');
+  }, []);
 
-  const filtered = useMemo(() => {
-    const q = debouncedSearch?.trim().toLowerCase();
-    const hasQuery = q.length > 0;
-    return transactions.filter(
-      (t) => {
-        if (categoryId && t.category_id !== categoryId) return false;
-        if (type && t.type !== type) return false;
-        if (accountId ? t.account_id !== accountId : isTransferInLeg(t)) return false;
-        if (hasQuery) {
-          return t.note?.toLowerCase().includes(q)
-            || t.category_name?.toLowerCase().includes(q)
-            || t.merchant_name?.toLowerCase().includes(q)
-            || t.counter_account_name?.toLowerCase().includes(q)
-            || t.amount?.toString().includes(q);
-        }
-        return true;
-      },
-    );
-  }, [transactions, debouncedSearch, categoryId, type, accountId]);
+  const isNarrowed = filterCount > 0 || debouncedSearch.trim().length > 0;
+  const header = (
+    <View className="px-5 pt-2">
+      <View pointerEvents="none" className="absolute inset-x-0 -top-2 h-[340px] bg-linear-to-b from-wash to-background" />
+      <View className="h-12 flex-row items-center justify-between gap-3">
+        <Text accessibilityRole="header" numberOfLines={1} className="shrink text-page-title font-bold tracking-page-title">{translate('nav.activity')}</Text>
+        <PeriodPill selection={selection} />
+      </View>
+      {hasAny && (
+        <>
+          <SearchRow search={search} onChangeSearch={setSearch} filterCount={filterCount} onOpenFilters={filterSheet.present} />
+          {filterCount > 0
+            ? (
+                <>
+                  <ActiveFilters chips={chips} onRemove={(chip: ActiveFilterChip) => updateFilters(chip.remove)} onClearAll={clearAll} />
+                  <FilterResultCard count={summary.count} total={summary.net} sort={filters.sort} onSortPress={filterSheet.present} />
+                </>
+              )
+            : <InOutNetCard income={summary.income} expense={summary.expense} net={summary.net} />}
+          <TypeTabs value={filters.type} onChange={(type) => updateFilters({ type })} />
+        </>
+      )}
+    </View>
+  );
+
+  const empty = hasAny
+    ? (
+        <View className="px-5 pt-14">
+          <EmptyState
+            title={translate(isNarrowed ? 'transactions.empty.no_results' : 'transactions.empty.no_period')}
+            body={translate(isNarrowed ? 'transactions.empty.no_results_body' : 'transactions.empty.no_period_body')}
+            actions={isNarrowed && <GhostButton label={translate('transactions.filter.clear_all')} onPress={clearAll} textClassName="underline" />}
+          />
+        </View>
+      )
+    : <ActivityEmpty />;
 
   return (
     <View className="flex-1">
       <FocusAwareStatusBar />
-
-      <PeriodSelector selection={selection} />
-
-      <View className="flex-row items-center gap-2 px-4">
-        <View className={inputClassNames}>
-          <Input
-            value={search}
-            placeholder={translate('transactions.search')}
-            onChangeText={setSearch}
-            size="sm"
-            containerClassName="min-w-0 flex-1"
-            className="rounded-r-none border-0 bg-transparent pr-8 focus:border-0"
-          />
-          {search.length > 0 && (
-            <Pressable
-              onPress={() => setSearch('')}
-              hitSlop={8}
-              className="absolute right-2 p-1"
-              pointerEvents="box-only"
-            >
-              <X className="size-5 text-gray-500" />
-            </Pressable>
-          )}
-        </View>
-      </View>
-      <TransactionFilterBar
-        filters={filters}
-        hasActiveFilters={categoryId !== null || type !== null || accountId !== null}
-        updateFilters={updateFilters}
+      <TransactionList
+        transactions={filtered}
+        isLoading={isLoading}
+        onRefresh={() => void refetch()}
+        grouped={isDateSort(filters.sort)}
+        showAccount
+        header={header}
+        empty={empty}
+        selectionMode={selectionMode}
+        selectedIds={selectedIds}
+        onSelect={toggleSelection}
+        onStartSelection={startSelection}
+        containerClassName="pb-16"
       />
-      <View className="flex-1">
-        <TransactionList
-          transactions={filtered}
-          isLoading={isLoading}
-          onRefresh={() => void refetch()}
-          selectionMode={selectionMode}
-          selectedIds={selectedIds}
-          onSelect={toggleSelection}
-          onStartSelection={startSelection}
-          containerClassName="pb-16"
-        />
-      </View>
       {selectionMode && (
         <TransactionSelectionToolbar
           selectedCount={selectedCount}
@@ -128,6 +139,15 @@ export function TransactionsScreen() {
           onDelete={deleteSelected}
         />
       )}
+      <TransactionFilterSheet
+        ref={filterSheet.ref}
+        filters={filters}
+        countFor={countFor}
+        onApply={(next) => {
+          setFilters(next);
+          filterSheet.close();
+        }}
+      />
     </View>
   );
 }

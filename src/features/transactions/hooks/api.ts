@@ -43,6 +43,15 @@ export function useTransaction(id: string) {
   });
 }
 
+export function useHasUserTransactions(enabled = true) {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: queryKeys.transactions.exists,
+    queryFn: () => queries.hasUserTransactions(db),
+    enabled,
+  });
+}
+
 export function useRecentTransactions(limit: number = 5) {
   const db = useSQLiteContext();
   return useQuery({

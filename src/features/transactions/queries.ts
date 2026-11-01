@@ -10,10 +10,11 @@ import { generateId } from '@/lib/sqlite';
 
 // ─── Read Queries ───
 
-const TRANSACTION_SELECT = `SELECT t.*, c.name as category_name, c.icon as category_icon, c.color as category_color,
+const TRANSACTION_SELECT = `SELECT t.*, a.name as account_name, c.name as category_name, c.icon as category_icon, c.color as category_color,
        tp.account_id as counter_account_id, ca.name as counter_account_name, ca.icon as counter_account_icon,
        tp.amount as counter_amount, tp.currency as counter_currency
      FROM transactions t
+     LEFT JOIN accounts a ON a.id = t.account_id
      LEFT JOIN categories c ON t.category_id = c.id
      LEFT JOIN transactions tp ON t.transfer_id IS NOT NULL AND tp.transfer_id = t.transfer_id AND tp.id <> t.id
      LEFT JOIN accounts ca ON ca.id = tp.account_id`;
@@ -52,6 +53,10 @@ export async function getTransactionById(
 
 export async function hasTransactions(db: SQLiteDatabase): Promise<boolean> {
   return (await db.getFirstAsync('SELECT 1 FROM transactions LIMIT 1')) !== null;
+}
+
+export async function hasUserTransactions(db: SQLiteDatabase): Promise<boolean> {
+  return (await db.getFirstAsync('SELECT 1 FROM transactions WHERE is_adjustment = 0 LIMIT 1')) !== null;
 }
 
 export async function getRecentTransactions(

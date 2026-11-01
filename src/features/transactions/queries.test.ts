@@ -13,6 +13,7 @@ import {
   getTransactionById,
   getTransactions,
   getTransactionsSample,
+  hasUserTransactions,
   isTransferInLeg,
   updateTransaction,
   updateTransfer,
@@ -80,6 +81,7 @@ describe('getTransactions', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('txn_1');
+    expect(result[0].account_name).toBe('Checking');
   });
 
   it('excludes transactions outside the date range', async () => {
@@ -149,6 +151,22 @@ describe('getTransactionById', () => {
 
     const result = await getTransactionById(db as any, 'missing');
     expect(result).toBeNull();
+  });
+});
+
+describe('hasUserTransactions', () => {
+  it('ignores opening-balance adjustment rows', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    await db.runAsync(
+      `INSERT INTO transactions (id, account_id, type, amount, currency, baseAmount, baseCurrency, date, is_adjustment)
+       VALUES ('adj', 'acc_1', 'transfer', 1000, 'EUR', 1000, 'EUR', ?, 1)`,
+      [MAR_MID],
+    );
+    expect(await hasUserTransactions(db as any)).toBe(false);
+
+    await seedTransaction(db);
+    expect(await hasUserTransactions(db as any)).toBe(true);
   });
 });
 

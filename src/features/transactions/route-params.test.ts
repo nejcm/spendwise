@@ -1,4 +1,6 @@
+import type { FilterState } from './types';
 import type { PeriodSelection } from '@/lib/store/store';
+import { DEFAULT_FILTERS } from './filters';
 import { buildTransactionsHref, formatPeriodParam, parsePeriodParam, parseTransactionsRouteSeed } from './route-params';
 
 describe('parseTransactionsRouteSeed', () => {
@@ -10,11 +12,7 @@ describe('parseTransactionsRouteSeed', () => {
       type: 'expense',
     })).toEqual({
       search: 'coffee',
-      filters: {
-        accountId: 'acc_1',
-        categoryId: 'cat_1',
-        type: 'expense',
-      },
+      filters: { ...DEFAULT_FILTERS, accountIds: ['acc_1'], categoryIds: ['cat_1'], type: 'expense' },
     });
   });
 
@@ -24,26 +22,31 @@ describe('parseTransactionsRouteSeed', () => {
       period: 'month:2026-13',
     })).toEqual({
       search: '',
-      filters: {
-        accountId: null,
-        categoryId: null,
-        type: null,
-      },
+      filters: DEFAULT_FILTERS,
     });
   });
 
-  it('uses the first value when params arrive as arrays', () => {
+  it('keeps every id when params arrive as arrays, and the first value otherwise', () => {
     expect(parseTransactionsRouteSeed({
       accountId: ['acc_1', 'acc_2'],
       search: ['rent', 'ignored'],
     })).toEqual({
       search: 'rent',
-      filters: {
-        accountId: 'acc_1',
-        categoryId: null,
-        type: null,
-      },
+      filters: { ...DEFAULT_FILTERS, accountIds: ['acc_1', 'acc_2'] },
     });
+  });
+
+  it('parses comma-separated ids, sort and cent amounts', () => {
+    expect(parseTransactionsRouteSeed({
+      categoryId: 'cat_1, cat_2,,cat_1',
+      sort: 'largest',
+      minAmount: '1000',
+      maxAmount: '5000',
+    }).filters).toEqual({ ...DEFAULT_FILTERS, categoryIds: ['cat_1', 'cat_2'], sort: 'largest', minAmount: 1000, maxAmount: 5000 });
+  });
+
+  it('ignores an unknown sort and non-integer amounts', () => {
+    expect(parseTransactionsRouteSeed({ sort: 'random', minAmount: '10.5', maxAmount: '-3' }).filters).toEqual(DEFAULT_FILTERS);
   });
 
   it('parses a period into the seed', () => {
@@ -96,8 +99,9 @@ describe('parsePeriodParam', () => {
 describe('buildTransactionsHref', () => {
   it('serialises only the set fields', () => {
     expect(buildTransactionsHref({
-      categoryId: 'cat_1',
-      accountId: null,
+      categoryIds: ['cat_1'],
+      accountIds: [],
+      sort: 'newest',
       search: '  ',
       type: 'expense',
       periodSelection: { mode: 'month', year: 2026, month: 10 },
@@ -108,14 +112,15 @@ describe('buildTransactionsHref', () => {
   });
 
   it('produces params that parse back into the same seed', () => {
+    const filters: FilterState = { type: 'income', accountIds: ['acc_1', 'acc_2'], categoryIds: ['cat_1'], minAmount: 0, maxAmount: 2500, sort: 'oldest' };
     const href = buildTransactionsHref({
-      accountId: 'acc_1',
+      ...filters,
       search: 'rent',
       periodSelection: { mode: 'custom', startDate: '2026-10-01', endDate: '2026-10-31' },
     });
     expect(parseTransactionsRouteSeed(href.params)).toEqual({
       search: 'rent',
-      filters: { accountId: 'acc_1', categoryId: null, type: null },
+      filters,
       periodSelection: { mode: 'custom', startDate: '2026-10-01', endDate: '2026-10-31' },
     });
   });

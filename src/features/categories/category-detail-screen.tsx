@@ -129,13 +129,14 @@ export function CategoryDetailScreen() {
 
             <SectionHeader
               title={translate('transactions.title')}
-              onSeeAll={() => router.push(buildTransactionsHref({ categoryId: category.category_id, periodSelection: selection }))}
+              onSeeAll={() => router.push(buildTransactionsHref({ categoryIds: [category.category_id], periodSelection: selection }))}
             />
           </View>
 
           <TransactionList
             transactions={transactions}
             isLoading={txLoading}
+            showAccount
             selectionMode={selectionMode}
             selectedIds={selectedIds}
             onSelect={toggleSelection}

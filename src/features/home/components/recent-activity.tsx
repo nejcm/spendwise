@@ -12,7 +12,7 @@ export function RecentActivity({ transactions }: { transactions: TransactionWith
   return (
     <View>
       <SectionHeader title={translate('home.recent_activity')} onSeeAll={() => router.push('/transactions')} className="px-0 pt-6 pb-1" titleClassName="text-header-title font-semibold text-foreground" />
-      {transactions.map((transaction) => <TransactionCard key={transaction.id} transaction={transaction} className="px-0" />)}
+      {transactions.map((transaction) => <TransactionCard key={transaction.id} transaction={transaction} showDate className="px-0" />)}
     </View>
   );
 }

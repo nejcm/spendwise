@@ -1,13 +1,18 @@
-import type { FilterState, TransactionType } from './types';
+import type { FilterState, TransactionSort, TransactionType } from './types';
 import type { PeriodSelection } from '@/lib/store/store';
+import { DEFAULT_FILTERS, SORT_OPTIONS } from './filters';
 
 type ParamValue = string | string[] | undefined;
 
+/** `accountId` and `categoryId` take one id or a comma-separated list; amounts are cents. */
 export type TransactionRouteParams = {
   accountId?: ParamValue;
   categoryId?: ParamValue;
+  maxAmount?: ParamValue;
+  minAmount?: ParamValue;
   period?: ParamValue;
   search?: ParamValue;
+  sort?: ParamValue;
   type?: ParamValue;
 };
 
@@ -28,6 +33,21 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 function firstValue(value: ParamValue): string | undefined {
   return Array.isArray(value) ? value[0] : value;
+}
+
+function parseIds(value: ParamValue): string[] {
+  const values = Array.isArray(value) ? value : [value ?? ''];
+  return [...new Set(values.flatMap((v) => v.split(',')).map((id) => id.trim()).filter(Boolean))];
+}
+
+function parseCents(value: ParamValue): number | null {
+  const raw = firstValue(value);
+  return raw && /^\d+$/.test(raw) ? Number(raw) : null;
+}
+
+function parseSort(value: ParamValue): TransactionSort {
+  const raw = firstValue(value);
+  return SORT_OPTIONS.find((sort) => sort === raw) ?? DEFAULT_FILTERS.sort;
 }
 
 function parseType(value: ParamValue): TransactionType | null {
@@ -108,18 +128,24 @@ export function parseTransactionsRouteSeed(params: TransactionRouteParams): Tran
   return {
     search: firstValue(params.search)?.trim() ?? '',
     filters: {
-      accountId: firstValue(params.accountId) ?? null,
-      categoryId: firstValue(params.categoryId) ?? null,
       type: parseType(params.type),
+      accountIds: parseIds(params.accountId),
+      categoryIds: parseIds(params.categoryId),
+      minAmount: parseCents(params.minAmount),
+      maxAmount: parseCents(params.maxAmount),
+      sort: parseSort(params.sort),
     },
     ...(periodSelection && { periodSelection }),
   };
 }
 
-export function buildTransactionsHref({ accountId, categoryId, search, type, periodSelection }: TransactionsHrefSeed) {
+export function buildTransactionsHref({ accountIds, categoryIds, minAmount, maxAmount, sort, search, type, periodSelection }: TransactionsHrefSeed) {
   const params: Record<string, string> = {};
-  if (accountId) params.accountId = accountId;
-  if (categoryId) params.categoryId = categoryId;
+  if (accountIds?.length) params.accountId = accountIds.join(',');
+  if (categoryIds?.length) params.categoryId = categoryIds.join(',');
+  if (minAmount != null) params.minAmount = String(minAmount);
+  if (maxAmount != null) params.maxAmount = String(maxAmount);
+  if (sort && sort !== DEFAULT_FILTERS.sort) params.sort = sort;
   if (search?.trim()) params.search = search.trim();
   if (type) params.type = type;
   if (periodSelection) params.period = formatPeriodParam(periodSelection);

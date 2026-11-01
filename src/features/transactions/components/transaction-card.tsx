@@ -4,17 +4,19 @@ import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
 import { DEFAULT_COLOR } from '@/components/color-selector';
-import { Checkbox, FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
+import { Checkbox, FormattedCurrency, getPressedStyle, IconTile, Text } from '@/components/ui';
 import { formatShortDate } from '@/features/formatting/helpers';
 import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
-import { hexWithOpacity } from '@/lib/theme/colors';
 import { MerchantLogo } from './merchant-logo';
 
 export type TransactionCardProps = {
   transaction: TransactionWithCategory;
   className?: string;
+  /** For lists that aren't grouped by day. */
+  showDate?: boolean;
+  showAccount?: boolean;
   selectionMode?: boolean;
   selected?: boolean;
   onSelect?: (id: string) => void;
@@ -24,15 +26,15 @@ export type TransactionCardProps = {
 export const TransactionCard = React.memo(({
   transaction,
   className,
+  showDate = false,
+  showAccount = false,
   selectionMode = false,
   selected = false,
   onSelect,
   onStartSelection,
 }: TransactionCardProps) => {
   const router = useRouter();
-  const currency = useAppStore.use.currency();
-  const density = useAppStore.use.density();
-  const isCompact = density === 'compact';
+  const isCompact = useAppStore.use.density() === 'compact';
   const isIncome = transaction.type === 'income';
   const isTransfer = transaction.type === 'transfer';
   const isInflow = isIncome || (isTransfer && transaction.amount > 0);
@@ -42,13 +44,19 @@ export const TransactionCard = React.memo(({
     : transaction.counter_account_name
       ? translate(transaction.amount < 0 ? 'transactions.transfer_to' : 'transactions.transfer_from', { account: transaction.counter_account_name })
       : transaction.merchant_name || transaction.category_name || (isTransfer ? translate('transactions.transfer') : 'Unknown');
-  const showConverted = transaction.currency !== currency;
-  const logo = transaction.merchant_logo_slug ? <MerchantLogo slug={transaction.merchant_logo_slug} /> : null;
+  const meta = [
+    showDate && formatShortDate(transaction.date),
+    isTransfer && !isAdjustment ? translate('transactions.transfer') : transaction.merchant_name && transaction.category_name,
+    showAccount && transaction.account_name,
+    transaction.note,
+  ].filter(Boolean).join(' · ');
+  const isForeign = transaction.currency !== transaction.baseCurrency;
+  const logo = transaction.merchant_logo_slug ? <MerchantLogo slug={transaction.merchant_logo_slug} size={22} withBg={false} /> : null;
   const toggleSelection = React.useCallback(() => onSelect?.(transaction.id), [onSelect, transaction.id]);
 
   return (
     <Pressable
-      className={cn('flex-row items-center', isCompact ? 'gap-2 px-3 py-1.5' : 'gap-3 p-3', selected && 'bg-accent/10', className)}
+      className={cn('flex-row items-center gap-3', isCompact ? 'min-h-12 py-1' : 'min-h-[60px] py-2', selected && 'bg-accent-soft', className)}
       style={getPressedStyle}
       onPress={() => selectionMode ? toggleSelection() : router.push(`/transactions/${transaction.id}`)}
       onLongPress={() => selectionMode ? toggleSelection() : onStartSelection?.(transaction.id)}
@@ -56,40 +64,28 @@ export const TransactionCard = React.memo(({
       accessibilityState={selectionMode ? { checked: selected } : undefined}
       accessibilityLabel={selectionMode ? translate('transactions.select_transaction') : undefined}
     >
-      {selectionMode && (
-        <Checkbox.Icon checked={selected} size="sm" />
-      )}
-      {logo || (
-        <View
-          className="size-10 items-center justify-center rounded-lg"
-          style={{ backgroundColor: hexWithOpacity(transaction.category_color ?? DEFAULT_COLOR, 36) }}
-        >
-          <Text className="text-xl font-medium">
-            {(transaction.category_icon || (isTransfer ? '⇄' : '?'))}
-          </Text>
-        </View>
-      )}
-      <View className="flex-1">
-        <Text className="text-base font-medium" numberOfLines={1}>
-          {displayName}
-        </Text>
-        <Text className="text-sm text-muted-foreground" numberOfLines={1}>
-          {formatShortDate(transaction.date)}
-          {transaction.merchant_name && transaction.category_name ? ` · ${transaction.category_name}` : ''}
-          {isTransfer && !isAdjustment ? ` · ${translate('transactions.not_spending')}` : ''}
-          {transaction.note ? ` · ${transaction.note}` : ''}
-        </Text>
+      {selectionMode && <Checkbox.Icon checked={selected} size="sm" />}
+      <IconTile
+        size={isCompact ? 'sm' : 'md'}
+        color={transaction.category_color ?? DEFAULT_COLOR}
+        icon={transaction.category_icon || (isTransfer ? '⇄' : '?')}
+      >
+        {logo}
+      </IconTile>
+      <View className="min-w-0 flex-1">
+        <Text className="text-row font-medium" numberOfLines={1}>{displayName}</Text>
+        {!!meta && <Text className="text-meta text-muted-foreground" numberOfLines={1}>{meta}</Text>}
       </View>
       <View className="items-end">
         <FormattedCurrency
-          value={Math.abs(transaction.amount)}
-          currency={transaction.currency}
+          value={transaction.baseAmount}
+          currency={transaction.baseCurrency}
           prefix={isInflow ? '+' : '-'}
-          className={`text-base font-medium ${isIncome ? 'text-success-600' : ''}`}
+          className={cn('text-row font-semibold', isIncome && 'text-positive', isTransfer && 'text-muted-foreground')}
         />
-        {showConverted && (
-          <FormattedCurrency value={Math.abs(transaction.baseAmount)} currency={transaction.baseCurrency} className="text-sm text-muted-foreground" />
-        )}
+        {isForeign
+          ? <FormattedCurrency value={Math.abs(transaction.amount)} currency={transaction.currency} className="text-xs text-muted-foreground" />
+          : isTransfer && !isAdjustment && <Text className="text-xs text-muted-foreground">{translate('transactions.not_spending')}</Text>}
       </View>
     </Pressable>
   );

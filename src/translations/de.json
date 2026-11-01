@@ -639,6 +639,14 @@
     "committed_for": "Eingeplant für {{month}}",
     "committed_missing_rate": "Regeln ohne gespeicherten Wechselkurs sind nicht enthalten",
     "delete_rule": "Regel löschen",
+    "empty": {
+      "body": "Regeln buchen Rechnungen und Gehalt am richtigen Tag, und Home zeigt, was als Nächstes fällig ist.",
+      "income": "Einnahme",
+      "on_first": "am 1.",
+      "scratch": "Ohne Vorlage starten",
+      "templates": "Oder mit einer Vorlage starten",
+      "title": "Einmal einrichten,\nbucht sich selbst."
+    },
     "end_date_invalid": "Das Enddatum muss am oder nach dem Startdatum liegen",
     "ended": "Beendet",
     "form": {
@@ -666,7 +674,6 @@
     "next": "Nächste: {{when}}",
     "next_days": "Nächste {{count}} Tage",
     "no_end_date": "kein Enddatum",
-    "no_rules": "Noch keine wiederkehrenden Regeln",
     "pause_rule": "Regel pausieren",
     "recurring_expense": "Wiederkehrende Ausgabe",
     "recurring_income": "Wiederkehrende Einnahme",
@@ -681,6 +688,14 @@
     "rule_not_found": "Diese wiederkehrende Regel existiert nicht mehr.",
     "since": "Seit",
     "start_date_required": "Startdatum ist erforderlich",
+    "templates": {
+      "gym": "Fitnessstudio",
+      "insurance": "Versicherung",
+      "phone": "Handyvertrag",
+      "rent": "Miete",
+      "salary": "Gehalt",
+      "streaming": "Netflix"
+    },
     "this_rule": "diese Regel",
     "title": "Rechnungen und Daueraufträge",
     "until": "bis {{date}}"
@@ -891,6 +906,19 @@
     "by_category": "Nach Kategorie",
     "calendar": "Kalender",
     "categories_total": "Kategorien {{amount}}",
+    "empty": {
+      "add": "Transaktion hinzufügen",
+      "body": "Trends, Top-Kategorien und Monatsvergleiche erscheinen nach {{total}} Transaktionen. Importierst du deinen Verlauf, ist das sofort gefüllt.",
+      "chart_label": "Ausgaben der letzten sechs Monate",
+      "import": "Verlauf importieren",
+      "locked_daily": "Tägliche Ausgaben, Tagesdurchschnitt und Sparquote",
+      "locked_months": "Monatsvergleich und Sechs-Monats-Trend",
+      "locked_where": "Wohin dein Geld ging",
+      "progress": "{{count}} von {{total}}",
+      "progress_label": "Erfasste Transaktionen",
+      "title": "Noch nicht genug Daten",
+      "unlocks": "Wird mit mehr Daten freigeschaltet"
+    },
     "free_amount": "{{amount}} frei",
     "global_budget_invalid": "Bitte gib einen gültigen positiven Betrag ein",
     "global_budget_prompt": "Lege ein Ausgabenlimit fest, um deine Gesamtausgaben zu verfolgen",

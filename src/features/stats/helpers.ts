@@ -33,6 +33,13 @@ function expandToMonthSlices(selection: BudgetPeriodSelection): MonthSlice[] {
 }
 
 /** Returns [startUnix, endUnix] for the full span of a BudgetPeriodSelection. */
+/** FINDINGS 20: Overview stays on InsightsEmpty below this many income/expense transactions. */
+export const INSIGHTS_MIN_TRANSACTIONS = 10;
+
+export function hasEnoughForInsights(count: number): boolean {
+  return count >= INSIGHTS_MIN_TRANSACTIONS;
+}
+
 export function getBudgetSelectionBoundaries(selection: BudgetPeriodSelection): [number, number] {
   if (selection.mode === 'day') {
     const start = dateToUnix(selection.date);

@@ -53,6 +53,7 @@ export const queryKeys = {
   // ─── Insights ───
   insights: {
     all: ['insights'] as const,
+    activityCount: ['insights', 'activity-count'] as const,
     categorySpendRange: (startDate: number | undefined, endDate: number | undefined) =>
       ['insights', 'category-spend-range', startDate, endDate] as const,
     monthlyTrend: (months: number) =>

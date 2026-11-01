@@ -1,5 +1,6 @@
 import type { ScheduledTransaction } from './types';
-import { canResume, committedForMonth, dueDatesBetween, groupRules } from './helpers';
+import { RECURRING_TEMPLATES } from './constants';
+import { canResume, committedForMonth, dueDatesBetween, groupRules, templateParams } from './helpers';
 import { isoDateToUnix } from './scheduler';
 
 function rule(overrides: Partial<ScheduledTransaction> & { due: string }): ScheduledTransaction {
@@ -93,5 +94,41 @@ describe('canResume', () => {
     const completed = rule({ due: '2026-09-01', end_date: end, next_due_date: isoDateToUnix('2026-12-01'), is_active: 0 });
     expect(canResume(completed, '2026-11-01')).toBe(false);
     expect(canResume({ ...completed, next_due_date: end }, '2026-11-01')).toBe(true);
+  });
+});
+
+describe('templateParams', () => {
+  const template = (key: string) => RECURRING_TEMPLATES.find((t) => t.key === key)!;
+  const categories = [
+    { id: 'cat_housing', name: 'Housing', kind: 'expense' as const },
+    { id: 'cat_rent_in', name: 'Rent received', kind: 'income' as const },
+    { id: 'cat_subs', name: 'Subscriptions', kind: 'expense' as const },
+    { id: 'cat_salary', name: 'Salary', kind: 'income' as const },
+  ];
+  const base = { categories, currency: 'EUR' as const, today: '2026-11-02' };
+
+  it('matches a category of the same kind by name and starts rent on the next 1st', () => {
+    expect(templateParams(template('rent'), { ...base, name: 'Rent' })).toEqual({
+      note: 'Rent',
+      type: 'expense',
+      frequency: 'monthly',
+      category_id: 'cat_housing',
+      start_date: '2026-12-01',
+    });
+    expect(templateParams(template('rent'), { ...base, name: 'Rent', today: '2026-11-01' }).start_date).toBe('2026-11-01');
+  });
+
+  it('prefills the amount in Preferred Currency and income type', () => {
+    expect(templateParams(template('streaming'), { ...base, name: 'Netflix' })).toMatchObject({ amount: '13.99', currency: 'EUR', category_id: 'cat_subs' });
+    expect(templateParams(template('salary'), { ...base, name: 'Salary' })).toMatchObject({ type: 'income', category_id: 'cat_salary' });
+  });
+
+  it('sends an empty category when nothing matches so a remembered one is not used', () => {
+    expect(templateParams(template('gym'), { ...base, name: 'Gym' }).category_id).toBe('');
+  });
+
+  it('only offers income and expense templates', () => {
+    expect(RECURRING_TEMPLATES).toHaveLength(6);
+    expect(RECURRING_TEMPLATES.every((t) => t.type === 'income' || t.type === 'expense')).toBe(true);
   });
 });

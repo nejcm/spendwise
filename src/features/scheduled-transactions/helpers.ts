@@ -1,6 +1,8 @@
+import type { RecurringTemplate } from './constants';
 import type { ScheduledTransaction, ScheduledTransactionFormData } from './types';
+import type { Category } from '@/features/categories/types';
 import type { CurrencyKey } from '@/features/currencies';
-import { addDays, endOfMonth, format, parseISO } from 'date-fns';
+import { addDays, addMonths, endOfMonth, format, parseISO, startOfMonth } from 'date-fns';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { unixToISODate } from '@/lib/date/helpers';
 import { advanceScheduledDate, getFirstDueOnOrAfter, isoDateToUnix } from './scheduler';
@@ -95,5 +97,25 @@ export function ruleToFormData(rule: ScheduledTransaction, overrides: Partial<Sc
     end_date: rule.end_date,
     is_active: !!rule.is_active,
     ...overrides,
+  };
+}
+
+/** Route params for `/scheduled/new`; an unmatched category is sent as '' so a remembered one isn't prefilled. */
+export function templateParams(
+  template: RecurringTemplate,
+  { name, categories, currency, today }: { name: string; categories: Pick<Category, 'id' | 'name' | 'kind'>[]; currency: CurrencyKey; today: string },
+): Record<string, string> {
+  const fitting = categories.filter((c) => c.kind === template.type);
+  const category = template.categoryHints
+    .map((hint) => fitting.find((c) => c.name.toLowerCase().includes(hint)))
+    .find(Boolean);
+  const day = parseISO(today);
+  return {
+    note: name,
+    type: template.type,
+    frequency: template.frequency,
+    category_id: category?.id ?? '',
+    ...(template.amount ? { amount: String(centsToAmount(template.amount)), currency } : {}),
+    ...(template.startsOnFirst ? { start_date: iso(day.getDate() === 1 ? day : startOfMonth(addMonths(day, 1))) } : {}),
   };
 }

@@ -1,3 +1,5 @@
+import { RECURRING_TEMPLATES } from '@/features/scheduled-transactions/constants';
+import { templateParams } from '@/features/scheduled-transactions/helpers';
 import { parseScheduledFormInitialValues, parseTransactionFormInitialValues } from './form-route-params';
 
 describe('parseTransactionFormInitialValues', () => {
@@ -97,6 +99,18 @@ describe('parseScheduledFormInitialValues', () => {
       is_active: ['1'],
       type: 'transfer',
     })).toBeUndefined();
+  });
+
+  it('round-trips every recurring template', () => {
+    for (const template of RECURRING_TEMPLATES) {
+      const params = templateParams(template, { name: 'X', categories: [], currency: 'EUR', today: '2026-11-02' });
+      expect(parseScheduledFormInitialValues(params)).toEqual({ ...params, note: 'X' });
+    }
+  });
+
+  it('ignores invalid scheduled amounts and keeps an empty category', () => {
+    expect(parseScheduledFormInitialValues({ amount: 'abc', category_id: '' })).toEqual({ category_id: '' });
+    expect(parseScheduledFormInitialValues({ amount: '-5' })).toBeUndefined();
   });
 
   it('parses false scheduled booleans and empty end dates', () => {

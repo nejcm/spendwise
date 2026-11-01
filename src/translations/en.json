@@ -639,6 +639,14 @@
     "committed_for": "Committed for {{month}}",
     "committed_missing_rate": "Excludes rules with no cached exchange rate",
     "delete_rule": "Delete rule",
+    "empty": {
+      "body": "Rules log your bills and salary on the right day, and Home shows what's due next.",
+      "income": "income",
+      "on_first": "1st",
+      "scratch": "Start from scratch",
+      "templates": "Or start from a template",
+      "title": "Set it once,\nit adds itself."
+    },
     "end_date_invalid": "End date must be on or after the start date",
     "ended": "Ended",
     "form": {
@@ -666,7 +674,6 @@
     "next": "Next: {{when}}",
     "next_days": "Next {{count}} days",
     "no_end_date": "no end date",
-    "no_rules": "No recurring rules yet",
     "pause_rule": "Pause this rule",
     "recurring_expense": "Recurring expense",
     "recurring_income": "Recurring income",
@@ -681,6 +688,14 @@
     "rule_not_found": "This recurring rule no longer exists.",
     "since": "Since",
     "start_date_required": "Start date is required",
+    "templates": {
+      "gym": "Gym",
+      "insurance": "Insurance",
+      "phone": "Phone plan",
+      "rent": "Rent",
+      "salary": "Salary",
+      "streaming": "Netflix"
+    },
     "this_rule": "this rule",
     "title": "Bills and recurring",
     "until": "until {{date}}"
@@ -891,6 +906,19 @@
     "by_category": "By category",
     "calendar": "Calendar",
     "categories_total": "Categories {{amount}}",
+    "empty": {
+      "add": "Add a transaction",
+      "body": "Trends, top categories and month-over-month comparisons appear after {{total}} transactions. Importing your history fills this in today.",
+      "chart_label": "Spending over the last six months",
+      "import": "Import history",
+      "locked_daily": "Daily spending, average per day and savings rate",
+      "locked_months": "Month-over-month and six-month trend",
+      "locked_where": "Where your money went",
+      "progress": "{{count}} of {{total}}",
+      "progress_label": "Transactions added",
+      "title": "Not enough data yet",
+      "unlocks": "Unlocks with more data"
+    },
     "free_amount": "{{amount}} free",
     "global_budget_invalid": "Please enter a valid positive amount",
     "global_budget_prompt": "Set a spending cap to track your total expenses",

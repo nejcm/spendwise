@@ -1,6 +1,7 @@
 import { createTestDb } from '@/test-utils/sqlite-db';
 
 import {
+  getActivityCount,
   getCategorySpendByRange,
   getMonthlyTrend,
   getSummaryByRange,
@@ -244,5 +245,22 @@ describe('getMonthlyTrend', () => {
       { month: '2026-04', income: 0, expense: 0 },
       { month: '2026-05', income: 500000, expense: 200000 },
     ]);
+  });
+});
+
+describe('getActivityCount', () => {
+  it('counts income and expense across all time, without transfers or adjustments', async () => {
+    const db = await createTestDb();
+    expect(await getActivityCount(db as any)).toBe(0);
+    await db.execAsync(`
+      INSERT INTO accounts (id, name, type, currency) VALUES ('acc_1', 'Checking', 'checking', 'EUR'), ('acc_2', 'Savings', 'savings', 'EUR');
+      INSERT INTO transactions (id, account_id, type, amount, currency, baseAmount, baseCurrency, date, transfer_id, is_adjustment) VALUES
+        ('t1', 'acc_1', 'expense', 3000, 'EUR', 3000, 'EUR', ${MAR_15}, NULL, 0),
+        ('t2', 'acc_1', 'income', 5000, 'EUR', 5000, 'EUR', 0, NULL, 0),
+        ('t3', 'acc_1', 'income', 90000, 'EUR', 90000, 'EUR', ${MAR_15}, NULL, 1),
+        ('t4', 'acc_1', 'transfer', -2000, 'EUR', -2000, 'EUR', ${MAR_20}, 'tr_1', 0),
+        ('t5', 'acc_2', 'transfer', 2000, 'EUR', 2000, 'EUR', ${MAR_20}, 'tr_1', 0);
+    `);
+    expect(await getActivityCount(db as any)).toBe(2);
   });
 });

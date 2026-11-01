@@ -1,7 +1,7 @@
 import type { GlobalBudget } from './global-budget-queries';
 import { getMonthBoundaries } from '@/lib/date/helpers';
 
-import { chartCeiling, dailyExpenses, daysLeftIn, elapsedSpendStats, getBudgetSelectionBoundaries, heatLevels, monthlyFromDaily, monthlyGlobalBudget, paceFraction, savedRatio, scaleGlobalBudget } from './helpers';
+import { chartCeiling, dailyExpenses, daysLeftIn, elapsedSpendStats, getBudgetSelectionBoundaries, hasEnoughForInsights, heatLevels, monthlyFromDaily, monthlyGlobalBudget, paceFraction, savedRatio, scaleGlobalBudget } from './helpers';
 
 const MONTHLY: GlobalBudget = { amountCents: 100_000, type: 'monthly' };
 const YEARLY: GlobalBudget = { amountCents: 1_200_000, type: 'yearly' };
@@ -201,5 +201,13 @@ describe('insights helpers', () => {
     expect(daysLeftIn(D(1), D(11), D(10))).toBe(0);
     expect(daysLeftIn(D(1), D(11), D(8))).toBe(2);
     expect(daysLeftIn(undefined, undefined, D(8))).toBeNull();
+  });
+});
+
+describe('hasEnoughForInsights', () => {
+  it('unlocks the Overview at 10 transactions', () => {
+    expect(hasEnoughForInsights(0)).toBe(false);
+    expect(hasEnoughForInsights(9)).toBe(false);
+    expect(hasEnoughForInsights(10)).toBe(true);
   });
 });

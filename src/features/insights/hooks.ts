@@ -6,6 +6,14 @@ import { queryKeys } from '@/lib/data/query-keys';
 
 import * as queries from './queries';
 
+export function useActivityCount() {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: queryKeys.insights.activityCount,
+    queryFn: () => queries.getActivityCount(db),
+  });
+}
+
 export function useSummaryByRange(startDate: number | undefined, endDate: number | undefined, enabled = true) {
   const db = useSQLiteContext();
   return useQuery({

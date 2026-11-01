@@ -2,6 +2,7 @@ import * as React from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { PeriodPill } from '@/components/period-pill';
 import { FocusAwareStatusBar, SegmentedControl, Text } from '@/components/ui';
+import { useActivityCount } from '@/features/insights/api';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { useCurrentDay } from '@/lib/hooks/use-current-year-month';
 import { useRefresh } from '@/lib/hooks/use-refresh';
@@ -10,7 +11,9 @@ import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { BudgetTab } from './components/budget-tab';
 import { CalendarTab } from './components/calendar-tab';
+import { InsightsEmpty } from './components/insights-empty';
 import { OverviewTab } from './components/overview-tab';
+import { hasEnoughForInsights } from './helpers';
 
 type StatsTab = 'overview' | 'calendar' | 'budget';
 
@@ -21,6 +24,7 @@ export function StatsScreen() {
   const { refreshing, onRefresh } = useRefresh();
   const [tab, setTab] = React.useState<StatsTab>('overview');
   const period = { selection, startDate, endDate };
+  const { data: activityCount } = useActivityCount();
 
   return (
     <>
@@ -49,7 +53,9 @@ export function StatsScreen() {
               { value: 'budget', label: translate('stats.budget') },
             ]}
           />
-          {tab === 'overview' && <OverviewTab {...period} onShowBudgets={() => setTab('budget')} />}
+          {tab === 'overview' && activityCount !== undefined && (hasEnoughForInsights(activityCount)
+            ? <OverviewTab {...period} onShowBudgets={() => setTab('budget')} />
+            : <InsightsEmpty {...period} count={activityCount} />)}
           {tab === 'calendar' && <CalendarTab {...period} />}
           {tab === 'budget' && <BudgetTab {...period} />}
         </View>

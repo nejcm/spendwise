@@ -6,7 +6,7 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderButton, PageHeader } from '@/components/page-header';
-import { AmountText, Card, EmptyState, FocusAwareStatusBar, IconTile, ListRow, ScrollView, SectionHeader, SolidButton, Text } from '@/components/ui';
+import { AmountText, Card, FocusAwareStatusBar, IconTile, ListRow, ScrollView, SectionHeader, Text } from '@/components/ui';
 import { ChevronLeft, Plus } from '@/components/ui/icon';
 import { NAV_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
 import { SkeletonRows } from '@/components/ui/skeleton';
@@ -19,6 +19,7 @@ import { goBackOrFallback } from '@/lib/routing';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { useScheduledTransactions, useToPreferred, useUpdateScheduledTransaction } from './api';
+import { RecurringEmpty } from './components/recurring-empty';
 import { FREQUENCY_OPTIONS } from './constants';
 import { canResume, committedForMonth, daysUntil, groupRules, ruleToFormData, SOON_DAYS } from './helpers';
 
@@ -59,18 +60,12 @@ export function ScheduledTransactionsScreen() {
           <PageHeader
             title={translate('scheduled.title')}
             left={<HeaderButton icon={ChevronLeft} label={translate('common.back')} onPress={() => goBackOrFallback(router)} />}
-            right={<HeaderButton icon={Plus} label={translate('scheduled.add')} onPress={add} />}
+            right={rules.length > 0 && <HeaderButton icon={Plus} label={translate('scheduled.add')} onPress={add} />}
           />
           {isLoading
             ? <SkeletonRows count={4} className="mt-5" />
             : rules.length === 0
-              ? (
-                  <EmptyState
-                    className="my-auto"
-                    title={translate('scheduled.no_rules')}
-                    actions={<SolidButton color="primary" size="lg" className="rounded-full" label={translate('scheduled.add')} onPress={add} />}
-                  />
-                )
+              ? <RecurringEmpty onAdd={add} />
               : (
                   <>
                     <CommittedCard rules={rules} yearMonth={yearMonth} toPreferred={toPreferred} />

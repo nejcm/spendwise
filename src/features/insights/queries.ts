@@ -9,6 +9,14 @@ import { inFilter } from '@/lib/sqlite/helpers';
 
 // ─── Read Queries ───
 
+/** All-time income and expense count, without transfers and opening-balance adjustments. */
+export async function getActivityCount(db: SQLiteDatabase): Promise<number> {
+  const row = await db.getFirstAsync<{ count: number }>(
+    `SELECT COUNT(*) as count FROM transactions WHERE type IN ('income','expense') AND is_adjustment = 0`,
+  );
+  return row?.count ?? 0;
+}
+
 export async function getSummaryByRange(
   db: SQLiteDatabase,
   startDate: number | undefined,

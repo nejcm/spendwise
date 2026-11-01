@@ -9,7 +9,7 @@ import { useTransactions } from '@/features/transactions/api';
 import { TransactionCard } from '@/features/transactions/components/transaction-card';
 import { isTransferInLeg } from '@/features/transactions/queries';
 import { cn } from '@/lib/cn';
-import { calendarDateToUnix, getMonthBoundaries, unixToDate } from '@/lib/date/helpers';
+import { calendarDateToUnix, getMonthBoundaries, monthOfDay, unixToDate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { dailyExpenses, heatLevels } from '../helpers';
@@ -22,8 +22,8 @@ const HEAT_CLASSES = ['bg-card-2', 'bg-accent/20', 'bg-accent/55', 'bg-accent'];
 /** The month holding today when the Period does, else the Period's first month. */
 function calendarMonth(startDate: number | undefined, endDate: number | undefined, today: number): [number, number] {
   const inPeriod = startDate === undefined || (today >= startDate && (endDate === undefined || today < endDate));
-  const anchor = unixToDate(inPeriod ? today : startDate);
-  return getMonthBoundaries(anchor.getUTCFullYear(), anchor.getUTCMonth() + 1);
+  const { year, month } = monthOfDay(inPeriod ? today : startDate);
+  return getMonthBoundaries(year, month);
 }
 
 export function CalendarTab({ startDate, endDate }: PeriodProps) {

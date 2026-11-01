@@ -1,12 +1,16 @@
 # Spendwise
 
-Spendwise is a personal finance context for tracking money across calendar periods.
+Spendwise is a personal finance context for tracking money across periods of time.
 
 ## Language
 
 **Period**:
-A calendar window used to summarize finance data.
+A window of local days used to summarize finance data. Month and year Periods follow the **Month Start Day**.
 _Avoid_: Range, filter
+
+**Month Start Day**:
+The day of the month (1–28, Settings › Formatting) a month Period starts on. A month is named by the month it starts in: with day 25, "October" is Oct 25 – Nov 24, and a year is its twelve months (2026 = Jan 25, 2026 – Jan 24, 2027). Day 1 means calendar months.
+_Avoid_: Billing cycle, pay period
 
 **Today**:
 A dynamic **Period** representing the current local calendar day.

@@ -2,9 +2,9 @@ import type { RecurringTemplate } from './constants';
 import type { ScheduledTransaction, ScheduledTransactionFormData } from './types';
 import type { Category } from '@/features/categories/types';
 import type { CurrencyKey } from '@/features/currencies';
-import { addDays, addMonths, endOfMonth, format, parseISO, startOfMonth } from 'date-fns';
+import { addDays, addMonths, format, parseISO, startOfMonth } from 'date-fns';
 import { centsToAmount } from '@/features/formatting/helpers';
-import { unixToISODate } from '@/lib/date/helpers';
+import { getCurrentMonthRange, unixToISODate, yearMonthOf } from '@/lib/date/helpers';
 import { advanceScheduledDate, getFirstDueOnOrAfter, isoDateToUnix } from './scheduler';
 
 type Schedule = Pick<ScheduledTransaction, 'frequency' | 'next_due_date' | 'end_date' | 'is_active'>;
@@ -25,14 +25,15 @@ export function dueDatesBetween(rule: Schedule, from: string, to: string): strin
 
 export type Committed = { bills: number; comingIn: number; missingRate: boolean };
 
-/** Every remaining occurrence in the calendar month `yearMonth`, in Preferred Currency; unconvertible rules are skipped and flagged. */
+/** Every remaining occurrence in the month `yearMonth`, in Preferred Currency; unconvertible rules are skipped and flagged. */
 export function committedForMonth(
   rules: (Schedule & Pick<ScheduledTransaction, 'type' | 'amount' | 'currency'>)[],
   yearMonth: string,
   toPreferred: (cents: number, currency: CurrencyKey) => number | null,
 ): Committed {
-  const from = `${yearMonth}-01`;
-  const to = iso(endOfMonth(parseISO(from)));
+  const [start, end] = getCurrentMonthRange(yearMonth);
+  const from = unixToISODate(start);
+  const to = unixToISODate(end - 86400);
   const committed: Committed = { bills: 0, comingIn: 0, missingRate: false };
   for (const rule of rules) {
     const count = dueDatesBetween(rule, from, to).length;
@@ -60,8 +61,7 @@ export function groupRules<T extends Pick<ScheduledTransaction, 'is_active' | 'n
 
   const active = rules.filter((r) => r.is_active).sort((a, b) => a.next_due_date - b.next_due_date);
   for (const rule of active) {
-    const due = unixToISODate(rule.next_due_date);
-    add(due < soonEnd ? 'soon' : `month:${due.slice(0, 7)}`, rule);
+    add(unixToISODate(rule.next_due_date) < soonEnd ? 'soon' : `month:${yearMonthOf(rule.next_due_date)}`, rule);
   }
   for (const rule of rules) {
     if (!rule.is_active) add('paused', rule);

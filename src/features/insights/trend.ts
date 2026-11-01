@@ -3,16 +3,12 @@ import type { PeriodMode } from '@/lib/store/store';
 
 import {
   addDays,
-  addMonths,
-  addYears,
   differenceInCalendarDays,
   format,
   parseISO,
-  startOfMonth,
-  startOfYear,
   subYears,
 } from 'date-fns';
-import { unixToISODate } from '@/lib/date/helpers';
+import { dateToUnix, getMonthBoundaries, getYearBoundaries, monthOfDay, unixToCalendarDate, unixToISODate } from '@/lib/date/helpers';
 
 type TrendBucket = {
   label: string;
@@ -62,46 +58,35 @@ function buildWeeklyBuckets(startDate: string, endDate: string, useWeekLabels: b
   return buckets;
 }
 
+function clippedBucket(label: string, [start, end]: [number, number], rangeStart: number, rangeEnd: number): TrendBucket {
+  return { label, startDate: unixToISODate(Math.max(start, rangeStart)), endDate: unixToISODate(Math.min(end, rangeEnd)) };
+}
+
 function buildMonthlyBuckets(startDate: string, endDate: string): TrendBucket[] {
   const buckets: TrendBucket[] = [];
-  const rangeStart = parseISO(startDate);
-  const rangeEnd = parseISO(endDate);
-  const rangeLastDay = addDays(rangeEnd, -1);
-  const labelFormat = rangeStart.getFullYear() === rangeLastDay.getFullYear() ? 'MMM' : 'MMM yy';
+  const rangeStart = dateToUnix(startDate);
+  const rangeEnd = dateToUnix(endDate);
+  const first = monthOfDay(rangeStart);
+  const labelFormat = first.year === monthOfDay(rangeEnd - 86400).year ? 'MMM' : 'MMM yy';
 
-  for (let cursor = startOfMonth(rangeStart); cursor < rangeEnd; cursor = addMonths(cursor, 1)) {
-    const nextMonth = startOfMonth(addMonths(cursor, 1));
-    const bucketStart = cursor.getTime() < rangeStart.getTime() ? rangeStart : cursor;
-    const bucketEnd = nextMonth.getTime() > rangeEnd.getTime() ? rangeEnd : nextMonth;
-    if (bucketStart.getTime() >= bucketEnd.getTime()) continue;
-
-    buckets.push({
-      label: format(cursor, labelFormat),
-      startDate: toIsoDate(bucketStart),
-      endDate: toIsoDate(bucketEnd),
-    });
+  for (let month = first.month; ; month += 1) {
+    const bounds = getMonthBoundaries(first.year, month);
+    if (bounds[0] >= rangeEnd) break;
+    buckets.push(clippedBucket(format(unixToCalendarDate(bounds[0]), labelFormat), bounds, rangeStart, rangeEnd));
   }
   return buckets;
 }
 
 function buildYearlyBuckets(startDate: string, endDate: string): TrendBucket[] {
   const buckets: TrendBucket[] = [];
-  const rangeStart = parseISO(startDate);
-  const rangeEnd = parseISO(endDate);
+  const rangeStart = dateToUnix(startDate);
+  const rangeEnd = dateToUnix(endDate);
 
-  for (let cursor = startOfYear(rangeStart); cursor < rangeEnd; cursor = addYears(cursor, 1)) {
-    const nextYear = startOfYear(addYears(cursor, 1));
-    const bucketStart = cursor.getTime() < rangeStart.getTime() ? rangeStart : cursor;
-    const bucketEnd = nextYear.getTime() > rangeEnd.getTime() ? rangeEnd : nextYear;
-    if (bucketStart.getTime() >= bucketEnd.getTime()) continue;
-
-    buckets.push({
-      label: format(cursor, 'yyyy'),
-      startDate: toIsoDate(bucketStart),
-      endDate: toIsoDate(bucketEnd),
-    });
+  for (let year = monthOfDay(rangeStart).year; ; year += 1) {
+    const bounds = getYearBoundaries(year);
+    if (bounds[0] >= rangeEnd) break;
+    buckets.push(clippedBucket(String(year), bounds, rangeStart, rangeEnd));
   }
-
   return buckets;
 }
 

@@ -59,6 +59,13 @@ const INVALIDATION_RULES = {
   globalBudget: [
     queryKeys.globalBudget.all,
   ],
+  monthStartDay: [
+    queryKeys.accounts.withBalance,
+    queryKeys.accounts.totalBalance,
+    queryKeys.monthSummary.all,
+    queryKeys.insights.all,
+    queryKeys.recommendations.all,
+  ],
 } as const;
 
 /**

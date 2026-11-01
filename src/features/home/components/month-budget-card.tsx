@@ -4,9 +4,9 @@ import { FormattedCurrency, getPressedStyle, Text, useModalSheet } from '@/compo
 import { BUDGET_STATE_CLASSES, getBudgetState } from '@/components/ui/budget-state';
 import { ChevronRight } from '@/components/ui/icon';
 import { ProgressBar } from '@/components/ui/progress-bar';
-import { formatCurrency } from '@/features/formatting/helpers';
+import { formatCurrency, todayUnix } from '@/features/formatting/helpers';
 import { BudgetSheet } from '@/features/stats/components/budget-sheet';
-import { getBudgetSelectionBoundaries, scaleGlobalBudget } from '@/features/stats/helpers';
+import { daysLeftIn, getBudgetSelectionBoundaries, scaleGlobalBudget } from '@/features/stats/helpers';
 import { useGlobalBudget, useGlobalBudgetSpend } from '@/features/stats/hooks';
 import { cn } from '@/lib/cn';
 import { useCurrentYearMonth } from '@/lib/hooks/use-current-year-month';
@@ -14,21 +14,17 @@ import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { monthName } from '../helpers';
 
-function endsLabel(now: Date) {
-  const daysLeft = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate() - now.getDate();
+function endsLabel(daysLeft: number) {
   if (daysLeft === 0) return translate('home.budget.ends_today');
   if (daysLeft === 1) return translate('home.budget.ends_tomorrow');
   return translate('home.budget.days_left', { count: daysLeft });
 }
 
 export function MonthBudgetCard() {
-  const now = new Date();
   const yearMonth = useCurrentYearMonth();
-  const selection = React.useMemo(() => {
-    const [year, month] = yearMonth.split('-').map(Number);
-    return { mode: 'month', year, month } as const;
-  }, [yearMonth]);
-  const [startDate, endDate] = React.useMemo(() => getBudgetSelectionBoundaries(selection), [selection]);
+  const [year, month] = yearMonth.split('-').map(Number);
+  const selection = { mode: 'month', year, month } as const;
+  const [startDate, endDate] = getBudgetSelectionBoundaries(selection);
   const { data: budget } = useGlobalBudget();
   const { data: spent = 0 } = useGlobalBudgetSpend(startDate, endDate, budget != null);
   const currency = useAppStore.use.currency();
@@ -45,10 +41,10 @@ export function MonthBudgetCard() {
     <>
       <Pressable accessibilityRole="button" onPress={() => sheet.present()} style={getPressedStyle} className="mt-3.5 gap-2.5 rounded-card bg-card px-5 py-[18px]">
         <View className="flex-row items-baseline justify-between gap-2">
-          <Text className="shrink text-row font-semibold" numberOfLines={1}>{translate('home.budget.title', { month: monthName(now.getMonth()) })}</Text>
+          <Text className="shrink text-row font-semibold" numberOfLines={1}>{translate('home.budget.title', { month: monthName(selection.month - 1) })}</Text>
           {state === 'none'
             ? <ChevronRight size={18} colorClassName="accent-muted-foreground" />
-            : <Text className="text-meta text-muted-foreground">{endsLabel(now)}</Text>}
+            : <Text className="text-meta text-muted-foreground">{endsLabel(daysLeftIn(startDate, endDate, todayUnix()) ?? 0)}</Text>}
         </View>
         {state === 'none'
           ? <Text className="text-meta text-muted-foreground">{translate('home.budget.set')}</Text>

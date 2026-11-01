@@ -8,13 +8,16 @@ import {
   getCurrentMonthRange,
   getPeriodRange,
   isValidISODate,
+  monthOfDay,
   navigatePeriod,
   parseDisplayDate,
   scaleBudgetForPeriod,
+  setPeriodMonthStartDay,
   splitBy,
   unixToCalendarDate,
   unixToDate,
   unixToISODate,
+  yearMonthOf,
 } from '@/lib/date/helpers';
 
 describe('getCurrentMonthRange', () => {
@@ -415,5 +418,48 @@ describe('findClosestDateBinary', () => {
   it('target after all dates — picks last', () => {
     const dates = [10 * DAY, 20 * DAY, 30 * DAY];
     expect(findClosestDateBinary(dates, 32 * DAY, tolerance)).toBe(30 * DAY);
+  });
+});
+
+describe('month start day', () => {
+  const utc = (y: number, m: number, d: number) => Date.UTC(y, m - 1, d) / 1000;
+
+  afterEach(() => {
+    setPeriodMonthStartDay(1);
+    jest.useRealTimers();
+  });
+
+  it('keeps calendar months on day 1', () => {
+    expect(getPeriodRange({ mode: 'month', year: 2026, month: 2 })).toEqual([utc(2026, 2, 1), utc(2026, 3, 1)]);
+    expect(getPeriodRange({ mode: 'year', year: 2026 })).toEqual([utc(2026, 1, 1), utc(2027, 1, 1)]);
+  });
+
+  it('names a month by its start month on day 15', () => {
+    setPeriodMonthStartDay(15);
+    expect(getPeriodRange({ mode: 'month', year: 2026, month: 10 })).toEqual([utc(2026, 10, 15), utc(2026, 11, 15)]);
+    expect(yearMonthOf(utc(2026, 10, 14))).toBe('2026-09');
+    expect(yearMonthOf(utc(2026, 10, 15))).toBe('2026-10');
+    expect(scaleBudgetForPeriod(10_000, { mode: 'month', year: 2026, month: 10 })).toBe(10_000);
+  });
+
+  it('clamps day 31 to the last day of short months', () => {
+    setPeriodMonthStartDay(31);
+    expect(getPeriodRange({ mode: 'month', year: 2026, month: 1 })).toEqual([utc(2026, 1, 31), utc(2026, 2, 28)]);
+    expect(getPeriodRange({ mode: 'month', year: 2026, month: 2 })).toEqual([utc(2026, 2, 28), utc(2026, 3, 31)]);
+    expect(getPeriodRange({ mode: 'month', year: 2028, month: 2 })).toEqual([utc(2028, 2, 29), utc(2028, 3, 31)]);
+    expect(monthOfDay(utc(2026, 3, 30))).toEqual({ year: 2026, month: 2 });
+  });
+
+  it('rolls over the year', () => {
+    setPeriodMonthStartDay(25);
+    expect(getPeriodRange({ mode: 'month', year: 2026, month: 12 })).toEqual([utc(2026, 12, 25), utc(2027, 1, 25)]);
+    expect(getPeriodRange({ mode: 'year', year: 2026 })).toEqual([utc(2026, 1, 25), utc(2027, 1, 25)]);
+    expect(monthOfDay(utc(2027, 1, 10))).toEqual({ year: 2026, month: 12 });
+    expect(scaleBudgetForPeriod(10_000, { mode: 'year', year: 2026 })).toBe(120_000);
+
+    jest.useFakeTimers().setSystemTime(new Date(2027, 0, 10, 12));
+    expect(getPeriodRange({ mode: 'this-month' })).toEqual([utc(2026, 12, 25), utc(2027, 1, 25)]);
+    expect(getPeriodRange({ mode: 'this-year' })).toEqual([utc(2026, 1, 25), utc(2027, 1, 25)]);
+    expect(navigatePeriod({ mode: 'this-month' }, 1)).toEqual({ mode: 'month', year: 2027, month: 1 });
   });
 });

@@ -3,13 +3,13 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import type { Recommendation } from './types';
 import type { CurrencyKey } from '@/features/currencies';
 
-import { addDays, format, startOfMonth, subMonths } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import { getAccountsWithBalance } from '@/features/accounts/queries';
 import { computeBaseAmount } from '@/features/currencies/conversion';
 import { getRatesForDate } from '@/features/currencies/queries';
 import { getCategorySpendByRange } from '@/features/insights/queries';
 import { getTransactions } from '@/features/transactions/queries';
-import { calendarDateToUnix } from '@/lib/date/helpers';
+import { calendarDateToUnix, monthRangeOf, yearMonthOf } from '@/lib/date/helpers';
 
 const LOOKBACK_MONTHS = 3;
 const UPCOMING_WINDOW_DAYS = 7;
@@ -50,18 +50,6 @@ function recommendationId(kind: Recommendation['kind'], ...parts: Array<string |
     .map((part) => String(part).replaceAll(':', '-'))
     .join(':');
   return suffix.length > 0 ? `${kind}:${suffix}` : kind;
-}
-
-function startOfCurrentMonthUnix(today: Date) {
-  return calendarDateToUnix(startOfMonth(today));
-}
-
-function startOfNextMonthUnix(today: Date) {
-  return Date.UTC(today.getFullYear(), today.getMonth() + 1, 1) / 1000;
-}
-
-function startOfHistoryUnix(today: Date) {
-  return calendarDateToUnix(startOfMonth(subMonths(today, LOOKBACK_MONTHS)));
 }
 
 async function getDueExpenseRules(
@@ -194,15 +182,10 @@ async function detectCategoryAnomaly(
   db: SQLiteDatabase,
   today: Date,
 ): Promise<Recommendation | null> {
-  const monthStart = startOfMonth(today);
-  const monthStartUnix = calendarDateToUnix(monthStart);
-  const nextMonthStartUnix = Date.UTC(today.getFullYear(), today.getMonth() + 1, 1) / 1000;
+  const [monthStartUnix, nextMonthStartUnix] = monthRangeOf(today);
   const previousRanges = Array.from({ length: LOOKBACK_MONTHS }, (_, index) => {
-    const rangeStart = startOfMonth(subMonths(today, index + 1));
-    return {
-      start: calendarDateToUnix(rangeStart),
-      end: Date.UTC(rangeStart.getFullYear(), rangeStart.getMonth() + 1, 1) / 1000,
-    };
+    const [start, end] = monthRangeOf(today, -(index + 1));
+    return { start, end };
   });
 
   const [currentRows, ...historyRows] = await Promise.all([
@@ -236,7 +219,7 @@ async function detectCategoryAnomaly(
     if (ratio < CATEGORY_ANOMALY_RATIO) continue;
 
     const recommendation: Recommendation = {
-      id: recommendationId('category_anomaly', row.category_id, format(today, 'yyyy-MM')),
+      id: recommendationId('category_anomaly', row.category_id, yearMonthOf(calendarDateToUnix(today))),
       kind: 'category_anomaly',
       severity: ratio >= 1.75 ? 'high' : 'medium',
       primaryTarget: 'stats',
@@ -260,9 +243,8 @@ async function detectUnusualSpending(
   db: SQLiteDatabase,
   today: Date,
 ): Promise<Recommendation | null> {
-  const monthStartUnix = startOfCurrentMonthUnix(today);
-  const nextMonthStartUnix = startOfNextMonthUnix(today);
-  const historyStartUnix = startOfHistoryUnix(today);
+  const [monthStartUnix, nextMonthStartUnix] = monthRangeOf(today);
+  const [historyStartUnix] = monthRangeOf(today, -LOOKBACK_MONTHS);
   const [currentTransactions, historyTransactions] = await Promise.all([
     getTransactions(db, monthStartUnix, nextMonthStartUnix),
     getTransactions(db, historyStartUnix, monthStartUnix),
@@ -319,11 +301,8 @@ async function detectBudgetSuggestion(
   today: Date,
 ): Promise<Recommendation | null> {
   const previousRanges = Array.from({ length: LOOKBACK_MONTHS }, (_, index) => {
-    const rangeStart = startOfMonth(subMonths(today, index + 1));
-    return {
-      start: calendarDateToUnix(rangeStart),
-      end: Date.UTC(rangeStart.getFullYear(), rangeStart.getMonth() + 1, 1) / 1000,
-    };
+    const [start, end] = monthRangeOf(today, -(index + 1));
+    return { start, end };
   });
 
   const historyRows = await Promise.all(previousRanges.map((range) => getCategorySpendByRange(db, range.start, range.end)));
@@ -359,7 +338,7 @@ async function detectBudgetSuggestion(
     if (averageMonthlyTotal <= 0 || average / averageMonthlyTotal < MIN_CATEGORY_SHARE) continue;
 
     const recommendation: Recommendation = {
-      id: recommendationId('budget_suggestion', categoryId, format(today, 'yyyy-MM')),
+      id: recommendationId('budget_suggestion', categoryId, yearMonthOf(calendarDateToUnix(today))),
       kind: 'budget_suggestion',
       severity: average / averageMonthlyTotal >= MEDIUM_CATEGORY_SHARE ? 'medium' : 'low',
       primaryTarget: 'categories',

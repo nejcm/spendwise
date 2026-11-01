@@ -4,6 +4,7 @@ import { Pressable, View } from 'react-native';
 import { getPressedStyle, Text } from '@/components/ui';
 import { SlidersHorizontal, Sparkle } from '@/components/ui/icon';
 import { ProfileAvatar } from '@/features/profile/profile-avatar';
+import { useCurrentYearMonth } from '@/lib/hooks/use-current-year-month';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { getGreetingPeriod, monthName } from '../helpers';
@@ -13,11 +14,12 @@ export function HomeHeader({ isEmpty }: { isEmpty: boolean }) {
   const name = useAppStore.use.profile().name.trim();
   const isChatOff = useAppStore((s) => s.aiFeatures?.chat === false);
   const now = new Date();
+  const yearMonth = useCurrentYearMonth();
   const greeting = isEmpty ? translate('home.welcome') : translate(`home.greeting.${getGreetingPeriod(now.getHours())}`);
   const title = name ? translate('home.greeting_named', { greeting, name }) : greeting;
   const subtitle = isEmpty
     ? translate('home.welcome_subtitle')
-    : translate('home.month_intro', { month: monthName(now.getMonth()) });
+    : translate('home.month_intro', { month: monthName(Number(yearMonth.slice(5)) - 1) });
 
   return (
     <View className="h-12 flex-row items-center justify-between gap-3">

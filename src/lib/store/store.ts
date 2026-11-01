@@ -15,7 +15,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { DEFAULT_DATE_FORMAT, DEFAULT_USER_CURRENCY } from '@/config';
 import { CURRENCIES_MAP } from '@/features/currencies';
-import { currentPeriodSelection } from '@/lib/date/helpers';
+import { currentPeriodSelection, setPeriodMonthStartDay } from '@/lib/date/helpers';
 import { createSelectors } from '@/lib/utils';
 import { mmkvStorage } from '../storage';
 
@@ -201,6 +201,9 @@ const _useAppStore = create<AppState>()(
 );
 
 export const useAppStore = createSelectors(_useAppStore);
+
+setPeriodMonthStartDay(_useAppStore.getState().monthStartDay);
+_useAppStore.subscribe((state) => setPeriodMonthStartDay(state.monthStartDay));
 
 export function clearAppStore() {
   return _useAppStore.setState(getDefaultState());

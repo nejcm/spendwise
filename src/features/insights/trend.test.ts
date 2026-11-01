@@ -1,5 +1,6 @@
 import { buildTrendSeries } from '@/features/insights/trend';
 import { isoDateToUnix } from '@/features/scheduled-transactions/scheduler';
+import { setPeriodMonthStartDay } from '@/lib/date/helpers';
 
 const d = isoDateToUnix;
 
@@ -89,5 +90,24 @@ describe('buildTrendSeries', () => {
       { label: 'Jan 27', income: 200, expense: 20 },
       { label: 'Feb 27', income: 300, expense: 30 },
     ]);
+  });
+
+  it('builds monthly buckets from the month start day', () => {
+    setPeriodMonthStartDay(25);
+    try {
+      expect(
+        buildTrendSeries('custom', d('2026-01-25'), d('2026-04-25'), [
+          { date: d('2026-02-24'), income: 0, expense: 10 },
+          { date: d('2026-02-25'), income: 0, expense: 20 },
+        ]),
+      ).toEqual([
+        { label: 'Jan', income: 0, expense: 10 },
+        { label: 'Feb', income: 0, expense: 20 },
+        { label: 'Mar', income: 0, expense: 0 },
+      ]);
+    }
+    finally {
+      setPeriodMonthStartDay(1);
+    }
   });
 });

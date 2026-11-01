@@ -1,15 +1,14 @@
 import type { GlobalBudget } from './global-budget-queries';
 import type { BudgetPeriodSelection, MonthSlice } from './types';
 import type { DailyTrendTotal, MonthlyTotals } from '@/features/insights/types';
-import { getDaysInMonth, getDaysInYear, parseISO } from 'date-fns';
-import { dateToUnix, getMonthBoundaries, unixToISODate } from '@/lib/date/helpers';
+import { dateToUnix, getMonthBoundaries, getYearBoundaries, monthOfDay, yearMonthOf } from '@/lib/date/helpers';
 
 const MAX_MONTH_SLICES = 36;
+const DAY = 86400;
 
 function expandToMonthSlices(selection: BudgetPeriodSelection): MonthSlice[] {
   if (selection.mode === 'day') {
-    const date = parseISO(selection.date);
-    return [{ year: date.getFullYear(), month: date.getMonth() + 1 }];
+    return [monthOfDay(dateToUnix(selection.date))];
   }
   if (selection.mode === 'month') {
     return [{ year: selection.year, month: selection.month }];
@@ -62,9 +61,9 @@ export function getBudgetSelectionBoundaries(selection: BudgetPeriodSelection): 
 export function scaleGlobalBudget(budget: GlobalBudget, selection: BudgetPeriodSelection): number {
   if (!budget.amountCents) return 0;
   if (selection.mode === 'day') {
-    const date = parseISO(selection.date);
-    const divisor = budget.type === 'yearly' ? getDaysInYear(date) : getDaysInMonth(date);
-    return Math.round(budget.amountCents / divisor);
+    const { year, month } = monthOfDay(dateToUnix(selection.date));
+    const [start, end] = budget.type === 'yearly' ? getYearBoundaries(year) : getMonthBoundaries(year, month);
+    return Math.round(budget.amountCents * DAY / (end - start));
   }
   const months = expandToMonthSlices(selection).length;
   if (budget.type === 'yearly') {
@@ -72,8 +71,6 @@ export function scaleGlobalBudget(budget: GlobalBudget, selection: BudgetPeriodS
   }
   return budget.amountCents * months;
 }
-
-const DAY = 86400;
 
 /** Monthly amount of a global budget; a yearly one counts as a twelfth. */
 export function monthlyGlobalBudget(budget: GlobalBudget | null | undefined): number | null {
@@ -126,7 +123,7 @@ export function heatLevels(values: number[]): number[] {
 export function monthlyFromDaily(rows: DailyTrendTotal[]): MonthlyTotals[] {
   const months = new Map<string, MonthlyTotals>();
   for (const row of rows) {
-    const month = unixToISODate(row.date).slice(0, 7);
+    const month = yearMonthOf(row.date);
     const total = months.get(month) ?? { month, income: 0, expense: 0 };
     total.income += row.income;
     total.expense += row.expense;

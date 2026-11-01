@@ -13,7 +13,7 @@ import { useAccounts } from '@/features/accounts/hooks';
 import { useCategories } from '@/features/categories/api';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
-import { getPeriodRange } from '@/lib/date/helpers';
+import { usePeriodRange } from '@/lib/hooks/use-current-year-month';
 import { translate } from '@/lib/i18n';
 import { setPeriodSelection, useAppStore } from '@/lib/store/store';
 import { transactionsQueryOptions, useHasUserTransactions, useTransactions } from './api';
@@ -53,7 +53,7 @@ export function TransactionsScreen() {
   }, [routeSeed]);
   const updateFilters = React.useCallback((patch: Partial<FilterState>) => setFilters((prev) => ({ ...prev, ...patch })), []);
 
-  const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
+  const [startDate, endDate] = usePeriodRange(selection);
   const { data: transactions = [], isLoading, refetch } = useTransactions(startDate, endDate);
   const { data: accounts = [] } = useAccounts();
   const { data: categories = [] } = useCategories();

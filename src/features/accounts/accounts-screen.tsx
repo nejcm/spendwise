@@ -24,7 +24,7 @@ export function AccountsScreen() {
   const router = useRouter();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const yearMonth = useCurrentYearMonth();
-  const [monthStart, monthEnd] = React.useMemo(() => getCurrentMonthRange(yearMonth), [yearMonth]);
+  const [monthStart, monthEnd] = getCurrentMonthRange(yearMonth);
   const { data: accounts = [], isPending } = useAccountsWithBalance();
   const { data: monthDeltas = {} } = useAccountNetChanges(monthStart, monthEnd);
   const { data: archived = [] } = useArchivedAccounts();

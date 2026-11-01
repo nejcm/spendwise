@@ -11,17 +11,22 @@ import { CURRENCY_FORMAT_OPTIONS, DATE_FORMAT_OPTIONS, NUMBER_FORMAT_OPTIONS } f
 import { formatCurrency, formatDate, formatDateFull, formatNumber } from '../formatting/helpers';
 import { CurrencyItem } from './components/currency-item';
 import { SettingsPage } from './components/settings-page';
+import { useSetMonthStartDay } from './hooks';
 
 const SAMPLE_CENTS = 123456;
 const SAMPLE_DATE = Date.UTC(2026, 1, 15) / 1000;
 
-type SheetType = 'numberFormat' | 'dateFormat';
+type SheetType = 'numberFormat' | 'dateFormat' | 'monthStartDay';
+
+const MONTH_START_DAYS = Array.from({ length: 28 }, (_, i) => String(i + 1));
 
 export function FormattingSettingsScreen() {
   const currency = useAppStore.use.currency();
   const currencyFormat = useAppStore.use.currencyFormat();
   const numberFormat = useAppStore.use.numberFormat();
   const dateFormat = useAppStore.use.dateFormat();
+  const monthStartDay = useAppStore.use.monthStartDay();
+  const setMonthStartDay = useSetMonthStartDay();
   const { data: ratesDate } = useLastCurrencyRatesFetchedAt();
   const sheet = useModalSheet();
   const [sheetType, setSheetType] = React.useState<SheetType>('numberFormat');
@@ -36,6 +41,11 @@ export function FormattingSettingsScreen() {
       options: DATE_FORMAT_OPTIONS.map((value) => ({ value, label: formatDateFull(SAMPLE_DATE, value) })),
       value: dateFormat,
       onSelect: (value) => setDateFormat(value as DateFormat),
+    },
+    monthStartDay: {
+      options: MONTH_START_DAYS.map((value) => ({ value, label: value })),
+      value: String(monthStartDay),
+      onSelect: (value) => setMonthStartDay(Number(value)),
     },
   };
   const openSheet = (type: SheetType) => {
@@ -90,6 +100,13 @@ export function FormattingSettingsScreen() {
           trailing={<Text className="text-row text-muted-foreground">{formatDateFull(SAMPLE_DATE, dateFormat)}</Text>}
           chevron
           onPress={() => openSheet('dateFormat')}
+        />
+        <ListRow
+          className="min-h-[50px] border-t border-border"
+          title={translate('settings.month_start_day')}
+          trailing={<Text className="text-row text-muted-foreground tabular-nums">{monthStartDay}</Text>}
+          chevron
+          onPress={() => openSheet('monthStartDay')}
         />
         <CurrencyItem className="min-h-[50px] border-t border-border" />
       </Card>

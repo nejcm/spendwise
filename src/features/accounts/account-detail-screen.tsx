@@ -11,7 +11,7 @@ import { TransactionList } from '@/features/transactions/components/transaction-
 import { TransactionSelectionToolbar } from '@/features/transactions/components/transaction-selection-toolbar';
 import { useTransactionSelection } from '@/features/transactions/hooks/selection';
 import { queryKeys } from '@/lib/data/query-keys';
-import { getPeriodRange } from '@/lib/date/helpers';
+import { usePeriodRange } from '@/lib/hooks/use-current-year-month';
 import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
 import { goBackOrFallback } from '@/lib/routing';
@@ -26,7 +26,7 @@ export function AccountDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const selection = useAppStore.use.periodSelection();
-  const [startDate, endDate] = React.useMemo(() => getPeriodRange(selection), [selection]);
+  const [startDate, endDate] = usePeriodRange(selection);
   const { refreshing, onRefresh } = useRefresh(REFRESH_KEYS);
 
   const { data: accounts, isPending: accountsPending } = useAccounts();

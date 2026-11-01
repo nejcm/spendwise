@@ -3,8 +3,7 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { PeriodPill } from '@/components/period-pill';
 import { FocusAwareStatusBar, SegmentedControl, Text } from '@/components/ui';
 import { useActivityCount } from '@/features/insights/api';
-import { getPeriodRange } from '@/lib/date/helpers';
-import { useCurrentDay } from '@/lib/hooks/use-current-year-month';
+import { usePeriodRange } from '@/lib/hooks/use-current-year-month';
 import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
@@ -19,8 +18,7 @@ type StatsTab = 'overview' | 'calendar' | 'budget';
 
 export function StatsScreen() {
   const selection = useAppStore.use.periodSelection();
-  useCurrentDay(); // re-renders at a date rollover so dynamic Periods (Today, This month…) re-derive
-  const [startDate, endDate] = getPeriodRange(selection);
+  const [startDate, endDate] = usePeriodRange(selection);
   const { refreshing, onRefresh } = useRefresh();
   const [tab, setTab] = React.useState<StatsTab>('overview');
   const period = { selection, startDate, endDate };

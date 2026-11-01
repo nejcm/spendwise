@@ -49,9 +49,9 @@ export function BalanceCard({ total, accountCount, isEmpty }: BalanceCardProps) 
 function BalanceTrend({ total, showLine }: { total: number; showLine: boolean }) {
   const currency = useAppStore.use.currency();
   const numberFormat = useAppStore.use.numberFormat();
-  const now = new Date();
   const yearMonth = useCurrentYearMonth();
-  const [startDate, endDate] = React.useMemo(() => getCurrentMonthRange(yearMonth), [yearMonth]);
+  const month = Number(yearMonth.slice(5)) - 1;
+  const [startDate, endDate] = getCurrentMonthRange(yearMonth);
   const { data: series } = useBalanceSeries(startDate, endDate);
   const change = series ? percentChange(total, series.opening) : null;
   const values = React.useMemo(
@@ -69,13 +69,13 @@ function BalanceTrend({ total, showLine }: { total: number; showLine: boolean })
             <Text className={cn('rounded-md px-[7px] py-0.5 text-xs font-semibold tabular-nums', isUp ? 'bg-positive/15 text-positive dark:bg-accent dark:text-accent-foreground' : 'bg-negative/15 text-negative')}>
               {`${isUp ? '▲' : '▼'} ${formatNumber(Math.abs(change), numberFormat, 1)}%`}
             </Text>
-            <Text className="text-xs text-muted-foreground">{translate('home.vs_end_of', { month: monthName((now.getMonth() + 11) % 12) })}</Text>
+            <Text className="text-xs text-muted-foreground">{translate('home.vs_end_of', { month: monthName((month + 11) % 12) })}</Text>
           </View>
         )}
       </View>
       {showLine && (
         <View className="-mx-5 mt-3.5">
-          <BalanceLine values={values} accessibilityLabel={translate('home.balance_chart_label', { month: monthName(now.getMonth()) })} />
+          <BalanceLine values={values} accessibilityLabel={translate('home.balance_chart_label', { month: monthName(month) })} />
         </View>
       )}
     </>

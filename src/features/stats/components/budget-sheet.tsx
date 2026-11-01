@@ -2,7 +2,6 @@ import type { BottomSheetModal } from '@gorhom/bottom-sheet';
 import type { GlobalBudget, GlobalBudgetType } from '../global-budget-queries';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useForm, useStore } from '@tanstack/react-form';
-import { format, subMonths } from 'date-fns';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import * as z from 'zod';
@@ -15,6 +14,7 @@ import { CURRENCIES_MAP } from '@/features/currencies';
 import { centsToAmount, formatMajorUnitsInputFromCents } from '@/features/formatting/helpers';
 import { useTrendByRange } from '@/features/insights/api';
 import { parseToCents } from '@/lib/data/money';
+import { monthRangeOf, yearMonthOf } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -32,8 +32,8 @@ const MONTHS_PER: Record<GlobalBudgetType, number> = { monthly: 1, yearly: 12 };
 
 /** Average monthly spending over the six complete months before this one, and the sum of category budgets. */
 function useSuggestions() {
-  const lastMonth = format(subMonths(new Date(), 1), 'yyyy-MM');
-  const [start, end] = React.useMemo(() => monthBarsRange(lastMonth), [lastMonth]);
+  const lastMonth = yearMonthOf(monthRangeOf(new Date(), -1)[0]);
+  const [start, end] = monthBarsRange(lastMonth);
   const { data: rows = [] } = useTrendByRange(start, end);
   const { data: categories = [] } = useCategories();
   return {

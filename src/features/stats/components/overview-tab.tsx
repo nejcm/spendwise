@@ -222,7 +222,7 @@ function SixMonths({ month }: { month: number | undefined }) {
   const format = useFormatMoney();
   const currentYearMonth = useCurrentYearMonth();
   const endYearMonth = month !== undefined ? new Date(month * 1000).toISOString().slice(0, 7) : currentYearMonth;
-  const [start, end] = React.useMemo(() => monthBarsRange(endYearMonth), [endYearMonth]);
+  const [start, end] = monthBarsRange(endYearMonth);
   const { data: rows = [] } = useTrendByRange(start, end);
   const { data: globalBudget } = useGlobalBudget();
   const bars = buildMonthBars(monthlyFromDaily(rows), endYearMonth, 'expense');

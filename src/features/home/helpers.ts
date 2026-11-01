@@ -1,5 +1,6 @@
 import type { ScheduledTransactionWithDetails } from '@/features/scheduled-transactions/types';
 import type { TxKeyPath } from '@/lib/i18n';
+import { yearMonthOf } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 
 const DAY = 86_400;
@@ -43,7 +44,7 @@ export function buildLinePath(values: number[], width: number, height: number, i
 export type NextBill = {
   rule: ScheduledTransactionWithDetails;
   daysUntil: number;
-  /** Other upcoming bills due in the same calendar month as `rule`. */
+  /** Other upcoming bills due in the same month as `rule`. */
   moreInMonth: number;
 };
 
@@ -53,11 +54,8 @@ export function selectNextBill(rules: ScheduledTransactionWithDetails[], activeA
     .sort((a, b) => a.next_due_date - b.next_due_date);
   const [next, ...rest] = bills;
   if (!next) return null;
-  const due = new Date(next.next_due_date * 1000);
-  const sameMonth = (rule: ScheduledTransactionWithDetails) => {
-    const date = new Date(rule.next_due_date * 1000);
-    return date.getUTCFullYear() === due.getUTCFullYear() && date.getUTCMonth() === due.getUTCMonth();
-  };
+  const dueMonth = yearMonthOf(next.next_due_date);
+  const sameMonth = (rule: ScheduledTransactionWithDetails) => yearMonthOf(rule.next_due_date) === dueMonth;
   return {
     rule: next,
     daysUntil: Math.max(0, Math.round((next.next_due_date - today) / DAY)),

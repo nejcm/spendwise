@@ -9,7 +9,7 @@ import { Chip, getPressedStyle, ModalSheet, SolidButton, Text, useModalSheet } f
 import { DateInput } from '@/components/ui/date-input';
 import { ChevronLeft, ChevronRight } from '@/components/ui/icon';
 import { cn } from '@/lib/cn';
-import { currentISOWeek, getWeeksInYear, isDynamicPeriodMode } from '@/lib/date/helpers';
+import { currentISOWeek, currentPeriodSelection, getWeeksInYear, isDynamicPeriodMode } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 
 import { setPeriodSelection } from '@/lib/store/store';
@@ -90,21 +90,21 @@ export function PeriodSelectorModal({
   }, [draft, modal]);
 
   const handleClear = React.useCallback(() => {
-    setPeriodSelection({ mode: 'month', year: new Date().getFullYear(), month: new Date().getMonth() + 1 });
+    setPeriodSelection(currentPeriodSelection());
     modal.close();
   }, [modal]);
 
   const switchMode = React.useCallback((mode: PeriodMode) => {
-    const now = new Date();
+    const now = currentPeriodSelection();
     switch (mode) {
       case 'year':
-        setDraft({ mode: 'year', year: draft.mode === 'year' ? draft.year : now.getFullYear() });
+        setDraft({ mode: 'year', year: draft.mode === 'year' ? draft.year : now.year });
         break;
       case 'month':
         setDraft({
           mode: 'month',
-          year: 'year' in draft ? draft.year : now.getFullYear(),
-          month: draft.mode === 'month' ? draft.month : now.getMonth() + 1,
+          year: 'year' in draft ? draft.year : now.year,
+          month: draft.mode === 'month' ? draft.month : now.month,
         });
         break;
       case 'week': {

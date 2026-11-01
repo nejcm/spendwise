@@ -86,7 +86,7 @@ export function InsightsEmpty({ count, selection, startDate, endDate }: PeriodPr
 function BaselineChart({ month }: { month: number | undefined }) {
   const currentYearMonth = useCurrentYearMonth();
   const endYearMonth = month !== undefined ? new Date(month * 1000).toISOString().slice(0, 7) : currentYearMonth;
-  const [start, end] = React.useMemo(() => monthBarsRange(endYearMonth), [endYearMonth]);
+  const [start, end] = monthBarsRange(endYearMonth);
   const { data: rows = [] } = useTrendByRange(start, end);
   const bars = buildMonthBars(monthlyFromDaily(rows), endYearMonth, 'expense');
   const max = Math.max(1, ...bars.map((bar) => bar.value));

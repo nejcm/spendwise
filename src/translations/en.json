@@ -856,6 +856,7 @@
     },
     "mock_data": "Mock Data",
     "money": "Money",
+    "month_start_day": "Month starts on day",
     "more": "More",
     "notifications": "Notifications",
     "notifications_on_count": "{{count}} on",

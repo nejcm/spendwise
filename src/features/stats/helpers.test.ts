@@ -1,5 +1,5 @@
 import type { GlobalBudget } from './global-budget-queries';
-import { getMonthBoundaries } from '@/lib/date/helpers';
+import { getMonthBoundaries, setPeriodMonthStartDay } from '@/lib/date/helpers';
 
 import { chartCeiling, dailyExpenses, daysLeftIn, elapsedSpendStats, getBudgetSelectionBoundaries, hasEnoughForInsights, heatLevels, monthlyFromDaily, monthlyGlobalBudget, paceFraction, savedRatio, scaleGlobalBudget } from './helpers';
 
@@ -193,6 +193,21 @@ describe('insights helpers', () => {
       { month: '2026-10', income: 5, expense: 150 },
       { month: '2026-11', income: 0, expense: 7 },
     ]);
+  });
+
+  it('monthlyFromDaily names months by the month start day', () => {
+    setPeriodMonthStartDay(25);
+    try {
+      const day = (m: number, d: number) => ({ date: Date.UTC(2026, m - 1, d) / 1000, income: 0, expense: 1 });
+      expect(monthlyFromDaily([day(10, 24), day(10, 25), day(11, 24), day(11, 25)]).map((m) => [m.month, m.expense])).toEqual([
+        ['2026-09', 1],
+        ['2026-10', 2],
+        ['2026-11', 1],
+      ]);
+    }
+    finally {
+      setPeriodMonthStartDay(1);
+    }
   });
 
   it('paceFraction and daysLeftIn are null outside the range', () => {

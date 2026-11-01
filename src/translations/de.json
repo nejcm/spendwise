@@ -856,6 +856,7 @@
     },
     "mock_data": "Beispieldaten",
     "money": "Geld",
+    "month_start_day": "Monat beginnt am Tag",
     "more": "Mehr",
     "notifications": "Benachrichtigungen",
     "notifications_on_count": "{{count}} an",

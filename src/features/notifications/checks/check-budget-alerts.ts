@@ -1,9 +1,8 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { NotificationSettings } from '../types';
-import { format } from 'date-fns';
 import { getGlobalBudget, getGlobalBudgetSpend } from '@/features/stats/global-budget-queries';
-import { currentMonthRange, currentYearRange } from '@/lib/date/helpers';
+import { currentMonthRange, currentYearMonth, currentYearRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { storage } from '@/lib/storage';
 import { getBudgetSpendForMonth } from '../queries';
@@ -23,7 +22,7 @@ export async function checkBudgetAlerts(
 ): Promise<void> {
   if (settings.budgetAlerts === false) return;
 
-  const yearMonth = format(new Date(), 'yyyy-MM');
+  const yearMonth = currentYearMonth();
   const [monthStart, monthEnd] = currentMonthRange();
 
   const [categories, globalBudget] = await Promise.all([
@@ -59,7 +58,7 @@ export async function checkBudgetAlerts(
 
   if (globalBudget && globalBudget.amountCents) {
     const isYearly = globalBudget.type === 'yearly';
-    const year = String(new Date().getFullYear());
+    const year = yearMonth.slice(0, 4);
     const [rangeStart, rangeEnd] = isYearly ? currentYearRange() : [monthStart, monthEnd];
     const alertPeriod = isYearly ? year : yearMonth;
     const spent = await getGlobalBudgetSpend(db, rangeStart, rangeEnd);

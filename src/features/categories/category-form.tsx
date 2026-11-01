@@ -146,7 +146,7 @@ function IdentityCard({ form }: { form: CategoryFormApi }) {
 function BudgetAverage({ id, onUse }: { id: string; onUse: (cents: number | null) => void }) {
   const format = useFormatMoney();
   const yearMonth = useCurrentYearMonth();
-  const [start, end] = React.useMemo(() => monthBarsRange(yearMonth, 3), [yearMonth]);
+  const [start, end] = monthBarsRange(yearMonth, 3);
   const { data: rows = [] } = useCategoryMonthlyTotals(id, start, end);
   const average = averageOfLast(buildMonthBars(rows, yearMonth, 'expense', 3));
   const rounded = Math.ceil(average / 100) * 100;

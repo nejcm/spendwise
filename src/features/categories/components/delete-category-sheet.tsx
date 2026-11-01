@@ -59,7 +59,7 @@ type DeleteCategoryBodyProps = {
 function DeleteCategoryBody({ category, usage, onDeleted, onClose }: DeleteCategoryBodyProps) {
   const format = useFormatMoney();
   const yearMonth = useCurrentYearMonth();
-  const [spendStart, spendEnd] = React.useMemo(() => monthBarsRange(yearMonth, 3), [yearMonth]);
+  const [spendStart, spendEnd] = monthBarsRange(yearMonth, 3);
   const { data: categories = [] } = useCategories();
   const { data: spend = [] } = useCategorySpendByRange(spendStart, spendEnd);
   const deleteCategory = useDeleteCategory(onDeleted);

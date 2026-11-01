@@ -4,7 +4,7 @@ import type { MonthSummary } from '../transactions/types';
 import type { CategorySpend, DailyTrendTotal, MonthlyTotals } from './types';
 
 import { addMonths, startOfMonth, subMonths } from 'date-fns';
-import { calendarDateToUnix } from '@/lib/date/helpers';
+import { calendarDateToUnix, getYearBoundaries } from '@/lib/date/helpers';
 import { inFilter } from '@/lib/sqlite/helpers';
 
 // ─── Read Queries ───
@@ -99,8 +99,7 @@ export async function getYearlySummary(
   db: SQLiteDatabase,
   year: number,
 ): Promise<MonthSummary> {
-  const startDate = Date.UTC(year, 0, 1) / 1000;
-  const endDate = Date.UTC(year + 1, 0, 1) / 1000;
+  const [startDate, endDate] = getYearBoundaries(year);
 
   const row = await db.getFirstAsync<{ income: number; expense: number }>(
     `SELECT
@@ -120,8 +119,7 @@ export async function getCategorySpendForYear(
   db: SQLiteDatabase,
   year: number,
 ): Promise<CategorySpend[]> {
-  const startDate = Date.UTC(year, 0, 1) / 1000;
-  const endDate = Date.UTC(year + 1, 0, 1) / 1000;
+  const [startDate, endDate] = getYearBoundaries(year);
 
   const rows = await db.getAllAsync<Omit<CategorySpend, 'percentage'>>(
     `SELECT

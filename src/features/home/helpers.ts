@@ -27,13 +27,17 @@ export function buildDailyBalances(opening: number, deltas: { date: number; delt
   return balances;
 }
 
-export function buildLinePath(values: number[], width: number, height: number, inset = 8): string {
-  if (values.length < 2 || width <= 0) return '';
+export function chartPoints(values: number[], width: number, height: number, inset = 8): [number, number][] {
+  if (values.length < 2 || width <= 0) return [];
   const min = Math.min(...values);
   const range = Math.max(...values) - min;
   const step = width / (values.length - 1);
   const y = (value: number) => range === 0 ? height / 2 : inset + (1 - (value - min) / range) * (height - inset * 2);
-  return values.map((value, i) => `${i === 0 ? 'M' : 'L'}${(i * step).toFixed(1)} ${y(value).toFixed(1)}`).join(' ');
+  return values.map((value, i) => [i * step, y(value)]);
+}
+
+export function buildLinePath(values: number[], width: number, height: number, inset = 8): string {
+  return chartPoints(values, width, height, inset).map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
 }
 
 export type NextBill = {

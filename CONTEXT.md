@@ -28,10 +28,6 @@ _Avoid_: Budget amount, spending target
 The global display currency chosen in Settings; used to normalize stored transaction totals across the app.
 _Avoid_: Default currency, base currency
 
-**View Currency**:
-An ephemeral, screen-local currency for account summary display; may differ from **Preferred Currency** and uses the latest exchange rates when it does.
-_Avoid_: Display currency, selected currency
-
 **Account Order**:
 The user-defined sequence in which active accounts appear consistently throughout Spendwise.
 _Avoid_: Account screen order, local account order

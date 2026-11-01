@@ -1,14 +1,11 @@
 /**
  * Shared money helpers.
  *
- * - Multi-currency conversion (convertAmount, re-exported from the currencies feature)
  * - String-to-cents parsing (parseToCents)
  *
  * Cents conversion (amountToCents, centsToAmount) and currency/number
  * formatting live in `src/features/formatting/helpers.ts`.
  */
-
-export { convertAmount } from '@/features/currencies/api';
 
 /**
  * Parse a user-entered string value into cents.

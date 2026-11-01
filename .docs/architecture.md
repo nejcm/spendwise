@@ -57,7 +57,7 @@ Feature data modules expose `useQuery` / `useMutation` hooks backed by SQLite. E
 |------|---------|
 | `query-keys.ts` | Single source of truth for all React Query cache keys. Import `queryKeys` instead of defining local key objects. |
 | `invalidation.ts` | Entity-based invalidation rules. Call `invalidateFor(queryClient, 'transaction')` instead of manually listing query key arrays. |
-| `money.ts` | Shared money helpers: `convertAmount` (re-exported from the currencies feature) and `parseToCents`. Cents conversion and currency formatting live in `src/features/formatting/helpers.ts`. |
+| `money.ts` | Shared money helpers: `parseToCents`. Cents conversion and currency formatting live in `src/features/formatting/helpers.ts`. |
 | `index.ts` | Barrel re-export of the above three modules. |
 
 Example mutation using the new patterns:

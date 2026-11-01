@@ -23,19 +23,17 @@ export const queryKeys = {
     withBalance: ['accounts', 'balance'] as const,
     withBalanceForMonth: (yearMonth: string) =>
       ['accounts', 'balance', yearMonth] as const,
-    withBalanceForRange: (startDate: number | undefined, endDate: number | undefined) =>
-      ['accounts', 'balance', startDate, endDate] as const,
-    balanceSeries: (startDate: number, endDate: number) =>
-      ['accounts', 'balance', 'series', startDate, endDate] as const,
+    balanceSeries: (startDate: number, endDate: number, accountId?: string) =>
+      ['accounts', 'balance', 'series', startDate, endDate, accountId] as const,
+    netChanges: (startDate: number, endDate: number) =>
+      ['accounts', 'balance', 'net-changes', startDate, endDate] as const,
+    archived: ['accounts', 'archived'] as const,
     totalBalance: ['total-balance'] as const,
     totalBalanceForMonth: (yearMonth: string) =>
       ['total-balance', yearMonth] as const,
     summaryForRange: (accountId: string | undefined, startDate: number | undefined, endDate: number | undefined) =>
       ['accounts', 'summary-range', accountId, startDate, endDate] as const,
-    summaryNativeForRange: (accountId: string | undefined, startDate: number | undefined, endDate: number | undefined) =>
-      ['accounts', 'summary-native-range', accountId, startDate, endDate] as const,
     summaryAll: ['accounts', 'summary-range'] as const,
-    summaryNativeAll: ['accounts', 'summary-native-range'] as const,
   },
 
   // ─── Categories ───

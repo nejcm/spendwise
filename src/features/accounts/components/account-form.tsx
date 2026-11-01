@@ -1,19 +1,22 @@
 import type { AccountFormData, AccountType } from '../types';
+import type { OptionType } from '@/components/ui';
 import type { CurrencyKey } from '@/features/currencies';
 import { useForm } from '@tanstack/react-form';
+import * as React from 'react';
 import { Keyboard, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
-import ColorSelector from '@/components/color-selector';
-import { GhostButton, Image, Input, SolidButton, Text } from '@/components/ui';
+import ColorSelector, { DEFAULT_COLOR } from '@/components/color-selector';
+import { Card, Chip, FlagCircle, GhostButton, Input, ListRow, Options, SolidButton, Text, useModalSheet } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
+import { ChevronRight } from '@/components/ui/icon';
 import { CURRENCY_VALUES } from '@/features/currencies';
-import { CURRENCY_IMAGES } from '@/features/currencies/images';
+import { CURRENCY_OPTIONS } from '@/features/currencies/images';
 import { translate } from '@/lib/i18n';
 import { toNumber } from '@/lib/number';
 import { addLastUsedCurrency, selectAccountFormPrefs, setAccountFormPrefs, useAppStore } from '@/lib/store/store';
-import { getRandomColor } from '@/lib/theme/colors';
+import { getRandomColor, hexWithOpacity } from '@/lib/theme/colors';
 import { useCreateAccount, useUpdateAccount } from '../api';
 import { ACCOUNT_TYPE_LABELS, ACCOUNT_TYPES } from '../types';
 
@@ -39,12 +42,8 @@ const defaultValues: AccountFormData = {
   opening_balance: null,
 };
 
-export type AccountFormBaseProps = {
-  initialData?: AccountFormData;
-  accountId?: string;
-  onSuccess?: () => void;
-  onCancel?: () => void;
-};
+const fieldInputClassName = 'rounded-tile border-0 bg-card';
+const rowInputClassName = 'h-auto min-w-[120px] rounded-none border-0 bg-transparent px-0 text-right text-base font-medium';
 
 function useAccountForm(
   initialData?: AccountFormData,
@@ -53,8 +52,6 @@ function useAccountForm(
 ) {
   const createAccount = useCreateAccount();
   const updateAccount = useUpdateAccount();
-  const preferredCurrency = useAppStore.use.currency();
-  const isCompact = useAppStore.use.density() === 'compact';
   const accountFormPrefs = useAppStore(selectAccountFormPrefs);
 
   const form = useForm({
@@ -89,216 +86,251 @@ function useAccountForm(
     },
   });
 
-  return { form, createAccount, updateAccount, preferredCurrency, isCompact };
+  return { form, isLoading: createAccount.isPending || updateAccount.isPending };
 }
 
-type UseAccountFormReturn = ReturnType<typeof useAccountForm>;
+type AccountFormApi = ReturnType<typeof useAccountForm>['form'];
 
-type AccountFormBodyProps = {
-  form: UseAccountFormReturn['form'];
-  isCreate: boolean;
-  isCompact: boolean;
-  preferredCurrency: CurrencyKey;
-};
+function FieldLabel({ children }: { children: string }) {
+  return <Text className="px-1 pt-4 pb-1.5 text-meta font-medium text-muted-foreground">{children}</Text>;
+}
 
-function AccountFormBody({ form, isCreate, preferredCurrency, isCompact }: AccountFormBodyProps) {
-  const inputSize = isCompact ? 'md' : 'lg';
+function IdentityCard({ form }: { form: AccountFormApi }) {
   return (
-    <>
-      <View className="mb-2 flex-row items-center justify-center gap-3">
-        <form.Field
-          name="color"
-          children={(field) => (
-            <ColorSelector
-              value={field.state.value ?? 'bg-sky-600'}
-              onSelect={(value) => field.handleChange(String(value))}
-              stackBehavior="push"
-              size={isCompact ? 'xl' : '2xl'}
-            />
-          )}
-        />
-        <form.Field
-          name="icon"
-          children={(field) => (
-            <Input
-              value={field.state.value ?? ''}
-              onBlur={field.handleBlur}
-              onChangeText={(v) => {
-                const icon = v.trim() || null;
-                field.handleChange(icon);
-                if (icon) Keyboard.dismiss();
-              }}
-              placeholder={translate('accounts.icon_placeholder')}
-              containerClassName="w-[100]"
-              className="px-0.5 text-center text-3xl"
-              size={isCompact ? 'xl' : '2xl'}
-            />
-          )}
-        />
-      </View>
-
-      <form.Field
-        name="name"
-        children={(field) => (
-          <Input
-            size={inputSize}
-            value={field.state.value}
-            onBlur={field.handleBlur}
-            onChangeText={field.handleChange}
-            placeholder={translate('accounts.name_placeholder')}
-            error={getFieldError(field)}
-          />
-        )}
-      />
-
-      <form.Field
-        name="description"
-        children={(field) => (
-          <Input
-            size={inputSize}
-            value={field.state.value ?? ''}
-            onBlur={field.handleBlur}
-            onChangeText={field.handleChange}
-            placeholder={translate('accounts.description_placeholder')}
-            error={getFieldError(field)}
-          />
-        )}
-      />
-
-      <form.Field
-        name="type"
-        children={(field) => (
-          <View>
-            <Text className="mb-2 text-sm font-medium">{translate('accounts.type')}</Text>
-            <View className="flex-row flex-wrap gap-2">
-              {ACCOUNT_TYPES.map((t) => (
-                <SolidButton
-                  key={t}
-                  size="sm"
-                  className="items-center rounded-3xl"
-                  color={field.state.value === t ? 'default' : 'secondary'}
-                  label={ACCOUNT_TYPE_LABELS[t]}
-                  onPress={() => field.handleChange(t)}
-                />
-              ))}
-            </View>
-          </View>
-        )}
-      />
-
-      <View className="flex-row gap-2">
-        <View className="w-[85] flex-row items-center justify-center gap-2 pr-4 pl-0">
-          <Image source={CURRENCY_IMAGES[preferredCurrency]} className="size-6 rounded-full" />
-          <Text className="border-none bg-transparent">
-            {preferredCurrency}
-          </Text>
-        </View>
-        <form.Field
-          name="budget"
-          children={(field) => (
-            <Input
-              value={field.state.value ?? ''}
-              onBlur={field.handleBlur}
-              size={inputSize}
-              onChangeText={field.handleChange}
-              placeholder={translate('accounts.budget_placeholder')}
-              keyboardType="decimal-pad"
-              containerClassName="flex-1"
-              error={getFieldError(field)}
-            />
-          )}
-        />
-      </View>
-
-      {isCreate && (
-        <View className="flex-row gap-2">
-          <form.Subscribe
-            selector={(s) => s.values.currency}
-            children={(currency) => (
-              <View className="w-[85] flex-row items-center justify-center gap-2 pr-4 pl-0">
-                <Image source={CURRENCY_IMAGES[currency]} className="size-6 rounded-full" />
-                <Text className="border-none bg-transparent">{currency}</Text>
-              </View>
-            )}
-          />
+    <form.Subscribe
+      selector={(s) => s.values.color}
+      children={(color) => (
+        <Card className="flex-row items-center gap-4 p-4">
           <form.Field
-            name="opening_balance"
+            name="icon"
             children={(field) => (
               <Input
                 value={field.state.value ?? ''}
                 onBlur={field.handleBlur}
-                size={inputSize}
-                onChangeText={field.handleChange}
-                placeholder={translate('accounts.opening_balance')}
-                accessibilityLabel={translate('accounts.opening_balance')}
-                keyboardType="numbers-and-punctuation"
-                containerClassName="flex-1"
-                error={getFieldError(field)}
+                onChangeText={(v) => {
+                  const icon = v.trim() || null;
+                  field.handleChange(icon);
+                  if (icon) Keyboard.dismiss();
+                }}
+                placeholder={translate('accounts.icon_placeholder')}
+                accessibilityLabel={translate('accounts.icon_placeholder')}
+                containerClassName="shrink-0"
+                className="size-16 rounded-card border-0 px-0 text-center text-3xl"
+                style={{ backgroundColor: hexWithOpacity(color || DEFAULT_COLOR, 26) }}
               />
             )}
           />
-        </View>
+          <View className="min-w-0 flex-1 gap-1">
+            <Text className="text-meta text-muted-foreground">{translate('accounts.tap_emoji')}</Text>
+            <form.Field
+              name="color"
+              children={(field) => (
+                <ColorSelector
+                  value={field.state.value ?? DEFAULT_COLOR}
+                  onSelect={(value) => field.handleChange(String(value))}
+                  stackBehavior="push"
+                  size="sm"
+                  inputClassName="h-auto self-start"
+                  renderSelectedItem={(item) => (
+                    <View className="flex-row items-center gap-2 py-1">
+                      <View className="size-5 rounded-full border border-border" style={{ backgroundColor: String(item?.value || field.state.value || DEFAULT_COLOR) }} />
+                      <Text className="text-row font-medium">{translate('accounts.color')}</Text>
+                      <ChevronRight size={16} colorClassName="accent-muted-foreground" />
+                    </View>
+                  )}
+                />
+              )}
+            />
+          </View>
+        </Card>
       )}
-    </>
+    />
   );
 }
 
-export type AccountFormProps = AccountFormBaseProps;
-export function AccountForm({
-  initialData,
-  accountId,
-  onSuccess,
-  onCancel,
-}: AccountFormProps) {
-  const { form, createAccount, updateAccount, preferredCurrency, isCompact } = useAccountForm(
-    initialData,
-    accountId,
-    onSuccess,
-  );
+function DetailsCard({ form, isCreate }: { form: AccountFormApi; isCreate: boolean }) {
+  const preferredCurrency = useAppStore.use.currency();
+  const currencyModal = useModalSheet();
 
-  const isLoading = createAccount.isPending || updateAccount.isPending;
+  return (
+    <form.Field
+      name="currency"
+      children={(currencyField) => (
+        <>
+          <Card className="mt-5 px-[18px]">
+            <ListRow
+              className="border-b border-border"
+              chevron={isCreate}
+              onPress={isCreate ? currencyModal.present : undefined}
+              title={translate('common.currency')}
+              trailing={(
+                <View className="flex-row items-center gap-2">
+                  <FlagCircle currency={currencyField.state.value} size={22} />
+                  <Text className="text-row font-medium">{currencyField.state.value}</Text>
+                </View>
+              )}
+            />
+            {isCreate && (
+              <form.Field
+                name="opening_balance"
+                children={(field) => (
+                  <ListRow
+                    className="border-b border-border"
+                    title={translate('accounts.opening_balance')}
+                    meta={getFieldError(field)}
+                    trailing={(
+                      <Input
+                        value={field.state.value ?? ''}
+                        onBlur={field.handleBlur}
+                        onChangeText={field.handleChange}
+                        placeholder="0.00"
+                        accessibilityLabel={translate('accounts.opening_balance')}
+                        keyboardType="numbers-and-punctuation"
+                        className={rowInputClassName}
+                      />
+                    )}
+                  />
+                )}
+              />
+            )}
+            <form.Field
+              name="budget"
+              children={(field) => (
+                <ListRow
+                  title={translate('accounts.budget')}
+                  meta={translate('accounts.budget_hint', { currency: preferredCurrency })}
+                  trailing={(
+                    <Input
+                      value={field.state.value ?? ''}
+                      onBlur={field.handleBlur}
+                      onChangeText={field.handleChange}
+                      placeholder={translate('common.optional')}
+                      accessibilityLabel={translate('accounts.budget')}
+                      keyboardType="decimal-pad"
+                      className={rowInputClassName}
+                    />
+                  )}
+                />
+              )}
+            />
+          </Card>
+          {isCreate && (
+            <Options
+              ref={currencyModal.ref}
+              options={CURRENCY_OPTIONS}
+              value={currencyField.state.value}
+              searchEnabled
+              onSelect={(option: OptionType) => {
+                currencyModal.close();
+                currencyField.handleChange(option.value as CurrencyKey);
+              }}
+            />
+          )}
+        </>
+      )}
+    />
+  );
+}
+
+export type AccountFormProps = {
+  initialData?: AccountFormData;
+  accountId?: string;
+  onSuccess?: () => void;
+  onArchive?: () => void;
+};
+
+export function AccountForm({ initialData, accountId, onSuccess, onArchive }: AccountFormProps) {
+  const { form, isLoading } = useAccountForm(initialData, accountId, onSuccess);
   const insets = useSafeAreaInsets();
-  const stickyFooterPadding = 56 + insets.bottom;
-  const buttonSize = isCompact ? 'sm' : 'md';
+  const isCreate = !accountId;
 
   return (
     <>
       <KeyboardAwareScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ gap: isCompact ? 8 : 12, paddingBottom: 8 + stickyFooterPadding, paddingHorizontal: 16, paddingTop: 32 }}
+        contentContainerClassName="px-5 pt-4"
+        contentContainerStyle={{ paddingBottom: 88 + insets.bottom }}
         keyboardShouldPersistTaps="handled"
       >
-        <AccountFormBody
-          form={form}
-          isCreate={!accountId}
-          isCompact={isCompact}
-          preferredCurrency={preferredCurrency}
+        <IdentityCard form={form} />
+
+        <form.Field
+          name="name"
+          children={(field) => (
+            <>
+              <FieldLabel>{translate('accounts.name')}</FieldLabel>
+              <Input
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChangeText={field.handleChange}
+                placeholder={translate('accounts.name_placeholder')}
+                accessibilityLabel={translate('accounts.name')}
+                className={fieldInputClassName}
+                error={getFieldError(field)}
+              />
+            </>
+          )}
         />
+
+        <form.Field
+          name="description"
+          children={(field) => (
+            <>
+              <FieldLabel>{translate('common.description')}</FieldLabel>
+              <Input
+                value={field.state.value ?? ''}
+                onBlur={field.handleBlur}
+                onChangeText={field.handleChange}
+                placeholder={translate('common.optional')}
+                accessibilityLabel={translate('common.description')}
+                className={fieldInputClassName}
+                error={getFieldError(field)}
+              />
+            </>
+          )}
+        />
+
+        <form.Field
+          name="type"
+          children={(field) => (
+            <>
+              <FieldLabel>{translate('accounts.type')}</FieldLabel>
+              <View accessibilityRole="radiogroup" accessibilityLabel={translate('accounts.type')} className="flex-row flex-wrap gap-2">
+                {ACCOUNT_TYPES.map((t) => (
+                  <Chip
+                    key={t}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: field.state.value === t }}
+                    label={ACCOUNT_TYPE_LABELS[t]}
+                    selected={field.state.value === t}
+                    onPress={() => field.handleChange(t)}
+                  />
+                ))}
+              </View>
+            </>
+          )}
+        />
+
+        <DetailsCard form={form} isCreate={isCreate} />
+
+        {onArchive && (
+          <GhostButton color="danger" className="mt-4" label={translate('accounts.archive_account')} onPress={onArchive} />
+        )}
       </KeyboardAwareScrollView>
       <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>
-        <View className="flex-row gap-3 border-t border-border bg-background px-4 py-2">
+        <View className="bg-background px-5 py-2">
           <form.Subscribe
             selector={({ isSubmitting, values }) => ({ isSubmitting, values })}
             children={(state) => (
-              <>
-                {onCancel && (
-                  <GhostButton
-                    size={buttonSize}
-                    textClassName="text-base/tight"
-                    label={translate('common.cancel')}
-                    onPress={onCancel}
-                  />
-                )}
-                <SolidButton
-                  size={buttonSize}
-                  textClassName="text-base/tight"
-                  label={translate('common.save')}
-                  onPress={form.handleSubmit}
-                  loading={(!!state.isSubmitting) || isLoading}
-                  disabled={!schema.safeParse(state.values).success}
-                  className="flex-1"
-                />
-              </>
+              <SolidButton
+                color="primary"
+                size="lg"
+                fullWidth
+                label={translate(isCreate ? 'accounts.create' : 'common.save')}
+                onPress={form.handleSubmit}
+                loading={state.isSubmitting || isLoading}
+                disabled={!schema.safeParse(state.values).success}
+              />
             )}
           />
         </View>

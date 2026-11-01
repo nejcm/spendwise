@@ -1,71 +1,40 @@
 import type { AccountWithBalance } from '@/features/accounts/types';
 import * as React from 'react';
-
 import { Pressable, View } from 'react-native';
-import { DEFAULT_COLOR } from '@/components/color-selector';
-import { FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
-
-import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
+import { FormattedCurrency, getPressedStyle, IconTile, Text } from '@/components/ui';
 import { cn } from '@/lib/cn';
-import { scaleBudgetForPeriod } from '@/lib/date/helpers';
+import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
-import { hexWithOpacity } from '@/lib/theme/colors';
-import { ACCOUNT_TYPE_LABELS } from '../types';
+import { ACCOUNT_TYPE_COLORS, ACCOUNT_TYPE_LABELS } from '../types';
 
 export type AccountCardProps = {
   account: AccountWithBalance;
+  monthDelta: number;
   onPress?: () => void;
 };
 
-export function AccountCard({ account, onPress }: AccountCardProps) {
-  const userCurrency = useAppStore.use.currency();
-  const periodSelection = useAppStore.use.periodSelection();
-  const density = useAppStore.use.density();
-  const isCompact = density === 'compact';
-  const scaledBudget = account.budget != null ? scaleBudgetForPeriod(account.budget, periodSelection) : null;
-  const isMonthView = periodSelection.mode === 'month';
+export function AccountCard({ account, monthDelta, onPress }: AccountCardProps) {
+  const currency = useAppStore.use.currency();
 
   return (
     <Pressable
+      accessibilityRole="button"
       onPress={onPress}
-      className={cn('rounded-xl bg-card', isCompact ? 'mb-2 p-2' : 'mb-3 p-4')}
       style={getPressedStyle}
+      className="flex-row items-center gap-3.5 rounded-card bg-card px-[18px] py-4"
     >
-      <View className="flex-row items-center justify-between gap-3">
-        {account.icon && (
-          <View
-            className={cn('items-center justify-center rounded-lg', isCompact ? 'size-10' : 'size-12')}
-            style={{ backgroundColor: hexWithOpacity(account.color ?? DEFAULT_COLOR, 36) }}
-          >
-            <Text className={isCompact ? 'text-2xl' : 'text-3xl'}>{account.icon}</Text>
-          </View>
-        )}
-        <View className="flex-1">
-          <Text className={`text-base/snug ${isCompact ? 'text-sm/snug' : ''}`}>{account.name}</Text>
-          <Text className="text-sm text-muted-foreground">
-            {ACCOUNT_TYPE_LABELS[account.type as keyof typeof ACCOUNT_TYPE_LABELS] || account.type}
-          </Text>
-          {!!account.description && (
-            <Text className="text-sm/snug text-muted-foreground italic" numberOfLines={1}>
-              {account.description}
-            </Text>
-          )}
-        </View>
-        <View className="items-end">
-          <FormattedCurrency value={account.baseBalance} currency={userCurrency} className={`font-bold ${isCompact ? 'text-base' : 'text-lg'}`} />
-        </View>
+      <IconTile size="lg" icon={account.icon || '💵'} color={account.color ?? ACCOUNT_TYPE_COLORS[account.type]} />
+      <View className="min-w-0 flex-1">
+        <Text className="text-base font-semibold" numberOfLines={1}>{account.name}</Text>
+        <Text className="text-meta text-muted-foreground" numberOfLines={1}>{`${ACCOUNT_TYPE_LABELS[account.type]} · ${account.currency}`}</Text>
       </View>
-      {account.budget != null && account.budget > 0 && account.monthlyExpense != null && periodSelection.mode !== 'all' && (
-        <BudgetProgressBar
-          spent={account.monthlyExpense}
-          budget={scaledBudget ?? 0}
-          monthlyBudget={!isMonthView ? account.budget : undefined}
-          currency={userCurrency}
-          containerClassName={isCompact ? 'mt-1' : 'mt-2'}
-          showValues={true}
-          bg="bg-muted-foreground/30"
-        />
-      )}
+      <View className="shrink-0 items-end">
+        <FormattedCurrency value={account.baseBalance} currency={currency} className="text-[17px] font-semibold" numberOfLines={1} />
+        <Text className={cn('text-xs', monthDelta > 0 ? 'text-positive' : 'text-muted-foreground')} numberOfLines={1}>
+          <FormattedCurrency value={monthDelta} currency={currency} prefix={monthDelta > 0 ? '+' : ''} />
+          {` ${translate('accounts.this_month')}`}
+        </Text>
+      </View>
     </Pressable>
   );
 }

@@ -1,8 +1,8 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { CurrencyKey } from '../currencies';
-import type { MonthSummary, TransactionInsertData, TransactionType } from '../transactions/types';
-import type { Account, AccountFormData, AccountWithBalance, FirstAccountData } from './types';
+import type { TransactionInsertData } from '../transactions/types';
+import type { Account, AccountFlows, AccountFormData, AccountWithBalance, FirstAccountData } from './types';
 
 import { computeBaseAmount } from '@/features/currencies/conversion';
 import { getRatesForDate } from '@/features/currencies/queries';
@@ -74,37 +74,6 @@ export async function getAccountsWithBalanceForMonth(
   );
 }
 
-export async function getAccountsWithBalanceForRange(
-  db: SQLiteDatabase,
-  startDate: number | undefined,
-  endDate: number | undefined,
-): Promise<AccountWithBalance[]> {
-  const hasRange = !!startDate && !!endDate;
-  return db.getAllAsync<AccountWithBalance>(
-    `SELECT a.*,
-       COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0)
-       - COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END), 0)
-       + COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount > 0 THEN t.amount ELSE 0 END), 0)
-       - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN ABS(t.amount) ELSE 0 END), 0)
-       as balance,
-       COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0)
-       - COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0)
-       + COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount > 0 THEN t.baseAmount ELSE 0 END), 0)
-       - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN ABS(t.baseAmount) ELSE 0 END), 0)
-       as baseBalance,
-       COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0)
-       as monthlyExpense,
-       t.baseCurrency as baseCurrency
-     FROM accounts a
-     LEFT JOIN transactions t ON t.account_id = a.id
-       ${hasRange ? 'AND t.date >= ? AND t.date < ?' : ''}
-     WHERE a.is_archived = 0
-     GROUP BY a.id
-     ORDER BY a.sort_order ASC`,
-    hasRange ? [startDate, endDate] : [],
-  );
-}
-
 export async function getTotalBalance(
   db: SQLiteDatabase,
   yearMonth?: string,
@@ -152,65 +121,62 @@ const SIGNED_BASE_AMOUNT = `CASE
   ELSE t.baseAmount
 END`;
 
-/** Total balance (Preferred Currency) before `startDate`, plus per-date net changes in `[startDate, endDate)`. */
+/** Balance (Preferred Currency) before `startDate`, plus per-date net changes in `[startDate, endDate)`; all active accounts unless `accountId` is given. */
 export async function getBalanceSeries(
   db: SQLiteDatabase,
   startDate: number,
   endDate: number,
+  accountId?: string,
 ): Promise<{ opening: number; deltas: { date: number; delta: number }[] }> {
-  const from = `FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.is_archived = 0`;
+  const from = `FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE ${accountId ? 't.account_id = ?' : 'a.is_archived = 0'}`;
+  const scope = accountId ? [accountId] : [];
   const [openingRow, deltas] = await Promise.all([
-    db.getFirstAsync<{ total: number }>(`SELECT COALESCE(SUM(${SIGNED_BASE_AMOUNT}), 0) AS total ${from} AND t.date < ?`, [startDate]),
+    db.getFirstAsync<{ total: number }>(`SELECT COALESCE(SUM(${SIGNED_BASE_AMOUNT}), 0) AS total ${from} AND t.date < ?`, [...scope, startDate]),
     db.getAllAsync<{ date: number; delta: number }>(
       `SELECT t.date AS date, SUM(${SIGNED_BASE_AMOUNT}) AS delta ${from} AND t.date >= ? AND t.date < ? GROUP BY t.date ORDER BY t.date`,
-      [startDate, endDate],
+      [...scope, startDate, endDate],
     ),
   ]);
   return { opening: openingRow?.total ?? 0, deltas };
 }
 
-export async function getAccountSummaryByRange(
+/** Per-account net change in `[startDate, endDate)`, transfers included, opening-balance adjustments excluded. */
+export async function getAccountNetChanges(
+  db: SQLiteDatabase,
+  startDate: number,
+  endDate: number,
+): Promise<Record<string, number>> {
+  const rows = await db.getAllAsync<{ account_id: string; delta: number }>(
+    `SELECT t.account_id AS account_id, SUM(${SIGNED_BASE_AMOUNT}) AS delta FROM transactions t
+     WHERE t.is_adjustment = 0 AND t.date >= ? AND t.date < ? GROUP BY t.account_id`,
+    [startDate, endDate],
+  );
+  return Object.fromEntries(rows.map((row) => [row.account_id, row.delta]));
+}
+
+/** Preferred Currency totals in the range; `movedOut` is outgoing transfer legs, adjustments excluded. */
+export async function getAccountFlows(
   db: SQLiteDatabase,
   accountId: string,
   startDate: number | undefined,
   endDate: number | undefined,
-): Promise<MonthSummary> {
+): Promise<AccountFlows> {
   const hasRange = !!startDate && !!endDate;
-  const row = await db.getFirstAsync<{ income: number; expense: number }>(
+  const row = await db.getFirstAsync<AccountFlows>(
     `SELECT
        COALESCE(SUM(CASE WHEN type = 'income' THEN baseAmount ELSE 0 END), 0) as income,
-       COALESCE(SUM(CASE WHEN type = 'expense' THEN baseAmount ELSE 0 END), 0) as expense
+       COALESCE(SUM(CASE WHEN type = 'expense' THEN baseAmount ELSE 0 END), 0) as expense,
+       COALESCE(SUM(CASE WHEN type = 'transfer' AND amount < 0 AND is_adjustment = 0 THEN ABS(baseAmount) ELSE 0 END), 0) as movedOut
      FROM transactions
      WHERE account_id = ?
      ${hasRange ? 'AND date >= ? AND date < ?' : ''}`,
     hasRange ? [accountId, startDate, endDate] : [accountId],
   );
-  const income = row?.income ?? 0;
-  const expense = row?.expense ?? 0;
-  return { income, expense, balance: income - expense };
+  return row ?? { income: 0, expense: 0, movedOut: 0 };
 }
 
-export type AccountSummaryNativeRow = {
-  type: Extract<TransactionType, 'income' | 'expense'>;
-  currency: CurrencyKey;
-  total: number;
-};
-
-export async function getAccountSummaryNativeByRange(
-  db: SQLiteDatabase,
-  accountId: string,
-  startDate: number | undefined,
-  endDate: number | undefined,
-): Promise<AccountSummaryNativeRow[]> {
-  const hasRange = !!startDate && !!endDate;
-  return db.getAllAsync<AccountSummaryNativeRow>(
-    `SELECT type, currency, SUM(amount) AS total
-     FROM transactions
-     WHERE account_id = ? AND type IN ('income', 'expense')
-     ${hasRange ? 'AND date >= ? AND date < ?' : ''}
-     GROUP BY type, currency`,
-    hasRange ? [accountId, startDate, endDate] : [accountId],
-  );
+export async function getArchivedAccounts(db: SQLiteDatabase): Promise<Account[]> {
+  return db.getAllAsync<Account>('SELECT * FROM accounts WHERE is_archived = 1 ORDER BY sort_order ASC');
 }
 
 // ─── Write Queries ───
@@ -312,6 +278,16 @@ export async function archiveAccount(
 ): Promise<void> {
   await db.runAsync(
     `UPDATE accounts SET is_archived = 1, updated_at = strftime('%s','now') WHERE id = ?`,
+    [id],
+  );
+}
+
+export async function unarchiveAccount(
+  db: SQLiteDatabase,
+  id: string,
+): Promise<void> {
+  await db.runAsync(
+    `UPDATE accounts SET is_archived = 0, updated_at = strftime('%s','now') WHERE id = ?`,
     [id],
   );
 }

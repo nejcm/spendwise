@@ -1,13 +1,10 @@
-import type { SQLiteDatabase } from 'expo-sqlite';
-
 import type { AccountFormData, FirstAccountData } from './types';
 import type { CurrencyKey } from '@/features/currencies';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { Alert } from '@/components/ui';
-import { useCurrencyRates } from '@/features/currencies/hooks';
 import { captureError } from '@/lib/analytics';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
@@ -15,7 +12,6 @@ import { queryKeys } from '@/lib/data/query-keys';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import * as queries from './queries';
-import { computeAccountSummaryForViewCurrency } from './summary-conversion';
 
 // ─── Read Hooks ───
 
@@ -35,86 +31,36 @@ export function useAccountsWithBalance() {
   });
 }
 
-export function useBalanceSeries(startDate: number, endDate: number) {
+export function useBalanceSeries(startDate: number, endDate: number, accountId?: string) {
   const db = useSQLiteContext();
   return useQuery({
-    queryKey: queryKeys.accounts.balanceSeries(startDate, endDate),
-    queryFn: () => queries.getBalanceSeries(db, startDate, endDate),
+    queryKey: queryKeys.accounts.balanceSeries(startDate, endDate, accountId),
+    queryFn: () => queries.getBalanceSeries(db, startDate, endDate, accountId),
   });
 }
 
-export function accountsWithBalanceForRangeQueryOptions(db: SQLiteDatabase, startDate: number | undefined, endDate: number | undefined) {
-  return {
-    queryKey: queryKeys.accounts.withBalanceForRange(startDate, endDate),
-    queryFn: () => queries.getAccountsWithBalanceForRange(db, startDate, endDate),
-  };
-}
-export function useAccountsWithBalanceForRange(startDate: number | undefined, endDate: number | undefined) {
+export function useAccountNetChanges(startDate: number, endDate: number) {
   const db = useSQLiteContext();
-  return useQuery(accountsWithBalanceForRangeQueryOptions(db, startDate, endDate));
+  return useQuery({
+    queryKey: queryKeys.accounts.netChanges(startDate, endDate),
+    queryFn: () => queries.getAccountNetChanges(db, startDate, endDate),
+  });
 }
 
-export function useAccountSummaryByRange(
-  accountId: string | undefined,
-  startDate: number | undefined,
-  endDate: number | undefined,
-  options?: { enabled?: boolean },
-) {
+export function useArchivedAccounts() {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: queryKeys.accounts.archived,
+    queryFn: () => queries.getArchivedAccounts(db),
+  });
+}
+
+export function useAccountFlows(accountId: string, startDate: number | undefined, endDate: number | undefined) {
   const db = useSQLiteContext();
   return useQuery({
     queryKey: queryKeys.accounts.summaryForRange(accountId, startDate, endDate),
-    queryFn: () => queries.getAccountSummaryByRange(db, accountId!, startDate, endDate),
-    enabled: (options?.enabled ?? true) && !!accountId,
+    queryFn: () => queries.getAccountFlows(db, accountId, startDate, endDate),
   });
-}
-
-export function useAccountSummaryNativeByRange(
-  accountId: string | undefined,
-  startDate: number | undefined,
-  endDate: number | undefined,
-  options?: { enabled?: boolean },
-) {
-  const db = useSQLiteContext();
-  return useQuery({
-    queryKey: queryKeys.accounts.summaryNativeForRange(accountId, startDate, endDate),
-    queryFn: () => queries.getAccountSummaryNativeByRange(db, accountId!, startDate, endDate),
-    enabled: (options?.enabled ?? true) && !!accountId,
-  });
-}
-
-export function useAccountSummaryDisplay(
-  accountId: string | undefined,
-  startDate: number | undefined,
-  endDate: number | undefined,
-  viewCurrency: CurrencyKey,
-) {
-  const preferredCurrency = useAppStore.use.currency();
-  const isPreferredView = viewCurrency === preferredCurrency;
-
-  const preferredQuery = useAccountSummaryByRange(accountId, startDate, endDate, {
-    enabled: isPreferredView,
-  });
-  const nativeQuery = useAccountSummaryNativeByRange(accountId, startDate, endDate, {
-    enabled: !isPreferredView,
-  });
-  const ratesQuery = useCurrencyRates({ enabled: !isPreferredView });
-  const ratesReady = !ratesQuery.isLoading && !ratesQuery.isPending;
-
-  const data = useMemo(() => {
-    if (isPreferredView) return preferredQuery.data;
-    if (!nativeQuery.data || !ratesReady) return undefined;
-    return computeAccountSummaryForViewCurrency(nativeQuery.data, viewCurrency, ratesQuery.data ?? {});
-  }, [isPreferredView, nativeQuery.data, preferredQuery.data, ratesQuery.data, ratesReady, viewCurrency]);
-
-  const isLoading = isPreferredView
-    ? preferredQuery.isLoading
-    : nativeQuery.isLoading || !ratesReady;
-
-  const isError = isPreferredView
-    ? preferredQuery.isError
-    : nativeQuery.isError || ratesQuery.isError;
-
-  return { data, isLoading, isError };
 }
 
 export function useTotalBalance(yearMonth?: string) {
@@ -206,17 +152,30 @@ export function useArchiveAccount(onSuccess?: () => void) {
   });
 }
 
+export function useUnarchiveAccount() {
+  const db = useSQLiteContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => queries.unarchiveAccount(db, id),
+    onSuccess: () => {
+      invalidateFor(queryClient, 'account');
+    },
+    onError,
+  });
+}
+
 export function useArchiveAccountConfirmation(onSuccess?: () => void) {
   const mutation = useArchiveAccount(onSuccess);
   const submit = useCallback((id: string, name?: string) => {
     if (!id) return;
     Alert.alert(
-      translate('common.delete'),
-      translate('accounts.delete_confirm', { name: name ?? '' }),
+      translate('accounts.archive_account'),
+      translate('accounts.archive_confirm', { name: name ?? '' }),
       [
         { text: translate('common.cancel'), style: 'cancel' },
         {
-          text: translate('common.delete'),
+          text: translate('accounts.archive_action'),
           style: 'destructive',
           onPress: async () => {
             mutation.mutate(id);

@@ -5,14 +5,16 @@ import { createTestDb } from '@/test-utils/sqlite-db';
 import {
   archiveAccount,
   createAccount,
+  getAccountFlows,
+  getAccountNetChanges,
   getAccounts,
-  getAccountSummaryNativeByRange,
   getAccountsWithBalance,
   getAccountsWithBalanceForMonth,
-  getAccountsWithBalanceForRange,
+  getArchivedAccounts,
   getBalanceSeries,
   getTotalBalance,
   setupFirstAccount,
+  unarchiveAccount,
   updateAccount,
   updateAccountOrder,
 } from './queries';
@@ -69,12 +71,13 @@ async function seedTransaction(
     baseCurrency: 'EUR',
     date: MAR_MID,
     note: null,
+    is_adjustment: 0,
     ...overrides,
   };
   await db.runAsync(
-    `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [row.id, row.account_id, row.category_id, row.type, row.amount, row.currency, row.baseAmount, row.baseCurrency, row.date, row.note],
+    `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note, is_adjustment)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [row.id, row.account_id, row.category_id, row.type, row.amount, row.currency, row.baseAmount, row.baseCurrency, row.date, row.note, row.is_adjustment],
   );
   return row;
 }
@@ -170,7 +173,6 @@ describe('getAccountsWithBalance', () => {
     const [withBalance] = await getAccountsWithBalance(db as any);
     expect(withBalance.baseBalance).toBe(-10_000);
     expect((await getAccountsWithBalanceForMonth(db as any, '2026-03'))[0].baseBalance).toBe(-10_000);
-    expect((await getAccountsWithBalanceForRange(db as any, MAR_START, APR_START))[0].baseBalance).toBe(-10_000);
     expect(await getTotalBalance(db as any)).toBe(-10_000);
   });
 
@@ -224,41 +226,6 @@ describe('getAccountsWithBalanceForMonth', () => {
 
     const result = await getAccountsWithBalanceForMonth(db as any, '2026-03');
     expect(result[0].balance).toBe(0);
-  });
-});
-
-// ─── getAccountsWithBalanceForRange ──────────────────────────────────────────
-
-describe('getAccountsWithBalanceForRange', () => {
-  it('includes monthlyExpense field', async () => {
-    const db = await createTestDb();
-    await seedAccount(db);
-    await seedTransaction(db, { type: 'expense', baseAmount: 20_000, date: MAR_MID });
-
-    const result = await getAccountsWithBalanceForRange(db as any, MAR_START, APR_START);
-    expect(result[0]).toHaveProperty('monthlyExpense');
-    expect(result[0].monthlyExpense).toBe(20_000);
-  });
-
-  it('filters by date range', async () => {
-    const db = await createTestDb();
-    await seedAccount(db);
-    await seedTransaction(db, { id: 'txn_1', type: 'expense', baseAmount: 10_000, date: MAR_MID });
-    await seedTransaction(db, { id: 'txn_2', type: 'expense', baseAmount: 10_000, date: APR_START + 100 });
-
-    const result = await getAccountsWithBalanceForRange(db as any, MAR_START, APR_START);
-    expect(result[0].monthlyExpense).toBe(10_000); // only March txn
-  });
-
-  it('balance and baseBalance are computed correctly for the range', async () => {
-    const db = await createTestDb();
-    await seedAccount(db);
-    await seedTransaction(db, { id: 'txn_1', type: 'income', amount: 100_000, baseAmount: 100_000, date: MAR_MID });
-    await seedTransaction(db, { id: 'txn_2', type: 'expense', amount: 30_000, baseAmount: 30_000, date: MAR_MID });
-
-    const result = await getAccountsWithBalanceForRange(db as any, MAR_START, APR_START);
-    expect(result[0].balance).toBe(70_000);
-    expect(result[0].baseBalance).toBe(70_000);
   });
 });
 
@@ -324,6 +291,21 @@ describe('getBalanceSeries', () => {
     });
   });
 
+  it('limits the series to one account, archived or not', async () => {
+    const db = await createTestDb();
+    await seedAccount(db, { id: 'acc_1', is_archived: 1 });
+    await seedAccount(db, { id: 'acc_2', sort_order: 1 });
+    await seedTransaction(db, { id: 'opening', type: 'transfer', amount: 150_000, baseAmount: 150_000, date: MAR_START - 86_400, is_adjustment: 1 });
+    await seedTransaction(db, { id: 'rent', type: 'expense', baseAmount: 82_000, date: MAR_MID });
+    await seedTransaction(db, { id: 'out', type: 'transfer', amount: -50_000, baseAmount: 50_000, date: MAR_MID });
+    await seedTransaction(db, { id: 'other', account_id: 'acc_2', type: 'income', baseAmount: 9_999, date: MAR_MID });
+
+    expect(await getBalanceSeries(db as any, MAR_START, APR_START, 'acc_1')).toEqual({
+      opening: 150_000,
+      deltas: [{ date: MAR_MID, delta: -132_000 }],
+    });
+  });
+
   it('subtracts an out leg whose baseAmount went negative and excludes archived accounts', async () => {
     const db = await createTestDb();
     await seedAccount(db, { id: 'acc_1' });
@@ -338,45 +320,50 @@ describe('getBalanceSeries', () => {
   });
 });
 
-// ─── getAccountSummaryNativeByRange ───────────────────────────────────────────
+// ─── getAccountFlows ──────────────────────────────────────────────────────────
 
-describe('getAccountSummaryNativeByRange', () => {
-  it('aggregates income and expense by native currency', async () => {
+describe('getAccountFlows', () => {
+  it('splits income, spending and outgoing transfers in the range', async () => {
     const db = await createTestDb();
     await seedAccount(db);
-    await seedTransaction(db, { id: 'txn_1', type: 'income', amount: 10_000, currency: 'EUR', date: MAR_MID });
-    await seedTransaction(db, { id: 'txn_2', type: 'expense', amount: 3000, currency: 'EUR', date: MAR_MID });
-    await seedTransaction(db, { id: 'txn_3', type: 'income', amount: 5000, currency: 'USD', date: MAR_MID });
+    await seedAccount(db, { id: 'acc_2', sort_order: 1 });
+    await seedTransaction(db, { id: 'in', type: 'income', baseAmount: 285_000, date: MAR_MID });
+    await seedTransaction(db, { id: 'spent', type: 'expense', baseAmount: 153_355, date: MAR_MID });
+    await seedTransaction(db, { id: 'out', type: 'transfer', amount: -50_000, baseAmount: 50_000, date: MAR_MID });
+    await seedTransaction(db, { id: 'legacy_out', type: 'transfer', amount: -1_000, baseAmount: -1_000, date: MAR_MID });
+    await seedTransaction(db, { id: 'moved_in', type: 'transfer', amount: 7_000, baseAmount: 7_000, date: MAR_MID });
+    await seedTransaction(db, { id: 'opening', type: 'transfer', amount: -2_000, baseAmount: 2_000, date: MAR_MID, is_adjustment: 1 });
+    await seedTransaction(db, { id: 'other_acc', account_id: 'acc_2', type: 'expense', baseAmount: 9_999, date: MAR_MID });
+    await seedTransaction(db, { id: 'april', type: 'expense', baseAmount: 9_999, date: APR_MID });
 
-    const rows = await getAccountSummaryNativeByRange(db as any, 'acc_1', undefined, undefined);
-
-    expect(rows).toEqual(expect.arrayContaining([
-      { type: 'income', currency: 'EUR', total: 10_000 },
-      { type: 'expense', currency: 'EUR', total: 3000 },
-      { type: 'income', currency: 'USD', total: 5000 },
-    ]));
-    expect(rows).toHaveLength(3);
+    expect(await getAccountFlows(db as any, 'acc_1', MAR_START, APR_START)).toEqual({ income: 285_000, expense: 153_355, movedOut: 51_000 });
   });
 
-  it('filters by date range', async () => {
+  it('covers all time without a range', async () => {
     const db = await createTestDb();
     await seedAccount(db);
-    await seedTransaction(db, { id: 'txn_1', type: 'expense', amount: 1000, currency: 'EUR', date: MAR_MID });
-    await seedTransaction(db, { id: 'txn_2', type: 'expense', amount: 2000, currency: 'EUR', date: APR_MID });
+    await seedTransaction(db, { id: 'a', type: 'expense', baseAmount: 100, date: MAR_MID });
+    await seedTransaction(db, { id: 'b', type: 'expense', baseAmount: 200, date: APR_MID });
 
-    const rows = await getAccountSummaryNativeByRange(db as any, 'acc_1', MAR_START, APR_START);
-
-    expect(rows).toEqual([{ type: 'expense', currency: 'EUR', total: 1000 }]);
+    expect(await getAccountFlows(db as any, 'acc_1', undefined, undefined)).toEqual({ income: 0, expense: 300, movedOut: 0 });
   });
+});
 
-  it('ignores transfers', async () => {
+// ─── getAccountNetChanges ─────────────────────────────────────────────────────
+
+describe('getAccountNetChanges', () => {
+  it('nets each account in the range with transfers but without opening balances', async () => {
     const db = await createTestDb();
     await seedAccount(db);
-    await seedTransaction(db, { id: 'txn_1', type: 'transfer', amount: 5000, currency: 'EUR', date: MAR_MID });
+    await seedAccount(db, { id: 'acc_2', sort_order: 1 });
+    await seedTransaction(db, { id: 'salary', type: 'income', baseAmount: 285_000, date: MAR_MID });
+    await seedTransaction(db, { id: 'rent', type: 'expense', baseAmount: 82_000, date: MAR_MID });
+    await seedTransaction(db, { id: 'out', type: 'transfer', amount: -50_000, baseAmount: 50_000, date: MAR_MID });
+    await seedTransaction(db, { id: 'in', account_id: 'acc_2', type: 'transfer', amount: 50_000, baseAmount: 50_000, date: MAR_MID });
+    await seedTransaction(db, { id: 'opening', account_id: 'acc_2', type: 'transfer', amount: 150_000, baseAmount: 150_000, date: MAR_MID, is_adjustment: 1 });
+    await seedTransaction(db, { id: 'april', type: 'expense', baseAmount: 1, date: APR_MID });
 
-    const rows = await getAccountSummaryNativeByRange(db as any, 'acc_1', undefined, undefined);
-
-    expect(rows).toEqual([]);
+    expect(await getAccountNetChanges(db as any, MAR_START, APR_START)).toEqual({ acc_1: 153_000, acc_2: 50_000 });
   });
 });
 
@@ -591,6 +578,22 @@ describe('archiveAccount', () => {
 
     const result = await archiveAccount(db as any, 'acc_1');
     expect(result).toBeUndefined();
+  });
+});
+
+describe('unarchiveAccount', () => {
+  it('moves an archived account back into the active list', async () => {
+    const db = await createTestDb();
+    await seedAccount(db);
+    await seedAccount(db, { id: 'acc_2', sort_order: 1 });
+
+    await archiveAccount(db as any, 'acc_1');
+    expect((await getArchivedAccounts(db as any)).map((a) => a.id)).toEqual(['acc_1']);
+    expect((await getAccounts(db as any)).map((a) => a.id)).toEqual(['acc_2']);
+
+    await unarchiveAccount(db as any, 'acc_1');
+    expect(await getArchivedAccounts(db as any)).toEqual([]);
+    expect((await getAccounts(db as any)).map((a) => a.id)).toEqual(['acc_1', 'acc_2']);
   });
 });
 

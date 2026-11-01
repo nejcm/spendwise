@@ -7,6 +7,7 @@ import type { ComponentType } from 'react';
 import {
   ALargeSmall as LucideALargeSmall,
   AlertTriangle as LucideAlertTriangle,
+  Archive as LucideArchive,
   ArrowDown as LucideArrowDown,
   ArrowDownRight as LucideArrowDownRight,
   ArrowLeftIcon as LucideArrowLeftIcon,
@@ -104,6 +105,7 @@ function createIcon(Icon: ComponentType<LucideProps>): UniwindLucideIcon {
 
 export const ALargeSmall = createIcon(LucideALargeSmall);
 export const AlertTriangle = createIcon(LucideAlertTriangle);
+export const Archive = createIcon(LucideArchive);
 export const ArrowDown = createIcon(LucideArrowDown);
 export const ArrowLeftIcon = createIcon(LucideArrowLeftIcon);
 export const ArrowLeftRight = createIcon(LucideArrowLeftRight);

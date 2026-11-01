@@ -48,7 +48,7 @@ export default function ColorSelector(props: Omit<SelectProps, 'options'>) {
       inputClassName={cn('border-0 bg-transparent px-0', props.inputClassName)}
       itemClassName="px-1 py-2 w-full min-h-14 2xs:min-h-16"
       renderItem={renderItem}
-      renderSelectedItem={renderSelectedItem(size, props.value)}
+      renderSelectedItem={props.renderSelectedItem ?? renderSelectedItem(size, props.value)}
     />
   );
 }

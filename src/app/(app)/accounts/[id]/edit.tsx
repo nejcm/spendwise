@@ -1,8 +1,9 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 import { View } from 'react-native';
-import ScreenHeader from '@/components/screen-header';
-import { GhostButton, OverflowMenu, Text, TrashIcon } from '@/components/ui';
+import { HeaderButton, PageHeader } from '@/components/page-header';
+import { Text } from '@/components/ui';
+import { X } from '@/components/ui/icon';
 import { useAccounts, useArchiveAccountConfirmation } from '@/features/accounts/api';
 import { AccountForm } from '@/features/accounts/components/account-form';
 import { centsToAmount } from '@/features/formatting/helpers';
@@ -15,61 +16,36 @@ export default function EditAccountRoute() {
   const { data: accounts = [], isLoading } = useAccounts();
   const account = React.useMemo(() => accounts.find((item) => item.id === id), [accounts, id]);
   const onBack = () => goBackOrFallback(router);
-  const archiveAccount = useArchiveAccountConfirmation(onBack);
-
-  if (isLoading) {
-    return (
-      <>
-        <ScreenHeader title={translate('accounts.edit')} />
-        <View className="flex-1 items-center justify-center bg-background">
-          <Text>{translate('common.loading')}</Text>
-        </View>
-      </>
-    );
-  }
-
-  if (!account) {
-    return (
-      <>
-        <ScreenHeader title={translate('accounts.edit')} />
-        <View className="flex-1 items-center justify-center gap-4 bg-background px-4">
-          <Text className="text-center text-muted-foreground">{translate('accounts.not_found')}</Text>
-          <GhostButton color="secondary" label={translate('common.back')} onPress={onBack} />
-        </View>
-      </>
-    );
-  }
+  const archiveAccount = useArchiveAccountConfirmation(() => router.dismissTo('/accounts'));
 
   return (
     <>
-      <ScreenHeader title={translate('accounts.edit')}>
-        <OverflowMenu
-          className="-mr-2 ml-auto"
-          accessibilityLabel={translate('settings.more')}
-          items={[
-            {
-              label: translate('common.delete'),
-              onPress: () => archiveAccount.submit(account.id, account.name),
-              className: 'text-danger-600',
-              icon: <TrashIcon size={16} colorClassName="accent-red-600" className="mr-2" />,
-            },
-          ]}
+      <View className="px-5 pt-2">
+        <PageHeader
+          title={translate('accounts.edit_title')}
+          left={<HeaderButton icon={X} label={translate('common.close')} onPress={onBack} />}
         />
-      </ScreenHeader>
-      <AccountForm
-        accountId={account.id}
-        initialData={{
-          name: account.name,
-          type: account.type,
-          currency: account.currency,
-          description: account.description,
-          budget: account.budget != null ? String(centsToAmount(account.budget)) : null,
-          icon: account.icon,
-          color: account.color,
-        }}
-        onSuccess={onBack}
-        onCancel={onBack}
-      />
+      </View>
+      {isLoading
+        ? <Text className="mt-10 text-center text-muted-foreground">{translate('common.loading')}</Text>
+        : !account
+            ? <Text className="mt-10 px-5 text-center text-muted-foreground">{translate('accounts.not_found')}</Text>
+            : (
+                <AccountForm
+                  accountId={account.id}
+                  initialData={{
+                    name: account.name,
+                    type: account.type,
+                    currency: account.currency,
+                    description: account.description,
+                    budget: account.budget != null ? String(centsToAmount(account.budget)) : null,
+                    icon: account.icon,
+                    color: account.color,
+                  }}
+                  onSuccess={onBack}
+                  onArchive={() => archiveAccount.submit(account.id, account.name)}
+                />
+              )}
     </>
   );
 }

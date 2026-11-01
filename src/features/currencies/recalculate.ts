@@ -14,34 +14,42 @@ import { getRatesForDates } from './queries';
  *
  * @returns The number of transactions updated.
  */
+type Row = { id: string; amount: number; currency: string; date: number; transfer_id: string | null };
+
 export async function recalculateAllBaseAmounts(
   db: SQLiteDatabase,
   newCurrency: CurrencyKey,
 ): Promise<number> {
-  const transactions = await db.getAllAsync<{ id: string; amount: number; currency: string; date: number }>(
-    `SELECT id, amount, currency, date FROM transactions`,
+  const transactions = await db.getAllAsync<Row>(
+    `SELECT id, amount, currency, date, transfer_id FROM transactions`,
   );
 
   if (transactions.length === 0) return 0;
 
   // Group transactions by date to minimise DB round-trips for rate lookups
-  const byDate = new Map<number, Array<{ id: string; amount: number; currency: string }>>();
+  const byDate = new Map<number, Row[]>();
   for (const tx of transactions) {
     const bucket = byDate.get(tx.date) ?? [];
-    bucket.push({ id: tx.id, amount: tx.amount, currency: tx.currency });
+    bucket.push(tx);
     byDate.set(tx.date, bucket);
   }
 
   const ratesByDate = await getRatesForDates(db, [...byDate.keys()]);
 
-  const updates: Array<{ id: string; baseAmount: number }> = [];
+  const computed: Array<Row & { baseAmount: number }> = [];
   for (const [date, txs] of byDate) {
     const rates = ratesByDate.get(date) ?? { EUR: 1 };
     for (const tx of txs) {
-      const baseAmount = computeBaseAmount(Math.abs(tx.amount), tx.currency as CurrencyKey, newCurrency, rates);
-      updates.push({ id: tx.id, baseAmount });
+      computed.push({ ...tx, baseAmount: computeBaseAmount(Math.abs(tx.amount), tx.currency as CurrencyKey, newCurrency, rates) });
     }
   }
+
+  // One baseAmount per transfer: rounding each leg in its own currency can drift a cent.
+  const outLegBase = new Map<string | null, number>();
+  for (const tx of computed) {
+    if (tx.transfer_id && tx.amount < 0) outLegBase.set(tx.transfer_id, tx.baseAmount);
+  }
+  const updates = computed.map((tx) => ({ id: tx.id, baseAmount: outLegBase.get(tx.transfer_id) ?? tx.baseAmount }));
 
   await db.withTransactionAsync(async () => {
     for (const { id, baseAmount } of updates) {

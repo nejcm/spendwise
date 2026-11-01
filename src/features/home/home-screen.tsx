@@ -4,7 +4,7 @@ import { ScrollView } from '@/components/ui';
 import { useAccountsWithBalance } from '@/features/accounts/api';
 import { todayUnix } from '@/features/formatting/helpers';
 import { useScheduledTransactions } from '@/features/scheduled-transactions/hooks';
-import { useRecentTransactions } from '@/features/transactions/api';
+import { useHasUserTransactions, useRecentTransactions } from '@/features/transactions/api';
 import { useRefresh } from '@/lib/hooks/use-refresh';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -27,15 +27,16 @@ export function HomeScreen() {
   const homeScreenChart = useAppStore.use.homeScreenChart();
   const { data: accounts = [], isPending: accountsPending } = useAccountsWithBalance();
   const { data: recent = [], isPending: recentPending } = useRecentTransactions(RECENT_LIMIT);
+  const { data: hasUserTransactions, isPending: existsPending } = useHasUserTransactions();
   const { data: rules = [] } = useScheduledTransactions();
 
   const total = accounts.reduce((sum, account) => sum + account.baseBalance, 0);
-  const isEmpty = !recent.some((transaction) => !transaction.is_adjustment);
+  const isEmpty = hasUserTransactions === false;
   const nextBill = React.useMemo(
     () => selectNextBill(rules, new Set(accounts.map((account) => account.id)), todayUnix()),
     [rules, accounts],
   );
-  const isLoading = accountsPending || recentPending;
+  const isLoading = accountsPending || recentPending || existsPending;
 
   return (
     <ScrollView className="flex-1" style={defaultStyles.transparentBg} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>

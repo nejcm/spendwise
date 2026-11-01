@@ -99,6 +99,15 @@ describe('formatting helpers', () => {
     }
   });
 
+  it('always shows two fraction digits for an amount with cents, none for a whole amount', () => {
+    const format = { numberFormat: 'stop', currencyFormat: 'symbol-after' } as const;
+    expect(formatCurrency(-4250, 'USD', format)).toBe('-42.50$');
+    expect(formatCurrency(4205, 'USD', format)).toBe('42.05$');
+    expect(formatCurrency(4200, 'USD', format)).toBe('42$');
+    expect(formatCurrency(4250, 'USD', { ...format, fractionDigits: 0 })).toBe('43$');
+    expect(formatCurrency(4250, 'USD', { numberFormat: 'comma', currencyFormat: 'symbol-before', shorten: true })).toBe('$42,50');
+  });
+
   it('returns the original value as string for non-finite input', () => {
     expect(formatCurrency('not-a-number', 'USD')).toBe('not-a-number');
   });

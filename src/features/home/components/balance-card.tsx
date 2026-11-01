@@ -1,4 +1,3 @@
-import { format } from 'date-fns';
 import * as React from 'react';
 import { View } from 'react-native';
 import { AmountText, Card, FlagCircle, Text } from '@/components/ui';
@@ -6,6 +5,7 @@ import { useBalanceSeries } from '@/features/accounts/api';
 import { formatNumber, todayUnix } from '@/features/formatting/helpers';
 import { cn } from '@/lib/cn';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
+import { useCurrentYearMonth } from '@/lib/hooks/use-current-year-month';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { buildDailyBalances, monthName, percentChange } from '../helpers';
@@ -50,7 +50,8 @@ function BalanceTrend({ total, showLine }: { total: number; showLine: boolean })
   const currency = useAppStore.use.currency();
   const numberFormat = useAppStore.use.numberFormat();
   const now = new Date();
-  const [startDate, endDate] = React.useMemo(() => getCurrentMonthRange(format(new Date(), 'yyyy-MM')), []);
+  const yearMonth = useCurrentYearMonth();
+  const [startDate, endDate] = React.useMemo(() => getCurrentMonthRange(yearMonth), [yearMonth]);
   const { data: series } = useBalanceSeries(startDate, endDate);
   const change = series ? percentChange(total, series.opening) : null;
   const values = React.useMemo(

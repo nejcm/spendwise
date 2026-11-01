@@ -1,11 +1,11 @@
 import type { ActiveFilterChip } from './filters';
-import type { TransactionRouteParams } from './route-params';
+import type { TransactionRouteParams, TransactionsRouteSeed } from './route-params';
 import type { FilterState } from './types';
 import { useDebouncedValue } from '@tanstack/react-pacer';
 import { useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { PeriodPill } from '@/components/period-pill';
 import { EmptyState, FocusAwareStatusBar, GhostButton, Text, useModalSheet } from '@/components/ui';
@@ -32,18 +32,25 @@ const debounceSettings = {
 
 export function TransactionsScreen() {
   const params = useLocalSearchParams<TransactionRouteParams>();
-  const initialRouteSeed = useRef(parseTransactionsRouteSeed(params)).current;
+  const routeKey = JSON.stringify(parseTransactionsRouteSeed(params));
+  const routeSeed = useMemo<TransactionsRouteSeed>(() => JSON.parse(routeKey), [routeKey]);
   const selection = useAppStore.use.periodSelection();
   const currency = useAppStore.use.currency();
   const numberFormat = useAppStore.use.numberFormat();
   const currencyFormat = useAppStore.use.currencyFormat();
-  const [search, setSearch] = useState(initialRouteSeed.search);
-  const [filters, setFilters] = useState<FilterState>(initialRouteSeed.filters);
+  const [seededRouteKey, setSeededRouteKey] = useState(routeKey);
+  const [search, setSearch] = useState(routeSeed.search);
+  const [filters, setFilters] = useState<FilterState>(routeSeed.filters);
+  if (seededRouteKey !== routeKey) {
+    setSeededRouteKey(routeKey);
+    setSearch(routeSeed.search);
+    setFilters(routeSeed.filters);
+  }
   const [debouncedSearch] = useDebouncedValue(search, debounceSettings);
   const filterSheet = useModalSheet();
   useEffect(() => {
-    if (initialRouteSeed.periodSelection) setPeriodSelection(initialRouteSeed.periodSelection);
-  }, [initialRouteSeed]);
+    if (routeSeed.periodSelection) setPeriodSelection(routeSeed.periodSelection);
+  }, [routeSeed]);
   const updateFilters = React.useCallback((patch: Partial<FilterState>) => setFilters((prev) => ({ ...prev, ...patch })), []);
 
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
@@ -61,7 +68,7 @@ export function TransactionsScreen() {
     () => getActiveFilterChips(filters, { accounts, categories }, (cents) => formatCurrency(cents, currency, { numberFormat, currencyFormat, fractionDigits: cents % 100 === 0 ? 0 : 2 })),
     [accounts, categories, currency, currencyFormat, filters, numberFormat],
   );
-  const { data: hasAny = true } = useHasUserTransactions(!isLoading && transactions.length === 0);
+  const { data: hasAny = true } = useHasUserTransactions();
 
   const {
     selectionMode,

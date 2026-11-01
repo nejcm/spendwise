@@ -48,6 +48,15 @@ export function useScheduledTransaction(id: string) {
   });
 }
 
+export function useRuleForTransaction(transactionId: string) {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: queryKeys.scheduledTransactions.forTransaction(transactionId),
+    queryFn: () => queries.getRuleForTransaction(db, transactionId),
+    enabled: !!transactionId,
+  });
+}
+
 function onError(error: unknown) {
   if (error instanceof Error) captureError(error, { context: 'scheduled-transactions' });
   Alert.alert(translate('common.error'), error instanceof Error ? error.message : translate('common.error_description'));

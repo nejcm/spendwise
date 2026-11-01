@@ -9,6 +9,7 @@ import { formatShortDate } from '@/features/formatting/helpers';
 import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
+import { transactionDisplayName } from '../helpers';
 import { MerchantLogo } from './merchant-logo';
 
 export type TransactionCardProps = {
@@ -39,11 +40,7 @@ export const TransactionCard = React.memo(({
   const isTransfer = transaction.type === 'transfer';
   const isInflow = isIncome || (isTransfer && transaction.amount > 0);
   const isAdjustment = !!transaction.is_adjustment;
-  const displayName = isAdjustment
-    ? translate('accounts.opening_balance')
-    : transaction.counter_account_name
-      ? translate(transaction.amount < 0 ? 'transactions.transfer_to' : 'transactions.transfer_from', { account: transaction.counter_account_name })
-      : transaction.merchant_name || transaction.category_name || (isTransfer ? translate('transactions.transfer') : 'Unknown');
+  const displayName = transactionDisplayName(transaction);
   const meta = [
     showDate && formatShortDate(transaction.date),
     isTransfer && !isAdjustment ? translate('transactions.transfer') : transaction.merchant_name && transaction.category_name,

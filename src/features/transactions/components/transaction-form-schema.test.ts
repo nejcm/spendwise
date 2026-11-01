@@ -1,5 +1,5 @@
 import type { TransactionWithCategory } from '../types';
-import { transactionFormDefaultValues, transactionFormSchema, transactionToFormValues } from './transaction-form-schema';
+import { adjustmentFormSchema, nextEntryValues, transactionFormDefaultValues, transactionFormSchema, transactionToFormValues } from './transaction-form-schema';
 
 const valid = { ...transactionFormDefaultValues, amount: '10', account_id: 'acc_1', category_id: 'cat_1' };
 const issuePaths = (value: unknown) => transactionFormSchema.safeParse(value).error?.issues.map((i) => i.path.join('.')) ?? [];
@@ -15,8 +15,22 @@ describe('transactionFormSchema', () => {
     expect(issuePaths({ ...valid, type: 'transfer', to_account_id: 'acc_1' })).toEqual(['to_account_id']);
   });
 
+  it('rejects partial or impossible calendar dates', () => {
+    expect(issuePaths({ ...valid, date: '2026-11-0' })).toEqual(['date']);
+    expect(issuePaths({ ...valid, date: '2026-02-30' })).toEqual(['date']);
+    expect(issuePaths({ ...valid, date: '2026-02-28' })).toEqual([]);
+  });
+
   it('accepts a legacy single leg without a destination', () => {
     expect(issuePaths({ ...valid, type: 'transfer', to_account_id: null })).toEqual([]);
+  });
+
+  it('accepts a signed non-zero amount only for an opening balance', () => {
+    const adjustment = { ...valid, type: 'transfer', category_id: '', to_account_id: null, amount: '-100' };
+    expect(issuePaths(adjustment)).toEqual(['amount']);
+    expect(adjustmentFormSchema.safeParse(adjustment).success).toBe(true);
+    expect(adjustmentFormSchema.safeParse({ ...adjustment, amount: '0' }).success).toBe(false);
+    expect(adjustmentFormSchema.safeParse({ ...adjustment, amount: '-' }).success).toBe(false);
   });
 });
 
@@ -56,6 +70,34 @@ describe('transactionToFormValues', () => {
       account_id: 'acc_usd',
       to_account_id: null,
       amount: 300,
+    });
+  });
+
+  it('opens an opening balance with its signed amount', () => {
+    expect(transactionToFormValues({ ...row, transfer_id: null, counter_account_id: null, amount: -300, is_adjustment: 1 }).amount).toBe(-300);
+  });
+});
+
+describe('nextEntryValues', () => {
+  it('clears amount, merchant and note but keeps type, accounts, date and category', () => {
+    const filled = {
+      ...valid,
+      type: 'transfer' as const,
+      to_account_id: 'acc_2',
+      date: '2026-10-31',
+      currency: 'USD' as const,
+      baseAmount: '8.46',
+      merchant_name: 'Pizzeria',
+      note: 'Lunch',
+      location: 'Ljubljana',
+    };
+    expect(nextEntryValues(filled)).toEqual({
+      ...filled,
+      amount: '',
+      baseAmount: '',
+      merchant_name: null,
+      note: null,
+      location: null,
     });
   });
 });

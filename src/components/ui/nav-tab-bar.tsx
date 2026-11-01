@@ -21,6 +21,8 @@ import { Text } from './text';
 export const NAV_BAR_HEIGHT = 50 as const;
 // Bottom padding floor; the bar paints the safe-area gutter itself since the root SafeAreaView skips that edge.
 export const TAB_BAR_PADDING = 8;
+// Grows the 40dp tab into the bar's top padding and bottom padding floor for a 58dp target.
+const TAB_HIT_SLOP = { top: 10, bottom: TAB_BAR_PADDING } as const;
 
 const TABS = [
   { name: 'index', path: '/', icon: Home, label: 'home.title' },
@@ -91,6 +93,7 @@ export function NavTabBar() {
             accessibilityState={{ selected: isActive }}
             accessibilityLabel={label}
             onPress={() => isActive ? undefined : router.replace(tab.path)}
+            hitSlop={TAB_HIT_SLOP}
             className="w-16 items-center gap-1"
           >
             <Icon

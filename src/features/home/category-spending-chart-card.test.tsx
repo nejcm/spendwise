@@ -12,6 +12,7 @@ const mockRouterPush = jest.fn();
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockRouterPush }),
+  useNavigation: () => ({ addListener: () => jest.fn() }),
 }));
 
 jest.mock('react-native-gifted-charts', () => {

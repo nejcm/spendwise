@@ -19,11 +19,14 @@ import { getFieldError } from '@/components/ui/form-utils';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { NAV_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
 import { useAccounts } from '@/features/accounts/api';
+import { useCategories } from '@/features/categories/api';
 import { CategoryPicker } from '@/features/categories/category-picker';
+import { fitCategoryToType } from '@/features/categories/helpers';
 import { CURRENCY_VALUES } from '@/features/currencies';
 import { CURRENCY_OPTIONS } from '@/features/currencies/images';
 import { todayISO } from '@/features/formatting/helpers';
-import { dateToUnix } from '@/lib/date/helpers';
+import { FormDataGate } from '@/features/transactions/components/form-data-gate';
+import { dateToUnix, isValidISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { toNumber } from '@/lib/number';
 import {
@@ -61,8 +64,8 @@ const schema = z
       'monthly',
       'yearly',
     ] as const),
-    start_date: z.string().min(1, translate('scheduled.start_date_required')),
-    end_date: z.string().nullable(),
+    start_date: z.string().min(1, translate('scheduled.start_date_required')).refine(isValidISODate, translate('transactions.date_invalid')),
+    end_date: z.string().nullable().refine((v) => v === null || isValidISODate(v), translate('transactions.date_invalid')),
     is_active: z.boolean(),
   })
   .refine(
@@ -109,6 +112,7 @@ function useScheduledTransactionForm(
   onSuccess?: () => void,
 ) {
   const { data: accounts = [] } = useAccounts();
+  const { data: categories = [] } = useCategories();
   const createScheduledTransaction = useCreateScheduledTransaction();
   const updateScheduledTransaction = useUpdateScheduledTransaction();
   const id = initialValues?.id;
@@ -121,16 +125,19 @@ function useScheduledTransactionForm(
     [lastUsedCurrencies],
   );
 
+  const preferredType = transactionFormPrefs?.type === 'income' ? 'income' : defaultValues.type;
+  const startValues = {
+    ...defaultValues,
+    type: preferredType,
+    currency: transactionFormPrefs?.currency || defaultValues.currency,
+    category_id: transactionFormPrefs?.category_id || '',
+    account_id: transactionFormPrefs?.account_id || (accounts[0]?.id ?? ''),
+    ...initialValues,
+    amount: initialValues?.amount?.toString() || '',
+  } as FormValues;
+
   const form = useForm({
-    defaultValues: {
-      ...defaultValues,
-      type: transactionFormPrefs?.type || defaultValues.type,
-      currency: transactionFormPrefs?.currency || defaultValues.currency,
-      category_id: transactionFormPrefs?.category_id || '',
-      account_id: transactionFormPrefs?.account_id || (accounts[0]?.id ?? ''),
-      ...initialValues,
-      amount: initialValues?.amount?.toString() || '',
-    } as FormValues,
+    defaultValues: id ? startValues : fitCategoryToType(startValues, categories, { type: !!initialValues?.type, category: !!initialValues?.category_id }),
     validators: { onChange: schema },
     onSubmit: async ({ value }) => {
       const payload: ScheduledTransactionFormData = {
@@ -378,7 +385,15 @@ function ScheduledTransactionFormBody({ form, isCompact, accounts, orderedCurren
 }
 
 export type ScheduledTransactionFormProps = ScheduledTransactionFormBaseProps;
-export function ScheduledTransactionForm({
+export function ScheduledTransactionForm(props: ScheduledTransactionFormProps) {
+  return (
+    <FormDataGate onClose={props.onCancel}>
+      <ScheduledTransactionFormContent {...props} />
+    </FormDataGate>
+  );
+}
+
+function ScheduledTransactionFormContent({
   hasNav,
   initialValues,
   onCancel,

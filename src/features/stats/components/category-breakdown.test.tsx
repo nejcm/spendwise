@@ -107,6 +107,17 @@ describe('category breakdown', () => {
     expect(mockRouterPush).toHaveBeenCalledWith('/transactions?categoryId=groceries');
   });
 
+  it('lists categories by the matching total, not their kind', () => {
+    mockCategorySpend([{ ...categories[1]!, category_type: 'income', income_total: 2000 }]);
+
+    const { rerender } = render(<CategoryBreakdown startDate={1} endDate={2} currency="USD" type="expense" />);
+    expect(screen.getByText('Groceries')).toBeOnTheScreen();
+
+    mockCategorySpend([categories[0]!]);
+    rerender(<CategoryBreakdown startDate={1} endDate={2} currency="USD" type="income" />);
+    expect(screen.queryByText('Rent and utilities')).not.toBeOnTheScreen();
+  });
+
   it('renders the empty state when no categories match', () => {
     mockCategorySpend([]);
 

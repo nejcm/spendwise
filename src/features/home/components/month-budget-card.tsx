@@ -9,6 +9,7 @@ import { BudgetSheet } from '@/features/stats/components/budget-sheet';
 import { getBudgetSelectionBoundaries, scaleGlobalBudget } from '@/features/stats/helpers';
 import { useGlobalBudget, useGlobalBudgetSpend } from '@/features/stats/hooks';
 import { cn } from '@/lib/cn';
+import { useCurrentYearMonth } from '@/lib/hooks/use-current-year-month';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { monthName } from '../helpers';
@@ -22,7 +23,11 @@ function endsLabel(now: Date) {
 
 export function MonthBudgetCard() {
   const now = new Date();
-  const selection = React.useMemo(() => ({ mode: 'month', year: new Date().getFullYear(), month: new Date().getMonth() + 1 }) as const, []);
+  const yearMonth = useCurrentYearMonth();
+  const selection = React.useMemo(() => {
+    const [year, month] = yearMonth.split('-').map(Number);
+    return { mode: 'month', year, month } as const;
+  }, [yearMonth]);
   const [startDate, endDate] = React.useMemo(() => getBudgetSelectionBoundaries(selection), [selection]);
   const { data: budget } = useGlobalBudget();
   const { data: spent = 0 } = useGlobalBudgetSpend(startDate, endDate, budget != null);

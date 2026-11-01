@@ -98,6 +98,7 @@ function GlobalBudgetForm({ currentBudget, onSuccess, onCancel }: GlobalBudgetFo
             keyboardType="decimal-pad"
             error={getFieldError(field)}
             autoFocus
+            sheet
           />
         )}
       />

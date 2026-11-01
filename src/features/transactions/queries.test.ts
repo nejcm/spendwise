@@ -15,6 +15,7 @@ import {
   getTransactionsSample,
   hasUserTransactions,
   isTransferInLeg,
+  TRANSFER_LEG_ROUNDS_TO_ZERO,
   updateTransaction,
   updateTransfer,
 } from './queries';
@@ -603,6 +604,29 @@ describe('transfer pairs', () => {
       ['acc_1', -5000, 'EUR', 5000],
       ['acc_usd', 5500, 'USD', 5000],
     ]);
+  });
+
+  it('rejects a transfer whose converted leg rounds to zero, on create and update', async () => {
+    const db = await createTestDb();
+    await seedAccounts(db);
+    const tiny = { ...transfer, to_account_id: 'acc_usd', amount: 1, baseAmount: 1 };
+
+    await expect(createTransfer(db as any, tiny, { USD: 0.4 })).rejects.toThrow(TRANSFER_LEG_ROUNDS_TO_ZERO);
+    expect(await legs(db)).toEqual([]);
+
+    await createTransfer(db as any, transfer, {});
+    const [out] = await legs(db);
+    await expect(updateTransfer(db as any, out!.transfer_id as string, tiny, { USD: 0.4 })).rejects.toThrow(TRANSFER_LEG_ROUNDS_TO_ZERO);
+    expect((await legs(db)).map((r) => r.amount)).toEqual([-5000, 5000]);
+  });
+
+  it('stores no category on either leg', async () => {
+    const db = await createTestDb();
+    await seedAccounts(db);
+
+    await createTransfer(db as any, { ...transfer, category_id: 'cat_1' }, {});
+
+    expect(await db.getAllAsync('SELECT category_id FROM transactions')).toEqual([{ category_id: null }, { category_id: null }]);
   });
 
   it('rejects a transfer to the same account', async () => {

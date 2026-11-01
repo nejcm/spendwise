@@ -5,26 +5,31 @@ import * as z from 'zod';
 import { DEFAULT_USER_CURRENCY } from '@/config';
 import { CURRENCY_VALUES } from '@/features/currencies';
 import { formatMajorUnitsInputFromCents, todayISO } from '@/features/formatting/helpers';
-import { unixToISODate } from '@/lib/date/helpers';
+import { isValidISODate, unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
+import { toNumber } from '@/lib/number';
 import { refinePositiveNumber, refinePositiveNumberOrNull } from '@/lib/validation/helpers';
 
-export const transactionFormSchema = z.object({
+const amountError = translate('transactions.form.amount_error');
+
+const transactionFormFields = z.object({
   type: z.enum(['expense', 'income', 'transfer'] as TransactionType[]),
   currency: z.enum(CURRENCY_VALUES as CurrencyKey[]),
-  amount: z.string().min(1, translate('transactions.amount_required')).refine(refinePositiveNumber, translate('transactions.amount_required')),
+  amount: z.string().min(1, amountError).refine(refinePositiveNumber, amountError),
   baseAmount: z.string().nullable().refine(refinePositiveNumberOrNull, translate('transactions.base_amount_required')),
   category_id: z.string(),
   account_id: z.string().min(1, translate('transactions.account_required')),
   // null: a legacy transfer leg without a pair, edited as a single row
   to_account_id: z.string().nullable(),
-  date: z.string().min(1, translate('transactions.date_required')),
-  note: z.string().max(500).nullable(),
-  merchant_name: z.string().max(100).nullable(),
-  location: z.string().max(250).nullable(),
-}).superRefine((value, ctx) => {
+  date: z.string().min(1, translate('transactions.date_required')).refine(isValidISODate, translate('transactions.date_invalid')),
+  note: z.string().max(500, translate('transactions.form.too_long', { max: 500 })).nullable(),
+  merchant_name: z.string().max(100, translate('transactions.form.too_long', { max: 100 })).nullable(),
+  location: z.string().max(250, translate('transactions.form.too_long', { max: 250 })).nullable(),
+});
+
+export const transactionFormSchema = transactionFormFields.superRefine((value, ctx) => {
   if (value.type !== 'transfer') {
-    if (!value.category_id) ctx.addIssue({ code: 'custom', path: ['category_id'], message: translate('transactions.category_required') });
+    if (!value.category_id) ctx.addIssue({ code: 'custom', path: ['category_id'], message: translate('transactions.form.category_error') });
     return;
   }
   if (value.to_account_id !== null && (!value.to_account_id || value.to_account_id === value.account_id)) {
@@ -32,10 +37,15 @@ export const transactionFormSchema = z.object({
   }
 });
 
+/** Opening balance: signed, e.g. a credit card starts in debt. */
+export const adjustmentFormSchema = transactionFormFields.extend({
+  amount: z.string().min(1, amountError).refine((v) => !!toNumber(v), amountError),
+});
+
 export const TRANSACTION_TYPE_OPTIONS: { label: string; value: TransactionType }[] = [
   { label: translate('common.expense'), value: 'expense' },
   { label: translate('common.income'), value: 'income' },
-  { label: translate('transactions.transfer'), value: 'transfer' },
+  { label: translate('transactions.form.transfer_type'), value: 'transfer' },
 ];
 
 export type TransactionFormValues = z.infer<typeof transactionFormSchema>;
@@ -61,6 +71,11 @@ export const transactionFormDefaultValues = {
   location: null,
 } satisfies TransactionFormValues;
 
+/** "Save & add another": clears what differs per entry, keeps type, accounts, date, currency and category. */
+export function nextEntryValues(values: TransactionFormValues): TransactionFormValues {
+  return { ...values, amount: '', baseAmount: '', merchant_name: null, note: null, location: null };
+}
+
 export function amountToString(amount?: number | string): string {
   if (amount == null) return '';
   if (typeof amount === 'number') {
@@ -77,7 +92,7 @@ export function transactionToFormValues(t: TransactionWithCategory): Transaction
     category_id: t.category_id ?? '',
     account_id: t.account_id,
     to_account_id: t.type === 'transfer' ? null : '',
-    amount: Math.abs(t.amount),
+    amount: t.is_adjustment ? t.amount : Math.abs(t.amount),
     currency: t.currency,
     baseAmount: t.baseAmount,
     date: unixToISODate(t.date),

@@ -22,6 +22,14 @@ export const isDynamicPeriodMode = (mode: PeriodMode): mode is DynamicPeriodMode
 
 export const isNavigablePeriodMode = (mode: PeriodMode) => mode !== 'all' && mode !== 'custom';
 
+/** True for a real calendar day in yyyy-MM-dd form; rejects partial input like 2026-11-0 and 2026-02-30. */
+export function isValidISODate(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+}
+
 /** Convert a Date or yyyy-MM-dd string to Unix seconds (UTC). */
 export function dateToUnix(date: Date | string): number {
   if (typeof date === 'string') return Math.floor(new Date(date).getTime() / 1000);

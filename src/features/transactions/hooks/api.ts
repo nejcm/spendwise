@@ -62,9 +62,14 @@ export function useRecentTransactions(limit: number = 5) {
 
 // ─── Write Hooks ───
 
+function errorMessage(error: unknown): string {
+  if (!(error instanceof Error)) return translate('common.error_description');
+  return error.message === queries.TRANSFER_LEG_ROUNDS_TO_ZERO ? translate('transactions.transfer_leg_zero') : error.message;
+}
+
 function onError(error: unknown) {
   if (error instanceof Error) captureError(error, { context: 'transactions' });
-  Alert.alert(translate('common.error'), error instanceof Error ? error.message : translate('common.error_description'));
+  Alert.alert(translate('common.error'), errorMessage(error));
 }
 
 function prepareTransactionData(
@@ -158,8 +163,9 @@ export function useUpdateTransaction(onSuccess?: (transactionId: string) => void
         if (leg?.transfer_id && data.to_account_id) {
           return queries.updateTransfer(db, leg.transfer_id, { ...prepared, to_account_id: data.to_account_id }, rates);
         }
-        // Legacy single leg: the form edits the absolute amount, the row keeps its direction.
-        return queries.updateTransaction(db, id, { ...prepared, amount: (leg && leg.amount < 0 ? -1 : 1) * Math.abs(prepared.amount) });
+        // Legacy single leg: the form edits the absolute amount, the row keeps its direction. An opening balance is edited signed.
+        const amount = leg?.is_adjustment ? prepared.amount : (leg && leg.amount < 0 ? -1 : 1) * Math.abs(prepared.amount);
+        return queries.updateTransaction(db, id, { ...prepared, amount });
       }
       // fetch rates only if baseAmount is not provided
       const rates = data.baseAmount ? undefined : await getRatesForDate(db, data.date);

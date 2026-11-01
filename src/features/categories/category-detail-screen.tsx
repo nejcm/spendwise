@@ -76,8 +76,9 @@ export function CategoryDetailScreen() {
     );
   }
 
+  const isIncome = category.category_type === 'income';
   const monthlyBudget = category.category_budget ?? 0;
-  const scaledBudget = monthlyBudget > 0 ? scaleBudgetForPeriod(monthlyBudget, selection) : undefined;
+  const scaledBudget = !isIncome && monthlyBudget > 0 ? scaleBudgetForPeriod(monthlyBudget, selection) : undefined;
 
   return (
     <>
@@ -105,9 +106,9 @@ export function CategoryDetailScreen() {
         >
           <View className="px-4">
             <Card className="gap-3 p-5">
-              <Text className="text-sm font-medium text-muted-foreground">{translate('categories.spent')}</Text>
+              <Text className="text-sm font-medium text-muted-foreground">{translate(isIncome ? 'common.income' : 'categories.spent')}</Text>
               <View className="flex-row items-baseline gap-1.5">
-                <FormattedCurrency value={category.expense_total} currency={currency} className="text-3xl font-bold" />
+                <FormattedCurrency value={isIncome ? category.income_total : category.expense_total} currency={currency} className="text-3xl font-bold" />
                 {scaledBudget != null && (
                   <>
                     <Text className="text-sm text-muted-foreground">/</Text>

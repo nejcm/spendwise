@@ -1,6 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type {
+  ScheduledTransaction,
   ScheduledTransactionFormData,
   ScheduledTransactionWithDetails,
 } from './types';
@@ -75,6 +76,22 @@ export async function getScheduledTransactionById(
      LEFT JOIN categories c ON c.id = r.category_id
      WHERE r.id = ?`,
     [id],
+  );
+}
+
+export type TransactionRule = Pick<ScheduledTransaction, 'id' | 'frequency' | 'next_due_date' | 'is_active'>;
+
+/** The rule that generated a transaction, via `recurring_rule_runs`. */
+export async function getRuleForTransaction(
+  db: SQLiteDatabase,
+  transactionId: string,
+): Promise<TransactionRule | null> {
+  return db.getFirstAsync<TransactionRule>(
+    `SELECT r.id, r.frequency, r.next_due_date, r.is_active
+     FROM recurring_rule_runs rr
+     JOIN recurring_rules r ON r.id = rr.rule_id
+     WHERE rr.transaction_id = ?`,
+    [transactionId],
   );
 }
 

@@ -18,9 +18,11 @@ export type DateInputProps = {
   value: string;
   onChange: (date: string) => void;
   modalProps?: Partial<ModalSheetProps>;
+  /** Native only: replaces the user's date format, e.g. with "Today". */
+  displayValue?: string;
 } & Omit<InputProps, 'value' | 'onChange'>;
 
-export function DateInput({ label, value, onChange, error, modalProps, ...rest }: DateInputProps) {
+export function DateInput({ label, value, onChange, error, modalProps, displayValue, ...rest }: DateInputProps) {
   const { ref, present, close } = useModalSheet();
   const dateFormat = useAppStore.use.dateFormat();
   const theme = useThemeConfig();
@@ -82,7 +84,7 @@ export function DateInput({ label, value, onChange, error, modalProps, ...rest }
       <Pressable onPress={open}>
         <Input
           label={label}
-          value={value ? format(parseISO(value), dateFormat) : ''}
+          value={value ? displayValue ?? format(parseISO(value), dateFormat) : ''}
           placeholder={translate('common.select_date')}
           error={error}
           editable={false}

@@ -1,19 +1,29 @@
+import type { TextInput } from 'react-native';
 import type { TransactionFormInitialValues, TransactionFormValues } from '@/features/transactions/components/transaction-form-schema';
 import { useForm } from '@tanstack/react-form';
+import { useRouter } from 'expo-router';
 
 import * as React from 'react';
+import { AccessibilityInfo } from 'react-native';
+import { showSnackbar } from '@/components/ui/snackbar';
 import { useAccounts } from '@/features/accounts/api';
+import { useCategories } from '@/features/categories/api';
+import { fitCategoryToType } from '@/features/categories/helpers';
 import { mergeCurrencyArrays } from '@/features/currencies/helpers';
 import { CURRENCY_OPTIONS } from '@/features/currencies/images';
 import { todayISO } from '@/features/formatting/helpers';
-import { useCreateTransaction, useUpdateTransaction } from '@/features/transactions/api';
+import { useCreateTransaction, useDeleteTransaction, useUpdateTransaction } from '@/features/transactions/api';
 import {
+  adjustmentFormSchema,
   amountToString,
+  nextEntryValues,
   TRANSACTION_TYPE_OPTIONS,
   transactionFormDefaultValues,
   transactionFormSchema,
 } from '@/features/transactions/components/transaction-form-schema';
+import { savedSnackbar } from '@/features/transactions/helpers';
 import { dateToUnix } from '@/lib/date/helpers';
+import { translate } from '@/lib/i18n';
 import { toNumber } from '@/lib/number';
 import {
   addLastUsedCurrency,
@@ -25,20 +35,55 @@ import {
 
 export type UseTransactionFormProps = {
   initialValues?: TransactionFormInitialValues;
-  onSuccess?: (transactionId?: string) => void;
+  /** `addAnother`: the form already reset itself for the next entry. */
+  onSaved?: (transactionId: string, addAnother: boolean) => void;
+  /** Opening-balance row: signed amount; only amount, currency, date and text fields are editable. */
+  isAdjustment?: boolean;
 };
 
-export function useTransactionForm({ initialValues, onSuccess }: UseTransactionFormProps) {
+type SubmitMeta = { addAnother: boolean };
+
+const FIELD_ORDER = ['amount', 'category_id', 'account_id', 'to_account_id', 'date', 'baseAmount', 'merchant_name', 'note', 'location'] as const;
+
+function useSavedSnackbar() {
+  const router = useRouter();
   const { data: accounts = [] } = useAccounts();
+  const { data: categories = [] } = useCategories();
+  const deleteTransaction = useDeleteTransaction();
+
+  return (id: string, values: TransactionFormValues) => {
+    const { numberFormat, currencyFormat } = useAppStore.getState();
+    const toAccount = accounts.find((a) => a.id === values.to_account_id);
+    const label = values.type === 'transfer'
+      ? toAccount && translate('transactions.transfer_to', { account: toAccount.name })
+      : values.merchant_name?.trim() || categories.find((c) => c.id === values.category_id)?.name;
+    showSnackbar(savedSnackbar({
+      type: values.type,
+      amount: values.amount,
+      currency: values.currency,
+      format: { numberFormat, currencyFormat },
+      label,
+      onUndo: () => deleteTransaction.mutate(id),
+      onView: () => router.push(`/transactions/${id}`),
+    }));
+  };
+}
+
+export function useTransactionForm({ initialValues, onSaved, isAdjustment = false }: UseTransactionFormProps) {
+  const { data: accounts = [] } = useAccounts();
+  const { data: categories = [] } = useCategories();
   const id = initialValues?.id;
   const preferredCurrency = useAppStore.use.currency();
-  const isCompact = useAppStore.use.density() === 'compact';
-  const createTransaction = useCreateTransaction(onSuccess);
-  const updateTransaction = useUpdateTransaction(onSuccess);
+  const openTxOnCreate = useAppStore.use.openTxOnCreate();
+  const createTransaction = useCreateTransaction();
+  const updateTransaction = useUpdateTransaction();
+  const showSaved = useSavedSnackbar();
+  const amountRef = React.useRef<TextInput>(null);
   const lastUsedCurrencies = useAppStore(selectLastUsedCurrencies);
   const orderedCurrencies = React.useMemo(() => mergeCurrencyArrays(lastUsedCurrencies, CURRENCY_OPTIONS), [lastUsedCurrencies]);
   const transactionFormPrefs = useAppStore(selectTransactionFormPrefs);
-  const [baseAmountIsManual, setBaseAmountIsManual] = React.useState(false);
+  // An edited row's stored baseAmount may be a manual correction; only re-derive once amount, currency or date change.
+  const [baseAmountIsManual, setBaseAmountIsManual] = React.useState(!!id);
   const typeOptions = id
     ? TRANSACTION_TYPE_OPTIONS.filter((o) => (o.value === 'transfer') === (initialValues?.type === 'transfer'))
     : TRANSACTION_TYPE_OPTIONS;
@@ -46,8 +91,9 @@ export function useTransactionForm({ initialValues, onSuccess }: UseTransactionF
     setBaseAmountIsManual(false);
   }, []);
 
-  const form = useForm({
-    defaultValues: {
+  // Held in state so useForm's per-render update never swaps in recomputed defaults over "add another" ones.
+  const [defaultValues, setDefaultValues] = React.useState(() => {
+    const startValues = {
       ...transactionFormDefaultValues,
       date: todayISO(),
       type: transactionFormPrefs?.type || transactionFormDefaultValues.type,
@@ -57,36 +103,67 @@ export function useTransactionForm({ initialValues, onSuccess }: UseTransactionF
       ...initialValues,
       amount: amountToString(initialValues?.amount),
       baseAmount: amountToString(initialValues?.baseAmount),
-    } as TransactionFormValues,
+    } as TransactionFormValues;
+    return id ? startValues : fitCategoryToType(startValues, categories, { type: !!initialValues?.type, category: !!initialValues?.category_id });
+  });
+
+  const form = useForm({
+    defaultValues,
     validators: {
-      onChange: transactionFormSchema,
+      onChange: isAdjustment ? adjustmentFormSchema : transactionFormSchema,
     },
-    onSubmit: async ({ value }) => {
+    onSubmitMeta: { addAnother: false } as SubmitMeta,
+    onSubmitInvalid: ({ formApi }) => {
+      const failing = FIELD_ORDER.find((name) => formApi.getFieldMeta(name)?.errors.length);
+      if (!failing) return;
+      if (failing === 'amount') amountRef.current?.focus();
+      const message = formApi.getFieldMeta(failing)?.errors[0]?.message;
+      if (message) AccessibilityInfo.announceForAccessibility(message);
+    },
+    onSubmit: async ({ value, meta }) => {
       if (!value.account_id) return;
       const data = {
         ...value,
+        category_id: value.type === 'transfer' ? null : value.category_id,
         amount: toNumber(value.amount) ?? 0,
         baseAmount: toNumber(value.baseAmount) ?? 0,
         date: dateToUnix(value.date),
       };
-      if (id) updateTransaction.mutate({ id, data });
-      else createTransaction.mutate(data);
+      let savedId = id ?? '';
+      try {
+        if (id) await updateTransaction.mutateAsync({ id, data });
+        else savedId = await createTransaction.mutateAsync(data);
+      }
+      catch {
+        return;
+      }
       setTransactionFormPrefs({
         type: data.type,
         currency: data.currency,
-        category_id: data.category_id,
+        category_id: value.category_id,
         account_id: data.account_id,
       });
       addLastUsedCurrency(data.currency);
+      if (!id) {
+        if (meta.addAnother) {
+          const next = nextEntryValues(value);
+          setDefaultValues(next);
+          form.reset(next);
+          setBaseAmountIsManual(false);
+          amountRef.current?.focus();
+        }
+        if (meta.addAnother || !openTxOnCreate) showSaved(savedId, value);
+      }
+      onSaved?.(savedId, meta.addAnother);
     },
   });
 
   return {
     form,
+    amountRef,
+    isEdit: !!id,
     accounts,
-    isCompact,
-    createTransaction,
-    updateTransaction,
+    isLoading: createTransaction.isPending || updateTransaction.isPending,
     baseAmountIsManual,
     onBaseDriversChanged,
     orderedCurrencies,
@@ -97,3 +174,4 @@ export function useTransactionForm({ initialValues, onSuccess }: UseTransactionF
 }
 
 export type UseTransactionFormReturnType = ReturnType<typeof useTransactionForm>;
+export type TransactionFormApi = UseTransactionFormReturnType['form'];

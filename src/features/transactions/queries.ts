@@ -137,6 +137,8 @@ export async function createTransaction(
   return id;
 }
 
+export const TRANSFER_LEG_ROUNDS_TO_ZERO = 'transfer_leg_rounds_to_zero';
+
 /** Out leg is negative and in leg positive, each in its own account's currency; both share the positive `baseAmount`. */
 async function buildTransferLegs(
   db: SQLiteDatabase,
@@ -154,12 +156,16 @@ async function buildTransferLegs(
   const { to_account_id, ...common } = data;
   const leg = (accountId: string, sign: 1 | -1): TransactionInsertData => {
     const currency = currencyOf(accountId);
+    const amount = convertAmount(data.amount, data.currency, currency, rates);
+    // Legs are told apart by sign, so a zero leg would be orphaned by update and duplicate.
+    if (amount === 0) throw new Error(TRANSFER_LEG_ROUNDS_TO_ZERO);
     return {
       ...common,
       type: 'transfer',
+      category_id: null,
       account_id: accountId,
       currency,
-      amount: sign * convertAmount(data.amount, data.currency, currency, rates),
+      amount: sign * amount,
       baseAmount: Math.abs(data.baseAmount),
       transfer_id: transferId,
       is_adjustment: 0,

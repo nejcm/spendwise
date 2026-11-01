@@ -12,7 +12,7 @@ export type PageHeaderProps = {
 
 export function PageHeader({ title, left, right, children }: PageHeaderProps) {
   return (
-    <View className="h-12 flex-row items-center justify-between gap-3">
+    <View className="h-12 flex-row items-center justify-between gap-2">
       <View className="w-11">{left}</View>
       {children ?? <Text accessibilityRole="header" numberOfLines={1} className="min-w-0 flex-1 text-center text-header-title font-semibold">{title}</Text>}
       <View className="w-11">{right}</View>

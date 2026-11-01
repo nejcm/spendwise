@@ -32,6 +32,7 @@ import {
   ChevronLeft as LucideChevronLeft,
   ChevronRight as LucideChevronRight,
   ChevronUp as LucideChevronUp,
+  CircleAlert as LucideCircleAlert,
   CircleDollarSign as LucideCircleDollarSign,
   Copy as LucideCopy,
   Database as LucideDatabase,
@@ -46,6 +47,7 @@ import {
   HelpCircle as LucideHelpCircle,
   Home as LucideHome,
   Import as LucideImport,
+  Info as LucideInfo,
   Languages as LucideLanguages,
   LayoutGrid as LucideLayoutGrid,
   Lightbulb as LucideLightbulb,
@@ -128,6 +130,7 @@ export const Camera = createIcon(LucideCamera);
 export const ChartNoAxesColumn = createIcon(LucideChartNoAxesColumn);
 export const Check = createIcon(LucideCheck);
 export const ChevronDown = createIcon(LucideChevronDown);
+export const CircleAlert = createIcon(LucideCircleAlert);
 export const CircleDollarSign = createIcon(LucideCircleDollarSign);
 export const Copy = createIcon(LucideCopy);
 export const Database = createIcon(LucideDatabase);
@@ -142,6 +145,7 @@ export const FileWarning = createIcon(LucideFileWarning);
 export const HelpCircle = createIcon(LucideHelpCircle);
 export const Home = createIcon(LucideHome);
 export const Import = createIcon(LucideImport);
+export const Info = createIcon(LucideInfo);
 export const Languages = createIcon(LucideLanguages);
 export const LayoutGrid = createIcon(LucideLayoutGrid);
 export const ListFilter = createIcon(LucideListFilter);

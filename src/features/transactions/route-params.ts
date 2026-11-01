@@ -1,5 +1,6 @@
 import type { FilterState, TransactionSort, TransactionType } from './types';
 import type { PeriodSelection } from '@/lib/store/store';
+import { isValidISODate } from '@/lib/date/helpers';
 import { DEFAULT_FILTERS, SORT_OPTIONS } from './filters';
 
 type ParamValue = string | string[] | undefined;
@@ -29,7 +30,6 @@ export type TransactionsHrefSeed = Partial<FilterState> & {
 
 const TRANSACTION_TYPES = new Set<TransactionType>(['expense', 'income', 'transfer']);
 const RELATIVE_PERIODS = new Set<string>(['all', 'today', 'this-week', 'this-month', 'this-year']);
-const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 function firstValue(value: ParamValue): string | undefined {
   return Array.isArray(value) ? value[0] : value;
@@ -55,13 +55,6 @@ function parseType(value: ParamValue): TransactionType | null {
   return normalized && TRANSACTION_TYPES.has(normalized as TransactionType)
     ? normalized as TransactionType
     : null;
-}
-
-function isValidDate(value: string): boolean {
-  if (!DATE_RE.test(value)) return false;
-  const [year, month, day] = value.split('-').map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
 }
 
 function parseIntInRange(value: string | undefined, min: number, max: number): number | undefined {
@@ -94,10 +87,10 @@ export function parsePeriodParam(value: ParamValue): PeriodSelection | undefined
       return year && week ? { mode: 'week', year, week } : undefined;
     }
     case 'day':
-      return rest && isValidDate(rest) ? { mode: 'day', date: rest } : undefined;
+      return rest && isValidISODate(rest) ? { mode: 'day', date: rest } : undefined;
     case 'custom': {
       const [startDate, endDate] = rest?.split('..') ?? [];
-      return startDate && endDate && isValidDate(startDate) && isValidDate(endDate) && startDate <= endDate
+      return startDate && endDate && isValidISODate(startDate) && isValidISODate(endDate) && startDate <= endDate
         ? { mode: 'custom', startDate, endDate }
         : undefined;
     }

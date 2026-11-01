@@ -1,4 +1,3 @@
-import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable } from 'react-native';
@@ -8,13 +7,14 @@ import { FormattedCurrency, getPressedStyle, Text, View } from '@/components/ui'
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCategorySpendByRange } from '@/features/insights/api';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
+import { useCurrentYearMonth } from '@/lib/hooks/use-current-year-month';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { getCategorySpendingChartData } from './category-spending-chart';
 
 export function CategorySpendingChartCard() {
   const router = useRouter();
-  const currentMonth = React.useMemo(() => format(new Date(), 'yyyy-MM'), []);
+  const currentMonth = useCurrentYearMonth();
   const [startDate, endDate] = React.useMemo(() => getCurrentMonthRange(currentMonth), [currentMonth]);
   const { data, isLoading } = useCategorySpendByRange(startDate, endDate);
   const density = useAppStore.use.density();

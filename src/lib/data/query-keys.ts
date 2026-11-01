@@ -78,6 +78,8 @@ export const queryKeys = {
     all: ['scheduled-transactions'] as const,
     detail: (id: string) =>
       ['scheduled-transactions', 'detail', id] as const,
+    forTransaction: (transactionId: string) =>
+      ['scheduled-transactions', 'for-transaction', transactionId] as const,
   },
 
   // ─── Budget Stats ───

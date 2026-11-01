@@ -9,7 +9,9 @@ import { dateToUnix } from '@/lib/date/helpers';
 import { toNumber } from '@/lib/number';
 import { useAppStore } from '@/lib/store/store';
 
-type FormLike = { setFieldValue: (name: 'baseAmount', value: string) => void };
+type FormLike = { setFieldValue: (name: 'baseAmount', value: string, opts: { dontUpdateMeta: boolean }) => void };
+// A derived value must not mark the form touched, or late defaults (accounts, categories) stop applying.
+const DERIVED = { dontUpdateMeta: true };
 
 export function TransactionBaseAmountSync({
   form,
@@ -49,16 +51,16 @@ export function TransactionBaseAmountSync({
     if (!useAutoBase) return;
 
     const amountNum = toNumber(amount);
-    if (amountNum === undefined || amountNum === null || amountNum <= 0) {
-      form.setFieldValue('baseAmount', '');
+    if (!amountNum) {
+      form.setFieldValue('baseAmount', '', DERIVED);
       return;
     }
 
     if (!rates) return;
 
-    const amountCents = amountToCents(amountNum);
+    const amountCents = amountToCents(Math.abs(amountNum));
     const baseCents = computeBaseAmount(amountCents, currency, preferredCurrency, rates);
-    form.setFieldValue('baseAmount', formatMajorUnitsInputFromCents(baseCents));
+    form.setFieldValue('baseAmount', formatMajorUnitsInputFromCents(baseCents), DERIVED);
   }, [amount, currency, date, rates, preferredCurrency, form, baseAmountIsManual, onDriversChanged]);
 
   return null;

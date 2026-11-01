@@ -6,6 +6,7 @@ import {
   findClosestDateBinary,
   getCurrentMonthRange,
   getPeriodRange,
+  isValidISODate,
   navigatePeriod,
   scaleBudgetForPeriod,
   splitBy,
@@ -29,6 +30,13 @@ describe('getCurrentMonthRange', () => {
 });
 
 // ─── dateToUnix / unixToDate / unixToISODate ──────────────────────────────────
+
+describe('isValidISODate', () => {
+  it('accepts only complete, real calendar days', () => {
+    expect(isValidISODate('2024-02-29')).toBe(true);
+    for (const v of ['', '2026-11-0', '2026-02-30', '2025-02-29', '2026-13-01', '01.11.2026']) expect(isValidISODate(v)).toBe(false);
+  });
+});
 
 describe('dateToUnix', () => {
   it('converts a Date object to unix seconds', () => {

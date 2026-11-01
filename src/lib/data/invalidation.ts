@@ -27,6 +27,7 @@ const INVALIDATION_RULES = {
     queryKeys.recommendations.all,
     queryKeys.globalBudget.all,
     queryKeys.categories.usageAll,
+    queryKeys.accounts.usageAll,
     queryKeys.scheduledTransactions.paymentsAll,
     queryKeys.dataCounts,
   ],
@@ -48,6 +49,7 @@ const INVALIDATION_RULES = {
   scheduledTransaction: [
     queryKeys.scheduledTransactions.all,
     queryKeys.categories.usageAll,
+    queryKeys.accounts.usageAll,
     queryKeys.recommendations.all,
     queryKeys.dataCounts,
   ],

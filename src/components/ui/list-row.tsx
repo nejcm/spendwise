@@ -7,6 +7,7 @@ import { ChevronRight } from './icon';
 import { Text } from './text';
 
 export type ListRowProps = Omit<PressableProps, 'children'> & {
+  ref?: React.Ref<View>;
   title: React.ReactNode;
   meta?: React.ReactNode;
   icon?: React.ReactNode;

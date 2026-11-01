@@ -87,6 +87,10 @@ export function useRulePayments(ruleId: string) {
 }
 
 function onError(error: unknown) {
+  if (error instanceof queries.RuleAccountArchivedError) {
+    Alert.alert(translate('common.error'), translate('scheduled.resume_archived_account'));
+    return;
+  }
   if (error instanceof Error) captureError(error, { context: 'scheduled-transactions' });
   Alert.alert(translate('common.error'), error instanceof Error ? error.message : translate('common.error_description'));
 }

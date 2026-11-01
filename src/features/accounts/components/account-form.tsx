@@ -227,9 +227,10 @@ export type AccountFormProps = {
   accountId?: string;
   onSuccess?: () => void;
   onArchive?: () => void;
+  onDelete?: () => void;
 };
 
-export function AccountForm({ initialData, accountId, onSuccess, onArchive }: AccountFormProps) {
+export function AccountForm({ initialData, accountId, onSuccess, onArchive, onDelete }: AccountFormProps) {
   const { form, isLoading } = useAccountForm(initialData, accountId, onSuccess);
   const insets = useSafeAreaInsets();
   const isCreate = !accountId;
@@ -305,6 +306,9 @@ export function AccountForm({ initialData, accountId, onSuccess, onArchive }: Ac
 
         {onArchive && (
           <GhostButton color="danger" className="mt-4" label={translate('accounts.archive_account')} onPress={onArchive} />
+        )}
+        {onDelete && (
+          <GhostButton color="danger" className="mt-2" label={translate('accounts.delete_account')} onPress={onDelete} />
         )}
       </KeyboardAwareScrollView>
       <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>

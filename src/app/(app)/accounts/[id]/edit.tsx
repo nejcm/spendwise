@@ -4,7 +4,7 @@ import { View } from 'react-native';
 import { HeaderButton, PageHeader } from '@/components/page-header';
 import { Text } from '@/components/ui';
 import { X } from '@/components/ui/icon';
-import { useAccounts, useArchiveAccountConfirmation } from '@/features/accounts/api';
+import { isAccountDeletable, useAccounts, useAccountUsage, useArchiveAccountConfirmation, useDeleteAccountConfirmation } from '@/features/accounts/api';
 import { AccountForm } from '@/features/accounts/components/account-form';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
@@ -16,7 +16,9 @@ export default function EditAccountRoute() {
   const { data: accounts = [], isLoading } = useAccounts();
   const account = React.useMemo(() => accounts.find((item) => item.id === id), [accounts, id]);
   const onBack = () => goBackOrFallback(router);
+  const { data: usage } = useAccountUsage(id);
   const archiveAccount = useArchiveAccountConfirmation(() => router.dismissTo('/accounts'));
+  const deleteAccount = useDeleteAccountConfirmation(() => router.dismissTo('/accounts'));
 
   return (
     <>
@@ -43,7 +45,8 @@ export default function EditAccountRoute() {
                     color: account.color,
                   }}
                   onSuccess={onBack}
-                  onArchive={() => archiveAccount.submit(account.id, account.name)}
+                  onArchive={() => archiveAccount.submit(account.id, account.name, usage?.activeRules)}
+                  onDelete={usage && isAccountDeletable(usage) ? () => deleteAccount.submit(account.id, account.name) : undefined}
                 />
               )}
     </>

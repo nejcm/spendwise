@@ -19,6 +19,7 @@ import { categoryTiles } from '@/features/transactions/helpers';
 import { cn } from '@/lib/cn';
 import { dateToUnix, isValidISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
+import { FieldNodesContext } from '../hooks/form';
 
 const CATEGORY_TILE_LIMIT = 8;
 const rowInputClassName = 'h-auto min-w-[140px] rounded-none border-0 bg-transparent px-0 text-right text-row';
@@ -34,6 +35,13 @@ function FieldError({ message }: { message?: string }) {
       <Text className="text-sm font-medium text-negative">{message}</Text>
     </View>
   );
+}
+
+function useFieldNode(name?: string) {
+  const register = React.use(FieldNodesContext);
+  return React.useCallback((node: View | null) => {
+    if (register && name) register(name, node);
+  }, [register, name]);
 }
 
 // Field errors wait for the first save attempt; form-level onChange validation would flag untouched fields on a type switch.
@@ -134,8 +142,8 @@ function CategoryTile({ category, selected, invalid, onPress }: {
       accessibilityHint={invalid ? translate('transactions.form.category_error') : undefined}
       onPress={onPress}
       className={cn(
-        'size-[78px] items-center justify-center gap-1 rounded-[18px] border-2 bg-card px-1',
-        selected ? 'border-foreground' : invalid ? 'border-negative/40' : 'border-transparent',
+        'size-[78px] items-center justify-center gap-1 rounded-[18px] border-2 px-1',
+        selected ? 'border-foreground bg-card' : invalid ? 'border-negative/40 bg-negative/10' : 'border-transparent bg-card',
       )}
     >
       <Text className="text-[22px]">{category.icon}</Text>
@@ -148,6 +156,7 @@ export function CategorySection({ form }: { form: TransactionFormApi }) {
   const type = useStore(form.store, (s) => s.values.type);
   const submitted = useStore(form.store, selectSubmitted);
   const { data: categories = [] } = useCategories(type);
+  const fieldNode = useFieldNode('category_id');
   if (type === 'transfer') return null;
 
   return (
@@ -157,7 +166,7 @@ export function CategorySection({ form }: { form: TransactionFormApi }) {
         const error = submitted ? getFieldError(field) : undefined;
         const tiles = categoryTiles(categories, field.state.value, CATEGORY_TILE_LIMIT);
         return (
-          <View>
+          <View ref={fieldNode}>
             <View className="flex-row items-center gap-2 px-5 pb-2.5">
               <Text className="text-sm font-semibold">{translate('transactions.category')}</Text>
               {!!error && <Text className="text-sm text-negative">{error}</Text>}
@@ -189,7 +198,9 @@ export function CategorySection({ form }: { form: TransactionFormApi }) {
   );
 }
 
-export function AccountRow({ label, accounts, value, onChange, error, first }: {
+export function AccountRow({ name, label, accounts, value, onChange, error, first }: {
+  /** Registers the row for scroll-to-error when inside a FieldNodesContext. */
+  name?: string;
   label: string;
   first?: boolean;
   accounts: Account[];
@@ -198,11 +209,13 @@ export function AccountRow({ label, accounts, value, onChange, error, first }: {
   error?: string;
 }) {
   const sheet = useModalSheet();
+  const fieldNode = useFieldNode(name);
   const selected = accounts.find((a) => a.id === value);
   const options = React.useMemo(() => accounts.map((a) => ({ value: a.id, label: a.icon ? `${a.icon} ${a.name}` : a.name })), [accounts]);
   return (
     <>
       <ListRow
+        ref={fieldNode}
         className={rowClassName(first)}
         title={<RowLabel>{label}</RowLabel>}
         meta={<RowError message={error} />}
@@ -263,6 +276,7 @@ function AccountRows({ form, accounts }: { form: TransactionFormApi; accounts: A
             children={(field) => (
               <AccountRow
                 first
+                name="account_id"
                 label={translate(type === 'income' ? 'transactions.form.to' : type === 'transfer' && !paired ? 'transactions.account' : 'transactions.form.from')}
                 accounts={accounts}
                 value={field.state.value}
@@ -276,6 +290,7 @@ function AccountRows({ form, accounts }: { form: TransactionFormApi; accounts: A
               name="to_account_id"
               children={(field) => (
                 <AccountRow
+                  name="to_account_id"
                   label={translate('transactions.form.to')}
                   accounts={accounts}
                   value={field.state.value}
@@ -300,6 +315,7 @@ export function DetailsCard({ form, accounts, isAdjustment, showBaseAmount, onBa
 }) {
   const [showLocation, setShowLocation] = React.useState(() => !!form.getFieldValue('location'));
   const submitted = useStore(form.store, selectSubmitted);
+  const dateNode = useFieldNode('date');
   return (
     <>
       <Card className="mx-5 mt-[18px] rounded-card px-4">
@@ -308,6 +324,7 @@ export function DetailsCard({ form, accounts, isAdjustment, showBaseAmount, onBa
           name="date"
           children={(field) => (
             <ListRow
+              ref={dateNode}
               className={rowClassName(isAdjustment)}
               title={<RowLabel>{translate('transactions.form.when')}</RowLabel>}
               meta={<RowError message={submitted ? getFieldError(field) : undefined} />}

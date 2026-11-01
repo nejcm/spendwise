@@ -31,6 +31,12 @@ export type AccountFlows = {
   movedOut: number;
 };
 
+export type AccountUsage = {
+  transactions: number;
+  rules: number;
+  activeRules: number;
+};
+
 export type AccountFormData = {
   name: string;
   type: AccountType;

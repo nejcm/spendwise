@@ -1,4 +1,5 @@
-import type { TextInput } from 'react-native';
+import type { TextInput, View } from 'react-native';
+import type { KeyboardAwareScrollViewRef } from 'react-native-keyboard-controller';
 import type { TransactionFormInitialValues, TransactionFormValues } from '@/features/transactions/components/transaction-form-schema';
 import { useForm } from '@tanstack/react-form';
 import { useRouter } from 'expo-router';
@@ -41,6 +42,10 @@ export type UseTransactionFormProps = {
 type SubmitMeta = { addAnother: boolean };
 
 const FIELD_ORDER = ['amount', 'category_id', 'account_id', 'to_account_id', 'date', 'baseAmount', 'merchant_name', 'note', 'location'] as const;
+const SCROLL_MARGIN = 16;
+
+/** Lets form rows register their node so a failed save can scroll to the first invalid one. */
+export const FieldNodesContext = React.createContext<((name: string, node: View | null) => void) | null>(null);
 
 function useSavedSnackbar() {
   const router = useRouter();
@@ -76,6 +81,12 @@ export function useTransactionForm({ initialValues, onSaved, isAdjustment = fals
   const updateTransaction = useUpdateTransaction();
   const showSaved = useSavedSnackbar();
   const amountRef = React.useRef<TextInput>(null);
+  const scrollRef = React.useRef<KeyboardAwareScrollViewRef>(null);
+  const contentRef = React.useRef<View>(null);
+  const fieldNodesRef = React.useRef<Partial<Record<string, View | null>>>({});
+  const registerFieldNode = React.useCallback((name: string, node: View | null) => {
+    fieldNodesRef.current[name] = node;
+  }, []);
   const transactionFormPrefs = useAppStore(selectTransactionFormPrefs);
   // An edited row's stored baseAmount may be a manual correction; only re-derive once amount, currency or date change.
   const [baseAmountIsManual, setBaseAmountIsManual] = React.useState(!!id);
@@ -111,7 +122,16 @@ export function useTransactionForm({ initialValues, onSaved, isAdjustment = fals
     onSubmitInvalid: ({ formApi }) => {
       const failing = FIELD_ORDER.find((name) => formApi.getFieldMeta(name)?.errors.length);
       if (!failing) return;
-      if (failing === 'amount') amountRef.current?.focus();
+      const node = fieldNodesRef.current[failing];
+      if (failing === 'amount') {
+        amountRef.current?.focus();
+      }
+      else if (node && contentRef.current) {
+        node.measureLayout(contentRef.current, (_x, y) => {
+          scrollRef.current?.scrollTo({ y: Math.max(0, y - SCROLL_MARGIN) });
+          AccessibilityInfo.sendAccessibilityEvent(node, 'focus');
+        });
+      }
       const message = formApi.getFieldMeta(failing)?.errors[0]?.message;
       if (message) AccessibilityInfo.announceForAccessibility(message);
     },
@@ -156,6 +176,9 @@ export function useTransactionForm({ initialValues, onSaved, isAdjustment = fals
   return {
     form,
     amountRef,
+    scrollRef,
+    contentRef,
+    registerFieldNode,
     isEdit: !!id,
     accounts,
     isLoading: createTransaction.isPending || updateTransaction.isPending,

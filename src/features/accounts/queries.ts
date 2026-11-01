@@ -2,7 +2,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { CurrencyKey } from '../currencies';
 import type { TransactionInsertData } from '../transactions/types';
-import type { Account, AccountFlows, AccountFormData, AccountWithBalance, FirstAccountData } from './types';
+import type { Account, AccountFlows, AccountFormData, AccountUsage, AccountWithBalance, FirstAccountData } from './types';
 
 import { computeBaseAmount } from '@/features/currencies/conversion';
 import { getRatesForDate } from '@/features/currencies/queries';
@@ -175,6 +175,22 @@ export async function getAccountFlows(
   return row ?? { income: 0, expense: 0, movedOut: 0 };
 }
 
+/** `transactions` excludes the account's own opening-balance adjustment. */
+export async function getAccountUsage(db: SQLiteDatabase, id: string): Promise<AccountUsage> {
+  const row = await db.getFirstAsync<AccountUsage>(
+    `SELECT
+       (SELECT COUNT(*) FROM transactions WHERE account_id = ? AND NOT (is_adjustment = 1 AND transfer_id IS NULL)) AS transactions,
+       (SELECT COUNT(*) FROM recurring_rules WHERE account_id = ?) AS rules,
+       (SELECT COUNT(*) FROM recurring_rules WHERE account_id = ? AND is_active = 1) AS activeRules`,
+    [id, id, id],
+  );
+  return row ?? { transactions: 0, rules: 0, activeRules: 0 };
+}
+
+export function isAccountDeletable(usage: AccountUsage) {
+  return usage.transactions === 0 && usage.rules === 0;
+}
+
 export async function getArchivedAccounts(db: SQLiteDatabase): Promise<Account[]> {
   return db.getAllAsync<Account>('SELECT * FROM accounts WHERE is_archived = 1 ORDER BY sort_order ASC');
 }
@@ -272,14 +288,37 @@ export async function setupFirstAccount(
   });
 }
 
+/** Also pauses the account's active recurring rules; unarchiving does not resume them. */
 export async function archiveAccount(
   db: SQLiteDatabase,
   id: string,
 ): Promise<void> {
-  await db.runAsync(
-    `UPDATE accounts SET is_archived = 1, updated_at = strftime('%s','now') WHERE id = ?`,
-    [id],
-  );
+  await withWriteTransaction(db, async () => {
+    await db.runAsync(
+      `UPDATE accounts SET is_archived = 1, updated_at = strftime('%s','now') WHERE id = ?`,
+      [id],
+    );
+    await db.runAsync(
+      `UPDATE recurring_rules SET is_active = 0, updated_at = strftime('%s','now') WHERE account_id = ? AND is_active = 1`,
+      [id],
+    );
+  });
+}
+
+export class AccountInUseError extends Error {
+  constructor() {
+    super('Account has transactions or recurring rules');
+    this.name = 'AccountInUseError';
+  }
+}
+
+/** Only for an account with nothing but its opening balance; removes both. */
+export async function deleteAccount(db: SQLiteDatabase, id: string): Promise<void> {
+  await withWriteTransaction(db, async () => {
+    if (!isAccountDeletable(await getAccountUsage(db, id))) throw new AccountInUseError();
+    await db.runAsync('DELETE FROM transactions WHERE account_id = ?', [id]);
+    await db.runAsync('DELETE FROM accounts WHERE id = ?', [id]);
+  });
 }
 
 export async function unarchiveAccount(

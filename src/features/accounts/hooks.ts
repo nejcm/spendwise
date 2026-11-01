@@ -5,12 +5,15 @@ import { useSQLiteContext } from 'expo-sqlite';
 
 import { useCallback } from 'react';
 import { Alert } from '@/components/ui';
+import { toggleScopeAccount } from '@/features/ai/helpers';
+import { getAiScope, setAiScope } from '@/features/ai/store';
+import { translateCount } from '@/features/categories/helpers';
 import { captureError } from '@/lib/analytics';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
 
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '@/lib/store/store';
+import { getAppState, setTransactionFormPrefs, useAppStore } from '@/lib/store/store';
 import * as queries from './queries';
 
 // ─── Read Hooks ───
@@ -55,6 +58,15 @@ export function useArchivedAccounts() {
   });
 }
 
+export function useAccountUsage(id: string | undefined) {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: queryKeys.accounts.usage(id ?? ''),
+    queryFn: () => queries.getAccountUsage(db, id!),
+    enabled: !!id,
+  });
+}
+
 export function useAccountFlows(accountId: string, startDate: number | undefined, endDate: number | undefined) {
   const db = useSQLiteContext();
   return useQuery({
@@ -76,6 +88,10 @@ export function useTotalBalance(yearMonth?: string) {
 // ─── Write Hooks ───
 
 function onError(error: unknown) {
+  if (error instanceof queries.AccountInUseError) {
+    Alert.alert(translate('common.error'), translate('accounts.delete_blocked'));
+    return;
+  }
   if (error instanceof Error) captureError(error, { context: 'accounts' });
   Alert.alert(translate('common.error'), error instanceof Error ? error.message : translate('common.error_description'));
 }
@@ -145,7 +161,7 @@ export function useArchiveAccount(onSuccess?: () => void) {
   return useMutation({
     mutationFn: (id: string) => queries.archiveAccount(db, id),
     onSuccess: () => {
-      invalidateFor(queryClient, 'account');
+      invalidateFor(queryClient, 'account', 'scheduledTransaction');
       onSuccess?.();
     },
     onError,
@@ -165,13 +181,49 @@ export function useUnarchiveAccount() {
   });
 }
 
+function forgetAccount(id: string) {
+  const prefs = getAppState().formPrefs.transactionForm;
+  if (prefs.account_id === id) setTransactionFormPrefs({ ...prefs, account_id: undefined });
+  const scope = getAiScope();
+  if (scope.accountIds !== 'all' && scope.accountIds.includes(id)) {
+    setAiScope({ ...scope, accountIds: toggleScopeAccount(scope.accountIds, id) });
+  }
+}
+
+export function useDeleteAccountConfirmation(onSuccess?: () => void) {
+  const db = useSQLiteContext();
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: (id: string) => queries.deleteAccount(db, id),
+    onSuccess: (_, id) => {
+      forgetAccount(id);
+      invalidateFor(queryClient, 'account', 'transaction');
+      onSuccess?.();
+    },
+    onError,
+  });
+  const submit = useCallback((id: string, name: string) => {
+    Alert.alert(
+      translate('accounts.delete_account'),
+      translate('accounts.delete_confirm', { name }),
+      [
+        { text: translate('common.cancel'), style: 'cancel' },
+        { text: translate('common.delete'), style: 'destructive', onPress: () => mutation.mutate(id) },
+      ],
+    );
+  }, [mutation]);
+
+  return { mutation, submit };
+}
+
 export function useArchiveAccountConfirmation(onSuccess?: () => void) {
   const mutation = useArchiveAccount(onSuccess);
-  const submit = useCallback((id: string, name?: string) => {
+  const submit = useCallback((id: string, name?: string, activeRules = 0) => {
     if (!id) return;
+    const pauses = activeRules > 0 ? ` ${translateCount('accounts.archive_pauses_rules', activeRules)}` : '';
     Alert.alert(
       translate('accounts.archive_account'),
-      translate('accounts.archive_confirm', { name: name ?? '' }),
+      translate('accounts.archive_confirm', { name: name ?? '' }) + pauses,
       [
         { text: translate('common.cancel'), style: 'cancel' },
         {

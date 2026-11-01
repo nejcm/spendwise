@@ -1,5 +1,5 @@
 import { createTestDb } from '@/test-utils/sqlite-db';
-import { deleteScheduledTransaction, getRuleForTransaction, getRulePayments, restoreScheduledTransaction } from './queries';
+import { deleteScheduledTransaction, getRuleForTransaction, getRulePayments, restoreScheduledTransaction, RuleAccountArchivedError, updateScheduledTransaction } from './queries';
 
 describe('getRuleForTransaction', () => {
   it('finds the rule that generated a transaction, and nothing for manual rows', async () => {
@@ -77,5 +77,38 @@ describe('deleteScheduledTransaction undo', () => {
 
     await expect(restoreScheduledTransaction(db as any, deleted)).rejects.toHaveProperty('code', 'SQLITE_CONSTRAINT_FOREIGNKEY');
     expect(await snapshot(db)).toEqual([[], [], [{ id: 't1' }]]);
+  });
+});
+
+describe('updateScheduledTransaction on an archived account', () => {
+  const data = (is_active: boolean) => ({
+    account_id: 'acc',
+    category_id: 'cat',
+    type: 'expense' as const,
+    currency: 'EUR' as const,
+    note: null,
+    frequency: 'monthly' as const,
+    start_date: Math.floor(Date.now() / 1000),
+    end_date: null,
+    amount: 10,
+    is_active,
+  });
+
+  it('blocks resuming but allows edits that keep the rule paused', async () => {
+    const db = await createTestDb();
+    await db.execAsync(`
+      INSERT INTO accounts (id, name, type, currency, is_archived) VALUES ('acc', 'Main', 'checking', 'EUR', 1);
+      INSERT INTO categories (id, name, color) VALUES ('cat', 'Bills', '#000');
+      INSERT INTO recurring_rules (id, account_id, type, amount, currency, frequency, start_date, next_due_date, is_active)
+        VALUES ('rule', 'acc', 'expense', 1000, 'EUR', 'monthly', 100, 200, 0);
+    `);
+
+    await expect(updateScheduledTransaction(db as any, 'rule', data(true))).rejects.toBeInstanceOf(RuleAccountArchivedError);
+    await updateScheduledTransaction(db as any, 'rule', data(false));
+    expect(await db.getFirstAsync('SELECT is_active, amount FROM recurring_rules')).toEqual({ is_active: 0, amount: 1000 });
+
+    await db.runAsync('UPDATE accounts SET is_archived = 0');
+    await updateScheduledTransaction(db as any, 'rule', data(true));
+    expect(await db.getFirstAsync('SELECT is_active FROM recurring_rules')).toEqual({ is_active: 1 });
   });
 });

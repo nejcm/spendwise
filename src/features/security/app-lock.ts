@@ -1,17 +1,17 @@
 import * as LocalAuthentication from 'expo-local-authentication';
 import { Alert } from '@/components/ui';
+import { translateCount } from '@/features/categories/helpers';
 import { translate } from '@/lib/i18n';
 import { setIsLocked, setLockEnabled } from '@/lib/store/store';
 
-export const LOCK_TIMEOUT_OPTIONS = [
-  { label: translate('security.timeout_immediately'), value: 0 },
-  { label: '1 min', value: 1 },
-  { label: '3 min', value: 3 },
-  { label: '5 min', value: 5 },
-  { label: '15 min', value: 15 },
-  { label: '30 min', value: 30 },
-  { label: '1 hour', value: 60 },
-];
+export const LOCK_TIMEOUT_MINUTES = [0, 1, 3, 5, 15, 30, 60];
+
+export function lockTimeoutLabel(minutes: number) {
+  if (minutes === 0) return translate('security.timeout_immediately');
+  return minutes % 60 === 0
+    ? translateCount('security.timeout_hours', minutes / 60)
+    : translateCount('security.timeout_minutes', minutes);
+}
 
 /** Turning the lock off needs a passing device auth and clears the lock gate too. */
 export async function toggleAppLock(on: boolean) {

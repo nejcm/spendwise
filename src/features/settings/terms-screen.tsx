@@ -1,16 +1,13 @@
 import * as React from 'react';
+import { Text, View } from '@/components/ui';
+import { translate } from '@/lib/i18n';
+import { SettingsPage } from './components/settings-page';
 
-import { FocusAwareStatusBar, ScrollView, Text } from '@/components/ui';
-import { defaultStyles } from '@/lib/theme/styles';
-
+// shortcut: legal text is English-only, translate when a German version is reviewed.
 export function TermsScreen() {
   return (
-    <>
-      <FocusAwareStatusBar />
-      <ScrollView className="flex-1" contentContainerClassName="px-4 pt-8 pb-12" style={defaultStyles.transparentBg}>
-        <Text className="mb-4 text-2xl font-bold text-foreground">
-          Terms &amp; Conditions
-        </Text>
+    <SettingsPage title={translate('settings.terms')}>
+      <View className="pt-5">
 
         <Text className="mb-4 text-sm text-muted-foreground">
           These terms and conditions apply to the Spendwise app (hereby referred to as
@@ -145,7 +142,7 @@ export function TermsScreen() {
         <Text className="mt-2 text-xs text-muted-foreground">
           These terms and conditions are effective as of 2026-03-13.
         </Text>
-      </ScrollView>
-    </>
+      </View>
+    </SettingsPage>
   );
 }

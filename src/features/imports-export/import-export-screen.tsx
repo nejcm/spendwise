@@ -1,19 +1,19 @@
+import type { UniwindLucideIcon } from '@/components/ui/icon';
 import type { ImportProps } from '@/features/imports-export/import';
 import { useMutation } from '@tanstack/react-query';
-
 import * as React from 'react';
 import { useState } from 'react';
-import DetailsSection from '@/components/details';
-
-import { Alert, FocusAwareStatusBar, ScrollView, SolidButton, Text, View } from '@/components/ui';
-import { ArrowUp } from '@/components/ui/icon';
+import { ActivityIndicator, Alert, Card, ListRow, SectionHeader, Text } from '@/components/ui';
+import { ArrowUp, FileText, Upload } from '@/components/ui/icon';
+import { IS_AUTO_BACKUP_SUPPORTED } from '@/features/imports-export/backup-file';
 import { autoDetectColumnMapping, parseCSV } from '@/features/imports-export/csv-parser';
+import { useExportBackup, useImportBackup } from '@/features/imports-export/hooks';
 import Import from '@/features/imports-export/import';
 import { documentPickerTypeForCsv, pickValidatedFile } from '@/features/imports-export/pick-file';
+import { SettingsPage } from '@/features/settings/components/settings-page';
+import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
-import { defaultStyles } from '@/lib/theme/styles';
-import AutoBackupSection from './auto-backup-section';
-import BackupSection from './backup-section';
+import { AutoBackupSection, LastBackupCard } from './auto-backup-section';
 
 const initialCsvState: ImportProps['state'] = {
   headers: [],
@@ -34,6 +34,8 @@ const initialCsvState: ImportProps['state'] = {
 export function ImportScreen() {
   const [importing, setImporting] = useState<boolean>(false);
   const [csvState, setCsvState] = useState<ImportProps['state']>(() => initialCsvState);
+  const exportBackup = useExportBackup();
+  const importBackup = useImportBackup();
 
   const pickFileMutation = useMutation({
     mutationFn: async () => {
@@ -67,50 +69,56 @@ export function ImportScreen() {
     },
   });
 
+  const moveRows: { key: string; icon: UniwindLucideIcon; title: string; meta: string; pending: boolean; onPress: () => void }[] = [
+    { key: 'csv', icon: ArrowUp, title: translate('import-export.import_csv_title'), meta: translate('import-export.import_csv_meta'), pending: pickFileMutation.isPending, onPress: () => pickFileMutation.mutate() },
+    { key: 'save', icon: FileText, title: translate('import-export.save_backup_title'), meta: translate('import-export.save_backup_meta'), pending: exportBackup.isPending, onPress: () => exportBackup.mutate() },
+    { key: 'restore', icon: Upload, title: translate('import-export.restore_file_title'), meta: translate('import-export.restore_file_meta'), pending: importBackup.isPending, onPress: () => importBackup.mutate() },
+  ];
+
   return (
-    <>
-      <FocusAwareStatusBar />
-      <ScrollView className="flex-1" style={defaultStyles.transparentBg}>
-        <View className="flex-1 px-4 py-8">
-          {importing
-            ? (
-                <Import
-                  state={csvState}
-                  setMapping={(mapping) =>
-                    setCsvState((prev) => ({
-                      ...prev,
-                      mapping,
-                    }))}
-                  onClose={() => setImporting(false)}
-                />
-              )
-            : (
-                <>
-                  <Text className="mb-2 font-bold dark:text-muted-foreground" tx="import-export.external_section_title" />
-                  <DetailsSection
-                    className="mb-8"
-                    data={[{
-                      label: translate('import-export.import_title'),
-                      description: translate('import-export.pick_description'),
-                      value: (
-                        <SolidButton
-                          color="primary"
-                          size="sm"
-                          className="min-w-28"
-                          iconLeft={<ArrowUp className="mr-1 text-background" size={16} />}
-                          label={translate('common.import')}
-                          loading={pickFileMutation.isPending}
-                          onPress={() => pickFileMutation.mutate()}
-                        />
-                      ),
-                    }]}
+    <SettingsPage title={translate('import-export.title')}>
+      {importing
+        ? (
+            <Import
+              state={csvState}
+              setMapping={(mapping) => setCsvState((prev) => ({ ...prev, mapping }))}
+              onClose={() => setImporting(false)}
+            />
+          )
+        : (
+            <>
+              {IS_AUTO_BACKUP_SUPPORTED
+                ? (
+                    <>
+                      <LastBackupCard />
+                      <AutoBackupSection />
+                    </>
+                  )
+                : (
+                    <Card className="mt-5 gap-1 p-[18px]">
+                      <Text className="text-row font-medium">{translate('import-export.auto_backup_web_unavailable_title')}</Text>
+                      <Text className="text-meta text-muted-foreground">{translate('import-export.auto_backup_web_unavailable_description')}</Text>
+                    </Card>
+                  )}
+
+              <SectionHeader title={translate('import-export.move_section_title')} />
+              <Card className="px-4">
+                {moveRows.map((row, index) => (
+                  <ListRow
+                    key={row.key}
+                    className={cn('py-3.5', index > 0 && 'border-t border-border')}
+                    icon={<row.icon size={22} colorClassName="accent-foreground" />}
+                    title={row.title}
+                    meta={<Text className="text-meta text-muted-foreground">{row.meta}</Text>}
+                    trailing={row.pending ? <ActivityIndicator /> : undefined}
+                    chevron
+                    disabled={row.pending}
+                    onPress={row.onPress}
                   />
-                  <BackupSection />
-                  <AutoBackupSection />
-                </>
-              )}
-        </View>
-      </ScrollView>
-    </>
+                ))}
+              </Card>
+            </>
+          )}
+    </SettingsPage>
   );
 }

@@ -76,3 +76,11 @@ export function toggleScopeAccount(picked: AiScope['accountIds'], id: string): A
   const next = current.includes(id) ? current.filter((x) => x !== id) : [...current, id];
   return next.length > 0 ? next : 'all';
 }
+
+/** "sk-proj-abc…4f2a" → "sk-••••••••4f2a"; short keys show only bullets. */
+export function maskApiKey(key: string) {
+  const trimmed = key.trim();
+  if (trimmed.length < 12) return '••••••••';
+  const prefix = trimmed.startsWith('sk-') ? 'sk-' : '';
+  return `${prefix}••••••••${trimmed.slice(-4)}`;
+}

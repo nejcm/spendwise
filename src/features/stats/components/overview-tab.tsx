@@ -17,7 +17,7 @@ import { calendarDateToUnix, getPeriodRange, isNavigablePeriodMode, navigatePeri
 import { getPeriodLabel } from '@/lib/date/labels';
 import { useCurrentYearMonth } from '@/lib/hooks/use-current-year-month';
 import { translate } from '@/lib/i18n';
-import { selectIsAiEnabled, useAppStore } from '@/lib/store/store';
+import { selectIsAiFeatureOn, useAppStore } from '@/lib/store/store';
 import { chartCeiling, dailyExpenses, elapsedSpendStats, monthlyFromDaily, monthlyGlobalBudget, savedRatio } from '../helpers';
 import { useGlobalBudget } from '../hooks';
 
@@ -33,7 +33,7 @@ export function OverviewTab({ selection, startDate, endDate, onShowBudgets }: Pe
   const { data: prevSummary } = useSummaryByRange(prevStart, prevEnd, !!previous);
   const spent = summary?.expense ?? 0;
   const prevSpent = previous && prevSummary ? prevSummary.expense : null;
-  const isAiEnabled = useAppStore(selectIsAiEnabled);
+  const isAiEnabled = useAppStore(selectIsAiFeatureOn('chat'));
   const prevLabels = previous && prevStart !== undefined
     ? (month ? { short: formatDateFull(prevStart, 'MMM'), long: formatDateFull(prevStart, 'MMMM') } : { short: getPeriodLabel(previous), long: getPeriodLabel(previous) })
     : null;

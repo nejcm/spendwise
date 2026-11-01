@@ -36,7 +36,7 @@ import { formatCurrency, formatInstant } from '@/features/formatting/helpers';
 import { LANGUAGES_OPTIONS } from '@/features/languages';
 import { countNotificationsOn } from '@/features/notifications/helpers';
 import { notificationsQuery } from '@/features/notifications/notifications';
-import { LOCK_TIMEOUT_OPTIONS, toggleAppLock } from '@/features/security/app-lock';
+import { lockTimeoutLabel, toggleAppLock } from '@/features/security/app-lock';
 import { setAnalyticsEnabled } from '@/lib/analytics';
 import { cn } from '@/lib/cn';
 import { translate, useSelectedLanguage } from '@/lib/i18n';
@@ -99,7 +99,6 @@ export function SettingsScreen() {
 
   const lastBackup = lastBackupAt ? formatInstant(Math.floor(Date.parse(lastBackupAt) / 1000), dateFormat) : null;
   const notificationsOn = canNotify ? countNotificationsOn(notifications, recommendationsEnabled) : 0;
-  const lockTimeout = LOCK_TIMEOUT_OPTIONS.find((o) => o.value === lockTimeoutMinutes)?.label;
 
   const groups: { title: string; rows: Row[] }[] = [
     {
@@ -129,7 +128,7 @@ export function SettingsScreen() {
           title: translate('settings.app_lock'),
           trailing: <Switch accessibilityLabel={translate('settings.app_lock')} checked={lockEnabled} onChange={(on) => { void toggleAppLock(on); }} />,
         },
-        ...(lockEnabled ? [{ key: 'lock-after', icon: Timer, title: translate('security.lock_after'), meta: lockTimeout, onPress: () => router.push('/settings/security') }] : []),
+        ...(lockEnabled ? [{ key: 'lock-after', icon: Timer, title: translate('security.lock_after'), meta: lockTimeoutLabel(lockTimeoutMinutes), onPress: () => router.push('/settings/security') }] : []),
         {
           key: 'analytics',
           icon: Shield,

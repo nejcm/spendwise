@@ -9,6 +9,7 @@ import { useRouter } from 'expo-router';
 import * as Sharing from 'expo-sharing';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Alert } from '@/components/ui';
+import { showSnackbar } from '@/components/ui/snackbar';
 import { CURRENCY_VALUES } from '@/features/currencies';
 import { exportBackup, importBackup, validateBackup } from '@/features/imports-export/backup';
 import { buildManualBackupFileName, IS_AUTO_BACKUP_SUPPORTED, writeAutoBackupFile } from '@/features/imports-export/backup-file';
@@ -83,6 +84,18 @@ export function useImportTransactions() {
     isInitializing: isCategoriesLoading || isAccountsLoading,
     onImport: prepareMutation.mutate,
   };
+}
+
+export function useBackUpNow() {
+  const db = useSQLiteContext();
+
+  return useMutation({
+    mutationFn: () => writeAutoBackupFile(db),
+    onSuccess: () => showSnackbar({ title: translate('import-export.backed_up') }),
+    onError: (error) => {
+      Alert.alert(translate('common.error'), error instanceof Error ? error.message : translate('common.error_description'));
+    },
+  });
 }
 
 export function useExportBackup() {

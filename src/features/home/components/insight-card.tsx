@@ -7,11 +7,11 @@ import { setAiDraftQuestion } from '@/features/ai/store';
 import { getRecommendationCopy } from '@/features/recommendations/helpers';
 import { useVisibleRecommendations } from '@/features/recommendations/hooks';
 import { translate } from '@/lib/i18n';
-import { selectIsAiEnabled, useAppStore } from '@/lib/store/store';
+import { selectIsAiFeatureOn, useAppStore } from '@/lib/store/store';
 
 export function InsightCard() {
   const recommendationsEnabled = useAppStore.use.recommendationsEnabled();
-  const isAiEnabled = useAppStore(selectIsAiEnabled);
+  const isAiEnabled = useAppStore(selectIsAiFeatureOn('insights'));
   if (!recommendationsEnabled || !isAiEnabled) return null;
   return <InsightCardBody />;
 }
@@ -19,6 +19,7 @@ export function InsightCard() {
 function InsightCardBody() {
   const router = useRouter();
   const currency = useAppStore.use.currency();
+  const isChatOn = useAppStore(selectIsAiFeatureOn('chat'));
   const { recommendations, dismiss } = useVisibleRecommendations();
   const recommendation = recommendations[0];
   if (!recommendation) return null;
@@ -37,17 +38,19 @@ function InsightCardBody() {
       </View>
       <Text className="text-row/snug">{getRecommendationCopy(recommendation, currency).summary}</Text>
       <View className="flex-row gap-2 pt-0.5">
-        <SolidButton
-          size="xs"
-          color="primary"
-          className="h-9 px-4"
-          textClassName="text-meta font-semibold"
-          label={translate('home.insight.ask')}
-          onPress={() => {
-            setAiDraftQuestion(recommendation.question);
-            router.push('/ai');
-          }}
-        />
+        {isChatOn && (
+          <SolidButton
+            size="xs"
+            color="primary"
+            className="h-9 px-4"
+            textClassName="text-meta font-semibold"
+            label={translate('home.insight.ask')}
+            onPress={() => {
+              setAiDraftQuestion(recommendation.question);
+              router.push('/ai');
+            }}
+          />
+        )}
         <OutlineButton
           size="xs"
           color="default"

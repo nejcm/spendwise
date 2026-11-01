@@ -1,137 +1,147 @@
 import type { AiProviderType } from './types';
-import type { AppState } from '@/lib/store/store';
+import type { AiFeature } from '@/lib/store/store';
 import * as React from 'react';
-import { Linking, Pressable, View } from 'react-native';
-import { FocusAwareStatusBar, Input, ScrollView, Select, SolidButton, Text } from '@/components/ui';
+import { Linking } from 'react-native';
+import { Alert, Card, GhostButton, Input, Pressable, SectionHeader, SegmentedControl, SolidButton, Text, View } from '@/components/ui';
+import { Sparkle } from '@/components/ui/icon';
 import { showSnackbar } from '@/components/ui/snackbar';
-import { setAiProvider, setAnthropicApiKey, setOpenaiApiKey, useAppStore } from '@/lib/store/store';
-import { defaultStyles } from '@/lib/theme/styles';
-import { translate } from '../../lib/i18n';
+import { SettingsPage } from '@/features/settings/components/settings-page';
+import { ToggleRow } from '@/features/settings/components/toggle-row';
+import { cn } from '@/lib/cn';
+import { translate } from '@/lib/i18n';
+import { setAiFeature, setAiProvider, setAnthropicApiKey, setOpenaiApiKey, useAppStore } from '@/lib/store/store';
+import { maskApiKey } from './helpers';
 
-const OPENAI_API_KEYS_URL = 'https://platform.openai.com/api-keys';
-const ANTHROPIC_API_KEYS_URL = 'https://console.anthropic.com/settings/keys';
-
-type AiProviderId = AppState['aiProvider'];
-
-const providerOptions = [
-  { label: translate('settings.provider_openai'), value: 'openai' as AiProviderType },
-  { label: translate('settings.provider_anthropic'), value: 'anthropic' as AiProviderType },
-];
+const PROVIDERS: AiProviderType[] = ['openai', 'anthropic'];
+const API_KEYS_URL: Record<AiProviderType, string> = {
+  openai: 'https://platform.openai.com/api-keys',
+  anthropic: 'https://console.anthropic.com/settings/keys',
+};
+const SET_KEY: Record<AiProviderType, (key: string | undefined) => void> = {
+  openai: setOpenaiApiKey,
+  anthropic: setAnthropicApiKey,
+};
+const FEATURES: AiFeature[] = ['chat', 'scan', 'insights'];
 
 export function AiSettingsScreen() {
-  const aiProvider = useAppStore.use.aiProvider();
-  const openaiApiKey = useAppStore.use.openaiApiKey();
-  const anthropicApiKey = useAppStore.use.anthropicApiKey();
-  const [dirty, setDirty] = React.useState(false);
-  const activeProviderHasKey = aiProvider === 'anthropic'
-    ? Boolean(anthropicApiKey?.trim())
-    : Boolean(openaiApiKey?.trim());
+  const provider = useAppStore.use.aiProvider();
+  const savedKey = useAppStore((s) => (provider === 'anthropic' ? s.anthropicApiKey : s.openaiApiKey))?.trim();
+  const aiFeatures = useAppStore((s) => s.aiFeatures);
+  const providerName = translate(`settings.provider_${provider}`);
 
-  const openaiInputRef = React.useRef<string | undefined>(openaiApiKey);
-  const anthropicInputRef = React.useRef<string | undefined>(anthropicApiKey);
-
-  const onSave = React.useCallback(() => {
-    setOpenaiApiKey(openaiInputRef.current);
-    setAnthropicApiKey(anthropicInputRef.current);
-    setDirty(false);
-    showSnackbar({ title: translate('settings.saved') });
-  }, [setDirty]);
+  const removeKey = () => {
+    Alert.alert(translate('settings.ai_remove_key_title', { provider: providerName }), translate('settings.ai_remove_key_message'), [
+      { text: translate('common.cancel'), style: 'cancel' },
+      {
+        text: translate('settings.ai_remove_key'),
+        style: 'destructive',
+        onPress: () => {
+          SET_KEY[provider](undefined);
+          showSnackbar({ title: translate('settings.ai_key_removed') });
+        },
+      },
+    ]);
+  };
 
   return (
-    <>
-      <FocusAwareStatusBar />
-      <ScrollView className="flex-1" contentContainerClassName="px-4 pt-4" style={defaultStyles.transparentBg}>
-        <Text className="mb-1 text-lg font-medium">{translate('settings.ai_provider')}</Text>
-        <Text className="mb-6 text-sm text-muted-foreground">
-          {translate('settings.ai_provider_desc')}
-        </Text>
+    <SettingsPage title={translate('settings.spendwise_ai')}>
+      <KeyCard key={provider} provider={provider} providerName={providerName} savedKey={savedKey} />
 
-        <View className="mb-6">
-          <Select<AiProviderId>
-            options={providerOptions}
-            value={aiProvider}
-            onSelect={setAiProvider}
-            testID="ai-provider-select"
+      <SegmentedControl
+        accessibilityLabel={translate('settings.ai_provider')}
+        className="mt-4"
+        options={PROVIDERS.map((value) => ({ value, label: translate(`settings.provider_${value}`) }))}
+        value={provider}
+        onChange={setAiProvider}
+      />
+
+      <SectionHeader title={translate('settings.ai_use_for')} />
+      <Card className="px-4">
+        {FEATURES.map((feature, index) => (
+          <ToggleRow
+            key={feature}
+            className={cn(index > 0 && 'border-t border-border')}
+            title={translate(`settings.ai_features.${feature}.title`)}
+            description={translate(`settings.ai_features.${feature}.body`)}
+            checked={aiFeatures?.[feature] !== false}
+            onChange={(on) => setAiFeature(feature, on)}
           />
-          {!activeProviderHasKey && (
-            <Text className="mt-3 text-sm/snug text-muted-foreground">
-              {translate('settings.ai_provider_missing_key')}
-            </Text>
+        ))}
+      </Card>
+      <Text className="px-1 pt-2.5 text-meta text-muted-foreground">{translate('settings.ai_requests_note', { provider: providerName })}</Text>
+
+      {savedKey && (
+        <GhostButton color="danger" className="mt-8 self-center" label={translate('settings.ai_remove_key')} onPress={removeKey} />
+      )}
+    </SettingsPage>
+  );
+}
+
+function KeyCard({ provider, providerName, savedKey }: { provider: AiProviderType; providerName: string; savedKey: string | undefined }) {
+  const [editing, setEditing] = React.useState(false);
+  const [draft, setDraft] = React.useState('');
+  const showForm = !savedKey || editing;
+
+  const save = () => {
+    SET_KEY[provider](draft.trim());
+    setEditing(false);
+    setDraft('');
+    showSnackbar({ title: translate('settings.saved') });
+  };
+
+  return (
+    <View className="mt-5 gap-3.5 rounded-card border border-accent-line bg-accent-soft p-[18px]">
+      <View className="flex-row items-center gap-3">
+        <View className="size-11 items-center justify-center rounded-tile bg-primary">
+          <Sparkle size={20} strokeWidth={2} colorClassName="accent-primary-foreground" />
+        </View>
+        <View className="min-w-0 flex-1">
+          <Text className="text-base font-semibold">
+            {translate(savedKey ? 'settings.ai_connected' : 'settings.ai_add_key', { provider: providerName })}
+          </Text>
+          {savedKey
+            ? (
+                <View className="flex-row items-center gap-1.5">
+                  <View className="size-[7px] rounded-full bg-positive" />
+                  <Text className="text-meta text-muted-foreground">{translate('settings.ai_key_on_phone')}</Text>
+                </View>
+              )
+            : <Text className="text-meta text-muted-foreground">{translate('settings.ai_add_key_meta')}</Text>}
+        </View>
+      </View>
+
+      {showForm
+        ? (
+            <>
+              <Input
+                accessibilityLabel={translate('settings.ai_api_key', { provider: providerName })}
+                value={draft}
+                onChangeText={setDraft}
+                autoCapitalize="none"
+                autoCorrect={false}
+                secureTextEntry
+                placeholder="sk-..."
+                onSubmitEditing={draft.trim() ? save : undefined}
+              />
+              <View className="flex-row items-center justify-between gap-3">
+                <Pressable accessibilityRole="link" hitSlop={8} onPress={() => Linking.openURL(API_KEYS_URL[provider])}>
+                  <Text className="text-sm font-medium underline">{translate('settings.get_api_key')}</Text>
+                </Pressable>
+                <View className="flex-row gap-2">
+                  {editing && <GhostButton size="sm" label={translate('common.cancel')} onPress={() => setEditing(false)} />}
+                  <SolidButton size="sm" color="primary" label={translate('common.save')} disabled={!draft.trim()} onPress={save} />
+                </View>
+              </View>
+            </>
+          )
+        : (
+            <View className="h-12 flex-row items-center justify-between rounded-tile bg-card px-3.5">
+              <Text className="tracking-widest" accessibilityLabel={translate('settings.ai_key_masked')}>{maskApiKey(savedKey)}</Text>
+              <Pressable accessibilityRole="button" hitSlop={8} onPress={() => setEditing(true)}>
+                <Text className="text-sm font-medium underline">{translate('settings.ai_replace_key')}</Text>
+              </Pressable>
+            </View>
           )}
-        </View>
-
-        <View
-          className="mb-6 rounded-xl bg-card p-4"
-          style={aiProvider === 'openai' ? undefined : { display: 'none' }}
-        >
-          <Input
-            label={translate('settings.openai_api_key')}
-            defaultValue={openaiApiKey ?? ''}
-            autoCapitalize="none"
-            autoCorrect={false}
-            secureTextEntry
-            placeholder="sk-..."
-            className="text-lg"
-            onChangeText={(text) => {
-              openaiInputRef.current = text;
-              setDirty(true);
-            }}
-          />
-          <Text className="mt-3 text-xs text-muted-foreground">
-            {translate('settings.openai_api_key_help')}
-          </Text>
-          <Pressable
-            accessibilityRole="link"
-            className="mt-2 self-start py-1"
-            onPress={() => Linking.openURL(OPENAI_API_KEYS_URL)}
-          >
-            <Text className="text-sm font-medium text-foreground underline">
-              {translate('settings.get_api_key')}
-            </Text>
-          </Pressable>
-        </View>
-
-        <View
-          className="mb-6 rounded-xl bg-card p-4"
-          style={aiProvider === 'anthropic' ? undefined : { display: 'none' }}
-        >
-          <Input
-            label={translate('settings.anthropic_api_key')}
-            defaultValue={anthropicApiKey ?? ''}
-            autoCapitalize="none"
-            autoCorrect={false}
-            secureTextEntry
-            placeholder="sk-..."
-            className="text-lg"
-            onChangeText={(text) => {
-              anthropicInputRef.current = text;
-              setDirty(true);
-            }}
-          />
-          <Text className="mt-3 text-xs text-muted-foreground">
-            {translate('settings.anthropic_api_key_help')}
-          </Text>
-          <Pressable
-            accessibilityRole="link"
-            className="mt-2 self-start py-1"
-            onPress={() => Linking.openURL(ANTHROPIC_API_KEYS_URL)}
-          >
-            <Text className="text-sm font-medium text-foreground underline">
-              {translate('settings.get_api_key')}
-            </Text>
-          </Pressable>
-        </View>
-
-        <View className="mb-10">
-          <SolidButton
-            color="primary"
-            fullWidth
-            label={translate('common.save')}
-            onPress={onSave}
-            disabled={!dirty}
-          />
-        </View>
-      </ScrollView>
-    </>
+    </View>
   );
 }

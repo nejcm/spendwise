@@ -11,6 +11,7 @@ import { getGreetingPeriod, monthName } from '../helpers';
 export function HomeHeader({ isEmpty }: { isEmpty: boolean }) {
   const router = useRouter();
   const name = useAppStore.use.profile().name.trim();
+  const isChatOff = useAppStore((s) => s.aiFeatures?.chat === false);
   const now = new Date();
   const greeting = isEmpty ? translate('home.welcome') : translate(`home.greeting.${getGreetingPeriod(now.getHours())}`);
   const title = name ? translate('home.greeting_named', { greeting, name }) : greeting;
@@ -28,9 +29,11 @@ export function HomeHeader({ isEmpty }: { isEmpty: boolean }) {
         </View>
       </Pressable>
       <View className="flex-row items-center rounded-full bg-card p-1">
-        <Pressable accessibilityRole="button" accessibilityLabel={translate('home.ask_ai')} onPress={() => router.push('/ai')} style={getPressedStyle} className="size-10 items-center justify-center">
-          <Sparkle size={18} strokeWidth={1.8} colorClassName="accent-foreground" />
-        </Pressable>
+        {!isChatOff && (
+          <Pressable accessibilityRole="button" accessibilityLabel={translate('home.ask_ai')} onPress={() => router.push('/ai')} style={getPressedStyle} className="size-10 items-center justify-center">
+            <Sparkle size={18} strokeWidth={1.8} colorClassName="accent-foreground" />
+          </Pressable>
+        )}
         <Pressable accessibilityRole="button" accessibilityLabel={translate('common.settings')} onPress={() => router.push('/settings')} style={getPressedStyle} className="size-10 items-center justify-center">
           <SlidersHorizontal size={18} strokeWidth={1.8} colorClassName="accent-foreground" />
         </Pressable>

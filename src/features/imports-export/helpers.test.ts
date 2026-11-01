@@ -1,5 +1,5 @@
 import type { Category } from '../categories/types';
-import { mapCategoryNameToId } from '@/features/imports-export/helpers';
+import { formatFileSize, mapCategoryNameToId } from '@/features/imports-export/helpers';
 
 function makeCategory(id: string, name: string): Category {
   return { id, name, icon: null, color: '#000000', kind: 'expense', budget: null, sort_order: 0, created_at: 0 };
@@ -109,5 +109,16 @@ describe('mapCategoryNameToId', () => {
     it('works correctly without a note argument (backwards-compatible)', () => {
       expect(mapCategoryNameToId('salary', CATEGORIES)).toBe('salary-id');
     });
+  });
+});
+
+describe('formatFileSize', () => {
+  it('shows whole KB below a megabyte, never 0', () => {
+    expect(formatFileSize(10, 'stop')).toBe('1 KB');
+    expect(formatFileSize(219_136, 'stop')).toBe('214 KB');
+  });
+
+  it('shows MB with one decimal in the number format', () => {
+    expect(formatFileSize(1.5 * 1024 * 1024, 'comma')).toBe('1,5 MB');
   });
 });

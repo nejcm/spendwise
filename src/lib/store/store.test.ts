@@ -1,5 +1,5 @@
 import { storage } from '@/lib/storage';
-import { clearAppStore, selectIsAiEnabled, setLastPrimaryTabPath, setPeriodSelection, useAppStore } from './store';
+import { clearAppStore, selectIsAiEnabled, selectIsAiFeatureOn, setLastPrimaryTabPath, setPeriodSelection, useAppStore } from './store';
 
 describe('app store selectors', () => {
   it('enables AI only when the active provider has a saved key', () => {
@@ -23,6 +23,15 @@ describe('app store selectors', () => {
       openaiApiKey: 'sk-openai',
       anthropicApiKey: '   ',
     })).toBe(false);
+  });
+
+  it('treats an AI feature as on until it is switched off, and off without a key', () => {
+    const withKey = { ...useAppStore.getState(), aiProvider: 'openai' as const, openaiApiKey: 'sk-openai' };
+
+    expect(selectIsAiFeatureOn('scan')(withKey)).toBe(true);
+    expect(selectIsAiFeatureOn('scan')({ ...withKey, aiFeatures: { chat: false } })).toBe(true);
+    expect(selectIsAiFeatureOn('chat')({ ...withKey, aiFeatures: { chat: false } })).toBe(false);
+    expect(selectIsAiFeatureOn('chat')({ ...withKey, openaiApiKey: undefined })).toBe(false);
   });
 });
 

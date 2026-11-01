@@ -54,7 +54,12 @@ export type AutoBackupSettings = {
   interval: AutoBackupInterval;
   lastAutoBackupAt: string | null;
   retention?: number;
+  lastBackupStats?: BackupStats;
 };
+
+export type BackupStats = { transactions: number; accounts: number; bytes: number };
+
+export type AiFeature = 'chat' | 'scan' | 'insights';
 
 export type AppState = {
   // Profile
@@ -95,6 +100,7 @@ export type AppState = {
   aiProvider: AiProviderType;
   openaiApiKey: string | undefined;
   anthropicApiKey: string | undefined;
+  aiFeatures?: Partial<Record<AiFeature, boolean>>;
 
   // Other
   lastUsed: {
@@ -278,6 +284,15 @@ export function selectIsAiEnabled(state: AppState) {
     ? state.anthropicApiKey
     : state.openaiApiKey;
   return Boolean(key?.trim());
+}
+
+/** A key is saved and the feature isn't switched off in AI settings (missing = on). */
+export function selectIsAiFeatureOn(feature: AiFeature) {
+  return (state: AppState) => selectIsAiEnabled(state) && state.aiFeatures?.[feature] !== false;
+}
+
+export function setAiFeature(feature: AiFeature, on: boolean) {
+  return updateAppState((prev) => ({ aiFeatures: { ...prev.aiFeatures, [feature]: on } }));
 }
 
 // Security actions

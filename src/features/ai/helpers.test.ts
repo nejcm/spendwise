@@ -1,4 +1,4 @@
-import { isSameAccountScope, resolveScopeAccounts, toggleScopeAccount } from './helpers';
+import { isSameAccountScope, maskApiKey, resolveScopeAccounts, toggleScopeAccount } from './helpers';
 
 const active = [{ id: 'a' }, { id: 'b' }];
 
@@ -35,5 +35,16 @@ describe('isSameAccountScope', () => {
     expect(isSameAccountScope(active, ['a'], ['a'])).toBe(true);
     expect(isSameAccountScope(active, 'all', ['a'])).toBe(false);
     expect(isSameAccountScope(active, ['a'], ['b'])).toBe(false);
+  });
+});
+
+describe('maskApiKey', () => {
+  it('keeps the sk- prefix and the last four characters', () => {
+    expect(maskApiKey(' sk-proj-abcdefghij4f2a ')).toBe('sk-••••••••4f2a');
+    expect(maskApiKey('anthropic-key-1234')).toBe('••••••••1234');
+  });
+
+  it('hides short keys completely', () => {
+    expect(maskApiKey('sk-short')).toBe('••••••••');
   });
 });

@@ -1,8 +1,10 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
+import type { BackupData } from '@/features/imports-export/backup';
+import type { BackupStats } from '@/lib/store/store';
 import { Directory, File, Paths } from 'expo-file-system';
 import { exportBackup } from '@/features/imports-export/backup';
 import { IS_WEB } from '@/lib/base';
-import { getAppState } from '@/lib/store/store';
+import { getAppState, updateAutoBackup } from '@/lib/store/store';
 
 export const BACKUP_FILE_NAME_PREFIX = 'spendwise-backup-';
 export const AUTO_BACKUP_SUBDIR = 'spendwise-auto-backups';
@@ -86,10 +88,20 @@ function pruneAutoBackups(dir: Directory, keepCount: number): void {
   }
 }
 
+/** Transfer legs share a `transfer_id`, so a transfer counts once. */
+export function getBackupStats(backup: Pick<BackupData, 'transactions' | 'accounts'>, bytes: number): BackupStats {
+  return {
+    transactions: new Set(backup.transactions.map((t) => t.transfer_id ?? t.id)).size,
+    accounts: backup.accounts.length,
+    bytes,
+  };
+}
+
+/** Writes a backup into app storage and records it as the last backup. */
 export async function writeAutoBackupFile(
   db: SQLiteDatabase,
   options: { retentionCount?: number } = {},
-): Promise<{ writtenAt: string }> {
+): Promise<void> {
   const dir = getAutoBackupDirectory();
   if (!dir) throw new Error('auto_backup_unavailable');
 
@@ -105,5 +117,5 @@ export async function writeAutoBackupFile(
 
   pruneAutoBackups(dir, options.retentionCount ?? getAppState().autoBackup.retention ?? DEFAULT_AUTO_BACKUP_RETENTION);
 
-  return { writtenAt: backup.exported_at };
+  updateAutoBackup({ lastAutoBackupAt: backup.exported_at, lastBackupStats: getBackupStats(backup, file.size ?? json.length) });
 }

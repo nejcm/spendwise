@@ -98,6 +98,9 @@ export const queryKeys = {
   // ─── Settings › Delete data and row counts ───
   dataCounts: ['data-counts'] as const,
 
+  // ─── OS notification permission ───
+  canNotify: ['notifications', 'canNotify'] as const,
+
   // ─── Global Budget ───
   globalBudget: {
     all: ['global-budget'] as const,

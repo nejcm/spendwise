@@ -34,6 +34,7 @@ import { NAV_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
 import { config } from '@/config';
 import { formatCurrency, formatInstant } from '@/features/formatting/helpers';
 import { LANGUAGES_OPTIONS } from '@/features/languages';
+import { countNotificationsOn } from '@/features/notifications/helpers';
 import { notificationsQuery } from '@/features/notifications/notifications';
 import { LOCK_TIMEOUT_OPTIONS, toggleAppLock } from '@/features/security/app-lock';
 import { setAnalyticsEnabled } from '@/lib/analytics';
@@ -71,6 +72,7 @@ export function SettingsScreen() {
   const notifications = useAppStore.use.notifications();
   const lockEnabled = useAppStore.use.lockEnabled();
   const lockTimeoutMinutes = useAppStore.use.lockTimeoutMinutes();
+  const recommendationsEnabled = useAppStore.use.recommendationsEnabled();
   const analyticsEnabled = useAppStore((s) => s.analyticsEnabled ?? true);
   const aiEnabled = useAppStore(selectIsAiEnabled);
   const aiProvider = useAppStore.use.aiProvider();
@@ -96,6 +98,7 @@ export function SettingsScreen() {
   };
 
   const lastBackup = lastBackupAt ? formatInstant(Math.floor(Date.parse(lastBackupAt) / 1000), dateFormat) : null;
+  const notificationsOn = canNotify ? countNotificationsOn(notifications, recommendationsEnabled) : 0;
   const lockTimeout = LOCK_TIMEOUT_OPTIONS.find((o) => o.value === lockTimeoutMinutes)?.label;
 
   const groups: { title: string; rows: Row[] }[] = [
@@ -113,7 +116,7 @@ export function SettingsScreen() {
         { key: 'general', icon: Settings, title: translate('settings.general'), onPress: () => router.push('/settings/general') },
         { key: 'appearance', icon: Paintbrush, title: translate('settings.appearance'), meta: translate(`settings.theme.${theme}`), onPress: () => router.push('/settings/appearance') },
         { key: 'formatting', icon: ALargeSmall, title: translate('settings.formatting'), meta: formatCurrency(123456, currency, { numberFormat, currencyFormat }), onPress: () => router.push('/settings/formatting') },
-        { key: 'notifications', icon: Bell, title: translate('settings.notifications'), meta: translate(notifications.global && canNotify ? 'common.on' : 'common.off'), onPress: () => router.push('/settings/notifications') },
+        { key: 'notifications', icon: Bell, title: translate('settings.notifications'), meta: notificationsOn ? translate('settings.notifications_on_count', { count: notificationsOn }) : translate('common.off'), onPress: () => router.push('/settings/notifications') },
         { key: 'language', icon: Globe, title: translate('settings.language'), meta: language?.name, onPress: languageModal.present },
       ],
     },

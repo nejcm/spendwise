@@ -1,6 +1,4 @@
 import type { TxKeyPath } from '@/lib/i18n';
-import { View } from '@/components/ui';
-import { translate } from '@/lib/i18n';
 
 export type AccentType
   = | 'spendwise'
@@ -194,9 +192,3 @@ export const ACCENT_VARIABLES: Record<AccentType, AccentVariables> = {
     dark: { accent: '#D97706', accentForeground: '#451a03' },
   },
 };
-
-export const ACCENT_OPTIONS = ACCENTS.map((value) => ({
-  value,
-  label: translate(ACCENT_LABEL_KEYS[value]),
-  prefix: <View className={`mr-4 size-8 rounded-full ${ACCENT_VARIABLES[value].bg}`} />,
-}));

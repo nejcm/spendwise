@@ -2,10 +2,11 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { NotificationSettings } from '../types';
 import { addDays } from 'date-fns';
-import { todayISO, todayUnix } from '@/features/formatting/helpers';
+import { formatDateFull, todayISO, todayUnix } from '@/features/formatting/helpers';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { storage } from '@/lib/storage';
+import { getAppState } from '@/lib/store/store';
 import { send } from '../send';
 
 type RuleRow = {
@@ -52,7 +53,7 @@ export async function checkUpcomingBills(
       const isToday = dueStr === todayStr;
       const body = isToday
         ? translate('notifications.bill_due_today', { name })
-        : translate('notifications.bill_due_on', { name, date: dueStr });
+        : translate('notifications.bill_due_on', { name, date: formatDateFull(rule.next_due_date, getAppState().dateFormat) });
       await send(translate('notifications.upcoming_bills'), body);
       storage.set(key, '1');
     }

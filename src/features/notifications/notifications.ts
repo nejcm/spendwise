@@ -4,6 +4,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import type { NotificationSettings } from './types';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import { queryKeys } from '@/lib/data';
 import { checkBudgetAlerts } from './checks/check-budget-alerts';
 import { checkLowBalance } from './checks/check-low-balance';
 import { checkRecommendations } from './checks/check-recommendations';
@@ -12,10 +13,8 @@ import { checkWeeklyDigest } from './checks/check-weekly-digest';
 
 export { send } from './send';
 
-export const NOTIFICATIONS_QUERY_KEY = ['notifications', 'canNotify'];
-
 export const notificationsQuery = {
-  queryKey: NOTIFICATIONS_QUERY_KEY,
+  queryKey: queryKeys.canNotify,
   gcTime: 10000,
   queryFn: () => canNotify(),
 } satisfies QueryOptions<boolean>;

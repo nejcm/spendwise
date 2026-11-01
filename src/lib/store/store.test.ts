@@ -105,6 +105,11 @@ describe('app store persist migration', () => {
     expect(state.currency).toBe('CHF');
   });
 
+  it('keeps persisted v2 notification settings instead of the new-install defaults', async () => {
+    const state = await rehydrateFrom({ notifications: { global: true, budgetAlerts: false } }, 2);
+    expect(state.notifications).toEqual({ global: true, budgetAlerts: false });
+  });
+
   it('keeps a non-default v1 chart choice', async () => {
     expect((await rehydrateFrom({ homeScreenChart: 'category_spending' }, 1)).homeScreenChart).toBe('category_spending');
     expect((await rehydrateFrom({ homeScreenChart: 'none' }, 1)).homeScreenChart).toBe('none');

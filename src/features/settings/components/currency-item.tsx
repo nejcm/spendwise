@@ -1,22 +1,17 @@
 import type { CurrencyKey } from '@/features/currencies';
 import * as React from 'react';
-import { Alert, Euro, Text, useModalSheet, View } from '@/components/ui';
+import { Modal } from 'react-native';
+import { ActivityIndicator, Alert, FlagCircle, ListRow, Text, useModalSheet, View } from '@/components/ui';
 import { CurrencySheet } from '@/features/currencies/components/currency-sheet';
-import { useChangeCurrency, useLastCurrencyRatesFetchedAt } from '@/features/currencies/hooks';
-import { formatDate } from '@/features/formatting/helpers';
+import { useChangeCurrency } from '@/features/currencies/hooks';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
-import { SettingsItem } from './settings-item';
 
-export function CurrencyItem() {
+/** Preferred Currency row: confirms, then recalculates every stored total. */
+export function CurrencyItem({ className }: { className?: string }) {
   const modal = useModalSheet();
   const currency = useAppStore.use.currency();
-  const dateFormat = useAppStore.use.dateFormat();
   const changeCurrency = useChangeCurrency();
-  const { data: lastFetchedAt } = useLastCurrencyRatesFetchedAt();
-  const lastRefreshed = lastFetchedAt
-    ? formatDate(lastFetchedAt, dateFormat)
-    : translate('settings.currency_rates_never_refreshed');
 
   const onSelect = React.useCallback(
     (newCurrency: CurrencyKey) => {
@@ -41,13 +36,24 @@ export function CurrencyItem() {
 
   return (
     <>
-      <View>
-        <SettingsItem text="common.currency" icon={<Euro colorClassName="accent-foreground" size={20} />} value={currency} onPress={modal.present} />
-        <Text className="px-4 pb-3 text-sm text-muted-foreground">
-          {translate('settings.currency_rates_last_refreshed', { date: lastRefreshed })}
-        </Text>
-      </View>
+      <ListRow
+        className={className}
+        title={translate('settings.preferred_currency')}
+        trailing={(
+          <View className="flex-row items-center gap-1.5">
+            <FlagCircle currency={currency} />
+            <Text className="text-row text-muted-foreground">{currency}</Text>
+          </View>
+        )}
+        chevron
+        onPress={modal.present}
+      />
       <CurrencySheet ref={modal.ref} onSelect={onSelect} value={currency} />
+      <Modal transparent visible={!!changeCurrency.isPending} statusBarTranslucent>
+        <View className="flex-1 items-center justify-center bg-background/80">
+          <ActivityIndicator size="large" />
+        </View>
+      </Modal>
     </>
   );
 }

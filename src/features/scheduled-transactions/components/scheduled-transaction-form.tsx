@@ -63,6 +63,7 @@ const schema = z
     start_date: z.string().min(1, translate('scheduled.start_date_required')).refine(isValidISODate, translate('transactions.date_invalid')),
     end_date: z.string().nullable().refine((v) => v === null || isValidISODate(v), translate('transactions.date_invalid')),
     is_active: z.boolean(),
+    source_transaction_id: z.string().optional(),
   })
   .refine(
     (value) => !value.end_date || value.end_date >= value.start_date,

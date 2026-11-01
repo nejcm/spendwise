@@ -49,6 +49,7 @@ function useTransactionActions(transaction: TransactionWithCategory | null | und
         account_id: transaction.account_id,
         note: transaction.note,
         start_date: unixToISODate(transaction.date),
+        source_transaction_id: transaction.id,
       },
     });
   };

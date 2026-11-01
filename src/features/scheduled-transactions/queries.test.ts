@@ -1,5 +1,6 @@
 import { createTestDb } from '@/test-utils/sqlite-db';
 import { createScheduledTransaction, deleteScheduledTransaction, getRuleForTransaction, getRulePayments, restoreScheduledTransaction, RuleAccountArchivedError, updateScheduledTransaction } from './queries';
+import { isoDateToUnix, todayISODate } from './scheduler';
 
 jest.mock('expo-crypto', () => ({
   randomUUID: jest.fn(() => 'test-uuid-1234'),
@@ -126,5 +127,40 @@ describe('updateScheduledTransaction on an archived account', () => {
     await expect(createScheduledTransaction(db as any, data(true))).rejects.toBeInstanceOf(RuleAccountArchivedError);
     await createScheduledTransaction(db as any, data(false));
     expect(await db.getAllAsync('SELECT is_active FROM recurring_rules')).toEqual([{ is_active: 0 }]);
+  });
+});
+
+describe('createScheduledTransaction from a transaction', () => {
+  const today = isoDateToUnix(todayISODate());
+  const data = (source_transaction_id: string) => ({
+    account_id: 'acc',
+    category_id: 'cat',
+    type: 'expense' as const,
+    currency: 'EUR' as const,
+    note: null,
+    frequency: 'monthly' as const,
+    start_date: today,
+    end_date: null,
+    amount: 10,
+    is_active: true,
+    source_transaction_id,
+  });
+
+  it('links the source as the run for its date, so it is not posted twice', async () => {
+    const db = await createTestDb();
+    await db.execAsync(`
+      INSERT INTO accounts (id, name, type, currency) VALUES ('acc', 'Main', 'checking', 'EUR');
+      INSERT INTO categories (id, name, color) VALUES ('cat', 'Bills', '#000');
+      INSERT INTO transactions (id, account_id, type, amount, currency, baseAmount, baseCurrency, date) VALUES
+        ('today', 'acc', 'expense', 1000, 'EUR', 1000, 'EUR', ${today}),
+        ('older', 'acc', 'expense', 1000, 'EUR', 1000, 'EUR', ${today - 86400});
+    `);
+
+    const ruleId = await createScheduledTransaction(db as any, data('today'));
+    expect(await getRuleForTransaction(db as any, 'today')).toMatchObject({ id: ruleId });
+
+    await db.execAsync('DELETE FROM recurring_rules; DELETE FROM recurring_rule_runs;');
+    await createScheduledTransaction(db as any, data('older'));
+    expect(await db.getAllAsync('SELECT * FROM recurring_rule_runs')).toEqual([]);
   });
 });

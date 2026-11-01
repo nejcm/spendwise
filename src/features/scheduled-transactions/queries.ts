@@ -172,6 +172,13 @@ export async function createScheduledTransaction(
         Number(scheduleState.isActive),
       ],
     );
+    if (data.source_transaction_id) {
+      await db.runAsync(
+        `INSERT INTO recurring_rule_runs (id, rule_id, scheduled_for_date, transaction_id)
+         SELECT ?, ?, date, id FROM transactions WHERE id = ? AND date = ? AND account_id = ?`,
+        [generateId(), id, data.source_transaction_id, scheduleState.nextDueDate, data.account_id],
+      );
+    }
   });
 
   return id;

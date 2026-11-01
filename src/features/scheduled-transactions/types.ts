@@ -47,6 +47,8 @@ export type ScheduledTransactionFormData = Pick<
 > & {
   amount: number | string;
   is_active: boolean;
+  /** Made from this transaction: it becomes the run for its date instead of a duplicate. */
+  source_transaction_id?: string;
 };
 
 export type ScheduledTransactionWithDetails = ScheduledTransaction & {

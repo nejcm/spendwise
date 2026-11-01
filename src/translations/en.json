@@ -170,7 +170,6 @@
     "show_less": "Show Less",
     "show_more": "Show More",
     "start_date": "Start Date",
-    "there": "there",
     "this-month": "This month",
     "this-week": "This week",
     "this-year": "This year",
@@ -209,28 +208,73 @@
     "title": "An unexpected error occurred"
   },
   "home": {
-    "add_category": "Add Category",
-    "add_category_description": "Create categories to track your spending by where it goes.",
+    "actions": {
+      "add": "Add",
+      "bills": "Bills",
+      "scan": "Scan",
+      "transfer": "Transfer"
+    },
     "add_transaction": "Add Transaction",
+    "ask_ai": "Ask Spendwise AI",
     "available_balance": "Balance for this month",
-    "balance": "Balance",
-    "budget_label": "Budget",
+    "balance_chart_label": "Balance through {{month}}",
+    "balance_line_empty": "Your balance line starts with the first transaction.",
+    "budget": {
+      "days_left": "{{count}} days left",
+      "ends_today": "Ends today",
+      "ends_tomorrow": "Ends tomorrow",
+      "left": "left",
+      "of": "{{spent}} of {{budget}}",
+      "set": "Set a monthly budget",
+      "title": "{{month}} budget"
+    },
     "category_spending": "Category spending",
     "category_spending_empty": "No category spending this month.",
     "category_spending_other": "Other",
-    "expense_trend": "Expense trend",
-    "expense_trend_empty": "No expenses in the last six months.",
-    "expenses": "Expenses",
-    "hi": "Hi, {{name}}",
-    "income": "Income",
-    "links": "Links",
+    "greeting": {
+      "afternoon": "Good afternoon",
+      "evening": "Good evening",
+      "morning": "Good morning"
+    },
+    "greeting_named": "{{greeting}}, {{name}}",
+    "insight": {
+      "ask": "Ask about it",
+      "dismiss": "Dismiss",
+      "label": "Insight",
+      "now": "Now",
+      "title": "Spendwise AI"
+    },
+    "month_intro": "Here's your {{month}}",
+    "next_bill": {
+      "in_days": "in {{count}} days",
+      "label": "Next bill · {{when}}",
+      "more": "+{{count}} more in {{month}}",
+      "today": "today",
+      "tomorrow": "tomorrow"
+    },
     "no_transactions": "No transactions yet",
-    "recent_transactions": "Recent Transactions",
-    "see_all": "See All",
-    "set_budget": "Set budget",
+    "recent_activity": "Recent activity",
+    "setup": {
+      "accounts_body": "Cards, savings, cash",
+      "accounts_title": "Add your other accounts",
+      "budget_body": "One cap for the month, or per category",
+      "budget_title": "Set a monthly budget",
+      "import_csv": "Import from a bank CSV",
+      "profile_body": "Name, currency and theme",
+      "profile_title": "Create your profile",
+      "progress": "{{done}} of {{total}} done",
+      "title": "Get set up",
+      "transaction_body": "Type it in or scan a receipt",
+      "transaction_title": "Add your first transaction"
+    },
     "title": "Home",
     "total_balance": "Total Balance",
-    "trend_vs_last_month": "vs last month"
+    "total_balance_many": "Total balance · {{count}} accounts",
+    "total_balance_one": "Total balance · 1 account",
+    "trend_vs_last_month": "vs last month",
+    "vs_end_of": "vs end of {{month}}",
+    "welcome": "Welcome",
+    "welcome_subtitle": "Let's get your money in one place"
   },
   "import-export": {
     "auto_backup_backups_title": "Backups",
@@ -430,13 +474,6 @@
       "summary": "This month is already at {{amount}}, above your recent monthly average of {{average}}.",
       "title": "{{category}} is trending above normal"
     },
-    "dismiss_all": "Dismiss all",
-    "section_title": "Recommendations",
-    "severity": {
-      "high": "High priority",
-      "low": "Low priority",
-      "medium": "Watch soon"
-    },
     "subscription_reminder": {
       "summary": "{{amount}} is scheduled for {{date}}. You have {{count}} recurring bills due soon.",
       "title": "{{name}} is due soon"
@@ -484,7 +521,6 @@
     "remove_confirm": "Remove recurring rule",
     "resume": "Resume",
     "rule_not_found": "This recurring rule no longer exists.",
-    "short_title": "Recurring",
     "start_date_required": "Start date is required",
     "this_rule": "this rule",
     "title": "Bills and recurring"
@@ -666,7 +702,6 @@
       "system": "System",
       "title": "Theme"
     },
-    "title": "Settings",
     "transactions": "Transactions",
     "version": "Version"
   },

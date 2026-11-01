@@ -145,6 +145,30 @@ export async function getTotalBalance(
   return result?.total ?? 0;
 }
 
+const SIGNED_BASE_AMOUNT = `CASE
+  WHEN t.type = 'income' THEN t.baseAmount
+  WHEN t.type = 'expense' THEN -t.baseAmount
+  WHEN t.amount < 0 THEN -ABS(t.baseAmount)
+  ELSE t.baseAmount
+END`;
+
+/** Total balance (Preferred Currency) before `startDate`, plus per-date net changes in `[startDate, endDate)`. */
+export async function getBalanceSeries(
+  db: SQLiteDatabase,
+  startDate: number,
+  endDate: number,
+): Promise<{ opening: number; deltas: { date: number; delta: number }[] }> {
+  const from = `FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE a.is_archived = 0`;
+  const [openingRow, deltas] = await Promise.all([
+    db.getFirstAsync<{ total: number }>(`SELECT COALESCE(SUM(${SIGNED_BASE_AMOUNT}), 0) AS total ${from} AND t.date < ?`, [startDate]),
+    db.getAllAsync<{ date: number; delta: number }>(
+      `SELECT t.date AS date, SUM(${SIGNED_BASE_AMOUNT}) AS delta ${from} AND t.date >= ? AND t.date < ? GROUP BY t.date ORDER BY t.date`,
+      [startDate, endDate],
+    ),
+  ]);
+  return { opening: openingRow?.total ?? 0, deltas };
+}
+
 export async function getAccountSummaryByRange(
   db: SQLiteDatabase,
   accountId: string,

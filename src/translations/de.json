@@ -170,7 +170,6 @@
     "show_less": "Weniger anzeigen",
     "show_more": "Mehr anzeigen",
     "start_date": "Startdatum",
-    "there": "da",
     "this-month": "Diesen Monat",
     "this-week": "Diese Woche",
     "this-year": "Dieses Jahr",
@@ -209,28 +208,73 @@
     "title": "Ein unerwarteter Fehler ist aufgetreten"
   },
   "home": {
-    "add_category": "Kategorie hinzufügen",
-    "add_category_description": "Erstelle Kategorien, um deine Ausgaben danach zu verfolgen, wohin dein Geld fließt.",
+    "actions": {
+      "add": "Neu",
+      "bills": "Rechnungen",
+      "scan": "Scannen",
+      "transfer": "Umbuchen"
+    },
     "add_transaction": "Transaktion hinzufügen",
+    "ask_ai": "Spendwise AI fragen",
     "available_balance": "Kontostand für diesen Monat",
-    "balance": "Kontostand",
-    "budget_label": "Budget",
+    "balance_chart_label": "Kontostand im {{month}}",
+    "balance_line_empty": "Deine Kontostandkurve beginnt mit der ersten Transaktion.",
+    "budget": {
+      "days_left": "Noch {{count}} Tage",
+      "ends_today": "Endet heute",
+      "ends_tomorrow": "Endet morgen",
+      "left": "übrig",
+      "of": "{{spent}} von {{budget}}",
+      "set": "Monatsbudget festlegen",
+      "title": "Budget {{month}}"
+    },
     "category_spending": "Ausgaben nach Kategorie",
     "category_spending_empty": "Keine Ausgaben nach Kategorie in diesem Monat.",
     "category_spending_other": "Sonstiges",
-    "expense_trend": "Ausgabentrend",
-    "expense_trend_empty": "Keine Ausgaben in den letzten sechs Monaten.",
-    "expenses": "Ausgaben",
-    "hi": "Hallo, {{name}}",
-    "income": "Einnahmen",
-    "links": "Links",
+    "greeting": {
+      "afternoon": "Guten Tag",
+      "evening": "Guten Abend",
+      "morning": "Guten Morgen"
+    },
+    "greeting_named": "{{greeting}}, {{name}}",
+    "insight": {
+      "ask": "Dazu fragen",
+      "dismiss": "Ausblenden",
+      "label": "Hinweis",
+      "now": "Jetzt",
+      "title": "Spendwise AI"
+    },
+    "month_intro": "Dein {{month}} im Überblick",
+    "next_bill": {
+      "in_days": "in {{count}} Tagen",
+      "label": "Nächste Rechnung · {{when}}",
+      "more": "+{{count}} weitere im {{month}}",
+      "today": "heute",
+      "tomorrow": "morgen"
+    },
     "no_transactions": "Noch keine Transaktionen",
-    "recent_transactions": "Letzte Transaktionen",
-    "see_all": "Alle anzeigen",
-    "set_budget": "Budget festlegen",
+    "recent_activity": "Letzte Aktivität",
+    "setup": {
+      "accounts_body": "Karten, Sparkonten, Bargeld",
+      "accounts_title": "Weitere Konten hinzufügen",
+      "budget_body": "Ein Limit für den Monat oder pro Kategorie",
+      "budget_title": "Monatsbudget festlegen",
+      "import_csv": "Aus Bank-CSV importieren",
+      "profile_body": "Name, Währung und Design",
+      "profile_title": "Profil erstellen",
+      "progress": "{{done}} von {{total}} erledigt",
+      "title": "Einrichten",
+      "transaction_body": "Eintippen oder Beleg scannen",
+      "transaction_title": "Erste Transaktion hinzufügen"
+    },
     "title": "Start",
     "total_balance": "Gesamtsaldo",
-    "trend_vs_last_month": "vs. letzten Monat"
+    "total_balance_many": "Gesamtsaldo · {{count}} Konten",
+    "total_balance_one": "Gesamtsaldo · 1 Konto",
+    "trend_vs_last_month": "vs. letzten Monat",
+    "vs_end_of": "vs. Ende {{month}}",
+    "welcome": "Willkommen",
+    "welcome_subtitle": "Bring dein Geld an einen Ort"
   },
   "import-export": {
     "auto_backup_backups_title": "Backups",
@@ -430,13 +474,6 @@
       "summary": "Dieser Monat liegt bereits bei {{amount}} und damit über deinem jüngsten Monatsdurchschnitt von {{average}}.",
       "title": "{{category}} liegt über deinem üblichen Niveau"
     },
-    "dismiss_all": "Alle ausblenden",
-    "section_title": "Empfehlungen",
-    "severity": {
-      "high": "Hohe Priorität",
-      "low": "Niedrige Priorität",
-      "medium": "Bald prüfen"
-    },
     "subscription_reminder": {
       "summary": "{{amount}} ist für {{date}} geplant. {{count}} wiederkehrende Rechnungen sind bald fällig.",
       "title": "{{name}} ist bald fällig"
@@ -484,7 +521,6 @@
     "remove_confirm": "Wiederkehrende Regel entfernen",
     "resume": "Fortsetzen",
     "rule_not_found": "Diese wiederkehrende Regel existiert nicht mehr.",
-    "short_title": "Wiederkehrend",
     "start_date_required": "Startdatum ist erforderlich",
     "this_rule": "diese Regel",
     "title": "Rechnungen und Daueraufträge"
@@ -666,7 +702,6 @@
       "system": "System",
       "title": "Design"
     },
-    "title": "Einstellungen",
     "transactions": "Transaktionen",
     "version": "Version"
   },

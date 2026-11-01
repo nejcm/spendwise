@@ -10,12 +10,13 @@ export type SectionHeaderProps = {
   /** Defaults to "See all". */
   actionLabel?: string;
   className?: string;
+  titleClassName?: string;
 };
 
-export function SectionHeader({ title, onSeeAll, actionLabel, className }: SectionHeaderProps) {
+export function SectionHeader({ title, onSeeAll, actionLabel, className, titleClassName }: SectionHeaderProps) {
   return (
     <View className={cn('flex-row items-center justify-between px-1 pt-5 pb-2', className)}>
-      <Text accessibilityRole="header" className="text-meta font-medium text-muted-foreground">{title}</Text>
+      <Text accessibilityRole="header" className={cn('text-meta font-medium text-muted-foreground', titleClassName)}>{title}</Text>
       {onSeeAll && (
         <Pressable accessibilityRole="button" onPress={onSeeAll} hitSlop={8}>
           <Text className="text-sm text-muted-foreground">{actionLabel ?? translate('common.seeAll')}</Text>

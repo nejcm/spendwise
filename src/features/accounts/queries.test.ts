@@ -10,6 +10,7 @@ import {
   getAccountsWithBalance,
   getAccountsWithBalanceForMonth,
   getAccountsWithBalanceForRange,
+  getBalanceSeries,
   getTotalBalance,
   setupFirstAccount,
   updateAccount,
@@ -302,6 +303,38 @@ describe('getTotalBalance', () => {
 
     const result = await getTotalBalance(db as any);
     expect(result).toBe(100_000);
+  });
+});
+
+describe('getBalanceSeries', () => {
+  it('splits the balance into the opening total and per-date changes', async () => {
+    const db = await createTestDb();
+    await seedAccount(db, { id: 'acc_1' });
+    await seedAccount(db, { id: 'acc_2', sort_order: 1 });
+    await seedTransaction(db, { id: 'feb', type: 'income', baseAmount: 100_000, date: MAR_START - 86_400 });
+    await seedTransaction(db, { id: 'mar_a', type: 'expense', baseAmount: 3_000, date: MAR_MID });
+    await seedTransaction(db, { id: 'mar_b', type: 'income', baseAmount: 1_000, date: MAR_MID });
+    await seedTransaction(db, { id: 'out', account_id: 'acc_1', type: 'transfer', amount: -10_000, baseAmount: 10_000, date: MAR_MID + 86_400 });
+    await seedTransaction(db, { id: 'in', account_id: 'acc_2', type: 'transfer', amount: 10_000, baseAmount: 10_000, date: MAR_MID + 86_400 });
+    await seedTransaction(db, { id: 'apr', type: 'income', baseAmount: 9_999, date: APR_MID });
+
+    expect(await getBalanceSeries(db as any, MAR_START, APR_START)).toEqual({
+      opening: 100_000,
+      deltas: [{ date: MAR_MID, delta: -2_000 }, { date: MAR_MID + 86_400, delta: 0 }],
+    });
+  });
+
+  it('subtracts an out leg whose baseAmount went negative and excludes archived accounts', async () => {
+    const db = await createTestDb();
+    await seedAccount(db, { id: 'acc_1' });
+    await seedAccount(db, { id: 'acc_2', is_archived: 1, sort_order: 1 });
+    await seedTransaction(db, { id: 'out', type: 'transfer', amount: -10_000, baseAmount: -10_000, date: MAR_MID });
+    await seedTransaction(db, { id: 'archived', account_id: 'acc_2', type: 'income', baseAmount: 50_000, date: MAR_START - 86_400 });
+
+    expect(await getBalanceSeries(db as any, MAR_START, APR_START)).toEqual({
+      opening: 0,
+      deltas: [{ date: MAR_MID, delta: -10_000 }],
+    });
   });
 });
 

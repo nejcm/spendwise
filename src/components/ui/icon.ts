@@ -10,6 +10,7 @@ import {
   ArrowDown as LucideArrowDown,
   ArrowDownRight as LucideArrowDownRight,
   ArrowLeftIcon as LucideArrowLeftIcon,
+  ArrowLeftRight as LucideArrowLeftRight,
   ArrowRight as LucideArrowRight,
   ArrowRightIcon as LucideArrowRightIcon,
   ArrowUp as LucideArrowUp,
@@ -66,6 +67,7 @@ import {
   Share as LucideShare,
   Shield as LucideShield,
   SlidersHorizontal as LucideSlidersHorizontal,
+  Sparkle as LucideSparkle,
   Sparkles as LucideSparkles,
   Sun as LucideSun,
   TrashIcon as LucideTrashIcon,
@@ -104,6 +106,7 @@ export const ALargeSmall = createIcon(LucideALargeSmall);
 export const AlertTriangle = createIcon(LucideAlertTriangle);
 export const ArrowDown = createIcon(LucideArrowDown);
 export const ArrowLeftIcon = createIcon(LucideArrowLeftIcon);
+export const ArrowLeftRight = createIcon(LucideArrowLeftRight);
 export const ArrowRight = createIcon(LucideArrowRight);
 export const ArrowRightIcon = createIcon(LucideArrowRightIcon);
 export const ArrowUp = createIcon(LucideArrowUp);
@@ -161,6 +164,7 @@ export const UserIcon = createIcon(LucideUserIcon);
 export const X = createIcon(LucideX);
 export const Settings = createIcon(LucideSettings);
 export const SlidersHorizontal = createIcon(LucideSlidersHorizontal);
+export const Sparkle = createIcon(LucideSparkle);
 export const Sparkles = createIcon(LucideSparkles);
 export const PauseIcon = createIcon(LucidePause);
 export const Paintbrush = createIcon(LucidePaintbrush);

@@ -1,0 +1,37 @@
+import type { AccountWithBalance } from '@/features/accounts/types';
+import { useRouter } from 'expo-router';
+import * as React from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
+import { DEFAULT_COLOR } from '@/components/color-selector';
+import { FormattedCurrency, getPressedStyle, IconTile, SectionHeader, Text } from '@/components/ui';
+import { translate } from '@/lib/i18n';
+import { useAppStore } from '@/lib/store/store';
+import { defaultStyles } from '@/lib/theme/styles';
+
+export function AccountsCarousel({ accounts }: { accounts: AccountWithBalance[] }) {
+  const router = useRouter();
+  const currency = useAppStore.use.currency();
+
+  return (
+    <View>
+      <SectionHeader title={translate('settings.accounts')} onSeeAll={() => router.push('/accounts')} className="px-0 pt-[22px] pb-2.5" titleClassName="text-header-title font-semibold text-foreground" />
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={defaultStyles.transparentBg} className="-mr-5" contentContainerClassName="gap-2.5 pr-5">
+        {accounts.map((account) => (
+          <Pressable
+            key={account.id}
+            accessibilityRole="button"
+            onPress={() => router.push(`/accounts/${account.id}`)}
+            style={getPressedStyle}
+            className="w-[150px] gap-3.5 rounded-card bg-card p-4"
+          >
+            <IconTile icon={account.icon || '💵'} color={account.color ?? DEFAULT_COLOR} className="size-9 rounded-[11px]" />
+            <View>
+              <Text className="text-meta text-muted-foreground" numberOfLines={1}>{account.name}</Text>
+              <FormattedCurrency value={account.baseBalance} currency={currency} className="text-header-title font-semibold" numberOfLines={1} adjustsFontSizeToFit />
+            </View>
+          </Pressable>
+        ))}
+      </ScrollView>
+    </View>
+  );
+}

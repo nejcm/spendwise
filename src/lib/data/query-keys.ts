@@ -25,6 +25,8 @@ export const queryKeys = {
       ['accounts', 'balance', yearMonth] as const,
     withBalanceForRange: (startDate: number | undefined, endDate: number | undefined) =>
       ['accounts', 'balance', startDate, endDate] as const,
+    balanceSeries: (startDate: number, endDate: number) =>
+      ['accounts', 'balance', 'series', startDate, endDate] as const,
     totalBalance: ['total-balance'] as const,
     totalBalanceForMonth: (yearMonth: string) =>
       ['total-balance', yearMonth] as const,

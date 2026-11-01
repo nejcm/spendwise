@@ -36,14 +36,6 @@ export function useTrendByRange(startDate: number | undefined, endDate: number |
   return useQuery(trendByRangeQueryOptions(db, startDate, endDate));
 }
 
-export function useMonthlyTrend(numMonths: number = 6) {
-  const db = useSQLiteContext();
-  return useQuery({
-    queryKey: queryKeys.insights.monthlyTrend(numMonths),
-    queryFn: () => queries.getMonthlyTrend(db, numMonths),
-  });
-}
-
 export function useYearlySummary(year: number) {
   const db = useSQLiteContext();
   return useQuery({

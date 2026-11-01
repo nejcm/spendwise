@@ -35,6 +35,14 @@ export function useAccountsWithBalance() {
   });
 }
 
+export function useBalanceSeries(startDate: number, endDate: number) {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: queryKeys.accounts.balanceSeries(startDate, endDate),
+    queryFn: () => queries.getBalanceSeries(db, startDate, endDate),
+  });
+}
+
 export function accountsWithBalanceForRangeQueryOptions(db: SQLiteDatabase, startDate: number | undefined, endDate: number | undefined) {
   return {
     queryKey: queryKeys.accounts.withBalanceForRange(startDate, endDate),

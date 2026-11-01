@@ -1,224 +1,238 @@
+import type { ScheduledTransactionWithDetails } from './types';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
-import { useState } from 'react';
-import { ScrollView, View } from 'react-native';
-import DetailsSection, { DetailsRow } from '@/components/details';
-import ScreenHeader from '@/components/screen-header';
-import { Alert, FocusAwareStatusBar, FormattedCurrency, FormattedDate, OverflowMenu, PauseIcon, PlayIcon, SolidButton, Text, TrashIcon } from '@/components/ui';
-
-import { GhostButton } from '@/components/ui/ghost-button';
-import { formatDate } from '@/features/formatting/helpers';
+import { Pressable, ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { HeaderButton, PageHeader } from '@/components/page-header';
+import { Alert, AmountText, Card, FocusAwareStatusBar, getPressedStyle, GhostButton, IconTile, ListRow, PauseIcon, PlayIcon, SectionHeader, Switch, Text } from '@/components/ui';
+import { ChevronLeft, Pencil } from '@/components/ui/icon';
+import { NAV_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
+import { translateCount } from '@/features/categories/helpers';
+import { formatDate, formatDateFull } from '@/features/formatting/helpers';
+import { DetailAction, DetailRow } from '@/features/transactions/components/transaction-detail-parts';
+import { cn } from '@/lib/cn';
 import { unixToISODate } from '@/lib/date/helpers';
+import { useCurrentDay } from '@/lib/hooks/use-current-year-month';
 import { translate } from '@/lib/i18n';
 import { goBackOrFallback } from '@/lib/routing';
-import { useAppStore } from '@/lib/store/store';
+import { updateNotifications, useAppStore } from '@/lib/store/store';
 import {
   useDeleteScheduledTransaction,
+  useRulePayments,
   useScheduledTransaction,
   useUpdateScheduledTransaction,
 } from './api';
 import { ScheduledTransactionForm } from './components/scheduled-transaction-form';
+import { FREQUENCY_OPTIONS } from './constants';
+import { canResume, daysUntil, ruleToFormData } from './helpers';
+
+const HERO_DATE_FORMAT = 'EEE MMM d';
+const SINCE_DATE_FORMAT = 'MMM d, yyyy';
+const PAYMENT_DATE_FORMAT = 'MMM d';
+
+function Wash() {
+  return <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[340px] bg-linear-to-b from-wash to-background" />;
+}
+
+function useMutedBillRule(ruleId: string) {
+  const mutedIds = useAppStore((s) => s.notifications.mutedBillRules);
+  const setMuted = (muted: boolean) => {
+    const rest = (mutedIds ?? []).filter((id) => id !== ruleId);
+    updateNotifications({ mutedBillRules: muted ? [...rest, ruleId] : rest });
+  };
+  return [!!mutedIds?.includes(ruleId), setMuted] as const;
+}
 
 export function ScheduledTransactionDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id = '' } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-  const isCompact = useAppStore.use.density() === 'compact';
-  const [isEditing, setIsEditing] = useState(false);
-  const [showAuditTimestamps, setShowAuditTimestamps] = useState(false);
-
-  const { data: rule, isLoading } = useScheduledTransaction(id ?? '');
+  const insets = useSafeAreaInsets();
+  const [isEditing, setIsEditing] = React.useState(false);
+  const { data: rule, isLoading } = useScheduledTransaction(id);
+  const [, setMuted] = useMutedBillRule(id);
   const deleteMut = useDeleteScheduledTransaction();
   const updateMut = useUpdateScheduledTransaction();
+  const today = useCurrentDay();
 
-  if (isLoading) {
+  if (isEditing && rule) {
     return (
-      <>
+      <View className="flex-1 bg-background">
         <FocusAwareStatusBar />
-        <ScreenHeader title={translate('scheduled.title')} />
-        <View className="flex-1 items-center justify-center bg-background">
-          <Text>{translate('common.loading')}</Text>
-        </View>
-      </>
-    );
-  }
-
-  if (!rule) {
-    return (
-      <>
-        <FocusAwareStatusBar />
-        <ScreenHeader title={translate('scheduled.title')} />
-        <View className="flex-1 items-center justify-center gap-4 bg-background px-4">
-          <Text className="text-center text-muted-foreground">
-            {translate('scheduled.rule_not_found')}
-          </Text>
-          <GhostButton
-            color="secondary"
-            label={translate('common.back')}
-            onPress={() => router.replace('/scheduled/index')}
-          />
-        </View>
-      </>
-    );
-  }
-
-  if (isEditing) {
-    return (
-      <ScheduledTransactionForm
-        hasNav
-        initialValues={{
-          ...rule,
-          amount: rule.amount / 100,
-          is_active: Boolean(rule.is_active),
-          start_date: unixToISODate(rule.start_date),
-          end_date: rule.end_date ? unixToISODate(rule.end_date) : null,
-        }}
-        onSuccess={() => setIsEditing(false)}
-        onCancel={() => setIsEditing(false)}
-      />
-    );
-  }
-
-  const handleDelete = () => {
-    Alert.alert(
-      translate('scheduled.remove'),
-      translate('scheduled.remove_confirm'),
-      [
-        { text: translate('common.cancel'), style: 'cancel' },
-        {
-          text: translate('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            if (id) {
-              await deleteMut.mutateAsync(id);
-              goBackOrFallback(router);
-            }
-          },
-        },
-      ],
-    );
-  };
-
-  const handleTogglePause = async () => {
-    if (!id) return;
-
-    await updateMut.mutateAsync({
-      id,
-      data: {
-        account_id: rule.account_id,
-        category_id: rule.category_id,
-        type: rule.type,
-        amount: rule.amount / 100,
-        currency: rule.currency,
-        note: rule.note,
-        frequency: rule.frequency,
-        start_date: rule.start_date,
-        end_date: rule.end_date,
-        is_active: !rule.is_active,
-      },
-    });
-  };
-  const buttonSize = isCompact ? 'sm' : 'md';
-  const title = rule.note?.trim() || translate('scheduled.title');
-
-  return (
-    <>
-      <ScreenHeader
-        title={title}
-        prefix={!rule.is_active
-          ? (
-              <View className="mr-1 rounded-full bg-yellow-500/15 p-1.5">
-                <PauseIcon size={15} colorClassName="accent-yellow-600" />
-              </View>
-            )
-          : null}
-      >
-        <OverflowMenu
-          className="-mr-2 ml-auto"
-          accessibilityLabel={translate('settings.more')}
-          items={[
-            {
-              label: rule.is_active ? translate('scheduled.pause') : translate('scheduled.resume'),
-              onPress: handleTogglePause,
-              icon: rule.is_active
-                ? <PauseIcon size={16} colorClassName="accent-foreground" className="mr-2" />
-                : <PlayIcon size={16} colorClassName="accent-foreground" className="mr-2" />,
-            },
-            {
-              label: translate('common.delete'),
-              onPress: handleDelete,
-              className: 'text-danger-600',
-              icon: <TrashIcon size={16} colorClassName="accent-red-600" className="mr-2" />,
-            },
-          ]}
-        />
-      </ScreenHeader>
-      <FocusAwareStatusBar />
-      <ScrollView className="flex-1" contentContainerClassName="flex-grow px-4 pt-7 pb-4">
-        <View className="flex-1">
-          <View className="items-center pb-6">
-            <FormattedCurrency
-              value={rule.amount}
-              currency={rule.currency}
-              prefix={rule.type === 'income' ? '+' : '-'}
-              className={`text-3xl font-bold ${rule.type === 'income' ? 'text-success-600' : ''}`}
-            />
-            <Text className="mt-1 text-muted-foreground">
-              {translate(`scheduled.frequencyOptions.${rule.frequency}`)}
-              {' '}
-              ·
-              {' '}
-              {formatDate(rule.next_due_date)}
-            </Text>
-          </View>
-
-          <DetailsSection
-            className="mb-4"
-            growSide="right"
-            data={[
-              { label: translate('transactions.category'), value: rule.category_name ? `${rule.category_icon} ${rule.category_name}` : '-' },
-              { label: translate('transactions.account'), value: rule.account_name ? `${rule.account_icon} ${rule.account_name}` : '-' },
-              { label: translate('transactions.type'), value: rule.type, className: 'capitalize' },
-              { label: translate('scheduled.next_due_date'), value: formatDate(rule.next_due_date) },
-              { label: translate('common.start_date'), value: formatDate(rule.start_date) },
-              { label: translate('common.end_date'), value: rule.end_date ? formatDate(rule.end_date) : '-' },
-              { label: translate('scheduled.active'), value: rule.is_active ? translate('common.yes') : translate('common.no') },
-              { label: translate('transactions.note'), value: rule.note || '-' },
-            ]}
-          >
-            {showAuditTimestamps && (
-              <View className="gap-3">
-                <DetailsRow label={translate('transactions.created_at')} value={<FormattedDate instant value={rule.created_at} className="text-foreground" />} />
-                <DetailsRow label={translate('transactions.updated_at')} value={<FormattedDate instant value={rule.updated_at} className="text-foreground" />} />
-              </View>
-            )}
-            <View>
-              <GhostButton
-                size="sm"
-                color="secondary"
-                label={showAuditTimestamps ? translate('common.show_less') : translate('common.show_more')}
-                onPress={() => setShowAuditTimestamps((v) => !v)}
-                textClassName="underline"
-              />
-            </View>
-          </DetailsSection>
-        </View>
-      </ScrollView>
-      <View className="flex-row gap-2 px-4 py-2">
-        <GhostButton
-          label={translate('common.back')}
-          onPress={() => goBackOrFallback(router)}
-          textClassName="text-base/tight"
-          size={buttonSize}
-        />
-        <SolidButton
-          color="primary"
-          className="flex-1"
-          label={translate('common.edit')}
-          onPress={() => setIsEditing(true)}
-          textClassName="text-base/tight"
-          size={buttonSize}
+        <Wash />
+        <ScheduledTransactionForm
+          hasNav
+          initialValues={{
+            ...rule,
+            amount: rule.amount / 100,
+            is_active: Boolean(rule.is_active),
+            start_date: unixToISODate(rule.start_date),
+            end_date: rule.end_date ? unixToISODate(rule.end_date) : null,
+          }}
+          onSuccess={() => setIsEditing(false)}
+          onCancel={() => setIsEditing(false)}
         />
       </View>
-    </>
+    );
+  }
+
+  const remove = () => {
+    Alert.alert(translate('scheduled.remove'), translate('scheduled.remove_confirm'), [
+      { text: translate('common.cancel'), style: 'cancel' },
+      {
+        text: translate('common.delete'),
+        style: 'destructive',
+        onPress: async () => {
+          await deleteMut.mutateAsync(id);
+          setMuted(false);
+          goBackOrFallback(router, '/scheduled');
+        },
+      },
+    ]);
+  };
+
+  const togglePause = () => {
+    if (rule) updateMut.mutate({ id, data: ruleToFormData(rule, { is_active: !rule.is_active }) });
+  };
+
+  return (
+    <View className="flex-1 bg-background">
+      <FocusAwareStatusBar />
+      <Wash />
+      <View className="px-5 pt-2">
+        <PageHeader
+          left={<HeaderButton icon={ChevronLeft} label={translate('common.back')} onPress={() => goBackOrFallback(router, '/scheduled')} />}
+          right={rule && <HeaderButton icon={Pencil} label={translate('common.edit')} onPress={() => setIsEditing(true)} />}
+        >
+          <Text className="min-w-0 flex-1 text-center text-[15px] text-muted-foreground" numberOfLines={1}>
+            {rule && translate(rule.type === 'income' ? 'scheduled.recurring_income' : 'scheduled.recurring_expense')}
+          </Text>
+        </PageHeader>
+      </View>
+      {isLoading
+        ? <Text className="mt-10 text-center">{translate('common.loading')}</Text>
+        : !rule
+            ? <Text className="mt-10 px-5 text-center text-muted-foreground">{translate('scheduled.rule_not_found')}</Text>
+            : (
+                <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: NAV_BAR_HEIGHT + insets.bottom + 16 }}>
+                  <Hero rule={rule} today={today} />
+                  <Rows rule={rule} />
+                  <LastPayments ruleId={rule.id} />
+                  {(rule.is_active || canResume(rule, today)) && (
+                    <View className="mx-5 mt-3 flex-row">
+                      <DetailAction
+                        icon={rule.is_active ? PauseIcon : PlayIcon}
+                        label={translate(rule.is_active ? 'scheduled.pause_rule' : 'scheduled.resume_rule')}
+                        onPress={togglePause}
+                      />
+                    </View>
+                  )}
+                  <GhostButton color="danger" className="mt-4" textClassName="text-[15px] font-medium" label={translate('scheduled.delete_rule')} onPress={remove} />
+                </ScrollView>
+              )}
+    </View>
+  );
+}
+
+function Hero({ rule, today }: { rule: ScheduledTransactionWithDetails; today: string }) {
+  const days = daysUntil(rule.next_due_date, today);
+  const date = formatDateFull(rule.next_due_date, HERO_DATE_FORMAT);
+  const when = days === 0
+    ? `${translate('home.next_bill.today')}, ${date}`
+    : days === 1 ? `${translate('home.next_bill.tomorrow')}, ${date}` : date;
+  const status = !rule.is_active
+    ? translate(canResume(rule, today) ? 'common.paused' : 'scheduled.ended')
+    : translate('scheduled.next', { when });
+
+  return (
+    <View className="items-center px-5 pt-4">
+      <IconTile color={rule.category_color} className="size-[68px] rounded-hero">
+        <Text className="text-[32px]">{rule.category_icon ?? '🔁'}</Text>
+      </IconTile>
+      <Text className="pt-2 text-center text-xl font-semibold" numberOfLines={2}>{rule.note || rule.category_name}</Text>
+      <AmountText
+        size="hero"
+        value={rule.amount}
+        currency={rule.currency}
+        prefix={rule.type === 'income' ? '+' : '-'}
+        className={cn('text-[46px]/[54px]', rule.type === 'income' && 'text-positive')}
+        centsClassName="text-[26px]"
+      />
+      <View className={cn('mt-1 rounded-full px-3.5 py-1.5', rule.is_active ? 'bg-accent-soft' : 'bg-card-2')}>
+        <Text className={cn('text-sm font-semibold', rule.is_active ? 'text-accent' : 'text-muted-foreground')}>{status}</Text>
+      </View>
+    </View>
+  );
+}
+
+function Rows({ rule }: { rule: ScheduledTransactionWithDetails }) {
+  const router = useRouter();
+  const notifications = useAppStore.use.notifications();
+  const [muted, setMuted] = useMutedBillRule(rule.id);
+  const remindersOn = !!notifications.global && notifications.upcomingBills !== false;
+  const remindLabel = translateCount('scheduled.remind_before', notifications.upcomingBillsDays ?? 7);
+  const withIcon = (icon: string | null, name: string | null) => `${icon ?? ''} ${name ?? ''}`.trim();
+  const frequency = FREQUENCY_OPTIONS.find((o) => o.value === rule.frequency)?.label ?? rule.frequency;
+  const since = formatDateFull(rule.start_date, SINCE_DATE_FORMAT);
+  const ends = rule.end_date != null
+    ? translate('scheduled.until', { date: formatDateFull(rule.end_date, SINCE_DATE_FORMAT) })
+    : translate('scheduled.no_end_date');
+
+  return (
+    <Card className="mx-5 mt-6 rounded-card px-[18px]">
+      <DetailRow first label={translate('scheduled.repeats')} value={frequency} />
+      <DetailRow
+        label={translate(rule.type === 'income' ? 'transactions.form.to' : 'transactions.form.from')}
+        value={withIcon(rule.account_icon, rule.account_name)}
+        onPress={() => router.push(`/accounts/${rule.account_id}`)}
+      />
+      <DetailRow
+        label={translate('transactions.category')}
+        value={withIcon(rule.category_icon, rule.category_name)}
+        onPress={() => router.push(`/categories/${rule.category_id}?kind=${rule.type}`)}
+      />
+      <DetailRow label={translate('scheduled.since')} value={`${since} · ${ends}`} />
+      {rule.type === 'expense' && !!rule.is_active && (
+        <ListRow
+          className="min-h-[52px] border-t border-border"
+          onPress={remindersOn ? undefined : () => router.push('/settings/notifications')}
+          title={<Text className="text-sm text-muted-foreground">{remindLabel}</Text>}
+          meta={remindersOn ? undefined : translate('scheduled.reminders_off')}
+          trailing={(
+            <Switch
+              accessibilityLabel={remindLabel}
+              checked={remindersOn && !muted}
+              disabled={!remindersOn}
+              onChange={(checked) => setMuted(!checked)}
+            />
+          )}
+        />
+      )}
+    </Card>
+  );
+}
+
+function LastPayments({ ruleId }: { ruleId: string }) {
+  const router = useRouter();
+  const { data: payments = [] } = useRulePayments(ruleId);
+  if (payments.length === 0) return null;
+
+  return (
+    <View className="px-5">
+      <SectionHeader title={translate('scheduled.last_payments')} />
+      <View className="flex-row gap-2.5">
+        {payments.map((payment) => (
+          <Pressable
+            key={payment.id}
+            accessibilityRole="button"
+            onPress={() => router.push(`/transactions/${payment.id}`)}
+            style={getPressedStyle}
+            className="flex-1 rounded-tile bg-card px-3.5 py-3"
+          >
+            <Text className="text-meta text-muted-foreground">{formatDate(payment.date, PAYMENT_DATE_FORMAT)}</Text>
+            <AmountText value={Math.abs(payment.baseAmount)} currency={payment.baseCurrency} className="font-semibold" numberOfLines={1} adjustsFontSizeToFit />
+          </Pressable>
+        ))}
+      </View>
+    </View>
   );
 }

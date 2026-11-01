@@ -42,7 +42,9 @@ export async function checkUpcomingBills(
     [todayStart, windowEndUnix],
   );
 
+  const muted = new Set(settings.mutedBillRules);
   for (const rule of rules) {
+    if (muted.has(rule.id)) continue;
     const dueStr = unixToISODate(rule.next_due_date);
     const key = ruleAlertKey(rule.id, dueStr);
     if (storage.getString(key) !== '1') {

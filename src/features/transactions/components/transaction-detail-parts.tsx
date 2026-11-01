@@ -64,7 +64,7 @@ export function DetailHero({ transaction: t, onAmountPress }: { transaction: Tra
   );
 }
 
-function DetailRow({ label, value, first, onPress, full }: { label: string; value: string; first?: boolean; onPress?: () => void; full?: boolean }) {
+export function DetailRow({ label, value, first, onPress, full }: { label: string; value: string; first?: boolean; onPress?: () => void; full?: boolean }) {
   if (full) {
     return (
       <View className={cn('gap-1 py-3.5', !first && 'border-t border-border')}>

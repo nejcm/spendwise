@@ -5,6 +5,7 @@ import type {
   ScheduledTransactionFormData,
   ScheduledTransactionWithDetails,
 } from './types';
+import type { Transaction } from '@/features/transactions/types';
 
 import { amountToCents } from '@/features/formatting/helpers';
 import { generateId } from '@/lib/sqlite';
@@ -92,6 +93,25 @@ export async function getRuleForTransaction(
      JOIN recurring_rules r ON r.id = rr.rule_id
      WHERE rr.transaction_id = ?`,
     [transactionId],
+  );
+}
+
+export type RulePayment = Pick<Transaction, 'id' | 'date' | 'baseAmount' | 'baseCurrency'>;
+
+/** Latest transactions posted by a rule, newest first. */
+export async function getRulePayments(
+  db: SQLiteDatabase,
+  ruleId: string,
+  limit: number,
+): Promise<RulePayment[]> {
+  return db.getAllAsync<RulePayment>(
+    `SELECT t.id, t.date, t.baseAmount, t.baseCurrency
+     FROM recurring_rule_runs rr
+     JOIN transactions t ON t.id = rr.transaction_id
+     WHERE rr.rule_id = ?
+     ORDER BY t.date DESC, t.id DESC
+     LIMIT ?`,
+    [ruleId, limit],
   );
 }
 

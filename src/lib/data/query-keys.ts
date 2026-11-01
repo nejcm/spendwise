@@ -84,6 +84,9 @@ export const queryKeys = {
       ['scheduled-transactions', 'detail', id] as const,
     forTransaction: (transactionId: string) =>
       ['scheduled-transactions', 'for-transaction', transactionId] as const,
+    paymentsAll: ['scheduled-transactions', 'payments'] as const,
+    payments: (ruleId: string) =>
+      ['scheduled-transactions', 'payments', ruleId] as const,
   },
 
   // ─── Recommendations ───

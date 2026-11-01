@@ -39,11 +39,11 @@ function FieldError({ message }: { message?: string }) {
 // Field errors wait for the first save attempt; form-level onChange validation would flag untouched fields on a type switch.
 const selectSubmitted = (s: { submissionAttempts: number }) => s.submissionAttempts > 0;
 
-function RowError({ message }: { message?: string }) {
+export function RowError({ message }: { message?: string }) {
   return message ? <Text className="text-meta text-negative">{message}</Text> : null;
 }
 
-function RowLabel({ children }: { children: string }) {
+export function RowLabel({ children }: { children: string }) {
   return <Text className="text-row text-muted-foreground">{children}</Text>;
 }
 
@@ -195,7 +195,7 @@ export function CategorySection({ form }: { form: TransactionFormApi }) {
   );
 }
 
-function AccountRow({ label, accounts, value, onChange, error, first }: {
+export function AccountRow({ label, accounts, value, onChange, error, first }: {
   label: string;
   first?: boolean;
   accounts: Account[];

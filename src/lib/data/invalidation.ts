@@ -27,6 +27,7 @@ const INVALIDATION_RULES = {
     queryKeys.recommendations.all,
     queryKeys.globalBudget.all,
     queryKeys.categories.usageAll,
+    queryKeys.scheduledTransactions.paymentsAll,
   ],
   account: [
     queryKeys.transactions.all,

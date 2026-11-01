@@ -19,7 +19,7 @@ describe('invalidateFor', () => {
     const qc = createMockQueryClient();
     invalidateFor(qc, 'transaction');
 
-    expect(qc.invalidateQueries).toHaveBeenCalledTimes(9);
+    expect(qc.invalidateQueries).toHaveBeenCalledTimes(10);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.transactions.all]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.withBalance]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.summaryAll]);
@@ -29,6 +29,7 @@ describe('invalidateFor', () => {
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.recommendations.all]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.globalBudget.all]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.categories.usageAll]);
+    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.scheduledTransactions.paymentsAll]);
   });
 
   it('deduplicates overlapping prefixes when multiple entities are passed', () => {

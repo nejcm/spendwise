@@ -1,15 +1,15 @@
 import type { BudgetPeriodSelection } from '../types';
 import type { CurrencyKey } from '@/features/currencies';
-import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
-import { FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
+import { FormattedCurrency, getPressedStyle, Text, useModalSheet } from '@/components/ui';
 import { BudgetProgressBar, getColorClass } from '@/components/ui/budget-progress-bar';
 import { Pencil, PlusIcon } from '@/components/ui/icon';
 import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
 import { getBudgetSelectionBoundaries, scaleGlobalBudget } from '../helpers';
 import { useGlobalBudget, useGlobalBudgetSpend } from '../hooks';
+import { BudgetSheet } from './budget-sheet';
 
 function getPeriodBudgetLabel(selection: BudgetPeriodSelection): string {
   if (selection.mode === 'day') return translate('stats.global_budget_period_day');
@@ -30,8 +30,17 @@ type GlobalBudgetCardProps = {
   currency: CurrencyKey;
 };
 
-export function GlobalBudgetCard({ selection, currency }: GlobalBudgetCardProps) {
-  const router = useRouter();
+export function GlobalBudgetCard(props: GlobalBudgetCardProps) {
+  const budgetSheet = useModalSheet();
+  return (
+    <>
+      <GlobalBudgetCardContent {...props} onPress={() => budgetSheet.present()} />
+      <BudgetSheet ref={budgetSheet.ref} />
+    </>
+  );
+}
+
+function GlobalBudgetCardContent({ selection, currency, onPress }: GlobalBudgetCardProps & { onPress: () => void }) {
   const { data: budget, isLoading } = useGlobalBudget();
   const [startDate, endDate] = React.useMemo(
     () => getBudgetSelectionBoundaries(selection),
@@ -46,15 +55,11 @@ export function GlobalBudgetCard({ selection, currency }: GlobalBudgetCardProps)
     budget != null && projectionEndDate > startDate,
   );
 
-  const handlePress = React.useCallback(() => {
-    router.push('/stats/global-budget');
-  }, [router]);
-
   if (isLoading) return null;
   if (budget == null) {
     return (
       <Pressable
-        onPress={handlePress}
+        onPress={onPress}
         style={getPressedStyle}
         className="mb-6 flex-row items-center gap-3 rounded-2xl border-2 border-dashed border-border bg-card p-3"
       >
@@ -83,7 +88,7 @@ export function GlobalBudgetCard({ selection, currency }: GlobalBudgetCardProps)
   const projectionColorClass = getColorClass(projectedRatio);
 
   return (
-    <Pressable onPress={handlePress} style={getPressedStyle} className="mb-6">
+    <Pressable onPress={onPress} style={getPressedStyle} className="mb-6">
       <View className="overflow-hidden rounded-2xl bg-card">
         <View className="p-5">
           <View className="mb-2 flex-row justify-between gap-2">

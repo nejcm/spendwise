@@ -8,13 +8,14 @@ describe('getShouldShowPersistentTabBar', () => {
     expect(getShouldShowPersistentTabBar('/categories/new')).toBe(false);
     expect(getShouldShowPersistentTabBar('/categories/cat_1/edit')).toBe(false);
     expect(getShouldShowPersistentTabBar('/scheduled/new')).toBe(false);
-    expect(getShouldShowPersistentTabBar('/stats/global-budget')).toBe(false);
   });
 
   it('keeps the tab bar on normal app routes', () => {
     expect(getShouldShowPersistentTabBar('/')).toBe(true);
     expect(getShouldShowPersistentTabBar('/transactions')).toBe(true);
     expect(getShouldShowPersistentTabBar('/accounts/acc_1')).toBe(true);
+    expect(getShouldShowPersistentTabBar('/categories/cat_1')).toBe(true);
+    expect(getShouldShowPersistentTabBar('/stats')).toBe(true);
   });
 });
 
@@ -30,7 +31,7 @@ describe('getPersistablePrimaryTabPath', () => {
   it('does not return nested or non-primary routes', () => {
     expect(getPersistablePrimaryTabPath('/transactions/new')).toBeUndefined();
     expect(getPersistablePrimaryTabPath('/transactions/tx_1')).toBeUndefined();
-    expect(getPersistablePrimaryTabPath('/stats/global-budget')).toBeUndefined();
+    expect(getPersistablePrimaryTabPath('/categories/cat_1')).toBeUndefined();
     expect(getPersistablePrimaryTabPath('/categories/cat_1/edit')).toBeUndefined();
     expect(getPersistablePrimaryTabPath('/accounts')).toBeUndefined();
     expect(getPersistablePrimaryTabPath('/settings')).toBeUndefined();

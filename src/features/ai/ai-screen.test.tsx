@@ -1,5 +1,5 @@
 import type { UseChatReturn } from './types';
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import AssistantMessage from '@/features/ai/components/assistant-message';
 
@@ -23,7 +23,12 @@ jest.mock('@/components/ui/skeleton', () => ({
   Skeleton: () => null,
 }));
 
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: mockRouterPush }),
+}));
+
 jest.mock('@/components/ui/icon', () => ({
+  Bot: () => null,
   Brain: () => null,
   Plus: () => null,
   SendHorizonal: () => null,
@@ -37,6 +42,7 @@ jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ bottom: 0, left: 0, right: 0, top: 0 }),
 }));
 
+const mockRouterPush = jest.fn();
 const chatHookMock = useChat as jest.MockedFunction<typeof useChat>;
 const AssistantMessageMock = AssistantMessage as jest.MockedFunction<typeof AssistantMessage>;
 
@@ -84,7 +90,9 @@ describe('ai screen', () => {
 
     expect(screen.getByText('AI setup required')).toBeTruthy();
     expect(screen.getByText('AI is optional. Spendwise is free, but AI chat needs your own OpenAI or Anthropic API key and provider usage may cost money.')).toBeTruthy();
-    expect(screen.getByText('Open AI settings')).toBeTruthy();
+    fireEvent.press(screen.getByText('Open AI settings'));
+    expect(mockRouterPush).toHaveBeenCalledWith('/settings/ai');
+    expect(screen.queryByPlaceholderText(/./)).toBeNull();
   });
 
   it('renders live assistant content as raw text while streaming', () => {

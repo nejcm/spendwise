@@ -1,19 +1,20 @@
-import type { StatsTab } from './components/stats-tab-bar';
 import * as React from 'react';
 import { useMemo, useState } from 'react';
 import { RefreshControl } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
-import { FocusAwareStatusBar, ScrollView, View } from '@/components/ui';
+import { FocusAwareStatusBar, ScrollView, SegmentedControl, View } from '@/components/ui';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { useRefresh } from '@/lib/hooks/use-refresh';
+import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { BudgetTab } from './components/budget-tab';
 import { CategoryBreakdown } from './components/category-breakdown';
 import { StatsCalendar } from './components/stats-calendar';
-import { StatsTabBar } from './components/stats-tab-bar';
 import { StatsTrend } from './components/stats-trend';
 import { Summary } from './components/summary';
+
+type StatsTab = 'overview' | 'calendar' | 'budget';
 
 export function StatsScreen() {
   const currency = useAppStore.use.currency();
@@ -21,11 +22,16 @@ export function StatsScreen() {
   const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
   const { refreshing, onRefresh } = useRefresh();
   const [activeTab, setActiveTab] = useState<StatsTab>('overview');
+  const tabOptions = [
+    { value: 'overview', label: translate('stats.overview') },
+    { value: 'calendar', label: translate('stats.calendar') },
+    { value: 'budget', label: translate('stats.budget') },
+  ] as const;
 
   return (
     <View className="flex-1">
       <FocusAwareStatusBar />
-      <StatsTabBar value={activeTab} onChange={setActiveTab} />
+      <SegmentedControl options={tabOptions} value={activeTab} onChange={setActiveTab} className="mx-4 mt-2 mb-1" />
 
       {activeTab === 'calendar'
         ? (

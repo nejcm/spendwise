@@ -4,10 +4,11 @@ import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
-import { FormattedCurrency, getPressedStyle, OutlineButton, Text } from '@/components/ui';
+import { FormattedCurrency, getPressedStyle, OutlineButton, Text, useModalSheet } from '@/components/ui';
 import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
 import { ArrowDownRight, ArrowUpRight, ChevronRight } from '@/components/ui/icon';
 import { SkeletonGrid } from '@/components/ui/skeleton';
+import { BudgetSheet } from '@/features/stats/components/budget-sheet';
 import { getBudgetSelectionBoundaries, scaleGlobalBudget } from '@/features/stats/helpers';
 import { useGlobalBudget, useGlobalBudgetSpend } from '@/features/stats/hooks';
 import { useMonthSummary, useMonthTrend } from '@/features/transactions/api';
@@ -46,9 +47,8 @@ function HomeGlobalBudget({ currency, selection, isCompact, balance }: HomeGloba
   );
   const scaledBudget = budget != null ? scaleGlobalBudget(budget, selection) : 0;
   const { data: spent = 0 } = useGlobalBudgetSpend(startDate, endDate, budget != null);
-  const onPress = () => {
-    router.push('/stats/global-budget');
-  };
+  const budgetSheet = useModalSheet();
+  const onPress = () => budgetSheet.present();
 
   const remaining = scaledBudget - spent;
   const ratio = scaledBudget > 0 ? spent / scaledBudget : 0;
@@ -115,6 +115,7 @@ function HomeGlobalBudget({ currency, selection, isCompact, balance }: HomeGloba
               iconRight={<ChevronRight size={16} colorClassName="accent-muted-foreground" className="ml-1" />}
             />
           )}
+      <BudgetSheet ref={budgetSheet.ref} />
     </View>
   );
 }

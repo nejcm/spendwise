@@ -83,6 +83,7 @@
   },
   "categories": {
     "add": "Kategorie hinzufügen",
+    "add_to": "Zu {{name}} hinzufügen",
     "budget": "Monatsbudget",
     "budget_invalid": "Das Budget muss eine positive Zahl sein",
     "budget_placeholder": "Monatsbudget (z. B. 1000)",
@@ -97,6 +98,7 @@
     "not_found": "Diese Kategorie existiert nicht mehr.",
     "select_category": "Kategorie auswählen",
     "sorting_tips": "Gedrückt halten und ziehen, um Kategorien neu anzuordnen",
+    "spent": "Ausgegeben",
     "title": "Kategorien",
     "total_all_categories": "Gesamt (Alle Kategorien)"
   },
@@ -459,7 +461,7 @@
     "short_title": "Wiederkehrend",
     "start_date_required": "Startdatum ist erforderlich",
     "this_rule": "diese Regel",
-    "title": "Wiederkehrende Regeln"
+    "title": "Rechnungen und Daueraufträge"
   },
   "security": {
     "app_lock": "App-Sperre",
@@ -622,7 +624,7 @@
     "save_on_scan_description": "Transaktionen automatisch speichern, wenn ein Beleg gescannt wird.",
     "saved": "KI-Einstellungen gespeichert",
     "scan": "Beleg scannen",
-    "scheduled": "Wiederkehrende Regeln",
+    "scheduled": "Rechnungen und Daueraufträge",
     "security": "Sicherheit",
     "seed": "Seed",
     "share": "Teilen",
@@ -645,7 +647,7 @@
   "stats": {
     "breakdown_view_chart": "Diagramm",
     "breakdown_view_list": "Liste",
-    "budget": "Ausgabenlimit",
+    "budget": "Budgets",
     "budget_go_to_categories": "Zu Kategorien",
     "budget_legend_budget": "Budget",
     "budget_legend_spent": "Ausgegeben",

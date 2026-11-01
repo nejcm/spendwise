@@ -83,6 +83,7 @@
   },
   "categories": {
     "add": "Add Category",
+    "add_to": "Add to {{name}}",
     "budget": "Monthly budget",
     "budget_invalid": "Budget must be a positive number",
     "budget_placeholder": "Monthly budget (e.g. 1000)",
@@ -97,6 +98,7 @@
     "not_found": "This category no longer exists.",
     "select_category": "Select Category",
     "sorting_tips": "Hold and drag to reorder categories",
+    "spent": "Spent",
     "title": "Categories",
     "total_all_categories": "Total (All Categories)"
   },
@@ -459,7 +461,7 @@
     "short_title": "Recurring",
     "start_date_required": "Start date is required",
     "this_rule": "this rule",
-    "title": "Recurring Rules"
+    "title": "Bills and recurring"
   },
   "security": {
     "app_lock": "App Lock",
@@ -622,7 +624,7 @@
     "save_on_scan_description": "Save transactions automatically when scanning a receipt.",
     "saved": "AI settings saved",
     "scan": "Scan",
-    "scheduled": "Recurring Rules",
+    "scheduled": "Bills and recurring",
     "security": "Security",
     "seed": "Seed",
     "share": "Share",
@@ -645,7 +647,7 @@
   "stats": {
     "breakdown_view_chart": "Chart",
     "breakdown_view_list": "List",
-    "budget": "Budget",
+    "budget": "Budgets",
     "budget_go_to_categories": "Go to Categories",
     "budget_legend_budget": "Budget",
     "budget_legend_spent": "Spent",

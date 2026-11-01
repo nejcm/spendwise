@@ -4,7 +4,7 @@ import { useDebouncedValue } from '@tanstack/react-pacer';
 import { useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { PeriodSelector } from '@/components/period-selector';
 import { FocusAwareStatusBar, Input, inputDefaultDefaults, inputDefaults } from '@/components/ui';
@@ -13,7 +13,7 @@ import { cn } from '@/lib/cn';
 import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
 import { getPeriodRange } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '@/lib/store/store';
+import { setPeriodSelection, useAppStore } from '@/lib/store/store';
 import { transactionsQueryOptions, useTransactions } from './api';
 import { TransactionFilterBar } from './components/transaction-filter-bar';
 import { TransactionList } from './components/transaction-list';
@@ -34,6 +34,9 @@ export function TransactionsScreen() {
   const [search, setSearch] = useState(initialRouteSeed.search);
   const [filters, setFilters] = useState<FilterState>(initialRouteSeed.filters);
   const [debouncedSearch] = useDebouncedValue(search, debounceSettings);
+  useEffect(() => {
+    if (initialRouteSeed.periodSelection) setPeriodSelection(initialRouteSeed.periodSelection);
+  }, [initialRouteSeed]);
   const { categoryId, type, accountId } = filters;
   const updateFilters = React.useCallback((newFilters: Partial<FilterState>) => {
     setFilters((prev) => ({ ...prev, ...newFilters }));

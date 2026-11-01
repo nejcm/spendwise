@@ -3,7 +3,7 @@ import type * as PosthogModule from './posthog';
 const mockPostHog = jest.fn();
 const mockState: { analyticsEnabled?: boolean } = {};
 
-jest.mock('posthog-react-native', () => ({ __esModule: true, default: mockPostHog }));
+jest.mock('posthog-react-native', () => ({ __esModule: true, default: mockPostHog, PostHogPersistedProperty: { Queue: 'queue' } }));
 jest.mock('@/lib/store/store', () => ({
   getAppState: () => mockState,
   updateAppState: (partial: object) => Object.assign(mockState, partial),
@@ -19,8 +19,15 @@ function load(): Analytics {
   return mod;
 }
 
-function fakeClient(optedOut = false) {
-  return { optedOut, optIn: jest.fn(), optOut: jest.fn(), captureException: jest.fn(), capture: jest.fn() };
+function fakeClient() {
+  return {
+    optIn: jest.fn(),
+    optOut: jest.fn(),
+    ready: jest.fn(() => Promise.resolve()),
+    setPersistedProperty: jest.fn(),
+    captureException: jest.fn(),
+    capture: jest.fn(),
+  };
 }
 
 beforeEach(() => {
@@ -57,25 +64,50 @@ describe('analytics gating', () => {
     expect(mockPostHog).not.toHaveBeenCalled();
   });
 
-  it('opts out and drops the client when turned off, and opts back in when turned on', () => {
-    const first = fakeClient();
-    const second = fakeClient(true);
-    mockPostHog.mockReturnValueOnce(first).mockReturnValueOnce(second);
+  it('opts in on creation even if the SDK has not loaded a persisted opt-out yet', () => {
+    const instance = fakeClient();
+    mockPostHog.mockReturnValue(instance);
+    const { captureEvent } = load();
+    captureEvent('event');
+    expect(instance.optIn).toHaveBeenCalledTimes(1);
+  });
+
+  it('opts out and drops queued events when turned off, then reuses the client when turned on', async () => {
+    const instance = fakeClient();
+    mockPostHog.mockReturnValue(instance);
     const { captureError, setAnalyticsEnabled } = load();
     captureError(new Error('a'));
 
     setAnalyticsEnabled(false);
+    await Promise.resolve();
     captureError(new Error('b'));
     expect(mockState.analyticsEnabled).toBe(false);
-    expect(first.optOut).toHaveBeenCalled();
-    expect(first.captureException).toHaveBeenCalledTimes(1);
-    expect(mockPostHog).toHaveBeenCalledTimes(1);
+    expect(instance.optOut).toHaveBeenCalledTimes(1);
+    expect(instance.setPersistedProperty).toHaveBeenCalledWith('queue', null);
+    expect(instance.captureException).toHaveBeenCalledTimes(1);
 
     setAnalyticsEnabled(true);
     captureError(new Error('c'));
-    expect(mockPostHog).toHaveBeenCalledTimes(2);
-    expect(second.optIn).toHaveBeenCalled();
-    expect(second.captureException).toHaveBeenCalledTimes(1);
+    expect(mockPostHog).toHaveBeenCalledTimes(1);
+    expect(instance.optIn).toHaveBeenCalledTimes(2);
+    expect(instance.captureException).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps the queue when re-enabled before storage finishes loading', async () => {
+    const instance = fakeClient();
+    let loaded!: () => void;
+    instance.ready.mockReturnValue(new Promise<void>((resolve) => {
+      loaded = resolve;
+    }));
+    mockPostHog.mockReturnValue(instance);
+    const { captureEvent, setAnalyticsEnabled } = load();
+    captureEvent('event');
+
+    setAnalyticsEnabled(false);
+    setAnalyticsEnabled(true);
+    loaded();
+    await Promise.resolve();
+    expect(instance.setPersistedProperty).not.toHaveBeenCalled();
   });
 
   it('does nothing without an API key', () => {

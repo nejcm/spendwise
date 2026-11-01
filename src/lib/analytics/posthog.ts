@@ -1,4 +1,4 @@
-import PostHog from 'posthog-react-native';
+import PostHog, { PostHogPersistedProperty } from 'posthog-react-native';
 import { IS_WEB } from '@/lib/base';
 import { getAppState, updateAppState } from '@/lib/store/store';
 
@@ -13,7 +13,8 @@ function isAnalyticsEnabled() {
 
 /** Created on first use, and only while the user's "Share anonymous usage stats" pref is on. */
 function getClient(): PostHog | undefined {
-  if (client || apiKey.length <= 5 || IS_WEB || !isAnalyticsEnabled()) return client;
+  if (!isAnalyticsEnabled()) return undefined;
+  if (client || apiKey.length <= 5 || IS_WEB) return client;
   try {
     client = new PostHog(apiKey, {
       host,
@@ -22,7 +23,8 @@ function getClient(): PostHog | undefined {
       preloadFeatureFlags: false,
       captureAppLifecycleEvents: false,
     });
-    if (client.optedOut) void client.optIn();
+    // optedOut reads false until storage loads, so an earlier persisted opt-out must be cleared unconditionally.
+    void client.optIn();
   }
   catch (e) {
     console.error('[PostHog] Failed to initialize', e);
@@ -32,9 +34,17 @@ function getClient(): PostHog | undefined {
 
 export function setAnalyticsEnabled(analyticsEnabled: boolean) {
   updateAppState({ analyticsEnabled });
-  if (analyticsEnabled || !client) return;
-  void client.optOut();
-  client = undefined;
+  const current = client;
+  if (!current) return;
+  if (analyticsEnabled) {
+    void current.optIn();
+    return;
+  }
+  void current.optOut();
+  // The SDK flushes queued events despite opt-out (timer, AppState), so drop them once storage has loaded.
+  void current.ready().then(() => {
+    if (!isAnalyticsEnabled()) current.setPersistedProperty(PostHogPersistedProperty.Queue, null);
+  });
 }
 
 export function captureError(

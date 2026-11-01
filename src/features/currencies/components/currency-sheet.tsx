@@ -83,7 +83,7 @@ function CurrencyRow({ currency, selected, onPress }: { currency: CurrencyKey; s
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ selected }}
-      accessibilityLabel={`${name}, ${currency}`}
+      accessibilityLabel={[name, currency, rate].filter(Boolean).join(', ')}
       onPress={() => onPress(currency)}
       style={getPressedStyle}
       className="h-[58px] flex-row items-center gap-3"

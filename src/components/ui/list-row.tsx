@@ -19,6 +19,8 @@ export type ListRowProps = Omit<PressableProps, 'children'> & {
 export function ListRow({ title, meta, icon, trailing, chevron = false, className, onPress, style, ...props }: ListRowProps) {
   return (
     <Pressable
+      // Pressable defaults to accessible, which would swallow a trailing Switch/Input into one inert element.
+      accessible={!!onPress}
       accessibilityRole={onPress ? 'button' : undefined}
       onPress={onPress}
       style={(state) => getPressedStyle(state, style, !!onPress)}

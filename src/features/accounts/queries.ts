@@ -7,7 +7,7 @@ import type { Account, AccountFlows, AccountFormData, AccountUsage, AccountWithB
 import { computeBaseAmount } from '@/features/currencies/conversion';
 import { getRatesForDate } from '@/features/currencies/queries';
 import { todayUnix } from '@/features/formatting/helpers';
-import { createTransaction } from '@/features/transactions/queries';
+import { createTransactionRow } from '@/features/transactions/queries';
 import { parseToCents } from '@/lib/data/money';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { generateId, withWriteTransaction } from '@/lib/sqlite';
@@ -241,7 +241,7 @@ export async function createAccount(
   const opening = await buildOpeningBalance(db, data.opening_balance, data.currency, baseCurrency);
   await withWriteTransaction(db, async () => {
     await insertAccount(db, id, data);
-    if (opening) await createTransaction(db, { ...opening, account_id: id });
+    if (opening) await createTransactionRow(db, generateId(), { ...opening, account_id: id });
   });
   return id;
 }
@@ -284,7 +284,7 @@ export async function setupFirstAccount(
     );
     const accountId = changes > 0 ? SEED_ACCOUNT_ID : generateId();
     if (changes === 0) await insertAccount(db, accountId, { ...data, description: null, budget: null, color: null });
-    if (opening) await createTransaction(db, { ...opening, account_id: accountId });
+    if (opening) await createTransactionRow(db, generateId(), { ...opening, account_id: accountId });
   });
 }
 

@@ -118,6 +118,19 @@ export async function getRulePayments(
 
 // ─── Write Queries ───
 
+export class RuleAccountArchivedError extends Error {
+  constructor() {
+    super('Cannot activate a recurring rule on an archived account');
+    this.name = 'RuleAccountArchivedError';
+  }
+}
+
+async function assertAccountUnarchived(db: SQLiteDatabase, accountId: string, isActive: boolean) {
+  if (!isActive) return;
+  const account = await db.getFirstAsync<{ is_archived: number }>('SELECT is_archived FROM accounts WHERE id = ?', [accountId]);
+  if (account?.is_archived) throw new RuleAccountArchivedError();
+}
+
 export async function createScheduledTransaction(
   db: SQLiteDatabase,
   data: ScheduledTransactionFormData,
@@ -126,46 +139,42 @@ export async function createScheduledTransaction(
   const amount = amountToCents(Number(data.amount) || 0);
   const scheduleState = deriveScheduleState(data);
 
-  await db.runAsync(
-    `INSERT INTO recurring_rules (
-      id,
-      account_id,
-      category_id,
-      type,
-      amount,
-      currency,
-      note,
-      frequency,
-      start_date,
-      end_date,
-      next_due_date,
-      is_active
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      id,
-      data.account_id,
-      data.category_id,
-      data.type,
-      amount,
-      data.currency,
-      normalizeText(data.note),
-      data.frequency,
-      data.start_date,
-      data.end_date || null,
-      scheduleState.nextDueDate,
-      Number(scheduleState.isActive),
-    ],
-  );
+  await withWriteTransaction(db, async () => {
+    await assertAccountUnarchived(db, data.account_id, scheduleState.isActive);
+    await db.runAsync(
+      `INSERT INTO recurring_rules (
+        id,
+        account_id,
+        category_id,
+        type,
+        amount,
+        currency,
+        note,
+        frequency,
+        start_date,
+        end_date,
+        next_due_date,
+        is_active
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        data.account_id,
+        data.category_id,
+        data.type,
+        amount,
+        data.currency,
+        normalizeText(data.note),
+        data.frequency,
+        data.start_date,
+        data.end_date || null,
+        scheduleState.nextDueDate,
+        Number(scheduleState.isActive),
+      ],
+    );
+  });
 
   return id;
-}
-
-export class RuleAccountArchivedError extends Error {
-  constructor() {
-    super('Cannot activate a recurring rule on an archived account');
-    this.name = 'RuleAccountArchivedError';
-  }
 }
 
 export async function updateScheduledTransaction(
@@ -175,42 +184,41 @@ export async function updateScheduledTransaction(
 ): Promise<void> {
   const amount = amountToCents(Number(data.amount) || 0);
   const scheduleState = deriveScheduleState(data);
-  if (scheduleState.isActive) {
-    const account = await db.getFirstAsync<{ is_archived: number }>('SELECT is_archived FROM accounts WHERE id = ?', [data.account_id]);
-    if (account?.is_archived) throw new RuleAccountArchivedError();
-  }
 
-  await db.runAsync(
-    `UPDATE recurring_rules
-     SET
-       account_id = ?,
-       category_id = ?,
-       type = ?,
-       amount = ?,
-       currency = ?,
-       note = ?,
-       frequency = ?,
-       start_date = ?,
-       end_date = ?,
-       next_due_date = ?,
-       is_active = ?,
-       updated_at = strftime('%s','now')
-     WHERE id = ?`,
-    [
-      data.account_id,
-      data.category_id,
-      data.type,
-      amount,
-      data.currency,
-      normalizeText(data.note),
-      data.frequency,
-      data.start_date,
-      data.end_date || null,
-      scheduleState.nextDueDate,
-      Number(scheduleState.isActive),
-      id,
-    ],
-  );
+  await withWriteTransaction(db, async () => {
+    await assertAccountUnarchived(db, data.account_id, scheduleState.isActive);
+    await db.runAsync(
+      `UPDATE recurring_rules
+       SET
+         account_id = ?,
+         category_id = ?,
+         type = ?,
+         amount = ?,
+         currency = ?,
+         note = ?,
+         frequency = ?,
+         start_date = ?,
+         end_date = ?,
+         next_due_date = ?,
+         is_active = ?,
+         updated_at = strftime('%s','now')
+       WHERE id = ?`,
+      [
+        data.account_id,
+        data.category_id,
+        data.type,
+        amount,
+        data.currency,
+        normalizeText(data.note),
+        data.frequency,
+        data.start_date,
+        data.end_date || null,
+        scheduleState.nextDueDate,
+        Number(scheduleState.isActive),
+        id,
+      ],
+    );
+  });
 }
 
 /** Everything a rule delete removes; its generated transactions stay. */

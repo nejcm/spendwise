@@ -1,4 +1,4 @@
-import type { TextInput } from 'react-native';
+import type { HostInstance, TextInput } from 'react-native';
 import type { TransactionFormApi } from '../hooks/form';
 import type { OptionType } from '@/components/ui';
 import type { Account } from '@/features/accounts/types';
@@ -39,7 +39,7 @@ function FieldError({ message }: { message?: string }) {
 
 function useFieldNode(name?: string) {
   const register = React.use(FieldNodesContext);
-  return React.useCallback((node: View | null) => {
+  return React.useCallback((node: HostInstance | null) => {
     if (register && name) register(name, node);
   }, [register, name]);
 }
@@ -166,9 +166,9 @@ export function CategorySection({ form }: { form: TransactionFormApi }) {
         const error = submitted ? getFieldError(field) : undefined;
         const tiles = categoryTiles(categories, field.state.value, CATEGORY_TILE_LIMIT);
         return (
-          <View ref={fieldNode}>
+          <View>
             <View className="flex-row items-center gap-2 px-5 pb-2.5">
-              <Text className="text-sm font-semibold">{translate('transactions.category')}</Text>
+              <Text ref={fieldNode} className="text-sm font-semibold">{translate('transactions.category')}</Text>
               {!!error && <Text className="text-sm text-negative">{error}</Text>}
               <CategoryPicker
                 type={type}
@@ -237,7 +237,8 @@ export function AccountRow({ name, label, accounts, value, onChange, error, firs
   );
 }
 
-function TextRow({ label, value, placeholder, onChange, onBlur, error }: {
+function TextRow({ name, label, value, placeholder, onChange, onBlur, error }: {
+  name: string;
   label: string;
   value: string | null;
   placeholder: string;
@@ -245,6 +246,7 @@ function TextRow({ label, value, placeholder, onChange, onBlur, error }: {
   onBlur: () => void;
   error?: string;
 }) {
+  const fieldNode = useFieldNode(name);
   return (
     <ListRow
       className={rowClassName()}
@@ -252,6 +254,7 @@ function TextRow({ label, value, placeholder, onChange, onBlur, error }: {
       meta={<RowError message={error} />}
       trailing={(
         <Input
+          ref={fieldNode}
           value={value ?? ''}
           onChangeText={onChange}
           onBlur={onBlur}
@@ -324,13 +327,13 @@ export function DetailsCard({ form, accounts, isAdjustment, showBaseAmount, onBa
           name="date"
           children={(field) => (
             <ListRow
-              ref={dateNode}
               className={rowClassName(isAdjustment)}
               title={<RowLabel>{translate('transactions.form.when')}</RowLabel>}
               meta={<RowError message={submitted ? getFieldError(field) : undefined} />}
               trailing={(
                 <View className="flex-row items-center gap-1">
                   <DateInput
+                    ref={dateNode}
                     value={field.state.value}
                     onChange={field.handleChange}
                     accessibilityLabel={translate('transactions.form.when')}
@@ -348,6 +351,7 @@ export function DetailsCard({ form, accounts, isAdjustment, showBaseAmount, onBa
             name="baseAmount"
             children={(field) => (
               <TextRow
+                name="baseAmount"
                 label={translate('transactions.base_amount')}
                 value={field.state.value}
                 placeholder="0.00"
@@ -364,20 +368,20 @@ export function DetailsCard({ form, accounts, isAdjustment, showBaseAmount, onBa
         <form.Field
           name="merchant_name"
           children={(field) => (
-            <TextRow label={translate('transactions.form.merchant')} value={field.state.value} placeholder={translate('common.optional')} onBlur={field.handleBlur} onChange={field.handleChange} error={submitted ? getFieldError(field) : undefined} />
+            <TextRow name="merchant_name" label={translate('transactions.form.merchant')} value={field.state.value} placeholder={translate('common.optional')} onBlur={field.handleBlur} onChange={field.handleChange} error={submitted ? getFieldError(field) : undefined} />
           )}
         />
         <form.Field
           name="note"
           children={(field) => (
-            <TextRow label={translate('transactions.note')} value={field.state.value} placeholder={translate('transactions.form.note_placeholder')} onBlur={field.handleBlur} onChange={field.handleChange} error={submitted ? getFieldError(field) : undefined} />
+            <TextRow name="note" label={translate('transactions.note')} value={field.state.value} placeholder={translate('transactions.form.note_placeholder')} onBlur={field.handleBlur} onChange={field.handleChange} error={submitted ? getFieldError(field) : undefined} />
           )}
         />
         {showLocation && (
           <form.Field
             name="location"
             children={(field) => (
-              <TextRow label={translate('transactions.location')} value={field.state.value} placeholder={translate('common.optional')} onBlur={field.handleBlur} onChange={field.handleChange} error={submitted ? getFieldError(field) : undefined} />
+              <TextRow name="location" label={translate('transactions.location')} value={field.state.value} placeholder={translate('common.optional')} onBlur={field.handleBlur} onChange={field.handleChange} error={submitted ? getFieldError(field) : undefined} />
             )}
           />
         )}

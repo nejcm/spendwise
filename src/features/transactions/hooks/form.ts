@@ -1,4 +1,4 @@
-import type { TextInput, View } from 'react-native';
+import type { HostInstance, TextInput, View } from 'react-native';
 import type { KeyboardAwareScrollViewRef } from 'react-native-keyboard-controller';
 import type { TransactionFormInitialValues, TransactionFormValues } from '@/features/transactions/components/transaction-form-schema';
 import { useForm } from '@tanstack/react-form';
@@ -45,7 +45,7 @@ const FIELD_ORDER = ['amount', 'category_id', 'account_id', 'to_account_id', 'da
 const SCROLL_MARGIN = 16;
 
 /** Lets form rows register their node so a failed save can scroll to the first invalid one. */
-export const FieldNodesContext = React.createContext<((name: string, node: View | null) => void) | null>(null);
+export const FieldNodesContext = React.createContext<((name: string, node: HostInstance | null) => void) | null>(null);
 
 function useSavedSnackbar() {
   const router = useRouter();
@@ -83,8 +83,8 @@ export function useTransactionForm({ initialValues, onSaved, isAdjustment = fals
   const amountRef = React.useRef<TextInput>(null);
   const scrollRef = React.useRef<KeyboardAwareScrollViewRef>(null);
   const contentRef = React.useRef<View>(null);
-  const fieldNodesRef = React.useRef<Partial<Record<string, View | null>>>({});
-  const registerFieldNode = React.useCallback((name: string, node: View | null) => {
+  const fieldNodesRef = React.useRef<Partial<Record<string, HostInstance | null>>>({});
+  const registerFieldNode = React.useCallback((name: string, node: HostInstance | null) => {
     fieldNodesRef.current[name] = node;
   }, []);
   const transactionFormPrefs = useAppStore(selectTransactionFormPrefs);

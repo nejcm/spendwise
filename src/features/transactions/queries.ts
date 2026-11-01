@@ -139,7 +139,7 @@ export async function createTransaction(
   data: TransactionInsertData,
 ): Promise<string> {
   const id = generateId();
-  await createTransactionRow(db, id, data);
+  await withWriteTransaction(db, () => createTransactionRow(db, id, data));
   return id;
 }
 
@@ -195,7 +195,8 @@ export async function createTransfer(
   return outId;
 }
 
-async function createTransactionRow(db: SQLiteDatabase, id: string, data: TransactionInsertData) {
+/** Unqueued insert for callers already inside `withWriteTransaction`. */
+export async function createTransactionRow(db: SQLiteDatabase, id: string, data: TransactionInsertData) {
   await db.runAsync(
     `INSERT INTO transactions (${INSERT_COLUMNS.join(', ')}) VALUES (${INSERT_COLUMNS.map(() => '?').join(', ')})`,
     insertParams(id, data),
@@ -269,12 +270,14 @@ export async function updateTransaction(
   id: string,
   data: TransactionInsertData,
 ): Promise<void> {
-  await db.runAsync(
-    `UPDATE transactions
-     SET account_id = ?, category_id = ?, type = ?, amount = ?, currency = ?, baseAmount = ?, baseCurrency = ?, date = ?, note = ?, merchant_name = ?, merchant_logo_slug = ?, location = ?, updated_at = strftime('%s','now')
-     WHERE id = ?`,
-    [data.account_id, data.category_id || null, data.type, data.amount, data.currency, data.baseAmount, data.baseCurrency, data.date, data.note || null, data.merchant_name, data.merchant_logo_slug, data.location, id],
-  );
+  await withWriteTransaction(db, async () => {
+    await db.runAsync(
+      `UPDATE transactions
+       SET account_id = ?, category_id = ?, type = ?, amount = ?, currency = ?, baseAmount = ?, baseCurrency = ?, date = ?, note = ?, merchant_name = ?, merchant_logo_slug = ?, location = ?, updated_at = strftime('%s','now')
+       WHERE id = ?`,
+      [data.account_id, data.category_id || null, data.type, data.amount, data.currency, data.baseAmount, data.baseCurrency, data.date, data.note || null, data.merchant_name, data.merchant_logo_slug, data.location, id],
+    );
+  });
 }
 
 /** Everything a single delete removes, so Undo can put it back unchanged. */

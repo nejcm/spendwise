@@ -1,5 +1,9 @@
 import { createTestDb } from '@/test-utils/sqlite-db';
-import { deleteScheduledTransaction, getRuleForTransaction, getRulePayments, restoreScheduledTransaction, RuleAccountArchivedError, updateScheduledTransaction } from './queries';
+import { createScheduledTransaction, deleteScheduledTransaction, getRuleForTransaction, getRulePayments, restoreScheduledTransaction, RuleAccountArchivedError, updateScheduledTransaction } from './queries';
+
+jest.mock('expo-crypto', () => ({
+  randomUUID: jest.fn(() => 'test-uuid-1234'),
+}));
 
 describe('getRuleForTransaction', () => {
   it('finds the rule that generated a transaction, and nothing for manual rows', async () => {
@@ -110,5 +114,17 @@ describe('updateScheduledTransaction on an archived account', () => {
     await db.runAsync('UPDATE accounts SET is_archived = 0');
     await updateScheduledTransaction(db as any, 'rule', data(true));
     expect(await db.getFirstAsync('SELECT is_active FROM recurring_rules')).toEqual({ is_active: 1 });
+  });
+
+  it('blocks creating an active rule but allows a paused one', async () => {
+    const db = await createTestDb();
+    await db.execAsync(`
+      INSERT INTO accounts (id, name, type, currency, is_archived) VALUES ('acc', 'Main', 'checking', 'EUR', 1);
+      INSERT INTO categories (id, name, color) VALUES ('cat', 'Bills', '#000');
+    `);
+
+    await expect(createScheduledTransaction(db as any, data(true))).rejects.toBeInstanceOf(RuleAccountArchivedError);
+    await createScheduledTransaction(db as any, data(false));
+    expect(await db.getAllAsync('SELECT is_active FROM recurring_rules')).toEqual([{ is_active: 0 }]);
   });
 });

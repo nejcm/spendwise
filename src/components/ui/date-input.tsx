@@ -1,3 +1,4 @@
+import type { HostInstance } from 'react-native';
 import type { InputProps } from '@/components/ui/input';
 import type { ModalSheetProps } from '@/components/ui/modal-sheet';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
@@ -22,8 +23,8 @@ export type DateInputProps = {
   displayValue?: string;
 } & Omit<InputProps, 'value' | 'onChange'>;
 
-export function DateInput({ label, value, onChange, error, modalProps, displayValue, ...rest }: DateInputProps) {
-  const { ref, present, close } = useModalSheet();
+export function DateInput({ ref, label, value, onChange, error, modalProps, displayValue, ...rest }: DateInputProps & { ref?: (node: HostInstance | null) => void }) {
+  const { ref: sheetRef, present, close } = useModalSheet();
   const dateFormat = useAppStore.use.dateFormat();
   const theme = useThemeConfig();
   const { width } = useWindowDimensions();
@@ -72,6 +73,7 @@ export function DateInput({ label, value, onChange, error, modalProps, displayVa
   if (IS_WEB) {
     return (
       <Input
+        ref={ref}
         label={label}
         value={webText}
         placeholder={translate('common.select_date')}
@@ -92,7 +94,7 @@ export function DateInput({ label, value, onChange, error, modalProps, displayVa
   }
   return (
     <>
-      <Pressable onPress={open}>
+      <Pressable ref={ref} onPress={open}>
         <Input
           label={label}
           value={value ? displayValue ?? format(parseISO(value), dateFormat) : ''}
@@ -104,7 +106,7 @@ export function DateInput({ label, value, onChange, error, modalProps, displayVa
         />
       </Pressable>
       {Platform.OS === 'ios' && (
-        <ModalSheet ref={ref} snapPoints={['60%']} stackBehavior="push" {...modalProps}>
+        <ModalSheet ref={sheetRef} snapPoints={['60%']} stackBehavior="push" {...modalProps}>
           <View className="items-center px-4 pb-6">
             <DateTimePicker
               value={dateValue}

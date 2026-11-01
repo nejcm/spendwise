@@ -160,7 +160,8 @@ export function useArchiveAccount(onSuccess?: () => void) {
 
   return useMutation({
     mutationFn: (id: string) => queries.archiveAccount(db, id),
-    onSuccess: () => {
+    onSuccess: (_, id) => {
+      forgetFormAccount(id);
       invalidateFor(queryClient, 'account', 'scheduledTransaction');
       onSuccess?.();
     },
@@ -181,9 +182,13 @@ export function useUnarchiveAccount() {
   });
 }
 
-function forgetAccount(id: string) {
+function forgetFormAccount(id: string) {
   const prefs = getAppState().formPrefs.transactionForm;
   if (prefs.account_id === id) setTransactionFormPrefs({ ...prefs, account_id: undefined });
+}
+
+function forgetAccount(id: string) {
+  forgetFormAccount(id);
   const scope = getAiScope();
   if (scope.accountIds !== 'all' && scope.accountIds.includes(id)) {
     setAiScope({ ...scope, accountIds: toggleScopeAccount(scope.accountIds, id) });

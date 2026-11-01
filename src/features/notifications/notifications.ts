@@ -56,6 +56,15 @@ export async function canNotify(): Promise<boolean> {
   return status === 'granted';
 }
 
+async function notificationsAllowed(settings: NotificationSettings): Promise<boolean> {
+  return !!settings.global && (await canNotify());
+}
+
+/** Upcoming-bills check alone, e.g. after a rule's reminder is unmuted mid-day. */
+export async function runUpcomingBillsCheck(db: SQLiteDatabase, settings: NotificationSettings): Promise<void> {
+  if (await notificationsAllowed(settings)) await checkUpcomingBills(db, settings);
+}
+
 /**
  * Run all notification checks. Called by ScheduledTransactionsProcessor on
  * app launch, foreground resume, and daily interval.
@@ -64,8 +73,7 @@ export async function runAllNotificationChecks(
   db: SQLiteDatabase,
   settings: NotificationSettings,
 ): Promise<void> {
-  if (!settings.global) return;
-  if (!(await canNotify())) return;
+  if (!(await notificationsAllowed(settings))) return;
 
   // TODO: can run in parallel?
   await checkUpcomingBills(db, settings);

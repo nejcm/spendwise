@@ -21,9 +21,9 @@ export function dueDatesBetween(rule: Schedule, from: string, to: string): strin
   return dates;
 }
 
-export type Committed = { bills: number; comingIn: number };
+export type Committed = { bills: number; comingIn: number; missingRate: boolean };
 
-/** Every remaining occurrence in the calendar month `yearMonth`, in Preferred Currency; unconvertible rules are skipped. */
+/** Every remaining occurrence in the calendar month `yearMonth`, in Preferred Currency; unconvertible rules are skipped and flagged. */
 export function committedForMonth(
   rules: (Schedule & Pick<ScheduledTransaction, 'type' | 'amount' | 'currency'>)[],
   yearMonth: string,
@@ -31,11 +31,15 @@ export function committedForMonth(
 ): Committed {
   const from = `${yearMonth}-01`;
   const to = iso(endOfMonth(parseISO(from)));
-  const committed: Committed = { bills: 0, comingIn: 0 };
+  const committed: Committed = { bills: 0, comingIn: 0, missingRate: false };
   for (const rule of rules) {
     const count = dueDatesBetween(rule, from, to).length;
-    const amount = count ? toPreferred(rule.amount, rule.currency) : null;
-    if (amount == null) continue;
+    if (!count) continue;
+    const amount = toPreferred(rule.amount, rule.currency);
+    if (amount == null) {
+      committed.missingRate = true;
+      continue;
+    }
     if (rule.type === 'expense') committed.bills += count * amount;
     else committed.comingIn += count * amount;
   }
@@ -63,8 +67,9 @@ export function groupRules<T extends Pick<ScheduledTransaction, 'is_active' | 'n
   return [...groups].map(([key, list]) => ({ key, rules: list }));
 }
 
-/** False once the end date leaves no occurrence on or after today. */
-export function canResume(rule: Pick<ScheduledTransaction, 'start_date' | 'end_date' | 'frequency'>, today: string): boolean {
+/** False once the scheduler has posted the final occurrence, or the end date leaves none on or after today. */
+export function canResume(rule: Pick<ScheduledTransaction, 'start_date' | 'end_date' | 'frequency' | 'next_due_date'>, today: string): boolean {
+  if (rule.end_date != null && rule.next_due_date > rule.end_date) return false;
   return getFirstDueOnOrAfter({
     startDate: unixToISODate(rule.start_date),
     frequency: rule.frequency,

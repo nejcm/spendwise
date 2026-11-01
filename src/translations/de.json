@@ -588,6 +588,7 @@
     "clear_end_date": "Enddatum löschen",
     "coming_in": "Eingänge",
     "committed_for": "Eingeplant für {{month}}",
+    "committed_missing_rate": "Regeln ohne gespeicherten Wechselkurs sind nicht enthalten",
     "delete_rule": "Regel löschen",
     "end_date_invalid": "Das Enddatum muss am oder nach dem Startdatum liegen",
     "ended": "Beendet",

@@ -1,5 +1,6 @@
 import type { ScheduledTransactionWithDetails } from './types';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,13 +10,15 @@ import { ChevronLeft, Pencil } from '@/components/ui/icon';
 import { NAV_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
 import { translateCount } from '@/features/categories/helpers';
 import { formatDate, formatDateFull } from '@/features/formatting/helpers';
+import { runUpcomingBillsCheck } from '@/features/notifications/notifications';
 import { DetailAction, DetailRow } from '@/features/transactions/components/transaction-detail-parts';
+import { captureError } from '@/lib/analytics';
 import { cn } from '@/lib/cn';
 import { unixToISODate } from '@/lib/date/helpers';
 import { useCurrentDay } from '@/lib/hooks/use-current-year-month';
 import { translate } from '@/lib/i18n';
 import { goBackOrFallback } from '@/lib/routing';
-import { updateNotifications, useAppStore } from '@/lib/store/store';
+import { getAppState, updateNotifications, useAppStore } from '@/lib/store/store';
 import {
   useDeleteScheduledTransaction,
   useRulePayments,
@@ -35,10 +38,13 @@ function Wash() {
 }
 
 function useMutedBillRule(ruleId: string) {
+  const db = useSQLiteContext();
   const mutedIds = useAppStore((s) => s.notifications.mutedBillRules);
   const setMuted = (muted: boolean) => {
     const rest = (mutedIds ?? []).filter((id) => id !== ruleId);
     updateNotifications({ mutedBillRules: muted ? [...rest, ruleId] : rest });
+    // The daily processor may already have skipped this rule today.
+    if (!muted) runUpcomingBillsCheck(db, getAppState().notifications).catch((error) => captureError(error instanceof Error ? error : new Error(String(error))));
   };
   return [!!mutedIds?.includes(ruleId), setMuted] as const;
 }

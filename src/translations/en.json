@@ -588,6 +588,7 @@
     "clear_end_date": "Clear end date",
     "coming_in": "Coming in",
     "committed_for": "Committed for {{month}}",
+    "committed_missing_rate": "Excludes rules with no cached exchange rate",
     "delete_rule": "Delete rule",
     "end_date_invalid": "End date must be on or after the start date",
     "ended": "Ended",

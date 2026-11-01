@@ -37,7 +37,7 @@ describe('dueDatesBetween', () => {
 });
 
 describe('committedForMonth', () => {
-  it('sums bills and income per occurrence in Preferred Currency, skipping unconvertible rules', () => {
+  it('sums bills and income per occurrence in Preferred Currency, flagging skipped unconvertible rules', () => {
     const rules = [
       rule({ due: '2026-12-01', amount: 82000 }),
       rule({ due: '2026-11-28', frequency: 'weekly', amount: 1000 }),
@@ -52,7 +52,14 @@ describe('committedForMonth', () => {
     expect(committedForMonth(rules, '2026-12', toPreferred)).toEqual({
       bills: 82000 + 4 * 1000 + 1099,
       comingIn: 285000,
+      missingRate: true,
     });
+  });
+
+  it('does not flag an unconvertible rule with no occurrence in the month', () => {
+    const rules = [rule({ due: '2026-12-01', amount: 500 }), rule({ due: '2027-01-06', currency: 'GBP' })];
+    expect(committedForMonth(rules, '2026-12', (cents, currency) => currency === 'EUR' ? cents : null))
+      .toEqual({ bills: 500, comingIn: 0, missingRate: false });
   });
 });
 
@@ -79,5 +86,12 @@ describe('canResume', () => {
   it('is false once the end date has passed every occurrence', () => {
     expect(canResume(rule({ due: '2026-01-01' }), '2026-11-01')).toBe(true);
     expect(canResume(rule({ due: '2026-01-01', end_date: isoDateToUnix('2026-10-15') }), '2026-11-01')).toBe(false);
+  });
+
+  it('is false on the final payment day once the scheduler has advanced past the end date', () => {
+    const end = isoDateToUnix('2026-11-01');
+    const completed = rule({ due: '2026-09-01', end_date: end, next_due_date: isoDateToUnix('2026-12-01'), is_active: 0 });
+    expect(canResume(completed, '2026-11-01')).toBe(false);
+    expect(canResume({ ...completed, next_due_date: end }, '2026-11-01')).toBe(true);
   });
 });

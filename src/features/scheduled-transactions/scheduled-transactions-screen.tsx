@@ -91,7 +91,7 @@ export function ScheduledTransactionsScreen() {
 function CommittedCard({ rules, yearMonth, toPreferred }: { rules: ScheduledTransactionWithDetails[]; yearMonth: string; toPreferred: ToPreferred }) {
   const currency = useAppStore.use.currency();
   const nextMonth = format(addMonths(parseISO(`${yearMonth}-01`), 1), 'yyyy-MM');
-  const { bills, comingIn } = React.useMemo(() => committedForMonth(rules, nextMonth, toPreferred), [rules, nextMonth, toPreferred]);
+  const { bills, comingIn, missingRate } = React.useMemo(() => committedForMonth(rules, nextMonth, toPreferred), [rules, nextMonth, toPreferred]);
 
   return (
     <Card variant="hero" className="mt-5 p-5">
@@ -104,6 +104,7 @@ function CommittedCard({ rules, yearMonth, toPreferred }: { rules: ScheduledTran
         <Text className="text-meta text-muted-foreground">{translate('scheduled.coming_in')}</Text>
         <AmountText value={comingIn} currency={currency} prefix="+" className="font-semibold text-positive" />
       </View>
+      {missingRate && <Text className="mt-3 text-meta text-muted-foreground">{translate('scheduled.committed_missing_rate')}</Text>}
     </Card>
   );
 }

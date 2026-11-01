@@ -332,7 +332,7 @@ function ScheduledTransactionFormBody({ form, isCompact, accounts, orderedCurren
             <View className="flex-1 gap-1">
               <DateInput
                 value={field.state.value || ''}
-                onChange={field.handleChange}
+                onChange={(value) => field.handleChange(value || null)}
                 error={getFieldError(field)}
                 placeholder={translate('common.end_date')}
                 modalProps={{ stackBehavior: 'push' }}

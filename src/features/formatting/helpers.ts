@@ -1,6 +1,8 @@
 import type { CurrencyKey } from '../currencies';
 import type { CurrencyFormat, NumberFormat } from './constants';
-import { format, isToday, isYesterday } from 'date-fns';
+import { format as formatDateFns, isToday, isYesterday } from 'date-fns';
+import { de, enUS } from 'date-fns/locale';
+import i18n from 'i18next';
 import { calendarDateToUnix, unixToCalendarDate, unixToDate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { DEFAULT_DATE_FORMAT, DEFAULT_USER_CURRENCY } from '../../config';
@@ -104,6 +106,10 @@ export function splitFraction(formatted: string, numberFormat: NumberFormat): [s
   return [formatted.slice(0, match.index), match[0], formatted.slice(end)];
 }
 
+function format(date: Date, displayFormat: string): string {
+  return formatDateFns(date, displayFormat, { locale: i18n.resolvedLanguage === 'de' ? de : enUS });
+}
+
 function formatRelativeOrDate(date: Date, displayFormat?: string): string {
   if (isToday(date)) return translate('common.today');
   if (isYesterday(date)) return translate('common.yesterday');
@@ -149,7 +155,7 @@ export function formatShortDate(unix: number): string {
  * Get today's date as an ISO string (date only). Used internally by scheduler.
  */
 export function todayISO(): string {
-  return format(new Date(), 'yyyy-MM-dd');
+  return formatDateFns(new Date(), 'yyyy-MM-dd');
 }
 
 /**

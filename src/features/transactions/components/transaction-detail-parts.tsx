@@ -51,7 +51,7 @@ export function DetailHero({ transaction: t, onAmountPress }: { transaction: Tra
           size="hero"
           value={Math.abs(t.baseAmount)}
           currency={t.baseCurrency}
-          prefix={t.is_adjustment ? '' : isInflow(t) ? '+' : '-'}
+          prefix={isInflow(t) ? '+' : '-'}
           className="text-[46px]/[54px]"
           centsClassName="text-[26px]"
         />
@@ -64,7 +64,15 @@ export function DetailHero({ transaction: t, onAmountPress }: { transaction: Tra
   );
 }
 
-function DetailRow({ label, value, first, onPress }: { label: string; value: string; first?: boolean; onPress?: () => void }) {
+function DetailRow({ label, value, first, onPress, full }: { label: string; value: string; first?: boolean; onPress?: () => void; full?: boolean }) {
+  if (full) {
+    return (
+      <View className={cn('gap-1 py-3.5', !first && 'border-t border-border')}>
+        <Text className="text-sm text-muted-foreground">{label}</Text>
+        <Text className="text-[15px]" selectable>{value}</Text>
+      </View>
+    );
+  }
   return (
     <ListRow
       className={cn('min-h-[52px]', !first && 'border-t border-border')}
@@ -91,7 +99,7 @@ export function DetailRows({ transaction: t, rule }: { transaction: TransactionW
   const frequency = rule && FREQUENCY_OPTIONS.find((o) => o.value === rule.frequency)?.label;
   const withIcon = (icon: string | null | undefined, name: string | null) => `${icon ?? ''} ${name ?? ''}`.trim();
 
-  const rows: { key: string; label: string; value: string; onPress?: () => void }[] = [
+  const rows: { key: string; label: string; value: string; onPress?: () => void; full?: boolean }[] = [
     ...(t.category_id && t.category_name
       ? [{ key: 'category', label: translate('transactions.category'), value: withIcon(t.category_icon, t.category_name), onPress: () => router.push(`/categories/${t.category_id}`) }]
       : []),
@@ -101,10 +109,10 @@ export function DetailRows({ transaction: t, rule }: { transaction: TransactionW
       : []),
     ...(rate ? [{ key: 'rate', label: translate('transactions.detail.exchange_rate'), value: translate('transactions.detail.rate_on', { rate, date: formatDate(t.date, SHORT_DATE_FORMAT) }) }] : []),
     ...(rule
-      ? [{ key: 'rule', label: translate('transactions.detail.repeats'), value: translate('transactions.detail.repeats_value', { frequency: frequency ?? rule.frequency, date: formatDate(rule.next_due_date, SHORT_DATE_FORMAT) }), onPress: () => router.push(`/scheduled/${rule.id}`) }]
+      ? [{ key: 'rule', label: translate('transactions.detail.repeats'), value: rule.is_active ? translate('transactions.detail.repeats_value', { frequency: frequency ?? rule.frequency, date: formatDate(rule.next_due_date, SHORT_DATE_FORMAT) }) : `${frequency ?? rule.frequency} · ${translate('common.paused')}`, onPress: () => router.push(`/scheduled/${rule.id}`) }]
       : []),
     ...(t.location ? [{ key: 'where', label: translate('transactions.detail.where'), value: t.location, onPress: () => openMaps(t.location!) }] : []),
-    ...(t.note ? [{ key: 'note', label: translate('transactions.note'), value: t.note }] : []),
+    ...(t.note ? [{ key: 'note', label: translate('transactions.note'), value: t.note, full: true }] : []),
   ];
 
   return (

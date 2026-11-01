@@ -6,7 +6,7 @@ import type { RatesMap } from '@/features/currencies/queries';
 
 import { convertAmount } from '@/features/currencies/queries';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
-import { generateId, withWriteTransaction } from '@/lib/sqlite';
+import { generateId, inFilter, withWriteTransaction } from '@/lib/sqlite';
 
 // ─── Read Queries ───
 
@@ -76,14 +76,15 @@ export async function getTransactionsSample(
   db: SQLiteDatabase,
   startDate: number,
   endDate: number,
-  limit: number,
+  { limit, accountIds }: { limit: number; accountIds?: readonly string[] },
 ): Promise<TransactionWithCategory[]> {
+  const [accountSql, accountParams] = inFilter('t.account_id', accountIds);
   return db.getAllAsync<TransactionWithCategory>(
     `${TRANSACTION_SELECT}
-     WHERE t.date >= ? AND t.date < ? AND ${HIDE_TRANSFER_IN_LEG}
+     WHERE t.date >= ? AND t.date < ? AND ${HIDE_TRANSFER_IN_LEG}${accountSql}
      ORDER BY t.date DESC, t.created_at DESC
      LIMIT ?`,
-    [startDate, endDate, limit],
+    [startDate, endDate, ...accountParams, limit],
   );
 }
 

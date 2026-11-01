@@ -28,14 +28,24 @@ jest.mock('expo-router', () => ({
 }));
 
 jest.mock('@/components/ui/icon', () => ({
-  Bot: () => null,
+  ArrowUp: () => null,
   Brain: () => null,
-  Plus: () => null,
-  SendHorizonal: () => null,
+  Calendar: () => null,
+  Check: () => null,
+  ChevronDown: () => null,
+  ChevronLeft: () => null,
+  SlidersHorizontal: () => null,
+  Sparkle: () => null,
+  SquarePen: () => null,
+  X: () => null,
 }));
 
-jest.mock('@/components/screen-header', () => ({
-  BackButton: () => null,
+jest.mock('./components/scope-sheet', () => ({
+  ScopeSheet: () => null,
+}));
+
+jest.mock('@/features/accounts/api', () => ({
+  useAccounts: () => ({ data: [] }),
 }));
 
 jest.mock('react-native-safe-area-context', () => ({
@@ -88,11 +98,26 @@ describe('ai screen', () => {
 
     render(<AiScreen />);
 
-    expect(screen.getByText('AI setup required')).toBeTruthy();
-    expect(screen.getByText('AI is optional. Spendwise is free, but AI chat needs your own OpenAI or Anthropic API key and provider usage may cost money.')).toBeTruthy();
+    expect(screen.getByText('Bring your own AI key')).toBeTruthy();
+    expect(screen.getByText(/They use your own OpenAI or Anthropic key, which stays on this phone/)).toBeTruthy();
     fireEvent.press(screen.getByText('Open AI settings'));
     expect(mockRouterPush).toHaveBeenCalledWith('/settings/ai');
     expect(screen.queryByPlaceholderText(/./)).toBeNull();
+    expect(screen.queryByLabelText('New chat')).toBeNull();
+  });
+
+  it('shows the focus chip with the default scope and starts a new chat from the header', () => {
+    const reset = jest.fn();
+    mockChat({
+      messages: [{ id: 'user-1', role: 'user', content: 'Hi' }],
+      actions: { send: jest.fn(), setDraft: jest.fn(), reset },
+    });
+
+    render(<AiScreen />);
+
+    expect(screen.getByText(/ · All accounts$/)).toBeTruthy();
+    fireEvent.press(screen.getByLabelText('New chat'));
+    expect(reset).toHaveBeenCalled();
   });
 
   it('renders live assistant content as raw text while streaming', () => {

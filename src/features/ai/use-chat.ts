@@ -4,8 +4,9 @@ import type { ChatMessage, UseChatReturn } from '@/features/ai/types';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import * as React from 'react';
+import { showSnackbar } from '@/components/ui/snackbar';
 import { streamAskWithTools } from '@/features/ai/service';
-import { clearAiChat, setAiDraftQuestion, setAiMessages, useAiChatStore } from '@/features/ai/store';
+import { clearAiChat, getAiScope, setAiDraftQuestion, setAiMessages, useAiChatStore } from '@/features/ai/store';
 import { captureError } from '@/lib/analytics';
 import { translate } from '@/lib/i18n';
 import { generateId } from '@/lib/sqlite';
@@ -123,7 +124,15 @@ export function useChat(): UseChatReturn {
       ...initialState(),
       viewportHeight: prev.viewportHeight,
     }));
+    const cleared = useAiChatStore.getState().messages.filter((m) => m.content);
     clearAiChat();
+    if (cleared.length === 0) return;
+    showSnackbar({
+      title: translate('ai.chat_cleared'),
+      undo: () => {
+        setAiMessages([...cleared, ...useAiChatStore.getState().messages]);
+      },
+    });
   }, [setChatState]);
 
   React.useEffect(() => {
@@ -144,6 +153,7 @@ export function useChat(): UseChatReturn {
       id: generateId(),
       role: 'user',
       content: trimmed,
+      createdAt: Date.now(),
     };
     const assistantPlaceholder: ChatMessage = {
       id: generateId(),
@@ -179,6 +189,7 @@ export function useChat(): UseChatReturn {
         const finalContent = await streamAskWithTools({
           messages: [...existingMessages, userMessage],
           db,
+          scope: getAiScope(),
           onToken: (token) => {
             if (!isMountedRef.current) return;
             appendStreamToken(token);

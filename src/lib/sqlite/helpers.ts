@@ -76,3 +76,8 @@ export function withWriteTransaction(db: SQLiteDatabase, task: () => Promise<voi
   writeQueues.set(db, run.catch(() => {}));
   return run;
 }
+
+/** `AND <column> IN (…)` for an optional id filter; an empty list matches nothing. */
+export function inFilter(column: string, ids?: readonly string[]): [string, string[]] {
+  return ids ? [` AND ${column} IN (${ids.map(() => '?').join(', ')})`, [...ids]] : ['', []];
+}

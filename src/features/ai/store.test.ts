@@ -5,7 +5,6 @@ import {
   clearAiChat,
   MAX_PERSISTED_AI_CHARACTERS,
   MAX_PERSISTED_AI_MESSAGES,
-  resetAiChatStore,
   setAiDraftQuestion,
   setAiMessages,
   trimPersistedMessages,
@@ -22,7 +21,7 @@ function createMessage(id: string, content: string): ChatMessage {
 
 describe('ai store', () => {
   beforeEach(() => {
-    resetAiChatStore();
+    clearAiChat();
   });
 
   it('keeps only the most recent persisted messages up to the count limit', () => {

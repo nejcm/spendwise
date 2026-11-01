@@ -70,13 +70,13 @@ import {
   RepeatIcon as LucideRepeatIcon,
   ScanLine as LucideScanLine,
   Search as LucideSearch,
-  SendHorizonal as LucideSendHorizonal,
   Settings as LucideSettings,
   Share as LucideShare,
   Shield as LucideShield,
   SlidersHorizontal as LucideSlidersHorizontal,
   Sparkle as LucideSparkle,
   Sparkles as LucideSparkles,
+  SquarePen as LucideSquarePen,
   Sun as LucideSun,
   TrashIcon as LucideTrashIcon,
   TrendingDown as LucideTrendingDown,
@@ -167,7 +167,6 @@ export const Printer = createIcon(LucidePrinter);
 export const RefreshCcw = createIcon(LucideRefreshCcw);
 export const ScanLine = createIcon(LucideScanLine);
 export const Search = createIcon(LucideSearch);
-export const SendHorizonal = createIcon(LucideSendHorizonal);
 export const Share = createIcon(LucideShare);
 export const Shield = createIcon(LucideShield);
 export const Sun = createIcon(LucideSun);
@@ -182,6 +181,7 @@ export const Settings = createIcon(LucideSettings);
 export const SlidersHorizontal = createIcon(LucideSlidersHorizontal);
 export const Sparkle = createIcon(LucideSparkle);
 export const Sparkles = createIcon(LucideSparkles);
+export const SquarePen = createIcon(LucideSquarePen);
 export const PauseIcon = createIcon(LucidePause);
 export const Paintbrush = createIcon(LucidePaintbrush);
 export const ChevronRight = createIcon(LucideChevronRight);

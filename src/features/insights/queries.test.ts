@@ -171,6 +171,25 @@ describe('getCategorySpendByRange', () => {
   });
 });
 
+describe('account filter', () => {
+  it('limits summary, category spend and trend to the given accounts; an empty list matches nothing', async () => {
+    const db = await createTestDb();
+    await db.execAsync(`
+      INSERT INTO accounts (id, name, type, currency) VALUES ('acc_1', 'Checking', 'checking', 'EUR'), ('acc_2', 'Card', 'checking', 'EUR');
+      INSERT INTO categories (id, name, color, kind, sort_order) VALUES ('cat_food', 'Food', '#f00', 'expense', 0);
+      INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date) VALUES
+        ('t1', 'acc_1', 'cat_food', 'expense', 3000, 'EUR', 3000, 'EUR', ${MAR_15}),
+        ('t2', 'acc_2', 'cat_food', 'expense', 7000, 'EUR', 7000, 'EUR', ${MAR_15});
+    `);
+
+    expect((await getSummaryByRange(db as any, MAR_START, APR_START, ['acc_1'])).expense).toBe(3000);
+    expect((await getSummaryByRange(db as any, MAR_START, APR_START)).expense).toBe(10000);
+    expect((await getCategorySpendByRange(db as any, MAR_START, APR_START, ['acc_2']))[0].expense_total).toBe(7000);
+    expect((await getTrendByRange(db as any, MAR_START, APR_START, ['acc_1', 'acc_2']))[0].expense).toBe(10000);
+    expect((await getSummaryByRange(db as any, undefined, undefined, [])).expense).toBe(0);
+  });
+});
+
 // ─── getTrendByRange ──────────────────────────────────────────────────────────
 
 describe('getTrendByRange', () => {

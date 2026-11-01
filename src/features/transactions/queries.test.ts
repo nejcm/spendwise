@@ -205,7 +205,7 @@ describe('getTransactionsSample', () => {
     await seedTransaction(db, { id: 'txn_2', date: MAR_MID + 1 });
     await seedTransaction(db, { id: 'txn_3', date: APR_MID });
 
-    const result = await getTransactionsSample(db as any, MAR_START, APR_START, 1);
+    const result = await getTransactionsSample(db as any, MAR_START, APR_START, { limit: 1 });
 
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('txn_2');
@@ -216,9 +216,21 @@ describe('getTransactionsSample', () => {
     await seedBase(db);
     await seedTransaction(db, { id: 'txn_1', date: APR_MID });
 
-    const result = await getTransactionsSample(db as any, MAR_START, APR_START, 5);
+    const result = await getTransactionsSample(db as any, MAR_START, APR_START, { limit: 5 });
 
     expect(result).toHaveLength(0);
+  });
+
+  it('keeps only rows of the given accounts', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    await db.runAsync(`INSERT INTO accounts (id, name, type, currency) VALUES ('acc_2', 'Card', 'checking', 'EUR')`);
+    await seedTransaction(db, { id: 'txn_1' });
+    await seedTransaction(db, { id: 'txn_2', account_id: 'acc_2' });
+
+    const result = await getTransactionsSample(db as any, MAR_START, APR_START, { limit: 5, accountIds: ['acc_2'] });
+
+    expect(result.map((t) => t.id)).toEqual(['txn_2']);
   });
 });
 
@@ -664,7 +676,7 @@ describe('transfer pairs', () => {
     await seedTransaction(db, { id: 'legacy_in', type: 'transfer', amount: 100, category_id: null });
 
     expect((await getRecentTransactions(db as any, 10)).map((t) => t.id).sort()).toEqual([outId, 'legacy_in'].sort());
-    expect((await getTransactionsSample(db as any, MAR_START, APR_START, 10)).map((t) => t.id).sort()).toEqual([outId, 'legacy_in'].sort());
+    expect((await getTransactionsSample(db as any, MAR_START, APR_START, { limit: 10 })).map((t) => t.id).sort()).toEqual([outId, 'legacy_in'].sort());
   });
 
   it('transfers never count as income or expense', async () => {

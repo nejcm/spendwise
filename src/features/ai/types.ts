@@ -1,6 +1,7 @@
 import type { RefObject } from 'react';
 import type { FlatList, LayoutChangeEvent } from 'react-native';
 import type { MarkdownStyle } from 'react-native-enriched-markdown';
+import type { PeriodSelection } from '@/lib/store/store';
 
 export type AiProviderType = 'openai' | 'anthropic';
 
@@ -8,6 +9,13 @@ export type ChatMessage = {
   readonly id: string;
   readonly role: 'user' | 'assistant';
   readonly content: string;
+  readonly createdAt?: number;
+};
+
+/** Focus period (soft, a default for the model) and accounts (strict filter on tool data). */
+export type AiScope = {
+  readonly period: PeriodSelection;
+  readonly accountIds: readonly string[] | 'all';
 };
 
 export type MessageRenderInfo = {

@@ -63,4 +63,13 @@ describe('ai tool executor', () => {
       { name: 'Refunds', kind: 'expense', expense_total: 0, income_total: 5, budget: null },
     ]);
   });
+
+  it('passes the scoped account ids to the query', async () => {
+    getSummaryByRangeMock.mockResolvedValueOnce({ income: 0, expense: 0, balance: 0 });
+    const db = {} as never;
+
+    await executeToolCall(db, 'get_summary', { start_date: '2026-01-01', end_date: '2026-02-01' }, ['acc_1']);
+
+    expect(getSummaryByRangeMock).toHaveBeenCalledWith(db, expect.any(Number), expect.any(Number), ['acc_1']);
+  });
 });

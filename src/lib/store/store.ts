@@ -243,7 +243,11 @@ export function setNumberFormat(numberFormat: AppState['numberFormat']) {
 }
 
 export function setMonthStartDay(monthStartDay: number) {
-  return updateAppState({ monthStartDay });
+  const { periodSelection } = getAppState();
+  const current = currentPeriodSelection();
+  const wasCurrentMonth = periodSelection.mode === 'month' && periodSelection.year === current.year && periodSelection.month === current.month;
+  updateAppState({ monthStartDay });
+  if (wasCurrentMonth) setPeriodSelection(currentPeriodSelection());
 }
 
 export function setTheme(theme: ThemeType) {

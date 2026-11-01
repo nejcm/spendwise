@@ -19,7 +19,7 @@ import { CategoryPicker } from '@/features/categories/category-picker';
 import { fitCategoryToType, fitsTransactionType, translateCount } from '@/features/categories/helpers';
 import { CURRENCIES_MAP, CURRENCY_VALUES } from '@/features/currencies';
 import { CurrencySheet } from '@/features/currencies/components/currency-sheet';
-import { formatDate, todayISO } from '@/features/formatting/helpers';
+import { formatDate, formatDateFull, todayISO } from '@/features/formatting/helpers';
 import { FormDataGate } from '@/features/transactions/components/form-data-gate';
 import { AccountRow, RowError, RowLabel } from '@/features/transactions/components/transaction-form-fields';
 import { cn } from '@/lib/cn';
@@ -423,7 +423,7 @@ function ScheduleHint({ form, isEdit }: { form: FormApi; isEdit: boolean }) {
   const firstDue = getFirstDueOnOrAfter({ startDate: values.start_date, frequency: values.frequency, targetDate: todayISO(), endDate: values.end_date });
   if (!firstDue) return null;
 
-  const date = formatDate(dateToUnix(firstDue), HINT_DATE_FORMAT);
+  const date = formatDateFull(dateToUnix(firstDue), HINT_DATE_FORMAT);
   const reminds = values.type === 'expense' && !!notifications.global && notifications.upcomingBills !== false;
   const text = [
     translate(isEdit ? 'scheduled.form.next_payment' : 'scheduled.form.first_payment', { date }),

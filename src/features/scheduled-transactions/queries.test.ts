@@ -1,5 +1,5 @@
 import { createTestDb } from '@/test-utils/sqlite-db';
-import { getRuleForTransaction, getRulePayments } from './queries';
+import { deleteScheduledTransaction, getRuleForTransaction, getRulePayments, restoreScheduledTransaction } from './queries';
 
 describe('getRuleForTransaction', () => {
   it('finds the rule that generated a transaction, and nothing for manual rows', async () => {
@@ -37,5 +37,45 @@ describe('getRulePayments', () => {
 
     const payments = await getRulePayments(db as any, 'rule', 2);
     expect(payments.map((p) => p.id)).toEqual(['t3', 't2']);
+  });
+});
+
+describe('deleteScheduledTransaction undo', () => {
+  const seed = `
+    INSERT INTO accounts (id, name, type, currency, icon, color) VALUES ('acc', 'Main', 'checking', 'EUR', '🏦', '#000000');
+    INSERT INTO recurring_rules (id, account_id, type, amount, currency, frequency, start_date, next_due_date, created_at, updated_at)
+      VALUES ('rule', 'acc', 'expense', 1000, 'EUR', 'monthly', 100, 300, 111, 222);
+    INSERT INTO transactions (id, account_id, type, amount, currency, baseAmount, baseCurrency, date) VALUES
+      ('t1', 'acc', 'expense', 1000, 'EUR', 1000, 'EUR', 100),
+      ('t2', 'acc', 'expense', 1000, 'EUR', 1000, 'EUR', 200);
+    INSERT INTO recurring_rule_runs (id, rule_id, scheduled_for_date, transaction_id, created_at) VALUES
+      ('r1', 'rule', 100, 't1', 333), ('r2', 'rule', 200, 't2', 444);
+  `;
+  const snapshot = (db: Awaited<ReturnType<typeof createTestDb>>) => Promise.all([
+    db.getAllAsync('SELECT * FROM recurring_rules'),
+    db.getAllAsync('SELECT * FROM recurring_rule_runs ORDER BY id'),
+    db.getAllAsync('SELECT id FROM transactions ORDER BY id'),
+  ]);
+
+  it('keeps generated transactions on delete and restores the rule with its runs', async () => {
+    const db = await createTestDb();
+    await db.execAsync(seed);
+    const before = await snapshot(db);
+
+    const deleted = await deleteScheduledTransaction(db as any, 'rule');
+    expect(await snapshot(db)).toEqual([[], [], before[2]]);
+
+    await restoreScheduledTransaction(db as any, deleted);
+    expect(await snapshot(db)).toEqual(before);
+  });
+
+  it('writes nothing when a generated transaction is gone', async () => {
+    const db = await createTestDb();
+    await db.execAsync(seed);
+    const deleted = await deleteScheduledTransaction(db as any, 'rule');
+    await db.runAsync(`DELETE FROM transactions WHERE id = 't2'`);
+
+    await expect(restoreScheduledTransaction(db as any, deleted)).rejects.toHaveProperty('code', 'SQLITE_CONSTRAINT_FOREIGNKEY');
+    expect(await snapshot(db)).toEqual([[], [], [{ id: 't1' }]]);
   });
 });

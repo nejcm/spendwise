@@ -3,12 +3,13 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import type {
   ScheduledTransaction,
   ScheduledTransactionFormData,
+  ScheduledTransactionRun,
   ScheduledTransactionWithDetails,
 } from './types';
 import type { Transaction } from '@/features/transactions/types';
 
 import { amountToCents } from '@/features/formatting/helpers';
-import { generateId } from '@/lib/sqlite';
+import { generateId, insertRow, withWriteTransaction } from '@/lib/sqlite';
 import { getFirstDueOnOrAfter, isoDateToUnix, todayISODate, unixToISODate } from './scheduler';
 
 function normalizeText(value?: string | null): string | null {
@@ -201,9 +202,33 @@ export async function updateScheduledTransaction(
   );
 }
 
+/** Everything a rule delete removes; its generated transactions stay. */
+export type DeletedScheduledTransaction = {
+  rule: ScheduledTransaction | null;
+  runs: ScheduledTransactionRun[];
+};
+
 export async function deleteScheduledTransaction(
   db: SQLiteDatabase,
   id: string,
+): Promise<DeletedScheduledTransaction> {
+  const deleted: DeletedScheduledTransaction = { rule: null, runs: [] };
+  await withWriteTransaction(db, async () => {
+    deleted.rule = await db.getFirstAsync<ScheduledTransaction>('SELECT * FROM recurring_rules WHERE id = ?', [id]);
+    deleted.runs = await db.getAllAsync<ScheduledTransactionRun>('SELECT * FROM recurring_rule_runs WHERE rule_id = ?', [id]);
+    await db.runAsync('DELETE FROM recurring_rules WHERE id = ?', [id]);
+  });
+  return deleted;
+}
+
+/** Re-inserts the rule as snapshotted, including its next_due_date; throws without writing if anything conflicts. */
+export async function restoreScheduledTransaction(
+  db: SQLiteDatabase,
+  { rule, runs }: DeletedScheduledTransaction,
 ): Promise<void> {
-  await db.runAsync('DELETE FROM recurring_rules WHERE id = ?', [id]);
+  if (!rule) return;
+  await withWriteTransaction(db, async () => {
+    await insertRow(db, 'recurring_rules', rule);
+    for (const run of runs) await insertRow(db, 'recurring_rule_runs', run);
+  });
 }

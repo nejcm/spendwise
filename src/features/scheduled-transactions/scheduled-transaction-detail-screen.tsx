@@ -5,9 +5,10 @@ import * as React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderButton, PageHeader } from '@/components/page-header';
-import { Alert, AmountText, Card, FocusAwareStatusBar, getPressedStyle, GhostButton, IconTile, ListRow, PauseIcon, PlayIcon, SectionHeader, Switch, Text } from '@/components/ui';
-import { ChevronLeft, Pencil } from '@/components/ui/icon';
+import { AmountText, Card, FocusAwareStatusBar, getPressedStyle, GhostButton, IconTile, ListRow, PauseIcon, PlayIcon, SectionHeader, Switch, Text } from '@/components/ui';
+import { ChevronLeft, Pencil, TrashIcon } from '@/components/ui/icon';
 import { NAV_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
+import { showSnackbar } from '@/components/ui/snackbar';
 import { translateCount } from '@/features/categories/helpers';
 import { formatDate, formatDateFull } from '@/features/formatting/helpers';
 import { runUpcomingBillsCheck } from '@/features/notifications/notifications';
@@ -21,6 +22,7 @@ import { goBackOrFallback } from '@/lib/routing';
 import { getAppState, updateNotifications, useAppStore } from '@/lib/store/store';
 import {
   useDeleteScheduledTransaction,
+  useRestoreScheduledTransaction,
   useRulePayments,
   useScheduledTransaction,
   useUpdateScheduledTransaction,
@@ -41,7 +43,7 @@ function useMutedBillRule(ruleId: string) {
   const db = useSQLiteContext();
   const mutedIds = useAppStore((s) => s.notifications.mutedBillRules);
   const setMuted = (muted: boolean) => {
-    const rest = (mutedIds ?? []).filter((id) => id !== ruleId);
+    const rest = (getAppState().notifications.mutedBillRules ?? []).filter((id) => id !== ruleId);
     updateNotifications({ mutedBillRules: muted ? [...rest, ruleId] : rest });
     // The daily processor may already have skipped this rule today.
     if (!muted) runUpcomingBillsCheck(db, getAppState().notifications).catch((error) => captureError(error instanceof Error ? error : new Error(String(error))));
@@ -55,8 +57,9 @@ export function ScheduledTransactionDetailScreen() {
   const insets = useSafeAreaInsets();
   const [isEditing, setIsEditing] = React.useState(false);
   const { data: rule, isLoading } = useScheduledTransaction(id);
-  const [, setMuted] = useMutedBillRule(id);
+  const [muted, setMuted] = useMutedBillRule(id);
   const deleteMut = useDeleteScheduledTransaction();
+  const restoreMut = useRestoreScheduledTransaction();
   const updateMut = useUpdateScheduledTransaction();
   const today = useCurrentDay();
 
@@ -82,18 +85,18 @@ export function ScheduledTransactionDetailScreen() {
   }
 
   const remove = () => {
-    Alert.alert(translate('scheduled.remove'), translate('scheduled.remove_confirm'), [
-      { text: translate('common.cancel'), style: 'cancel' },
-      {
-        text: translate('common.delete'),
-        style: 'destructive',
-        onPress: async () => {
-          await deleteMut.mutateAsync(id);
-          setMuted(false);
-          goBackOrFallback(router, '/scheduled');
-        },
+    deleteMut.mutate(id, {
+      onSuccess: (deleted) => {
+        const wasMuted = muted;
+        setMuted(false);
+        goBackOrFallback(router, '/scheduled');
+        showSnackbar({
+          title: translate('scheduled.deleted'),
+          icon: TrashIcon,
+          undo: () => restoreMut.mutateAsync(deleted).then(() => setMuted(wasMuted), () => {}),
+        });
       },
-    ]);
+    });
   };
 
   const togglePause = () => {

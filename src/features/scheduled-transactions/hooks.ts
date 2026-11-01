@@ -10,6 +10,8 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback } from 'react';
 
 import { Alert } from '@/components/ui';
+import { CircleAlert } from '@/components/ui/icon';
+import { showSnackbar } from '@/components/ui/snackbar';
 import { computeBaseAmount } from '@/features/currencies/conversion';
 import { useCurrencyRates } from '@/features/currencies/hooks';
 import { todayUnix } from '@/features/formatting/helpers';
@@ -134,5 +136,22 @@ export function useDeleteScheduledTransaction() {
       invalidateFor(queryClient, 'scheduledTransaction');
     },
     onError,
+  });
+}
+
+export function useRestoreScheduledTransaction() {
+  const db = useSQLiteContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (deleted: queries.DeletedScheduledTransaction) => queries.restoreScheduledTransaction(db, deleted),
+    onSuccess: async () => {
+      invalidateFor(queryClient, 'scheduledTransaction', 'transaction');
+      await syncDueScheduledTransactions(db, queryClient);
+    },
+    onError: (error) => {
+      if (error instanceof Error) captureError(error, { context: 'scheduled-transactions' });
+      showSnackbar({ title: translate('common.undo_failed'), icon: CircleAlert });
+    },
   });
 }

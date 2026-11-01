@@ -15,6 +15,7 @@ import {
   getTransactionsSample,
   hasUserTransactions,
   isTransferInLeg,
+  restoreTransaction,
   TRANSFER_LEG_ROUNDS_TO_ZERO,
   updateTransaction,
   updateTransfer,
@@ -532,14 +533,78 @@ describe('deleteTransaction', () => {
     const row = await getTransactionById(db as any, 'txn_1');
     expect(row).toBeNull();
   });
+});
 
-  it('returns undefined (void)', async () => {
+describe('deleteTransaction undo', () => {
+  type Db = Awaited<ReturnType<typeof createTestDb>>;
+  const snapshot = (db: Db) => Promise.all([
+    db.getAllAsync('SELECT * FROM transactions ORDER BY id'),
+    db.getAllAsync('SELECT * FROM recurring_rule_runs ORDER BY id'),
+  ]);
+
+  async function roundTrip(db: Db, id: string) {
+    await db.runAsync(`UPDATE transactions SET created_at = 111, updated_at = 222`);
+    const before = await snapshot(db);
+    const deleted = await deleteTransaction(db as any, id);
+    expect(await snapshot(db)).not.toEqual(before);
+    await restoreTransaction(db as any, deleted);
+    expect(await snapshot(db)).toEqual(before);
+    return deleted;
+  }
+
+  it('restores an expense unchanged', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    await seedTransaction(db, { merchant_name: 'Cafe', location: 'Ljubljana' });
+
+    expect((await roundTrip(db, 'txn_1')).transactions).toHaveLength(1);
+  });
+
+  it('restores both legs of a transfer', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    await db.runAsync(`INSERT INTO accounts (id, name, type, currency) VALUES ('acc_2', 'Savings', 'savings', 'EUR')`);
+    await seedTransaction(db, { id: 'out', type: 'transfer', amount: -500, category_id: null });
+    await seedTransaction(db, { id: 'in', type: 'transfer', amount: 500, category_id: null, account_id: 'acc_2' });
+    await db.runAsync(`UPDATE transactions SET transfer_id = 'tr'`);
+
+    expect((await roundTrip(db, 'in')).transactions.map((t) => t.id).sort()).toEqual(['in', 'out']);
+  });
+
+  it('restores an opening-balance adjustment', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    await seedTransaction(db, { category_id: null, amount: 12345 });
+    await db.runAsync(`UPDATE transactions SET is_adjustment = 1`);
+
+    expect((await roundTrip(db, 'txn_1')).transactions[0]).toMatchObject({ is_adjustment: 1, amount: 12345 });
+  });
+
+  it('restores a rule-generated transaction with its run link', async () => {
     const db = await createTestDb();
     await seedBase(db);
     await seedTransaction(db);
+    await db.execAsync(`
+      INSERT INTO recurring_rules (id, account_id, type, amount, currency, frequency, start_date, next_due_date)
+        VALUES ('rule', 'acc_1', 'expense', 5000, 'EUR', 'monthly', 100, 200);
+      INSERT INTO recurring_rule_runs (id, rule_id, scheduled_for_date, transaction_id, created_at) VALUES ('run', 'rule', 100, 'txn_1', 333);
+    `);
 
-    const result = await deleteTransaction(db as any, 'txn_1');
-    expect(result).toBeUndefined();
+    expect((await roundTrip(db, 'txn_1')).runs).toEqual([expect.objectContaining({ id: 'run', created_at: 333 })]);
+  });
+
+  it('writes nothing when a referenced row is gone', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    await db.runAsync(`INSERT INTO accounts (id, name, type, currency) VALUES ('acc_2', 'Savings', 'savings', 'EUR')`);
+    await seedTransaction(db, { id: 'out', type: 'transfer', amount: -500, category_id: null });
+    await seedTransaction(db, { id: 'in', type: 'transfer', amount: 500, category_id: null, account_id: 'acc_2' });
+    await db.runAsync(`UPDATE transactions SET transfer_id = 'tr'`);
+    const deleted = await deleteTransaction(db as any, 'out');
+    await db.runAsync(`DELETE FROM accounts WHERE id = 'acc_2'`);
+
+    await expect(restoreTransaction(db as any, deleted)).rejects.toHaveProperty('code', 'SQLITE_CONSTRAINT_FOREIGNKEY');
+    expect(await snapshot(db)).toEqual([[], []]);
   });
 });
 

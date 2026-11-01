@@ -9,6 +9,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Alert } from '@/components/ui';
+import { CircleAlert } from '@/components/ui/icon';
+import { showSnackbar } from '@/components/ui/snackbar';
 import { computeBaseAmount } from '@/features/currencies/conversion';
 import { getRatesForDate, getRatesForDates } from '@/features/currencies/queries';
 import { captureError } from '@/lib/analytics';
@@ -70,6 +72,11 @@ function errorMessage(error: unknown): string {
 function onError(error: unknown) {
   if (error instanceof Error) captureError(error, { context: 'transactions' });
   Alert.alert(translate('common.error'), errorMessage(error));
+}
+
+function onUndoError(error: unknown) {
+  if (error instanceof Error) captureError(error, { context: 'transactions' });
+  showSnackbar({ title: translate('common.undo_failed'), icon: CircleAlert });
 }
 
 function prepareTransactionData(
@@ -204,6 +211,19 @@ export function useDeleteTransaction() {
       invalidateFor(queryClient, 'transaction');
     },
     onError,
+  });
+}
+
+export function useRestoreTransaction() {
+  const db = useSQLiteContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (deleted: queries.DeletedTransaction) => queries.restoreTransaction(db, deleted),
+    onSuccess: () => {
+      invalidateFor(queryClient, 'transaction', 'scheduledTransaction');
+    },
+    onError: onUndoError,
   });
 }
 

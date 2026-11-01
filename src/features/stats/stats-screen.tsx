@@ -24,7 +24,7 @@ export function StatsScreen() {
   const { refreshing, onRefresh } = useRefresh();
   const [tab, setTab] = React.useState<StatsTab>('overview');
   const period = { selection, startDate, endDate };
-  const { data: activityCount } = useActivityCount();
+  const { data: activityCount, isError: activityCountFailed } = useActivityCount();
 
   return (
     <>
@@ -53,7 +53,7 @@ export function StatsScreen() {
               { value: 'budget', label: translate('stats.budget') },
             ]}
           />
-          {tab === 'overview' && activityCount !== undefined && (hasEnoughForInsights(activityCount)
+          {tab === 'overview' && (activityCount !== undefined || activityCountFailed) && (activityCount === undefined || hasEnoughForInsights(activityCount)
             ? <OverviewTab {...period} onShowBudgets={() => setTab('budget')} />
             : <InsightsEmpty {...period} count={activityCount} />)}
           {tab === 'calendar' && <CalendarTab {...period} />}

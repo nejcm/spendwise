@@ -127,6 +127,14 @@ describe('templateParams', () => {
     expect(templateParams(template('gym'), { ...base, name: 'Gym' }).category_id).toBe('');
   });
 
+  it('matches hints as word prefixes, not inside other words', () => {
+    const seeded = [
+      { id: 'cat_transport', name: 'Transportation', kind: 'expense' as const },
+      { id: 'cat_health', name: 'Healthcare', kind: 'expense' as const },
+    ];
+    expect(templateParams(template('gym'), { ...base, categories: seeded, name: 'Gym' }).category_id).toBe('cat_health');
+  });
+
   it('only offers income and expense templates', () => {
     expect(RECURRING_TEMPLATES).toHaveLength(6);
     expect(RECURRING_TEMPLATES.every((t) => t.type === 'income' || t.type === 'expense')).toBe(true);

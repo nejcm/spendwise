@@ -107,7 +107,7 @@ export function templateParams(
 ): Record<string, string> {
   const fitting = categories.filter((c) => c.kind === template.type);
   const category = template.categoryHints
-    .map((hint) => fitting.find((c) => c.name.toLowerCase().includes(hint)))
+    .map((hint) => fitting.find((c) => c.name.toLowerCase().split(/\P{L}+/u).some((word) => word.startsWith(hint))))
     .find(Boolean);
   const day = parseISO(today);
   return {

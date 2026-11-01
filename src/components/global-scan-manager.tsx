@@ -12,6 +12,7 @@ import { Alert } from '@/components/ui';
 import { useAccounts } from '@/features/accounts/api';
 import { useScanReceipt } from '@/features/ai/use-scan-receipt';
 import { useCategories } from '@/features/categories/api';
+import { firstFittingCategoryId } from '@/features/categories/helpers';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { useCreateTransaction } from '@/features/transactions/api';
 import { dateToUnix } from '@/lib/date/helpers';
@@ -75,7 +76,7 @@ export function GlobalScanManager() {
 
   const handleScanSuccess = async (result: ScannedReceipt) => {
     const accountId = transactionFormPrefs.account_id || accounts[0]?.id;
-    const categoryId = result.category_id || transactionFormPrefs.category_id || categories[0]?.id;
+    const categoryId = firstFittingCategoryId([result.category_id, transactionFormPrefs.category_id, categories[0]?.id], categories, result.type);
     if (!saveOnScan || !accountId || !categoryId) {
       const nextRoute = {
         pathname: '/transactions/new',

@@ -21,6 +21,11 @@ describe('transactionFormSchema', () => {
     expect(issuePaths({ ...valid, date: '2026-02-28' })).toEqual([]);
   });
 
+  it('rejects a negative base amount as invalid, not missing', () => {
+    expect(transactionFormSchema.safeParse({ ...valid, baseAmount: '-5' }).error?.issues).toMatchObject([{ path: ['baseAmount'], message: 'Enter a positive amount' }]);
+    expect(issuePaths({ ...valid, baseAmount: null })).toEqual([]);
+  });
+
   it('accepts a legacy single leg without a destination', () => {
     expect(issuePaths({ ...valid, type: 'transfer', to_account_id: null })).toEqual([]);
   });

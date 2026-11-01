@@ -1,4 +1,5 @@
-import { getSummaryByRange } from '@/features/insights/queries';
+import type { CategorySpend } from '@/features/insights/types';
+import { getCategorySpendByRange, getSummaryByRange } from '@/features/insights/queries';
 
 import { executeToolCall, getToolStatusMessage } from './tool-executor';
 
@@ -12,6 +13,7 @@ jest.mock('@/features/transactions/queries', () => ({
   getTransactionsSample: jest.fn(),
 }));
 
+const getCategorySpendByRangeMock = getCategorySpendByRange as jest.MockedFunction<typeof getCategorySpendByRange>;
 const getSummaryByRangeMock = getSummaryByRange as jest.MockedFunction<typeof getSummaryByRange>;
 
 describe('ai tool executor', () => {
@@ -33,5 +35,32 @@ describe('ai tool executor', () => {
       start_date: '2026-01-01',
       end_date: '2026-02-01',
     })).resolves.toBe(JSON.stringify({ error: 'Invalid date range' }));
+  });
+
+  it('reports category expense and income totals separately', async () => {
+    const row = (category_name: string, expense_total: number, income_total: number): CategorySpend => ({
+      category_id: category_name,
+      category_name,
+      category_color: '',
+      category_icon: '',
+      category_budget: null,
+      category_type: 'expense',
+      sort_order: 0,
+      total: expense_total + income_total,
+      income_total,
+      expense_total,
+      percentage: 0,
+    });
+    getCategorySpendByRangeMock.mockResolvedValueOnce([row('Food', 3000, 1000), row('Idle', 0, 0), row('Refunds', 0, 500)]);
+
+    const result = JSON.parse(await executeToolCall({} as never, 'get_category_spending', {
+      start_date: '2026-01-01',
+      end_date: '2026-02-01',
+    }));
+
+    expect(result.categories).toEqual([
+      { name: 'Food', kind: 'expense', expense_total: 30, income_total: 10, budget: null },
+      { name: 'Refunds', kind: 'expense', expense_total: 0, income_total: 5, budget: null },
+    ]);
   });
 });

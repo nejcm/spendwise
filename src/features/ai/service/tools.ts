@@ -3,7 +3,7 @@
 
 const TOOL_DESCRIPTIONS = {
   get_summary: 'Get income, expense, and balance totals for a date range. Use when the user asks about spending totals, income, savings, or balance for a period.',
-  get_category_spending: 'Get spending breakdown by category for a date range. Use when the user asks about category-level spending, budgets, or where money goes.',
+  get_category_spending: 'Get per-category totals for a date range, in the returned currency. Each category has expense_total (money spent) and income_total (money received), reported separately and never combined; kind (expense or income) is the category\'s configured kind, metadata only. budget is the monthly budget limit or null. Use when the user asks about category-level spending, income sources, budgets, or where money goes.',
   get_transactions: 'Get a sample of individual transactions for a date range. Use when the user asks to list, find, or show specific transactions, charges, or purchases.',
   get_trends: 'Get daily income/expense trend data for a date range. Use when the user asks about spending trends, patterns over time, or day-by-day breakdown.',
 } as const;

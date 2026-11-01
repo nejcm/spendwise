@@ -6,6 +6,17 @@ export function fitsTransactionType(category: Pick<Category, 'id' | 'kind'>, typ
   return type === 'transfer' || category.id === DEFAULT_CATEGORY_ID || category.kind === type;
 }
 
+export function firstFittingCategoryId(
+  ids: (string | null | undefined)[],
+  categories: Pick<Category, 'id' | 'kind'>[],
+  type: TransactionType,
+): string | undefined {
+  return ids.find((id) => {
+    const category = categories.find((c) => c.id === id);
+    return category && fitsTransactionType(category, type);
+  }) ?? undefined;
+}
+
 /** Starting values whose category contradicts the type: a given type drops the category, otherwise the type follows the category. */
 export function fitCategoryToType<T extends { type: TransactionType; category_id: string | null }>(
   values: T,

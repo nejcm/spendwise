@@ -10,6 +10,8 @@ import {
   format,
   getISOWeek,
   getISOWeeksInYear,
+  isValid,
+  parse,
   parseISO,
   setISOWeek,
   startOfDay,
@@ -274,14 +276,15 @@ export function scaleBudgetForPeriod(monthlyBudget: number, selection: PeriodSel
   return Math.round(monthlyBudget * daysInPeriod / daysInMonth);
 }
 
-export function tryFormatDate(date: string, dateFormat = 'yyyy-MM-dd') {
-  try {
-    return format(date, dateFormat);
-  }
-  catch (err) {
-    console.error('Error formatting date', err);
-    return undefined;
-  }
+/** Parse text typed in the user's date format to yyyy-MM-dd; null until it is a complete, real day. */
+export function parseDisplayDate(text: string, dateFormat: string): string | null {
+  const trimmed = text.trim();
+  const date = parse(trimmed, dateFormat, new Date());
+  return isValid(date) && format(date, dateFormat) === trimmed ? format(date, 'yyyy-MM-dd') : null;
+}
+
+export function formatISOForDisplay(value: string, dateFormat: string): string {
+  return isValidISODate(value) ? format(parseISO(value), dateFormat) : value;
 }
 
 /**

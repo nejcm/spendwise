@@ -16,7 +16,7 @@ const transactionFormFields = z.object({
   type: z.enum(['expense', 'income', 'transfer'] as TransactionType[]),
   currency: z.enum(CURRENCY_VALUES as CurrencyKey[]),
   amount: z.string().min(1, amountError).refine(refinePositiveNumber, amountError),
-  baseAmount: z.string().nullable().refine(refinePositiveNumberOrNull, translate('transactions.base_amount_required')),
+  baseAmount: z.string().nullable().refine(refinePositiveNumberOrNull, translate('transactions.form.base_amount_invalid')),
   category_id: z.string(),
   account_id: z.string().min(1, translate('transactions.account_required')),
   // null: a legacy transfer leg without a pair, edited as a single row

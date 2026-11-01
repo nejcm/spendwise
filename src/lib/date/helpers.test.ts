@@ -4,10 +4,12 @@ import {
   commitPickerDate,
   dateToUnix,
   findClosestDateBinary,
+  formatISOForDisplay,
   getCurrentMonthRange,
   getPeriodRange,
   isValidISODate,
   navigatePeriod,
+  parseDisplayDate,
   scaleBudgetForPeriod,
   splitBy,
   unixToCalendarDate,
@@ -26,6 +28,24 @@ describe('getCurrentMonthRange', () => {
 
   it('rolls over to next year for December', () => {
     expect(getCurrentMonthRange('2026-12')).toEqual([Date.UTC(2026, 11, 1) / 1000, Date.UTC(2027, 0, 1) / 1000]);
+  });
+});
+
+describe('parseDisplayDate', () => {
+  it('returns ISO for a complete day in the user format', () => {
+    expect(parseDisplayDate('01.11.2026', 'dd.MM.yyyy')).toBe('2026-11-01');
+    expect(parseDisplayDate('11/01/2026', 'MM/dd/yyyy')).toBe('2026-11-01');
+    expect(parseDisplayDate('Nov 1, 2026', 'MMM d, yyyy')).toBe('2026-11-01');
+    expect(parseDisplayDate('2026-11-01', 'yyyy-MM-dd')).toBe('2026-11-01');
+  });
+
+  it('returns null for partial or impossible input', () => {
+    for (const v of ['', '01.11.', '01.11.2', '30.02.2026', '2026-11-01']) expect(parseDisplayDate(v, 'dd.MM.yyyy')).toBeNull();
+  });
+
+  it('round-trips with formatISOForDisplay', () => {
+    expect(formatISOForDisplay('2026-11-01', 'dd.MM.yyyy')).toBe('01.11.2026');
+    expect(formatISOForDisplay('', 'dd.MM.yyyy')).toBe('');
   });
 });
 

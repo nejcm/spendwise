@@ -41,13 +41,13 @@ async function executeCategorySpending(db: SQLiteDatabase, args: ToolArgs) {
   return {
     currency: displayCurrency,
     categories: rows
-      .filter((r) => r.total > 0)
-      .sort((a, b) => b.total - a.total)
+      .filter((r) => r.expense_total > 0 || r.income_total > 0)
+      .sort((a, b) => b.expense_total - a.expense_total || b.income_total - a.income_total)
       .map((r) => ({
         name: r.category_name,
-        total: centsToAmount(r.total),
-        percentage: Number(r.percentage.toFixed(1)),
-        type: r.category_type,
+        kind: r.category_type,
+        expense_total: centsToAmount(r.expense_total),
+        income_total: centsToAmount(r.income_total),
         budget: r.category_budget === null ? null : centsToAmount(r.category_budget),
       })),
   };

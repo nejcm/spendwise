@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { ModalSheet, useModalSheet } from '@/components/ui/modal-sheet';
 import { todayISO } from '@/features/formatting/helpers';
 import { IS_WEB } from '@/lib/base';
-import { commitPickerDate, tryFormatDate } from '@/lib/date/helpers';
+import { commitPickerDate, formatISOForDisplay, parseDisplayDate } from '@/lib/date/helpers';
 import { getLanguage, translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
@@ -29,6 +29,12 @@ export function DateInput({ label, value, onChange, error, modalProps, displayVa
   const { width } = useWindowDimensions();
 
   const dateValue = React.useMemo(() => parseISO(value || todayISO()), [value]);
+  const [webText, setWebText] = React.useState(() => formatISOForDisplay(value, dateFormat));
+  const [webTextSource, setWebTextSource] = React.useState({ value, dateFormat });
+  if (webTextSource.value !== value || webTextSource.dateFormat !== dateFormat) {
+    setWebTextSource({ value, dateFormat });
+    setWebText(formatISOForDisplay(value, dateFormat));
+  }
   const onChangeRef = React.useRef(onChange);
   onChangeRef.current = onChange;
 
@@ -67,15 +73,20 @@ export function DateInput({ label, value, onChange, error, modalProps, displayVa
     return (
       <Input
         label={label}
-        value={value ? tryFormatDate(value, dateFormat) || value : ''}
+        value={webText}
         placeholder={translate('common.select_date')}
         textContentType="dateTime"
         error={error}
-        onChangeText={(v) => {
-          const formatted = tryFormatDate(v, dateFormat) || v;
-          onChange(formatted);
+        onChangeText={(text) => {
+          setWebText(text);
+          const iso = text.trim() ? parseDisplayDate(text, dateFormat) : '';
+          if (iso !== null) onChange(iso);
         }}
         {...rest}
+        onBlur={(e) => {
+          setWebText(formatISOForDisplay(value, dateFormat));
+          rest.onBlur?.(e);
+        }}
       />
     );
   }

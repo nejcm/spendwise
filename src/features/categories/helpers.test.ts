@@ -1,6 +1,6 @@
 import { DEFAULT_CATEGORY_ID } from '@/config';
 
-import { fitCategoryToType, fitsTransactionType } from './helpers';
+import { firstFittingCategoryId, fitCategoryToType, fitsTransactionType } from './helpers';
 
 describe('fitsTransactionType', () => {
   const food = { id: 'cat_food', kind: 'expense' as const };
@@ -43,5 +43,14 @@ describe('fitCategoryToType', () => {
     expect(fitCategoryToType(unknown, categories, remembered)).toBe(unknown);
     const transfer = { type: 'transfer' as const, category_id: 'cat_salary' };
     expect(fitCategoryToType(transfer, categories, remembered)).toBe(transfer);
+  });
+});
+
+describe('firstFittingCategoryId', () => {
+  const categories = [{ id: 'cat_food', kind: 'expense' as const }, { id: 'cat_salary', kind: 'income' as const }];
+
+  it('skips missing, unknown and other-kind ids', () => {
+    expect(firstFittingCategoryId([undefined, 'cat_gone', 'cat_salary', 'cat_food'], categories, 'expense')).toBe('cat_food');
+    expect(firstFittingCategoryId(['cat_food'], categories, 'income')).toBeUndefined();
   });
 });

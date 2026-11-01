@@ -4,15 +4,14 @@ import * as React from 'react';
 import { ScrollView } from 'react-native';
 import { HeaderButton, PageHeader } from '@/components/page-header';
 import { Copy, FocusAwareStatusBar, GhostButton, RepeatIcon, Text, View } from '@/components/ui';
-import { ChevronLeft, Pencil, TrashIcon } from '@/components/ui/icon';
+import { ChevronLeft, Pencil } from '@/components/ui/icon';
 import { NAV_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
-import { showSnackbar } from '@/components/ui/snackbar';
 import { useRuleForTransaction } from '@/features/scheduled-transactions/hooks';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { goBackOrFallback } from '@/lib/routing';
 import { centsToAmount } from '../formatting/helpers';
-import { useCreateTransaction, useDeleteTransaction, useDuplicateTransfer, useRestoreTransaction, useTransaction } from './api';
+import { useCreateTransaction, useDeleteTransactionWithUndo, useDuplicateTransfer, useTransaction } from './api';
 import { DetailAction, DetailHero, DetailRows, FxNote } from './components/transaction-detail-parts';
 import { TransactionForm } from './components/transaction-form';
 import { transactionToFormValues } from './components/transaction-form-schema';
@@ -26,16 +25,15 @@ function useTransactionActions(transaction: TransactionWithCategory | null | und
   const router = useRouter();
   const createMut = useCreateTransaction();
   const duplicateTransferMut = useDuplicateTransfer();
-  const deleteMut = useDeleteTransaction();
-  const restoreMut = useRestoreTransaction();
+  const deleteMut = useDeleteTransactionWithUndo();
+  const deletingRef = React.useRef(false);
 
   const remove = () => {
-    if (!transaction) return;
+    if (!transaction || deletingRef.current) return;
+    deletingRef.current = true;
     deleteMut.mutate(transaction.id, {
-      onSuccess: (deleted) => {
-        goBackOrFallback(router);
-        showSnackbar({ title: translate('transactions.deleted'), icon: TrashIcon, undo: () => restoreMut.mutate(deleted) });
-      },
+      onSuccess: () => goBackOrFallback(router),
+      onSettled: () => { deletingRef.current = false; },
     });
   };
 

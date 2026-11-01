@@ -9,7 +9,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Alert } from '@/components/ui';
-import { CircleAlert } from '@/components/ui/icon';
+import { CircleAlert, TrashIcon } from '@/components/ui/icon';
 import { showSnackbar } from '@/components/ui/snackbar';
 import { computeBaseAmount } from '@/features/currencies/conversion';
 import { getRatesForDate, getRatesForDates } from '@/features/currencies/queries';
@@ -214,7 +214,7 @@ export function useDeleteTransaction() {
   });
 }
 
-export function useRestoreTransaction() {
+function useRestoreTransaction() {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
 
@@ -224,6 +224,23 @@ export function useRestoreTransaction() {
       invalidateFor(queryClient, 'transaction', 'scheduledTransaction');
     },
     onError: onUndoError,
+  });
+}
+
+/** Single delete with an Undo snackbar; hook-level callbacks so it still fires after the screen unmounts. */
+export function useDeleteTransactionWithUndo() {
+  const db = useSQLiteContext();
+  const queryClient = useQueryClient();
+  const restore = useRestoreTransaction();
+
+  return useMutation({
+    mutationFn: (id: string) => queries.deleteTransaction(db, id),
+    onSuccess: (deleted) => {
+      invalidateFor(queryClient, 'transaction');
+      if (deleted.transactions.length === 0) return;
+      showSnackbar({ title: translate('transactions.deleted'), icon: TrashIcon, undo: () => restore.mutate(deleted) });
+    },
+    onError,
   });
 }
 

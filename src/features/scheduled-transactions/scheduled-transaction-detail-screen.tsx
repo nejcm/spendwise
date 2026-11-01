@@ -6,9 +6,8 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderButton, PageHeader } from '@/components/page-header';
 import { AmountText, Card, FocusAwareStatusBar, getPressedStyle, GhostButton, IconTile, ListRow, PauseIcon, PlayIcon, SectionHeader, Switch, Text } from '@/components/ui';
-import { ChevronLeft, Pencil, TrashIcon } from '@/components/ui/icon';
+import { ChevronLeft, Pencil } from '@/components/ui/icon';
 import { NAV_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
-import { showSnackbar } from '@/components/ui/snackbar';
 import { translateCount } from '@/features/categories/helpers';
 import { formatDate, formatDateFull } from '@/features/formatting/helpers';
 import { runUpcomingBillsCheck } from '@/features/notifications/notifications';
@@ -19,10 +18,10 @@ import { unixToISODate } from '@/lib/date/helpers';
 import { useCurrentDay } from '@/lib/hooks/use-current-year-month';
 import { translate } from '@/lib/i18n';
 import { goBackOrFallback } from '@/lib/routing';
-import { getAppState, updateNotifications, useAppStore } from '@/lib/store/store';
+import { getAppState, useAppStore } from '@/lib/store/store';
 import {
+  setBillRuleMuted,
   useDeleteScheduledTransaction,
-  useRestoreScheduledTransaction,
   useRulePayments,
   useScheduledTransaction,
   useUpdateScheduledTransaction,
@@ -43,8 +42,7 @@ function useMutedBillRule(ruleId: string) {
   const db = useSQLiteContext();
   const mutedIds = useAppStore((s) => s.notifications.mutedBillRules);
   const setMuted = (muted: boolean) => {
-    const rest = (getAppState().notifications.mutedBillRules ?? []).filter((id) => id !== ruleId);
-    updateNotifications({ mutedBillRules: muted ? [...rest, ruleId] : rest });
+    setBillRuleMuted(ruleId, muted);
     // The daily processor may already have skipped this rule today.
     if (!muted) runUpcomingBillsCheck(db, getAppState().notifications).catch((error) => captureError(error instanceof Error ? error : new Error(String(error))));
   };
@@ -57,9 +55,8 @@ export function ScheduledTransactionDetailScreen() {
   const insets = useSafeAreaInsets();
   const [isEditing, setIsEditing] = React.useState(false);
   const { data: rule, isLoading } = useScheduledTransaction(id);
-  const [muted, setMuted] = useMutedBillRule(id);
   const deleteMut = useDeleteScheduledTransaction();
-  const restoreMut = useRestoreScheduledTransaction();
+  const deletingRef = React.useRef(false);
   const updateMut = useUpdateScheduledTransaction();
   const today = useCurrentDay();
 
@@ -85,17 +82,11 @@ export function ScheduledTransactionDetailScreen() {
   }
 
   const remove = () => {
+    if (deletingRef.current) return;
+    deletingRef.current = true;
     deleteMut.mutate(id, {
-      onSuccess: (deleted) => {
-        const wasMuted = muted;
-        setMuted(false);
-        goBackOrFallback(router, '/scheduled');
-        showSnackbar({
-          title: translate('scheduled.deleted'),
-          icon: TrashIcon,
-          undo: () => restoreMut.mutateAsync(deleted).then(() => setMuted(wasMuted), () => {}),
-        });
-      },
+      onSuccess: () => goBackOrFallback(router, '/scheduled'),
+      onSettled: () => { deletingRef.current = false; },
     });
   };
 

@@ -4,7 +4,7 @@ export type NotificationType = 'upcomingBills' | 'budgetAlerts' | 'lowBalance' |
 
 const NOTIFICATION_TYPES: NotificationType[] = ['upcomingBills', 'budgetAlerts', 'lowBalance', 'weeklyDigest', 'recommendations'];
 
-const OPT_IN_TYPES = new Set<NotificationType>(['lowBalance', 'weeklyDigest']);
+const OPT_IN_TYPES = new Set<NotificationType>(['lowBalance', 'weeklyDigest', 'recommendations']);
 
 // Mirrors the checks: opt-in types fire only when `true`, the rest unless `false`.
 function isTypeEnabled(settings: NotificationSettings, type: NotificationType): boolean {

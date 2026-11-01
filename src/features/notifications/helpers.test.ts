@@ -12,6 +12,7 @@ describe('isNotificationOn', () => {
     expect(isNotificationOn({ global: true }, 'upcomingBills')).toBe(true);
     expect(isNotificationOn({ global: true }, 'lowBalance')).toBe(false);
     expect(isNotificationOn({ global: true }, 'weeklyDigest')).toBe(false);
+    expect(isNotificationOn({ global: true }, 'recommendations')).toBe(false);
   });
 });
 

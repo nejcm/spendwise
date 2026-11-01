@@ -171,6 +171,8 @@
     "today": "Heute",
     "tomorrow": "Morgen",
     "total": "Gesamt",
+    "undo": "Rückgängig",
+    "view": "Ansehen",
     "week": "Woche",
     "year": "Jahr",
     "yes": "Ja",
@@ -297,6 +299,10 @@
     "no_data": "Keine Daten",
     "spending_by_category": "Ausgaben nach Kategorie",
     "title": "Einblicke"
+  },
+  "nav": {
+    "activity": "Aktivität",
+    "add_transaction_hint": "Lange drücken: {{action}}"
   },
   "notifications": {
     "android_requested": "Benachrichtigungsberechtigungen wurden angefragt. Du kannst sie auch in den Systemeinstellungen anpassen.",

@@ -23,6 +23,7 @@ import {
   BrainCircuit as LucideBrainCircuit,
   Calendar as LucideCalendar,
   Camera as LucideCamera,
+  ChartNoAxesColumn as LucideChartNoAxesColumn,
   Check as LucideCheck,
   ChevronDown as LucideChevronDown,
   ChevronLeft as LucideChevronLeft,
@@ -46,6 +47,7 @@ import {
   LayoutGrid as LucideLayoutGrid,
   Lightbulb as LucideLightbulb,
   Link as LucideLink,
+  List as LucideList,
   ListChecks as LucideListChecks,
   Paintbrush as LucidePaintbrush,
   Pause as LucidePause,
@@ -113,6 +115,7 @@ export const Brain = createIcon(LucideBrain);
 export const BrainCircuit = createIcon(LucideBrainCircuit);
 export const Calendar = createIcon(LucideCalendar);
 export const Camera = createIcon(LucideCamera);
+export const ChartNoAxesColumn = createIcon(LucideChartNoAxesColumn);
 export const Check = createIcon(LucideCheck);
 export const ChevronDown = createIcon(LucideChevronDown);
 export const CircleDollarSign = createIcon(LucideCircleDollarSign);
@@ -133,6 +136,7 @@ export const Languages = createIcon(LucideLanguages);
 export const LayoutGrid = createIcon(LucideLayoutGrid);
 export const Lightbulb = createIcon(LucideLightbulb);
 export const Link = createIcon(LucideLink);
+export const List = createIcon(LucideList);
 export const ListChecks = createIcon(LucideListChecks);
 export const Pencil = createIcon(LucidePencil);
 export const PencilOff = createIcon(LucidePencilOff);

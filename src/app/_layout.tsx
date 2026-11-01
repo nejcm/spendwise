@@ -7,7 +7,6 @@ import { SQLiteProvider } from 'expo-sqlite';
 import * as React from 'react';
 import { useEffect } from 'react';
 import { AppState, StyleSheet } from 'react-native';
-import FlashMessage from 'react-native-flash-message';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,6 +14,7 @@ import { AppErrorBoundary } from '@/components/app-error-boundary';
 import { GlobalScanManager } from '@/components/global-scan-manager';
 import { SafeAreaView, View } from '@/components/ui';
 import { NavTabBar } from '@/components/ui/nav-tab-bar';
+import { SnackbarHost } from '@/components/ui/snackbar';
 import { DB_NAME } from '@/config';
 import { useCurrencyRates } from '@/features/currencies/api';
 import { AutoBackupProcessor } from '@/features/imports-export/auto-backup-processor';
@@ -133,7 +133,6 @@ function WebFontsLoader({ children }: { children?: React.ReactNode }) {
   return children;
 }
 
-const flashListStyle = IS_WEB ? undefined : { paddingTop: 32 };
 // Bottom is owned by PersistentTabBar so the tab bar's background can extend
 // into the Android navigation-bar gutter.
 const SAFE_AREA_EDGES = ['top', 'left', 'right'] as const;
@@ -164,10 +163,7 @@ function Providers({ children }: { children: React.ReactNode }) {
                                 {children}
                               </SafeAreaView>
                             </View>
-                            <FlashMessage
-                              position="top"
-                              style={flashListStyle}
-                            />
+                            <SnackbarHost />
                             {__DEV__ && IS_WEB && <DevThemeToggle />}
                           </BottomSheetModalProvider>
                         </FontLoader>

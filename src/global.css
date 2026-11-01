@@ -93,6 +93,8 @@
 
   --color-primary: #17151c;
   --color-primary-foreground: #ffffff;
+  --color-fab: #17151c;
+  --color-fab-foreground: #ffffff;
 
   --color-positive: #1d7a4b;
   --color-negative: #b42318;
@@ -131,6 +133,8 @@
 
       --color-primary: #17151c;
       --color-primary-foreground: #ffffff;
+      --color-fab: #17151c;
+      --color-fab-foreground: #ffffff;
 
       --color-positive: #1d7a4b;
       --color-negative: #b42318;
@@ -165,6 +169,8 @@
 
       --color-primary: #d4f05a;
       --color-primary-foreground: #111214;
+      --color-fab: #ffffff;
+      --color-fab-foreground: #111214;
 
       --color-positive: #8fe0a6;
       --color-negative: #ff8a80;

@@ -2,8 +2,8 @@ import type { AiProviderType } from './types';
 import type { AppState } from '@/lib/store/store';
 import * as React from 'react';
 import { Linking, Pressable, View } from 'react-native';
-import { showMessage } from 'react-native-flash-message';
 import { FocusAwareStatusBar, Input, ScrollView, Select, SolidButton, Text } from '@/components/ui';
+import { showSnackbar } from '@/components/ui/snackbar';
 import { setAiProvider, setAnthropicApiKey, setOpenaiApiKey, useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { translate } from '../../lib/i18n';
@@ -34,12 +34,7 @@ export function AiSettingsScreen() {
     setOpenaiApiKey(openaiInputRef.current);
     setAnthropicApiKey(anthropicInputRef.current);
     setDirty(false);
-    showMessage({
-      message: translate('settings.saved'),
-      type: 'success',
-      duration: 2500,
-      icon: 'success',
-    });
+    showSnackbar({ title: translate('settings.saved') });
   }, [setDirty]);
 
   return (

@@ -5,50 +5,29 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
+  ChartNoAxesColumn,
   Home,
   LayoutGrid,
-  ListChecks,
-  PieChart,
-  PlusIcon,
+  List,
+  Plus,
 } from '@/components/ui/icon';
+import { cn } from '@/lib/cn';
+import { translate } from '@/lib/i18n';
 import { triggerScan } from '@/lib/store/local-store';
 import { useAppStore } from '@/lib/store/store';
-import { SolidButton } from './solid-button';
+import { getPressedStyle } from './button';
+import { Text } from './text';
 
-export const NAV_BAR_HEIGHT = 66 as const;
-const bgColor = `bg-gray-50`;
-const darkBgColor = `dark:bg-[#17191C]`;
-// Mirrors the `p-2` on the bar. The bottom safe-area inset is added on top of
-// it so the bar's own background paints the Android navigation-bar gutter —
-// the root SafeAreaView deliberately no longer claims that edge.
-const TAB_BAR_PADDING = 8;
+export const NAV_BAR_HEIGHT = 50 as const;
+// Bottom padding floor; the bar paints the safe-area gutter itself since the root SafeAreaView skips that edge.
+export const TAB_BAR_PADDING = 8;
 
 const TABS = [
-  {
-    name: 'index',
-    path: '/',
-    icon: Home,
-  },
-  {
-    name: 'categories',
-    path: '/categories',
-    icon: LayoutGrid,
-  },
-  {
-    name: '__add__',
-    path: '__add__',
-    icon: PlusIcon,
-  },
-  {
-    name: 'transactions',
-    path: '/transactions',
-    icon: ListChecks,
-  },
-  {
-    name: 'stats',
-    path: '/stats',
-    icon: PieChart,
-  },
+  { name: 'index', path: '/', icon: Home, label: 'home.title' },
+  { name: 'categories', path: '/categories', icon: LayoutGrid, label: 'common.categories' },
+  { name: '__add__', path: '__add__', icon: Plus, label: 'home.add_transaction' },
+  { name: 'transactions', path: '/transactions', icon: List, label: 'nav.activity' },
+  { name: 'stats', path: '/stats', icon: ChartNoAxesColumn, label: 'insights.title' },
 ] as const;
 
 type TabConfig = (typeof TABS)[number];
@@ -65,22 +44,27 @@ export function NavTabBar() {
 
   return (
     <View
-      className={`flex-row border-t border-gray-200 p-2 dark:border-gray-800 ${bgColor} ${darkBgColor}`}
+      accessibilityRole="tablist"
+      className="flex-row items-start justify-around border-t border-border bg-card px-2 pt-2.5 dark:bg-background"
       style={{
         elevation: 0,
-        minHeight: NAV_BAR_HEIGHT + insets.bottom,
-        paddingBottom: TAB_BAR_PADDING + insets.bottom,
+        minHeight: NAV_BAR_HEIGHT + Math.max(insets.bottom, TAB_BAR_PADDING),
+        paddingBottom: Math.max(insets.bottom, TAB_BAR_PADDING),
       }}
     >
       {TABS.map((tab) => {
-        const isAddButton = tab.name === '__add__';
         const Icon = tab.icon;
+        const label = translate(tab.label);
 
-        if (isAddButton) {
+        if (tab.name === '__add__') {
           return (
-            <View key="add" className="flex-1 items-center justify-center">
-              <SolidButton
-                color="primary"
+            <View key="add" className="h-10 w-16 items-center">
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={label}
+                accessibilityHint={translate('nav.add_transaction_hint', {
+                  action: translate(`settings.long_press_action_options.${longPressAction}`),
+                })}
                 onPress={() => router.push('/transactions/new')}
                 onLongPress={() =>
                   triggerScan(
@@ -89,14 +73,11 @@ export function NavTabBar() {
                       : 'camera',
                   )}
                 delayLongPress={400}
-                className="size-12 items-center justify-center rounded-full p-0"
+                style={getPressedStyle}
+                className="-mt-1.5 size-[52px] items-center justify-center rounded-full bg-fab"
               >
-                <Icon
-                  colorClassName="accent-primary-foreground"
-                  size={24}
-                  strokeWidth={2}
-                />
-              </SolidButton>
+                <Icon colorClassName="accent-fab-foreground" size={22} strokeWidth={2.2} />
+              </Pressable>
             </View>
           );
         }
@@ -106,17 +87,23 @@ export function NavTabBar() {
         return (
           <Pressable
             key={tab.name}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: isActive }}
+            accessibilityLabel={label}
             onPress={() => isActive ? undefined : router.replace(tab.path)}
-            className="flex-1 items-center justify-center gap-1"
+            className="w-16 items-center gap-1"
           >
             <Icon
-              colorClassName={isActive ? 'accent-foreground' : 'accent-gray-500'}
-              size={24}
-              strokeWidth={2}
+              colorClassName={isActive ? 'accent-foreground' : 'accent-muted-foreground'}
+              size={22}
+              strokeWidth={1.8}
             />
-            {isActive && (
-              <View className="size-1 rounded-full bg-black dark:bg-white" />
-            )}
+            <Text
+              numberOfLines={1}
+              className={cn('text-[11px] leading-[14px]', isActive ? 'font-semibold text-foreground' : 'text-muted-foreground')}
+            >
+              {label}
+            </Text>
           </Pressable>
         );
       })}

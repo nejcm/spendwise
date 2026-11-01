@@ -10,7 +10,7 @@ import { todayUnix } from '@/features/formatting/helpers';
 import { createTransaction } from '@/features/transactions/queries';
 import { parseToCents } from '@/lib/data/money';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
-import { generateId } from '@/lib/sqlite';
+import { generateId, withWriteTransaction } from '@/lib/sqlite';
 import { SEED_ACCOUNT_ID } from '@/lib/sqlite/seed';
 
 // ─── Read Queries ───
@@ -223,7 +223,7 @@ export async function createAccount(
 ): Promise<string> {
   const id = generateId();
   const opening = await buildOpeningBalance(db, data.opening_balance, data.currency, baseCurrency);
-  await db.withTransactionAsync(async () => {
+  await withWriteTransaction(db, async () => {
     await insertAccount(db, id, data);
     if (opening) await createTransaction(db, { ...opening, account_id: id });
   });
@@ -261,7 +261,7 @@ export async function setupFirstAccount(
   }
 
   const opening = await buildOpeningBalance(db, data.opening_balance, data.currency, preferredCurrency);
-  await db.withTransactionAsync(async () => {
+  await withWriteTransaction(db, async () => {
     const { changes } = await db.runAsync(
       `UPDATE accounts SET name = ?, icon = ?, type = ?, currency = ?, updated_at = strftime('%s','now') ${UNUSED_SEED_GUARD}`,
       [data.name, data.icon, data.type, data.currency, SEED_ACCOUNT_ID, SEED_ACCOUNT_ID],
@@ -296,7 +296,7 @@ export async function updateAccountOrder(
   db: SQLiteDatabase,
   items: Array<{ id: string; sort_order: number }>,
 ): Promise<void> {
-  await db.withTransactionAsync(async () => {
+  await withWriteTransaction(db, async () => {
     for (const item of items) {
       await db.runAsync('UPDATE accounts SET sort_order = ? WHERE id = ?', [item.sort_order, item.id]);
     }

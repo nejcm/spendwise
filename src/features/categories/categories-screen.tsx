@@ -20,14 +20,8 @@ import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { CategoriesEditList } from './components/categories-edit-list';
 import { CategoryTile, NewCategoryTile } from './components/category-tile';
-import { isUncategorised, periodMonthName, translateCount } from './helpers';
+import { amountFor, inKindTab, periodMonthName, translateCount } from './helpers';
 import { useFormatMoney } from './hooks';
-
-const amountFor = (kind: CategoryType, item: CategorySpend) => kind === 'income' ? item.income_total : item.expense_total;
-
-function inTab(kind: CategoryType, item: CategorySpend) {
-  return isUncategorised(item.category_id) ? amountFor(kind, item) > 0 : item.category_type === kind;
-}
 
 export function CategoriesScreen() {
   const { edit } = useLocalSearchParams<{ edit?: string }>();
@@ -46,7 +40,7 @@ function CategoriesOverview() {
   usePrefetchAdjacentPeriods(selection, (start, end) => categorySpendByRangeQueryOptions(db, start, end));
 
   const tabs = React.useMemo(() => {
-    const byKind = (k: CategoryType) => data.filter((item) => inTab(k, item));
+    const byKind = (k: CategoryType) => data.filter((item) => inKindTab(k, item));
     return { expense: byKind('expense'), income: byKind('income') };
   }, [data]);
   const items = tabs[kind];
@@ -117,7 +111,7 @@ function CategoriesOverview() {
                               item={cell}
                               kind={kind}
                               budget={budgetFor(cell)}
-                              onPress={() => router.push({ pathname: '/categories/[id]', params: { id: cell.category_id } })}
+                              onPress={() => router.push({ pathname: '/categories/[id]', params: { id: cell.category_id, kind } })}
                             />
                           ))}
                       {row.length === 1 && <View className="flex-1" />}

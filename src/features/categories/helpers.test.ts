@@ -1,6 +1,6 @@
 import { DEFAULT_CATEGORY_ID } from '@/config';
 
-import { averageOfLast, buildMonthBars, firstFittingCategoryId, fitCategoryToType, fitsTransactionType, monthBarsRange, paletteColorName, rankMoveTargets } from './helpers';
+import { averageOfLast, buildMonthBars, firstFittingCategoryId, fitCategoryToType, fitsTransactionType, inKindTab, monthBarsRange, paletteColorName, rankMoveTargets, routeKind } from './helpers';
 
 describe('fitsTransactionType', () => {
   const food = { id: 'cat_food', kind: 'expense' as const };
@@ -99,5 +99,32 @@ describe('paletteColorName', () => {
     expect(paletteColorName('#FB923C')).toEqual({ hue: 'orange', step: 400 });
     expect(paletteColorName('#831843')).toEqual({ hue: 'pink', step: 900 });
     expect(paletteColorName('#333333')).toBeNull();
+  });
+});
+
+describe('inKindTab', () => {
+  const spend = (category_id: string, category_type: 'expense' | 'income', expense_total: number, income_total: number) =>
+    ({ category_id, category_type, expense_total, income_total }) as any;
+
+  it('lists a category under its own kind and under any kind it has activity in', () => {
+    const switched = spend('cat_food', 'income', 1000, 0);
+    expect(inKindTab('expense', switched)).toBe(true);
+    expect(inKindTab('income', switched)).toBe(true);
+    const idle = spend('cat_food', 'expense', 0, 0);
+    expect(inKindTab('expense', idle)).toBe(true);
+    expect(inKindTab('income', idle)).toBe(false);
+  });
+
+  it('lists Uncategorised only where it has activity', () => {
+    expect(inKindTab('expense', spend(DEFAULT_CATEGORY_ID, 'expense', 0, 200000))).toBe(false);
+    expect(inKindTab('income', spend(DEFAULT_CATEGORY_ID, 'expense', 0, 200000))).toBe(true);
+  });
+});
+
+describe('routeKind', () => {
+  it('prefers a valid kind param and falls back to the stored kind', () => {
+    expect(routeKind('income', 'expense')).toBe('income');
+    expect(routeKind('transfer', 'income')).toBe('income');
+    expect(routeKind(undefined, undefined)).toBe('expense');
   });
 });

@@ -6,7 +6,7 @@ import type { RatesMap } from '@/features/currencies/queries';
 
 import { convertAmount } from '@/features/currencies/queries';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
-import { generateId } from '@/lib/sqlite';
+import { generateId, withWriteTransaction } from '@/lib/sqlite';
 
 // ─── Read Queries ───
 
@@ -182,7 +182,7 @@ export async function createTransfer(
 ): Promise<string> {
   const [outLeg, inLeg] = await buildTransferLegs(db, data, rates, generateId());
   const outId = generateId();
-  await db.withTransactionAsync(async () => {
+  await withWriteTransaction(db, async () => {
     await createTransactionRow(db, outId, outLeg);
     await createTransactionRow(db, generateId(), inLeg);
   });
@@ -203,7 +203,7 @@ export async function updateTransfer(
   rates: RatesMap,
 ): Promise<void> {
   const legs = await buildTransferLegs(db, data, rates, transferId);
-  await db.withTransactionAsync(async () => {
+  await withWriteTransaction(db, async () => {
     for (const [leg, side] of [[legs[0], 'amount < 0'], [legs[1], 'amount > 0']] as const) {
       await db.runAsync(
         `UPDATE transactions
@@ -223,7 +223,7 @@ export async function duplicateTransfer(
   const newTransferId = generateId();
   const outId = generateId();
   const copied = INSERT_COLUMNS.slice(1, -2).join(', ');
-  await db.withTransactionAsync(async () => {
+  await withWriteTransaction(db, async () => {
     for (const [id, side] of [[outId, 'amount < 0'], [generateId(), 'amount > 0']] as const) {
       await db.runAsync(
         `INSERT INTO transactions (id, ${copied}, transfer_id, is_adjustment)
@@ -246,7 +246,7 @@ export async function createTransactions(
     return [];
   }
   const allIds: string[] = [];
-  await db.withTransactionAsync(async () => {
+  await withWriteTransaction(db, async () => {
     for (let offset = 0; offset < dataList.length; offset += MAX_TRANSACTION_ROWS_PER_BATCH) {
       const chunk = dataList.slice(offset, offset + MAX_TRANSACTION_ROWS_PER_BATCH);
       const ids = chunk.map(() => generateId());
@@ -286,7 +286,7 @@ export async function deleteTransactions(
 
   // Keep well below SQLite's usual 999 bind-variable limit.
   const chunkSize = 400;
-  await db.withTransactionAsync(async () => {
+  await withWriteTransaction(db, async () => {
     for (let offset = 0; offset < ids.length; offset += chunkSize) {
       const chunk = ids.slice(offset, offset + chunkSize);
       const placeholders = chunk.map(() => '?').join(', ');

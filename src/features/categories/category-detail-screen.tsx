@@ -1,4 +1,4 @@
-import type { CategorySpend } from '@/features/insights/types';
+import type { CategorySpend, CategoryType } from '@/features/insights/types';
 import type { PeriodSelection } from '@/lib/store/store';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
@@ -12,7 +12,7 @@ import { ChevronLeft, Pencil, Plus } from '@/components/ui/icon';
 import { SkeletonRows } from '@/components/ui/skeleton';
 import { formatNumber } from '@/features/formatting/helpers';
 import { useCategorySpendByRange } from '@/features/insights/api';
-import { isTransferInLeg, useTransactions } from '@/features/transactions/api';
+import { useTransactions } from '@/features/transactions/api';
 import { TransactionCard } from '@/features/transactions/components/transaction-card';
 import { buildTransactionsHref } from '@/features/transactions/route-params';
 import { cn } from '@/lib/cn';
@@ -25,13 +25,13 @@ import { goBackOrFallback } from '@/lib/routing';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { MonthBars } from './components/month-bars';
-import { averageOfLast, buildMonthBars, categoryIcon, categoryName, isUncategorised, monthBarsRange, periodMonthName, translateCount } from './helpers';
+import { averageOfLast, buildMonthBars, categoryIcon, categoryName, isUncategorised, monthBarsRange, periodMonthName, routeKind, translateCount } from './helpers';
 import { useCategoryMonthlyTotals, useFormatMoney } from './hooks';
 
 const RECENT_COUNT = 5;
 
 export function CategoryDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, kind: kindParam } = useLocalSearchParams<{ id: string; kind?: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const selection = useAppStore.use.periodSelection();
@@ -44,10 +44,11 @@ export function CategoryDetailScreen() {
 
   const { data: spend = [], isLoading } = useCategorySpendByRange(startDate, endDate);
   const category = spend.find((c) => c.category_id === id);
+  const kind = routeKind(kindParam, category?.category_type);
   const { data: allTransactions = [] } = useTransactions(startDate, endDate);
   const transactions = React.useMemo(
-    () => allTransactions.filter((t) => t.category_id === id && !isTransferInLeg(t)),
-    [allTransactions, id],
+    () => allTransactions.filter((t) => t.category_id === id && t.type === kind),
+    [allTransactions, id, kind],
   );
 
   return (
@@ -79,13 +80,13 @@ export function CategoryDetailScreen() {
                 ? <Text className="mt-10 text-center text-muted-foreground">{translate('categories.not_found')}</Text>
                 : (
                     <>
-                      <CategoryHero category={category} spend={spend} selection={selection} startDate={startDate} visits={transactions.length} />
-                      <SixMonths category={category} selection={selection} startDate={startDate} />
+                      <CategoryHero category={category} kind={kind} spend={spend} selection={selection} startDate={startDate} visits={transactions.length} />
+                      <SixMonths category={category} kind={kind} selection={selection} startDate={startDate} />
                       <SectionHeader
                         title={translate('transactions.title')}
                         actionLabel={transactions.length > RECENT_COUNT ? translate('categories.all_count', { count: transactions.length }) : undefined}
                         onSeeAll={transactions.length > RECENT_COUNT
-                          ? () => router.push(buildTransactionsHref({ categoryIds: [category.category_id], periodSelection: selection }))
+                          ? () => router.push(buildTransactionsHref({ categoryIds: [category.category_id], type: kind, periodSelection: selection }))
                           : undefined}
                       />
                       {transactions.length === 0
@@ -113,17 +114,18 @@ export function CategoryDetailScreen() {
 
 type HeroProps = {
   category: CategorySpend;
+  kind: CategoryType;
   spend: CategorySpend[];
   selection: PeriodSelection;
   startDate: number | undefined;
   visits: number;
 };
 
-function CategoryHero({ category, spend, selection, startDate, visits }: HeroProps) {
+function CategoryHero({ category, kind, spend, selection, startDate, visits }: HeroProps) {
   const format = useFormatMoney();
   const currency = useAppStore.use.currency();
   const numberFormat = useAppStore.use.numberFormat();
-  const isIncome = category.category_type === 'income';
+  const isIncome = kind === 'income';
   const amountOf = (c: CategorySpend) => isIncome ? c.income_total : c.expense_total;
   const amount = amountOf(category);
   const kindTotal = spend.reduce((sum, c) => sum + amountOf(c), 0);
@@ -176,7 +178,7 @@ function BudgetBar({ amount, budget }: { amount: number; budget: number }) {
   );
 }
 
-function SixMonths({ category, selection, startDate }: { category: CategorySpend; selection: PeriodSelection; startDate: number | undefined }) {
+function SixMonths({ category, kind, selection, startDate }: { category: CategorySpend; kind: CategoryType; selection: PeriodSelection; startDate: number | undefined }) {
   const format = useFormatMoney();
   const currentYearMonth = useCurrentYearMonth();
   const endYearMonth = periodMonthName(selection, startDate) && startDate !== undefined
@@ -184,8 +186,8 @@ function SixMonths({ category, selection, startDate }: { category: CategorySpend
     : currentYearMonth;
   const [start, end] = React.useMemo(() => monthBarsRange(endYearMonth), [endYearMonth]);
   const { data: rows = [] } = useCategoryMonthlyTotals(category.category_id, start, end);
-  const bars = buildMonthBars(rows, endYearMonth, category.category_type);
-  const budget = category.category_type === 'expense' ? category.category_budget ?? undefined : undefined;
+  const bars = buildMonthBars(rows, endYearMonth, kind);
+  const budget = kind === 'expense' ? category.category_budget ?? undefined : undefined;
 
   return (
     <Card className="mt-3 p-4">

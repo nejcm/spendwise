@@ -101,7 +101,7 @@ export function DetailRows({ transaction: t, rule }: { transaction: TransactionW
 
   const rows: { key: string; label: string; value: string; onPress?: () => void; full?: boolean }[] = [
     ...(t.category_id && t.category_name
-      ? [{ key: 'category', label: translate('transactions.category'), value: withIcon(t.category_icon, t.category_name), onPress: () => router.push(`/categories/${t.category_id}`) }]
+      ? [{ key: 'category', label: translate('transactions.category'), value: withIcon(t.category_icon, t.category_name), onPress: () => router.push(`/categories/${t.category_id}?kind=${t.type}`) }]
       : []),
     { key: 'account', label: translate(t.counter_account_id ? (t.amount < 0 ? 'transactions.form.from' : 'transactions.form.to') : 'transactions.account'), value: withIcon(account?.icon, account?.name ?? t.account_name), onPress: () => router.push(`/accounts/${t.account_id}`) },
     ...(t.counter_account_id

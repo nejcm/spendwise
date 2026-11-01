@@ -1,5 +1,5 @@
 import type { Category } from './types';
-import type { MonthlyTotals } from '@/features/insights/types';
+import type { CategorySpend, CategoryType, MonthlyTotals } from '@/features/insights/types';
 import type { TransactionType } from '@/features/transactions/types';
 import type { TxKeyPath } from '@/lib/i18n';
 import type { PeriodSelection } from '@/lib/store/store';
@@ -39,6 +39,18 @@ export function fitCategoryToType<T extends { type: TransactionType; category_id
 
 export function isUncategorised(id: string): boolean {
   return id === DEFAULT_CATEGORY_ID;
+}
+
+export const amountFor = (kind: CategoryType, item: CategorySpend) => kind === 'income' ? item.income_total : item.expense_total;
+
+/** Activity of that kind in the Period, or the category's own kind; Uncategorised only with activity. */
+export function inKindTab(kind: CategoryType, item: CategorySpend): boolean {
+  return amountFor(kind, item) > 0 || (!isUncategorised(item.category_id) && item.category_type === kind);
+}
+
+/** The `kind` route param when valid, else the category's stored kind. */
+export function routeKind(param: string | undefined, stored: CategoryType | undefined): CategoryType {
+  return param === 'income' || param === 'expense' ? param : stored ?? 'expense';
 }
 
 export function categoryName(id: string, name: string): string {

@@ -5,7 +5,7 @@ import type { MonthlyTotals } from '@/features/insights/types';
 
 import { DEFAULT_CATEGORY_ID } from '@/config';
 import { amountToCents } from '@/features/formatting/helpers';
-import { generateId } from '@/lib/sqlite';
+import { generateId, withWriteTransaction } from '@/lib/sqlite';
 
 export async function getCategories(db: SQLiteDatabase): Promise<Category[]> {
   return db.getAllAsync<Category>('SELECT * FROM categories ORDER BY sort_order ASC');
@@ -53,7 +53,7 @@ export async function deleteCategory(
   targetId?: string,
 ): Promise<void> {
   if (id === DEFAULT_CATEGORY_ID || targetId === id) throw new Error('invalid_category_delete');
-  await db.withTransactionAsync(async () => {
+  await withWriteTransaction(db, async () => {
     if (targetId) {
       if (targetId === DEFAULT_CATEGORY_ID) {
         await db.runAsync(`INSERT OR IGNORE INTO categories (id, name, icon, color, sort_order) VALUES (?, 'Unknown', '?', '#333333', 11)`, [DEFAULT_CATEGORY_ID]);
@@ -88,7 +88,7 @@ export async function updateCategoryOrder(
   db: SQLiteDatabase,
   items: Array<{ id: string; sort_order: number }>,
 ): Promise<void> {
-  await db.withTransactionAsync(async () => {
+  await withWriteTransaction(db, async () => {
     for (const item of items) {
       await db.runAsync('UPDATE categories SET sort_order = ? WHERE id = ?', [item.sort_order, item.id]);
     }

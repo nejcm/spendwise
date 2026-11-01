@@ -2,6 +2,8 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { CurrencyKey } from './';
 
+import { withWriteTransaction } from '@/lib/sqlite';
+
 import { computeBaseAmount } from './conversion';
 import { getRatesForDates } from './queries';
 
@@ -51,7 +53,7 @@ export async function recalculateAllBaseAmounts(
   }
   const updates = computed.map((tx) => ({ id: tx.id, baseAmount: outLegBase.get(tx.transfer_id) ?? tx.baseAmount }));
 
-  await db.withTransactionAsync(async () => {
+  await withWriteTransaction(db, async () => {
     for (const { id, baseAmount } of updates) {
       await db.runAsync(
         `UPDATE transactions SET baseAmount = ?, baseCurrency = ? WHERE id = ?`,

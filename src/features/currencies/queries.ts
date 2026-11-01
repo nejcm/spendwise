@@ -4,6 +4,7 @@ import type { CurrencyKey } from './';
 import type { RateMap } from './service';
 
 import { findClosestDateBinary, unixToISODate } from '@/lib/date/helpers';
+import { withWriteTransaction } from '@/lib/sqlite';
 import { CURRENCY_VALUES } from './';
 
 import { HISTORICAL_WALKBACK_CACHE_BUDGET_MS } from './providers/utils';
@@ -188,7 +189,7 @@ async function withTransactionUnlessNested(
     await task();
     return;
   }
-  await db.withTransactionAsync(task);
+  await withWriteTransaction(db, task);
 }
 
 async function insertCurrencyRateRows(

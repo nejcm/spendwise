@@ -9,7 +9,7 @@ import { addDays, addMonths, addWeeks, addYears, format, parseISO } from 'date-f
 import { computeBaseAmount } from '@/features/currencies/conversion';
 import { getRatesForDate } from '@/features/currencies/queries';
 import { unixToISODate } from '@/lib/date/helpers';
-import { generateId } from '@/lib/sqlite';
+import { generateId, withWriteTransaction } from '@/lib/sqlite';
 import { getAppState } from '@/lib/store/store';
 
 export { unixToISODate };
@@ -159,7 +159,7 @@ export async function processDueScheduledTransactions(
   let createdTransactions = 0;
   let updatedRules = 0;
 
-  await db.withTransactionAsync(async () => {
+  await withWriteTransaction(db, async () => {
     // Re-read so edits or pauses made during the prefetch win over the stale snapshot.
     const rules = await getDueRules(db, todayUnix);
     for (const rule of rules) {

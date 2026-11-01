@@ -1,4 +1,5 @@
 import { DEFAULT_CATEGORY_ID } from '@/config';
+import { withWriteTransaction } from '@/lib/sqlite';
 import { createTestDb } from '@/test-utils/sqlite-db';
 
 import { createCategory, deleteCategory, getCategories, getCategoryMonthlyTotals, getCategoryUsage, updateCategory } from './queries';
@@ -77,7 +78,17 @@ describe('category delete', () => {
 
   it('refuses to delete a used category without a target', async () => {
     const db = await seed();
-    await expect(deleteCategory(db as any, 'eat')).rejects.toThrow(/FOREIGN KEY/);
+    await expect(deleteCategory(db as any, 'eat')).rejects.toHaveProperty('message', expect.stringMatching(/FOREIGN KEY/));
+  });
+
+  it('waits for a concurrent write transaction instead of interleaving with it', async () => {
+    const db = await seed();
+    const other = withWriteTransaction(db as any, async () => {
+      await db.runAsync(`UPDATE recurring_rules SET amount = 2000 WHERE id = 'r1'`);
+    });
+    await Promise.all([other, deleteCategory(db as any, 'eat', 'go')]);
+    expect(await categoryOf(db, 'transactions', 't1')).toBe('go');
+    expect(await db.getFirstAsync('SELECT category_id, amount FROM recurring_rules WHERE id = ?', ['r1'])).toEqual({ category_id: 'go', amount: 2000 });
   });
 
   it('refuses to delete Uncategorised or move a category onto itself', async () => {

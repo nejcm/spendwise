@@ -3,6 +3,7 @@ import type { Account } from '../accounts/types';
 import type { Category } from '../categories/types';
 import type { ScheduledTransaction, ScheduledTransactionRun } from '../scheduled-transactions/types';
 import type { Transaction } from '../transactions/types';
+import { withWriteTransaction } from '@/lib/sqlite';
 import { clearDbData } from '@/lib/sqlite/db';
 import { BACKFILL_CATEGORY_KIND_SQL } from '@/lib/sqlite/migrations';
 import { getAppState } from '@/lib/store/store';
@@ -81,7 +82,7 @@ export async function importBackup(db: SQLiteDatabase, backup: BackupData): Prom
   // Clear all existing data (FK constraints disabled inside clearDbData)
   await clearDbData(db);
 
-  await db.withTransactionAsync(async () => {
+  await withWriteTransaction(db, async () => {
     await db.execAsync('PRAGMA foreign_keys = ON;');
     for (const row of backup.categories) {
       await db.runAsync(

@@ -44,6 +44,7 @@ import {
   EllipsisVertical as LucideEllipsisVertical,
   Euro as LucideEuro,
   FileWarning as LucideFileWarning,
+  GripVertical as LucideGripVertical,
   HelpCircle as LucideHelpCircle,
   Home as LucideHome,
   Import as LucideImport,
@@ -55,6 +56,7 @@ import {
   List as LucideList,
   ListChecks as LucideListChecks,
   ListFilter as LucideListFilter,
+  Minus as LucideMinus,
   Paintbrush as LucidePaintbrush,
   Pause as LucidePause,
   Pencil as LucidePencil,
@@ -142,6 +144,7 @@ export const Download = createIcon(LucideDownload);
 export const EllipsisVertical = createIcon(LucideEllipsisVertical);
 export const Euro = createIcon(LucideEuro);
 export const FileWarning = createIcon(LucideFileWarning);
+export const GripVertical = createIcon(LucideGripVertical);
 export const HelpCircle = createIcon(LucideHelpCircle);
 export const Home = createIcon(LucideHome);
 export const Import = createIcon(LucideImport);
@@ -151,6 +154,7 @@ export const LayoutGrid = createIcon(LucideLayoutGrid);
 export const ListFilter = createIcon(LucideListFilter);
 export const Lightbulb = createIcon(LucideLightbulb);
 export const Link = createIcon(LucideLink);
+export const Minus = createIcon(LucideMinus);
 export const List = createIcon(LucideList);
 export const ListChecks = createIcon(LucideListChecks);
 export const Pencil = createIcon(LucidePencil);

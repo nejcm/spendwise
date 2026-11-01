@@ -40,6 +40,8 @@ export const queryKeys = {
   // ─── Categories ───
   categories: {
     all: ['categories'] as const,
+    usageAll: ['category-usage'] as const,
+    usage: (id: string) => ['category-usage', id] as const,
   },
 
   // ─── Month Summary ───
@@ -63,6 +65,8 @@ export const queryKeys = {
       ['insights', 'category-spend-year', year] as const,
     summaryRange: (startDate: number | undefined, endDate: number | undefined) =>
       ['insights', 'summary-range', startDate, endDate] as const,
+    categoryMonthly: (categoryId: string, startDate: number, endDate: number) =>
+      ['insights', 'category-monthly', categoryId, startDate, endDate] as const,
   },
 
   // ─── Currency Rates ───

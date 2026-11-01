@@ -17,3 +17,8 @@ export type CategoryFormData = {
   budget?: string | null;
   sort_order?: number | null;
 };
+
+export type CategoryUsage = {
+  transactions: number;
+  rules: number;
+};

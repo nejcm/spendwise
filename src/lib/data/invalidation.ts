@@ -26,6 +26,7 @@ const INVALIDATION_RULES = {
     queryKeys.insights.all,
     queryKeys.recommendations.all,
     queryKeys.globalBudget.all,
+    queryKeys.categories.usageAll,
   ],
   account: [
     queryKeys.transactions.all,
@@ -36,11 +37,13 @@ const INVALIDATION_RULES = {
   ],
   category: [
     queryKeys.categories.all,
+    queryKeys.categories.usageAll,
     queryKeys.insights.all,
     queryKeys.recommendations.all,
   ],
   scheduledTransaction: [
     queryKeys.scheduledTransactions.all,
+    queryKeys.categories.usageAll,
     queryKeys.recommendations.all,
   ],
   currencyRates: [

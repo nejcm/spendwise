@@ -1,6 +1,6 @@
 import { DEFAULT_CATEGORY_ID } from '@/config';
 
-import { firstFittingCategoryId, fitCategoryToType, fitsTransactionType } from './helpers';
+import { averageOfLast, buildMonthBars, firstFittingCategoryId, fitCategoryToType, fitsTransactionType, monthBarsRange, paletteColorName, rankMoveTargets } from './helpers';
 
 describe('fitsTransactionType', () => {
   const food = { id: 'cat_food', kind: 'expense' as const };
@@ -52,5 +52,52 @@ describe('firstFittingCategoryId', () => {
   it('skips missing, unknown and other-kind ids', () => {
     expect(firstFittingCategoryId([undefined, 'cat_gone', 'cat_salary', 'cat_food'], categories, 'expense')).toBe('cat_food');
     expect(firstFittingCategoryId(['cat_food'], categories, 'income')).toBeUndefined();
+  });
+});
+
+describe('rankMoveTargets', () => {
+  const cat = (id: string, name: string, kind: 'expense' | 'income' = 'expense', sort_order = 0) => ({ id, name, kind, sort_order });
+  const eating = cat('eat', 'Eating out');
+  const all = [eating, cat('gro', 'Groceries', 'expense', 1), cat('go', 'Going out', 'expense', 2), cat('shop', 'Shopping', 'expense', 3), cat('sal', 'Salary', 'income'), cat(DEFAULT_CATEGORY_ID, 'Unknown')];
+
+  it('puts shared name words first, then closest spending, same kind only', () => {
+    const spend = { eat: 20000, gro: 40000, shop: 18000, go: 0 };
+    expect(rankMoveTargets(eating, all, spend).map((c) => c.id)).toEqual(['go', 'shop', 'gro']);
+  });
+
+  it('falls back to sort order without spending data', () => {
+    expect(rankMoveTargets(cat('x', 'Rent'), all, {}).map((c) => c.id)).toEqual(['eat', 'gro', 'go', 'shop']);
+  });
+});
+
+describe('month bars', () => {
+  it('zero-fills six calendar months ending with the given month, across a year boundary', () => {
+    const bars = buildMonthBars([{ month: '2025-12', income: 0, expense: 500 }, { month: '2026-02', income: 9, expense: 300 }], '2026-02', 'expense');
+    expect(bars.map((b) => [b.month, b.value])).toEqual([
+      ['2025-09', 0],
+      ['2025-10', 0],
+      ['2025-11', 0],
+      ['2025-12', 500],
+      ['2026-01', 0],
+      ['2026-02', 300],
+    ]);
+    expect(bars[0].start).toBe(Date.UTC(2025, 8, 1) / 1000);
+    expect(monthBarsRange('2026-02')).toEqual([Date.UTC(2025, 8, 1) / 1000, Date.UTC(2026, 2, 1) / 1000]);
+  });
+
+  it('averages the last three months in whole cents', () => {
+    expect(averageOfLast(buildMonthBars([
+      { month: '2026-08', income: 0, expense: 22720 },
+      { month: '2026-09', income: 0, expense: 17880 },
+      { month: '2026-10', income: 0, expense: 23690 },
+    ], '2026-10', 'expense'))).toBe(21430);
+  });
+});
+
+describe('paletteColorName', () => {
+  it('names palette colours by hue and shade', () => {
+    expect(paletteColorName('#FB923C')).toEqual({ hue: 'orange', step: 400 });
+    expect(paletteColorName('#831843')).toEqual({ hue: 'pink', step: 900 });
+    expect(paletteColorName('#333333')).toBeNull();
   });
 });

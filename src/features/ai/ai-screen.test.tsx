@@ -69,6 +69,7 @@ function mockChat(overrides: Partial<UseChatReturn> = {}) {
       send: jest.fn(),
       setDraft: jest.fn(),
       reset: jest.fn(),
+      applyScope: jest.fn(),
     },
     scroll: {
       scrollViewRef: { current: null },
@@ -110,7 +111,7 @@ describe('ai screen', () => {
     const reset = jest.fn();
     mockChat({
       messages: [{ id: 'user-1', role: 'user', content: 'Hi' }],
-      actions: { send: jest.fn(), setDraft: jest.fn(), reset },
+      actions: { send: jest.fn(), setDraft: jest.fn(), reset, applyScope: jest.fn() },
     });
 
     render(<AiScreen />);

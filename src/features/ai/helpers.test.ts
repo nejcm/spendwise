@@ -1,4 +1,4 @@
-import { resolveScopeAccounts, toggleScopeAccount } from './helpers';
+import { isSameAccountScope, resolveScopeAccounts, toggleScopeAccount } from './helpers';
 
 const active = [{ id: 'a' }, { id: 'b' }];
 
@@ -25,5 +25,15 @@ describe('toggleScopeAccount', () => {
     expect(toggleScopeAccount('all', 'a')).toEqual(['a']);
     expect(toggleScopeAccount(['a'], 'b')).toEqual(['a', 'b']);
     expect(toggleScopeAccount(['a'], 'a')).toBe('all');
+  });
+});
+
+describe('isSameAccountScope', () => {
+  it('compares the resolved accounts, not the raw pick', () => {
+    expect(isSameAccountScope(active, 'all', ['a', 'b'])).toBe(true);
+    expect(isSameAccountScope(active, ['b', 'a', 'archived'], ['a', 'b'])).toBe(true);
+    expect(isSameAccountScope(active, ['a'], ['a'])).toBe(true);
+    expect(isSameAccountScope(active, 'all', ['a'])).toBe(false);
+    expect(isSameAccountScope(active, ['a'], ['b'])).toBe(false);
   });
 });

@@ -232,6 +232,23 @@ describe('getTransactionsSample', () => {
 
     expect(result.map((t) => t.id)).toEqual(['txn_2']);
   });
+
+  it('keeps a transfer in-leg whose out-leg account is outside the scope, once per pair otherwise', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    await db.runAsync(`INSERT INTO accounts (id, name, type, currency) VALUES ('acc_2', 'Savings', 'savings', 'EUR')`);
+    await seedTransaction(db, { id: 'out', type: 'transfer', amount: -5000, category_id: null });
+    await seedTransaction(db, { id: 'in', account_id: 'acc_2', type: 'transfer', amount: 5000, category_id: null });
+    await db.runAsync(`UPDATE transactions SET transfer_id = 'tr_1'`);
+
+    const ids = async (accountIds?: string[]) =>
+      (await getTransactionsSample(db as any, MAR_START, APR_START, { limit: 5, accountIds })).map((t) => t.id);
+
+    expect(await ids(['acc_2'])).toEqual(['in']);
+    expect(await ids(['acc_1'])).toEqual(['out']);
+    expect(await ids(['acc_1', 'acc_2'])).toEqual(['out']);
+    expect(await ids()).toEqual(['out']);
+  });
 });
 
 // ─── getMonthSummary ──────────────────────────────────────────────────────────

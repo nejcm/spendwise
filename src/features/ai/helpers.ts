@@ -63,6 +63,14 @@ export function resolveScopeAccounts<T extends { id: string }>(active: readonly 
     : { accounts: active, limited: false };
 }
 
+export function isSameAccountScope(active: readonly { id: string }[], a: AiScope['accountIds'], b: AiScope['accountIds']) {
+  const key = (picked: AiScope['accountIds']) => {
+    const { accounts, limited } = resolveScopeAccounts(active, picked);
+    return limited ? accounts.map((x) => x.id).sort().join() : 'all';
+  };
+  return key(a) === key(b);
+}
+
 export function toggleScopeAccount(picked: AiScope['accountIds'], id: string): AiScope['accountIds'] {
   const current = picked === 'all' ? [] : picked;
   const next = current.includes(id) ? current.filter((x) => x !== id) : [...current, id];

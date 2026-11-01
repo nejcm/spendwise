@@ -27,6 +27,7 @@ export type ChatActions = {
   readonly send: (text?: string) => void;
   readonly setDraft: (text: string) => void;
   readonly reset: () => void;
+  readonly applyScope: (scope: AiScope, accountsChanged: boolean) => void;
 };
 
 export type ChatScrollHandlers = {

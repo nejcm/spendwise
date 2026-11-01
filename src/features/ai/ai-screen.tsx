@@ -30,7 +30,7 @@ import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { ScopeSheet } from './components/scope-sheet';
 import { AI_INPUT_NATIVE_ID, PRESET_QUESTIONS } from './constants';
-import { resolveScopeAccounts } from './helpers';
+import { isSameAccountScope, resolveScopeAccounts } from './helpers';
 import { DEFAULT_AI_SCOPE, useAiChatStore } from './store';
 import { useChat } from './use-chat';
 
@@ -124,7 +124,7 @@ function chatTime(createdAt: number | undefined) {
   return format(createdAt, isToday(createdAt) ? 'HH:mm' : 'MMM d, HH:mm');
 }
 
-function ScopeRow({ startedAt }: { startedAt: number | undefined }) {
+function ScopeRow({ startedAt, onApply }: { startedAt: number | undefined; onApply: (scope: AiScope, accountsChanged: boolean) => void }) {
   const scope = useAiChatStore((s) => s.scope) ?? DEFAULT_AI_SCOPE;
   const { data: activeAccounts = [] } = useAccounts();
   const { ref, present, close } = useModalSheet();
@@ -150,7 +150,15 @@ function ScopeRow({ startedAt }: { startedAt: number | undefined }) {
         <ChevronDown size={14} strokeWidth={2} colorClassName="accent-muted-foreground" />
       </Pressable>
       {time && <Text className="text-xs text-muted-foreground">{time}</Text>}
-      <ScopeSheet ref={ref} scope={sheetScope} accounts={activeAccounts} onClose={close} />
+      <ScopeSheet
+        ref={ref}
+        scope={sheetScope}
+        accounts={activeAccounts}
+        onApply={(next) => {
+          onApply(next, !isSameAccountScope(activeAccounts, sheetScope.accountIds, next.accountIds));
+          close();
+        }}
+      />
     </View>
   );
 }
@@ -335,7 +343,7 @@ export function AiScreen() {
     scrollViewRef,
     shouldShowBottomFiller,
   } = scroll;
-  const { reset, send, setDraft } = actions;
+  const { applyScope, reset, send, setDraft } = actions;
   const dismissComposer = React.useCallback(() => {
     inputRef.current?.blur();
     Keyboard.dismiss();
@@ -390,7 +398,7 @@ export function AiScreen() {
           {hasKey
             ? (
                 <>
-                  <ScopeRow startedAt={messages[0]?.createdAt} />
+                  <ScopeRow startedAt={messages[0]?.createdAt} onApply={applyScope} />
                   <FlatList
                     ref={scrollViewRef}
                     data={messages}

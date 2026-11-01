@@ -1,12 +1,12 @@
 import type { FlatList, LayoutChangeEvent } from 'react-native';
 import type { MarkdownStyle } from 'react-native-enriched-markdown';
-import type { ChatMessage, UseChatReturn } from '@/features/ai/types';
+import type { AiScope, ChatMessage, UseChatReturn } from '@/features/ai/types';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import * as React from 'react';
-import { showSnackbar } from '@/components/ui/snackbar';
+import { hideSnackbar, showSnackbar } from '@/components/ui/snackbar';
 import { streamAskWithTools } from '@/features/ai/service';
-import { clearAiChat, getAiScope, setAiDraftQuestion, setAiMessages, useAiChatStore } from '@/features/ai/store';
+import { clearAiChat, getAiScope, setAiDraftQuestion, setAiMessages, setAiScope, useAiChatStore } from '@/features/ai/store';
 import { captureError } from '@/lib/analytics';
 import { translate } from '@/lib/i18n';
 import { generateId } from '@/lib/sqlite';
@@ -17,6 +17,32 @@ import { getMarkdownStyle } from './helpers';
 const TOP_OFFSET = 8;
 const FALLBACK_FILLER_RATIO = 0.7;
 const STREAM_FLUSH_INTERVAL_MS = 50;
+
+let undoableChat: ChatMessage[] | null = null;
+
+function updateAiMessages(update: (messages: ChatMessage[]) => ChatMessage[]) {
+  setAiMessages(update(useAiChatStore.getState().messages));
+}
+
+function clearChatHistory(undoable: boolean) {
+  const cleared = useAiChatStore.getState().messages.filter((m) => m.content);
+  clearAiChat();
+  if (!undoable) {
+    if (undoableChat) hideSnackbar();
+    undoableChat = null;
+    return;
+  }
+  if (cleared.length === 0) return;
+  undoableChat = cleared;
+  showSnackbar({
+    title: translate('ai.chat_cleared'),
+    undo: () => {
+      if (undoableChat !== cleared) return;
+      undoableChat = null;
+      updateAiMessages((messages) => [...cleared, ...messages]);
+    },
+  });
+}
 
 export type ChatState = {
   isStreaming: boolean;
@@ -116,7 +142,7 @@ export function useChat(): UseChatReturn {
     resetStreamedContent,
   } = useStreamedContentFlush(setChatState);
 
-  const reset = React.useCallback(() => {
+  const clearChat = React.useCallback((undoable: boolean) => {
     abortControllerRef.current?.abort();
     abortControllerRef.current = null;
     inFlightRequestRef.current = false;
@@ -124,16 +150,16 @@ export function useChat(): UseChatReturn {
       ...initialState(),
       viewportHeight: prev.viewportHeight,
     }));
-    const cleared = useAiChatStore.getState().messages.filter((m) => m.content);
-    clearAiChat();
-    if (cleared.length === 0) return;
-    showSnackbar({
-      title: translate('ai.chat_cleared'),
-      undo: () => {
-        setAiMessages([...cleared, ...useAiChatStore.getState().messages]);
-      },
-    });
+    clearChatHistory(undoable);
   }, [setChatState]);
+
+  const reset = React.useCallback(() => clearChat(true), [clearChat]);
+
+  const applyScope = React.useCallback((scope: AiScope, accountsChanged: boolean) => {
+    setAiScope(scope);
+    // Earlier answers hold data from accounts the new scope excludes; don't resend or restore them.
+    if (accountsChanged) clearChat(false);
+  }, [clearChat]);
 
   React.useEffect(() => {
     return () => {
@@ -161,8 +187,6 @@ export function useChat(): UseChatReturn {
       content: '',
     };
 
-    const currentMessages = [...existingMessages, userMessage, assistantPlaceholder];
-
     abortControllerRef.current?.abort();
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -181,7 +205,7 @@ export function useChat(): UseChatReturn {
 
     pendingInitialScrollToEndRef.current = false;
     pendingScrollToEndRef.current = true;
-    setAiMessages(currentMessages);
+    setAiMessages([...existingMessages, userMessage, assistantPlaceholder]);
     setAiDraftQuestion('');
 
     void (async () => {
@@ -204,12 +228,11 @@ export function useChat(): UseChatReturn {
         if (!isMountedRef.current) return;
         clearStreamFlushTimeout();
 
-        const finalMessages = currentMessages.map((m) => (
+        updateAiMessages((messages) => messages.map((m) => (
           m.id === assistantPlaceholder.id
             ? { ...m, content: finalContent }
             : m
-        ));
-        setAiMessages(finalMessages);
+        )));
       }
       catch (err) {
         if (controller.signal.aborted) return;
@@ -225,8 +248,7 @@ export function useChat(): UseChatReturn {
           : translate('ai.contact_error');
         setChatState((prev) => ({ ...prev, errorMessage: message }));
 
-        // Remove the placeholder assistant message; keep the user's question.
-        setAiMessages([...existingMessages, userMessage]);
+        updateAiMessages((messages) => messages.filter((m) => m.id !== assistantPlaceholder.id));
       }
       finally {
         // If a newer request replaced the active AbortController, don't clobber its UI state.
@@ -330,6 +352,7 @@ export function useChat(): UseChatReturn {
       send,
       setDraft: setAiDraftQuestion,
       reset,
+      applyScope,
     },
     scroll: {
       scrollViewRef,

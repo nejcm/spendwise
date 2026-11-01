@@ -79,12 +79,16 @@ export async function getTransactionsSample(
   { limit, accountIds }: { limit: number; accountIds?: readonly string[] },
 ): Promise<TransactionWithCategory[]> {
   const [accountSql, accountParams] = inFilter('t.account_id', accountIds);
+  // Scoped: show the in-leg when its out-leg's account is not in scope, else the pair would vanish.
+  const transferLegSql = accountIds
+    ? `(${HIDE_TRANSFER_IN_LEG} OR tp.account_id NOT IN (${accountIds.map(() => '?').join(', ')}))`
+    : HIDE_TRANSFER_IN_LEG;
   return db.getAllAsync<TransactionWithCategory>(
     `${TRANSACTION_SELECT}
-     WHERE t.date >= ? AND t.date < ? AND ${HIDE_TRANSFER_IN_LEG}${accountSql}
+     WHERE t.date >= ? AND t.date < ? AND ${transferLegSql}${accountSql}
      ORDER BY t.date DESC, t.created_at DESC
      LIMIT ?`,
-    [startDate, endDate, ...accountParams, limit],
+    [startDate, endDate, ...(accountIds ?? []), ...accountParams, limit],
   );
 }
 

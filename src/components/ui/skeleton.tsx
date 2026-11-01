@@ -3,7 +3,7 @@ import type { DimensionValue } from 'react-native';
 import { MotiView, View } from 'moti';
 import { Skeleton as MSkeleton } from 'moti/skeleton';
 import { memo } from 'react';
-import { cn } from 'tailwind-variants';
+import { cn } from '@/lib/cn';
 import { useThemeConfig } from '../../lib/theme/use-theme-config';
 
 export type SkeletonContainerProps = {

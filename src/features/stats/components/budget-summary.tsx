@@ -1,7 +1,7 @@
 import type { CurrencyKey } from '@/features/currencies';
 import * as React from 'react';
-import { cn } from 'tailwind-variants';
 import { FormattedCurrency, Text, View } from '@/components/ui';
+import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
 import { BudgetProgressBar, getColorClass } from '../../../components/ui/budget-progress-bar';
 

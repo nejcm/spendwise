@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
-import { cn } from 'tailwind-variants';
-
 import { getPressedStyle, Text } from '@/components/ui';
+
 import { Plus } from '@/components/ui/icon';
+import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 

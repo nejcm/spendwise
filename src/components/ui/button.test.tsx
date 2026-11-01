@@ -65,6 +65,6 @@ describe('button component ', () => {
   it('should apply correct styles for label when variant is secondary', () => {
     render(<SolidButton testID="button" color="secondary" label="Submit" />);
 
-    expect(screen.getByTestId('button-label').props.className).toContain('text-muted-foreground');
+    expect(screen.getByTestId('button-label').props.className).toContain('text-foreground');
   });
 });

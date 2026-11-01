@@ -2,11 +2,11 @@
 import type { PressableProps, PressableStateCallbackType, StyleProp, TextProps, View, ViewStyle } from 'react-native';
 import * as React from 'react';
 import { ActivityIndicator, Pressable, Text } from 'react-native';
-import { tv } from 'tailwind-variants';
+import { tv } from '@/lib/cn';
 
 export const buttonTv = tv({
   slots: {
-    container: 'flex flex-row items-center justify-center rounded-lg px-4',
+    container: 'flex flex-row items-center justify-center rounded-full px-4',
     label: 'items-center text-center font-sans text-base/tight font-medium',
     indicator: 'accent-background',
   },
@@ -28,9 +28,14 @@ export const buttonTv = tv({
         indicator: 'accent-foreground',
       },
       'secondary': {
-        container: 'bg-muted',
-        label: 'text-muted-foreground',
-        indicator: 'accent-muted-foreground',
+        container: 'bg-card',
+        label: 'text-foreground',
+        indicator: 'accent-foreground',
+      },
+      'tonal': {
+        container: 'bg-card-2',
+        label: 'text-foreground',
+        indicator: 'accent-foreground',
       },
       'secondary-alt': {
         container: 'bg-muted-foreground',
@@ -48,9 +53,9 @@ export const buttonTv = tv({
         indicator: 'accent-white',
       },
       'danger': {
-        container: 'bg-danger-600',
-        label: 'text-white',
-        indicator: 'accent-white',
+        container: 'bg-danger',
+        label: 'text-danger-foreground',
+        indicator: 'accent-danger-foreground',
       },
     },
     size: {

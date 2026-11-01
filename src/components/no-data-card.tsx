@@ -1,8 +1,8 @@
 import type { UniwindLucideIcon } from '@/components/ui/icon';
 import { Pressable } from 'react-native';
 
-import { cn } from 'tailwind-variants';
 import { Plus } from '@/components/ui/icon';
+import { cn } from '@/lib/cn';
 import { getPressedStyle, Text, View } from './ui';
 
 export interface NoDataCardProps {

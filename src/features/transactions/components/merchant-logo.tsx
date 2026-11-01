@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Path } from 'react-native-svg';
-import { cn } from 'tailwind-variants';
 import { StyledSvg, View } from '@/components/ui';
+import { cn } from '@/lib/cn';
 import { hexWithOpacity } from '@/lib/theme/colors';
 import { getIconBySlug } from '../merchant-logo/infer';
 

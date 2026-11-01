@@ -1,4 +1,4 @@
-import { cn } from 'tailwind-variants';
+import { cn } from '@/lib/cn';
 import { Text } from './text';
 
 export type LabelProps = {

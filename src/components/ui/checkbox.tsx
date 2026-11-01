@@ -6,8 +6,8 @@ import { useCallback } from 'react';
 import { I18nManager, Pressable, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { cn } from 'tailwind-variants';
 import { useCSSVariable } from 'uniwind';
+import { cn } from '@/lib/cn';
 import { Text } from './text';
 
 const checkboxSizes = {

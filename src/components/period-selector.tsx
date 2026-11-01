@@ -1,10 +1,10 @@
 import type { PeriodSelection } from '@/lib/store/store';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
-import { cn } from 'tailwind-variants';
 import { Text, useModalSheet } from '@/components/ui';
 import { ArrowLeftIcon, ArrowRightIcon } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
+import { cn } from '@/lib/cn';
 import { isNavigablePeriodMode, navigatePeriod } from '@/lib/date/helpers';
 import { getPeriodLabel } from '@/lib/date/labels';
 import { setPeriodSelection } from '@/lib/store/store';

@@ -1,5 +1,5 @@
 import type { CurrencyFormat, NumberFormat } from './constants';
-import { formatCurrency, formatDateFull, formatInstantFull, formatNumber } from './helpers';
+import { formatCurrency, formatDateFull, formatInstantFull, formatNumber, splitFraction } from './helpers';
 
 const number = 1234.56;
 const negativeNumber = -1234.56;
@@ -194,5 +194,17 @@ describe('formatting helpers', () => {
         fractionDigits: 1,
       }),
     ).toBe('USD 1.2k');
+  });
+
+  it.each([
+    ['€7,400.75', 'stop-space', ['€7,400', '.75', '']],
+    ['-€7,400.75', 'stop-space', ['-€7,400', '.75', '']],
+    ['€7,400', 'stop-space', ['€7,400', '', '']],
+    ['7.400,75€', 'comma-space', ['7.400', ',75', '€']],
+    ['7.400€', 'comma-space', ['7.400€', '', '']],
+    ['USD 1234.5', 'stop', ['USD 1234', '.5', '']],
+    ['1234,56 USD', 'comma', ['1234', ',56', ' USD']],
+  ])('splits %p (%p) around its fraction', (formatted: string, numberFormat: NumberFormat, expected: string[]) => {
+    expect(splitFraction(formatted, numberFormat)).toEqual(expected);
   });
 });

@@ -4,7 +4,7 @@ import type { BlurEvent, FocusEvent, TextInputProps } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
 import * as React from 'react';
 import { I18nManager, TextInput as NTextInput, StyleSheet, View } from 'react-native';
-import { cn, tv } from 'tailwind-variants';
+import { cn, tv } from '@/lib/cn';
 import { InputLabel, labelDefaults } from './input-label';
 import { Text } from './text';
 

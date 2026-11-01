@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import type { OptionsProps, OptionType, SelectProps } from './ui';
-import { cn } from 'tailwind-variants';
+import { cn } from '@/lib/cn';
 import { COLOR_OPTIONS } from '@/lib/theme/colors';
 import { Select, View } from './ui';
 

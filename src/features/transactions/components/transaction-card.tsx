@@ -3,10 +3,10 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
-import { cn } from 'tailwind-variants';
 import { DEFAULT_COLOR } from '@/components/color-selector';
 import { Checkbox, FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
 import { formatShortDate } from '@/features/formatting/helpers';
+import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { hexWithOpacity } from '@/lib/theme/colors';

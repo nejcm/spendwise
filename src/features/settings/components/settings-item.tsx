@@ -1,11 +1,11 @@
 import type { TxKeyPath } from '@/lib/i18n';
 
 import * as React from 'react';
-import { cn } from 'tailwind-variants';
-
 import { useUniwind } from 'uniwind';
+
 import { Pressable, Text, View } from '@/components/ui';
 import { ArrowRight } from '@/components/ui/icon';
+import { cn } from '@/lib/cn';
 
 type ItemProps = {
   text: TxKeyPath;

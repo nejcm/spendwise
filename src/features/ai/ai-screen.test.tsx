@@ -59,6 +59,7 @@ const AssistantMessageMock = AssistantMessage as jest.MockedFunction<typeof Assi
 function mockChat(overrides: Partial<UseChatReturn> = {}) {
   const base: UseChatReturn = {
     hasKey: true,
+    isChatOn: true,
     messages: [],
     draftQuestion: '',
     isStreaming: false,
@@ -95,12 +96,24 @@ describe('ai screen', () => {
   });
 
   it('explains that AI chat requires a user-provided provider key', () => {
-    mockChat({ hasKey: false });
+    mockChat({ hasKey: false, isChatOn: false });
 
     render(<AiScreen />);
 
     expect(screen.getByText('Bring your own AI key')).toBeTruthy();
     expect(screen.getByText(/They use your own OpenAI or Anthropic key, which stays on this phone/)).toBeTruthy();
+    fireEvent.press(screen.getByText('Open AI settings'));
+    expect(mockRouterPush).toHaveBeenCalledWith('/settings/ai');
+    expect(screen.queryByPlaceholderText(/./)).toBeNull();
+    expect(screen.queryByLabelText('New chat')).toBeNull();
+  });
+
+  it('shows an off state instead of the composer when Chat is switched off', () => {
+    mockChat({ isChatOn: false });
+
+    render(<AiScreen />);
+
+    expect(screen.getByText('Chat is off')).toBeTruthy();
     fireEvent.press(screen.getByText('Open AI settings'));
     expect(mockRouterPush).toHaveBeenCalledWith('/settings/ai');
     expect(screen.queryByPlaceholderText(/./)).toBeNull();

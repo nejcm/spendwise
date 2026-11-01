@@ -10,7 +10,7 @@ import { clearAiChat, getAiScope, setAiDraftQuestion, setAiMessages, setAiScope,
 import { captureError } from '@/lib/analytics';
 import { translate } from '@/lib/i18n';
 import { generateId } from '@/lib/sqlite';
-import { selectIsAiEnabled, useAppStore } from '@/lib/store/store';
+import { selectIsAiEnabled, selectIsAiFeatureOn, useAppStore } from '@/lib/store/store';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import { getMarkdownStyle } from './helpers';
 
@@ -128,6 +128,7 @@ export function useChat(): UseChatReturn {
   const messages = useAiChatStore.use.messages();
   const draftQuestion = useAiChatStore.use.draftQuestion();
   const isAiEnabled = useAppStore(selectIsAiEnabled);
+  const isChatOn = useAppStore(selectIsAiFeatureOn('chat'));
   const inFlightRequestRef = React.useRef(false);
   const abortControllerRef = React.useRef<AbortController | null>(null);
   const isMountedRef = React.useRef(true);
@@ -169,10 +170,14 @@ export function useChat(): UseChatReturn {
     };
   }, [clearStreamFlushTimeout]);
 
+  React.useEffect(() => {
+    if (!isChatOn) abortControllerRef.current?.abort();
+  }, [isChatOn]);
+
   const send = React.useCallback((presetQuestion?: string) => {
     const sourceQuestion = presetQuestion ?? draftQuestion;
     const trimmed = sourceQuestion?.trim();
-    if (!trimmed.length || chatState.isStreaming || inFlightRequestRef.current) return;
+    if (!isChatOn || !trimmed.length || chatState.isStreaming || inFlightRequestRef.current) return;
 
     const existingMessages = useAiChatStore.getState().messages;
     const userMessage: ChatMessage = {
@@ -235,9 +240,8 @@ export function useChat(): UseChatReturn {
         )));
       }
       catch (err) {
-        if (controller.signal.aborted) return;
-
-        if (!isMountedRef.current) return;
+        updateAiMessages((messages) => messages.filter((m) => m.id !== assistantPlaceholder.id));
+        if (controller.signal.aborted || !isMountedRef.current) return;
 
         if (err instanceof Error) {
           captureError(err, { context: 'ai-chat' });
@@ -247,8 +251,6 @@ export function useChat(): UseChatReturn {
           ? err.message
           : translate('ai.contact_error');
         setChatState((prev) => ({ ...prev, errorMessage: message }));
-
-        updateAiMessages((messages) => messages.filter((m) => m.id !== assistantPlaceholder.id));
       }
       finally {
         // If a newer request replaced the active AbortController, don't clobber its UI state.
@@ -275,6 +277,7 @@ export function useChat(): UseChatReturn {
     db,
     chatState.isStreaming,
     draftQuestion,
+    isChatOn,
     resetStreamedContent,
     setChatState,
   ]);
@@ -345,6 +348,7 @@ export function useChat(): UseChatReturn {
 
   return {
     hasKey: isAiEnabled,
+    isChatOn,
     messages,
     draftQuestion,
     ...chatState,

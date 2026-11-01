@@ -132,9 +132,9 @@ export function SettingsScreen() {
         {
           key: 'analytics',
           icon: Shield,
-          title: translate('settings.usage_stats'),
-          meta: translate('settings.usage_stats_meta'),
-          trailing: <Switch accessibilityLabel={translate('settings.usage_stats')} checked={analyticsEnabled} onChange={setAnalyticsEnabled} />,
+          title: translate('settings.error_reports'),
+          meta: translate('settings.error_reports_meta'),
+          trailing: <Switch accessibilityLabel={translate('settings.error_reports')} checked={analyticsEnabled} onChange={setAnalyticsEnabled} />,
         },
         { key: 'import', icon: Import, title: translate('settings.import'), meta: lastBackup && translate('settings.last_backup', { date: lastBackup }), onPress: () => router.push('/settings/import-export') },
         { key: 'delete', icon: DatabaseZap, title: translate('settings.delete_data'), danger: true, onPress: deleteModal.present },

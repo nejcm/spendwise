@@ -41,6 +41,7 @@ export type ChatScrollHandlers = {
 
 export type UseChatReturn = {
   readonly hasKey: boolean;
+  readonly isChatOn: boolean;
   readonly messages: readonly ChatMessage[];
   readonly draftQuestion: string;
   readonly isStreaming: boolean;

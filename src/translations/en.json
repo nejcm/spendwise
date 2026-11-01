@@ -54,6 +54,8 @@
   "ai": {
     "ask_prompt": "Ask the AI about your spending or budgeting...",
     "chat_cleared": "Chat cleared",
+    "chat_off_body": "Turn Chat back on in AI settings to ask about your money. Your key stays saved.",
+    "chat_off_title": "Chat is off",
     "contact_error": "Something went wrong while contacting the AI provider.",
     "header_title": "Spendwise AI",
     "input_placeholder": "Ask about your money",
@@ -86,7 +88,8 @@
     "tool_status_range": " ({{startDate}} to {{endDate}})",
     "tool_status_summary": "Looking up your financial summary{{range}}...",
     "tool_status_transactions": "Looking up transactions{{range}}...",
-    "tool_status_trends": "Looking up spending trends{{range}}..."
+    "tool_status_trends": "Looking up spending trends{{range}}...",
+    "unavailable": "AI chat is off or no key is saved."
   },
   "auth": {
     "email": "Email",
@@ -523,7 +526,7 @@
         "title": "Budgets that warn early"
       },
       "privacy": {
-        "body": "Your money data stays on this phone. Only anonymous usage stats are shared.",
+        "body": "Your money data stays on this phone. Anonymous error reports can be switched off in Settings.",
         "title": "Private by design"
       }
     },
@@ -557,7 +560,7 @@
     "welcome_headline": "Know where every cent goes"
   },
   "privacy": {
-    "ai_body": "Only when you use AI chat or receipt scanning with your own key. Your question with the totals and transactions it needs (dates, types, categories, amounts and currencies, never merchants, notes or account names), or a receipt photo with your category names, goes straight from this phone to the provider you picked, OpenAI or Anthropic. No key, no requests. The provider’s own privacy policy and charges apply.",
+    "ai_body": "Only when you use AI chat or receipt scanning with your own key. Chat sends what you type or tap as a question (suggested questions may name an account or quote a note), the earlier messages of the current chat, and the data the AI looks up to answer: totals and transactions with dates, types, categories, budgets, amounts and currencies, without merchants, notes or account names. Receipt scanning sends the photo and your category names. Both go straight from this phone to the provider you picked, OpenAI or Anthropic. No key, no requests. The provider’s own privacy policy and charges apply.",
     "ai_title": "AI requests",
     "changes_body": "If this policy changes, the new version appears on this screen with a new date.",
     "changes_title": "Changes",
@@ -568,17 +571,21 @@
     "contact_body": "Questions about privacy? Email {{email}}.",
     "contact_title": "Contact",
     "effective": "Effective from 2 November 2026",
+    "errors_body": "Only while “Share anonymous error reports” is on (it is on by default). When something fails, the error message and stack trace go to PostHog with the context the app adds (which part of the app failed, the component stack, or the dates and services of a failed exchange-rate download), plus your device model, operating system, app version, language, time zone and a random ID for this install. The app doesn’t add amounts, account or category names, merchants or notes. No usage events are sent, no person profile is built, and your IP address isn’t used to look up your location.",
+    "errors_title": "Anonymous error reports",
     "files_body": "Backup and CSV files leave the phone only when you share or save them somewhere yourself. Automatic backups stay in the app’s storage, which your phone’s own system backup (iCloud or Google) may include, depending on your phone settings.",
     "files_title": "Files and backups",
     "hero_body": "Accounts, transactions, categories, budgets, recurring rules and backups are stored on this device. There is no Spendwise account and no Spendwise server.",
     "hero_title": "Your money data stays on this phone",
+    "maps_body": "Tapping a transaction’s location opens Apple Maps or your phone’s maps app with that address. That app’s own privacy policy applies.",
+    "maps_title": "Maps",
     "outbound_title": "What leaves this phone",
     "rates_body": "To convert currencies, the app downloads exchange rates from Frankfurter (api.frankfurter.dev), ExchangeRate-API (open.er-api.com) or the free currency API by fawazahmed0 (cdn.jsdelivr.net, currency-api.pages.dev). Requests contain only dates and currency codes. Like any website, these services see your IP address.",
     "rates_title": "Exchange rates",
-    "stats_body": "Only while “Share anonymous usage stats” is on (it is on by default). Error reports and usage events go to PostHog with your device model, operating system, app version, language and time zone. They never contain amounts, account or category names, merchants or notes. No person profile is built, your IP address isn’t used to look up your location, and app opens aren’t tracked.",
-    "stats_title": "Anonymous usage stats and error reports",
     "stores_body": "Google Play and the App Store handle downloads and updates under their own privacy policies.",
-    "stores_title": "App stores"
+    "stores_title": "App stores",
+    "updates_body": "When the app starts, it asks Expo’s update service (u.expo.dev) for fixes. The request contains the platform, release channel, runtime and update versions and a random ID for this install, never your data. Like any website, Expo sees your IP address.",
+    "updates_title": "App updates"
   },
   "recommendations": {
     "actions": {
@@ -801,6 +808,8 @@
     "dump_db": "Dump DB tables",
     "edit_profile": "Edit profile",
     "english": "English",
+    "error_reports": "Share anonymous error reports",
+    "error_reports_meta": "Crash and error details, never your money data",
     "expense_categories": "Expense Categories",
     "feature_suggestions": "Suggest a feature",
     "formatting": "Formatting",
@@ -867,8 +876,6 @@
       "title": "Theme"
     },
     "transactions": "Transactions",
-    "usage_stats": "Share anonymous usage stats",
-    "usage_stats_meta": "Crashes and feature use, never your money data",
     "version": "Version"
   },
   "stats": {

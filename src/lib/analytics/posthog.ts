@@ -11,7 +11,7 @@ function isAnalyticsEnabled() {
   return getAppState().analyticsEnabled ?? true;
 }
 
-/** Created on first use, and only while the user's "Share anonymous usage stats" pref is on. */
+/** Created on first use, and only while the user's "Share anonymous error reports" pref is on. */
 function getClient(): PostHog | undefined {
   if (!isAnalyticsEnabled()) return undefined;
   if (client || apiKey.length <= 5 || IS_WEB) return client;

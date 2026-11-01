@@ -54,6 +54,8 @@
   "ai": {
     "ask_prompt": "Frage die KI zu deinen Ausgaben oder Budgets...",
     "chat_cleared": "Chat gelöscht",
+    "chat_off_body": "Schalte Chat in den KI-Einstellungen wieder ein, um Fragen zu deinem Geld zu stellen. Dein Schlüssel bleibt gespeichert.",
+    "chat_off_title": "Chat ist aus",
     "contact_error": "Beim Kontaktieren des KI-Anbieters ist etwas schiefgelaufen.",
     "header_title": "Spendwise AI",
     "input_placeholder": "Frag nach deinem Geld",
@@ -86,7 +88,8 @@
     "tool_status_range": " ({{startDate}} bis {{endDate}})",
     "tool_status_summary": "Finanzübersicht wird gesucht{{range}}...",
     "tool_status_transactions": "Transaktionen werden gesucht{{range}}...",
-    "tool_status_trends": "Ausgabentrends werden gesucht{{range}}..."
+    "tool_status_trends": "Ausgabentrends werden gesucht{{range}}...",
+    "unavailable": "KI-Chat ist aus oder es ist kein Schlüssel gespeichert."
   },
   "auth": {
     "email": "E-Mail",
@@ -523,7 +526,7 @@
         "title": "Budgets, die früh warnen"
       },
       "privacy": {
-        "body": "Deine Finanzdaten bleiben auf diesem Gerät. Nur anonyme Nutzungsstatistiken werden geteilt.",
+        "body": "Deine Finanzdaten bleiben auf diesem Gerät. Anonyme Fehlerberichte kannst du in den Einstellungen abschalten.",
         "title": "Privat von Grund auf"
       }
     },
@@ -557,7 +560,7 @@
     "welcome_headline": "Wisse, wohin jeder Cent geht"
   },
   "privacy": {
-    "ai_body": "Nur wenn du KI-Chat oder Belegscan mit deinem eigenen Schlüssel nutzt. Deine Frage mit den nötigen Summen und Buchungen (Datum, Art, Kategorie, Betrag und Währung, nie Händler, Notizen oder Kontonamen) oder ein Belegfoto mit deinen Kategorienamen geht direkt von diesem Telefon an den gewählten Anbieter, OpenAI oder Anthropic. Ohne Schlüssel keine Anfragen. Es gelten die Datenschutzerklärung und Gebühren des Anbieters.",
+    "ai_body": "Nur wenn du KI-Chat oder Belegscan mit deinem eigenen Schlüssel nutzt. Der Chat sendet, was du als Frage tippst oder antippst (vorgeschlagene Fragen können ein Konto nennen oder eine Notiz zitieren), die früheren Nachrichten des aktuellen Chats und die Daten, die die KI für die Antwort nachschlägt: Summen und Buchungen mit Datum, Art, Kategorie, Budget, Betrag und Währung, ohne Händler, Notizen oder Kontonamen. Der Belegscan sendet das Foto und deine Kategorienamen. Beides geht direkt von diesem Telefon an den gewählten Anbieter, OpenAI oder Anthropic. Ohne Schlüssel keine Anfragen. Es gelten die Datenschutzerklärung und Gebühren des Anbieters.",
     "ai_title": "KI-Anfragen",
     "changes_body": "Wenn sich diese Erklärung ändert, erscheint die neue Fassung mit neuem Datum auf diesem Bildschirm.",
     "changes_title": "Änderungen",
@@ -568,17 +571,21 @@
     "contact_body": "Fragen zum Datenschutz? Schreib an {{email}}.",
     "contact_title": "Kontakt",
     "effective": "Gültig ab 2. November 2026",
+    "errors_body": "Nur solange „Anonyme Fehlerberichte teilen“ an ist (standardmäßig an). Wenn etwas fehlschlägt, gehen Fehlermeldung und Stacktrace an PostHog, mit dem Kontext, den die App hinzufügt (welcher Teil der App betroffen ist, der Komponenten-Stack oder Daten und Dienste eines fehlgeschlagenen Wechselkurs-Downloads), sowie Gerätemodell, Betriebssystem, App-Version, Sprache, Zeitzone und einer zufälligen ID für diese Installation. Die App fügt keine Beträge, Konto- oder Kategorienamen, Händler oder Notizen hinzu. Es werden keine Nutzungsereignisse gesendet, kein Personenprofil erstellt und deine IP-Adresse wird nicht zur Standortbestimmung genutzt.",
+    "errors_title": "Anonyme Fehlerberichte",
     "files_body": "Sicherungs- und CSV-Dateien verlassen das Telefon nur, wenn du sie selbst teilst oder woanders speicherst. Automatische Sicherungen bleiben im App-Speicher, den die Systemsicherung deines Telefons (iCloud oder Google) je nach Einstellung einschließen kann.",
     "files_title": "Dateien und Sicherungen",
     "hero_body": "Konten, Buchungen, Kategorien, Budgets, Daueraufträge und Sicherungen werden auf diesem Gerät gespeichert. Es gibt kein Spendwise-Konto und keinen Spendwise-Server.",
     "hero_title": "Deine Finanzdaten bleiben auf diesem Telefon",
+    "maps_body": "Tippst du auf den Ort einer Buchung, öffnet sich Apple Karten oder die Karten-App deines Telefons mit dieser Adresse. Es gilt die Datenschutzerklärung dieser App.",
+    "maps_title": "Karten",
     "outbound_title": "Was dieses Telefon verlässt",
     "rates_body": "Zum Umrechnen lädt die App Wechselkurse von Frankfurter (api.frankfurter.dev), ExchangeRate-API (open.er-api.com) oder der freien Währungs-API von fawazahmed0 (cdn.jsdelivr.net, currency-api.pages.dev). Die Anfragen enthalten nur Daten und Währungscodes. Wie jede Website sehen diese Dienste deine IP-Adresse.",
     "rates_title": "Wechselkurse",
-    "stats_body": "Nur solange „Anonyme Nutzungsstatistiken teilen“ an ist (standardmäßig an). Fehlerberichte und Nutzungsereignisse gehen an PostHog, mit Gerätemodell, Betriebssystem, App-Version, Sprache und Zeitzone. Sie enthalten nie Beträge, Konto- oder Kategorienamen, Händler oder Notizen. Es wird kein Personenprofil erstellt, deine IP-Adresse wird nicht zur Standortbestimmung genutzt und App-Starts werden nicht erfasst.",
-    "stats_title": "Anonyme Nutzungsstatistiken und Fehlerberichte",
     "stores_body": "Google Play und der App Store wickeln Downloads und Updates nach ihren eigenen Datenschutzerklärungen ab.",
-    "stores_title": "App-Stores"
+    "stores_title": "App-Stores",
+    "updates_body": "Beim Start fragt die App den Update-Dienst von Expo (u.expo.dev) nach Korrekturen. Die Anfrage enthält Plattform, Release-Kanal, Laufzeit- und Update-Versionen und eine zufällige ID für diese Installation, nie deine Daten. Wie jede Website sieht Expo deine IP-Adresse.",
+    "updates_title": "App-Updates"
   },
   "recommendations": {
     "actions": {
@@ -801,6 +808,8 @@
     "dump_db": "DB-Tabellen ausgeben",
     "edit_profile": "Profil bearbeiten",
     "english": "Englisch",
+    "error_reports": "Anonyme Fehlerberichte teilen",
+    "error_reports_meta": "Absturz- und Fehlerdetails, nie deine Finanzdaten",
     "expense_categories": "Ausgabenkategorien",
     "feature_suggestions": "Funktion vorschlagen",
     "formatting": "Formatierung",
@@ -867,8 +876,6 @@
       "title": "Design"
     },
     "transactions": "Transaktionen",
-    "usage_stats": "Anonyme Nutzungsstatistiken teilen",
-    "usage_stats_meta": "Abstürze und Funktionsnutzung, nie deine Finanzdaten",
     "version": "Version"
   },
   "stats": {

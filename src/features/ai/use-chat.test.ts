@@ -1,5 +1,6 @@
 import type { ChatMessage } from './types';
 import { showSnackbar } from '@/components/ui/snackbar';
+import { clearAppStore, setAiFeature, setOpenaiApiKey } from '@/lib/store/store';
 import { act, renderHook } from '@/lib/test-utils';
 import { streamAskWithTools } from './service';
 import { clearAiChat, DEFAULT_AI_SCOPE, getAiScope, setAiMessages, useAiChatStore } from './store';
@@ -34,8 +35,17 @@ function deferred() {
 const contents = () => useAiChatStore.getState().messages.map((m) => m.content);
 const lastUndo = () => snackbarMock.mock.calls.at(-1)![0].undo!;
 
+function abortableStream() {
+  streamMock.mockImplementation(({ signal }) => new Promise((_, reject) => {
+    signal?.addEventListener('abort', () => reject(new Error('aborted')));
+  }));
+  return () => streamMock.mock.calls.at(-1)![0].signal!;
+}
+
 beforeEach(() => {
   jest.clearAllMocks();
+  clearAppStore();
+  setOpenaiApiKey('sk-test');
   clearAiChat();
   useAiChatStore.setState({ scope: undefined });
   setAiMessages(oldChat);
@@ -91,5 +101,31 @@ describe('useChat', () => {
 
     expect(getAiScope()).toEqual(scope);
     expect(contents()).toEqual(['Old question', 'Old answer']);
+  });
+
+  it('does not send while Chat is switched off', () => {
+    act(() => setAiFeature('chat', false));
+    const { result } = renderHook(() => useChat());
+
+    act(() => result.current.actions.send('New question'));
+
+    expect(result.current.isChatOn).toBe(false);
+    expect(streamMock).not.toHaveBeenCalled();
+    expect(contents()).toEqual(['Old question', 'Old answer']);
+  });
+
+  it.each([
+    ['Chat is switched off', () => setAiFeature('chat', false)],
+    ['the key is removed', () => setOpenaiApiKey(undefined)],
+  ])('aborts a streaming answer when %s and drops its placeholder', async (_: string, turnOff: () => void) => {
+    const signal = abortableStream();
+    const { result } = renderHook(() => useChat());
+    act(() => result.current.actions.send('New question'));
+
+    await act(async () => turnOff());
+
+    expect(signal().aborted).toBe(true);
+    expect(result.current.isStreaming).toBe(false);
+    expect(contents()).toEqual(['Old question', 'Old answer', 'New question']);
   });
 });

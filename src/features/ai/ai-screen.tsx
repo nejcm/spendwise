@@ -37,15 +37,15 @@ import { useChat } from './use-chat';
 // markdown library not supported on web
 const MessageComponent = IS_WEB ? AssistantMessageWeb : AssistantMessage;
 
-function AiSetup() {
+function AiSetup({ hasKey }: { hasKey: boolean }) {
   const router = useRouter();
   return (
     <View className="flex-1 px-5">
       <View className="mt-[26px] size-14 items-center justify-center rounded-[18px] bg-primary">
         <Sparkle size={22} strokeWidth={2} colorClassName="accent-primary-foreground" />
       </View>
-      <Text accessibilityRole="header" className="mt-[18px] text-[30px]/[34px] font-bold tracking-page-title">{translate('ai.setup_required_title')}</Text>
-      <Text className="mt-2 text-base/normal text-muted-foreground">{translate('ai.setup_required_body')}</Text>
+      <Text accessibilityRole="header" className="mt-[18px] text-[30px]/[34px] font-bold tracking-page-title">{translate(hasKey ? 'ai.chat_off_title' : 'ai.setup_required_title')}</Text>
+      <Text className="mt-2 text-base/normal text-muted-foreground">{translate(hasKey ? 'ai.chat_off_body' : 'ai.setup_required_body')}</Text>
       <View className="mt-auto gap-1.5 pb-6">
         <SolidButton
           color="primary"
@@ -324,6 +324,7 @@ export function AiScreen() {
   const [composerGestureOffset, setComposerGestureOffset] = React.useState(0);
   const {
     hasKey,
+    isChatOn,
     messages,
     draftQuestion,
     isStreaming,
@@ -393,9 +394,9 @@ export function AiScreen() {
           textInputNativeID={AI_INPUT_NATIVE_ID}
         >
           <View className="pt-2">
-            <ChatHeader hasKey={hasKey} canStartNewChat={messages.length > 0} onNewChat={reset} />
+            <ChatHeader hasKey={isChatOn} canStartNewChat={messages.length > 0} onNewChat={reset} />
           </View>
-          {hasKey
+          {isChatOn
             ? (
                 <>
                   <ScopeRow startedAt={messages[0]?.createdAt} onApply={applyScope} />
@@ -427,7 +428,7 @@ export function AiScreen() {
                   />
                 </>
               )
-            : <AiSetup />}
+            : <AiSetup hasKey={hasKey} />}
         </KeyboardGestureArea>
       </KeyboardAvoidingView>
     </View>

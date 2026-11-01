@@ -152,6 +152,7 @@ function getDefaultState(): AppState {
     aiProvider: 'openai',
     openaiApiKey: undefined,
     anthropicApiKey: undefined,
+    aiFeatures: undefined,
 
     notifications: {
       budgetAlerts: true,

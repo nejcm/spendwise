@@ -8,7 +8,7 @@ import { SettingsPage } from './components/settings-page';
 import { ToggleRow } from './components/toggle-row';
 
 const CONTACT_EMAIL = 'nmursi2@gmail.com';
-const OUTBOUND = ['ai', 'stats', 'rates', 'files', 'stores'] as const;
+const OUTBOUND = ['ai', 'errors', 'rates', 'updates', 'maps', 'files', 'stores'] as const;
 const NOTES = ['children', 'changes'] as const;
 
 export function PrivacyScreen() {
@@ -34,8 +34,8 @@ export function PrivacyScreen() {
       <SectionHeader title={translate('privacy.choices_title')} />
       <Card className="px-4">
         <ToggleRow
-          title={translate('settings.usage_stats')}
-          description={translate('settings.usage_stats_meta')}
+          title={translate('settings.error_reports')}
+          description={translate('settings.error_reports_meta')}
           checked={analyticsEnabled}
           onChange={setAnalyticsEnabled}
         />

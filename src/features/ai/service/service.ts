@@ -1,10 +1,11 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import type { AiScope, ChatMessage, ProviderChatMessage, ToolCall } from '../types';
+import type { AiProviderType, AiScope, ChatMessage, ProviderChatMessage, ToolCall } from '../types';
 
 import { AI_MAX_TOOL_ROUNDS } from '@/config';
 import { getAccounts } from '@/features/accounts/queries';
-import { useAppStore } from '@/lib/store/store';
+import { translate } from '@/lib/i18n';
+import { selectIsAiFeatureOn, useAppStore } from '@/lib/store/store';
 import { resolveScopeAccounts } from '../helpers';
 import {
   appendAnthropicToolCall,
@@ -25,21 +26,12 @@ function toProviderMessages(messages: readonly ChatMessage[]): ProviderChatMessa
   return messages.map((m) => ({ role: m.role, content: m.content }));
 }
 
-function getProviderData() {
-  const { aiProvider, openaiApiKey, anthropicApiKey } = useAppStore.getState();
-  let key: string | undefined;
-  switch (aiProvider) {
-    case 'openai':
-      key = openaiApiKey;
-      break;
-    case 'anthropic':
-      key = anthropicApiKey;
-      break;
-    default:
-      throw new Error(`Invalid provider: ${aiProvider}`);
-  }
-  if (!key) throw new Error(`API key is not set for ${aiProvider}`);
-  return { provider: aiProvider, apiKey: key };
+// Read before every provider call so removing the key or switching chat off stops a running tool loop.
+function getChatKey(provider: AiProviderType) {
+  const state = useAppStore.getState();
+  const key = provider === 'anthropic' ? state.anthropicApiKey : state.openaiApiKey;
+  if (state.aiProvider !== provider || !selectIsAiFeatureOn('chat')(state) || !key) throw new Error(translate('ai.unavailable'));
+  return key;
 }
 
 // ─── Streaming with tool-call loop ───
@@ -61,20 +53,21 @@ export async function streamAskWithTools({
   onToolStatus,
   signal,
 }: StreamAskWithToolsInput): Promise<string> {
-  const { provider, apiKey } = getProviderData();
+  const provider = useAppStore.getState().aiProvider;
+  getChatKey(provider);
   const providerMessages = toProviderMessages(messages);
   const { accounts, limited } = resolveScopeAccounts(await getAccounts(db), scope.accountIds);
   const systemPrompt = buildSystemPrompt(scope.period, limited);
   const runTool = (call: ToolCall) => executeToolCall(db, call.name, call.arguments, accounts.map((a) => a.id));
   const providerFunction = provider === 'openai' ? streamWithToolsOpenAI : streamWithToolsAnthropic;
-  return providerFunction({ apiKey, systemPrompt, providerMessages, runTool, onToken, onToolStatus, signal });
+  return providerFunction({ getApiKey: () => getChatKey(provider), systemPrompt, providerMessages, runTool, onToken, onToolStatus, signal });
 }
 
 type RunTool = (call: ToolCall) => Promise<string>;
 
 // OpenAI streaming with tool loop
 async function streamWithToolsOpenAI({
-  apiKey,
+  getApiKey,
   systemPrompt,
   providerMessages,
   runTool,
@@ -82,7 +75,7 @@ async function streamWithToolsOpenAI({
   onToolStatus,
   signal,
 }: {
-  apiKey: string;
+  getApiKey: () => string;
   systemPrompt: string;
   providerMessages: readonly ProviderChatMessage[];
   runTool: RunTool;
@@ -93,7 +86,7 @@ async function streamWithToolsOpenAI({
   let openAiMessages = buildOpenAiMessages(systemPrompt, providerMessages);
 
   for (let round = 0; round < AI_MAX_TOOL_ROUNDS; round++) {
-    const result = await streamAskOpenAI(apiKey, openAiMessages, onToken, signal);
+    const result = await streamAskOpenAI(getApiKey(), openAiMessages, onToken, signal);
     if (result.type === 'text') return result.content;
 
     // Execute tool calls
@@ -102,13 +95,13 @@ async function streamWithToolsOpenAI({
   }
 
   // Final round — stream response after tool results
-  const finalResult = await streamAskOpenAI(apiKey, openAiMessages, onToken, signal);
+  const finalResult = await streamAskOpenAI(getApiKey(), openAiMessages, onToken, signal);
   return finalResult.content;
 }
 
 // Anthropic streaming with tool loop
 async function streamWithToolsAnthropic({
-  apiKey,
+  getApiKey,
   systemPrompt,
   providerMessages,
   runTool,
@@ -116,7 +109,7 @@ async function streamWithToolsAnthropic({
   onToolStatus,
   signal,
 }: {
-  apiKey: string;
+  getApiKey: () => string;
   systemPrompt: string;
   providerMessages: readonly ProviderChatMessage[];
   runTool: RunTool;
@@ -127,7 +120,7 @@ async function streamWithToolsAnthropic({
   let anthropicMessages = buildAnthropicMessages(providerMessages);
 
   for (let round = 0; round < AI_MAX_TOOL_ROUNDS; round++) {
-    const result = await streamAskAnthropic({ apiKey, systemPrompt, messages: anthropicMessages, onToken, signal });
+    const result = await streamAskAnthropic({ apiKey: getApiKey(), systemPrompt, messages: anthropicMessages, onToken, signal });
     if (result.type === 'text') return result.content;
 
     // Execute tool calls
@@ -136,7 +129,7 @@ async function streamWithToolsAnthropic({
   }
 
   // Final round
-  const finalResult = await streamAskAnthropic({ apiKey, systemPrompt, messages: anthropicMessages, onToken, signal });
+  const finalResult = await streamAskAnthropic({ apiKey: getApiKey(), systemPrompt, messages: anthropicMessages, onToken, signal });
   return finalResult.content;
 }
 

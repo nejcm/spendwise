@@ -6,10 +6,11 @@ import { queryKeys } from '@/lib/data/query-keys';
 
 import * as queries from './queries';
 
-export function useSummaryByRange(startDate: number | undefined, endDate: number | undefined) {
+export function useSummaryByRange(startDate: number | undefined, endDate: number | undefined, enabled = true) {
   const db = useSQLiteContext();
   return useQuery({
     queryKey: queryKeys.insights.summaryRange(startDate, endDate),
+    enabled,
     queryFn: () => queries.getSummaryByRange(db, startDate, endDate),
   });
 }
@@ -25,7 +26,7 @@ export function useCategorySpendByRange(startDate: number | undefined, endDate: 
   return useQuery(categorySpendByRangeQueryOptions(db, startDate, endDate));
 }
 
-export function trendByRangeQueryOptions(db: SQLiteDatabase, startDate: number | undefined, endDate: number | undefined) {
+function trendByRangeQueryOptions(db: SQLiteDatabase, startDate: number | undefined, endDate: number | undefined) {
   return {
     queryKey: queryKeys.insights.trendRange(startDate, endDate),
     queryFn: () => queries.getTrendByRange(db, startDate, endDate),

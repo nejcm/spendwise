@@ -1,4 +1,4 @@
-export type Period = 'month' | 'year' | 'week';
+import type { PeriodSelection } from '@/lib/store/store';
 
 export type BudgetPeriodSelection
   = | { mode: 'day'; date: string }
@@ -6,6 +6,10 @@ export type BudgetPeriodSelection
     | { mode: 'year'; year: number }
     | { mode: 'range'; startYear: number; startMonth: number; endYear: number; endMonth: number };
 
-export type BudgetViewMode = 'cards' | 'chart';
-
 export type MonthSlice = { year: number; month: number };
+
+export type PeriodProps = {
+  selection: PeriodSelection;
+  startDate: number | undefined;
+  endDate: number | undefined;
+};

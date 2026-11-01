@@ -7,7 +7,7 @@
 - `src/app/(app)/index.tsx`: home dashboard
 - `src/app/(app)/transactions.tsx`: transaction list and seeded drill-down destination
 - `src/app/(app)/categories.tsx`: category management
-- `src/app/(app)/stats.tsx`: stats overview
+- `src/app/(app)/stats.tsx`: Insights (Overview, Calendar, Budget tabs)
 - `src/app/(app)/settings.tsx`: settings landing page
 - `src/app/(app)/accounts.tsx`: accounts list
 - `src/app/(app)/ai.tsx`: AI assistant
@@ -48,7 +48,7 @@
 
 ### Planning And Tracking
 
-- `stats`: high-level summaries, trends, category breakdowns
+- `stats`: Insights screen tabs, global budget and BudgetSheet
 - `insights`: deeper trend and monthly analytics
 - `recommendations`: derived spending/cashflow suggestions and anomaly hints
 - `scheduled-transactions`: recurring rules, due-date tracking, and processing

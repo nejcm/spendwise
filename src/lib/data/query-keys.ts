@@ -86,14 +86,6 @@ export const queryKeys = {
       ['scheduled-transactions', 'for-transaction', transactionId] as const,
   },
 
-  // ─── Budget Stats ───
-  budgetStats: {
-    byMonth: (year: number, month: number) =>
-      ['budget-stats', 'by-month', year, month] as const,
-    byPeriod: (startDate: number, endDate: number) =>
-      ['budget-stats', 'by-period', startDate, endDate] as const,
-  },
-
   // ─── Recommendations ───
   recommendations: {
     all: ['recommendations'] as const,

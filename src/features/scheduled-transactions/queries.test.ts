@@ -2,8 +2,9 @@ import { createTestDb } from '@/test-utils/sqlite-db';
 import { createScheduledTransaction, deleteScheduledTransaction, getRuleForTransaction, getRulePayments, restoreScheduledTransaction, RuleAccountArchivedError, updateScheduledTransaction } from './queries';
 import { isoDateToUnix, todayISODate } from './scheduler';
 
+let mockUuid = 0;
 jest.mock('expo-crypto', () => ({
-  randomUUID: jest.fn(() => 'test-uuid-1234'),
+  randomUUID: jest.fn(() => `test-uuid-${++mockUuid}`),
 }));
 
 describe('getRuleForTransaction', () => {
@@ -19,7 +20,7 @@ describe('getRuleForTransaction', () => {
       INSERT INTO recurring_rule_runs (id, rule_id, scheduled_for_date, transaction_id) VALUES ('run', 'rule', 100, 'generated');
     `);
 
-    expect(await getRuleForTransaction(db as any, 'generated')).toEqual({ id: 'rule', frequency: 'monthly', next_due_date: 200, is_active: 1 });
+    expect(await getRuleForTransaction(db as any, 'generated')).toEqual({ id: 'rule', frequency: 'monthly', next_due_date: 200, is_active: 1, generated: 1 });
     expect(await getRuleForTransaction(db as any, 'manual')).toBeNull();
   });
 });
@@ -132,35 +133,59 @@ describe('updateScheduledTransaction on an archived account', () => {
 
 describe('createScheduledTransaction from a transaction', () => {
   const today = isoDateToUnix(todayISODate());
-  const data = (source_transaction_id: string) => ({
+  const DAY = 86400;
+  const data = (source_transaction_id: string, overrides: object = {}) => ({
     account_id: 'acc',
     category_id: 'cat',
     type: 'expense' as const,
     currency: 'EUR' as const,
     note: null,
-    frequency: 'monthly' as const,
+    frequency: 'daily' as const,
     start_date: today,
     end_date: null,
     amount: 10,
     is_active: true,
     source_transaction_id,
+    ...overrides,
   });
+  const runs = (db: Awaited<ReturnType<typeof createTestDb>>) =>
+    db.getAllAsync('SELECT scheduled_for_date, transaction_id FROM recurring_rule_runs');
 
-  it('links the source as the run for its date, so it is not posted twice', async () => {
+  async function seed() {
     const db = await createTestDb();
     await db.execAsync(`
       INSERT INTO accounts (id, name, type, currency) VALUES ('acc', 'Main', 'checking', 'EUR');
       INSERT INTO categories (id, name, color) VALUES ('cat', 'Bills', '#000');
-      INSERT INTO transactions (id, account_id, type, amount, currency, baseAmount, baseCurrency, date) VALUES
-        ('today', 'acc', 'expense', 1000, 'EUR', 1000, 'EUR', ${today}),
-        ('older', 'acc', 'expense', 1000, 'EUR', 1000, 'EUR', ${today - 86400});
+      INSERT INTO transactions (id, account_id, type, amount, currency, baseAmount, baseCurrency, date, created_at) VALUES
+        ('today', 'acc', 'expense', 1000, 'EUR', 1000, 'EUR', ${today}, 1),
+        ('noon', 'acc', 'expense', 1000, 'EUR', 1000, 'EUR', ${today + DAY / 2}, 1),
+        ('later', 'acc', 'expense', 1000, 'EUR', 1000, 'EUR', ${today + 2 * DAY}, 1);
     `);
+    return db;
+  }
 
+  it('links the source as the run for its date and reports it as not generated', async () => {
+    const db = await seed();
     const ruleId = await createScheduledTransaction(db as any, data('today'));
-    expect(await getRuleForTransaction(db as any, 'today')).toMatchObject({ id: ruleId });
+    expect(await getRuleForTransaction(db as any, 'today')).toMatchObject({ id: ruleId, generated: 0 });
+  });
 
-    await db.execAsync('DELETE FROM recurring_rules; DELETE FROM recurring_rule_runs;');
-    await createScheduledTransaction(db as any, data('older'));
-    expect(await db.getAllAsync('SELECT * FROM recurring_rule_runs')).toEqual([]);
+  it('uses the calendar day of a timestamped source and any later occurrence', async () => {
+    const db = await seed();
+    await createScheduledTransaction(db as any, data('noon'));
+    await createScheduledTransaction(db as any, data('later'));
+    expect(await runs(db)).toEqual([
+      { scheduled_for_date: today, transaction_id: 'noon' },
+      { scheduled_for_date: today + 2 * DAY, transaction_id: 'later' },
+    ]);
+  });
+
+  it('skips a source that is not an occurrence or does not match the rule', async () => {
+    const db = await seed();
+    await createScheduledTransaction(db as any, data('later', { frequency: 'weekly' }));
+    await createScheduledTransaction(db as any, data('today', { type: 'income' }));
+    await createScheduledTransaction(db as any, data('today', { amount: 11 }));
+    await createScheduledTransaction(db as any, data('today', { currency: 'USD' }));
+    expect(await runs(db)).toEqual([]);
   });
 });

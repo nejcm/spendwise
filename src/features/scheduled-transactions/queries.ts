@@ -81,17 +81,21 @@ export async function getScheduledTransactionById(
   );
 }
 
-export type TransactionRule = Pick<ScheduledTransaction, 'id' | 'frequency' | 'next_due_date' | 'is_active'>;
+export type TransactionRule = Pick<ScheduledTransaction, 'id' | 'frequency' | 'next_due_date' | 'is_active'> & {
+  /** 0 when an existing transaction was linked as a run (Make recurring) rather than posted by the rule. */
+  generated: number;
+};
 
-/** The rule that generated a transaction, via `recurring_rule_runs`. */
+/** The rule a transaction is a run of, via `recurring_rule_runs`. */
 export async function getRuleForTransaction(
   db: SQLiteDatabase,
   transactionId: string,
 ): Promise<TransactionRule | null> {
   return db.getFirstAsync<TransactionRule>(
-    `SELECT r.id, r.frequency, r.next_due_date, r.is_active
+    `SELECT r.id, r.frequency, r.next_due_date, r.is_active, rr.created_at <= t.created_at + 1 AS generated
      FROM recurring_rule_runs rr
      JOIN recurring_rules r ON r.id = rr.rule_id
+     JOIN transactions t ON t.id = rr.transaction_id
      WHERE rr.transaction_id = ?`,
     [transactionId],
   );
@@ -129,6 +133,29 @@ async function assertAccountUnarchived(db: SQLiteDatabase, accountId: string, is
   if (!isActive) return;
   const account = await db.getFirstAsync<{ is_archived: number }>('SELECT is_archived FROM accounts WHERE id = ?', [accountId]);
   if (account?.is_archived) throw new RuleAccountArchivedError();
+}
+
+/** Counts a matching source transaction as the run for its date, so the scheduler does not post it again. */
+async function linkSourceTransaction(db: SQLiteDatabase, ruleId: string, sourceId: string, data: ScheduledTransactionFormData) {
+  const amount = amountToCents(Number(data.amount) || 0);
+  const source = await db.getFirstAsync<{ date: number }>(
+    `SELECT date FROM transactions
+     WHERE id = ? AND account_id = ? AND type = ? AND currency = ? AND ABS(amount) = ?`,
+    [sourceId, data.account_id, data.type, data.currency, amount],
+  );
+  if (!source) return;
+  const day = unixToISODate(source.date);
+  const occurrence = getFirstDueOnOrAfter({
+    startDate: unixToISODate(data.start_date),
+    frequency: data.frequency,
+    targetDate: day,
+    endDate: data.end_date != null ? unixToISODate(data.end_date) : null,
+  });
+  if (occurrence !== day) return;
+  await db.runAsync(
+    'INSERT INTO recurring_rule_runs (id, rule_id, scheduled_for_date, transaction_id) VALUES (?, ?, ?, ?)',
+    [generateId(), ruleId, isoDateToUnix(day), sourceId],
+  );
 }
 
 export async function createScheduledTransaction(
@@ -172,13 +199,7 @@ export async function createScheduledTransaction(
         Number(scheduleState.isActive),
       ],
     );
-    if (data.source_transaction_id) {
-      await db.runAsync(
-        `INSERT INTO recurring_rule_runs (id, rule_id, scheduled_for_date, transaction_id)
-         SELECT ?, ?, date, id FROM transactions WHERE id = ? AND date = ? AND account_id = ?`,
-        [generateId(), id, data.source_transaction_id, scheduleState.nextDueDate, data.account_id],
-      );
-    }
+    if (data.source_transaction_id) await linkSourceTransaction(db, id, data.source_transaction_id, data);
   });
 
   return id;

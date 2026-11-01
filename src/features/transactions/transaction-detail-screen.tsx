@@ -140,7 +140,7 @@ export function TransactionDetailScreen() {
                 </View>
               )}
               <GhostButton color="danger" className="mt-4" textClassName="text-[15px] font-medium" label={translate('transactions.detail.delete')} onPress={actions.remove} />
-              <Text className="pt-2 text-center text-xs text-muted-foreground">{transactionFooterText(transaction, !!rule)}</Text>
+              <Text className="pt-2 text-center text-xs text-muted-foreground">{transactionFooterText(transaction, !!rule?.generated)}</Text>
             </ScrollView>
           )}
     </View>

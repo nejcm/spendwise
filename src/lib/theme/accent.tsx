@@ -3,7 +3,8 @@ import { View } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 
 export type AccentType
-  = | 'black'
+  = | 'spendwise'
+    | 'black'
     | 'mist'
     | 'stone'
     | 'clay'
@@ -24,19 +25,21 @@ export type AccentType
     | 'berry'
     | 'amber';
 
+type AccentColors = {
+  accent: string;
+  accentForeground: string;
+  accentSoft?: string;
+  accentLine?: string;
+};
+
 export type AccentVariables = {
   bg: string;
-  light: {
-    accent: string;
-    accentForeground: string;
-  };
-  dark: {
-    accent: string;
-    accentForeground: string;
-  };
+  light: AccentColors;
+  dark: AccentColors;
 };
 
 export const ACCENTS: AccentType[] = [
+  'spendwise',
   'black',
   'mist',
   'stone',
@@ -61,6 +64,7 @@ export const ACCENTS: AccentType[] = [
 
 const prefix = 'settings.accent';
 export const ACCENT_LABEL_KEYS: Record<AccentType, TxKeyPath> = {
+  spendwise: `${prefix}.spendwise`,
   black: `${prefix}.black`,
   mist: `${prefix}.mist`,
   stone: `${prefix}.stone`,
@@ -84,6 +88,11 @@ export const ACCENT_LABEL_KEYS: Record<AccentType, TxKeyPath> = {
 };
 
 export const ACCENT_VARIABLES: Record<AccentType, AccentVariables> = {
+  spendwise: {
+    bg: 'bg-[#6b4fd8] dark:bg-[#d4f05a]',
+    light: { accent: '#6b4fd8', accentForeground: '#ffffff', accentSoft: '#efeafc', accentLine: '#ddd3f7' },
+    dark: { accent: '#d4f05a', accentForeground: '#111214', accentSoft: '#1b1f12', accentLine: '#38421c' },
+  },
   black: {
     bg: 'bg-[#111827] dark:bg-[#e5e7eb]',
     light: { accent: '#111827', accentForeground: '#f9fafb' },

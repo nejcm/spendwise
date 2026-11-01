@@ -1,16 +1,18 @@
+import type * as ReactModule from 'react';
+import type * as ReactNativeModule from 'react-native';
 import { clearAppStore, updateAppState } from '@/lib/store/store';
 import { render, screen } from '@/lib/test-utils';
 import { HomeScreenChart } from './home-screen-chart';
 
 jest.mock('./category-spending-chart-card', () => {
-  const React = jest.requireActual('react');
-  const { View } = jest.requireActual('react-native');
+  const React = jest.requireActual<typeof ReactModule>('react');
+  const { View } = jest.requireActual<typeof ReactNativeModule>('react-native');
   return { CategorySpendingChartCard: () => React.createElement(View, { testID: 'category-spending-chart' }) };
 });
 
 jest.mock('./monthly-expense-trend-card', () => {
-  const React = jest.requireActual('react');
-  const { View } = jest.requireActual('react-native');
+  const React = jest.requireActual<typeof ReactModule>('react');
+  const { View } = jest.requireActual<typeof ReactNativeModule>('react-native');
   return { MonthlyExpenseTrendCard: () => React.createElement(View, { testID: 'monthly-spending-chart' }) };
 });
 

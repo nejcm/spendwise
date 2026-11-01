@@ -117,7 +117,7 @@ function getDefaultState(): AppState {
     numberFormat: 'stop',
     monthStartDay: 1,
     theme: 'system',
-    colorTheme: 'black',
+    colorTheme: 'spendwise',
     isFirstTime: true,
     language: undefined,
     saveOnScan: undefined,

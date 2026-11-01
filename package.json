@@ -55,7 +55,7 @@
   },
   "dependencies": {
     "@date-fns/utc": "2.1.1",
-    "@expo-google-fonts/inter": "0.4.2",
+    "@expo-google-fonts/outfit": "0.4.3",
     "@expo/dom-webview": "57.0.1",
     "@expo/metro-runtime": "57.0.14",
     "@gorhom/bottom-sheet": "5.2.14",

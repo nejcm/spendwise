@@ -20,7 +20,7 @@ function RecommendationIcon({ kind }: { kind: Recommendation['kind'] }) {
     case 'upcoming_cashflow':
       return <AlertTriangle size={20} className="text-warning-600" />;
     case 'subscription_reminder':
-      return <Bell size={20} className="text-primary" />;
+      return <Bell size={20} className="text-accent" />;
     case 'category_anomaly':
     case 'unusual_spending':
       return <TrendingUp size={20} className="text-danger-500" />;

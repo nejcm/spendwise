@@ -41,11 +41,11 @@ export function FormattedNumber({ value, format, prefix = '', ...textProps }: Nu
   );
 }
 
-export function FormattedCurrency({ value, format, currency, prefix = '', shorten = false, negativeSymbol = true, fractionDigits = 2, ...textProps }: CurrencyProps) {
+export function FormattedCurrency({ value, format, currency, prefix = '', shorten = false, negativeSymbol = true, fractionDigits = 2, className, ...textProps }: CurrencyProps) {
   const effectiveFormat = useAppStore.use.numberFormat();
   const effectiveCurrencyFormat = useAppStore.use.currencyFormat();
   return (
-    <Text {...textProps}>
+    <Text {...textProps} className={`tabular-nums ${className ?? ''}`}>
       {prefix}
       {formatCurrency(value, currency, { numberFormat: format ?? effectiveFormat, currencyFormat: effectiveCurrencyFormat, shorten, negativeSymbol, fractionDigits })}
     </Text>

@@ -8,7 +8,7 @@ import { cn, tv } from 'tailwind-variants';
 import { InputLabel, labelDefaults } from './input-label';
 import { Text } from './text';
 
-export const inputDefaults = 'rounded-lg border font-family-sans focus:outline-none text-base/snug';
+export const inputDefaults = 'rounded-lg border font-sans focus:outline-none text-base/snug';
 export const inputDefaultDefaults = 'border-border bg-input text-foreground';
 
 export const inputTv = tv({

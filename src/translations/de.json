@@ -476,7 +476,7 @@
     "accent": {
       "amber": "Amber",
       "berry": "Berry",
-      "black": "Standard",
+      "black": "Schwarz",
       "clay": "Clay",
       "coffee": "Coffee",
       "coral": "Coral",
@@ -492,6 +492,7 @@
       "reflection": "Reflection",
       "saltwater": "Saltwater",
       "slate": "Slate",
+      "spendwise": "Spendwise",
       "stone": "Stone",
       "title": "Farbaccent",
       "wave": "Wave"

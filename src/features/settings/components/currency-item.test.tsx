@@ -1,3 +1,4 @@
+import type * as UiModule from '@/components/ui';
 import type { OptionType } from '@/components/ui';
 import * as React from 'react';
 import { Alert } from '@/components/ui';
@@ -7,7 +8,7 @@ import { cleanup, screen, setup } from '@/lib/test-utils';
 import { CurrencyItem } from './currency-item';
 
 jest.mock('@/components/ui', () => {
-  const actual = jest.requireActual('@/components/ui');
+  const actual = jest.requireActual<typeof UiModule>('@/components/ui');
   const MockPressable = actual.Pressable;
   const MockText = actual.Text;
   const MockView = actual.View;
@@ -56,7 +57,7 @@ afterEach(() => {
 describe('currency item', () => {
   it('asks for confirmation before changing currency', async () => {
     const mutate = jest.fn();
-    jest.mocked(useChangeCurrency).mockReturnValue({ mutate } as ReturnType<typeof useChangeCurrency>);
+    jest.mocked(useChangeCurrency).mockReturnValue({ mutate } as unknown as ReturnType<typeof useChangeCurrency>);
     const { user } = setup(<CurrencyItem />);
 
     await user.press(screen.getByTestId('currency-option-USD'));
@@ -77,7 +78,7 @@ describe('currency item', () => {
 
   it('does not ask for confirmation when the current currency is selected', async () => {
     const mutate = jest.fn();
-    jest.mocked(useChangeCurrency).mockReturnValue({ mutate } as ReturnType<typeof useChangeCurrency>);
+    jest.mocked(useChangeCurrency).mockReturnValue({ mutate } as unknown as ReturnType<typeof useChangeCurrency>);
     const { user } = setup(<CurrencyItem />);
 
     await user.press(screen.getByTestId('currency-option-EUR'));

@@ -69,7 +69,7 @@ function Label({ text, testID, className = '' }: LabelProps) {
 }
 
 export function CheckboxIcon({ checked = false, size = 'md', disabled = false }: IconProps) {
-  const background = String(useCSSVariable('--color-background') ?? '#000');
+  const tick = String(useCSSVariable('--color-accent-foreground') ?? '#fff');
   const SIZE = checkboxSizes[size];
   return (
     <View
@@ -77,13 +77,13 @@ export function CheckboxIcon({ checked = false, size = 'md', disabled = false }:
         height: SIZE,
         width: SIZE,
       }}
-      className={`items-center justify-center rounded-md border-2 transition-colors duration-150 ${disabled ? 'border-primary/50' : 'border-primary'} ${checked ? (disabled ? 'bg-primary/50' : 'bg-primary') : 'bg-transparent'}`}
+      className={`items-center justify-center rounded-md border-2 transition-colors duration-150 ${disabled ? 'border-accent/50' : 'border-accent'} ${checked ? (disabled ? 'bg-accent/50' : 'bg-accent') : 'bg-transparent'}`}
     >
       <View className={`transition-opacity duration-100 ${checked ? 'opacity-100' : 'opacity-0'}`}>
         <Svg width={SIZE * 1.2} height={SIZE * 1.2} viewBox="0 0 24 24" fill="none">
           <Path
             d="m16.726 7-.64.633c-2.207 2.212-3.878 4.047-5.955 6.158l-2.28-1.928-.69-.584L6 12.66l.683.577 2.928 2.477.633.535.591-.584c2.421-2.426 4.148-4.367 6.532-6.756l.633-.64L16.726 7Z"
-            fill={background}
+            fill={tick}
           />
         </Svg>
       </View>

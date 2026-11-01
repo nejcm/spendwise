@@ -1,6 +1,5 @@
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { useQueryClient } from '@tanstack/react-query';
-import { useFonts } from 'expo-font';
 import { Stack, usePathname } from 'expo-router';
 import { ThemeProvider } from 'expo-router/react-navigation';
 import * as SplashScreen from 'expo-splash-screen';
@@ -116,17 +115,20 @@ function DevThemeToggle() {
   return null;
 }
 
-function WebFontsLoader({ children }: { children?: React.ReactNode }) {
-  const [_loader, error] = useFonts({
-    'Inter': require('node_modules/@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf'),
-    'Inter-Medium': require('node_modules/@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf'),
-    'Inter-SemiBold': require('node_modules/@expo-google-fonts/inter/600SemiBold/Inter_600SemiBold.ttf'),
-    'Inter-Bold': require('node_modules/@expo-google-fonts/inter/700Bold/Inter_700Bold.ttf'),
-  });
+const OUTFIT_WEB_FACES: Record<string, string> = {
+  400: require('node_modules/@expo-google-fonts/outfit/400Regular/Outfit_400Regular.ttf'),
+  500: require('node_modules/@expo-google-fonts/outfit/500Medium/Outfit_500Medium.ttf'),
+  600: require('node_modules/@expo-google-fonts/outfit/600SemiBold/Outfit_600SemiBold.ttf'),
+  700: require('node_modules/@expo-google-fonts/outfit/700Bold/Outfit_700Bold.ttf'),
+};
 
+// expo-font's useFonts can't register several weights under one family on web, so fontWeight would be synthesized.
+function WebFontsLoader({ children }: { children?: React.ReactNode }) {
   useEffect(() => {
-    if (error) console.error(error);
-  }, [error]);
+    for (const [weight, uri] of Object.entries(OUTFIT_WEB_FACES)) {
+      new FontFace('Outfit', `url("${uri}")`, { weight }).load().then((face) => document.fonts.add(face)).catch(console.error);
+    }
+  }, []);
 
   return children;
 }

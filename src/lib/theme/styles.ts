@@ -7,33 +7,33 @@ export const defaultStyles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   background: {
-    backgroundColor: '#fcfcfc',
+    backgroundColor: '#f7f6fb',
   },
   backgroundDark: {
-    backgroundColor: '#1A1C20',
+    backgroundColor: '#111214',
   },
 });
 
 export const LightTheme = {
   ...DefaultTheme,
   colors: {
-    primary: '#3965cc',
-    background: '#fcfcfc',
-    card: '#efefef',
-    text: '#0a0a0a',
-    border: '#e5e5e5',
-    notification: '#f7f0e9',
+    primary: '#17151c',
+    background: '#f7f6fb',
+    card: '#ffffff',
+    text: '#17151c',
+    border: '#ebe9f1',
+    notification: '#b42318',
   },
 } satisfies Theme;
 
 export const DarkTheme = {
   ..._DarkTheme,
   colors: {
-    primary: '#3965cc',
-    background: '#1A1C20',
-    card: '#21232C',
-    text: '#fafafa',
-    border: '#1f222d',
-    notification: '#63605d',
+    primary: '#d4f05a',
+    background: '#111214',
+    card: '#1c1d21',
+    text: '#ffffff',
+    border: '#26272c',
+    notification: '#ff8a80',
   },
 } satisfies Theme;

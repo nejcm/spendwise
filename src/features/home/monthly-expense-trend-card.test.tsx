@@ -1,3 +1,6 @@
+import type * as ReactModule from 'react';
+import type * as ReactNativeModule from 'react-native';
+import type * as UniwindModule from 'uniwind';
 import { useMonthlyTrend } from '@/features/insights/api';
 import { fireEvent, render, screen } from '@/lib/test-utils';
 import { getMonthlyTrendChartGeometry } from './monthly-expense-trend';
@@ -11,8 +14,8 @@ jest.mock('expo-router', () => ({
 }));
 
 jest.mock('react-native-gifted-charts', () => {
-  const React = jest.requireActual('react');
-  const { View } = jest.requireActual('react-native');
+  const React = jest.requireActual<typeof ReactModule>('react');
+  const { View } = jest.requireActual<typeof ReactNativeModule>('react-native');
   return {
     BarChart: (props: unknown) => {
       mockBarChart(props);
@@ -27,8 +30,8 @@ jest.mock('react-native-gifted-charts', () => {
 });
 
 jest.mock('@/components/ui/skeleton', () => {
-  const React = jest.requireActual('react');
-  const { View } = jest.requireActual('react-native');
+  const React = jest.requireActual<typeof ReactModule>('react');
+  const { View } = jest.requireActual<typeof ReactNativeModule>('react-native');
   return { Skeleton: () => React.createElement(View) };
 });
 
@@ -37,7 +40,7 @@ jest.mock('@/features/insights/api', () => ({
 }));
 
 jest.mock('uniwind', () => ({
-  ...jest.requireActual('uniwind'),
+  ...jest.requireActual<typeof UniwindModule>('uniwind'),
   useCSSVariable: () => '#336B87',
 }));
 

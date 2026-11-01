@@ -92,6 +92,11 @@ describe('month bars', () => {
       { month: '2026-10', income: 0, expense: 23690 },
     ], '2026-10', 'expense'))).toBe(21430);
   });
+
+  it('averageOfLast counts zero-spend months', () => {
+    const bars = buildMonthBars([{ month: '2026-09', income: 0, expense: 600 }], '2026-10', 'expense');
+    expect(averageOfLast(bars, 6)).toBe(100);
+  });
 });
 
 describe('paletteColorName', () => {

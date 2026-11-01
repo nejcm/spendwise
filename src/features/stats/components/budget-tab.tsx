@@ -13,7 +13,7 @@ import { cn } from '@/lib/cn';
 import { calendarDateToUnix, scaleBudgetForPeriod } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
-import { daysLeftIn, monthlyGlobalBudget, paceFraction } from '../helpers';
+import { daysLeftIn, paceFraction } from '../helpers';
 import { useGlobalBudget } from '../hooks';
 import { BudgetSheet } from './budget-sheet';
 
@@ -23,7 +23,7 @@ export function BudgetTab({ selection, startDate, endDate }: PeriodProps) {
   const router = useRouter();
   const sheet = useModalSheet();
   const { data: spend = [] } = useCategorySpendByRange(startDate, endDate);
-  const scale = (monthly: number) => scaleBudgetForPeriod(monthly, selection);
+  const scale = (amount: number, monthsPerAmount?: number) => scaleBudgetForPeriod(amount, selection, monthsPerAmount);
   const rows: BudgetRow[] = spend
     .filter((c) => c.category_type === 'expense' && c.category_budget)
     .map((c) => ({ ...c, limit: scale(c.category_budget!) ?? 0 }))
@@ -82,7 +82,7 @@ export function BudgetTab({ selection, startDate, endDate }: PeriodProps) {
 }
 
 type OverallProps = Pick<PeriodProps, 'startDate' | 'endDate'> & {
-  scale: (monthly: number) => number | undefined;
+  scale: (amount: number, monthsPerAmount?: number) => number | undefined;
   assigned: number;
   onEdit: () => void;
 };
@@ -93,10 +93,9 @@ function OverallCard({ startDate, endDate, scale, assigned, onEdit }: OverallPro
   const numberFormat = useAppStore.use.numberFormat();
   const { data: budget } = useGlobalBudget();
   const { data: summary } = useSummaryByRange(startDate, endDate);
-  const monthly = monthlyGlobalBudget(budget);
   const today = calendarDateToUnix(new Date());
 
-  if (!monthly) {
+  if (!budget?.amountCents) {
     return (
       <Pressable accessibilityRole="button" onPress={onEdit} style={getPressedStyle} className="mt-4 flex-row items-center gap-3 rounded-hero bg-card p-5">
         <View className="flex-1 gap-1">
@@ -108,7 +107,7 @@ function OverallCard({ startDate, endDate, scale, assigned, onEdit }: OverallPro
     );
   }
 
-  const limit = scale(monthly) ?? 0;
+  const limit = scale(budget.amountCents, budget.type === 'yearly' ? 12 : 1) ?? 0;
   const spent = summary?.expense ?? 0;
   const state = getBudgetState(spent, limit);
   const over = state === 'over';
@@ -117,7 +116,7 @@ function OverallCard({ startDate, endDate, scale, assigned, onEdit }: OverallPro
   const ends = daysLeft === null
     ? null
     : daysLeft === 0 ? translate('home.budget.ends_today') : daysLeft === 1 ? translate('home.budget.ends_tomorrow') : translate('home.budget.days_left', { count: daysLeft });
-  const title = translate(budget?.type === 'yearly' ? 'stats.yearly_budget' : 'stats.monthly_budget');
+  const title = translate(budget.type === 'yearly' ? 'stats.yearly_budget' : 'stats.monthly_budget');
   const unassigned = limit - assigned;
 
   return (

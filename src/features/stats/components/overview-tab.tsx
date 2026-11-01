@@ -6,7 +6,7 @@ import { AmountText, Card, getPressedStyle, Text } from '@/components/ui';
 import { ChevronRight, Sparkle } from '@/components/ui/icon';
 import { setAiDraftQuestion } from '@/features/ai/store';
 import { MonthBars } from '@/features/categories/components/month-bars';
-import { buildMonthBars, categoryIcon, categoryName, monthBarsRange, periodMonthName } from '@/features/categories/helpers';
+import { averageOfLast, buildMonthBars, categoryIcon, categoryName, monthBarsRange, periodMonthName } from '@/features/categories/helpers';
 import { useFormatMoney } from '@/features/categories/hooks';
 import { formatDateFull, formatNumber } from '@/features/formatting/helpers';
 import { useCategorySpendByRange, useSummaryByRange, useTrendByRange } from '@/features/insights/api';
@@ -17,8 +17,8 @@ import { calendarDateToUnix, getPeriodRange, isNavigablePeriodMode, navigatePeri
 import { getPeriodLabel } from '@/lib/date/labels';
 import { useCurrentYearMonth } from '@/lib/hooks/use-current-year-month';
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '@/lib/store/store';
-import { averageOfActive, chartCeiling, dailyExpenses, elapsedSpendStats, monthlyFromDaily, monthlyGlobalBudget, savedRatio } from '../helpers';
+import { selectIsAiEnabled, useAppStore } from '@/lib/store/store';
+import { chartCeiling, dailyExpenses, elapsedSpendStats, monthlyFromDaily, monthlyGlobalBudget, savedRatio } from '../helpers';
 import { useGlobalBudget } from '../hooks';
 
 const DAY = 86400;
@@ -33,6 +33,7 @@ export function OverviewTab({ selection, startDate, endDate, onShowBudgets }: Pe
   const { data: prevSummary } = useSummaryByRange(prevStart, prevEnd, !!previous);
   const spent = summary?.expense ?? 0;
   const prevSpent = previous && prevSummary ? prevSummary.expense : null;
+  const isAiEnabled = useAppStore(selectIsAiEnabled);
   const prevLabels = previous && prevStart !== undefined
     ? (month ? { short: formatDateFull(prevStart, 'MMM'), long: formatDateFull(prevStart, 'MMMM') } : { short: getPeriodLabel(previous), long: getPeriodLabel(previous) })
     : null;
@@ -51,11 +52,13 @@ export function OverviewTab({ selection, startDate, endDate, onShowBudgets }: Pe
       />
       <WhereItWent selection={selection} startDate={startDate} endDate={endDate} onShowBudgets={onShowBudgets} />
       <SixMonths month={month ? startDate : undefined} />
-      <AskCard
-        question={prevSpent != null && prevLabels && prevSpent !== spent
-          ? translate(spent > prevSpent ? 'stats.ask_more' : 'stats.ask_less', { period: prevLabels.long })
-          : translate('stats.ask_where', { period: month ?? getPeriodLabel(selection) })}
-      />
+      {isAiEnabled && (
+        <AskCard
+          question={prevSpent != null && prevLabels && prevSpent !== spent
+            ? translate(spent > prevSpent ? 'stats.ask_more' : 'stats.ask_less', { period: prevLabels.long })
+            : translate('stats.ask_where', { period: month ?? getPeriodLabel(selection) })}
+        />
+      )}
     </>
   );
 }
@@ -223,7 +226,8 @@ function SixMonths({ month }: { month: number | undefined }) {
   const { data: rows = [] } = useTrendByRange(start, end);
   const { data: globalBudget } = useGlobalBudget();
   const bars = buildMonthBars(monthlyFromDaily(rows), endYearMonth, 'expense');
-  const average = averageOfActive(bars.slice(0, -1).map((bar) => bar.value));
+  const complete = bars.filter((bar) => bar.month < currentYearMonth);
+  const average = averageOfLast(complete, complete.length);
   const budget = monthlyGlobalBudget(globalBudget) ?? undefined;
   const meta = [
     average > 0 && translate('stats.avg_amount', { amount: format(average, 0) }),

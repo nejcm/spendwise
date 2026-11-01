@@ -80,9 +80,8 @@ export const TransactionCard = React.memo(({
           prefix={isInflow ? '+' : '-'}
           className={cn('text-row font-semibold', isIncome && 'text-positive', isTransfer && 'text-muted-foreground')}
         />
-        {isForeign
-          ? <FormattedCurrency value={Math.abs(transaction.amount)} currency={transaction.currency} className="text-xs text-muted-foreground" />
-          : isTransfer && !isAdjustment && <Text className="text-xs text-muted-foreground">{translate('transactions.not_spending')}</Text>}
+        {isForeign && <FormattedCurrency value={Math.abs(transaction.amount)} currency={transaction.currency} className="text-xs text-muted-foreground" />}
+        {isTransfer && !isAdjustment && <Text className="text-xs text-muted-foreground">{translate('transactions.not_spending')}</Text>}
       </View>
     </Pressable>
   );

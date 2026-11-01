@@ -233,47 +233,24 @@ export function currentISOWeek(): { year: number; week: number } {
   return { year: now.getFullYear(), week: getISOWeek(now) };
 }
 
-const AVERAGE_DAYS_PER_MONTH = 365.25 / 12;
-
-function getDaysInUTCMonth(unix: number): number {
-  const date = unixToDate(unix);
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();
+function calendarMonthsIn(start: number, end: number): number {
+  let months = 0;
+  for (let cursor = start; cursor < end;) {
+    const date = unixToDate(cursor);
+    const monthStart = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1) / 1000;
+    const nextMonth = Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 1) / 1000;
+    const until = Math.min(end, nextMonth);
+    months += (until - cursor) / (nextMonth - monthStart);
+    cursor = until;
+  }
+  return months;
 }
 
-/**
- * Scale a monthly budget amount to match the given period selection.
- * Returns the prorated budget in the same unit (cents) as the input.
- */
-export function scaleBudgetForPeriod(monthlyBudget: number, selection: PeriodSelection): number | undefined {
-  if (selection.mode === 'all') return undefined;
-  if ((DYNAMIC_PERIOD_MODES).includes(selection.mode as DynamicPeriodMode)) {
-    const [startUnix, endUnix] = getPeriodRange(selection) as [number, number];
-    const daysInPeriod = (endUnix - startUnix) / 86400;
-    const daysInMonth = getDaysInUTCMonth(startUnix);
-    return Math.round(monthlyBudget * daysInPeriod / daysInMonth);
-  }
-  if (selection.mode === 'month') return monthlyBudget;
-
-  const [startUnix, endUnix] = getPeriodRange(selection) as [number, number];
-  const daysInPeriod = (endUnix - startUnix) / 86400;
-
-  let daysInMonth: number = 30;
-  switch (selection.mode) {
-    case 'year':
-      daysInMonth = daysInPeriod / 12;
-      break;
-    case 'week':
-    case 'day':
-      daysInMonth = getDaysInUTCMonth(startUnix);
-      break;
-    case 'custom': {
-      const sameMonth = selection.startDate.slice(0, 7) === selection.endDate.slice(0, 7);
-      daysInMonth = sameMonth ? getDaysInUTCMonth(startUnix) : AVERAGE_DAYS_PER_MONTH;
-      break;
-    }
-  }
-
-  return Math.round(monthlyBudget * daysInPeriod / daysInMonth);
+/** Prorate a budget spanning `monthsPerAmount` months (12 = yearly) over the Period by calendar month; undefined for All time. */
+export function scaleBudgetForPeriod(amount: number, selection: PeriodSelection, monthsPerAmount = 1): number | undefined {
+  const [startUnix, endUnix] = getPeriodRange(selection);
+  if (startUnix === undefined || endUnix === undefined) return undefined;
+  return Math.round(amount * calendarMonthsIn(startUnix, endUnix) / monthsPerAmount);
 }
 
 /** Parse text typed in the user's date format to yyyy-MM-dd; null until it is a complete, real day. */

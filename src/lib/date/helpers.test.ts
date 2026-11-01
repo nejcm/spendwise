@@ -322,6 +322,33 @@ describe('scaleBudgetForPeriod', () => {
     expect(result).toBeGreaterThan(40_000);
     expect(result).toBeLessThan(60_000);
   });
+
+  it('gives equivalent periods the same limit', () => {
+    jest.useFakeTimers().setSystemTime(new Date(2026, 1, 10));
+    try {
+      expect(scaleBudgetForPeriod(10_000, { mode: 'this-year' })).toBe(120_000);
+      expect(scaleBudgetForPeriod(10_000, { mode: 'year', year: 2026 })).toBe(120_000);
+      expect(scaleBudgetForPeriod(10_000, { mode: 'this-month' })).toBe(10_000);
+      expect(scaleBudgetForPeriod(10_000, { mode: 'custom', startDate: '2026-01-01', endDate: '2026-03-31' })).toBe(30_000);
+    }
+    finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('prorates a week across the two months it spans', () => {
+    // 2026-W05 is Jan 26 – Feb 1: 6/31 + 1/28 of a month
+    expect(scaleBudgetForPeriod(868_000, { mode: 'week', year: 2026, week: 5 })).toBe(199_000);
+  });
+
+  it('scales a yearly amount without rounding through a monthly figure', () => {
+    expect(scaleBudgetForPeriod(10_000, { mode: 'year', year: 2026 }, 12)).toBe(10_000);
+    expect(scaleBudgetForPeriod(10_000, { mode: 'month', year: 2026, month: 3 }, 12)).toBe(833);
+  });
+
+  it('returns undefined for All time', () => {
+    expect(scaleBudgetForPeriod(10_000, { mode: 'all' })).toBeUndefined();
+  });
 });
 
 // ─── findClosestDateBinary ───────────────────────────────────────────────────

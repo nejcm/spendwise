@@ -9,17 +9,17 @@ import * as z from 'zod';
 import { Input, ModalSheet, SegmentedControl, SolidButton, Text } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import { useCategories } from '@/features/categories/api';
-import { monthBarsRange } from '@/features/categories/helpers';
+import { averageOfLast, buildMonthBars, monthBarsRange } from '@/features/categories/helpers';
 import { useFormatMoney } from '@/features/categories/hooks';
 import { CURRENCIES_MAP } from '@/features/currencies';
-import { centsToAmount } from '@/features/formatting/helpers';
+import { centsToAmount, formatMajorUnitsInputFromCents } from '@/features/formatting/helpers';
 import { useTrendByRange } from '@/features/insights/api';
 import { parseToCents } from '@/lib/data/money';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { refinePositiveNumberOrNull } from '@/lib/validation/helpers';
-import { averageOfActive, monthlyFromDaily } from '../helpers';
+import { monthlyFromDaily } from '../helpers';
 import { useGlobalBudget, useSetGlobalBudget } from '../hooks';
 
 const schema = z.object({
@@ -37,7 +37,7 @@ function useSuggestions() {
   const { data: rows = [] } = useTrendByRange(start, end);
   const { data: categories = [] } = useCategories();
   return {
-    average: averageOfActive(monthlyFromDaily(rows).map((m) => m.expense)),
+    average: averageOfLast(buildMonthBars(monthlyFromDaily(rows), lastMonth, 'expense'), 6),
     categories: categories.reduce((sum, c) => sum + (c.kind === 'expense' ? c.budget ?? 0 : 0), 0),
   };
 }
@@ -116,7 +116,7 @@ function GlobalBudgetForm({ currentBudget, onSuccess }: { currentBudget: GlobalB
                     <Pressable
                       key={chip.label}
                       accessibilityRole="button"
-                      onPress={() => field.handleChange(String(Math.round(centsToAmount(chip.cents))))}
+                      onPress={() => field.handleChange(formatMajorUnitsInputFromCents(chip.cents))}
                       className="h-9 justify-center rounded-full bg-card-2 px-3.5"
                     >
                       <Text className="text-meta font-medium">{chip.label}</Text>

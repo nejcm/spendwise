@@ -128,12 +128,6 @@ export function monthlyFromDaily(rows: DailyTrendTotal[]): MonthlyTotals[] {
   return [...months.values()];
 }
 
-/** Mean of the non-zero values, 0 when there are none. */
-export function averageOfActive(values: number[]): number {
-  const active = values.filter((v) => v > 0);
-  return active.length ? Math.round(active.reduce((sum, v) => sum + v, 0) / active.length) : 0;
-}
-
 /** Fraction of [start, end) elapsed by the end of `today`, or null when today is outside it. */
 export function paceFraction(start: number | undefined, end: number | undefined, today: number): number | null {
   if (start === undefined || end === undefined || today < start || today >= end) return null;

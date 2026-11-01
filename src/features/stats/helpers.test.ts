@@ -1,7 +1,7 @@
 import type { GlobalBudget } from './global-budget-queries';
 import { getMonthBoundaries } from '@/lib/date/helpers';
 
-import { averageOfActive, chartCeiling, dailyExpenses, daysLeftIn, elapsedSpendStats, getBudgetSelectionBoundaries, heatLevels, monthlyFromDaily, monthlyGlobalBudget, paceFraction, savedRatio, scaleGlobalBudget } from './helpers';
+import { chartCeiling, dailyExpenses, daysLeftIn, elapsedSpendStats, getBudgetSelectionBoundaries, heatLevels, monthlyFromDaily, monthlyGlobalBudget, paceFraction, savedRatio, scaleGlobalBudget } from './helpers';
 
 const MONTHLY: GlobalBudget = { amountCents: 100_000, type: 'monthly' };
 const YEARLY: GlobalBudget = { amountCents: 1_200_000, type: 'yearly' };
@@ -193,11 +193,6 @@ describe('insights helpers', () => {
       { month: '2026-10', income: 5, expense: 150 },
       { month: '2026-11', income: 0, expense: 7 },
     ]);
-  });
-
-  it('averageOfActive ignores empty months', () => {
-    expect(averageOfActive([0, 100, 200])).toBe(150);
-    expect(averageOfActive([0])).toBe(0);
   });
 
   it('paceFraction and daysLeftIn are null outside the range', () => {

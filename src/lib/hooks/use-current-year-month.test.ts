@@ -1,7 +1,7 @@
 import type { AppStateStatus } from 'react-native';
 import { AppState } from 'react-native';
 import { act, renderHook } from '@/lib/test-utils';
-import { useCurrentYearMonth } from './use-current-year-month';
+import { useCurrentDay, useCurrentYearMonth } from './use-current-year-month';
 
 let mockFocusListener: (() => void) | undefined;
 const mockUnsubscribeFocus = jest.fn();
@@ -72,5 +72,27 @@ describe('useCurrentYearMonth', () => {
     expect(remove).toHaveBeenCalled();
     expect(mockUnsubscribeFocus).toHaveBeenCalled();
     expect(jest.getTimerCount()).toBe(0);
+  });
+});
+
+describe('useCurrentDay', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date(2026, 5, 30, 23, 50));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('updates at local midnight while in the foreground, and keeps re-arming', () => {
+    const { result } = renderHook(() => useCurrentDay());
+    expect(result.current).toBe('2026-06-30');
+
+    act(() => jest.advanceTimersByTime(10 * 60_000));
+    expect(result.current).toBe('2026-07-01');
+
+    act(() => jest.advanceTimersByTime(24 * 60 * 60_000));
+    expect(result.current).toBe('2026-07-02');
   });
 });

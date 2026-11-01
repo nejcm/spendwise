@@ -16,6 +16,8 @@ export type Transaction = {
   merchant_name: string | null;
   merchant_logo_slug: string | null;
   location: string | null;
+  transfer_id: string | null;
+  is_adjustment: number;
   created_at: number; // Unix seconds
   updated_at: number; // Unix seconds
 };
@@ -24,7 +26,7 @@ export type TransactionFormData = Pick<Transaction, 'account_id' | 'category_id'
   baseAmount?: number;
 };
 
-export type TransactionInsertData = Omit<Transaction, 'id' | 'created_at' | 'updated_at'>;
+export type TransactionInsertData = Omit<Transaction, 'id' | 'created_at' | 'updated_at' | 'transfer_id' | 'is_adjustment'>;
 
 export type TransactionWithCategory = Transaction & {
   category_name: string | null;

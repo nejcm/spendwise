@@ -9,7 +9,7 @@ import { CurrencyItem } from './components/currency-item';
 import { SettingsContainer } from './components/settings-container';
 
 const LONG_PRESS_ACTION_OPTIONS: LongPressActionType[] = ['scan_receipt', 'pick_from_gallery'];
-const HOME_SCREEN_CHART_OPTIONS: HomeScreenChartType[] = ['none', 'monthly_spending', 'category_spending'];
+const HOME_SCREEN_CHART_OPTIONS: HomeScreenChartType[] = ['balance', 'category_spending', 'none'];
 
 export function GeneralSettingsScreen() {
   const saveOnScan = useAppStore.use.saveOnScan();

@@ -3,6 +3,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import { IS_WEB } from '../base';
 import { dropDb, migrateDb } from '../sqlite';
 import { clearDbData, clearSelectedDataDb, clearTransactionsDb } from '../sqlite/db';
+import { BACKFILL_CATEGORY_KIND_SQL } from '../sqlite/migrations';
 import { mockData } from '../sqlite/mock-data';
 import { seedDefaults } from '../sqlite/seed';
 import { clearAppStore } from '../store/store';
@@ -46,6 +47,7 @@ export async function clearSelectedData(
 export async function seedData(db: SQLiteDatabase, queryClient: QueryClient) {
   try {
     await seedDefaults(db);
+    await db.execAsync(BACKFILL_CATEGORY_KIND_SQL);
     queryClient.clear();
     queryClient.invalidateQueries();
     console.info('Database seeded successfully');
@@ -59,6 +61,7 @@ export async function seedMockData(db: SQLiteDatabase, queryClient: QueryClient)
   try {
     await seedDefaults(db);
     await mockData(db);
+    await db.execAsync(BACKFILL_CATEGORY_KIND_SQL);
     console.info('Mock data import successfully');
   }
   catch (err) {

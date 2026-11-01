@@ -3,6 +3,7 @@ export interface Category {
   name: string;
   icon: string | null;
   color: string;
+  kind: 'expense' | 'income';
   budget: number | null; // monthly budget in cents (base currency)
   sort_order: number;
   created_at: number; // Unix seconds

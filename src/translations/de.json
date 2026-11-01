@@ -606,10 +606,10 @@
     "generale": "Allgemein",
     "get_api_key": "So erhältst du einen API-Schlüssel",
     "home_screen_chart": "Startseiten-Diagramm",
-    "home_screen_chart_description": "Wähle, welches Ausgabendiagramm auf der Startseite angezeigt wird.",
+    "home_screen_chart_description": "Wähle, welches Diagramm auf der Startseite angezeigt wird.",
     "home_screen_chart_options": {
-      "category_spending": "Ausgaben nach Kategorie",
-      "monthly_spending": "Monatliche Ausgaben",
+      "balance": "Kontostand",
+      "category_spending": "Kategorien",
       "none": "Keine"
     },
     "import": "Import/Export",

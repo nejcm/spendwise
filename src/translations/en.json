@@ -606,10 +606,10 @@
     "generale": "General",
     "get_api_key": "How to get an API key",
     "home_screen_chart": "Home screen chart",
-    "home_screen_chart_description": "Choose which spending chart appears on the home screen.",
+    "home_screen_chart_description": "Choose which chart appears on the home screen.",
     "home_screen_chart_options": {
-      "category_spending": "Category spending",
-      "monthly_spending": "Monthly spending",
+      "balance": "Balance",
+      "category_spending": "Categories",
       "none": "None"
     },
     "import": "Import/Export",

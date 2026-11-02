@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "spendwise-web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["exec", "expo", "start", "--web", "--port", "8081", "--clear"],
+      "port": 8081
+    }
+  ]
+}

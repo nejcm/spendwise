@@ -3,7 +3,7 @@ import type { AiFeature } from '@/lib/store/store';
 import * as React from 'react';
 import { Linking } from 'react-native';
 import { Alert, Card, GhostButton, Input, Pressable, SectionHeader, SegmentedControl, SolidButton, Text, View } from '@/components/ui';
-import { Sparkle } from '@/components/ui/icon';
+import { Bot } from '@/components/ui/icon';
 import { showSnackbar } from '@/components/ui/snackbar';
 import { SettingsPage } from '@/features/settings/components/settings-page';
 import { ToggleRow } from '@/features/settings/components/toggle-row';
@@ -93,7 +93,7 @@ function KeyCard({ provider, providerName, savedKey }: { provider: AiProviderTyp
     <View className="mt-5 gap-3.5 rounded-card border border-accent-line bg-accent-soft p-4.5">
       <View className="flex-row items-center gap-3">
         <View className="size-11 items-center justify-center rounded-tile bg-primary">
-          <Sparkle size={20} strokeWidth={2} colorClassName="accent-primary-foreground" />
+          <Bot size={20} strokeWidth={2} colorClassName="accent-primary-foreground" />
         </View>
         <View className="min-w-0 flex-1">
           <Text className="text-base font-semibold">

@@ -16,7 +16,7 @@ import {
   useModalSheet,
   View,
 } from '@/components/ui';
-import { ArrowUp, Brain, Calendar, ChevronDown, ChevronLeft, SlidersHorizontal, Sparkle, SquarePen } from '@/components/ui/icon';
+import { ArrowUp, Bot, Brain, Calendar, ChevronDown, ChevronLeft, SlidersHorizontal, SquarePen } from '@/components/ui/icon';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAccounts } from '@/features/accounts/api';
 import AssistantMessage from '@/features/ai/components/assistant-message';
@@ -42,7 +42,7 @@ function AiSetup({ hasKey }: { hasKey: boolean }) {
   return (
     <View className="flex-1 px-5">
       <View className="mt-6.5 size-14 items-center justify-center rounded-[18px] bg-primary">
-        <Sparkle size={22} strokeWidth={2} colorClassName="accent-primary-foreground" />
+        <Bot size={22} strokeWidth={2} colorClassName="accent-primary-foreground" />
       </View>
       <Text accessibilityRole="header" className="mt-4.5 text-[30px]/[34px] font-bold tracking-page-title">{translate(hasKey ? 'ai.chat_off_title' : 'ai.setup_required_title')}</Text>
       <Text className="mt-2 text-base/normal text-muted-foreground">{translate(hasKey ? 'ai.chat_off_body' : 'ai.setup_required_body')}</Text>
@@ -167,7 +167,7 @@ function Intro() {
   return (
     <View className="flex-1 items-center justify-center px-8 py-10">
       <View className="size-12 items-center justify-center rounded-full bg-primary">
-        <Sparkle size={18} strokeWidth={2} colorClassName="accent-primary-foreground" />
+        <Bot size={18} strokeWidth={2} colorClassName="accent-primary-foreground" />
       </View>
       <Text className="mt-4 text-center text-row text-muted-foreground">{translate('ai.ask_prompt')}</Text>
     </View>
@@ -204,7 +204,7 @@ const ChatMessageRow = React.memo(({
   return (
     <View onLayout={handleLayout} className="mx-5 mt-4 flex-row gap-2.5">
       <View className="size-7.5 items-center justify-center rounded-full bg-primary">
-        <Sparkle size={13} strokeWidth={2.5} colorClassName="accent-primary-foreground" />
+        <Bot size={13} strokeWidth={2.5} colorClassName="accent-primary-foreground" />
       </View>
       {isLiveStreaming && !displayContent
         ? <Skeleton height={44} className="flex-1 rounded-card rounded-tl-md" />

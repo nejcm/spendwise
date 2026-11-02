@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { AmountText, Card, getPressedStyle, Text } from '@/components/ui';
-import { ChevronRight, Sparkle } from '@/components/ui/icon';
+import { Bot, ChevronRight } from '@/components/ui/icon';
 import { setAiDraftQuestion } from '@/features/ai/store';
 import { MonthBars } from '@/features/categories/components/month-bars';
 import { averageOfLast, buildMonthBars, categoryIcon, categoryName, monthBarsRange, periodMonthName } from '@/features/categories/helpers';
@@ -258,7 +258,7 @@ function AskCard({ question }: { question: string }) {
       className="mt-3.5 flex-row items-center gap-3 rounded-card border border-accent-line bg-accent-soft px-4 py-3.5"
     >
       <View className="size-8 items-center justify-center rounded-full bg-primary">
-        <Sparkle size={14} strokeWidth={2.5} colorClassName="accent-primary-foreground" />
+        <Bot size={14} strokeWidth={2.5} colorClassName="accent-primary-foreground" />
       </View>
       <Text className="flex-1 text-row">{question}</Text>
       <ChevronRight size={18} colorClassName="accent-foreground" />

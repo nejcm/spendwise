@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { View } from 'react-native';
 import { EmptyState, SolidButton, Text } from '@/components/ui';
-import { Download, Plus, Sparkle } from '@/components/ui/icon';
+import { Bot, Download, Plus } from '@/components/ui/icon';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 
@@ -59,7 +59,7 @@ export function ActivityEmpty() {
         )}
       />
       <View className="mt-5.5 flex-row gap-2.5 rounded-[18px] border border-accent-line bg-accent-soft px-4 py-3.5">
-        <Sparkle size={16} colorClassName="accent-accent" className="mt-0.5" />
+        <Bot size={16} colorClassName="accent-accent" className="mt-0.5" />
         <Text className="flex-1 text-sm/snug">{translate(`transactions.empty.tip_${longPressAction}`)}</Text>
       </View>
     </View>

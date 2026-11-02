@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { View } from 'react-native';
 import { OutlineButton, SolidButton, Text } from '@/components/ui';
-import { Sparkle } from '@/components/ui/icon';
+import { Bot } from '@/components/ui/icon';
 import { setAiDraftQuestion } from '@/features/ai/store';
 import { getRecommendationCopy } from '@/features/recommendations/helpers';
 import { useVisibleRecommendations } from '@/features/recommendations/hooks';
@@ -29,7 +29,7 @@ function InsightCardBody() {
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
           <View className="size-5 items-center justify-center rounded-full bg-primary">
-            <Sparkle size={11} strokeWidth={2.5} colorClassName="accent-primary-foreground" />
+            <Bot size={11} strokeWidth={2.5} colorClassName="accent-primary-foreground" />
           </View>
           <Text className="text-meta font-semibold">{translate('home.insight.title')}</Text>
           <Text className="text-meta text-muted-foreground">{`· ${translate('home.insight.label')}`}</Text>

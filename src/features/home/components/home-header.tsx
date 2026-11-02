@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { getPressedStyle, Text } from '@/components/ui';
-import { SlidersHorizontal, Sparkle } from '@/components/ui/icon';
+import { Bot, SlidersHorizontal } from '@/components/ui/icon';
 import { ProfileAvatar } from '@/features/profile/profile-avatar';
 import { useCurrentYearMonth } from '@/lib/hooks/use-current-year-month';
 import { translate } from '@/lib/i18n';
@@ -33,7 +33,7 @@ export function HomeHeader({ isEmpty }: { isEmpty: boolean }) {
       <View className="flex-row items-center rounded-full bg-card p-1">
         {!isChatOff && (
           <Pressable accessibilityRole="button" accessibilityLabel={translate('home.ask_ai')} onPress={() => router.push('/ai')} style={getPressedStyle} className="size-10 items-center justify-center">
-            <Sparkle size={18} strokeWidth={1.8} colorClassName="accent-foreground" />
+            <Bot size={18} strokeWidth={1.8} colorClassName="accent-foreground" />
           </Pressable>
         )}
         <Pressable accessibilityRole="button" accessibilityLabel={translate('common.settings')} onPress={() => router.push('/settings')} style={getPressedStyle} className="size-10 items-center justify-center">

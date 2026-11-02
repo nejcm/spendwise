@@ -13,7 +13,9 @@ import {
   getTransactionById,
   getTransactions,
   getTransactionsSample,
+  hasUserTransactions,
   isTransferInLeg,
+  TRANSFER_LEG_ROUNDS_TO_ZERO,
   updateTransaction,
   updateTransfer,
 } from './queries';
@@ -80,6 +82,7 @@ describe('getTransactions', () => {
 
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('txn_1');
+    expect(result[0].account_name).toBe('Checking');
   });
 
   it('excludes transactions outside the date range', async () => {
@@ -152,6 +155,22 @@ describe('getTransactionById', () => {
   });
 });
 
+describe('hasUserTransactions', () => {
+  it('ignores opening-balance adjustment rows', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    await db.runAsync(
+      `INSERT INTO transactions (id, account_id, type, amount, currency, baseAmount, baseCurrency, date, is_adjustment)
+       VALUES ('adj', 'acc_1', 'transfer', 1000, 'EUR', 1000, 'EUR', ?, 1)`,
+      [MAR_MID],
+    );
+    expect(await hasUserTransactions(db as any)).toBe(false);
+
+    await seedTransaction(db);
+    expect(await hasUserTransactions(db as any)).toBe(true);
+  });
+});
+
 // ─── getRecentTransactions ────────────────────────────────────────────────────
 
 describe('getRecentTransactions', () => {
@@ -186,7 +205,7 @@ describe('getTransactionsSample', () => {
     await seedTransaction(db, { id: 'txn_2', date: MAR_MID + 1 });
     await seedTransaction(db, { id: 'txn_3', date: APR_MID });
 
-    const result = await getTransactionsSample(db as any, MAR_START, APR_START, 1);
+    const result = await getTransactionsSample(db as any, MAR_START, APR_START, { limit: 1 });
 
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('txn_2');
@@ -197,9 +216,38 @@ describe('getTransactionsSample', () => {
     await seedBase(db);
     await seedTransaction(db, { id: 'txn_1', date: APR_MID });
 
-    const result = await getTransactionsSample(db as any, MAR_START, APR_START, 5);
+    const result = await getTransactionsSample(db as any, MAR_START, APR_START, { limit: 5 });
 
     expect(result).toHaveLength(0);
+  });
+
+  it('keeps only rows of the given accounts', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    await db.runAsync(`INSERT INTO accounts (id, name, type, currency) VALUES ('acc_2', 'Card', 'checking', 'EUR')`);
+    await seedTransaction(db, { id: 'txn_1' });
+    await seedTransaction(db, { id: 'txn_2', account_id: 'acc_2' });
+
+    const result = await getTransactionsSample(db as any, MAR_START, APR_START, { limit: 5, accountIds: ['acc_2'] });
+
+    expect(result.map((t) => t.id)).toEqual(['txn_2']);
+  });
+
+  it('keeps a transfer in-leg whose out-leg account is outside the scope, once per pair otherwise', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    await db.runAsync(`INSERT INTO accounts (id, name, type, currency) VALUES ('acc_2', 'Savings', 'savings', 'EUR')`);
+    await seedTransaction(db, { id: 'out', type: 'transfer', amount: -5000, category_id: null });
+    await seedTransaction(db, { id: 'in', account_id: 'acc_2', type: 'transfer', amount: 5000, category_id: null });
+    await db.runAsync(`UPDATE transactions SET transfer_id = 'tr_1'`);
+
+    const ids = async (accountIds?: string[]) =>
+      (await getTransactionsSample(db as any, MAR_START, APR_START, { limit: 5, accountIds })).map((t) => t.id);
+
+    expect(await ids(['acc_2'])).toEqual(['in']);
+    expect(await ids(['acc_1'])).toEqual(['out']);
+    expect(await ids(['acc_1', 'acc_2'])).toEqual(['out']);
+    expect(await ids()).toEqual(['out']);
   });
 });
 
@@ -587,6 +635,29 @@ describe('transfer pairs', () => {
     ]);
   });
 
+  it('rejects a transfer whose converted leg rounds to zero, on create and update', async () => {
+    const db = await createTestDb();
+    await seedAccounts(db);
+    const tiny = { ...transfer, to_account_id: 'acc_usd', amount: 1, baseAmount: 1 };
+
+    await expect(createTransfer(db as any, tiny, { USD: 0.4 })).rejects.toThrow(TRANSFER_LEG_ROUNDS_TO_ZERO);
+    expect(await legs(db)).toEqual([]);
+
+    await createTransfer(db as any, transfer, {});
+    const [out] = await legs(db);
+    await expect(updateTransfer(db as any, out!.transfer_id as string, tiny, { USD: 0.4 })).rejects.toThrow(TRANSFER_LEG_ROUNDS_TO_ZERO);
+    expect((await legs(db)).map((r) => r.amount)).toEqual([-5000, 5000]);
+  });
+
+  it('stores no category on either leg', async () => {
+    const db = await createTestDb();
+    await seedAccounts(db);
+
+    await createTransfer(db as any, { ...transfer, category_id: 'cat_1' }, {});
+
+    expect(await db.getAllAsync('SELECT category_id FROM transactions')).toEqual([{ category_id: null }, { category_id: null }]);
+  });
+
   it('rejects a transfer to the same account', async () => {
     const db = await createTestDb();
     await seedAccounts(db);
@@ -622,7 +693,7 @@ describe('transfer pairs', () => {
     await seedTransaction(db, { id: 'legacy_in', type: 'transfer', amount: 100, category_id: null });
 
     expect((await getRecentTransactions(db as any, 10)).map((t) => t.id).sort()).toEqual([outId, 'legacy_in'].sort());
-    expect((await getTransactionsSample(db as any, MAR_START, APR_START, 10)).map((t) => t.id).sort()).toEqual([outId, 'legacy_in'].sort());
+    expect((await getTransactionsSample(db as any, MAR_START, APR_START, { limit: 10 })).map((t) => t.id).sort()).toEqual([outId, 'legacy_in'].sort());
   });
 
   it('transfers never count as income or expense', async () => {

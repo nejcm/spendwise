@@ -227,6 +227,7 @@ export function Options<T extends string | number>({
                 onChangeText={setSearchQuery}
                 placeholder={searchPlaceholder}
                 testID={testID ? `${testID}-search` : undefined}
+                sheet
               />
             </View>
           )

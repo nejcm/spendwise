@@ -6,14 +6,15 @@ import type { RatesMap } from '@/features/currencies/queries';
 
 import { convertAmount } from '@/features/currencies/queries';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
-import { generateId } from '@/lib/sqlite';
+import { generateId, inFilter, withWriteTransaction } from '@/lib/sqlite';
 
 // ─── Read Queries ───
 
-const TRANSACTION_SELECT = `SELECT t.*, c.name as category_name, c.icon as category_icon, c.color as category_color,
+const TRANSACTION_SELECT = `SELECT t.*, a.name as account_name, c.name as category_name, c.icon as category_icon, c.color as category_color,
        tp.account_id as counter_account_id, ca.name as counter_account_name, ca.icon as counter_account_icon,
        tp.amount as counter_amount, tp.currency as counter_currency
      FROM transactions t
+     LEFT JOIN accounts a ON a.id = t.account_id
      LEFT JOIN categories c ON t.category_id = c.id
      LEFT JOIN transactions tp ON t.transfer_id IS NOT NULL AND tp.transfer_id = t.transfer_id AND tp.id <> t.id
      LEFT JOIN accounts ca ON ca.id = tp.account_id`;
@@ -54,6 +55,10 @@ export async function hasTransactions(db: SQLiteDatabase): Promise<boolean> {
   return (await db.getFirstAsync('SELECT 1 FROM transactions LIMIT 1')) !== null;
 }
 
+export async function hasUserTransactions(db: SQLiteDatabase): Promise<boolean> {
+  return (await db.getFirstAsync('SELECT 1 FROM transactions WHERE is_adjustment = 0 LIMIT 1')) !== null;
+}
+
 export async function getRecentTransactions(
   db: SQLiteDatabase,
   limit: number,
@@ -71,14 +76,19 @@ export async function getTransactionsSample(
   db: SQLiteDatabase,
   startDate: number,
   endDate: number,
-  limit: number,
+  { limit, accountIds }: { limit: number; accountIds?: readonly string[] },
 ): Promise<TransactionWithCategory[]> {
+  const [accountSql, accountParams] = inFilter('t.account_id', accountIds);
+  // Scoped: show the in-leg when its out-leg's account is not in scope, else the pair would vanish.
+  const transferLegSql = accountIds
+    ? `(${HIDE_TRANSFER_IN_LEG} OR tp.account_id NOT IN (${accountIds.map(() => '?').join(', ')}))`
+    : HIDE_TRANSFER_IN_LEG;
   return db.getAllAsync<TransactionWithCategory>(
     `${TRANSACTION_SELECT}
-     WHERE t.date >= ? AND t.date < ? AND ${HIDE_TRANSFER_IN_LEG}
+     WHERE t.date >= ? AND t.date < ? AND ${transferLegSql}${accountSql}
      ORDER BY t.date DESC, t.created_at DESC
      LIMIT ?`,
-    [startDate, endDate, limit],
+    [startDate, endDate, ...(accountIds ?? []), ...accountParams, limit],
   );
 }
 
@@ -132,6 +142,8 @@ export async function createTransaction(
   return id;
 }
 
+export const TRANSFER_LEG_ROUNDS_TO_ZERO = 'transfer_leg_rounds_to_zero';
+
 /** Out leg is negative and in leg positive, each in its own account's currency; both share the positive `baseAmount`. */
 async function buildTransferLegs(
   db: SQLiteDatabase,
@@ -149,12 +161,16 @@ async function buildTransferLegs(
   const { to_account_id, ...common } = data;
   const leg = (accountId: string, sign: 1 | -1): TransactionInsertData => {
     const currency = currencyOf(accountId);
+    const amount = convertAmount(data.amount, data.currency, currency, rates);
+    // Legs are told apart by sign, so a zero leg would be orphaned by update and duplicate.
+    if (amount === 0) throw new Error(TRANSFER_LEG_ROUNDS_TO_ZERO);
     return {
       ...common,
       type: 'transfer',
+      category_id: null,
       account_id: accountId,
       currency,
-      amount: sign * convertAmount(data.amount, data.currency, currency, rates),
+      amount: sign * amount,
       baseAmount: Math.abs(data.baseAmount),
       transfer_id: transferId,
       is_adjustment: 0,
@@ -171,7 +187,7 @@ export async function createTransfer(
 ): Promise<string> {
   const [outLeg, inLeg] = await buildTransferLegs(db, data, rates, generateId());
   const outId = generateId();
-  await db.withTransactionAsync(async () => {
+  await withWriteTransaction(db, async () => {
     await createTransactionRow(db, outId, outLeg);
     await createTransactionRow(db, generateId(), inLeg);
   });
@@ -192,7 +208,7 @@ export async function updateTransfer(
   rates: RatesMap,
 ): Promise<void> {
   const legs = await buildTransferLegs(db, data, rates, transferId);
-  await db.withTransactionAsync(async () => {
+  await withWriteTransaction(db, async () => {
     for (const [leg, side] of [[legs[0], 'amount < 0'], [legs[1], 'amount > 0']] as const) {
       await db.runAsync(
         `UPDATE transactions
@@ -212,7 +228,7 @@ export async function duplicateTransfer(
   const newTransferId = generateId();
   const outId = generateId();
   const copied = INSERT_COLUMNS.slice(1, -2).join(', ');
-  await db.withTransactionAsync(async () => {
+  await withWriteTransaction(db, async () => {
     for (const [id, side] of [[outId, 'amount < 0'], [generateId(), 'amount > 0']] as const) {
       await db.runAsync(
         `INSERT INTO transactions (id, ${copied}, transfer_id, is_adjustment)
@@ -235,7 +251,7 @@ export async function createTransactions(
     return [];
   }
   const allIds: string[] = [];
-  await db.withTransactionAsync(async () => {
+  await withWriteTransaction(db, async () => {
     for (let offset = 0; offset < dataList.length; offset += MAX_TRANSACTION_ROWS_PER_BATCH) {
       const chunk = dataList.slice(offset, offset + MAX_TRANSACTION_ROWS_PER_BATCH);
       const ids = chunk.map(() => generateId());
@@ -275,7 +291,7 @@ export async function deleteTransactions(
 
   // Keep well below SQLite's usual 999 bind-variable limit.
   const chunkSize = 400;
-  await db.withTransactionAsync(async () => {
+  await withWriteTransaction(db, async () => {
     for (let offset = 0; offset < ids.length; offset += chunkSize) {
       const chunk = ids.slice(offset, offset + chunkSize);
       const placeholders = chunk.map(() => '?').join(', ');

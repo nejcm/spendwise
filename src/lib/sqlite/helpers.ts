@@ -67,3 +67,17 @@ export async function getById<T>(db: SQLiteDatabase, table: string, id: string):
 export async function getAll<T>(db: SQLiteDatabase, table: string, orderBy: string = 'created_at DESC'): Promise<T[]> {
   return db.getAllAsync<T>(`SELECT * FROM ${table} ORDER BY ${orderBy}`);
 }
+
+const writeQueues = new WeakMap<SQLiteDatabase, Promise<void>>();
+
+/** Runs `task` in a transaction, one at a time per connection: expo-sqlite lets a second BEGIN interleave and roll back the first. Never nest calls. */
+export function withWriteTransaction(db: SQLiteDatabase, task: () => Promise<void>): Promise<void> {
+  const run = (writeQueues.get(db) ?? Promise.resolve()).then(() => db.withTransactionAsync(task));
+  writeQueues.set(db, run.catch(() => {}));
+  return run;
+}
+
+/** `AND <column> IN (…)` for an optional id filter; an empty list matches nothing. */
+export function inFilter(column: string, ids?: readonly string[]): [string, string[]] {
+  return ids ? [` AND ${column} IN (${ids.map(() => '?').join(', ')})`, [...ids]] : ['', []];
+}

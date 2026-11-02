@@ -1,6 +1,8 @@
 import type { CurrencyKey } from '../currencies';
 import type { CurrencyFormat, NumberFormat } from './constants';
-import { format, isToday, isYesterday } from 'date-fns';
+import { format as formatDateFns, isToday, isYesterday } from 'date-fns';
+import { de, enUS } from 'date-fns/locale';
+import i18n from 'i18next';
 import { calendarDateToUnix, unixToCalendarDate, unixToDate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { DEFAULT_DATE_FORMAT, DEFAULT_USER_CURRENCY } from '../../config';
@@ -39,13 +41,14 @@ const NUMBER_FORMAT_MAP: Record<NumberFormat, [string, Intl.NumberFormatOptions]
   'comma': ['de-DE', { useGrouping: false }],
   'comma-space': ['de-DE', { useGrouping: true }],
 } as const;
-export function formatNumber(value: number | string, numberFormat: NumberFormat, fractionDigits = 2): string {
+export function formatNumber(value: number | string, numberFormat: NumberFormat, fractionDigits = 2, minFractionDigits = 0): string {
   const number = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(number)) return String(value);
 
   const [locale, opts] = NUMBER_FORMAT_MAP[numberFormat];
   return new Intl.NumberFormat(locale, {
     useGrouping: true,
+    minimumFractionDigits: Math.min(minFractionDigits, fractionDigits),
     maximumFractionDigits: fractionDigits,
     ...opts,
   }).format(number);
@@ -79,9 +82,10 @@ export function formatCurrency(
   const isNegative = adjustedNumber < 0;
   const isCurrencyBeforeNumber = currencyFormat === 'symbol-before' || currencyFormat === 'code-before';
   const numberForFormatting = isNegative && isCurrencyBeforeNumber ? Math.abs(adjustedNumber) : adjustedNumber;
-  const formattedNumber = shorten
-    ? shortenNumberString(centsToAmount(numberForFormatting), 1000, fractionDigits)
-    : formatNumber(centsToAmount(numberForFormatting), numberFormat, fractionDigits);
+  const amount = centsToAmount(numberForFormatting);
+  const formattedNumber = shorten && Math.abs(amount) >= 1000
+    ? shortenNumberString(amount, 1000, fractionDigits)
+    : formatNumber(amount, numberFormat, fractionDigits, Number.isInteger(amount) ? 0 : 2);
   const isCode = currencyFormat === 'code-before' || currencyFormat === 'code-after';
   const currencyTxt = isCode ? curr : CURRENCIES_MAP[curr]?.symbol ?? DEFAULT_USER_CURRENCY;
   const space = isCode ? ' ' : '';
@@ -100,6 +104,10 @@ export function splitFraction(formatted: string, numberFormat: NumberFormat): [s
   if (!match) return [formatted, '', ''];
   const end = match.index + match[0].length;
   return [formatted.slice(0, match.index), match[0], formatted.slice(end)];
+}
+
+function format(date: Date, displayFormat: string): string {
+  return formatDateFns(date, displayFormat, { locale: i18n.resolvedLanguage === 'de' ? de : enUS });
 }
 
 function formatRelativeOrDate(date: Date, displayFormat?: string): string {
@@ -147,7 +155,7 @@ export function formatShortDate(unix: number): string {
  * Get today's date as an ISO string (date only). Used internally by scheduler.
  */
 export function todayISO(): string {
-  return format(new Date(), 'yyyy-MM-dd');
+  return formatDateFns(new Date(), 'yyyy-MM-dd');
 }
 
 /**

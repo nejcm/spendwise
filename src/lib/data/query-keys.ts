@@ -15,6 +15,7 @@ export const queryKeys = {
     list: (range: string) => ['transactions', 'list', range] as const,
     detail: (id: string) => ['transactions', 'detail', id] as const,
     recent: (limit: number) => ['transactions', 'recent', limit] as const,
+    exists: ['transactions', 'exists'] as const,
   },
 
   // ─── Accounts ───
@@ -23,22 +24,24 @@ export const queryKeys = {
     withBalance: ['accounts', 'balance'] as const,
     withBalanceForMonth: (yearMonth: string) =>
       ['accounts', 'balance', yearMonth] as const,
-    withBalanceForRange: (startDate: number | undefined, endDate: number | undefined) =>
-      ['accounts', 'balance', startDate, endDate] as const,
+    balanceSeries: (startDate: number, endDate: number, accountId?: string) =>
+      ['accounts', 'balance', 'series', startDate, endDate, accountId] as const,
+    netChanges: (startDate: number, endDate: number) =>
+      ['accounts', 'balance', 'net-changes', startDate, endDate] as const,
+    archived: ['accounts', 'archived'] as const,
     totalBalance: ['total-balance'] as const,
     totalBalanceForMonth: (yearMonth: string) =>
       ['total-balance', yearMonth] as const,
     summaryForRange: (accountId: string | undefined, startDate: number | undefined, endDate: number | undefined) =>
       ['accounts', 'summary-range', accountId, startDate, endDate] as const,
-    summaryNativeForRange: (accountId: string | undefined, startDate: number | undefined, endDate: number | undefined) =>
-      ['accounts', 'summary-native-range', accountId, startDate, endDate] as const,
     summaryAll: ['accounts', 'summary-range'] as const,
-    summaryNativeAll: ['accounts', 'summary-native-range'] as const,
   },
 
   // ─── Categories ───
   categories: {
     all: ['categories'] as const,
+    usageAll: ['category-usage'] as const,
+    usage: (id: string) => ['category-usage', id] as const,
   },
 
   // ─── Month Summary ───
@@ -50,6 +53,7 @@ export const queryKeys = {
   // ─── Insights ───
   insights: {
     all: ['insights'] as const,
+    activityCount: ['insights', 'activity-count'] as const,
     categorySpendRange: (startDate: number | undefined, endDate: number | undefined) =>
       ['insights', 'category-spend-range', startDate, endDate] as const,
     monthlyTrend: (months: number) =>
@@ -62,6 +66,8 @@ export const queryKeys = {
       ['insights', 'category-spend-year', year] as const,
     summaryRange: (startDate: number | undefined, endDate: number | undefined) =>
       ['insights', 'summary-range', startDate, endDate] as const,
+    categoryMonthly: (categoryId: string, startDate: number, endDate: number) =>
+      ['insights', 'category-monthly', categoryId, startDate, endDate] as const,
   },
 
   // ─── Currency Rates ───
@@ -77,14 +83,11 @@ export const queryKeys = {
     all: ['scheduled-transactions'] as const,
     detail: (id: string) =>
       ['scheduled-transactions', 'detail', id] as const,
-  },
-
-  // ─── Budget Stats ───
-  budgetStats: {
-    byMonth: (year: number, month: number) =>
-      ['budget-stats', 'by-month', year, month] as const,
-    byPeriod: (startDate: number, endDate: number) =>
-      ['budget-stats', 'by-period', startDate, endDate] as const,
+    forTransaction: (transactionId: string) =>
+      ['scheduled-transactions', 'for-transaction', transactionId] as const,
+    paymentsAll: ['scheduled-transactions', 'payments'] as const,
+    payments: (ruleId: string) =>
+      ['scheduled-transactions', 'payments', ruleId] as const,
   },
 
   // ─── Recommendations ───
@@ -92,6 +95,12 @@ export const queryKeys = {
     all: ['recommendations'] as const,
     home: ['recommendations', 'home'] as const,
   },
+
+  // ─── Settings › Delete data and row counts ───
+  dataCounts: ['data-counts'] as const,
+
+  // ─── OS notification permission ───
+  canNotify: ['notifications', 'canNotify'] as const,
 
   // ─── Global Budget ───
   globalBudget: {

@@ -2,17 +2,22 @@ import type { QueryClient } from '@tanstack/react-query';
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { ScheduledTransactionFormData } from './types';
+import type { CurrencyKey } from '@/features/currencies';
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { useSQLiteContext } from 'expo-sqlite';
+import { useCallback } from 'react';
 
 import { Alert } from '@/components/ui';
+import { computeBaseAmount } from '@/features/currencies/conversion';
+import { useCurrencyRates } from '@/features/currencies/hooks';
 import { todayUnix } from '@/features/formatting/helpers';
 import { captureError } from '@/lib/analytics';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
 import { translate } from '@/lib/i18n';
+import { useAppStore } from '@/lib/store/store';
 import * as queries from './queries';
 
 import { processDueScheduledTransactions } from './scheduler';
@@ -45,6 +50,37 @@ export function useScheduledTransaction(id: string) {
     queryKey: queryKeys.scheduledTransactions.detail(id),
     queryFn: () => queries.getScheduledTransactionById(db, id),
     enabled: !!id,
+  });
+}
+
+export function useRuleForTransaction(transactionId: string) {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: queryKeys.scheduledTransactions.forTransaction(transactionId),
+    queryFn: () => queries.getRuleForTransaction(db, transactionId),
+    enabled: !!transactionId,
+  });
+}
+
+/** Rule amount in Preferred Currency at the latest cached rates; null when a needed rate is missing. */
+export function useToPreferred() {
+  const { data: rates } = useCurrencyRates();
+  const preferred = useAppStore.use.currency();
+  return useCallback((cents: number, currency: CurrencyKey) => {
+    if (currency === preferred) return cents;
+    const known = (c: CurrencyKey) => c === 'EUR' || rates?.[c] != null;
+    return rates && known(currency) && known(preferred) ? computeBaseAmount(cents, currency, preferred, rates) : null;
+  }, [rates, preferred]);
+}
+
+const RULE_PAYMENTS_LIMIT = 3;
+
+export function useRulePayments(ruleId: string) {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: queryKeys.scheduledTransactions.payments(ruleId),
+    queryFn: () => queries.getRulePayments(db, ruleId, RULE_PAYMENTS_LIMIT),
+    enabled: !!ruleId,
   });
 }
 

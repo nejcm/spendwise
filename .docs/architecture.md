@@ -57,7 +57,7 @@ Feature data modules expose `useQuery` / `useMutation` hooks backed by SQLite. E
 |------|---------|
 | `query-keys.ts` | Single source of truth for all React Query cache keys. Import `queryKeys` instead of defining local key objects. |
 | `invalidation.ts` | Entity-based invalidation rules. Call `invalidateFor(queryClient, 'transaction')` instead of manually listing query key arrays. |
-| `money.ts` | Shared money helpers: `convertAmount` (re-exported from the currencies feature) and `parseToCents`. Cents conversion and currency formatting live in `src/features/formatting/helpers.ts`. |
+| `money.ts` | Shared money helpers: `parseToCents`. Cents conversion and currency formatting live in `src/features/formatting/helpers.ts`. |
 | `index.ts` | Barrel re-export of the above three modules. |
 
 Example mutation using the new patterns:
@@ -137,4 +137,5 @@ For new data access code: add query functions to `queries.ts`, add hooks to `hoo
 - Finance data is stored locally in SQLite
 - Preferences and lightweight persisted state are stored in MMKV
 - AI requests are sent directly from the client to OpenAI or Anthropic when configured
+- Anonymous error reports (`captureError`; no usage events are sent) go to PostHog only while the `analyticsEnabled` pref is on; exchange rates come from public rate APIs (`src/features/currencies/providers`)
 - App lock behavior is managed by the security feature and lock settings in app state

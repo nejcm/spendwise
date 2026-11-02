@@ -7,9 +7,12 @@ import type { ComponentType } from 'react';
 import {
   ALargeSmall as LucideALargeSmall,
   AlertTriangle as LucideAlertTriangle,
+  Archive as LucideArchive,
   ArrowDown as LucideArrowDown,
   ArrowDownRight as LucideArrowDownRight,
+  ArrowDownUp as LucideArrowDownUp,
   ArrowLeftIcon as LucideArrowLeftIcon,
+  ArrowLeftRight as LucideArrowLeftRight,
   ArrowRight as LucideArrowRight,
   ArrowRightIcon as LucideArrowRightIcon,
   ArrowUp as LucideArrowUp,
@@ -21,6 +24,7 @@ import {
   BotMessageSquare as LucideBotMessageSquare,
   Brain as LucideBrain,
   BrainCircuit as LucideBrainCircuit,
+  Bug as LucideBug,
   Calendar as LucideCalendar,
   Camera as LucideCamera,
   ChartNoAxesColumn as LucideChartNoAxesColumn,
@@ -29,6 +33,7 @@ import {
   ChevronLeft as LucideChevronLeft,
   ChevronRight as LucideChevronRight,
   ChevronUp as LucideChevronUp,
+  CircleAlert as LucideCircleAlert,
   CircleDollarSign as LucideCircleDollarSign,
   Copy as LucideCopy,
   Database as LucideDatabase,
@@ -39,16 +44,24 @@ import {
   Download as LucideDownload,
   EllipsisVertical as LucideEllipsisVertical,
   Euro as LucideEuro,
+  FileText as LucideFileText,
   FileWarning as LucideFileWarning,
+  Globe as LucideGlobe,
+  GripVertical as LucideGripVertical,
+  Heart as LucideHeart,
   HelpCircle as LucideHelpCircle,
   Home as LucideHome,
   Import as LucideImport,
+  Info as LucideInfo,
   Languages as LucideLanguages,
   LayoutGrid as LucideLayoutGrid,
   Lightbulb as LucideLightbulb,
   Link as LucideLink,
   List as LucideList,
   ListChecks as LucideListChecks,
+  ListFilter as LucideListFilter,
+  Lock as LucideLock,
+  Minus as LucideMinus,
   Paintbrush as LucidePaintbrush,
   Pause as LucidePause,
   Pencil as LucidePencil,
@@ -61,13 +74,16 @@ import {
   RefreshCcw as LucideRefreshCcw,
   RepeatIcon as LucideRepeatIcon,
   ScanLine as LucideScanLine,
-  SendHorizonal as LucideSendHorizonal,
+  Search as LucideSearch,
   Settings as LucideSettings,
   Share as LucideShare,
   Shield as LucideShield,
   SlidersHorizontal as LucideSlidersHorizontal,
+  Sparkle as LucideSparkle,
   Sparkles as LucideSparkles,
+  SquarePen as LucideSquarePen,
   Sun as LucideSun,
+  Timer as LucideTimer,
   TrashIcon as LucideTrashIcon,
   TrendingDown as LucideTrendingDown,
   TrendingUp as LucideTrendingUp,
@@ -102,8 +118,11 @@ function createIcon(Icon: ComponentType<LucideProps>): UniwindLucideIcon {
 
 export const ALargeSmall = createIcon(LucideALargeSmall);
 export const AlertTriangle = createIcon(LucideAlertTriangle);
+export const Archive = createIcon(LucideArchive);
 export const ArrowDown = createIcon(LucideArrowDown);
+export const ArrowDownUp = createIcon(LucideArrowDownUp);
 export const ArrowLeftIcon = createIcon(LucideArrowLeftIcon);
+export const ArrowLeftRight = createIcon(LucideArrowLeftRight);
 export const ArrowRight = createIcon(LucideArrowRight);
 export const ArrowRightIcon = createIcon(LucideArrowRightIcon);
 export const ArrowUp = createIcon(LucideArrowUp);
@@ -119,6 +138,7 @@ export const Camera = createIcon(LucideCamera);
 export const ChartNoAxesColumn = createIcon(LucideChartNoAxesColumn);
 export const Check = createIcon(LucideCheck);
 export const ChevronDown = createIcon(LucideChevronDown);
+export const CircleAlert = createIcon(LucideCircleAlert);
 export const CircleDollarSign = createIcon(LucideCircleDollarSign);
 export const Copy = createIcon(LucideCopy);
 export const Database = createIcon(LucideDatabase);
@@ -130,13 +150,17 @@ export const Download = createIcon(LucideDownload);
 export const EllipsisVertical = createIcon(LucideEllipsisVertical);
 export const Euro = createIcon(LucideEuro);
 export const FileWarning = createIcon(LucideFileWarning);
+export const GripVertical = createIcon(LucideGripVertical);
 export const HelpCircle = createIcon(LucideHelpCircle);
 export const Home = createIcon(LucideHome);
 export const Import = createIcon(LucideImport);
+export const Info = createIcon(LucideInfo);
 export const Languages = createIcon(LucideLanguages);
 export const LayoutGrid = createIcon(LucideLayoutGrid);
+export const ListFilter = createIcon(LucideListFilter);
 export const Lightbulb = createIcon(LucideLightbulb);
 export const Link = createIcon(LucideLink);
+export const Minus = createIcon(LucideMinus);
 export const List = createIcon(LucideList);
 export const ListChecks = createIcon(LucideListChecks);
 export const Pencil = createIcon(LucidePencil);
@@ -148,7 +172,7 @@ export const PlusIcon = createIcon(LucidePlusIcon);
 export const Printer = createIcon(LucidePrinter);
 export const RefreshCcw = createIcon(LucideRefreshCcw);
 export const ScanLine = createIcon(LucideScanLine);
-export const SendHorizonal = createIcon(LucideSendHorizonal);
+export const Search = createIcon(LucideSearch);
 export const Share = createIcon(LucideShare);
 export const Shield = createIcon(LucideShield);
 export const Sun = createIcon(LucideSun);
@@ -161,7 +185,9 @@ export const UserIcon = createIcon(LucideUserIcon);
 export const X = createIcon(LucideX);
 export const Settings = createIcon(LucideSettings);
 export const SlidersHorizontal = createIcon(LucideSlidersHorizontal);
+export const Sparkle = createIcon(LucideSparkle);
 export const Sparkles = createIcon(LucideSparkles);
+export const SquarePen = createIcon(LucideSquarePen);
 export const PauseIcon = createIcon(LucidePause);
 export const Paintbrush = createIcon(LucidePaintbrush);
 export const ChevronRight = createIcon(LucideChevronRight);
@@ -170,3 +196,9 @@ export const ChevronUp = createIcon(LucideChevronUp);
 export const RepeatIcon = createIcon(LucideRepeatIcon);
 export const ArrowUpRight = createIcon(LucideArrowUpRight);
 export const ArrowDownRight = createIcon(LucideArrowDownRight);
+export const Bug = createIcon(LucideBug);
+export const Timer = createIcon(LucideTimer);
+export const FileText = createIcon(LucideFileText);
+export const Globe = createIcon(LucideGlobe);
+export const Heart = createIcon(LucideHeart);
+export const Lock = createIcon(LucideLock);

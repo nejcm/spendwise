@@ -4,17 +4,16 @@ import type { PeriodMode, PeriodSelection } from '@/lib/store/store';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { format } from 'date-fns';
 import * as React from 'react';
-import { View } from 'react-native';
-import { ModalSheet, OutlineButton, SolidButton, Text, useModalSheet } from '@/components/ui';
+import { Pressable, View } from 'react-native';
+import { Chip, getPressedStyle, ModalSheet, SolidButton, Text, useModalSheet } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
-import { ArrowLeftIcon, ArrowRightIcon } from '@/components/ui/icon';
-import { IconButton } from '@/components/ui/icon-button';
+import { ChevronLeft, ChevronRight } from '@/components/ui/icon';
+import { cn } from '@/lib/cn';
 import { currentISOWeek, getWeeksInYear, isDynamicPeriodMode } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 
-import { setPeriodSelection, useAppStore } from '@/lib/store/store';
+import { setPeriodSelection } from '@/lib/store/store';
 import { todayISO } from '../features/formatting/helpers';
-import { GhostButton } from './ui/ghost-button';
 
 const CURRENT_YEAR = new Date().getFullYear();
 const YEAR_LIST = Array.from({ length: CURRENT_YEAR + 5 - 1989 }, (_, i) => CURRENT_YEAR + 5 - i);
@@ -35,12 +34,12 @@ const MONTH_LABELS = [
 ];
 
 const MODES: { key: PeriodMode; label: string }[] = [
-  { key: 'year', label: 'Year' },
-  { key: 'month', label: 'Month' },
-  { key: 'week', label: 'Week' },
+  { key: 'year', label: translate('common.year') },
+  { key: 'month', label: translate('common.month') },
+  { key: 'week', label: translate('common.week') },
   { key: 'day', label: translate('common.day') },
-  { key: 'custom', label: 'Custom' },
-  { key: 'all', label: 'All' },
+  { key: 'custom', label: translate('common.custom_range') },
+  { key: 'all', label: translate('common.all-time') },
 ];
 
 const QUICK_MODES: { key: DynamicPeriodMode; label: string }[] = [
@@ -65,7 +64,6 @@ export function PeriodSelectorModal({
   selection,
 }: PeriodSelectorModalProps & { ref?: React.RefObject<BottomSheetModal | null> }) {
   const modal = useModalSheet();
-  const isCompact = useAppStore.use.density() === 'compact';
 
   const [draft, setDraft] = React.useState<PeriodSelection>(() => defaultDraftFor(selection));
   const scrollRef = React.useRef<React.ComponentRef<typeof BottomSheetScrollView>>(null);
@@ -148,30 +146,20 @@ export function PeriodSelectorModal({
   }, [draft.mode, weekYear, weekWeek]);
 
   return (
-    <ModalSheet ref={modal.ref} title="Select Period" snapPoints={['78%']}>
+    <ModalSheet ref={modal.ref} title={translate('common.period')} snapPoints={['78%']}>
       <View className="flex-1">
         <BottomSheetScrollView
           ref={scrollRef}
           className="flex-1"
-          contentContainerClassName="px-4 pt-2 pb-6"
+          contentContainerClassName="px-5 pt-3 pb-6"
           onLayout={() => {
             scrollReadyRef.current = true;
             tryScrollToSelectedWeek();
           }}
         >
-          <View className="mb-8 flex-row flex-wrap gap-2">
+          <View className="mb-6 flex-row flex-wrap gap-2">
             {MODE_BUTTONS.map(({ key, label }) => (
-              <View className="grow basis-[48%] 3xs:basis-[31%]" key={key}>
-                <OutlineButton
-                  className={`items-center px-1 ${draft.mode === key ? '' : 'border-border'}`}
-                  textClassName={`shrink text-center text-xs 2xs:text-sm ${draft.mode === key ? '' : 'text-muted-foreground'}`}
-                  textProps={{ numberOfLines: 1, ellipsizeMode: 'tail' }}
-                  fullWidth
-                  label={label}
-                  size={isCompact ? 'sm' : 'md'}
-                  onPress={() => switchMode(key)}
-                />
-              </View>
+              <Chip key={key} tone="solid" label={label} selected={draft.mode === key} onPress={() => switchMode(key)} className="px-3.5" />
             ))}
           </View>
 
@@ -226,18 +214,14 @@ export function PeriodSelectorModal({
           )}
         </BottomSheetScrollView>
 
-        <View className="flex-row items-center justify-center gap-2 p-4">
-          <GhostButton
-            label={translate('common.clear')}
-            onPress={handleClear}
-            size="sm"
-            textClassName="underline"
-          />
+        <View className="flex-row items-center gap-2.5 px-5 pt-3 pb-4">
+          <SolidButton color="tonal" size="lg" label={translate('common.clear')} onPress={handleClear} />
           <SolidButton
             color="primary"
+            size="lg"
             label={translate('common.apply')}
             className="flex-1"
-            size="sm"
+            textClassName="font-semibold"
             onPress={handleApply}
           />
         </View>
@@ -246,32 +230,44 @@ export function PeriodSelectorModal({
   );
 }
 
+function Tile({ label, selected, onPress, className }: { label: string; selected: boolean; onPress: () => void; className?: string }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      onPress={onPress}
+      style={getPressedStyle}
+      className={cn('h-14 items-center justify-center rounded-tile px-3', selected ? 'bg-primary' : 'bg-card-2', className)}
+    >
+      <Text numberOfLines={1} className={cn('text-base font-semibold', selected && 'text-primary-foreground')}>{label}</Text>
+    </Pressable>
+  );
+}
+
 function YearBody({ selectedYear, onSelect }: { selectedYear: number; onSelect: (year: number) => void }) {
   return (
-    <View className="flex-row flex-wrap justify-evenly gap-2">
+    <View className="flex-row flex-wrap gap-2">
       {YEAR_LIST.map((year) => (
-        <GhostButton
-          key={year}
-          className={`w-[30%] rounded-xl px-4 py-3 ${year === selectedYear ? 'bg-muted' : ''}`}
-          onPress={() => onSelect(year)}
-          textClassName={year === selectedYear ? '' : 'font-normal text-muted-foreground'}
-          label={year.toString()}
-        />
+        <Tile key={year} className="w-[31.5%]" label={year.toString()} selected={year === selectedYear} onPress={() => onSelect(year)} />
       ))}
     </View>
   );
 }
 
+function YearNavButton({ icon: Icon, onPress, label }: { icon: typeof ChevronLeft; onPress: () => void; label: string }) {
+  return (
+    <Pressable onPress={onPress} hitSlop={8} accessibilityRole="button" accessibilityLabel={label} style={getPressedStyle} className="size-10 items-center justify-center rounded-full bg-card-2">
+      <Icon size={20} colorClassName="accent-foreground" />
+    </Pressable>
+  );
+}
+
 function YearNavRow({ year, onChangeYear }: { year: number; onChangeYear: (y: number) => void }) {
   return (
-    <View className="flex-row items-center justify-between py-2">
-      <IconButton size="sm" color="none" onPress={() => onChangeYear(year - 1)} hitSlop={12}>
-        <ArrowLeftIcon className="text-muted-foreground" size={20} />
-      </IconButton>
-      <Text className="text-base font-semibold">{year}</Text>
-      <IconButton size="sm" color="none" onPress={() => onChangeYear(year + 1)} hitSlop={12}>
-        <ArrowRightIcon className="text-muted-foreground" size={20} />
-      </IconButton>
+    <View className="flex-row items-center justify-between py-1">
+      <YearNavButton icon={ChevronLeft} label={String(year - 1)} onPress={() => onChangeYear(year - 1)} />
+      <Text className="text-xl font-semibold">{year}</Text>
+      <YearNavButton icon={ChevronRight} label={String(year + 1)} onPress={() => onChangeYear(year + 1)} />
     </View>
   );
 }
@@ -290,20 +286,10 @@ function MonthBody({
   return (
     <View>
       <YearNavRow year={year} onChangeYear={onChangeYear} />
-      <View className="mt-3 flex-row flex-wrap justify-evenly gap-2">
-        {MONTH_LABELS.map((label, i) => {
-          const m = i + 1;
-          const selected = m === month;
-          return (
-            <GhostButton
-              key={m}
-              onPress={() => onChangeMonth(m)}
-              className={`w-[31%] ${selected ? 'bg-muted' : ''}`}
-              textClassName={`${selected ? '' : 'font-normal text-muted-foreground'} uppercase`}
-              label={label}
-            />
-          );
-        })}
+      <View className="mt-3 flex-row flex-wrap gap-2">
+        {MONTH_LABELS.map((label, i) => (
+          <Tile key={label} className="w-[23.5%]" label={label} selected={i + 1 === month} onPress={() => onChangeMonth(i + 1)} />
+        ))}
       </View>
     </View>
   );
@@ -339,11 +325,9 @@ function WeekBody({
                   }
                 : undefined}
             >
-              <GhostButton
-                fullWidth
+              <Tile
                 onPress={() => onChangeWeek(w)}
-                className={`w-full rounded-xl ${selected ? 'bg-muted' : ''}`}
-                textClassName={selected ? '' : 'font-normal text-muted-foreground'}
+                selected={selected}
                 label={`${format(start, 'MMM d, yyyy')} – ${format(end, 'MMM d, yyyy')}`}
               />
             </View>

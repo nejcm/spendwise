@@ -1,4 +1,5 @@
-import { shouldRunAutoBackup } from '@/features/imports-export/backup-file';
+import type { BackupData } from '@/features/imports-export/backup';
+import { getBackupStats, shouldRunAutoBackup } from '@/features/imports-export/backup-file';
 
 describe('shouldRunAutoBackup', () => {
   it('returns true when last backup is null', () => {
@@ -27,5 +28,18 @@ describe('shouldRunAutoBackup', () => {
 
   it('returns true for invalid last timestamp', () => {
     expect(shouldRunAutoBackup('not-a-date', 'weekly', new Date('2026-01-10T12:00:00.000Z'))).toBe(true);
+  });
+});
+
+describe('getBackupStats', () => {
+  it('counts both legs of a transfer once', () => {
+    const transactions = [
+      { id: 'a', transfer_id: null },
+      { id: 'b', transfer_id: 't1' },
+      { id: 'c', transfer_id: 't1' },
+    ] as BackupData['transactions'];
+    const accounts = [{ id: 'x' }, { id: 'y' }] as BackupData['accounts'];
+
+    expect(getBackupStats({ transactions, accounts }, 2048)).toEqual({ transactions: 2, accounts: 2, bytes: 2048 });
   });
 });

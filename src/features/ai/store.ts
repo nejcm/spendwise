@@ -1,4 +1,4 @@
-import type { ChatMessage } from '@/features/ai/types';
+import type { AiScope, ChatMessage } from '@/features/ai/types';
 
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
@@ -8,10 +8,13 @@ import { mmkvStorage } from '../../lib/storage';
 export const MAX_PERSISTED_AI_MESSAGES = 50;
 export const MAX_PERSISTED_AI_CHARACTERS = 24_000;
 
+export const DEFAULT_AI_SCOPE: AiScope = { period: { mode: 'this-month' }, accountIds: 'all' };
+
 export type AiChatState = {
   messages: ChatMessage[];
   draftQuestion: string;
   lastUpdatedAt: number | null;
+  scope?: AiScope;
 };
 
 const defaultState: Pick<AiChatState, 'draftQuestion' | 'lastUpdatedAt' | 'messages'> = {
@@ -61,16 +64,17 @@ function buildPersistedState(messages: ChatMessage[], draftQuestion: string) {
 
 const _useAiChatStore = create<AiChatState>()(
   persist(
-    () => ({
+    (): AiChatState => ({
       ...defaultState,
     }),
     {
       name: 'ai-chat-storage',
       storage: createJSONStorage(() => mmkvStorage),
-      partialize: ({ messages, draftQuestion, lastUpdatedAt }) => ({
+      partialize: ({ messages, draftQuestion, lastUpdatedAt, scope }) => ({
         messages,
         draftQuestion,
         lastUpdatedAt,
+        scope,
       }),
     },
   ),
@@ -107,9 +111,10 @@ export function clearAiChat() {
   }));
 }
 
-export function resetAiChatStore() {
-  return _useAiChatStore.setState((state) => ({
-    ...state,
-    ...defaultState,
-  }));
+export function setAiScope(scope: AiScope) {
+  return _useAiChatStore.setState({ scope });
+}
+
+export function getAiScope(): AiScope {
+  return _useAiChatStore.getState().scope ?? DEFAULT_AI_SCOPE;
 }

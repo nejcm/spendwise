@@ -16,10 +16,13 @@ export type ChipProps = Omit<PressableProps, 'children'> & {
   /** Emoji string or node. */
   icon?: React.ReactNode;
   selected?: boolean;
+  /** `solid` fills the selected chip with primary, for pickers inside sheets. */
+  tone?: 'soft' | 'solid';
   className?: string;
 };
 
-export function Chip({ label, icon, selected = false, className, style, ...props }: ChipProps) {
+export function Chip({ label, icon, selected = false, tone = 'soft', className, style, ...props }: ChipProps) {
+  const solid = selected && tone === 'solid';
   return (
     <Pressable
       accessibilityRole="button"
@@ -27,13 +30,13 @@ export function Chip({ label, icon, selected = false, className, style, ...props
       style={(state) => getPressedStyle(state, style)}
       className={cn(
         'h-[38px] flex-row items-center gap-1.5 self-start rounded-full border pr-3.5 pl-2.5',
-        selected ? 'border-accent-line bg-accent-soft' : 'border-transparent bg-card-2',
+        solid ? 'border-transparent bg-primary' : selected ? 'border-accent-line bg-accent-soft' : 'border-transparent bg-card-2',
         className,
       )}
       {...props}
     >
       {renderIcon(icon)}
-      <Text className="text-sm font-medium">{label}</Text>
+      <Text className={cn('text-sm font-medium', solid && 'text-primary-foreground')}>{label}</Text>
     </Pressable>
   );
 }

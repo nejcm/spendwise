@@ -1,4 +1,5 @@
 import type { MarkdownStyle } from 'react-native-enriched-markdown';
+import type { AiScope } from './types';
 import { DarkTheme, LightTheme } from '@/lib/theme/styles';
 
 export function getMarkdownStyle(isDark: boolean): MarkdownStyle {
@@ -52,4 +53,34 @@ export function getMarkdownStyle(isDark: boolean): MarkdownStyle {
     link: { color: '#2668ab', underline: true },
     thematicBreak: { color: colors.border },
   } as const;
+}
+
+/** Scoped accounts among the active ones; falls back to all when none of the picked ones is still active. */
+export function resolveScopeAccounts<T extends { id: string }>(active: readonly T[], picked: AiScope['accountIds']) {
+  const selected = picked === 'all' ? [] : active.filter((a) => picked.includes(a.id));
+  return selected.length > 0
+    ? { accounts: selected, limited: selected.length < active.length }
+    : { accounts: active, limited: false };
+}
+
+export function isSameAccountScope(active: readonly { id: string }[], a: AiScope['accountIds'], b: AiScope['accountIds']) {
+  const key = (picked: AiScope['accountIds']) => {
+    const { accounts, limited } = resolveScopeAccounts(active, picked);
+    return limited ? accounts.map((x) => x.id).sort().join() : 'all';
+  };
+  return key(a) === key(b);
+}
+
+export function toggleScopeAccount(picked: AiScope['accountIds'], id: string): AiScope['accountIds'] {
+  const current = picked === 'all' ? [] : picked;
+  const next = current.includes(id) ? current.filter((x) => x !== id) : [...current, id];
+  return next.length > 0 ? next : 'all';
+}
+
+/** "sk-proj-abc…4f2a" → "sk-••••••••4f2a"; short keys show only bullets. */
+export function maskApiKey(key: string) {
+  const trimmed = key.trim();
+  if (trimmed.length < 12) return '••••••••';
+  const prefix = trimmed.startsWith('sk-') ? 'sk-' : '';
+  return `${prefix}••••••••${trimmed.slice(-4)}`;
 }

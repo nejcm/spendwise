@@ -1,108 +1,49 @@
-import type { DetailsRowProps } from '@/components/details';
+import type { TransactionWithCategory } from './types';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
-import { useState } from 'react';
 import { ScrollView } from 'react-native';
-import DetailsSection, { DetailsRow } from '@/components/details';
-import ScreenHeader from '@/components/screen-header';
-
-import { Alert, Copy, FocusAwareStatusBar, FormattedCurrency, FormattedDate, GhostButton, OverflowMenu, RepeatIcon, SolidButton, Text, TrashIcon, View } from '@/components/ui';
-
+import { HeaderButton, PageHeader } from '@/components/page-header';
+import { Alert, Copy, FocusAwareStatusBar, GhostButton, RepeatIcon, Text, View } from '@/components/ui';
+import { ChevronLeft, Pencil } from '@/components/ui/icon';
 import { NAV_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
-import { useAccounts } from '@/features/accounts/api';
+import { useRuleForTransaction } from '@/features/scheduled-transactions/hooks';
 import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { goBackOrFallback } from '@/lib/routing';
-import { useAppStore } from '@/lib/store/store';
 import { centsToAmount } from '../formatting/helpers';
 import { useCreateTransaction, useDeleteTransaction, useDuplicateTransfer, useTransaction } from './api';
-import { MerchantLogo } from './components/merchant-logo';
+import { DetailAction, DetailHero, DetailRows, FxNote } from './components/transaction-detail-parts';
 import { TransactionForm } from './components/transaction-form';
 import { transactionToFormValues } from './components/transaction-form-schema';
+import { transactionFooterText } from './helpers';
 
-export function TransactionDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+function Wash() {
+  return <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[340px] bg-linear-to-b from-wash to-background" />;
+}
+
+function useTransactionActions(transaction: TransactionWithCategory | null | undefined) {
   const router = useRouter();
-  const isCompact = useAppStore.use.density() === 'compact';
-
-  const { data: transaction, isLoading } = useTransaction(id ?? '');
   const createMut = useCreateTransaction();
   const duplicateTransferMut = useDuplicateTransfer();
   const deleteMut = useDeleteTransaction();
-  const { data: accounts = [] } = useAccounts();
-  const [isEditing, setIsEditing] = useState(false);
-  const [showAuditTimestamps, setShowAuditTimestamps] = useState(false);
 
-  if (isLoading || !transaction) {
-    return (
-      <>
-        <FocusAwareStatusBar />
-        <ScreenHeader title={translate('transactions.detail_title')} />
-        <View className="flex-1 items-center justify-center bg-background">
-          <Text>{translate('common.loading')}</Text>
-        </View>
-      </>
-    );
-  }
-
-  if (isEditing) {
-    return (
-      <>
-        <FocusAwareStatusBar />
-        <ScreenHeader title={translate('transactions.edit_title')} />
-        <TransactionForm
-          initialValues={transactionToFormValues(transaction)}
-          isAdjustment={!!transaction.is_adjustment}
-          onSuccess={() => setIsEditing(false)}
-          onCancel={() => setIsEditing(false)}
-          bottomMenuOffset={NAV_BAR_HEIGHT}
-        />
-      </>
-    );
-  }
-
-  const isIncome = transaction.type === 'income';
-  const isTransfer = transaction.type === 'transfer';
-  const isAdjustment = !!transaction.is_adjustment;
-  const isInflow = isIncome || (isTransfer && transaction.amount > 0);
-  const account = accounts.find((a) => a.id === transaction.account_id);
-  const primaryDetails: DetailsRowProps[] = [
-    { label: translate('transactions.date'), value: <FormattedDate value={transaction.date} className="text-foreground" /> },
-    ...(transaction.category_name ? [{ label: translate('transactions.category'), value: `${transaction.category_icon} ${transaction.category_name}` }] : []),
-    { label: translate('transactions.account'), value: account ? (account.icon ? `${account.icon} ${account.name}` : account.name) : '-' },
-    ...(transaction.counter_account_name
-      ? [{
-          label: translate(transaction.amount < 0 ? 'transactions.to_account' : 'transactions.from_account'),
-          value: `${transaction.counter_account_icon ?? ''} ${transaction.counter_account_name}`.trim(),
-        }]
-      : []),
-    isAdjustment
-      ? { label: translate('transactions.type'), value: translate('accounts.opening_balance') }
-      : isTransfer
-        ? { label: translate('transactions.type'), value: `${translate('transactions.transfer')} · ${translate('transactions.not_spending')}` }
-        : { label: translate('transactions.type'), value: transaction.type, className: 'capitalize' },
-    ...(transaction.merchant_name ? [{ label: translate('transactions.merchant_name'), value: transaction.merchant_name }] : []),
-    ...(transaction.location ? [{ label: translate('transactions.location'), value: transaction.location }] : []),
-  ];
-
-  const handleDelete = () => {
+  const remove = () => {
+    if (!transaction) return;
     Alert.alert(translate('common.delete'), translate('transactions.delete_confirmation'), [
       { text: translate('common.cancel'), style: 'cancel' },
       {
         text: translate('common.delete'),
         style: 'destructive',
         onPress: async () => {
-          if (id) {
-            await deleteMut.mutateAsync(id);
-            goBackOrFallback(router);
-          }
+          await deleteMut.mutateAsync(transaction.id);
+          goBackOrFallback(router);
         },
       },
     ]);
   };
 
-  const handleMakeRecurring = () => {
-    if (transaction.type === 'transfer') return;
+  const makeRecurring = () => {
+    if (!transaction || transaction.type === 'transfer') return;
     router.push({
       pathname: '/scheduled/new',
       params: {
@@ -117,7 +58,8 @@ export function TransactionDetailScreen() {
     });
   };
 
-  const handleDuplicate = () => {
+  const duplicate = () => {
+    if (!transaction) return;
     const onSuccess = (duplicateId: string) => router.replace({ pathname: '/transactions/[id]', params: { id: duplicateId } });
     if (transaction.transfer_id) {
       duplicateTransferMut.mutate(transaction.transfer_id, { onSuccess });
@@ -137,109 +79,74 @@ export function TransactionDetailScreen() {
     }, { onSuccess });
   };
 
-  const logo = transaction.merchant_logo_slug ? <MerchantLogo slug={transaction.merchant_logo_slug} size={56} withBg={false} /> : null;
-  const buttonSize = isCompact ? 'sm' : 'md';
+  return { remove, makeRecurring, duplicate };
+}
 
-  return (
-    <>
-      <ScreenHeader title={translate('transactions.detail_title')}>
-        <OverflowMenu
-          className="-mr-2 ml-auto"
-          accessibilityLabel={translate('settings.more')}
-          items={[
-            {
-              label: translate('transactions.duplicate'),
-              onPress: handleDuplicate,
-              hidden: isAdjustment,
-              icon: <Copy size={16} colorClassName="accent-foreground" className="mr-2" />,
-            },
-            {
-              label: translate('transactions.make_recurring'),
-              onPress: handleMakeRecurring,
-              hidden: transaction.type === 'transfer',
-              icon: <RepeatIcon size={16} colorClassName="accent-foreground" className="mr-2" />,
-            },
-            {
-              label: translate('common.delete'),
-              onPress: handleDelete,
-              className: 'text-danger-600',
-              icon: <TrashIcon size={16} colorClassName="accent-red-600" className="mr-2" />,
-            },
-          ]}
-        />
-      </ScreenHeader>
-      <FocusAwareStatusBar />
-      <ScrollView className="flex-1" contentContainerClassName="flex-grow px-4 pt-7 pb-4">
-        <View className="flex-1">
-          {!!logo && (
-            <View className="mb-6 flex-row justify-center gap-2">
-              {logo}
-            </View>
-          )}
-          <View className="items-center pb-6">
-            <FormattedCurrency
-              value={Math.abs(transaction.amount)}
-              currency={transaction.currency}
-              prefix={isInflow ? '+' : '-'}
-              className={`text-3xl font-bold ${isIncome ? 'text-success-600' : ''}`}
-            />
-            {transaction.baseCurrency !== transaction.currency && (
-              <FormattedCurrency
-                value={Math.abs(transaction.baseAmount)}
-                currency={transaction.baseCurrency}
-                prefix={isInflow ? '+' : '-'}
-                className="text-lg text-muted-foreground"
-              />
-            )}
-          </View>
-          <DetailsSection
-            className="mb-4"
-            growSide="right"
-            data={primaryDetails}
-          >
-            {showAuditTimestamps && (
-              <View className="gap-3">
-                <DetailsRow label={translate('transactions.created_at')} value={<FormattedDate instant value={transaction.created_at} className="text-foreground" />} />
-                <DetailsRow label={translate('transactions.updated_at')} value={<FormattedDate instant value={transaction.updated_at} className="text-foreground" />} />
-              </View>
-            )}
-            <View>
-              <GhostButton
-                size="sm"
-                color="secondary"
-                label={showAuditTimestamps ? translate('common.show_less') : translate('common.show_more')}
-                onPress={() => setShowAuditTimestamps((v) => !v)}
-                textClassName="underline"
-              />
-            </View>
-          </DetailsSection>
-          {!!transaction.note?.length && (
-            <DetailsSection
-              className="mb-4"
-              growSide="right"
-              data={[
-                { label: translate('transactions.note'), value: transaction.note, sectionClassName: 'flex-col justify-start items-start gap-1' },
-              ]}
-            />
-          )}
-        </View>
-      </ScrollView>
-      <View className="flex-row gap-2 px-4 py-2">
-        <GhostButton
-          label={translate('common.back')}
-          onPress={() => goBackOrFallback(router)}
-          textClassName="text-base/tight"
-          size={buttonSize}
-        />
-        <SolidButton
-          color="primary"
-          className="flex-1"
-          label={translate('common.edit')}
-          onPress={() => setIsEditing(true)}
-          textClassName="text-base/tight"
-          size={buttonSize}
+export function TransactionDetailScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const router = useRouter();
+  const { data: transaction, isLoading } = useTransaction(id ?? '');
+  const { data: rule } = useRuleForTransaction(id ?? '');
+  const actions = useTransactionActions(transaction);
+  const [isEditing, setIsEditing] = React.useState(false);
+
+  if (isEditing && transaction) {
+    return (
+      <View className="flex-1 bg-background">
+        <FocusAwareStatusBar />
+        <Wash />
+        <TransactionForm
+          initialValues={transactionToFormValues(transaction)}
+          isAdjustment={!!transaction.is_adjustment}
+          onSaved={() => setIsEditing(false)}
+          onClose={() => setIsEditing(false)}
+          bottomMenuOffset={NAV_BAR_HEIGHT}
         />
       </View>
-    </>
+    );
+  }
+
+  const isAdjustment = !!transaction?.is_adjustment;
+  const isForeign = !!transaction && transaction.currency !== transaction.baseCurrency;
+  const canDuplicate = !isAdjustment;
+  const canMakeRecurring = !isAdjustment && transaction?.type !== 'transfer' && !rule;
+  const edit = () => setIsEditing(true);
+
+  return (
+    <View className="flex-1 bg-background">
+      <FocusAwareStatusBar />
+      <Wash />
+      <View className="px-5 pt-2">
+        <PageHeader
+          left={<HeaderButton icon={ChevronLeft} label={translate('common.back')} onPress={() => goBackOrFallback(router)} />}
+          right={transaction && <HeaderButton icon={Pencil} label={translate('common.edit')} onPress={edit} />}
+        >
+          <Text className="min-w-0 flex-1 text-center text-[15px] text-muted-foreground" numberOfLines={1}>
+            {transaction && translate(isAdjustment ? 'accounts.opening_balance' : `transactions.${transaction.type}`)}
+          </Text>
+        </PageHeader>
+      </View>
+      {isLoading || !transaction
+        ? (
+            <View className="flex-1 items-center justify-center">
+              <Text>{translate('common.loading')}</Text>
+            </View>
+          )
+        : (
+            <ScrollView className="flex-1" contentContainerClassName="pb-6">
+              <DetailHero transaction={transaction} onAmountPress={isForeign ? edit : undefined} />
+              <DetailRows transaction={transaction} rule={rule} />
+              {isForeign && <FxNote />}
+              {(canDuplicate || canMakeRecurring) && (
+                <View className="mx-5 mt-3 flex-row gap-2.5">
+                  {canDuplicate && <DetailAction icon={Copy} label={translate('transactions.duplicate')} onPress={actions.duplicate} />}
+                  {canMakeRecurring && <DetailAction icon={RepeatIcon} label={translate('transactions.make_recurring')} onPress={actions.makeRecurring} />}
+                </View>
+              )}
+              <GhostButton color="danger" className="mt-4" textClassName="text-[15px] font-medium" label={translate('transactions.detail.delete')} onPress={actions.remove} />
+              <Text className="pt-2 text-center text-xs text-muted-foreground">{transactionFooterText(transaction, !!rule)}</Text>
+            </ScrollView>
+          )}
+    </View>
   );
 }

@@ -36,6 +36,7 @@ export type TransferInsertData = Omit<TransactionInsertData, 'type' | 'transfer_
 };
 
 export type TransactionWithCategory = Transaction & {
+  account_name: string | null;
   category_name: string | null;
   category_icon: string | null;
   category_color: string | null;
@@ -52,13 +53,14 @@ export type MonthSummary = {
   balance: number;
 };
 
-export type DateGroup = {
-  date: number; // Unix seconds
-  transactions: TransactionWithCategory[];
-};
+export type TransactionSort = 'newest' | 'oldest' | 'largest' | 'smallest';
 
 export type FilterState = {
-  categoryId: string | null;
   type: TransactionType | null;
-  accountId: string | null;
+  accountIds: string[];
+  categoryIds: string[];
+  /** Cents in Preferred Currency, compared against `baseAmount`. */
+  minAmount: number | null;
+  maxAmount: number | null;
+  sort: TransactionSort;
 };

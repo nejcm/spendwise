@@ -64,7 +64,7 @@ const transactionFormRouteParamsSchema = z.object({
 });
 const scheduledFormRouteParamsSchema = z.object({
   account_id: singleParamSchema,
-  amount: singleParamSchema,
+  amount: amountParamSchema,
   category_id: singleParamSchema,
   currency: singleParamSchema.pipe(currencySchema.optional()).catch(undefined),
   end_date: singleParamSchema.transform((value) => {

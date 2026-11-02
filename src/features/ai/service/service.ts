@@ -1,9 +1,12 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import type { ChatMessage, ProviderChatMessage, ToolCall } from '../types';
+import type { AiProviderType, AiScope, ChatMessage, ProviderChatMessage, ToolCall } from '../types';
 
 import { AI_MAX_TOOL_ROUNDS } from '@/config';
-import { useAppStore } from '@/lib/store/store';
+import { getAccounts } from '@/features/accounts/queries';
+import { translate } from '@/lib/i18n';
+import { selectIsAiFeatureOn, useAppStore } from '@/lib/store/store';
+import { resolveScopeAccounts } from '../helpers';
 import {
   appendAnthropicToolCall,
   appendAnthropicToolResult,
@@ -23,21 +26,12 @@ function toProviderMessages(messages: readonly ChatMessage[]): ProviderChatMessa
   return messages.map((m) => ({ role: m.role, content: m.content }));
 }
 
-function getProviderData() {
-  const { aiProvider, openaiApiKey, anthropicApiKey } = useAppStore.getState();
-  let key: string | undefined;
-  switch (aiProvider) {
-    case 'openai':
-      key = openaiApiKey;
-      break;
-    case 'anthropic':
-      key = anthropicApiKey;
-      break;
-    default:
-      throw new Error(`Invalid provider: ${aiProvider}`);
-  }
-  if (!key) throw new Error(`API key is not set for ${aiProvider}`);
-  return { provider: aiProvider, apiKey: key };
+// Read before every provider call so removing the key or switching chat off stops a running tool loop.
+function getChatKey(provider: AiProviderType) {
+  const state = useAppStore.getState();
+  const key = provider === 'anthropic' ? state.anthropicApiKey : state.openaiApiKey;
+  if (state.aiProvider !== provider || !selectIsAiFeatureOn('chat')(state) || !key) throw new Error(translate('ai.unavailable'));
+  return key;
 }
 
 // ─── Streaming with tool-call loop ───
@@ -45,6 +39,7 @@ function getProviderData() {
 type StreamAskWithToolsInput = {
   readonly messages: readonly ChatMessage[];
   readonly db: SQLiteDatabase;
+  readonly scope: AiScope;
   readonly onToken: (token: string) => void;
   readonly onToolStatus?: (status: string) => void;
   readonly signal?: AbortSignal;
@@ -53,31 +48,37 @@ type StreamAskWithToolsInput = {
 export async function streamAskWithTools({
   messages,
   db,
+  scope,
   onToken,
   onToolStatus,
   signal,
 }: StreamAskWithToolsInput): Promise<string> {
-  const { provider, apiKey } = getProviderData();
+  const provider = useAppStore.getState().aiProvider;
+  getChatKey(provider);
   const providerMessages = toProviderMessages(messages);
-  const systemPrompt = buildSystemPrompt();
+  const { accounts, limited } = resolveScopeAccounts(await getAccounts(db), scope.accountIds);
+  const systemPrompt = buildSystemPrompt(scope.period, limited);
+  const runTool = (call: ToolCall) => executeToolCall(db, call.name, call.arguments, accounts.map((a) => a.id));
   const providerFunction = provider === 'openai' ? streamWithToolsOpenAI : streamWithToolsAnthropic;
-  return providerFunction({ apiKey, systemPrompt, providerMessages, db, onToken, onToolStatus, signal });
+  return providerFunction({ getApiKey: () => getChatKey(provider), systemPrompt, providerMessages, runTool, onToken, onToolStatus, signal });
 }
+
+type RunTool = (call: ToolCall) => Promise<string>;
 
 // OpenAI streaming with tool loop
 async function streamWithToolsOpenAI({
-  apiKey,
+  getApiKey,
   systemPrompt,
   providerMessages,
-  db,
+  runTool,
   onToken,
   onToolStatus,
   signal,
 }: {
-  apiKey: string;
+  getApiKey: () => string;
   systemPrompt: string;
   providerMessages: readonly ProviderChatMessage[];
-  db: SQLiteDatabase;
+  runTool: RunTool;
   onToken: (token: string) => void;
   onToolStatus?: (status: string) => void;
   signal?: AbortSignal;
@@ -85,33 +86,33 @@ async function streamWithToolsOpenAI({
   let openAiMessages = buildOpenAiMessages(systemPrompt, providerMessages);
 
   for (let round = 0; round < AI_MAX_TOOL_ROUNDS; round++) {
-    const result = await streamAskOpenAI(apiKey, openAiMessages, onToken, signal);
+    const result = await streamAskOpenAI(getApiKey(), openAiMessages, onToken, signal);
     if (result.type === 'text') return result.content;
 
     // Execute tool calls
     openAiMessages = appendOpenAiToolCall(openAiMessages, result.content, result.calls);
-    openAiMessages = await executeOpenAiToolCalls(db, result.calls, openAiMessages, onToolStatus);
+    openAiMessages = await executeOpenAiToolCalls(runTool, result.calls, openAiMessages, onToolStatus);
   }
 
   // Final round — stream response after tool results
-  const finalResult = await streamAskOpenAI(apiKey, openAiMessages, onToken, signal);
+  const finalResult = await streamAskOpenAI(getApiKey(), openAiMessages, onToken, signal);
   return finalResult.content;
 }
 
 // Anthropic streaming with tool loop
 async function streamWithToolsAnthropic({
-  apiKey,
+  getApiKey,
   systemPrompt,
   providerMessages,
-  db,
+  runTool,
   onToken,
   onToolStatus,
   signal,
 }: {
-  apiKey: string;
+  getApiKey: () => string;
   systemPrompt: string;
   providerMessages: readonly ProviderChatMessage[];
-  db: SQLiteDatabase;
+  runTool: RunTool;
   onToken: (token: string) => void;
   onToolStatus?: (status: string) => void;
   signal?: AbortSignal;
@@ -119,23 +120,23 @@ async function streamWithToolsAnthropic({
   let anthropicMessages = buildAnthropicMessages(providerMessages);
 
   for (let round = 0; round < AI_MAX_TOOL_ROUNDS; round++) {
-    const result = await streamAskAnthropic({ apiKey, systemPrompt, messages: anthropicMessages, onToken, signal });
+    const result = await streamAskAnthropic({ apiKey: getApiKey(), systemPrompt, messages: anthropicMessages, onToken, signal });
     if (result.type === 'text') return result.content;
 
     // Execute tool calls
     anthropicMessages = appendAnthropicToolCall(anthropicMessages, result.content, result.calls);
-    anthropicMessages = await executeAnthropicToolCalls(db, result.calls, anthropicMessages, onToolStatus);
+    anthropicMessages = await executeAnthropicToolCalls(runTool, result.calls, anthropicMessages, onToolStatus);
   }
 
   // Final round
-  const finalResult = await streamAskAnthropic({ apiKey, systemPrompt, messages: anthropicMessages, onToken, signal });
+  const finalResult = await streamAskAnthropic({ apiKey: getApiKey(), systemPrompt, messages: anthropicMessages, onToken, signal });
   return finalResult.content;
 }
 
 // ─── Shared tool execution helpers ───
 
 async function executeOpenAiToolCalls(
-  db: SQLiteDatabase,
+  runTool: RunTool,
   calls: readonly ToolCall[],
   messages: ReturnType<typeof buildOpenAiMessages>,
   onToolStatus?: (status: string) => void,
@@ -143,14 +144,14 @@ async function executeOpenAiToolCalls(
   let result = messages;
   for (const call of calls) {
     onToolStatus?.(getToolStatusMessage(call.name, call.arguments));
-    const toolResult = await executeToolCall(db, call.name, call.arguments);
+    const toolResult = await runTool(call);
     result = appendOpenAiToolResult(result, call.id, toolResult);
   }
   return result;
 }
 
 async function executeAnthropicToolCalls(
-  db: SQLiteDatabase,
+  runTool: RunTool,
   calls: readonly ToolCall[],
   messages: ReturnType<typeof buildAnthropicMessages>,
   onToolStatus?: (status: string) => void,
@@ -158,7 +159,7 @@ async function executeAnthropicToolCalls(
   let result = messages;
   for (const call of calls) {
     onToolStatus?.(getToolStatusMessage(call.name, call.arguments));
-    const toolResult = await executeToolCall(db, call.name, call.arguments);
+    const toolResult = await runTool(call);
     result = appendAnthropicToolResult(result, call.id, toolResult);
   }
   return result;

@@ -12,6 +12,7 @@ import { Alert } from '@/components/ui';
 import { useAccounts } from '@/features/accounts/api';
 import { useScanReceipt } from '@/features/ai/use-scan-receipt';
 import { useCategories } from '@/features/categories/api';
+import { firstFittingCategoryId } from '@/features/categories/helpers';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { useCreateTransaction } from '@/features/transactions/api';
 import { dateToUnix } from '@/lib/date/helpers';
@@ -19,6 +20,7 @@ import { translate } from '@/lib/i18n';
 import { closeScan, useLocalStore } from '@/lib/store/local-store';
 import {
   selectIsAiEnabled,
+  selectIsAiFeatureOn,
   selectTransactionFormPrefs,
   useAppStore,
 } from '@/lib/store/store';
@@ -65,6 +67,7 @@ export function GlobalScanManager() {
   const pathname = usePathname();
   const isTransactionFormRoute = pathname === '/transactions/new';
   const isAiEnabled = useAppStore(selectIsAiEnabled);
+  const isScanOn = useAppStore(selectIsAiFeatureOn('scan'));
   const scanTriggered = useLocalStore.use.scanTriggered();
   const saveOnScan = useAppStore.use.saveOnScan();
   const preferredCurrency = useAppStore.use.currency();
@@ -75,7 +78,7 @@ export function GlobalScanManager() {
 
   const handleScanSuccess = async (result: ScannedReceipt) => {
     const accountId = transactionFormPrefs.account_id || accounts[0]?.id;
-    const categoryId = result.category_id || transactionFormPrefs.category_id || categories[0]?.id;
+    const categoryId = firstFittingCategoryId([result.category_id, transactionFormPrefs.category_id, categories[0]?.id], categories, result.type);
     if (!saveOnScan || !accountId || !categoryId) {
       const nextRoute = {
         pathname: '/transactions/new',
@@ -146,10 +149,10 @@ export function GlobalScanManager() {
   }, [mutatePrepare]);
 
   const handleTrigger = useCallback((type: ScanTriggeredType) => {
-    if (!isAiEnabled) {
+    if (!isScanOn) {
       Alert.alert(
-        translate('scan.no_key_title'),
-        translate('scan.no_key_message'),
+        translate(isAiEnabled ? 'scan.off_title' : 'scan.no_key_title'),
+        translate(isAiEnabled ? 'scan.off_message' : 'scan.no_key_message'),
         [
           { text: translate('common.cancel'), style: 'cancel' },
           { text: translate('scan.go_to_settings'), onPress: () => router.push('/settings/ai') },
@@ -170,7 +173,7 @@ export function GlobalScanManager() {
         { text: translate('common.cancel'), style: 'cancel' },
       ],
     );
-  }, [isAiEnabled, router, pickAndPrepare]);
+  }, [isAiEnabled, isScanOn, router, pickAndPrepare]);
 
   React.useEffect(() => {
     if (!scanTriggered) return;

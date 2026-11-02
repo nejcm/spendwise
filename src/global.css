@@ -78,6 +78,7 @@
   --color-danger-900: #7f1d1d;
 
   --color-background: #f7f6fb;
+  --color-wash: #dcd0f7;
   --color-card: #ffffff;
   --color-card-2: #f1eff7;
   --color-sheet: #ffffff;
@@ -118,6 +119,7 @@
   :root {
     @variant light {
       --color-background: #f7f6fb;
+      --color-wash: #dcd0f7;
       --color-card: #ffffff;
       --color-card-2: #f1eff7;
       --color-sheet: #ffffff;
@@ -154,6 +156,7 @@
 
     @variant dark {
       --color-background: #111214;
+      --color-wash: #111214;
       --color-card: #1c1d21;
       --color-card-2: #2a2b30;
       --color-sheet: #1c1d21;

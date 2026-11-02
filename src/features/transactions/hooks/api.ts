@@ -6,7 +6,6 @@ import type { TransactionFormData, TransactionInsertData } from '../types';
 import type { RatesMap } from '@/features/currencies/queries';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { format, parse, subMonths } from 'date-fns';
 import * as Haptics from 'expo-haptics';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Alert } from '@/components/ui';
@@ -44,6 +43,15 @@ export function useTransaction(id: string) {
   });
 }
 
+export function useHasUserTransactions(enabled = true) {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: queryKeys.transactions.exists,
+    queryFn: () => queries.hasUserTransactions(db),
+    enabled,
+  });
+}
+
 export function useRecentTransactions(limit: number = 5) {
   const db = useSQLiteContext();
   return useQuery({
@@ -52,51 +60,16 @@ export function useRecentTransactions(limit: number = 5) {
   });
 }
 
-export function useMonthSummary(yearMonth: string) {
-  const db = useSQLiteContext();
-  return useQuery({
-    queryKey: queryKeys.monthSummary.byMonth(yearMonth),
-    queryFn: () => queries.getMonthSummary(db, yearMonth),
-  });
-}
-
-export type MonthTrend = {
-  incomeDeltaPct: number | null;
-  expenseDeltaPct: number | null;
-};
-
-export function calcDeltaPct(current: number, prior: number): number | null {
-  if (prior === 0) return current === 0 ? 0 : null;
-  return Math.round(((current - prior) / prior) * 100);
-}
-
-export function useMonthTrend(currentYearMonth: string): MonthTrend {
-  const db = useSQLiteContext();
-  const priorYearMonth = format(subMonths(parse(currentYearMonth, 'yyyy-MM', new Date()), 1), 'yyyy-MM');
-
-  const { data: current } = useQuery({
-    queryKey: queryKeys.monthSummary.byMonth(currentYearMonth),
-    queryFn: () => queries.getMonthSummary(db, currentYearMonth),
-  });
-
-  const { data: prior } = useQuery({
-    queryKey: queryKeys.monthSummary.byMonth(priorYearMonth),
-    queryFn: () => queries.getMonthSummary(db, priorYearMonth),
-  });
-
-  if (!current || !prior) return { incomeDeltaPct: null, expenseDeltaPct: null };
-
-  return {
-    incomeDeltaPct: calcDeltaPct(current.income, prior.income),
-    expenseDeltaPct: calcDeltaPct(current.expense, prior.expense),
-  };
-}
-
 // ─── Write Hooks ───
+
+function errorMessage(error: unknown): string {
+  if (!(error instanceof Error)) return translate('common.error_description');
+  return error.message === queries.TRANSFER_LEG_ROUNDS_TO_ZERO ? translate('transactions.transfer_leg_zero') : error.message;
+}
 
 function onError(error: unknown) {
   if (error instanceof Error) captureError(error, { context: 'transactions' });
-  Alert.alert(translate('common.error'), error instanceof Error ? error.message : translate('common.error_description'));
+  Alert.alert(translate('common.error'), errorMessage(error));
 }
 
 function prepareTransactionData(
@@ -190,8 +163,9 @@ export function useUpdateTransaction(onSuccess?: (transactionId: string) => void
         if (leg?.transfer_id && data.to_account_id) {
           return queries.updateTransfer(db, leg.transfer_id, { ...prepared, to_account_id: data.to_account_id }, rates);
         }
-        // Legacy single leg: the form edits the absolute amount, the row keeps its direction.
-        return queries.updateTransaction(db, id, { ...prepared, amount: (leg && leg.amount < 0 ? -1 : 1) * Math.abs(prepared.amount) });
+        // Legacy single leg: the form edits the absolute amount, the row keeps its direction. An opening balance is edited signed.
+        const amount = leg?.is_adjustment ? prepared.amount : (leg && leg.amount < 0 ? -1 : 1) * Math.abs(prepared.amount);
+        return queries.updateTransaction(db, id, { ...prepared, amount });
       }
       // fetch rates only if baseAmount is not provided
       const rates = data.baseAmount ? undefined : await getRatesForDate(db, data.date);

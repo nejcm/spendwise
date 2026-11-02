@@ -1,0 +1,142 @@
+import type { ScheduledTransaction } from './types';
+import { RECURRING_TEMPLATES } from './constants';
+import { canResume, committedForMonth, dueDatesBetween, groupRules, templateParams } from './helpers';
+import { isoDateToUnix } from './scheduler';
+
+function rule(overrides: Partial<ScheduledTransaction> & { due: string }): ScheduledTransaction {
+  const { due, ...rest } = overrides;
+  return {
+    id: due,
+    account_id: 'acc',
+    category_id: 'cat',
+    type: 'expense',
+    amount: 1000,
+    currency: 'EUR',
+    note: null,
+    frequency: 'monthly',
+    start_date: isoDateToUnix(due),
+    end_date: null,
+    next_due_date: isoDateToUnix(due),
+    is_active: 1,
+    created_at: 0,
+    updated_at: 0,
+    ...rest,
+  };
+}
+
+describe('dueDatesBetween', () => {
+  it('walks every occurrence inside the window and stops at the end date', () => {
+    expect(dueDatesBetween(rule({ due: '2026-11-25', frequency: 'weekly' }), '2026-12-01', '2026-12-31'))
+      .toEqual(['2026-12-02', '2026-12-09', '2026-12-16', '2026-12-23', '2026-12-30']);
+    expect(dueDatesBetween(rule({ due: '2026-12-01', frequency: 'weekly', end_date: isoDateToUnix('2026-12-10') }), '2026-12-01', '2026-12-31'))
+      .toEqual(['2026-12-01', '2026-12-08']);
+  });
+
+  it('returns nothing for paused rules', () => {
+    expect(dueDatesBetween(rule({ due: '2026-12-01', is_active: 0 }), '2026-12-01', '2026-12-31')).toEqual([]);
+  });
+});
+
+describe('committedForMonth', () => {
+  it('sums bills and income per occurrence in Preferred Currency, flagging skipped unconvertible rules', () => {
+    const rules = [
+      rule({ due: '2026-12-01', amount: 82000 }),
+      rule({ due: '2026-11-28', frequency: 'weekly', amount: 1000 }),
+      rule({ due: '2026-12-25', type: 'income', amount: 285000 }),
+      rule({ due: '2026-12-05', currency: 'USD', amount: 1299 }),
+      rule({ due: '2026-12-06', currency: 'GBP', amount: 999 }),
+      rule({ due: '2027-01-01', amount: 5000 }),
+      rule({ due: '2026-12-02', amount: 999, is_active: 0 }),
+    ];
+    const toPreferred = (cents: number, currency: string) => currency === 'EUR' ? cents : currency === 'USD' ? Math.round(cents * 0.846) : null;
+
+    expect(committedForMonth(rules, '2026-12', toPreferred)).toEqual({
+      bills: 82000 + 4 * 1000 + 1099,
+      comingIn: 285000,
+      missingRate: true,
+    });
+  });
+
+  it('does not flag an unconvertible rule with no occurrence in the month', () => {
+    const rules = [rule({ due: '2026-12-01', amount: 500 }), rule({ due: '2027-01-06', currency: 'GBP' })];
+    expect(committedForMonth(rules, '2026-12', (cents, currency) => currency === 'EUR' ? cents : null))
+      .toEqual({ bills: 500, comingIn: 0, missingRate: false });
+  });
+});
+
+describe('groupRules', () => {
+  it('splits active rules into the next 7 days and later months, paused last', () => {
+    const rules = [
+      rule({ due: '2026-11-23' }),
+      rule({ due: '2026-11-02' }),
+      rule({ due: '2026-10-30', is_active: 0 }),
+      rule({ due: '2026-11-07' }),
+      rule({ due: '2026-11-08' }),
+      rule({ due: '2027-03-01' }),
+    ];
+    expect(groupRules(rules, '2026-11-01').map((g) => [g.key, g.rules.map((r) => r.id)])).toEqual([
+      ['soon', ['2026-11-02', '2026-11-07']],
+      ['month:2026-11', ['2026-11-08', '2026-11-23']],
+      ['month:2027-03', ['2027-03-01']],
+      ['paused', ['2026-10-30']],
+    ]);
+  });
+});
+
+describe('canResume', () => {
+  it('is false once the end date has passed every occurrence', () => {
+    expect(canResume(rule({ due: '2026-01-01' }), '2026-11-01')).toBe(true);
+    expect(canResume(rule({ due: '2026-01-01', end_date: isoDateToUnix('2026-10-15') }), '2026-11-01')).toBe(false);
+  });
+
+  it('is false on the final payment day once the scheduler has advanced past the end date', () => {
+    const end = isoDateToUnix('2026-11-01');
+    const completed = rule({ due: '2026-09-01', end_date: end, next_due_date: isoDateToUnix('2026-12-01'), is_active: 0 });
+    expect(canResume(completed, '2026-11-01')).toBe(false);
+    expect(canResume({ ...completed, next_due_date: end }, '2026-11-01')).toBe(true);
+  });
+});
+
+describe('templateParams', () => {
+  const template = (key: string) => RECURRING_TEMPLATES.find((t) => t.key === key)!;
+  const categories = [
+    { id: 'cat_housing', name: 'Housing', kind: 'expense' as const },
+    { id: 'cat_rent_in', name: 'Rent received', kind: 'income' as const },
+    { id: 'cat_subs', name: 'Subscriptions', kind: 'expense' as const },
+    { id: 'cat_salary', name: 'Salary', kind: 'income' as const },
+  ];
+  const base = { categories, currency: 'EUR' as const, today: '2026-11-02' };
+
+  it('matches a category of the same kind by name and starts rent on the next 1st', () => {
+    expect(templateParams(template('rent'), { ...base, name: 'Rent' })).toEqual({
+      note: 'Rent',
+      type: 'expense',
+      frequency: 'monthly',
+      category_id: 'cat_housing',
+      start_date: '2026-12-01',
+    });
+    expect(templateParams(template('rent'), { ...base, name: 'Rent', today: '2026-11-01' }).start_date).toBe('2026-11-01');
+  });
+
+  it('prefills the amount in Preferred Currency and income type', () => {
+    expect(templateParams(template('streaming'), { ...base, name: 'Netflix' })).toMatchObject({ amount: '13.99', currency: 'EUR', category_id: 'cat_subs' });
+    expect(templateParams(template('salary'), { ...base, name: 'Salary' })).toMatchObject({ type: 'income', category_id: 'cat_salary' });
+  });
+
+  it('sends an empty category when nothing matches so a remembered one is not used', () => {
+    expect(templateParams(template('gym'), { ...base, name: 'Gym' }).category_id).toBe('');
+  });
+
+  it('matches hints as word prefixes, not inside other words', () => {
+    const seeded = [
+      { id: 'cat_transport', name: 'Transportation', kind: 'expense' as const },
+      { id: 'cat_health', name: 'Healthcare', kind: 'expense' as const },
+    ];
+    expect(templateParams(template('gym'), { ...base, categories: seeded, name: 'Gym' }).category_id).toBe('cat_health');
+  });
+
+  it('only offers income and expense templates', () => {
+    expect(RECURRING_TEMPLATES).toHaveLength(6);
+    expect(RECURRING_TEMPLATES.every((t) => t.type === 'income' || t.type === 'expense')).toBe(true);
+  });
+});

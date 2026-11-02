@@ -16,7 +16,7 @@ Deeper reference: [`.docs/architecture.md`](.docs/architecture.md). Domain vocab
 
 [`CONTEXT.md`](CONTEXT.md) is the glossary. Read it before naming anything, and use its terms when describing work back to me:
 
-**Period**, **Today** (dynamic, the current day) vs **Day** (fixed, the selected one), **Custom Period**, **Budget Limit**, **Preferred Currency** (global, stored) vs **View Currency** (ephemeral, screen-local), **Account Order**. Today and Day are not interchangeable — that distinction has already caused one bug.
+**Period**, **Today** (dynamic, the current day) vs **Day** (fixed, the selected one), **Custom Period**, **Budget Limit**, **Preferred Currency** (global, stored), **Account Order**. Today and Day are not interchangeable — that distinction has already caused one bug.
 
 ## The data layer
 

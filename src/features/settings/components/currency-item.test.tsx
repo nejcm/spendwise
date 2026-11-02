@@ -1,5 +1,4 @@
 import type * as UiModule from '@/components/ui';
-import type { OptionType } from '@/components/ui';
 import * as React from 'react';
 import { Alert } from '@/components/ui';
 import { useChangeCurrency } from '@/features/currencies/hooks';
@@ -9,28 +8,30 @@ import { CurrencyItem } from './currency-item';
 
 jest.mock('@/components/ui', () => {
   const actual = jest.requireActual<typeof UiModule>('@/components/ui');
-  const MockPressable = actual.Pressable;
-  const MockText = actual.Text;
-  const MockView = actual.View;
-
   return {
     ...actual,
     Alert: { alert: jest.fn() },
     Euro: () => null,
-    Options: ({ options, onSelect }: { options: OptionType[]; onSelect: (option: OptionType) => void }) => (
-      <MockView>
-        {options.filter((option) => option.value === 'EUR' || option.value === 'USD').map((option) => (
-          <MockPressable key={option.value} testID={`currency-option-${option.value}`} onPress={() => onSelect(option)}>
-            <MockText>{option.label}</MockText>
-          </MockPressable>
-        ))}
-      </MockView>
-    ),
     useModalSheet: jest.fn(() => ({
       ref: { current: null },
       present: jest.fn(),
       close: jest.fn(),
     })),
+  };
+});
+
+jest.mock('@/features/currencies/components/currency-sheet', () => {
+  const { Pressable, Text, View } = jest.requireActual<typeof UiModule>('@/components/ui');
+  return {
+    CurrencySheet: ({ onSelect }: { onSelect: (currency: string) => void }) => (
+      <View>
+        {['EUR', 'USD'].map((currency) => (
+          <Pressable key={currency} testID={`currency-option-${currency}`} onPress={() => onSelect(currency)}>
+            <Text>{currency}</Text>
+          </Pressable>
+        ))}
+      </View>
+    ),
   };
 });
 

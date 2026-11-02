@@ -54,7 +54,12 @@ export type AutoBackupSettings = {
   interval: AutoBackupInterval;
   lastAutoBackupAt: string | null;
   retention?: number;
+  lastBackupStats?: BackupStats;
 };
+
+export type BackupStats = { transactions: number; accounts: number; bytes: number };
+
+export type AiFeature = 'chat' | 'scan' | 'insights';
 
 export type AppState = {
   // Profile
@@ -89,11 +94,13 @@ export type AppState = {
   lockEnabled: boolean;
   lockTimeoutMinutes: number;
   isLocked: boolean; // runtime only — not persisted
+  analyticsEnabled?: boolean;
 
   // AI
   aiProvider: AiProviderType;
   openaiApiKey: string | undefined;
   anthropicApiKey: string | undefined;
+  aiFeatures?: Partial<Record<AiFeature, boolean>>;
 
   // Other
   lastUsed: {
@@ -145,6 +152,7 @@ function getDefaultState(): AppState {
     aiProvider: 'openai',
     openaiApiKey: undefined,
     anthropicApiKey: undefined,
+    aiFeatures: undefined,
 
     notifications: {
       budgetAlerts: true,
@@ -279,6 +287,15 @@ export function selectIsAiEnabled(state: AppState) {
   return Boolean(key?.trim());
 }
 
+/** A key is saved and the feature isn't switched off in AI settings (missing = on). */
+export function selectIsAiFeatureOn(feature: AiFeature) {
+  return (state: AppState) => selectIsAiEnabled(state) && state.aiFeatures?.[feature] !== false;
+}
+
+export function setAiFeature(feature: AiFeature, on: boolean) {
+  return updateAppState((prev) => ({ aiFeatures: { ...prev.aiFeatures, [feature]: on } }));
+}
+
 // Security actions
 export function setLockEnabled(lockEnabled: boolean) {
   return updateAppState({ lockEnabled });
@@ -318,11 +335,6 @@ export function addLastUsedCurrency(currency: CurrencyKey) {
       },
     };
   });
-}
-export function selectLastUsedCurrencies(state: AppState) {
-  return state.lastUsed.currencies.length
-    ? state.lastUsed.currencies
-    : state.currency ? [state.currency] : undefined;
 }
 
 // Form preference actions

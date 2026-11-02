@@ -4,9 +4,12 @@ import {
   commitPickerDate,
   dateToUnix,
   findClosestDateBinary,
+  formatISOForDisplay,
   getCurrentMonthRange,
   getPeriodRange,
+  isValidISODate,
   navigatePeriod,
+  parseDisplayDate,
   scaleBudgetForPeriod,
   splitBy,
   unixToCalendarDate,
@@ -28,7 +31,32 @@ describe('getCurrentMonthRange', () => {
   });
 });
 
+describe('parseDisplayDate', () => {
+  it('returns ISO for a complete day in the user format', () => {
+    expect(parseDisplayDate('01.11.2026', 'dd.MM.yyyy')).toBe('2026-11-01');
+    expect(parseDisplayDate('11/01/2026', 'MM/dd/yyyy')).toBe('2026-11-01');
+    expect(parseDisplayDate('Nov 1, 2026', 'MMM d, yyyy')).toBe('2026-11-01');
+    expect(parseDisplayDate('2026-11-01', 'yyyy-MM-dd')).toBe('2026-11-01');
+  });
+
+  it('returns null for partial or impossible input', () => {
+    for (const v of ['', '01.11.', '01.11.2', '30.02.2026', '2026-11-01']) expect(parseDisplayDate(v, 'dd.MM.yyyy')).toBeNull();
+  });
+
+  it('round-trips with formatISOForDisplay', () => {
+    expect(formatISOForDisplay('2026-11-01', 'dd.MM.yyyy')).toBe('01.11.2026');
+    expect(formatISOForDisplay('', 'dd.MM.yyyy')).toBe('');
+  });
+});
+
 // ─── dateToUnix / unixToDate / unixToISODate ──────────────────────────────────
+
+describe('isValidISODate', () => {
+  it('accepts only complete, real calendar days', () => {
+    expect(isValidISODate('2024-02-29')).toBe(true);
+    for (const v of ['', '2026-11-0', '2026-02-30', '2025-02-29', '2026-13-01', '01.11.2026']) expect(isValidISODate(v)).toBe(false);
+  });
+});
 
 describe('dateToUnix', () => {
   it('converts a Date object to unix seconds', () => {
@@ -293,6 +321,33 @@ describe('scaleBudgetForPeriod', () => {
     // 15/31 ≈ 48% of monthly budget
     expect(result).toBeGreaterThan(40_000);
     expect(result).toBeLessThan(60_000);
+  });
+
+  it('gives equivalent periods the same limit', () => {
+    jest.useFakeTimers().setSystemTime(new Date(2026, 1, 10));
+    try {
+      expect(scaleBudgetForPeriod(10_000, { mode: 'this-year' })).toBe(120_000);
+      expect(scaleBudgetForPeriod(10_000, { mode: 'year', year: 2026 })).toBe(120_000);
+      expect(scaleBudgetForPeriod(10_000, { mode: 'this-month' })).toBe(10_000);
+      expect(scaleBudgetForPeriod(10_000, { mode: 'custom', startDate: '2026-01-01', endDate: '2026-03-31' })).toBe(30_000);
+    }
+    finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('prorates a week across the two months it spans', () => {
+    // 2026-W05 is Jan 26 – Feb 1: 6/31 + 1/28 of a month
+    expect(scaleBudgetForPeriod(868_000, { mode: 'week', year: 2026, week: 5 })).toBe(199_000);
+  });
+
+  it('scales a yearly amount without rounding through a monthly figure', () => {
+    expect(scaleBudgetForPeriod(10_000, { mode: 'year', year: 2026 }, 12)).toBe(10_000);
+    expect(scaleBudgetForPeriod(10_000, { mode: 'month', year: 2026, month: 3 }, 12)).toBe(833);
+  });
+
+  it('returns undefined for All time', () => {
+    expect(scaleBudgetForPeriod(10_000, { mode: 'all' })).toBeUndefined();
   });
 });
 

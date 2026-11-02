@@ -1,174 +1,56 @@
 import * as React from 'react';
+import { Card, SectionHeader, Text, View } from '@/components/ui';
+import { setAnalyticsEnabled } from '@/lib/analytics';
+import { cn } from '@/lib/cn';
+import { translate } from '@/lib/i18n';
+import { useAppStore } from '@/lib/store/store';
+import { SettingsPage } from './components/settings-page';
+import { ToggleRow } from './components/toggle-row';
 
-import { FocusAwareStatusBar, ScrollView, Text, View } from '@/components/ui';
-import { defaultStyles } from '@/lib/theme/styles';
+const CONTACT_EMAIL = 'nmursi2@gmail.com';
+const OUTBOUND = ['ai', 'errors', 'rates', 'updates', 'maps', 'files', 'stores'] as const;
+const NOTES = ['children', 'changes'] as const;
 
 export function PrivacyScreen() {
+  const analyticsEnabled = useAppStore((s) => s.analyticsEnabled ?? true);
+
   return (
-    <>
-      <FocusAwareStatusBar />
-      <ScrollView className="flex-1" contentContainerClassName="px-4 pt-8 pb-12" style={defaultStyles.transparentBg}>
-        <Text className="mb-4 text-2xl font-bold text-foreground">
-          Privacy Policy
-        </Text>
+    <SettingsPage title={translate('settings.privacy')}>
+      <View className="mt-5 gap-1.5 rounded-card border border-accent-line bg-accent-soft p-[18px]">
+        <Text className="text-lg font-semibold">{translate('privacy.hero_title')}</Text>
+        <Text className="text-sm/snug text-muted-foreground">{translate('privacy.hero_body')}</Text>
+      </View>
 
-        <Text className="mb-4 text-sm text-muted-foreground">
-          This privacy policy applies to the free Spendwise app (hereby referred to as &quot;Application&quot;) for
-          mobile devices that was created by Nejc (hereby referred to as &quot;Service Provider&quot;) as an
-          Open Source service. This service is intended for use &quot;AS IS&quot;.
-        </Text>
+      <SectionHeader title={translate('privacy.outbound_title')} />
+      <Card className="px-4">
+        {OUTBOUND.map((item, index) => (
+          <View key={item} className={cn('gap-1 py-3.5', index > 0 && 'border-t border-border')}>
+            <Text className="text-row font-medium">{translate(`privacy.${item}_title`)}</Text>
+            <Text className="text-meta text-muted-foreground">{translate(`privacy.${item}_body`)}</Text>
+          </View>
+        ))}
+      </Card>
 
-        <Text className="mb-2 text-base font-semibold text-foreground">
-          Information Collection and Use
-        </Text>
-        <Text className="mb-4 text-sm text-muted-foreground">
-          The Application collects information when you download and use it. This information may include
-          information such as:
-        </Text>
+      <SectionHeader title={translate('privacy.choices_title')} />
+      <Card className="px-4">
+        <ToggleRow
+          title={translate('settings.error_reports')}
+          description={translate('settings.error_reports_meta')}
+          checked={analyticsEnabled}
+          onChange={setAnalyticsEnabled}
+        />
+      </Card>
+      <Text className="px-1 pt-2.5 text-meta text-muted-foreground">{translate('privacy.choices_body')}</Text>
 
-        <View className="mb-4 pl-4">
-          <Text className="mb-1 text-sm text-muted-foreground">
-            • Your device&apos;s Internet Protocol address (e.g. IP address)
-          </Text>
-          <Text className="mb-1 text-sm text-muted-foreground">
-            • The pages of the Application that you visit, the time and date of your visit, the time spent on those pages
-          </Text>
-          <Text className="mb-1 text-sm text-muted-foreground">
-            • The time spent on the Application
-          </Text>
-          <Text className="text-sm text-muted-foreground">
-            • The operating system you use on your mobile device
-          </Text>
+      {NOTES.map((item) => (
+        <View key={item}>
+          <SectionHeader title={translate(`privacy.${item}_title`)} />
+          <Text className="px-1 text-sm/snug text-muted-foreground">{translate(`privacy.${item}_body`)}</Text>
         </View>
-
-        <Text className="mb-4 text-sm text-muted-foreground">
-          The Application does not gather precise information about the location of your mobile device.
-        </Text>
-
-        <Text className="mb-4 text-sm text-muted-foreground">
-          Spendwise stores financial records locally on your device and is designed to work offline for core budgeting
-          and tracking features. The Service Provider does not operate a Spendwise cloud account or server that stores a
-          copy of your financial database.
-        </Text>
-
-        <Text className="mb-4 text-sm text-muted-foreground">
-          The Application includes optional Artificial Intelligence (AI) features. If you choose to use AI chat or
-          receipt scanning, requests are sent directly from your device to the AI provider you configure, using your own
-          provider API key stored on your device. Spendwise is free to use, but your selected AI provider may charge your
-          provider account for usage.
-        </Text>
-
-        <Text className="mb-4 text-sm text-muted-foreground">
-          The Application does not require you to provide a Spendwise account for core use. Any profile, finance, backup,
-          or preference data you enter is stored locally on your device unless you export, share, back up, or send it to
-          an optional provider feature yourself.
-        </Text>
-
-        <Text className="mb-2 text-base font-semibold text-foreground">
-          Third Party Access
-        </Text>
-        <Text className="mb-4 text-sm text-muted-foreground">
-          Core financial data is not periodically transmitted to external Spendwise services. Third-party access may
-          occur only through platform services, optional AI provider requests you initiate, or files you export/share
-          yourself. The Service Provider may disclose information in the ways described in this privacy statement.
-        </Text>
-
-        <Text className="mb-2 text-sm font-semibold text-foreground">
-          Third-party services:
-        </Text>
-        <View className="mb-4 pl-4">
-          <Text className="text-sm text-muted-foreground">
-            • Google Play Services (see their privacy policy at https://www.google.com/policies/privacy/)
-          </Text>
-        </View>
-
-        <Text className="mb-4 text-sm text-muted-foreground">
-          The Service Provider may disclose User Provided and Automatically Collected Information:
-        </Text>
-
-        <View className="mb-4 pl-4">
-          <Text className="mb-1 text-sm text-muted-foreground">
-            • as required by law, such as to comply with a subpoena, or similar legal process;
-          </Text>
-          <Text className="mb-1 text-sm text-muted-foreground">
-            • when they believe in good faith that disclosure is necessary to protect their rights, protect your safety
-            or the safety of others, investigate fraud, or respond to a government request;
-          </Text>
-          <Text className="text-sm text-muted-foreground">
-            • with their trusted service providers who work on their behalf, do not have an independent use of the
-            information we disclose to them, and have agreed to adhere to the rules set forth in this privacy statement.
-          </Text>
-        </View>
-
-        <Text className="mb-2 text-base font-semibold text-foreground">
-          Opt-Out Rights
-        </Text>
-        <Text className="mb-4 text-sm text-muted-foreground">
-          You can stop all collection of information by the Application easily by uninstalling it. You may use the
-          standard uninstall processes as may be available as part of your mobile device or via the mobile application
-          marketplace or network.
-        </Text>
-
-        <Text className="mb-2 text-base font-semibold text-foreground">
-          Data Retention Policy
-        </Text>
-        <Text className="mb-4 text-sm text-muted-foreground">
-          The Service Provider will retain User Provided data for as long as you use the Application and for a
-          reasonable time thereafter. If you would like them to delete User Provided Data that you have provided via the
-          Application, please contact them at nmursi2@gmail.com and they will respond in a reasonable time.
-        </Text>
-
-        <Text className="mb-2 text-base font-semibold text-foreground">
-          Children
-        </Text>
-        <Text className="mb-4 text-sm text-muted-foreground">
-          The Service Provider does not use the Application to knowingly solicit data from or market to children under
-          the age of 13. The Application does not address anyone under the age of 13. The Service Provider does not
-          knowingly collect personally identifiable information from children under 13 years of age. In the case the
-          Service Provider discovers that a child under 13 has provided personal information, the Service Provider will
-          immediately delete this from their servers. If you are a parent or guardian and you are aware that your child
-          has provided us with personal information, please contact the Service Provider (nmursi2@gmail.com) so that
-          they will be able to take the necessary actions.
-        </Text>
-
-        <Text className="mb-2 text-base font-semibold text-foreground">
-          Security
-        </Text>
-        <Text className="mb-4 text-sm text-muted-foreground">
-          The Service Provider is concerned about safeguarding the confidentiality of your information. The Service
-          Provider provides physical, electronic, and procedural safeguards to protect information the Service Provider
-          processes and maintains.
-        </Text>
-
-        <Text className="mb-2 text-base font-semibold text-foreground">
-          Changes
-        </Text>
-        <Text className="mb-4 text-sm text-muted-foreground">
-          This Privacy Policy may be updated from time to time for any reason. The Service Provider will notify you of
-          any changes to the Privacy Policy by updating this page with the new Privacy Policy. You are advised to
-          consult this Privacy Policy regularly for any changes, as continued use is deemed approval of all changes.
-        </Text>
-
-        <Text className="mb-2 text-base font-semibold text-foreground">
-          Your Consent
-        </Text>
-        <Text className="mb-4 text-sm text-muted-foreground">
-          By using the Application, you are consenting to the processing of your information as set forth in this
-          Privacy Policy now and as amended by us.
-        </Text>
-
-        <Text className="mb-2 text-base font-semibold text-foreground">
-          Contact Us
-        </Text>
-        <Text className="mb-4 text-sm text-muted-foreground">
-          If you have any questions regarding privacy while using the Application, or have questions about these
-          practices, please contact the Service Provider via email at nmursi2@gmail.com.
-        </Text>
-
-        <Text className="mt-2 text-xs text-muted-foreground">
-          This privacy policy is effective as of 2026-03-13
-        </Text>
-      </ScrollView>
-    </>
+      ))}
+      <SectionHeader title={translate('privacy.contact_title')} />
+      <Text selectable className="px-1 text-sm/snug text-muted-foreground">{translate('privacy.contact_body', { email: CONTACT_EMAIL })}</Text>
+      <Text className="px-1 pt-6 text-xs text-muted-foreground">{translate('privacy.effective')}</Text>
+    </SettingsPage>
   );
 }

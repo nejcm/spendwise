@@ -51,17 +51,21 @@ export async function createTestDb() {
       return asyncify(() => sqlite.prepare(sql).all(params) as T[]);
     },
 
-    /**
-     * Wrap a callback in a transaction.
-     * better-sqlite3 transactions are synchronous so we simply await the async
-     * callback directly — atomicity guarantees are not required in unit tests.
-     */
-    withTransactionAsync(cb: () => Promise<void>): Promise<void> {
-      return cb();
+    /** Same BEGIN/COMMIT/ROLLBACK sequence as expo-sqlite, so interleaving bugs reproduce. */
+    async withTransactionAsync(cb: () => Promise<void>): Promise<void> {
+      try {
+        sqlite.exec('BEGIN');
+        await cb();
+        sqlite.exec('COMMIT');
+      }
+      catch (e) {
+        if (sqlite.inTransaction) sqlite.exec('ROLLBACK');
+        throw e;
+      }
     },
 
     isInTransactionAsync(): Promise<boolean> {
-      return Promise.resolve(false);
+      return Promise.resolve(sqlite.inTransaction);
     },
 
     /** Direct access to the underlying better-sqlite3 instance for seeding. */

@@ -2,11 +2,15 @@
 
 import type { BlurEvent, FocusEvent, TextInputProps } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
+import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import * as React from 'react';
 import { I18nManager, TextInput as NTextInput, StyleSheet, View } from 'react-native';
+import { withUniwind } from 'uniwind';
 import { cn, tv } from '@/lib/cn';
 import { InputLabel, labelDefaults } from './input-label';
 import { Text } from './text';
+
+const SheetTextInput = withUniwind(BottomSheetTextInput);
 
 export const inputDefaults = 'rounded-lg border font-sans focus:outline-none text-base/snug';
 export const inputDefaultDefaults = 'border-border bg-input text-foreground';
@@ -93,10 +97,13 @@ export type InputProps = {
   containerClassName?: string;
   rightSection?: React.ReactNode;
   showErrorMessage?: boolean;
+  /** Render gorhom's BottomSheetTextInput so the sheet tracks focus and avoids the keyboard. */
+  sheet?: boolean;
 } & Omit<VariantProps<typeof inputTv>, 'error'> & Omit<TextInputProps, 'size'>;
 
 export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInput | null> }) {
-  const { label, error, size = 'md', value, color = 'default', testID, onBlur: onBlurProp, onFocus: onFocusProp, containerClassName, rightSection, className, variant, showErrorMessage, ...inputProps } = props;
+  const { label, error, size = 'md', value, color = 'default', testID, onBlur: onBlurProp, onFocus: onFocusProp, containerClassName, rightSection, className, variant, showErrorMessage, sheet, ...inputProps } = props;
+  const TextInput = (sheet ? SheetTextInput : NTextInput) as typeof NTextInput;
   const [isFocussed, setIsFocussed] = React.useState(false);
 
   const onBlur = React.useCallback(
@@ -130,7 +137,7 @@ export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInp
         <InputLabel label={label} testID={testID ? `${testID}-label` : undefined} className={styles.label()} />
       )}
       <View className="relative">
-        <NTextInput
+        <TextInput
           testID={testID}
           ref={ref}
           placeholderTextColor="#6b7280"

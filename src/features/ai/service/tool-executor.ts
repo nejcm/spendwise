@@ -20,9 +20,9 @@ function parseDateRange(args: ToolArgs): { startDate: number; endDate: number } 
   return { startDate, endDate };
 }
 
-async function executeSummary(db: SQLiteDatabase, args: ToolArgs) {
+async function executeSummary(db: SQLiteDatabase, args: ToolArgs, accountIds?: readonly string[]) {
   const { startDate, endDate } = parseDateRange(args);
-  const summary = await getSummaryByRange(db, startDate, endDate);
+  const summary = await getSummaryByRange(db, startDate, endDate, accountIds);
   const displayCurrency = useAppStore.getState().currency;
 
   return {
@@ -33,31 +33,31 @@ async function executeSummary(db: SQLiteDatabase, args: ToolArgs) {
   };
 }
 
-async function executeCategorySpending(db: SQLiteDatabase, args: ToolArgs) {
+async function executeCategorySpending(db: SQLiteDatabase, args: ToolArgs, accountIds?: readonly string[]) {
   const { startDate, endDate } = parseDateRange(args);
-  const rows = await getCategorySpendByRange(db, startDate, endDate);
+  const rows = await getCategorySpendByRange(db, startDate, endDate, accountIds);
   const displayCurrency = useAppStore.getState().currency;
 
   return {
     currency: displayCurrency,
     categories: rows
-      .filter((r) => r.total > 0)
-      .sort((a, b) => b.total - a.total)
+      .filter((r) => r.expense_total > 0 || r.income_total > 0)
+      .sort((a, b) => b.expense_total - a.expense_total || b.income_total - a.income_total)
       .map((r) => ({
         name: r.category_name,
-        total: centsToAmount(r.total),
-        percentage: Number(r.percentage.toFixed(1)),
-        type: r.category_type,
+        kind: r.category_type,
+        expense_total: centsToAmount(r.expense_total),
+        income_total: centsToAmount(r.income_total),
         budget: r.category_budget === null ? null : centsToAmount(r.category_budget),
       })),
   };
 }
 
-async function executeTransactions(db: SQLiteDatabase, args: ToolArgs) {
+async function executeTransactions(db: SQLiteDatabase, args: ToolArgs, accountIds?: readonly string[]) {
   const { startDate, endDate } = parseDateRange(args);
   const rawLimit = typeof args.limit === 'number' ? args.limit : DEFAULT_TRANSACTION_LIMIT;
   const limit = Math.min(Math.max(1, rawLimit), MAX_TRANSACTION_LIMIT);
-  const rows = await getTransactionsSample(db, startDate, endDate, limit);
+  const rows = await getTransactionsSample(db, startDate, endDate, { limit, accountIds });
   const displayCurrency = useAppStore.getState().currency;
 
   return {
@@ -76,9 +76,9 @@ async function executeTransactions(db: SQLiteDatabase, args: ToolArgs) {
   };
 }
 
-async function executeTrends(db: SQLiteDatabase, args: ToolArgs) {
+async function executeTrends(db: SQLiteDatabase, args: ToolArgs, accountIds?: readonly string[]) {
   const { startDate, endDate } = parseDateRange(args);
-  const rows = await getTrendByRange(db, startDate, endDate);
+  const rows = await getTrendByRange(db, startDate, endDate, accountIds);
   const displayCurrency = useAppStore.getState().currency;
 
   return {
@@ -91,7 +91,7 @@ async function executeTrends(db: SQLiteDatabase, args: ToolArgs) {
   };
 }
 
-const EXECUTORS: Record<ToolName, (db: SQLiteDatabase, args: ToolArgs) => Promise<unknown>> = {
+const EXECUTORS: Record<ToolName, (db: SQLiteDatabase, args: ToolArgs, accountIds?: readonly string[]) => Promise<unknown>> = {
   get_summary: executeSummary,
   get_category_spending: executeCategorySpending,
   get_transactions: executeTransactions,
@@ -102,6 +102,7 @@ export async function executeToolCall(
   db: SQLiteDatabase,
   toolName: string,
   args: ToolArgs,
+  accountIds?: readonly string[],
 ): Promise<string> {
   const executor = EXECUTORS[toolName as ToolName];
   if (!executor) {
@@ -109,7 +110,7 @@ export async function executeToolCall(
   }
 
   try {
-    const result = await executor(db, args);
+    const result = await executor(db, args, accountIds);
     return JSON.stringify(result);
   }
   catch (err) {

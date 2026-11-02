@@ -1,166 +1,118 @@
 import type { AutoBackupFileEntry, AutoBackupInterval } from '@/features/imports-export/backup-file';
-
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import * as React from 'react';
-import { useState } from 'react';
-import DetailsSection from '@/components/details';
-
-import { getPressedStyle, ModalSheet, Pressable, Select, SolidButton, Switch, Text, useModalSheet, View } from '@/components/ui';
+import { ActivityIndicator, Card, ListRow, ModalSheet, SectionHeader, SegmentedControl, SolidButton, Text, useModalSheet, View } from '@/components/ui';
+import { Download, Upload } from '@/components/ui/icon';
+import { translateCount } from '@/features/categories/helpers';
 import { formatInstant } from '@/features/formatting/helpers';
-import { IS_AUTO_BACKUP_SUPPORTED, listAutoBackupFiles } from '@/features/imports-export/backup-file';
-import { useRestoreAutoBackup } from '@/features/imports-export/hooks';
+import { DEFAULT_AUTO_BACKUP_RETENTION, listAutoBackupFiles } from '@/features/imports-export/backup-file';
+import { useBackUpNow, useRestoreAutoBackup } from '@/features/imports-export/hooks';
+import { ToggleRow } from '@/features/settings/components/toggle-row';
+import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
 import { updateAutoBackup, useAppStore } from '@/lib/store/store';
+import { formatFileSize } from './helpers';
 
-function autoBackupIntervalOptions(): { label: string; value: AutoBackupInterval }[] {
-  return [
-    { label: translate('import-export.auto_backup_interval_daily'), value: 'daily' },
-    { label: translate('import-export.auto_backup_interval_weekly'), value: 'weekly' },
-    { label: translate('import-export.auto_backup_interval_monthly'), value: 'monthly' },
-  ];
+const INTERVALS: AutoBackupInterval[] = ['daily', 'weekly', 'monthly'];
+
+function formatBackupTime(ms: number, dateFormat: string) {
+  const time = new Date(ms).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return `${formatInstant(Math.floor(ms / 1000), dateFormat)}, ${time}`;
 }
 
-export default function AutoBackupSection() {
-  const autoBackup = useAppStore.use.autoBackup();
+export function LastBackupCard() {
+  const { lastAutoBackupAt, lastBackupStats } = useAppStore.use.autoBackup();
   const dateFormat = useAppStore.use.dateFormat();
-  const restoreAutoBackup = useRestoreAutoBackup();
-  const backupsSheet = useModalSheet();
-  const [backups, setBackups] = useState<AutoBackupFileEntry[]>([]);
-  const [selectedUri, setSelectedUri] = useState<string | null>(null);
+  const numberFormat = useAppStore.use.numberFormat();
+  const backUpNow = useBackUpNow();
+  const restore = useRestoreAutoBackup();
+  const sheet = useModalSheet();
+  const [backups, setBackups] = React.useState<AutoBackupFileEntry[]>([]);
 
-  if (!IS_AUTO_BACKUP_SUPPORTED) {
-    return (
-      <>
-        <Text className="mb-2 font-bold dark:text-muted-foreground" tx="import-export.auto_backup_section_title" />
-        <DetailsSection
-          className="mb-8"
-          data={[{
-            label: translate('import-export.auto_backup_web_unavailable_title'),
-            description: translate('import-export.auto_backup_web_unavailable_description'),
-            value: <Text className="text-muted-foreground">—</Text>,
-          }]}
-        />
-      </>
-    );
-  }
-
-  const lastDisplay = autoBackup.lastAutoBackupAt
-    ? formatInstant(Math.floor(new Date(autoBackup.lastAutoBackupAt).getTime() / 1000), dateFormat)
-    : translate('import-export.auto_backup_never');
-
-  const openBackups = () => {
-    setSelectedUri(null);
+  const openRestore = () => {
     setBackups(listAutoBackupFiles().slice(0, 20));
-    backupsSheet.present();
+    sheet.present();
   };
 
   return (
-    <>
-      <Text className="mb-2 font-bold dark:text-muted-foreground" tx="import-export.auto_backup_section_title" />
-      <DetailsSection
-        className="mb-8"
-        data={[
-          {
-            label: translate('import-export.auto_backup_enable_label'),
-            description: translate('import-export.auto_backup_enable_description'),
-            value: (
-              <Switch
-                accessibilityLabel={translate('import-export.auto_backup_enable_label')}
-                checked={autoBackup.enabled}
-                onChange={(checked) => updateAutoBackup({ enabled: checked })}
-              />
-            ),
-          },
-          ...(autoBackup.enabled
-            ? [{
-                label: translate('import-export.auto_backup_interval_label'),
-                value: (
-                  <Select<AutoBackupInterval>
-                    containerClassName="min-w-36"
-                    size="sm"
-                    options={autoBackupIntervalOptions()}
-                    value={autoBackup.interval}
-                    onSelect={(interval) => updateAutoBackup({ interval })}
-                  />
-                ),
-              }]
-            : []),
-          {
-            label: translate('import-export.auto_backup_last_label'),
-            value: lastDisplay,
-          },
-        ]}
-      >
-        {autoBackup.enabled && (
-          <SolidButton
-            color="primary"
-            size="sm"
-            className="mt-2 min-w-30"
-            label={translate('import-export.auto_backup_view_backups')}
-            onPress={openBackups}
-            disabled={restoreAutoBackup.isPending}
-          />
-        )}
-      </DetailsSection>
-
-      <ModalSheet
-        ref={backupsSheet.ref}
-        title={translate('import-export.auto_backup_backups_title')}
-        onDismiss={backupsSheet.close}
-        snapPoints={['60%']}
-      >
-        <BottomSheetScrollView
+    <Card className="mt-5 p-[18px]">
+      <Text className="text-meta text-muted-foreground">{translate('import-export.last_backup')}</Text>
+      <Text className="pt-0.5 text-[28px] leading-[34px] font-bold tracking-tight">
+        {lastAutoBackupAt ? formatBackupTime(Date.parse(lastAutoBackupAt), dateFormat) : translate('import-export.auto_backup_never')}
+      </Text>
+      {lastBackupStats && (
+        <Text className="pt-1 text-meta text-muted-foreground">
+          {[
+            translateCount('import-export.stats_transactions', lastBackupStats.transactions),
+            translateCount('import-export.stats_accounts', lastBackupStats.accounts),
+            formatFileSize(lastBackupStats.bytes, numberFormat),
+          ].join(' · ')}
+        </Text>
+      )}
+      <View className="flex-row gap-2 pt-4">
+        <SolidButton
+          color="primary"
           className="flex-1"
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24, minHeight: '100%' }}
-        >
-          {backups.length === 0
-            ? (
-                <View className="py-6">
-                  <Text className="text-center text-muted-foreground" tx="import-export.auto_backup_no_backups" />
-                </View>
-              )
-            : (
-                <View className="gap-2 py-2">
-                  {backups.map((entry: AutoBackupFileEntry) => {
-                    const display = formatInstant(Math.floor(entry.ts / 1000), dateFormat);
-                    const isSelected = selectedUri === entry.uri;
-                    const isLoading = restoreAutoBackup.isPending && isSelected;
+          label={translate('import-export.back_up_now')}
+          iconLeft={<Download size={18} colorClassName="accent-primary-foreground" />}
+          loading={backUpNow.isPending}
+          onPress={() => backUpNow.mutate()}
+        />
+        <SolidButton
+          color="secondary"
+          className="flex-1"
+          label={translate('common.restore')}
+          iconLeft={<Upload size={18} colorClassName="accent-foreground" />}
+          disabled={restore.isPending}
+          onPress={openRestore}
+        />
+      </View>
 
-                    return (
-                      <Pressable
-                        key={entry.uri}
-                        disabled={restoreAutoBackup.isPending}
-                        onPress={() => {
-                          setSelectedUri(entry.uri);
-                          restoreAutoBackup.mutate(entry.uri);
-                        }}
-                        style={getPressedStyle}
-                        className="flex-row items-center justify-between rounded-xl border border-border p-3"
-                      >
-                        <View className="flex-1 pr-3">
-                          <Text className="font-medium text-foreground">{display}</Text>
-                          <Text className="text-xs text-muted-foreground">{entry.name}</Text>
-                        </View>
-                        <SolidButton
-                          color="primary"
-                          size="sm"
-                          className="min-w-20"
-                          label={translate('common.restore')}
-                          loading={isLoading}
-                          onPress={() => {
-                            setSelectedUri(entry.uri);
-                            restoreAutoBackup.mutate(entry.uri);
-                          }}
-                          disabled={restoreAutoBackup.isPending}
-                        />
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              )}
+      <ModalSheet ref={sheet.ref} title={translate('import-export.auto_backup_backups_title')} onDismiss={sheet.close} snapPoints={['60%']}>
+        <BottomSheetScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24 }}>
+          {backups.length === 0
+            ? <Text className="py-6 text-center text-muted-foreground">{translate('import-export.auto_backup_no_backups')}</Text>
+            : backups.map((entry, index) => (
+                <ListRow
+                  key={entry.uri}
+                  className={cn('min-h-[56px]', index > 0 && 'border-t border-border')}
+                  title={formatBackupTime(entry.ts, dateFormat)}
+                  trailing={restore.isPending && restore.variables === entry.uri ? <ActivityIndicator /> : undefined}
+                  chevron
+                  disabled={restore.isPending}
+                  onPress={() => restore.mutate(entry.uri, { onSuccess: sheet.close })}
+                />
+              ))}
         </BottomSheetScrollView>
       </ModalSheet>
+    </Card>
+  );
+}
+
+export function AutoBackupSection() {
+  const { enabled, interval, retention } = useAppStore.use.autoBackup();
+  const copies = retention ?? DEFAULT_AUTO_BACKUP_RETENTION;
+
+  return (
+    <>
+      <SectionHeader title={translate('import-export.auto_backup_section_title')} />
+      <Card className="px-4">
+        <ToggleRow
+          title={translate('import-export.auto_backup_on_open')}
+          description={translateCount('import-export.auto_backup_keeps', copies)}
+          checked={enabled}
+          onChange={(on) => updateAutoBackup({ enabled: on })}
+        />
+        {enabled && (
+          <SegmentedControl
+            accessibilityLabel={translate('import-export.auto_backup_section_title')}
+            className="mb-4"
+            options={INTERVALS.map((value) => ({ value, label: translate(`import-export.auto_backup_interval_${value}`) }))}
+            value={interval}
+            onChange={(value) => updateAutoBackup({ interval: value })}
+          />
+        )}
+      </Card>
     </>
   );
 }

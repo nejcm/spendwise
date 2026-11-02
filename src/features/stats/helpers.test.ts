@@ -1,7 +1,7 @@
 import type { GlobalBudget } from './global-budget-queries';
 import { getMonthBoundaries } from '@/lib/date/helpers';
 
-import { budgetPeriodLabel, getBudgetSelectionBoundaries, scaleGlobalBudget } from './helpers';
+import { chartCeiling, dailyExpenses, daysLeftIn, elapsedSpendStats, getBudgetSelectionBoundaries, hasEnoughForInsights, heatLevels, monthlyFromDaily, monthlyGlobalBudget, paceFraction, savedRatio, scaleGlobalBudget } from './helpers';
 
 const MONTHLY: GlobalBudget = { amountCents: 100_000, type: 'monthly' };
 const YEARLY: GlobalBudget = { amountCents: 1_200_000, type: 'yearly' };
@@ -144,24 +144,70 @@ describe('scaleGlobalBudget', () => {
   });
 });
 
-// ─── budgetPeriodLabel ───────────────────────────────────────────────────────
+const D = (day: number) => Date.UTC(2026, 9, day) / 1000;
+const row = (day: number, expense: number, income = 0) => ({ date: D(day), expense, income });
 
-describe('budgetPeriodLabel', () => {
-  beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(new Date(2026, 2, 15, 12));
+describe('insights helpers', () => {
+  it('monthlyGlobalBudget turns a yearly budget into a twelfth', () => {
+    expect(monthlyGlobalBudget(YEARLY)).toBe(100_000);
+    expect(monthlyGlobalBudget(MONTHLY)).toBe(100_000);
+    expect(monthlyGlobalBudget(null)).toBeNull();
   });
 
-  afterEach(() => {
-    jest.useRealTimers();
+  it('dailyExpenses zero-fills every day of the range', () => {
+    expect(dailyExpenses(D(1), D(4), [row(2, 500)])).toEqual([
+      { date: D(1), value: 0 },
+      { date: D(2), value: 500 },
+      { date: D(3), value: 0 },
+    ]);
   });
 
-  it('day mode: labels nearby days relatively', () => {
-    expect(budgetPeriodLabel({ mode: 'day', date: '2026-03-14' })).toBe('Yesterday');
-    expect(budgetPeriodLabel({ mode: 'day', date: '2026-03-15' })).toBe('Today');
-    expect(budgetPeriodLabel({ mode: 'day', date: '2026-03-16' })).toBe('Tomorrow');
+  it('elapsedSpendStats only counts days up to today', () => {
+    const rows = [row(1, 3000), row(3, 1000), row(20, 9999)];
+    expect(elapsedSpendStats(D(1), D(32), rows, D(4))).toEqual({ days: 4, perDay: 1000, zeroDays: 2 });
   });
 
-  it('day mode: formats the selected day', () => {
-    expect(budgetPeriodLabel({ mode: 'day', date: '2026-03-20' })).toBe('Mar 20, 2026');
+  it('elapsedSpendStats covers the whole range once it is past', () => {
+    expect(elapsedSpendStats(D(1), D(3), [row(1, 100)], D(20))).toEqual({ days: 2, perDay: 50, zeroDays: 1 });
+  });
+
+  it('savedRatio is null without income', () => {
+    expect(savedRatio(0, 100)).toBeNull();
+    expect(savedRatio(1000, 600)).toBeCloseTo(0.4);
+    expect(savedRatio(1000, 1500)).toBeCloseTo(-0.5);
+  });
+
+  it('chartCeiling clips a single outlier', () => {
+    expect(chartCeiling([83240, 2310, 17304, 0])).toBe(Math.round(17304 * 1.2));
+    expect(chartCeiling([3000, 2000])).toBe(3000);
+    expect(chartCeiling([0, 0])).toBe(1);
+  });
+
+  it('heatLevels ranks by tertiles and keeps zero at 0', () => {
+    expect(heatLevels([0, 10, 20, 30, 40, 50, 60])).toEqual([0, 1, 1, 2, 2, 3, 3]);
+    expect(heatLevels([0, 0])).toEqual([0, 0]);
+  });
+
+  it('monthlyFromDaily sums days into months', () => {
+    expect(monthlyFromDaily([row(1, 100, 5), row(2, 50), { date: Date.UTC(2026, 10, 1) / 1000, expense: 7, income: 0 }])).toEqual([
+      { month: '2026-10', income: 5, expense: 150 },
+      { month: '2026-11', income: 0, expense: 7 },
+    ]);
+  });
+
+  it('paceFraction and daysLeftIn are null outside the range', () => {
+    expect(paceFraction(D(1), D(11), D(5))).toBeCloseTo(0.5);
+    expect(paceFraction(D(1), D(11), D(11))).toBeNull();
+    expect(daysLeftIn(D(1), D(11), D(10))).toBe(0);
+    expect(daysLeftIn(D(1), D(11), D(8))).toBe(2);
+    expect(daysLeftIn(undefined, undefined, D(8))).toBeNull();
+  });
+});
+
+describe('hasEnoughForInsights', () => {
+  it('unlocks the Overview at 10 transactions', () => {
+    expect(hasEnoughForInsights(0)).toBe(false);
+    expect(hasEnoughForInsights(9)).toBe(false);
+    expect(hasEnoughForInsights(10)).toBe(true);
   });
 });

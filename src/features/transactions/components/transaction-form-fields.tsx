@@ -1,0 +1,375 @@
+import type { TextInput } from 'react-native';
+import type { TransactionFormApi } from '../hooks/form';
+import type { OptionType } from '@/components/ui';
+import type { Account } from '@/features/accounts/types';
+import type { Category } from '@/features/categories/types';
+import { useStore } from '@tanstack/react-form';
+import * as React from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
+import { Card, FlagCircle, Input, ListRow, Options, Text, useModalSheet } from '@/components/ui';
+import { DateInput } from '@/components/ui/date-input';
+import { getFieldError } from '@/components/ui/form-utils';
+import { ChevronDown, ChevronRight, CircleAlert } from '@/components/ui/icon';
+import { useCategories } from '@/features/categories/api';
+import { CategoryPicker } from '@/features/categories/category-picker';
+import { CURRENCIES_MAP } from '@/features/currencies';
+import { CurrencySheet } from '@/features/currencies/components/currency-sheet';
+import { formatDate } from '@/features/formatting/helpers';
+import { categoryTiles } from '@/features/transactions/helpers';
+import { cn } from '@/lib/cn';
+import { dateToUnix, isValidISODate } from '@/lib/date/helpers';
+import { translate } from '@/lib/i18n';
+
+const CATEGORY_TILE_LIMIT = 8;
+const rowInputClassName = 'h-auto min-w-[140px] rounded-none border-0 bg-transparent px-0 text-right text-row';
+function rowClassName(first = false) {
+  return cn('min-h-[54px] py-0', !first && 'border-t border-border');
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return (
+    <View className="flex-row items-center justify-center gap-1.5 pt-2">
+      <CircleAlert size={15} colorClassName="accent-negative" />
+      <Text className="text-sm font-medium text-negative">{message}</Text>
+    </View>
+  );
+}
+
+// Field errors wait for the first save attempt; form-level onChange validation would flag untouched fields on a type switch.
+const selectSubmitted = (s: { submissionAttempts: number }) => s.submissionAttempts > 0;
+
+export function RowError({ message }: { message?: string }) {
+  return message ? <Text className="text-meta text-negative">{message}</Text> : null;
+}
+
+export function RowLabel({ children }: { children: string }) {
+  return <Text className="text-row text-muted-foreground">{children}</Text>;
+}
+
+export function AmountField({ form, amountRef, signed = false }: {
+  form: TransactionFormApi;
+  amountRef: React.RefObject<TextInput | null>;
+  /** Shows a sign toggle, for an opening balance. */
+  signed?: boolean;
+}) {
+  const currencyModal = useModalSheet();
+  const submitted = useStore(form.store, selectSubmitted);
+  return (
+    <form.Field
+      name="currency"
+      children={(currencyField) => (
+        <View className="items-center pt-8 pb-6">
+          <form.Field
+            name="amount"
+            children={(field) => {
+              const error = submitted ? getFieldError(field) : undefined;
+              return (
+                <>
+                  <View className="max-w-full flex-row items-baseline justify-center gap-2 px-5">
+                    {signed && (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={translate('transactions.form.toggle_sign')}
+                        onPress={() => field.handleChange(field.state.value.startsWith('-') ? field.state.value.slice(1) : `-${field.state.value}`)}
+                        hitSlop={8}
+                      >
+                        <Text className="text-3xl font-semibold text-muted-foreground">±</Text>
+                      </Pressable>
+                    )}
+                    <Text className="text-3xl font-semibold text-muted-foreground">{CURRENCIES_MAP[currencyField.state.value].symbol}</Text>
+                    <Input
+                      ref={amountRef}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChangeText={field.handleChange}
+                      placeholder="0.00"
+                      keyboardType="decimal-pad"
+                      testID="amount-input"
+                      accessibilityLabel={translate('transactions.amount')}
+                      accessibilityHint={error}
+                      autoFocus={!form.getFieldValue('amount')}
+                      containerClassName="min-w-[120px] shrink"
+                      className="h-auto rounded-none border-0 bg-transparent px-0 text-6xl font-bold tracking-tighter tabular-nums web:field-sizing-content"
+                    />
+                  </View>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={translate('common.currency')}
+                    onPress={currencyModal.present}
+                    className="mt-2 h-[34px] flex-row items-center gap-1.5 rounded-full bg-card pr-2.5 pl-[5px]"
+                  >
+                    <FlagCircle currency={currencyField.state.value} size={24} />
+                    <Text className="text-[13px] font-semibold">{currencyField.state.value}</Text>
+                    <ChevronDown size={14} colorClassName="accent-muted-foreground" />
+                  </Pressable>
+                  <FieldError message={error} />
+                </>
+              );
+            }}
+          />
+          <CurrencySheet
+            ref={currencyModal.ref}
+            value={currencyField.state.value}
+            stackBehavior="push"
+            onSelect={currencyField.handleChange}
+          />
+        </View>
+      )}
+    />
+  );
+}
+
+function CategoryTile({ category, selected, invalid, onPress }: {
+  category: Category;
+  selected: boolean;
+  invalid: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="radio"
+      accessibilityState={{ checked: selected }}
+      accessibilityLabel={category.name}
+      accessibilityHint={invalid ? translate('transactions.form.category_error') : undefined}
+      onPress={onPress}
+      className={cn(
+        'size-[78px] items-center justify-center gap-1 rounded-[18px] border-2 bg-card px-1',
+        selected ? 'border-foreground' : invalid ? 'border-negative/40' : 'border-transparent',
+      )}
+    >
+      <Text className="text-[22px]">{category.icon}</Text>
+      <Text numberOfLines={1} className="text-xs font-medium">{category.name}</Text>
+    </Pressable>
+  );
+}
+
+export function CategorySection({ form }: { form: TransactionFormApi }) {
+  const type = useStore(form.store, (s) => s.values.type);
+  const submitted = useStore(form.store, selectSubmitted);
+  const { data: categories = [] } = useCategories(type);
+  if (type === 'transfer') return null;
+
+  return (
+    <form.Field
+      name="category_id"
+      children={(field) => {
+        const error = submitted ? getFieldError(field) : undefined;
+        const tiles = categoryTiles(categories, field.state.value, CATEGORY_TILE_LIMIT);
+        return (
+          <View>
+            <View className="flex-row items-center gap-2 px-5 pb-2.5">
+              <Text className="text-sm font-semibold">{translate('transactions.category')}</Text>
+              {!!error && <Text className="text-sm text-negative">{error}</Text>}
+              <CategoryPicker
+                type={type}
+                selectedId={field.state.value}
+                onSelect={(category) => field.handleChange(category.id)}
+                containerClassName="ml-auto"
+                inputClassName="h-auto border-0 bg-transparent px-0"
+                showChevron={false}
+                renderSelectedItem={() => <Text className="text-[13px] text-muted-foreground">{translate('transactions.form.all_categories')}</Text>}
+              />
+            </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2 px-5" accessibilityRole="radiogroup">
+              {tiles.map((category) => (
+                <CategoryTile
+                  key={category.id}
+                  category={category}
+                  selected={field.state.value === category.id}
+                  invalid={!!error}
+                  onPress={() => field.handleChange(category.id)}
+                />
+              ))}
+            </ScrollView>
+          </View>
+        );
+      }}
+    />
+  );
+}
+
+export function AccountRow({ label, accounts, value, onChange, error, first }: {
+  label: string;
+  first?: boolean;
+  accounts: Account[];
+  value: string | null;
+  onChange: (id: string) => void;
+  error?: string;
+}) {
+  const sheet = useModalSheet();
+  const selected = accounts.find((a) => a.id === value);
+  const options = React.useMemo(() => accounts.map((a) => ({ value: a.id, label: a.icon ? `${a.icon} ${a.name}` : a.name })), [accounts]);
+  return (
+    <>
+      <ListRow
+        className={rowClassName(first)}
+        title={<RowLabel>{label}</RowLabel>}
+        meta={<RowError message={error} />}
+        chevron
+        onPress={sheet.present}
+        trailing={<Text className="max-w-[60%] text-row" numberOfLines={1}>{selected ? `${selected.icon ?? ''} ${selected.name}`.trim() : ''}</Text>}
+      />
+      <Options
+        ref={sheet.ref}
+        options={options}
+        value={value ?? undefined}
+        stackBehavior="push"
+        onSelect={(option: OptionType) => {
+          sheet.close();
+          onChange(String(option.value));
+        }}
+      />
+    </>
+  );
+}
+
+function TextRow({ label, value, placeholder, onChange, onBlur, error }: {
+  label: string;
+  value: string | null;
+  placeholder: string;
+  onChange: (value: string) => void;
+  onBlur: () => void;
+  error?: string;
+}) {
+  return (
+    <ListRow
+      className={rowClassName()}
+      title={<RowLabel>{label}</RowLabel>}
+      meta={<RowError message={error} />}
+      trailing={(
+        <Input
+          value={value ?? ''}
+          onChangeText={onChange}
+          onBlur={onBlur}
+          placeholder={placeholder}
+          accessibilityLabel={label}
+          accessibilityHint={error}
+          className={rowInputClassName}
+        />
+      )}
+    />
+  );
+}
+
+function AccountRows({ form, accounts }: { form: TransactionFormApi; accounts: Account[] }) {
+  return (
+    <form.Subscribe
+      selector={(s) => ({ type: s.values.type, paired: s.values.type === 'transfer' && s.values.to_account_id !== null, submitted: selectSubmitted(s) })}
+      children={({ type, paired, submitted }) => (
+        <>
+          <form.Field
+            name="account_id"
+            children={(field) => (
+              <AccountRow
+                first
+                label={translate(type === 'income' ? 'transactions.form.to' : type === 'transfer' && !paired ? 'transactions.account' : 'transactions.form.from')}
+                accounts={accounts}
+                value={field.state.value}
+                onChange={field.handleChange}
+                error={submitted ? getFieldError(field) : undefined}
+              />
+            )}
+          />
+          {paired && (
+            <form.Field
+              name="to_account_id"
+              children={(field) => (
+                <AccountRow
+                  label={translate('transactions.form.to')}
+                  accounts={accounts}
+                  value={field.state.value}
+                  onChange={field.handleChange}
+                  error={submitted ? getFieldError(field) : undefined}
+                />
+              )}
+            />
+          )}
+        </>
+      )}
+    />
+  );
+}
+
+export function DetailsCard({ form, accounts, isAdjustment, showBaseAmount, onBaseAmountEdited }: {
+  form: TransactionFormApi;
+  accounts: Account[];
+  isAdjustment: boolean;
+  showBaseAmount: boolean;
+  onBaseAmountEdited: () => void;
+}) {
+  const [showLocation, setShowLocation] = React.useState(() => !!form.getFieldValue('location'));
+  const submitted = useStore(form.store, selectSubmitted);
+  return (
+    <>
+      <Card className="mx-5 mt-[18px] rounded-card px-4">
+        {!isAdjustment && <AccountRows form={form} accounts={accounts} />}
+        <form.Field
+          name="date"
+          children={(field) => (
+            <ListRow
+              className={rowClassName(isAdjustment)}
+              title={<RowLabel>{translate('transactions.form.when')}</RowLabel>}
+              meta={<RowError message={submitted ? getFieldError(field) : undefined} />}
+              trailing={(
+                <View className="flex-row items-center gap-1">
+                  <DateInput
+                    value={field.state.value}
+                    onChange={field.handleChange}
+                    accessibilityLabel={translate('transactions.form.when')}
+                    className={rowInputClassName}
+                    displayValue={isValidISODate(field.state.value) ? formatDate(dateToUnix(field.state.value)) : undefined}
+                  />
+                  <ChevronRight size={18} colorClassName="accent-muted-foreground" />
+                </View>
+              )}
+            />
+          )}
+        />
+        {showBaseAmount && (
+          <form.Field
+            name="baseAmount"
+            children={(field) => (
+              <TextRow
+                label={translate('transactions.base_amount')}
+                value={field.state.value}
+                placeholder="0.00"
+                error={submitted ? getFieldError(field) : undefined}
+                onBlur={field.handleBlur}
+                onChange={(text) => {
+                  onBaseAmountEdited();
+                  field.handleChange(text);
+                }}
+              />
+            )}
+          />
+        )}
+        <form.Field
+          name="merchant_name"
+          children={(field) => (
+            <TextRow label={translate('transactions.form.merchant')} value={field.state.value} placeholder={translate('common.optional')} onBlur={field.handleBlur} onChange={field.handleChange} error={submitted ? getFieldError(field) : undefined} />
+          )}
+        />
+        <form.Field
+          name="note"
+          children={(field) => (
+            <TextRow label={translate('transactions.note')} value={field.state.value} placeholder={translate('transactions.form.note_placeholder')} onBlur={field.handleBlur} onChange={field.handleChange} error={submitted ? getFieldError(field) : undefined} />
+          )}
+        />
+        {showLocation && (
+          <form.Field
+            name="location"
+            children={(field) => (
+              <TextRow label={translate('transactions.location')} value={field.state.value} placeholder={translate('common.optional')} onBlur={field.handleBlur} onChange={field.handleChange} error={submitted ? getFieldError(field) : undefined} />
+            )}
+          />
+        )}
+      </Card>
+      {!showLocation && (
+        <Pressable accessibilityRole="button" onPress={() => setShowLocation(true)} className="items-center p-3">
+          <Text className="text-sm text-muted-foreground">{translate('transactions.form.add_location')}</Text>
+        </Pressable>
+      )}
+    </>
+  );
+}

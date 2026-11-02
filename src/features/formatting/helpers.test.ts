@@ -1,4 +1,5 @@
 import type { CurrencyFormat, NumberFormat } from './constants';
+import i18n from 'i18next';
 import { formatCurrency, formatDateFull, formatInstantFull, formatNumber, splitFraction } from './helpers';
 
 const number = 1234.56;
@@ -16,6 +17,19 @@ describe('formatting helpers', () => {
     const instant = Date.UTC(2026, 6, 1, 2, 0) / 1000;
     expect(formatInstantFull(instant, 'yyyy-MM-dd')).toBe('2026-06-30');
     expect(formatDateFull(instant, 'yyyy-MM-dd')).toBe('2026-07-01');
+  });
+
+  it('localizes month and day names to the app language, leaving numeric formats alone', async () => {
+    const day = Date.UTC(2026, 9, 15) / 1000;
+    expect(formatDateFull(day, 'EEEE, MMM d')).toBe('Thursday, Oct 15');
+    await i18n.changeLanguage('de');
+    try {
+      expect(formatDateFull(day, 'EEEE, MMM d')).toBe('Donnerstag, Okt. 15');
+      expect(formatDateFull(day, 'dd.MM.yyyy')).toBe('15.10.2026');
+    }
+    finally {
+      await i18n.changeLanguage('en');
+    }
   });
 
   it('formats a number correctly', () => {
@@ -97,6 +111,15 @@ describe('formatting helpers', () => {
         }),
       ).toBe(expected1[currencyFormat]);
     }
+  });
+
+  it('always shows two fraction digits for an amount with cents, none for a whole amount', () => {
+    const format = { numberFormat: 'stop', currencyFormat: 'symbol-after' } as const;
+    expect(formatCurrency(-4250, 'USD', format)).toBe('-42.50$');
+    expect(formatCurrency(4205, 'USD', format)).toBe('42.05$');
+    expect(formatCurrency(4200, 'USD', format)).toBe('42$');
+    expect(formatCurrency(4250, 'USD', { ...format, fractionDigits: 0 })).toBe('43$');
+    expect(formatCurrency(4250, 'USD', { numberFormat: 'comma', currencyFormat: 'symbol-before', shorten: true })).toBe('$42,50');
   });
 
   it('returns the original value as string for non-finite input', () => {

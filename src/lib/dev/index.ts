@@ -2,7 +2,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { IS_WEB } from '../base';
 import { dropDb, migrateDb } from '../sqlite';
-import { clearDbData, clearSelectedDataDb, clearTransactionsDb } from '../sqlite/db';
+import { clearDbData, clearTransactionsDb } from '../sqlite/db';
 import { BACKFILL_CATEGORY_KIND_SQL } from '../sqlite/migrations';
 import { mockData } from '../sqlite/mock-data';
 import { seedDefaults } from '../sqlite/seed';
@@ -29,17 +29,6 @@ export async function clearTransactionsData(db: SQLiteDatabase, queryClient: Que
   catch (err) {
     console.error('Failed to clear database', err);
   }
-  queryClient.clear();
-  queryClient.invalidateQueries();
-}
-
-export async function clearSelectedData(
-  db: SQLiteDatabase,
-  queryClient: QueryClient,
-  options: { deleteAccounts: boolean; deleteCategories: boolean },
-) {
-  await clearSelectedDataDb(db, options);
-  console.info('Database cleared successfully');
   queryClient.clear();
   queryClient.invalidateQueries();
 }

@@ -19,16 +19,17 @@ describe('invalidateFor', () => {
     const qc = createMockQueryClient();
     invalidateFor(qc, 'transaction');
 
-    expect(qc.invalidateQueries).toHaveBeenCalledTimes(9);
+    expect(qc.invalidateQueries).toHaveBeenCalledTimes(11);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.transactions.all]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.withBalance]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.summaryAll]);
-    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.summaryNativeAll]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.totalBalance]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.monthSummary.all]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.insights.all]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.recommendations.all]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.globalBudget.all]);
+    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.categories.usageAll]);
+    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.scheduledTransactions.paymentsAll]);
   });
 
   it('deduplicates overlapping prefixes when multiple entities are passed', () => {
@@ -44,7 +45,8 @@ describe('invalidateFor', () => {
     const qc = createMockQueryClient();
     invalidateFor(qc, 'account');
 
-    expect(qc.invalidateQueries).toHaveBeenCalledTimes(4);
+    expect(qc.invalidateQueries).toHaveBeenCalledTimes(6);
+    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.transactions.all]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.all]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.withBalance]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.totalBalance]);
@@ -54,8 +56,9 @@ describe('invalidateFor', () => {
     const qc = createMockQueryClient();
     invalidateFor(qc, 'category');
 
-    expect(qc.invalidateQueries).toHaveBeenCalledTimes(3);
+    expect(qc.invalidateQueries).toHaveBeenCalledTimes(5);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.categories.all]);
+    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.categories.usageAll]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.insights.all]);
   });
 
@@ -63,8 +66,10 @@ describe('invalidateFor', () => {
     const qc = createMockQueryClient();
     invalidateFor(qc, 'scheduledTransaction');
 
-    expect(qc.invalidateQueries).toHaveBeenCalledTimes(2);
+    expect(qc.invalidateQueries).toHaveBeenCalledTimes(4);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.scheduledTransactions.all]);
+    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.categories.usageAll]);
+    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.dataCounts]);
   });
 
   it('invalidates global budget prefix for globalBudget entity', () => {

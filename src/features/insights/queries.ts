@@ -5,22 +5,33 @@ import type { CategorySpend, DailyTrendTotal, MonthlyTotals } from './types';
 
 import { addMonths, startOfMonth, subMonths } from 'date-fns';
 import { calendarDateToUnix } from '@/lib/date/helpers';
+import { inFilter } from '@/lib/sqlite/helpers';
 
 // ─── Read Queries ───
+
+/** All-time income and expense count, without transfers and opening-balance adjustments. */
+export async function getActivityCount(db: SQLiteDatabase): Promise<number> {
+  const row = await db.getFirstAsync<{ count: number }>(
+    `SELECT COUNT(*) as count FROM transactions WHERE type IN ('income','expense') AND is_adjustment = 0`,
+  );
+  return row?.count ?? 0;
+}
 
 export async function getSummaryByRange(
   db: SQLiteDatabase,
   startDate: number | undefined,
   endDate: number | undefined,
+  accountIds?: readonly string[],
 ): Promise<MonthSummary> {
   const hasRange = !!startDate && !!endDate;
+  const [accountSql, accountParams] = inFilter('account_id', accountIds);
   const row = await db.getFirstAsync<{ income: number; expense: number }>(
     `SELECT
        COALESCE(SUM(CASE WHEN type = 'income' THEN baseAmount ELSE 0 END), 0) as income,
        COALESCE(SUM(CASE WHEN type = 'expense' THEN baseAmount ELSE 0 END), 0) as expense
      FROM transactions
-     ${hasRange ? 'WHERE date >= ? AND date < ?' : ''}`,
-    hasRange ? [startDate, endDate] : [],
+     WHERE 1 = 1 ${hasRange ? 'AND date >= ? AND date < ?' : ''}${accountSql}`,
+    [...(hasRange ? [startDate, endDate] : []), ...accountParams],
   );
   const income = row?.income ?? 0;
   const expense = row?.expense ?? 0;
@@ -31,8 +42,10 @@ export async function getCategorySpendByRange(
   db: SQLiteDatabase,
   startDate: number | undefined,
   endDate: number | undefined,
+  accountIds?: readonly string[],
 ): Promise<CategorySpend[]> {
   const hasRange = !!startDate && !!endDate;
+  const [accountSql, accountParams] = inFilter('t.account_id', accountIds);
   const rows = await db.getAllAsync<Omit<CategorySpend, 'percentage'>>(
     `SELECT
        c.id as category_id,
@@ -47,10 +60,10 @@ export async function getCategorySpendByRange(
        c.kind as category_type
      FROM categories c
      LEFT JOIN transactions t ON t.category_id = c.id
-       AND t.type IN ('income','expense') ${hasRange ? 'AND t.date >= ? AND t.date < ?' : ''}
+       AND t.type IN ('income','expense') ${hasRange ? 'AND t.date >= ? AND t.date < ?' : ''}${accountSql}
      GROUP BY c.id, c.name, c.color, c.icon, c.kind, c.budget, c.sort_order
      ORDER BY c.sort_order ASC`,
-    hasRange ? [startDate, endDate] : [],
+    [...(hasRange ? [startDate, endDate] : []), ...accountParams],
   );
 
   const grandTotal = rows.reduce((s, r) => s + r.total, 0);
@@ -65,18 +78,20 @@ export async function getTrendByRange(
   db: SQLiteDatabase,
   startDate: number | undefined,
   endDate: number | undefined,
+  accountIds?: readonly string[],
 ): Promise<DailyTrendTotal[]> {
   const hasRange = !!startDate && !!endDate;
+  const [accountSql, accountParams] = inFilter('account_id', accountIds);
   return db.getAllAsync<DailyTrendTotal>(
     `SELECT
        date,
        COALESCE(SUM(CASE WHEN type = 'income' THEN baseAmount ELSE 0 END), 0) as income,
        COALESCE(SUM(CASE WHEN type = 'expense' THEN baseAmount ELSE 0 END), 0) as expense
      FROM transactions
-     ${hasRange ? 'WHERE date >= ? AND date < ?' : ''}
+     WHERE 1 = 1 ${hasRange ? 'AND date >= ? AND date < ?' : ''}${accountSql}
      GROUP BY date
      ORDER BY date ASC`,
-    hasRange ? [startDate, endDate] : [],
+    [...(hasRange ? [startDate, endDate] : []), ...accountParams],
   );
 }
 

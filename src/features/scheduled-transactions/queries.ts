@@ -1,9 +1,11 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type {
+  ScheduledTransaction,
   ScheduledTransactionFormData,
   ScheduledTransactionWithDetails,
 } from './types';
+import type { Transaction } from '@/features/transactions/types';
 
 import { amountToCents } from '@/features/formatting/helpers';
 import { generateId } from '@/lib/sqlite';
@@ -75,6 +77,41 @@ export async function getScheduledTransactionById(
      LEFT JOIN categories c ON c.id = r.category_id
      WHERE r.id = ?`,
     [id],
+  );
+}
+
+export type TransactionRule = Pick<ScheduledTransaction, 'id' | 'frequency' | 'next_due_date' | 'is_active'>;
+
+/** The rule that generated a transaction, via `recurring_rule_runs`. */
+export async function getRuleForTransaction(
+  db: SQLiteDatabase,
+  transactionId: string,
+): Promise<TransactionRule | null> {
+  return db.getFirstAsync<TransactionRule>(
+    `SELECT r.id, r.frequency, r.next_due_date, r.is_active
+     FROM recurring_rule_runs rr
+     JOIN recurring_rules r ON r.id = rr.rule_id
+     WHERE rr.transaction_id = ?`,
+    [transactionId],
+  );
+}
+
+export type RulePayment = Pick<Transaction, 'id' | 'date' | 'baseAmount' | 'baseCurrency'>;
+
+/** Latest transactions posted by a rule, newest first. */
+export async function getRulePayments(
+  db: SQLiteDatabase,
+  ruleId: string,
+  limit: number,
+): Promise<RulePayment[]> {
+  return db.getAllAsync<RulePayment>(
+    `SELECT t.id, t.date, t.baseAmount, t.baseCurrency
+     FROM recurring_rule_runs rr
+     JOIN transactions t ON t.id = rr.transaction_id
+     WHERE rr.rule_id = ?
+     ORDER BY t.date DESC, t.id DESC
+     LIMIT ?`,
+    [ruleId, limit],
   );
 }
 

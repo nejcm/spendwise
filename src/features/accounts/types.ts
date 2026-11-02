@@ -22,8 +22,13 @@ export type Account = {
 export type AccountWithBalance = Account & {
   balance: number; // computed: income - expense in the account's own currency
   baseBalance: number; // computed: income - expense in the user's preferred currency
-  monthlyExpense?: number; // computed: total expenses (baseAmount) for the selected period
   baseCurrency: CurrencyKey;
+};
+
+export type AccountFlows = {
+  income: number;
+  expense: number;
+  movedOut: number;
 };
 
 export type AccountFormData = {
@@ -39,6 +44,15 @@ export type AccountFormData = {
 };
 
 export type FirstAccountData = Pick<AccountFormData, 'name' | 'type' | 'currency' | 'icon' | 'opening_balance'>;
+
+export const ACCOUNT_TYPE_COLORS: Record<AccountType, string> = {
+  cash: '#3fb27f',
+  checking: '#5b8def',
+  savings: '#e0a526',
+  credit_card: '#e5677a',
+  investment: '#a77be6',
+  other: '#8d899a',
+};
 
 const baseNs = 'accounts.typeOptions';
 export const ACCOUNT_TYPE_LABELS: Record<AccountType, string> = {

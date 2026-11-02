@@ -1,45 +1,30 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
-import ScreenHeader from '@/components/screen-header';
-import { ScanLine, SolidButton } from '@/components/ui';
+import { View } from 'react-native';
 import { TransactionForm } from '@/features/transactions/components/transaction-form';
 import { parseTransactionFormInitialValues } from '@/features/transactions/form-route-params';
-import { translate } from '@/lib/i18n';
 import { goBackOrFallback } from '@/lib/routing';
-import { triggerScanPicker } from '@/lib/store/local-store';
 import { useAppStore } from '@/lib/store/store';
 
 export default function NewTransactionRoute() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const openTxDetails = useAppStore.use.openTxOnCreate();
+  const openTxOnCreate = useAppStore.use.openTxOnCreate();
   const initialValues = React.useMemo(() => parseTransactionFormInitialValues(params), [params]);
-  const onBack = () => goBackOrFallback(router);
+  const onClose = () => goBackOrFallback(router);
 
   return (
-    <>
-      <ScreenHeader title={translate('transactions.add')}>
-        <SolidButton
-          className="ml-auto rounded-4xl px-3"
-          size="2xs"
-          color="default"
-          accessibilityLabel={translate('scan.button_label')}
-          onPress={triggerScanPicker}
-          label={translate('common.scan')}
-          iconRight={<ScanLine colorClassName="accent-background" className="mt-px ml-2" size={15} />}
-        />
-      </ScreenHeader>
+    <View className="flex-1 bg-background">
+      <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[340px] bg-linear-to-b from-wash to-background" />
       <TransactionForm
         initialValues={initialValues}
-        onSuccess={(transactionId) => {
-          if (openTxDetails && transactionId) {
-            router.replace(`/transactions/${transactionId}`);
-            return;
-          }
-          onBack();
+        onClose={onClose}
+        onSaved={(transactionId, addAnother) => {
+          if (addAnother) return;
+          if (openTxOnCreate) router.replace(`/transactions/${transactionId}`);
+          else onClose();
         }}
-        onCancel={onBack}
       />
-    </>
+    </View>
   );
 }

@@ -1,13 +1,19 @@
-import type { FilterState, TransactionType } from './types';
+import type { FilterState, TransactionSort, TransactionType } from './types';
 import type { PeriodSelection } from '@/lib/store/store';
+import { isValidISODate } from '@/lib/date/helpers';
+import { DEFAULT_FILTERS, SORT_OPTIONS } from './filters';
 
 type ParamValue = string | string[] | undefined;
 
+/** `accountId` and `categoryId` take one id or a comma-separated list; amounts are cents. */
 export type TransactionRouteParams = {
   accountId?: ParamValue;
   categoryId?: ParamValue;
+  maxAmount?: ParamValue;
+  minAmount?: ParamValue;
   period?: ParamValue;
   search?: ParamValue;
+  sort?: ParamValue;
   type?: ParamValue;
 };
 
@@ -24,10 +30,24 @@ export type TransactionsHrefSeed = Partial<FilterState> & {
 
 const TRANSACTION_TYPES = new Set<TransactionType>(['expense', 'income', 'transfer']);
 const RELATIVE_PERIODS = new Set<string>(['all', 'today', 'this-week', 'this-month', 'this-year']);
-const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 function firstValue(value: ParamValue): string | undefined {
   return Array.isArray(value) ? value[0] : value;
+}
+
+function parseIds(value: ParamValue): string[] {
+  const values = Array.isArray(value) ? value : [value ?? ''];
+  return [...new Set(values.flatMap((v) => v.split(',')).map((id) => id.trim()).filter(Boolean))];
+}
+
+function parseCents(value: ParamValue): number | null {
+  const raw = firstValue(value);
+  return raw && /^\d+$/.test(raw) ? Number(raw) : null;
+}
+
+function parseSort(value: ParamValue): TransactionSort {
+  const raw = firstValue(value);
+  return SORT_OPTIONS.find((sort) => sort === raw) ?? DEFAULT_FILTERS.sort;
 }
 
 function parseType(value: ParamValue): TransactionType | null {
@@ -35,13 +55,6 @@ function parseType(value: ParamValue): TransactionType | null {
   return normalized && TRANSACTION_TYPES.has(normalized as TransactionType)
     ? normalized as TransactionType
     : null;
-}
-
-function isValidDate(value: string): boolean {
-  if (!DATE_RE.test(value)) return false;
-  const [year, month, day] = value.split('-').map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
 }
 
 function parseIntInRange(value: string | undefined, min: number, max: number): number | undefined {
@@ -74,10 +87,10 @@ export function parsePeriodParam(value: ParamValue): PeriodSelection | undefined
       return year && week ? { mode: 'week', year, week } : undefined;
     }
     case 'day':
-      return rest && isValidDate(rest) ? { mode: 'day', date: rest } : undefined;
+      return rest && isValidISODate(rest) ? { mode: 'day', date: rest } : undefined;
     case 'custom': {
       const [startDate, endDate] = rest?.split('..') ?? [];
-      return startDate && endDate && isValidDate(startDate) && isValidDate(endDate) && startDate <= endDate
+      return startDate && endDate && isValidISODate(startDate) && isValidISODate(endDate) && startDate <= endDate
         ? { mode: 'custom', startDate, endDate }
         : undefined;
     }
@@ -108,18 +121,24 @@ export function parseTransactionsRouteSeed(params: TransactionRouteParams): Tran
   return {
     search: firstValue(params.search)?.trim() ?? '',
     filters: {
-      accountId: firstValue(params.accountId) ?? null,
-      categoryId: firstValue(params.categoryId) ?? null,
       type: parseType(params.type),
+      accountIds: parseIds(params.accountId),
+      categoryIds: parseIds(params.categoryId),
+      minAmount: parseCents(params.minAmount),
+      maxAmount: parseCents(params.maxAmount),
+      sort: parseSort(params.sort),
     },
     ...(periodSelection && { periodSelection }),
   };
 }
 
-export function buildTransactionsHref({ accountId, categoryId, search, type, periodSelection }: TransactionsHrefSeed) {
+export function buildTransactionsHref({ accountIds, categoryIds, minAmount, maxAmount, sort, search, type, periodSelection }: TransactionsHrefSeed) {
   const params: Record<string, string> = {};
-  if (accountId) params.accountId = accountId;
-  if (categoryId) params.categoryId = categoryId;
+  if (accountIds?.length) params.accountId = accountIds.join(',');
+  if (categoryIds?.length) params.categoryId = categoryIds.join(',');
+  if (minAmount != null) params.minAmount = String(minAmount);
+  if (maxAmount != null) params.maxAmount = String(maxAmount);
+  if (sort && sort !== DEFAULT_FILTERS.sort) params.sort = sort;
   if (search?.trim()) params.search = search.trim();
   if (type) params.type = type;
   if (periodSelection) params.period = formatPeriodParam(periodSelection);

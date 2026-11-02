@@ -2,7 +2,7 @@ import type { PressableProps, View } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
 import * as React from 'react';
 import { Pressable } from 'react-native';
-import { tv } from 'tailwind-variants';
+import { tv } from '@/lib/cn';
 import { buttonTv, getPressedStyle } from './button';
 
 const iconButton = tv({
@@ -23,7 +23,7 @@ const iconButton = tv({
         indicator: 'h-2',
       },
       md: {
-        container: 'size-10 p-0',
+        container: 'size-11 p-0',
         label: 'text-base',
       },
       lg: {

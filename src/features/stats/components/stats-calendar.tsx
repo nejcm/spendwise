@@ -177,7 +177,7 @@ export function StatsCalendar() {
                             setSelectedKey(isSelected ? null : key);
                           }}
                           style={getPressedStyle}
-                          className={`${baseDayCls} border ${isSelected ? 'border-primary' : day.isToday ? 'border-gray-500' : 'border-transparent'} ${day.isCurrentMonth ? '' : 'opacity-50'} min-h-13 bg-muted/40`}
+                          className={`${baseDayCls} border ${isSelected ? 'border-accent' : day.isToday ? 'border-gray-500' : 'border-transparent'} ${day.isCurrentMonth ? '' : 'opacity-50'} min-h-13 bg-muted/40`}
                         >
                           <Text className="text-xs text-muted-foreground">
                             {day.date.getDate()}

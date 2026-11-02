@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Modal, Pressable, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { cn } from 'tailwind-variants';
+import { cn } from '@/lib/cn';
 import { getPressedStyle } from './button';
 import { GhostButton } from './ghost-button';
 import { EllipsisVertical } from './icon';

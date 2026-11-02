@@ -3,7 +3,7 @@ import type { TxKeyPath } from '@/lib/i18n';
 import * as React from 'react';
 import { I18nManager, Text as NNText, StyleSheet } from 'react-native';
 
-import { cn } from 'tailwind-variants';
+import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
 
 type Props = {
@@ -13,7 +13,7 @@ type Props = {
 
 export function Text({ className = '', style, tx, children, ...props }: Props) {
   const textStyle = React.useMemo(
-    () => cn('font-family-sans text-base font-normal text-foreground', className),
+    () => cn('font-sans text-base font-normal text-foreground', className),
     [className],
   );
 

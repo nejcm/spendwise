@@ -1,5 +1,5 @@
-import { cn } from 'tailwind-variants';
 import { DatabaseSearch } from '@/components/ui/icon';
+import { cn } from '@/lib/cn';
 import { Text, View } from './ui';
 
 export interface NoDataProps {

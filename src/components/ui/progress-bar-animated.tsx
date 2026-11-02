@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useImperativeHandle } from 'react';
 import { View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { twMerge } from 'tailwind-merge';
+import { cn } from '@/lib/cn';
 
 type Props = {
   initialProgress?: number;
@@ -38,7 +38,7 @@ export function ProgressBarAnimated({
     };
   });
   return (
-    <View className={twMerge(`bg-[#EAEAEA]`, className)}>
+    <View className={cn(`bg-[#EAEAEA]`, className)}>
       <Animated.View style={style} />
     </View>
   );

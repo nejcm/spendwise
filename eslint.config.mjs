@@ -120,6 +120,12 @@ export default antfu(
         },
       ],
       'react-hooks/refs': 'off', // Allow useRef without exhaustive-deps
+      'no-restricted-imports': ['error', {
+        paths: [
+          { name: 'tailwind-variants', importNames: ['cn', 'tv'], message: 'Use @/lib/cn (merge config knows the custom tokens).' },
+          { name: 'tailwind-merge', message: 'Use cn from @/lib/cn.' },
+        ],
+      }],
       'ts/consistent-type-imports': [
         'warn',
         {

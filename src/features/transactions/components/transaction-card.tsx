@@ -3,10 +3,10 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
-import { cn } from 'tailwind-variants';
 import { DEFAULT_COLOR } from '@/components/color-selector';
 import { Checkbox, FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
 import { formatShortDate } from '@/features/formatting/helpers';
+import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { hexWithOpacity } from '@/lib/theme/colors';
@@ -41,7 +41,7 @@ export const TransactionCard = React.memo(({
 
   return (
     <Pressable
-      className={cn('flex-row items-center', isCompact ? 'gap-2 px-3 py-1.5' : 'gap-3 p-3', selected && 'bg-primary/10', className)}
+      className={cn('flex-row items-center', isCompact ? 'gap-2 px-3 py-1.5' : 'gap-3 p-3', selected && 'bg-accent/10', className)}
       style={getPressedStyle}
       onPress={() => selectionMode ? toggleSelection() : router.push(`/transactions/${transaction.id}`)}
       onLongPress={() => selectionMode ? toggleSelection() : onStartSelection?.(transaction.id)}

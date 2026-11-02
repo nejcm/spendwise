@@ -1,25 +1,26 @@
-import type { AccentType } from './accent';
+import type { AccentType, AccentVariables } from './accent';
 import * as React from 'react';
 import { Uniwind } from 'uniwind';
 import { getAppState, setAccentColor, useAppStore } from '@/lib/store/store';
 import { ACCENT_VARIABLES } from './accent';
 
-function applyAccentColorVariables(colorTheme: AccentType) {
-  const { light, dark } = ACCENT_VARIABLES[colorTheme] || ACCENT_VARIABLES.black;
+const DEFAULT_ACCENT: AccentType = 'spendwise';
 
-  const variablesByTheme = {
-    light: {
-      '--color-primary': light.accent,
-      '--color-primary-foreground': light.accentForeground,
-    },
-    dark: {
-      '--color-primary': dark.accent,
-      '--color-primary-foreground': dark.accentForeground,
-    },
+// Legacy accents have no soft/line shades; #RRGGBBAA tints of the accent stand in.
+function accentCSSVariables({ accent, accentForeground, accentSoft, accentLine }: AccentVariables['light']) {
+  return {
+    '--color-accent': accent,
+    '--color-accent-foreground': accentForeground,
+    '--color-accent-soft': accentSoft ?? `${accent}1f`,
+    '--color-accent-line': accentLine ?? `${accent}4d`,
   };
+}
 
-  Uniwind.updateCSSVariables('light', variablesByTheme.light);
-  Uniwind.updateCSSVariables('dark', variablesByTheme.dark);
+function applyAccentColorVariables(colorTheme: AccentType) {
+  const { light, dark } = ACCENT_VARIABLES[colorTheme] || ACCENT_VARIABLES[DEFAULT_ACCENT];
+
+  Uniwind.updateCSSVariables('light', accentCSSVariables(light));
+  Uniwind.updateCSSVariables('dark', accentCSSVariables(dark));
 }
 
 function setSelected(accentColor: AccentType) {
@@ -29,7 +30,7 @@ function setSelected(accentColor: AccentType) {
 
 export function useSelectedAccent() {
   const selectedAccent = useAppStore.use.colorTheme();
-  const accent = selectedAccent ?? 'black';
+  const accent = selectedAccent ?? DEFAULT_ACCENT;
 
   React.useEffect(() => {
     setSelected(accent);
@@ -40,7 +41,7 @@ export function useSelectedAccent() {
 
 export function loadSelectedAccentColor() {
   const colorTheme = getAppState().colorTheme;
-  const color = colorTheme ?? 'black';
+  const color = colorTheme ?? DEFAULT_ACCENT;
 
   if (colorTheme !== color) setAccentColor(color);
   applyAccentColorVariables(color);

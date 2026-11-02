@@ -57,6 +57,7 @@ jest.mock('react-native-reanimated', () => {
     },
     FadeIn: { duration: jest.fn(() => ({})) },
     FadeOut: { duration: jest.fn(() => ({})) },
+    FadeOutDown: { duration: jest.fn(() => ({})) },
     FadeInDown: { duration: jest.fn(() => ({})) },
     FadeInUp: { duration: jest.fn(() => ({})) },
     FadeInLeft: { duration: jest.fn(() => ({})) },

@@ -92,6 +92,16 @@ export function formatCurrency(
   return `${formattedNumber}${space}${currencyTxt}`;
 }
 
+const FRACTION_PATTERNS = { stop: /\.\d+(?!.*\d)/, comma: /,\d+(?!.*\d)/ } as const;
+
+/** Splits a formatted amount around its fraction, e.g. "€7,400.75" → ["€7,400", ".75", ""]. */
+export function splitFraction(formatted: string, numberFormat: NumberFormat): [string, string, string] {
+  const match = FRACTION_PATTERNS[numberFormat.startsWith('comma') ? 'comma' : 'stop'].exec(formatted);
+  if (!match) return [formatted, '', ''];
+  const end = match.index + match[0].length;
+  return [formatted.slice(0, match.index), match[0], formatted.slice(end)];
+}
+
 function formatRelativeOrDate(date: Date, displayFormat?: string): string {
   if (isToday(date)) return translate('common.today');
   if (isYesterday(date)) return translate('common.yesterday');

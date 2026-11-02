@@ -1,8 +1,8 @@
 import type { TxKeyPath } from '@/lib/i18n';
 
 import * as React from 'react';
-import { cn } from 'tailwind-variants';
 import { Text, View } from '@/components/ui';
+import { cn } from '@/lib/cn';
 
 type Props = {
   children: React.ReactNode;

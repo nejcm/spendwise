@@ -5,10 +5,10 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useCSSVariable } from 'uniwind';
 import { IS_WEB } from '@/lib/base';
-
-import { defaultStyles } from '@/lib/theme/styles';
-import { useThemeConfig } from '@/lib/theme/use-theme-config';
+import { cn } from '@/lib/cn';
+import { translate } from '@/lib/i18n';
 import { X } from './icon';
 import { Text } from './text';
 
@@ -35,6 +35,7 @@ export function useModalSheet<T>() {
 }
 
 const defaultSnapPoints = ['66%'];
+const SHEET_RADIUS = 28;
 
 export function ModalSheet<T>({
   ref,
@@ -44,9 +45,16 @@ export function ModalSheet<T>({
   bottomInset: providedBottomInset,
   ...props
 }: ModalSheetProps & { ref?: ModalSheetRef<T> }) {
-  const theme = useThemeConfig();
+  const sheetColor = useCSSVariable('--color-sheet') as string | undefined;
   const { bottom: bottomInset } = useSafeAreaInsets();
   const detachedProps = React.useMemo(() => getDetachedProps(detached), [detached]);
+  const backgroundStyle = React.useMemo(() => ({
+    backgroundColor: sheetColor,
+    borderTopLeftRadius: SHEET_RADIUS,
+    borderTopRightRadius: SHEET_RADIUS,
+    borderBottomLeftRadius: detached ? SHEET_RADIUS : 0,
+    borderBottomRightRadius: detached ? SHEET_RADIUS : 0,
+  }), [sheetColor, detached]);
   const modal = useModalSheet<T>();
   const sheetBottomInset = providedBottomInset ?? (detached ? bottomInset + 12 : bottomInset);
 
@@ -55,7 +63,7 @@ export function ModalSheet<T>({
   const renderHandleComponent = React.useCallback(
     () => (
       <>
-        <View className={`mt-2 ${title ? 'mb-2' : 'mb-8'} h-1 w-12 self-center rounded-lg bg-gray-300 dark:bg-gray-700`} />
+        <View className="mt-2.5 h-[5px] w-10 self-center rounded-full bg-track" />
         <ModalSheetHeader title={title} close={modal.close} />
       </>
     ),
@@ -66,7 +74,7 @@ export function ModalSheet<T>({
     <BottomSheetModal
       {...props}
       {...detachedProps}
-      backgroundStyle={theme.dark ? defaultStyles.backgroundDark : defaultStyles.background}
+      backgroundStyle={backgroundStyle}
       ref={modal.ref}
       snapPoints={snapPoints}
       enableDynamicSizing={false}
@@ -86,12 +94,13 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 function CustomBackdrop({ style }: BottomSheetBackdropProps) {
   const { close } = useBottomSheet();
+  const scrim = useCSSVariable('--color-scrim') as string | undefined;
   return (
     <AnimatedPressable
       onPress={() => close()}
       entering={FadeIn.duration(50)}
       exiting={FadeOut.duration(20)}
-      style={[style, { backgroundColor: 'rgba(0, 0, 0, 0.4)' }]}
+      style={[style, { backgroundColor: scrim }]}
     />
   );
 }
@@ -115,28 +124,23 @@ function getDetachedProps(detached: boolean) {
 
 const ModalSheetHeader = React.memo(({ title, close }: ModalSheetHeaderProps) => {
   return (
-    <>
-      {title && (
-        <View className="flex-row px-2 py-3">
-          <View className="flex-1">
-            {typeof title === 'string' ? <Text className="text-center text-lg font-bold text-foreground">{title}</Text> : title}
-          </View>
-        </View>
-      )}
+    <View className="flex-row items-center gap-3 px-5 pt-3 pb-2">
+      <View className="flex-1">
+        {typeof title === 'string' ? <Text accessibilityRole="header" className="text-xl font-bold">{title}</Text> : title}
+      </View>
       <CloseButton close={close} />
-    </>
+    </View>
   );
 });
 
-export function CloseButton({ close }: { close: () => void }) {
+export function CloseButton({ close, className }: { close: () => void; className?: string }) {
   return (
     <Pressable
       onPress={close}
-      className="absolute top-3 right-3 size-6 items-center justify-center"
-      hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-      accessibilityLabel="close modal"
+      className={cn('size-10 items-center justify-center rounded-full bg-card-2', className)}
+      hitSlop={8}
+      accessibilityLabel={translate('common.close')}
       accessibilityRole="button"
-      accessibilityHint="closes the modal"
     >
       <X size={20} colorClassName="accent-foreground" />
     </Pressable>

@@ -147,8 +147,9 @@
     "none": "Keine",
     "note": "Notiz",
     "ok": "OK",
-    "over": "ÜBER",
+    "over": "über",
     "paused": "Pausiert",
+    "remove_filter": "Filter {{label}} entfernen",
     "restore": "Wiederherstellen",
     "save": "Speichern",
     "scan": "Scannen",
@@ -170,6 +171,8 @@
     "today": "Heute",
     "tomorrow": "Morgen",
     "total": "Gesamt",
+    "undo": "Rückgängig",
+    "view": "Ansehen",
     "week": "Woche",
     "year": "Jahr",
     "yes": "Ja",
@@ -296,6 +299,10 @@
     "no_data": "Keine Daten",
     "spending_by_category": "Ausgaben nach Kategorie",
     "title": "Einblicke"
+  },
+  "nav": {
+    "activity": "Aktivität",
+    "add_transaction_hint": "Lange drücken: {{action}}"
   },
   "notifications": {
     "android_requested": "Benachrichtigungsberechtigungen wurden angefragt. Du kannst sie auch in den Systemeinstellungen anpassen.",
@@ -476,7 +483,7 @@
     "accent": {
       "amber": "Amber",
       "berry": "Berry",
-      "black": "Standard",
+      "black": "Schwarz",
       "clay": "Clay",
       "coffee": "Coffee",
       "coral": "Coral",
@@ -492,6 +499,7 @@
       "reflection": "Reflection",
       "saltwater": "Saltwater",
       "slate": "Slate",
+      "spendwise": "Spendwise",
       "stone": "Stone",
       "title": "Farbaccent",
       "wave": "Wave"

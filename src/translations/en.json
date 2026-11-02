@@ -147,13 +147,14 @@
     "none": "None",
     "note": "Note",
     "ok": "OK",
-    "over": "OVER",
+    "over": "over",
     "paused": "Paused",
+    "remove_filter": "Remove filter {{label}}",
     "restore": "Restore",
     "save": "Save",
     "scan": "Scan",
     "search": "Search",
-    "seeAll": "See All",
+    "seeAll": "See all",
     "select": "Select",
     "select_date": "Select Date",
     "select_month": "Select Month",
@@ -170,6 +171,8 @@
     "today": "Today",
     "tomorrow": "Tomorrow",
     "total": "Total",
+    "undo": "Undo",
+    "view": "View",
     "week": "Week",
     "year": "Year",
     "yes": "Yes",
@@ -296,6 +299,10 @@
     "no_data": "No data",
     "spending_by_category": "Spending by Category",
     "title": "Insights"
+  },
+  "nav": {
+    "activity": "Activity",
+    "add_transaction_hint": "Long press: {{action}}"
   },
   "notifications": {
     "android_requested": "Notification permissions have been requested. You can also adjust them in system settings.",
@@ -476,7 +483,7 @@
     "accent": {
       "amber": "Amber",
       "berry": "Berry",
-      "black": "Default",
+      "black": "Black",
       "clay": "Clay",
       "coffee": "Coffee",
       "coral": "Coral",
@@ -492,6 +499,7 @@
       "reflection": "Reflection",
       "saltwater": "Saltwater",
       "slate": "Slate",
+      "spendwise": "Spendwise",
       "stone": "Stone",
       "title": "Color accent",
       "wave": "Wave"

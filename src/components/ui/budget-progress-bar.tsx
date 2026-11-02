@@ -2,8 +2,11 @@
 import type { CurrencyKey } from '@/features/currencies';
 import * as React from 'react';
 import { formatCurrency } from '@/features/formatting/helpers';
+import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
+import { BUDGET_STATE_CLASSES, getBudgetState } from './budget-state';
 import { ProgressBar } from './progress-bar';
+import { Text } from './text';
 
 export type BudgetProgressBarProps = {
   spent: number; // cents (for the current period)
@@ -18,9 +21,8 @@ export type BudgetProgressBarProps = {
 };
 
 export function getColorClass(ratio: number): [string, string | undefined, string] {
-  if (ratio >= 1) return ['bg-danger-600', 'bg-danger-600/20', 'text-danger-600'];
-  if (ratio >= 0.8) return ['bg-warning-500', 'bg-warning-500/20', 'text-warning-600'];
-  return ['bg-foreground', undefined, 'text-foreground'];
+  const { bar, text } = BUDGET_STATE_CLASSES[getBudgetState(ratio, 1)];
+  return [bar, undefined, text];
 }
 
 export function BudgetProgressBar({
@@ -32,27 +34,35 @@ export function BudgetProgressBar({
   containerClassName,
   showValues = false,
   showPercentage = true,
-  bg,
+  bg = 'bg-track',
 }: BudgetProgressBarProps) {
   const numberFormat = useAppStore.use.numberFormat();
   const currencyFormat = useAppStore.use.currencyFormat();
 
-  const ratio = budget > 0 ? spent / budget : 0;
-  const percentage = Math.min(ratio * 100, 100);
+  const state = getBudgetState(spent, budget);
+  if (state === 'none') return null;
+
+  const isOver = state === 'over';
+  const percentage = Math.min((spent / budget) * 100, 100);
   const monthlyHint = showValues && monthlyBudget != null && currency != null
     ? ` (${formatCurrency(monthlyBudget, currency, { numberFormat, currencyFormat })}/m)`
     : null;
-  const colors = getColorClass(ratio);
 
   return (
     <ProgressBar
       value={percentage}
-      color={colors[0]}
-      showPercentage={showPercentage}
-      children={showValues ? monthlyHint : undefined}
-      bg={colors[1] || bg || 'bg-gray-300 dark:bg-gray-700'}
+      color={BUDGET_STATE_CLASSES[state].bar}
+      showPercentage={showPercentage && !isOver}
+      bg={bg}
       className={className}
       containerClassName={containerClassName}
-    />
+    >
+      {(isOver || monthlyHint) && (
+        <>
+          {isOver && <Text className="text-xs/snug font-medium text-negative">{translate('common.over')}</Text>}
+          {monthlyHint}
+        </>
+      )}
+    </ProgressBar>
   );
 }

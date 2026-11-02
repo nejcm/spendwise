@@ -1,13 +1,13 @@
 import type { PressableProps, TextProps, View } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
 import * as React from 'react';
-import { tv } from 'tailwind-variants';
+import { tv } from '@/lib/cn';
 import { Button, buttonTv } from './button';
 
 const outlineButton = tv({
   extend: buttonTv,
   slots: {
-    container: 'flex flex-row items-center justify-center rounded-lg border bg-transparent px-4',
+    container: 'flex flex-row items-center justify-center rounded-full border bg-transparent px-4',
   },
   variants: {
     color: {

@@ -42,7 +42,7 @@ export function MonthlyExpenseTrendCard() {
   const currency = useAppStore.use.currency();
   const colorScheme = useColorScheme();
   const barColor = String(
-    useCSSVariable('--color-primary') ?? (colorScheme === 'dark' ? '#fafafa' : '#0a0a0a'),
+    useCSSVariable('--color-accent') ?? (colorScheme === 'dark' ? '#d4f05a' : '#6b4fd8'),
   );
   const [chartWidth, setChartWidth] = React.useState(0);
   const handleChartLayout = React.useCallback((event: LayoutChangeEvent) => {

@@ -26,7 +26,7 @@ function HighlightCard({ itemKey, Icon }: { itemKey: HighlightKey; Icon: Uniwind
   return (
     <View className="flex-row gap-3 rounded-lg bg-card p-3">
       <View className="size-10 items-center justify-center rounded-lg bg-muted">
-        <Icon size={24} className="text-primary" />
+        <Icon size={24} className="text-accent" />
       </View>
       <View className="min-w-0 flex-1">
         <Text className="font-semibold text-foreground">

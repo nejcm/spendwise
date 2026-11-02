@@ -8,11 +8,25 @@
   --breakpoint-2xs: 400px;
   --breakpoint-xs: 420px;
 
-  /* Font families */
-  --font-family-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-family-regular: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-family-medium: "Inter-Medium", ui-sans-serif, system-ui, sans-serif;
-  --font-family-bold: "Inter-Bold", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Outfit";
+
+  --text-hero: 40px;
+  --text-hero--line-height: 44px;
+  --text-page-title: 28px;
+  --text-page-title--line-height: 34px;
+  --text-header-title: 17px;
+  --text-header-title--line-height: 22px;
+  --text-row: 15px;
+  --text-row--line-height: 20px;
+  --text-meta: 13px;
+  --text-meta--line-height: 18px;
+  --tracking-hero: -1.2px;
+  --tracking-page-title: -0.56px;
+
+  --radius-hero: 22px;
+  --radius-card: 20px;
+  --radius-tile: 14px;
+  --radius-sheet: 28px;
 
   /* Gray palette — ramp from #1a1c20 @ 900 (mix toward white / black, same hue family) */
   --color-gray-50: #f6f6f7;
@@ -63,108 +77,121 @@
   --color-danger-800: #991b1b;
   --color-danger-900: #7f1d1d;
 
-  --color-primary: #0a0a0a;
-  --color-primary-foreground: #fcfcfc;
+  --color-background: #f7f6fb;
+  --color-card: #ffffff;
+  --color-card-2: #f1eff7;
+  --color-sheet: #ffffff;
+  --color-foreground: #17151c;
+  --color-foreground-2: #3d3a47;
+  --color-muted-foreground: #6f6b7a;
+  --color-border: #ebe9f1;
 
-  --color-background: #fcfcfc;
-  --color-foreground: #0a0a0a;
-  --color-card: #efefef;
-  --color-card-foreground: #0a0a0a;
-  --color-surface: #f8f8f8;
-  --color-surface-foreground: #0a0a0a;
-  --color-muted: #e0e3e5;
-  --color-muted-foreground: #838689;
-  --color-border: #d8dbdf;
-  --color-input: #fcfcfc;
-  --color-ring: #ff6c00;
-  --color-destructive: #ef4444;
-  --color-destructive-foreground: #ffffff;
-  --color-subtle: #f7f0e9;
-  --color-subtle-2: #d0d3d9;
-  --color-subtle-3: #c1c4c9;
-  --color-subtle-4: #a3a6a9;
-  --color-subtle-5: #63686b;
+  --color-accent: #6b4fd8;
+  --color-accent-foreground: #ffffff;
+  --color-accent-soft: #efeafc;
+  --color-accent-line: #ddd3f7;
+
+  --color-primary: #17151c;
+  --color-primary-foreground: #ffffff;
+  --color-fab: #17151c;
+  --color-fab-foreground: #ffffff;
+
+  --color-positive: #1d7a4b;
+  --color-negative: #b42318;
+  --color-danger: #c2261b;
+  --color-danger-foreground: #ffffff;
+
+  --color-track: #ebe8f3;
+  --color-segment-track: #ebe8f3;
+  --color-segment-selected: #ffffff;
+  --color-scrim: rgba(23, 21, 28, 0.42);
+
+  /* Legacy names still used by callers */
+  --color-muted: #f1eff7;
+  --color-surface: #f7f6fb;
+  --color-input: #ffffff;
+  --color-subtle-5: #3d3a47;
 }
 
 /* Theme specific variables */
 @layer theme {
   :root {
     @variant light {
-      --color-background: #fcfcfc;
-      --color-foreground: #0a0a0a;
+      --color-background: #f7f6fb;
+      --color-card: #ffffff;
+      --color-card-2: #f1eff7;
+      --color-sheet: #ffffff;
+      --color-foreground: #17151c;
+      --color-foreground-2: #3d3a47;
+      --color-muted-foreground: #6f6b7a;
+      --color-border: #ebe9f1;
 
-      --color-card: #efefef;
-      --color-card-foreground: #0a0a0a;
+      --color-accent: #6b4fd8;
+      --color-accent-foreground: #ffffff;
+      --color-accent-soft: #efeafc;
+      --color-accent-line: #ddd3f7;
 
-      --color-surface: #f8f8f8;
-      --color-surface-foreground: #0a0a0a;
+      --color-primary: #17151c;
+      --color-primary-foreground: #ffffff;
+      --color-fab: #17151c;
+      --color-fab-foreground: #ffffff;
 
-      --color-muted: #e0e3e5;
-      --color-muted-foreground: #838689;
+      --color-positive: #1d7a4b;
+      --color-negative: #b42318;
+      --color-danger: #c2261b;
+      --color-danger-foreground: #ffffff;
 
-      --color-border: #d8dbdf;
-      --color-input: #fcfcfc;
-      --color-ring: #ff6c00;
+      --color-track: #ebe8f3;
+      --color-segment-track: #ebe8f3;
+      --color-segment-selected: #ffffff;
+      --color-scrim: rgba(23, 21, 28, 0.42);
 
-      --color-primary: #0a0a0a;
-      --color-primary-foreground: #fcfcfc;
-
-      --color-destructive: #ef4444;
-      --color-destructive-foreground: #ffffff;
-
-      --color-subtle: #f7f0e9;
-      --color-subtle-2: #d0d3d9;
-      --color-subtle-3: #c1c4c9;
-      --color-subtle-4: #a3a6a9;
-      --color-subtle-5: #63686b;
+      --color-muted: #f1eff7;
+      --color-surface: #f7f6fb;
+      --color-input: #ffffff;
+      --color-subtle-5: #3d3a47;
     }
 
     @variant dark {
-      --color-background: #1a1c20;
-      --color-foreground: #fafafa;
+      --color-background: #111214;
+      --color-card: #1c1d21;
+      --color-card-2: #2a2b30;
+      --color-sheet: #1c1d21;
+      --color-foreground: #ffffff;
+      --color-foreground-2: #d6d7da;
+      --color-muted-foreground: #9a9ca1;
+      --color-border: #26272c;
 
-      --color-card: #262931;
-      --color-card-foreground: #fafafa;
+      --color-accent: #d4f05a;
+      --color-accent-foreground: #111214;
+      --color-accent-soft: #1b1f12;
+      --color-accent-line: #38421c;
 
-      --color-surface: #111111;
-      --color-surface-foreground: #fafafa;
+      --color-primary: #d4f05a;
+      --color-primary-foreground: #111214;
+      --color-fab: #ffffff;
+      --color-fab-foreground: #111214;
 
-      --color-muted: #393c49;
-      --color-muted-foreground: #a3a6aa;
+      --color-positive: #8fe0a6;
+      --color-negative: #ff8a80;
+      --color-danger: #c2261b;
+      --color-danger-foreground: #ffffff;
 
-      --color-border: #2b2f3f;
-      --color-input: #2b2f3f;
-      --color-ring: #ff6c00;
+      --color-track: #2a2b30;
+      --color-segment-track: #1c1d21;
+      --color-segment-selected: #34353b;
+      --color-scrim: rgba(0, 0, 0, 0.62);
 
-      --color-primary: #fafafa;
-      --color-primary-foreground: #1a1c20;
-
-      --color-destructive: #ef4444;
-      --color-destructive-foreground: #ffffff;
-
-      --color-subtle: #63686b;
-      --color-subtle-2: #a3a6a9;
-      --color-subtle-3: #c1c4c9;
-      --color-subtle-4: #d0d3d9;
-      --color-subtle-5: #f7f0e9;
+      --color-muted: #2a2b30;
+      --color-surface: #111214;
+      --color-input: #2a2b30;
+      --color-subtle-5: #d6d7da;
     }
   }
 }
 
 /* Custom utilities (if needed) */
 @layer utilities {
-  .font-sans {
-    font-family: var(--font-family-sans);
-  }
-  .font-bold {
-    font-family: var(--font-family-bold);
-  }
-  .font-medium {
-    font-family: var(--font-family-medium);
-  }
-  .font-regular {
-    font-family: var(--font-family-regular);
-  }
   .text-balance {
     text-wrap: balance;
   }

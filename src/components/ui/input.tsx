@@ -4,11 +4,11 @@ import type { BlurEvent, FocusEvent, TextInputProps } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
 import * as React from 'react';
 import { I18nManager, TextInput as NTextInput, StyleSheet, View } from 'react-native';
-import { cn, tv } from 'tailwind-variants';
+import { cn, tv } from '@/lib/cn';
 import { InputLabel, labelDefaults } from './input-label';
 import { Text } from './text';
 
-export const inputDefaults = 'rounded-lg border font-family-sans focus:outline-none text-base/snug';
+export const inputDefaults = 'rounded-lg border font-sans focus:outline-none text-base/snug';
 export const inputDefaultDefaults = 'border-border bg-input text-foreground';
 
 export const inputTv = tv({

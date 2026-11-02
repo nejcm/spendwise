@@ -2,11 +2,11 @@ import type { AccountWithBalance } from '@/features/accounts/types';
 import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
-import { cn } from 'tailwind-variants';
 import { DEFAULT_COLOR } from '@/components/color-selector';
-
 import { FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
+
 import { BudgetProgressBar } from '@/components/ui/budget-progress-bar';
+import { cn } from '@/lib/cn';
 import { scaleBudgetForPeriod } from '@/lib/date/helpers';
 import { useAppStore } from '@/lib/store/store';
 import { hexWithOpacity } from '@/lib/theme/colors';

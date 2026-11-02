@@ -32,6 +32,20 @@ describe('mapRows', () => {
     );
   });
 
+  it('keeps the sign of transfer amounts', () => {
+    const result = mapRows(
+      [
+        ['date', 'amount', 'type', 'currency'],
+        ['2026-03-18', '-50.00', 'transfer', 'EUR'],
+        ['2026-03-18', '50.00', 'Transfer', 'EUR'],
+      ],
+      { date: 0, amount: 1, type: 2, note: null, currency: 3, category: null, account: null, fallbackAmount: null, fallbackCurrency: null },
+      true,
+    );
+
+    expect(result.rows.map((r) => [r.type, r.amount])).toEqual([['transfer', -5000], ['transfer', 5000]]);
+  });
+
   it('maps currency and category columns', () => {
     const rows = mapRows(
       [

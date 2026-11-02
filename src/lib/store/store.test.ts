@@ -33,8 +33,12 @@ describe('app store actions', () => {
     jest.mocked(storage.getString).mockReset();
   });
 
-  it('shows monthly spending on the home screen by default', () => {
-    expect(useAppStore.getState().homeScreenChart).toBe('monthly_spending');
+  it('uses the new-install defaults', () => {
+    const state = useAppStore.getState();
+    expect(state.homeScreenChart).toBe('balance');
+    expect(state.openTxOnCreate).toBe(false);
+    expect(state.notifications).toMatchObject({ upcomingBillsDays: 1, lowBalance: true, lowBalanceThresholdCents: 10000 });
+    expect(state.autoBackup.retention).toBe(5);
   });
 
   it('stores the last primary tab path', () => {
@@ -51,5 +55,63 @@ describe('app store actions', () => {
     await useAppStore.persist.rehydrate();
 
     expect(useAppStore.getState().periodSelection).toEqual({ mode: 'today' });
+  });
+});
+
+describe('app store persist migration', () => {
+  beforeEach(() => {
+    clearAppStore();
+    jest.mocked(storage.getString).mockReset();
+  });
+
+  async function rehydrateFrom(state: Record<string, unknown>, version: number) {
+    jest.mocked(storage.getString).mockReturnValue(JSON.stringify({ state, version }));
+    await useAppStore.persist.rehydrate();
+    return useAppStore.getState();
+  }
+
+  const v1Notifications = {
+    budgetAlerts: false,
+    recommendations: true,
+    upcomingBills: true,
+    upcomingBillsDays: 7,
+    lowBalance: false,
+    lowBalanceThresholdCents: 5000,
+    weeklyDigest: false,
+  };
+  const v1AutoBackup = { enabled: true, interval: 'weekly', lastAutoBackupAt: null };
+
+  it('maps monthly_spending to balance and keeps every other v1 preference', async () => {
+    const state = await rehydrateFrom({
+      homeScreenChart: 'monthly_spending',
+      isFirstTime: false,
+      openaiApiKey: 'sk-openai',
+      anthropicApiKey: 'sk-anthropic',
+      aiProvider: 'anthropic',
+      openTxOnCreate: true,
+      notifications: v1Notifications,
+      autoBackup: v1AutoBackup,
+      currency: 'CHF',
+    }, 1);
+
+    expect(state.homeScreenChart).toBe('balance');
+    expect(state.isFirstTime).toBe(false);
+    expect(state.openaiApiKey).toBe('sk-openai');
+    expect(state.anthropicApiKey).toBe('sk-anthropic');
+    expect(state.aiProvider).toBe('anthropic');
+    expect(state.openTxOnCreate).toBe(true);
+    expect(state.notifications).toEqual(v1Notifications);
+    expect(state.autoBackup).toEqual(v1AutoBackup);
+    expect(state.currency).toBe('CHF');
+  });
+
+  it('keeps a non-default v1 chart choice', async () => {
+    expect((await rehydrateFrom({ homeScreenChart: 'category_spending' }, 1)).homeScreenChart).toBe('category_spending');
+    expect((await rehydrateFrom({ homeScreenChart: 'none' }, 1)).homeScreenChart).toBe('none');
+  });
+
+  it('keeps the old openTxOnCreate default for v1 state saved before the key existed', async () => {
+    expect((await rehydrateFrom({ isFirstTime: false }, 1)).openTxOnCreate).toBe(true);
+    expect((await rehydrateFrom({ openTxOnCreate: false }, 1)).openTxOnCreate).toBe(false);
   });
 });

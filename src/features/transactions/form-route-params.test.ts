@@ -23,6 +23,18 @@ describe('parseTransactionFormInitialValues', () => {
     });
   });
 
+  it('parses transfer defaults with a destination account', () => {
+    expect(parseTransactionFormInitialValues({
+      account_id: 'acc_1',
+      to_account_id: 'acc_2',
+      type: 'transfer',
+    })).toEqual({
+      account_id: 'acc_1',
+      to_account_id: 'acc_2',
+      type: 'transfer',
+    });
+  });
+
   it('ignores invalid transaction defaults', () => {
     expect(parseTransactionFormInitialValues({
       amount: '-1',

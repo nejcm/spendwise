@@ -108,7 +108,7 @@ function prepareTransactionData(
   return {
     ...item,
     amount: amountToCents(amount),
-    baseAmount: amount === 0 ? 0 : (item.baseAmount ? amountToCents(item.baseAmount) : computeBaseAmount(amountToCents(amount), item.currency, baseCurrency, rates ?? {})),
+    baseAmount: amount === 0 ? 0 : (item.baseAmount ? amountToCents(item.baseAmount) : computeBaseAmount(Math.abs(amountToCents(amount)), item.currency, baseCurrency, rates ?? {})),
     baseCurrency,
     merchant_name: item.merchant_name?.trim() || null,
     merchant_logo_slug: inferMerchantLogoSlug({ merchant_name: item.merchant_name, note: item.note }),
@@ -140,6 +140,10 @@ export function useCreateTransaction(onSuccess?: (transactionId: string) => void
   return useMutation({
     mutationFn: async (data: TransactionFormData) => {
       const baseCurrency = useAppStore.getState().currency;
+      if (data.type === 'transfer' && data.to_account_id) {
+        const rates = await getRatesForDate(db, data.date);
+        return queries.createTransfer(db, { ...prepareTransactionData(data, rates, baseCurrency), to_account_id: data.to_account_id }, rates);
+      }
       // fetch rates only if baseAmount is not provided
       const rates = data.baseAmount ? undefined : await getRatesForDate(db, data.date);
       return queries.createTransaction(db, prepareTransactionData(data, rates, baseCurrency));
@@ -177,16 +181,40 @@ export function useUpdateTransaction(onSuccess?: (transactionId: string) => void
 
   return useMutation({
     mutationFn: async (params: { id: string; data: TransactionFormData }) => {
+      const { id, data } = params;
       const baseCurrency = useAppStore.getState().currency;
+      if (data.type === 'transfer') {
+        const leg = await queries.getTransactionById(db, id);
+        const rates = await getRatesForDate(db, data.date);
+        const prepared = prepareTransactionData(data, rates, baseCurrency);
+        if (leg?.transfer_id && data.to_account_id) {
+          return queries.updateTransfer(db, leg.transfer_id, { ...prepared, to_account_id: data.to_account_id }, rates);
+        }
+        // Legacy single leg: the form edits the absolute amount, the row keeps its direction.
+        return queries.updateTransaction(db, id, { ...prepared, amount: (leg && leg.amount < 0 ? -1 : 1) * Math.abs(prepared.amount) });
+      }
       // fetch rates only if baseAmount is not provided
-      const rates = params.data.baseAmount ? undefined : await getRatesForDate(db, params.data.date);
-      const prepared = prepareTransactionData(params.data, rates, baseCurrency);
-      return queries.updateTransaction(db, params.id, prepared);
+      const rates = data.baseAmount ? undefined : await getRatesForDate(db, data.date);
+      return queries.updateTransaction(db, id, prepareTransactionData(data, rates, baseCurrency));
     },
     onSuccess: (_, vars) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       invalidateFor(queryClient, 'transaction');
       onSuccess?.(vars.id);
+    },
+    onError,
+  });
+}
+
+export function useDuplicateTransfer() {
+  const db = useSQLiteContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (transferId: string) => queries.duplicateTransfer(db, transferId),
+    onSuccess: () => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      invalidateFor(queryClient, 'transaction');
     },
     onError,
   });

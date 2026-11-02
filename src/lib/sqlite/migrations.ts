@@ -2,6 +2,19 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import { logger } from '../logger';
 import { seedDefaults } from './seed';
 
+export const BACKFILL_CATEGORY_KIND_SQL = `
+  UPDATE categories SET kind = 'income'
+  WHERE id <> '_unknown'
+    AND CASE
+      WHEN EXISTS (SELECT 1 FROM transactions t WHERE t.category_id = categories.id AND t.type IN ('income','expense'))
+        THEN (SELECT COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0)
+                   > COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0)
+              FROM transactions t WHERE t.category_id = categories.id)
+      ELSE id IN ('cat_salary','cat_freelance','cat_investment','cat_other_income')
+        OR EXISTS (SELECT 1 FROM recurring_rules r WHERE r.category_id = categories.id AND r.type = 'income')
+    END;
+`;
+
 /**
  * Runs on first open. Sets WAL mode and runs schema migrations via PRAGMA user_version.
  */
@@ -157,5 +170,19 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
         ON recurring_rules(is_active DESC, next_due_date ASC, created_at DESC);
     `);
     await db.execAsync(`PRAGMA user_version = 5`);
+  }
+
+  if (currentDbVersion < 6) {
+    await db.withTransactionAsync(async () => {
+      await db.execAsync(`
+        ALTER TABLE transactions ADD COLUMN transfer_id TEXT;
+        ALTER TABLE transactions ADD COLUMN is_adjustment INTEGER NOT NULL DEFAULT 0;
+        CREATE INDEX IF NOT EXISTS idx_transactions_transfer ON transactions(transfer_id) WHERE transfer_id IS NOT NULL;
+        ALTER TABLE categories ADD COLUMN kind TEXT NOT NULL DEFAULT 'expense' CHECK(kind IN ('expense','income'));
+      `);
+      await db.execAsync(BACKFILL_CATEGORY_KIND_SQL);
+      await db.execAsync(`UPDATE transactions SET baseAmount = ABS(baseAmount) WHERE type = 'transfer' AND baseAmount < 0`);
+      await db.execAsync(`PRAGMA user_version = 6`);
+    });
   }
 }

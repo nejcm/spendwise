@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
 
 import ColorSelector from '@/components/color-selector';
-import { Alert, GhostButton, Image, Input, SolidButton, Text, TrashIcon } from '@/components/ui';
+import { Alert, GhostButton, Image, Input, SegmentedControl, SolidButton, Text, TrashIcon } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from '@/features/categories/api';
 import { CURRENCY_IMAGES } from '@/features/currencies/images';
@@ -19,8 +19,14 @@ const schema = z.object({
   name: z.string().min(1, translate('categories.name_required')),
   icon: z.emoji().nullable(),
   color: z.string(),
+  kind: z.enum(['expense', 'income']),
   budget: z.string().nullable().refine(refinePositiveNumberOrNull, translate('categories.budget_invalid')),
 });
+
+const KIND_OPTIONS = [
+  { value: 'expense', label: translate('categories.kind_expense') },
+  { value: 'income', label: translate('categories.kind_income') },
+] as const;
 
 export type CategoryInitialValues = (Partial<CategoryFormData> & { id: undefined }) | (CategoryFormData & { id: Category['id'] });
 
@@ -34,6 +40,7 @@ const defaultValues: CategoryFormData = {
   name: '',
   icon: null,
   color: 'bg-sky-600',
+  kind: 'expense',
   budget: null,
 };
 
@@ -132,6 +139,18 @@ function CategoryFormBody({ form, preferredCurrency, deleteCategory, id, initial
             onChangeText={field.handleChange}
             error={getFieldError(field)}
             size={inputSize}
+          />
+        )}
+      />
+
+      <form.Field
+        name="kind"
+        children={(field) => (
+          <SegmentedControl
+            options={KIND_OPTIONS}
+            value={field.state.value}
+            onChange={field.handleChange}
+            accessibilityLabel={translate('categories.kind')}
           />
         )}
       />

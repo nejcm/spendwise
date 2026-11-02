@@ -44,16 +44,11 @@ export async function getCategorySpendByRange(
        COALESCE(SUM(t.baseAmount), 0) as total,
        COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0) as income_total,
        COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0) as expense_total,
-       CASE
-         WHEN COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0) >
-              COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0)
-         THEN 'income'
-         ELSE 'expense'
-       END as category_type
+       c.kind as category_type
      FROM categories c
      LEFT JOIN transactions t ON t.category_id = c.id
        AND t.type IN ('income','expense') ${hasRange ? 'AND t.date >= ? AND t.date < ?' : ''}
-     GROUP BY c.id, c.name, c.color, c.icon, c.budget, c.sort_order
+     GROUP BY c.id, c.name, c.color, c.icon, c.kind, c.budget, c.sort_order
      ORDER BY c.sort_order ASC`,
     hasRange ? [startDate, endDate] : [],
   );
@@ -124,16 +119,11 @@ export async function getCategorySpendForYear(
        COALESCE(SUM(t.baseAmount), 0) as total,
        COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0) as income_total,
        COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0) as expense_total,
-       CASE
-         WHEN COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0) >
-              COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0)
-         THEN 'income'
-         ELSE 'expense'
-       END as category_type
+       c.kind as category_type
      FROM categories c
      LEFT JOIN transactions t ON t.category_id = c.id
        AND t.type IN ('income','expense') AND t.date >= ? AND t.date < ?
-     GROUP BY c.id, c.name, c.color, c.icon, c.budget, c.sort_order
+     GROUP BY c.id, c.name, c.color, c.icon, c.kind, c.budget, c.sort_order
      ORDER BY c.sort_order ASC`,
     [startDate, endDate],
   );

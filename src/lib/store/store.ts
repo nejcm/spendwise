@@ -23,7 +23,7 @@ export type LongPressActionType = 'scan_receipt' | 'pick_from_gallery';
 
 export type DensityType = 'default' | 'compact';
 
-export type HomeScreenChartType = 'none' | 'monthly_spending' | 'category_spending';
+export type HomeScreenChartType = 'none' | 'balance' | 'category_spending';
 
 export type PeriodMode = 'year' | 'month' | 'week' | 'custom' | 'all' | 'today' | 'day' | 'this-week' | 'this-month' | 'this-year';
 
@@ -53,6 +53,7 @@ export type AutoBackupSettings = {
   enabled: boolean;
   interval: AutoBackupInterval;
   lastAutoBackupAt: string | null;
+  retention?: number;
 };
 
 export type AppState = {
@@ -131,11 +132,11 @@ function getDefaultState(): AppState {
     isFirstTime: true,
     language: undefined,
     saveOnScan: undefined,
-    openTxOnCreate: true,
+    openTxOnCreate: false,
     longPressAction: 'scan_receipt',
     recommendationsEnabled: true,
     density: 'default',
-    homeScreenChart: 'monthly_spending',
+    homeScreenChart: 'balance',
     lastPrimaryTabPath: '/',
     lockEnabled: false,
     lockTimeoutMinutes: 1,
@@ -149,15 +150,16 @@ function getDefaultState(): AppState {
       budgetAlerts: true,
       recommendations: true,
       upcomingBills: true,
-      upcomingBillsDays: 7,
-      lowBalance: false,
-      lowBalanceThresholdCents: 5000,
+      upcomingBillsDays: 1,
+      lowBalance: true,
+      lowBalanceThresholdCents: 10000,
       weeklyDigest: false,
     },
     autoBackup: {
       enabled: false,
       interval: 'daily',
       lastAutoBackupAt: null,
+      retention: 5,
     },
     lastUsed: {
       currencies: [currency],
@@ -175,8 +177,16 @@ const _useAppStore = create<AppState>()(
     (_set) => (getDefaultState()),
     {
       name: 'app-storage',
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => mmkvStorage),
+      migrate: (persisted, version) => {
+        const state = persisted as Record<string, unknown>;
+        if (version < 2) {
+          if (state.homeScreenChart === 'monthly_spending') state.homeScreenChart = 'balance';
+          state.openTxOnCreate ??= true;
+        }
+        return state as AppState;
+      },
       partialize: ({ isLocked: _, ...rest }) => rest as AppState,
     },
   ),

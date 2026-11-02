@@ -55,7 +55,7 @@ export async function getAccountBalances(
        COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0)
        - COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0)
        + COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount > 0 THEN t.baseAmount ELSE 0 END), 0)
-       - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN t.baseAmount ELSE 0 END), 0)
+       - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN ABS(t.baseAmount) ELSE 0 END), 0)
        AS baseBalance
      FROM accounts a
      LEFT JOIN transactions t ON t.account_id = a.id

@@ -131,9 +131,9 @@ export function useCreateAccount() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: AccountFormData) => queries.createAccount(db, data),
+    mutationFn: (data: AccountFormData) => queries.createAccount(db, data, useAppStore.getState().currency),
     onSuccess: () => {
-      invalidateFor(queryClient, 'account');
+      invalidateFor(queryClient, 'account', 'transaction');
     },
     onError,
   });
@@ -161,7 +161,7 @@ export function useSetupFirstAccount() {
     mutationFn: (params: { data: FirstAccountData | null; preferredCurrency: CurrencyKey }) =>
       queries.setupFirstAccount(db, params.data, params.preferredCurrency),
     onSuccess: () => {
-      invalidateFor(queryClient, 'account');
+      invalidateFor(queryClient, 'account', 'transaction');
     },
     onError,
   });

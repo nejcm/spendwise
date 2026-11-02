@@ -261,7 +261,7 @@ function ScheduledTransactionFormBody({ form, isCompact, accounts, orderedCurren
                     size="sm"
                     className="items-center rounded-3xl"
                     color={field.state.value === account.id ? 'default' : 'secondary'}
-                    label={`${account.icon} ${account.name}`}
+                    label={account.icon ? `${account.icon} ${account.name}` : account.name}
                     onPress={() => field.handleChange(account.id)}
                   />
                 ))}
@@ -271,14 +271,20 @@ function ScheduledTransactionFormBody({ form, isCompact, accounts, orderedCurren
         )}
       />
 
-      <form.Field
-        name="category_id"
-        children={(field) => (
-          <CategoryPicker
-            size={inputSize}
-            selectedId={field.state.value}
-            onSelect={(category) => field.handleChange(category.id)}
-            error={getFieldError(field)}
+      <form.Subscribe
+        selector={(s) => s.values.type}
+        children={(type) => (
+          <form.Field
+            name="category_id"
+            children={(field) => (
+              <CategoryPicker
+                type={type}
+                size={inputSize}
+                selectedId={field.state.value}
+                onSelect={(category) => field.handleChange(category.id)}
+                error={getFieldError(field)}
+              />
+            )}
           />
         )}
       />

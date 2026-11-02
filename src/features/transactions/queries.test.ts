@@ -4,14 +4,18 @@ import { createTestDb } from '@/test-utils/sqlite-db';
 import {
   createTransaction,
   createTransactions,
+  createTransfer,
   deleteTransaction,
   deleteTransactions,
+  duplicateTransfer,
   getMonthSummary,
   getRecentTransactions,
   getTransactionById,
   getTransactions,
   getTransactionsSample,
+  isTransferInLeg,
   updateTransaction,
+  updateTransfer,
 } from './queries';
 
 jest.mock('expo-crypto', () => ({
@@ -513,5 +517,183 @@ describe('deleteTransactions', () => {
 
     await expect(deleteTransactions(db as any, [])).resolves.toBeUndefined();
     expect(await getTransactionById(db as any, 'txn_1')).not.toBeNull();
+  });
+});
+
+// ─── Transfers ────────────────────────────────────────────────────────────────
+
+describe('transfer pairs', () => {
+  const { randomUUID } = jest.requireMock<{ randomUUID: jest.Mock }>('expo-crypto');
+
+  beforeEach(() => {
+    let n = 0;
+    randomUUID.mockImplementation(() => `uuid-${n++}`);
+  });
+
+  afterEach(() => {
+    randomUUID.mockImplementation(() => 'test-uuid-1234');
+  });
+
+  async function seedAccounts(db: Awaited<ReturnType<typeof createTestDb>>) {
+    await seedBase(db);
+    await db.runAsync(
+      `INSERT INTO accounts (id, name, type, currency, icon) VALUES (?, ?, ?, ?, ?), (?, ?, ?, ?, ?)`,
+      ['acc_2', 'Savings', 'savings', 'EUR', '💰', 'acc_usd', 'Dollars', 'checking', 'USD', '💵'],
+    );
+  }
+
+  const transfer = {
+    account_id: 'acc_1',
+    to_account_id: 'acc_2',
+    category_id: null,
+    amount: 5000,
+    currency: 'EUR' as const,
+    baseAmount: 5000,
+    baseCurrency: 'EUR' as const,
+    date: MAR_MID,
+    note: 'to savings',
+    merchant_name: null,
+    merchant_logo_slug: null,
+    location: null,
+  };
+
+  const legs = (db: Awaited<ReturnType<typeof createTestDb>>) => db.getAllAsync<Record<string, unknown>>(
+    'SELECT id, account_id, type, amount, currency, baseAmount, transfer_id, is_adjustment FROM transactions ORDER BY amount',
+  );
+
+  it('createTransfer writes a negative out leg and positive in leg sharing a transfer_id', async () => {
+    const db = await createTestDb();
+    await seedAccounts(db);
+
+    const outId = await createTransfer(db as any, transfer, {});
+
+    const rows = await legs(db);
+    expect(rows).toEqual([
+      { id: outId, account_id: 'acc_1', type: 'transfer', amount: -5000, currency: 'EUR', baseAmount: 5000, transfer_id: rows[0]!.transfer_id, is_adjustment: 0 },
+      { id: expect.any(String), account_id: 'acc_2', type: 'transfer', amount: 5000, currency: 'EUR', baseAmount: 5000, transfer_id: rows[0]!.transfer_id, is_adjustment: 0 },
+    ]);
+    expect(rows[0]!.transfer_id).toEqual(expect.any(String));
+  });
+
+  it('converts each leg into its own account currency', async () => {
+    const db = await createTestDb();
+    await seedAccounts(db);
+
+    await createTransfer(db as any, { ...transfer, to_account_id: 'acc_usd' }, { USD: 1.1 });
+
+    expect((await legs(db)).map((r) => [r.account_id, r.amount, r.currency, r.baseAmount])).toEqual([
+      ['acc_1', -5000, 'EUR', 5000],
+      ['acc_usd', 5500, 'USD', 5000],
+    ]);
+  });
+
+  it('rejects a transfer to the same account', async () => {
+    const db = await createTestDb();
+    await seedAccounts(db);
+
+    await expect(createTransfer(db as any, { ...transfer, to_account_id: 'acc_1' }, {}))
+      .rejects
+      .toHaveProperty('message', expect.stringMatching(/must differ/));
+    expect(await legs(db)).toEqual([]);
+  });
+
+  it('reads expose the counter account on both legs; legacy legs have none', async () => {
+    const db = await createTestDb();
+    await seedAccounts(db);
+    const outId = await createTransfer(db as any, transfer, {});
+    await seedTransaction(db, { id: 'legacy', type: 'transfer', amount: -100, category_id: null });
+
+    const out = await getTransactionById(db as any, outId);
+    expect(out).toMatchObject({ counter_account_id: 'acc_2', counter_account_name: 'Savings', counter_account_icon: '💰', counter_amount: 5000, counter_currency: 'EUR' });
+
+    const all = await getTransactions(db as any, MAR_START, APR_START);
+    expect(all).toHaveLength(3);
+    const inLeg = all.find((t) => t.account_id === 'acc_2')!;
+    expect(inLeg).toMatchObject({ counter_account_id: 'acc_1', counter_account_name: 'Checking' });
+    expect(isTransferInLeg(inLeg)).toBe(true);
+    expect(isTransferInLeg(out!)).toBe(false);
+    expect(all.find((t) => t.id === 'legacy')).toMatchObject({ counter_account_id: null, counter_account_name: null });
+  });
+
+  it('recent and AI sample lists show only the out leg of a pair', async () => {
+    const db = await createTestDb();
+    await seedAccounts(db);
+    const outId = await createTransfer(db as any, transfer, {});
+    await seedTransaction(db, { id: 'legacy_in', type: 'transfer', amount: 100, category_id: null });
+
+    expect((await getRecentTransactions(db as any, 10)).map((t) => t.id).sort()).toEqual([outId, 'legacy_in'].sort());
+    expect((await getTransactionsSample(db as any, MAR_START, APR_START, 10)).map((t) => t.id).sort()).toEqual([outId, 'legacy_in'].sort());
+  });
+
+  it('transfers never count as income or expense', async () => {
+    const db = await createTestDb();
+    await seedAccounts(db);
+    await createTransfer(db as any, transfer, {});
+
+    expect(await getMonthSummary(db as any, '2026-03')).toEqual({ income: 0, expense: 0, balance: 0 });
+  });
+
+  it('updateTransfer rewrites both legs atomically, keeping ids and transfer_id', async () => {
+    const db = await createTestDb();
+    await seedAccounts(db);
+    await createTransfer(db as any, transfer, {});
+    const before = await legs(db);
+
+    await updateTransfer(db as any, before[0]!.transfer_id as string, { ...transfer, to_account_id: 'acc_usd', amount: 2000, baseAmount: 2000, note: 'fx' }, { USD: 2 });
+
+    const after = await legs(db);
+    expect(after.map((r) => [r.id, r.account_id, r.amount, r.currency, r.baseAmount, r.transfer_id])).toEqual([
+      [before[0]!.id, 'acc_1', -2000, 'EUR', 2000, before[0]!.transfer_id],
+      [before[1]!.id, 'acc_usd', 4000, 'USD', 2000, before[0]!.transfer_id],
+    ]);
+  });
+
+  it('deleteTransaction removes the paired leg too', async () => {
+    const db = await createTestDb();
+    await seedAccounts(db);
+    await createTransfer(db as any, transfer, {});
+    await seedTransaction(db, { id: 'keep' });
+    const [, inLeg] = await legs(db);
+
+    await deleteTransaction(db as any, inLeg!.id as string);
+
+    expect((await legs(db)).map((r) => r.id)).toEqual(['keep']);
+  });
+
+  it('deleteTransactions expands pairs and leaves legacy legs alone', async () => {
+    const db = await createTestDb();
+    await seedAccounts(db);
+    const outId = await createTransfer(db as any, transfer, {});
+    await seedTransaction(db, { id: 'legacy', type: 'transfer', amount: -100, category_id: null });
+    await seedTransaction(db, { id: 'legacy_2', type: 'transfer', amount: 100, category_id: null, account_id: 'acc_2' });
+
+    await deleteTransactions(db as any, [outId, 'legacy']);
+
+    expect((await legs(db)).map((r) => r.id)).toEqual(['legacy_2']);
+  });
+
+  it('duplicateTransfer copies both legs under a new transfer_id', async () => {
+    const db = await createTestDb();
+    await seedAccounts(db);
+    await createTransfer(db as any, transfer, {});
+    const [original] = await legs(db);
+
+    const copyId = await duplicateTransfer(db as any, original!.transfer_id as string);
+
+    const copy = await getTransactionById(db as any, copyId);
+    expect(copy).toMatchObject({ account_id: 'acc_1', amount: -5000, note: 'to savings', counter_account_id: 'acc_2', counter_amount: 5000 });
+    expect(copy!.transfer_id).not.toBe(original!.transfer_id);
+    expect(await legs(db)).toHaveLength(4);
+  });
+
+  it('createTransaction and createTransactions persist transfer_id and is_adjustment, defaulting to null and 0', async () => {
+    const db = await createTestDb();
+    await seedAccounts(db);
+    const base = { ...transfer, type: 'transfer' as const };
+
+    await createTransaction(db as any, { ...base, is_adjustment: 1 });
+    await createTransactions(db as any, [{ ...base, transfer_id: 'tr_x', amount: -1 }]);
+
+    expect((await legs(db)).map((r) => [r.amount, r.transfer_id, r.is_adjustment])).toEqual([[-1, 'tr_x', 0], [5000, null, 1]]);
   });
 });

@@ -73,7 +73,7 @@ export type ColumnMapping = {
 
 export type ParsedRow = {
   date: string;
-  amount: number; // cents, positive = income, negative = expense
+  amount: number; // cents, positive = income or incoming transfer, negative = expense or outgoing transfer
   note: string;
   currency?: CurrencyKey;
   type?: TransactionType;
@@ -178,7 +178,7 @@ export function mapRows(rows: string[][], mapping: ColumnMapping, hasHeader: boo
 
     parsed.push({
       date: normalizeDate(rawDate),
-      amount: type === 'expense' ? -finalAmount : finalAmount,
+      amount: type === 'expense' || (type === 'transfer' && numericAmount < 0) ? -finalAmount : finalAmount,
       note: rawNote,
       type,
       currency: finalCurrency ?? DEFAULT_USER_CURRENCY,

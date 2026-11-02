@@ -4,9 +4,10 @@ import type { Category } from '../categories/types';
 import type { ScheduledTransaction, ScheduledTransactionRun } from '../scheduled-transactions/types';
 import type { Transaction } from '../transactions/types';
 import { clearDbData } from '@/lib/sqlite/db';
+import { BACKFILL_CATEGORY_KIND_SQL } from '@/lib/sqlite/migrations';
 import { getAppState } from '@/lib/store/store';
 
-const CURRENT_BACKUP_VERSION = 3;
+const CURRENT_BACKUP_VERSION = 4;
 
 export type BackupData = {
   version: number;
@@ -77,16 +78,13 @@ export function validateBackup(parsed: unknown): BackupData {
 }
 
 export async function importBackup(db: SQLiteDatabase, backup: BackupData): Promise<void> {
-  // Clear all existing data (FK constraints disabled inside clearDbData)
-  await clearDbData(db);
-
   await db.withTransactionAsync(async () => {
-    await db.execAsync('PRAGMA foreign_keys = ON;');
+    await clearDbData(db);
     for (const row of backup.categories) {
       await db.runAsync(
-        `INSERT INTO categories (id, name, icon, color, budget, sort_order, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [row.id, row.name, row.icon ?? null, row.color, row.budget ?? null, row.sort_order ?? 999999, row.created_at],
+        `INSERT INTO categories (id, name, icon, color, kind, budget, sort_order, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [row.id, row.name, row.icon ?? null, row.color, row.kind === 'income' ? 'income' : 'expense', row.budget ?? null, row.sort_order ?? 999999, row.created_at],
       );
     }
 
@@ -113,8 +111,8 @@ export async function importBackup(db: SQLiteDatabase, backup: BackupData): Prom
 
     for (const row of backup.transactions) {
       await db.runAsync(
-        `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note, merchant_name, merchant_logo_slug, location, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO transactions (id, account_id, category_id, type, amount, currency, baseAmount, baseCurrency, date, note, merchant_name, merchant_logo_slug, location, transfer_id, is_adjustment, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           row.id,
           row.account_id,
@@ -122,13 +120,15 @@ export async function importBackup(db: SQLiteDatabase, backup: BackupData): Prom
           row.type,
           row.amount,
           row.currency ?? 'EUR',
-          row.baseAmount,
+          row.type === 'transfer' ? Math.abs(row.baseAmount) : row.baseAmount,
           row.baseCurrency,
           row.date,
           row.note || null,
           row.merchant_name || null,
           row.merchant_logo_slug || null,
           row.location || null,
+          row.transfer_id ?? null,
+          row.is_adjustment ? 1 : 0,
           row.created_at,
           row.updated_at,
         ],
@@ -165,5 +165,7 @@ export async function importBackup(db: SQLiteDatabase, backup: BackupData): Prom
         [row.id, row.rule_id, row.scheduled_for_date, row.transaction_id, row.created_at],
       );
     }
+
+    if (backup.version < 4) await db.execAsync(BACKFILL_CATEGORY_KIND_SQL);
   });
 }

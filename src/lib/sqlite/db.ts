@@ -13,18 +13,16 @@ const deleteCategoriesSql = 'DELETE FROM categories;';
 const deleteCurrencyRatesSql = 'DELETE FROM currency_rates;';
 
 /**
- * Clears all data from the database.
+ * Clears all data from the database. Child tables go first so it is FK-safe inside a transaction.
  */
 export async function clearDbData(db: SQLiteDatabase): Promise<void> {
   await db.execAsync(`
-    PRAGMA foreign_keys = OFF;
     ${deleteRecurringRuleRunsSql}
     ${deleteRecurringRulesSql}
     ${deleteTransactionsSql}
     ${deleteAccountsSql}
     ${deleteCategoriesSql}
     ${deleteCurrencyRatesSql}
-    PRAGMA foreign_keys = ON;
   `);
 };
 

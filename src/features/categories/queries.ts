@@ -16,8 +16,8 @@ export async function createCategory(
   const id = generateId();
   const budgetCents = data.budget?.trim() ? amountToCents(Number(data.budget)) : null;
   await db.runAsync(
-    'INSERT INTO categories (id, name, icon, color, budget, sort_order) VALUES (?, ?, ?, ?, ?, ?)',
-    [id, data.name.trim(), data.icon?.trim() || null, data.color, budgetCents, data.sort_order ?? 999999],
+    'INSERT INTO categories (id, name, icon, color, kind, budget, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [id, data.name.trim(), data.icon?.trim() || null, data.color, data.kind, budgetCents, data.sort_order ?? 999999],
   );
   return id;
 }
@@ -25,12 +25,12 @@ export async function createCategory(
 export async function updateCategory(
   db: SQLiteDatabase,
   id: string,
-  data: Pick<CategoryFormData, 'name' | 'icon' | 'color' | 'budget' | 'sort_order'>,
+  data: CategoryFormData,
 ): Promise<void> {
   const budgetCents = data.budget?.trim() ? amountToCents(Number(data.budget)) : null;
   await db.runAsync(
-    'UPDATE categories SET name = ?, icon = ?, color = ?, budget = ? WHERE id = ?',
-    [data.name.trim(), data.icon?.trim() || null, data.color, budgetCents, id],
+    'UPDATE categories SET name = ?, icon = ?, color = ?, kind = ?, budget = ? WHERE id = ?',
+    [data.name.trim(), data.icon?.trim() || null, data.color, data.kind, budgetCents, id],
   );
 }
 

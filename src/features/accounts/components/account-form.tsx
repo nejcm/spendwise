@@ -11,6 +11,7 @@ import { getFieldError } from '@/components/ui/form-utils';
 import { CURRENCY_VALUES } from '@/features/currencies';
 import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { translate } from '@/lib/i18n';
+import { toNumber } from '@/lib/number';
 import { addLastUsedCurrency, selectAccountFormPrefs, setAccountFormPrefs, useAppStore } from '@/lib/store/store';
 import { getRandomColor } from '@/lib/theme/colors';
 import { useCreateAccount, useUpdateAccount } from '../api';
@@ -24,6 +25,7 @@ const schema = z.object({
   description: z.string().nullable(),
   icon: z.emoji().nullable(),
   budget: z.string().nullable(),
+  opening_balance: z.string().nullable().refine((v) => !v?.trim() || toNumber(v) !== undefined, translate('accounts.opening_balance_invalid')),
 });
 
 const defaultValues: AccountFormData = {
@@ -34,6 +36,7 @@ const defaultValues: AccountFormData = {
   currency: 'USD',
   icon: null,
   budget: null,
+  opening_balance: null,
 };
 
 export type AccountFormBaseProps = {
@@ -72,6 +75,7 @@ function useAccountForm(
         icon: value.icon || null,
         color: value.color || null,
         budget: value.budget?.trim() ? value.budget : null,
+        opening_balance: value.opening_balance?.trim() || null,
       };
       if (accountId) {
         await updateAccount.mutateAsync({ id: accountId, data });
@@ -92,11 +96,12 @@ type UseAccountFormReturn = ReturnType<typeof useAccountForm>;
 
 type AccountFormBodyProps = {
   form: UseAccountFormReturn['form'];
+  isCreate: boolean;
   isCompact: boolean;
   preferredCurrency: CurrencyKey;
 };
 
-function AccountFormBody({ form, preferredCurrency, isCompact }: AccountFormBodyProps) {
+function AccountFormBody({ form, isCreate, preferredCurrency, isCompact }: AccountFormBodyProps) {
   const inputSize = isCompact ? 'md' : 'lg';
   return (
     <>
@@ -205,6 +210,35 @@ function AccountFormBody({ form, preferredCurrency, isCompact }: AccountFormBody
         />
       </View>
 
+      {isCreate && (
+        <View className="flex-row gap-2">
+          <form.Subscribe
+            selector={(s) => s.values.currency}
+            children={(currency) => (
+              <View className="w-[85] flex-row items-center justify-center gap-2 pr-4 pl-0">
+                <Image source={CURRENCY_IMAGES[currency]} className="size-6 rounded-full" />
+                <Text className="border-none bg-transparent">{currency}</Text>
+              </View>
+            )}
+          />
+          <form.Field
+            name="opening_balance"
+            children={(field) => (
+              <Input
+                value={field.state.value ?? ''}
+                onBlur={field.handleBlur}
+                size={inputSize}
+                onChangeText={field.handleChange}
+                placeholder={translate('accounts.opening_balance')}
+                accessibilityLabel={translate('accounts.opening_balance')}
+                keyboardType="numbers-and-punctuation"
+                containerClassName="flex-1"
+                error={getFieldError(field)}
+              />
+            )}
+          />
+        </View>
+      )}
     </>
   );
 }
@@ -236,6 +270,7 @@ export function AccountForm({
       >
         <AccountFormBody
           form={form}
+          isCreate={!accountId}
           isCompact={isCompact}
           preferredCurrency={preferredCurrency}
         />

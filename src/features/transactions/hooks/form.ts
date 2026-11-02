@@ -9,6 +9,7 @@ import { todayISO } from '@/features/formatting/helpers';
 import { useCreateTransaction, useUpdateTransaction } from '@/features/transactions/api';
 import {
   amountToString,
+  TRANSACTION_TYPE_OPTIONS,
   transactionFormDefaultValues,
   transactionFormSchema,
 } from '@/features/transactions/components/transaction-form-schema';
@@ -38,6 +39,9 @@ export function useTransactionForm({ initialValues, onSuccess }: UseTransactionF
   const orderedCurrencies = React.useMemo(() => mergeCurrencyArrays(lastUsedCurrencies, CURRENCY_OPTIONS), [lastUsedCurrencies]);
   const transactionFormPrefs = useAppStore(selectTransactionFormPrefs);
   const [baseAmountIsManual, setBaseAmountIsManual] = React.useState(false);
+  const typeOptions = id
+    ? TRANSACTION_TYPE_OPTIONS.filter((o) => (o.value === 'transfer') === (initialValues?.type === 'transfer'))
+    : TRANSACTION_TYPE_OPTIONS;
   const onBaseDriversChanged = React.useCallback(() => {
     setBaseAmountIsManual(false);
   }, []);
@@ -88,6 +92,7 @@ export function useTransactionForm({ initialValues, onSuccess }: UseTransactionF
     orderedCurrencies,
     preferredCurrency,
     setBaseAmountIsManual,
+    typeOptions,
   };
 }
 

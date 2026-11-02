@@ -38,7 +38,7 @@ export async function recalculateAllBaseAmounts(
   for (const [date, txs] of byDate) {
     const rates = ratesByDate.get(date) ?? { EUR: 1 };
     for (const tx of txs) {
-      const baseAmount = computeBaseAmount(tx.amount, tx.currency as CurrencyKey, newCurrency, rates);
+      const baseAmount = computeBaseAmount(Math.abs(tx.amount), tx.currency as CurrencyKey, newCurrency, rates);
       updates.push({ id: tx.id, baseAmount });
     }
   }

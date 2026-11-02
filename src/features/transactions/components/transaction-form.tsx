@@ -2,48 +2,110 @@ import type { UseTransactionFormProps, UseTransactionFormReturnType } from '../h
 import type { OptionType } from '@/components/ui';
 import type { Account } from '@/features/accounts/types';
 import type { CurrencyKey } from '@/features/currencies';
+import type { TransactionType } from '@/features/transactions/types';
+import { useStore } from '@tanstack/react-form';
 import { ScrollView, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GhostButton, Image, Input, Select, SolidButton, Text } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
+import { useCategories } from '@/features/categories/api';
 import { CategoryPicker } from '@/features/categories/category-picker';
+import { fitsTransactionType } from '@/features/categories/helpers';
 import { CURRENCY_IMAGES } from '@/features/currencies/images';
 import { TransactionBaseAmountSync } from '@/features/transactions/components/transaction-base-amount-sync';
-import {
-  TRANSACTION_TYPE_OPTIONS,
-  transactionFormSchema,
-} from '@/features/transactions/components/transaction-form-schema';
+import { transactionFormSchema } from '@/features/transactions/components/transaction-form-schema';
 import { translate } from '@/lib/i18n';
 import { useTransactionForm } from '../hooks/form';
 
 export type TransactionFormBaseProps = UseTransactionFormProps & {
   bottomMenuOffset?: number;
+  /** Opening-balance row: only amount, currency, date and text fields are editable. */
+  isAdjustment?: boolean;
   onCancel?: () => void;
 };
 
 type TransactionFormBodyProps = {
   form: UseTransactionFormReturnType['form'];
   isCompact: boolean;
+  isAdjustment: boolean;
   accounts: Account[];
   baseAmountIsManual: boolean;
   onBaseDriversChanged: () => void;
   orderedCurrencies: OptionType[];
   preferredCurrency: CurrencyKey;
   setBaseAmountIsManual: (value: boolean) => void;
+  typeOptions: UseTransactionFormReturnType['typeOptions'];
 };
+
+function AccountChips({ label, accounts, value, onChange, error }: {
+  label: string;
+  accounts: Account[];
+  value: string | null;
+  onChange: (id: string) => void;
+  error?: string;
+}) {
+  return (
+    <View>
+      <Text className="mb-2 text-sm font-medium">{label}</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View className="flex-row gap-2">
+          {accounts.map((a) => (
+            <SolidButton
+              key={a.id}
+              size="sm"
+              className="items-center rounded-3xl"
+              color={value === a.id ? 'default' : 'secondary'}
+              label={a.icon ? `${a.icon} ${a.name}` : a.name}
+              onPress={() => onChange(a.id)}
+            />
+          ))}
+        </View>
+      </ScrollView>
+      {!!error && <Text className="mt-1 text-sm text-danger-600">{error}</Text>}
+    </View>
+  );
+}
+
+function TypeChips({ options, value, onChange }: {
+  options: UseTransactionFormReturnType['typeOptions'];
+  value: TransactionType;
+  onChange: (type: TransactionType) => void;
+}) {
+  return (
+    <View>
+      <Text className="mb-2 text-sm font-medium">{translate('transactions.type')}</Text>
+      <View className="flex-row gap-2">
+        {options.map((option) => (
+          <SolidButton
+            key={option.value}
+            size="sm"
+            className="items-center rounded-3xl"
+            color={value === option.value ? 'default' : 'secondary'}
+            label={option.label}
+            onPress={() => onChange(option.value)}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
 
 function TransactionFormBody({
   form,
   isCompact,
+  isAdjustment,
   accounts,
   baseAmountIsManual,
   onBaseDriversChanged,
   orderedCurrencies,
   preferredCurrency,
   setBaseAmountIsManual,
+  typeOptions,
 }: TransactionFormBodyProps) {
+  const { data: categories = [] } = useCategories();
+  const type = useStore(form.store, (s) => s.values.type);
   const inputSize = isCompact ? 'md' : 'lg';
   return (
     <>
@@ -158,72 +220,77 @@ function TransactionFormBody({
             />
           )}
         />
+        {!isAdjustment && (
+          <form.Field
+            name="category_id"
+            children={(field) => (
+              <CategoryPicker
+                type={type}
+                size={inputSize}
+                containerClassName="flex-1 min-w-[45%]"
+                inputClassName="px-3"
+                showChevron={false}
+                selectedItemTextProps={{ numberOfLines: 1 }}
+                selectedId={field.state.value}
+                onSelect={(cat) => field.handleChange(cat.id)}
+                error={getFieldError(field)}
+              />
+            )}
+          />
+        )}
+      </View>
+
+      {!isAdjustment && (
+        <form.Subscribe
+          selector={(s) => s.values.type === 'transfer' && s.values.to_account_id !== null}
+          children={(isPairedTransfer) => (
+            <>
+              <form.Field
+                name="account_id"
+                children={(field) => (
+                  <AccountChips
+                    label={translate(isPairedTransfer ? 'transactions.from_account' : 'transactions.account')}
+                    accounts={accounts}
+                    value={field.state.value}
+                    onChange={field.handleChange}
+                  />
+                )}
+              />
+              {isPairedTransfer && (
+                <form.Field
+                  name="to_account_id"
+                  children={(field) => (
+                    <AccountChips
+                      label={translate('transactions.to_account')}
+                      accounts={accounts}
+                      value={field.state.value}
+                      onChange={field.handleChange}
+                      error={getFieldError(field)}
+                    />
+                  )}
+                />
+              )}
+            </>
+          )}
+        />
+      )}
+
+      {!isAdjustment && (
         <form.Field
-          name="category_id"
+          name="type"
           children={(field) => (
-            <CategoryPicker
-              size={inputSize}
-              containerClassName="flex-1 min-w-[45%]"
-              inputClassName="px-3"
-              showChevron={false}
-              selectedItemTextProps={{ numberOfLines: 1 }}
-              selectedId={field.state.value}
-              onSelect={(cat) => field.handleChange(cat.id)}
-              error={getFieldError(field)}
+            <TypeChips
+              options={typeOptions}
+              value={field.state.value}
+              onChange={(next) => {
+                field.handleChange(next);
+                const selected = categories.find((c) => c.id === form.getFieldValue('category_id'));
+                if (selected && !fitsTransactionType(selected, next)) form.setFieldValue('category_id', '');
+              }}
             />
           )}
         />
-      </View>
-
-      <form.Field
-        name="account_id"
-        children={(field) => (
-          <View>
-            <Text className="mb-2 text-sm font-medium">
-              {translate('transactions.account')}
-            </Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View className="flex-row gap-2">
-                {accounts.map((a) => (
-                  <SolidButton
-                    key={a.id}
-                    size="sm"
-                    className="items-center rounded-3xl"
-                    color={field.state.value === a.id ? 'default' : 'secondary'}
-                    label={`${a.icon} ${a.name}`}
-                    onPress={() => field.handleChange(a.id)}
-                  />
-                ))}
-              </View>
-            </ScrollView>
-          </View>
-        )}
-      />
-
-      <form.Field
-        name="type"
-        children={(field) => (
-          <View>
-            <Text className="mb-2 text-sm font-medium">
-              {translate('transactions.type')}
-            </Text>
-            <View className="flex-row gap-2">
-              {TRANSACTION_TYPE_OPTIONS.map((option) => (
-                <SolidButton
-                  key={option.value}
-                  size="sm"
-                  className="items-center rounded-3xl"
-                  color={field.state.value === option.value ? 'default' : 'secondary'}
-                  label={option.label}
-                  onPress={() => {
-                    field.handleChange(option.value);
-                  }}
-                />
-              ))}
-            </View>
-          </View>
-        )}
-      />
+      )}
 
       <form.Field
         name="note"
@@ -278,6 +345,7 @@ export function TransactionForm({
   onSuccess,
   onCancel,
   bottomMenuOffset = 0,
+  isAdjustment = false,
 }: TransactionFormBaseProps) {
   const {
     form,
@@ -290,6 +358,7 @@ export function TransactionForm({
     orderedCurrencies,
     preferredCurrency,
     setBaseAmountIsManual,
+    typeOptions,
   } = useTransactionForm({ initialValues, onSuccess });
 
   const isLoading = createTransaction.isPending || updateTransaction.isPending;
@@ -310,12 +379,14 @@ export function TransactionForm({
         <TransactionFormBody
           form={form}
           isCompact={isCompact}
+          isAdjustment={isAdjustment}
           accounts={accounts}
           baseAmountIsManual={baseAmountIsManual}
           onBaseDriversChanged={onBaseDriversChanged}
           orderedCurrencies={orderedCurrencies}
           preferredCurrency={preferredCurrency}
           setBaseAmountIsManual={setBaseAmountIsManual}
+          typeOptions={typeOptions}
         />
       </KeyboardAwareScrollView>
       <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom + bottomMenuOffset }}>

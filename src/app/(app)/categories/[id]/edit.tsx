@@ -47,6 +47,7 @@ export default function EditCategoryRoute() {
           id: category.id,
           name: category.name,
           color: category.color,
+          kind: category.kind,
           icon: category.icon || null,
           budget: category.budget ? String(centsToAmount(category.budget)) : null,
         }}

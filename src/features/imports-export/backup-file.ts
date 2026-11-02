@@ -2,6 +2,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import { Directory, File, Paths } from 'expo-file-system';
 import { exportBackup } from '@/features/imports-export/backup';
 import { IS_WEB } from '@/lib/base';
+import { getAppState } from '@/lib/store/store';
 
 export const BACKUP_FILE_NAME_PREFIX = 'spendwise-backup-';
 export const AUTO_BACKUP_SUBDIR = 'spendwise-auto-backups';
@@ -102,7 +103,7 @@ export async function writeAutoBackupFile(
   file.create({ overwrite: true });
   file.write(json);
 
-  pruneAutoBackups(dir, options.retentionCount ?? DEFAULT_AUTO_BACKUP_RETENTION);
+  pruneAutoBackups(dir, options.retentionCount ?? getAppState().autoBackup.retention ?? DEFAULT_AUTO_BACKUP_RETENTION);
 
   return { writtenAt: backup.exported_at };
 }

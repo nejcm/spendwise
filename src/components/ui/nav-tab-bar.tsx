@@ -18,7 +18,7 @@ import { useAppStore } from '@/lib/store/store';
 import { getPressedStyle } from './button';
 import { Text } from './text';
 
-export const NAV_BAR_HEIGHT = 50 as const;
+export const NAV_BAR_HEIGHT = 52 as const;
 // Bottom padding floor; the bar paints the safe-area gutter itself since the root SafeAreaView skips that edge.
 export const TAB_BAR_PADDING = 8;
 // Grows the 40dp tab into the bar's top padding and bottom padding floor for a 58dp target.

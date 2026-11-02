@@ -25,7 +25,7 @@ function InsightCardBody() {
   if (!recommendation) return null;
 
   return (
-    <View className="mt-[22px] gap-2.5 rounded-card border border-accent-line bg-accent-soft px-5 py-[18px]">
+    <View className="mt-6 gap-2.5 rounded-card border border-accent-line bg-accent-soft px-5 py-4">
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
           <View className="size-5 items-center justify-center rounded-full bg-primary">

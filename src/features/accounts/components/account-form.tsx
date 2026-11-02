@@ -1,3 +1,4 @@
+import type { TextInput } from 'react-native';
 import type { AccountFormData, AccountType } from '../types';
 import type { CurrencyKey } from '@/features/currencies';
 import { useForm } from '@tanstack/react-form';
@@ -150,6 +151,8 @@ function IdentityCard({ form }: { form: AccountFormApi }) {
 function DetailsCard({ form, isCreate }: { form: AccountFormApi; isCreate: boolean }) {
   const preferredCurrency = useAppStore.use.currency();
   const currencyModal = useModalSheet();
+  const openingBalanceRef = React.useRef<TextInput>(null);
+  const budgetRef = React.useRef<TextInput>(null);
 
   return (
     <form.Field
@@ -174,11 +177,13 @@ function DetailsCard({ form, isCreate }: { form: AccountFormApi; isCreate: boole
                 name="opening_balance"
                 children={(field) => (
                   <ListRow
+                    focusInput={openingBalanceRef}
                     className="border-b border-border"
                     title={translate('accounts.opening_balance')}
                     meta={getFieldError(field)}
                     trailing={(
                       <Input
+                        ref={openingBalanceRef}
                         value={field.state.value ?? ''}
                         onBlur={field.handleBlur}
                         onChangeText={field.handleChange}
@@ -196,10 +201,12 @@ function DetailsCard({ form, isCreate }: { form: AccountFormApi; isCreate: boole
               name="budget"
               children={(field) => (
                 <ListRow
+                  focusInput={budgetRef}
                   title={translate('accounts.budget')}
                   meta={translate('accounts.budget_hint', { currency: preferredCurrency })}
                   trailing={(
                     <Input
+                      ref={budgetRef}
                       value={field.state.value ?? ''}
                       onBlur={field.handleBlur}
                       onChangeText={field.handleChange}

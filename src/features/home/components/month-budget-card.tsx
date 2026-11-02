@@ -39,31 +39,32 @@ export function MonthBudgetCard() {
 
   return (
     <>
-      <Pressable accessibilityRole="button" onPress={() => sheet.present()} style={getPressedStyle} className="mt-3.5 gap-2.5 rounded-card bg-card px-5 py-[18px]">
-        <View className="flex-row items-baseline justify-between gap-2">
-          <Text className="shrink text-row font-semibold" numberOfLines={1}>{translate('home.budget.title', { month: monthName(selection.month - 1) })}</Text>
+      <Pressable accessibilityRole="button" onPress={() => sheet.present()} style={getPressedStyle} className={`mt-4 rounded-card bg-card px-5 py-4 ${state === 'none' ? 'flex-row items-center justify-between gap-2' : 'flex-col'}`}>
+        <View className="gap-1">
+          <View className="flex-row items-baseline justify-between gap-2">
+            <Text className="shrink text-row font-semibold" numberOfLines={1}>{translate('home.budget.title', { month: monthName(selection.month - 1) })}</Text>
+            {state !== 'none' && <Text className="text-meta text-muted-foreground">{endsLabel(daysLeftIn(startDate, endDate, todayUnix()) ?? 0)}</Text>}
+          </View>
           {state === 'none'
-            ? <ChevronRight size={18} colorClassName="accent-muted-foreground" />
-            : <Text className="text-meta text-muted-foreground">{endsLabel(daysLeftIn(startDate, endDate, todayUnix()) ?? 0)}</Text>}
-        </View>
-        {state === 'none'
-          ? <Text className="text-meta text-muted-foreground">{translate('home.budget.set')}</Text>
-          : (
-              <>
-                <View className="flex-row flex-wrap items-baseline justify-between gap-x-2">
-                  <View className="flex-row items-baseline gap-1">
-                    <FormattedCurrency value={Math.abs(left)} currency={currency} className={cn('text-2xl font-bold tracking-tight', BUDGET_STATE_CLASSES[state].text)} />
-                    <Text className={cn('text-sm font-medium text-muted-foreground', state === 'over' && 'text-negative')}>
-                      {translate(state === 'over' ? 'common.over' : 'home.budget.left')}
+            ? <Text className="text-meta text-muted-foreground">{translate('home.budget.set')}</Text>
+            : (
+                <>
+                  <View className="flex-row flex-wrap items-baseline justify-between gap-x-2">
+                    <View className="flex-row items-baseline gap-1">
+                      <FormattedCurrency value={Math.abs(left)} currency={currency} className={cn('text-2xl font-bold tracking-tight', BUDGET_STATE_CLASSES[state].text)} />
+                      <Text className={cn('text-sm font-medium text-muted-foreground', state === 'over' && 'text-negative')}>
+                        {translate(state === 'over' ? 'common.over' : 'home.budget.left')}
+                      </Text>
+                    </View>
+                    <Text className="text-meta text-muted-foreground tabular-nums">
+                      {translate('home.budget.of', { spent: money(spent), budget: money(limit) })}
                     </Text>
                   </View>
-                  <Text className="text-meta text-muted-foreground tabular-nums">
-                    {translate('home.budget.of', { spent: money(spent), budget: money(limit) })}
-                  </Text>
-                </View>
-                <ProgressBar value={Math.min((spent / limit) * 100, 100)} color={BUDGET_STATE_CLASSES[state].bar} showPercentage={false} className="h-2" />
-              </>
-            )}
+                  <ProgressBar value={Math.min((spent / limit) * 100, 100)} color={BUDGET_STATE_CLASSES[state].bar} showPercentage={false} className="h-2" />
+                </>
+              )}
+        </View>
+        {state === 'none' && <ChevronRight size={24} colorClassName="accent-muted-foreground" />}
       </Pressable>
       <BudgetSheet ref={sheet.ref} />
     </>

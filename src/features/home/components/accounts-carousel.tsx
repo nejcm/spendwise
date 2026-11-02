@@ -22,7 +22,7 @@ export function AccountsCarousel({ accounts }: { accounts: AccountWithBalance[] 
             accessibilityRole="button"
             onPress={() => router.push(`/accounts/${account.id}`)}
             style={getPressedStyle}
-            className="w-[150px] gap-3.5 rounded-card bg-card p-4"
+            className="w-38 gap-2 rounded-card bg-card p-4"
           >
             <IconTile icon={account.icon || '💵'} color={account.color ?? DEFAULT_COLOR} className="size-9 rounded-[11px]" />
             <View>

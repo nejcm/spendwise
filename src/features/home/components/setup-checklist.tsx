@@ -10,7 +10,7 @@ import { BudgetSheet } from '@/features/stats/components/budget-sheet';
 import { useGlobalBudget } from '@/features/stats/hooks';
 import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '@/lib/store/store';
+import { hideSetupChecklist, useAppStore } from '@/lib/store/store';
 import { getSetupSteps } from '../helpers';
 
 const STEP_HREFS: Record<Exclude<SetupStepKey, 'budget'>, Href> = {
@@ -19,15 +19,17 @@ const STEP_HREFS: Record<Exclude<SetupStepKey, 'budget'>, Href> = {
   accounts: '/accounts/new',
 };
 
-export function SetupChecklist({ accountCount }: { accountCount: number }) {
+export function SetupChecklist({ accountCount, hasTransactions }: { accountCount: number; hasTransactions: boolean }) {
   const router = useRouter();
   const profileName = useAppStore.use.profile().name;
+  const hidden = useAppStore((state) => !!state.setupChecklistHidden);
   const { data: globalBudget } = useGlobalBudget();
   const { data: categories = [] } = useCategories();
   const budgetSheet = useModalSheet();
   const hasBudget = !!globalBudget?.amountCents || categories.some((category) => (category.budget ?? 0) > 0);
-  const steps = getSetupSteps({ profileName, hasTransactions: false, hasBudget, accountCount });
+  const steps = getSetupSteps({ profileName, hasTransactions, hasBudget, accountCount });
   const doneCount = steps.filter((step) => step.done).length;
+  if (doneCount === steps.length || (hasTransactions && hidden)) return null;
 
   return (
     <View>
@@ -46,7 +48,7 @@ export function SetupChecklist({ accountCount }: { accountCount: number }) {
             accessibilityState={{ checked: done }}
             onPress={() => (key === 'budget' ? budgetSheet.present() : router.push(STEP_HREFS[key]))}
             style={getPressedStyle}
-            className={cn('h-[72px] flex-row items-center gap-3.5', index > 0 && 'border-t border-border')}
+            className={cn('h-18 flex-row items-center gap-3.5', index > 0 && 'border-t border-border')}
           >
             <View className={cn('size-7 items-center justify-center rounded-full border-[1.5px]', done ? 'border-accent bg-accent' : 'border-muted-foreground')}>
               {done && <Check size={14} strokeWidth={3} colorClassName="accent-accent-foreground" />}
@@ -59,11 +61,16 @@ export function SetupChecklist({ accountCount }: { accountCount: number }) {
           </Pressable>
         ))}
       </View>
+      {hasTransactions && (
+        <Pressable accessibilityRole="button" onPress={hideSetupChecklist} hitSlop={8} style={getPressedStyle} className="mt-3.5 self-center px-3 py-1">
+          <Text className="text-sm font-semibold text-accent">{translate('home.setup.hide')}</Text>
+        </Pressable>
+      )}
       <OutlineButton
         size="md"
         color="default"
         fullWidth
-        className="mt-3.5 border-accent-line"
+        className="my-4 border-accent-line"
         label={translate('home.setup.import_csv')}
         iconLeft={<Upload size={18} strokeWidth={1.8} colorClassName="accent-foreground" className="mr-2" />}
         onPress={() => router.push('/settings/import-export')}

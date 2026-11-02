@@ -26,7 +26,7 @@ export function QuickActions() {
   const router = useRouter();
 
   return (
-    <View className="flex-row gap-2.5 pt-[18px]">
+    <View className="flex-row gap-2.5 py-4">
       {ACTIONS.map(({ key, Icon, href }) => {
         const isPrimary = key === 'add';
         return (

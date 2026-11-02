@@ -1,3 +1,4 @@
+import type { TextInput } from 'react-native';
 import type { Category, CategoryFormData } from './types';
 import { useForm } from '@tanstack/react-form';
 import * as React from 'react';
@@ -5,7 +6,7 @@ import { Keyboard, Pressable, View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
-import { Card, Chip, getPressedStyle, GhostButton, Input, SegmentedControl, SolidButton, Text, useModalSheet } from '@/components/ui';
+import { Card, Chip, FocusArea, getPressedStyle, GhostButton, Input, SegmentedControl, SolidButton, Text, useModalSheet } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import { ChevronRight } from '@/components/ui/icon';
 import { CURRENCIES_MAP } from '@/features/currencies';
@@ -166,26 +167,30 @@ function BudgetAverage({ id, onUse }: { id: string; onUse: (cents: number | null
 
 function BudgetCard({ form, id }: { form: CategoryFormApi; id?: string }) {
   const currency = useAppStore.use.currency();
+  const budgetRef = React.useRef<TextInput>(null);
   return (
     <form.Field
       name="budget"
       children={(field) => (
         <Card className="mt-5 p-4">
-          <Text className="text-meta font-medium text-muted-foreground">{translate('categories.budget')}</Text>
-          <View className="mt-1 flex-row items-center gap-1">
-            <Text className="text-[30px] font-bold text-muted-foreground">{CURRENCIES_MAP[currency].symbol}</Text>
-            <Input
-              value={field.state.value ?? ''}
-              onBlur={field.handleBlur}
-              onChangeText={(v) => field.handleChange(v.trim() ? v : null)}
-              placeholder="0"
-              accessibilityLabel={translate('categories.budget')}
-              keyboardType="decimal-pad"
-              containerClassName="flex-1"
-              className="h-auto rounded-none border-0 bg-transparent px-0 text-[30px] font-bold"
-              error={getFieldError(field)}
-            />
-          </View>
+          <FocusArea target={budgetRef}>
+            <Text className="text-meta font-medium text-muted-foreground">{translate('categories.budget')}</Text>
+            <View className="mt-1 flex-row items-center gap-1">
+              <Text className="text-[30px] font-bold text-muted-foreground">{CURRENCIES_MAP[currency].symbol}</Text>
+              <Input
+                ref={budgetRef}
+                value={field.state.value ?? ''}
+                onBlur={field.handleBlur}
+                onChangeText={(v) => field.handleChange(v.trim() ? v : null)}
+                placeholder="0"
+                accessibilityLabel={translate('categories.budget')}
+                keyboardType="decimal-pad"
+                containerClassName="flex-1"
+                className="h-auto rounded-none border-0 bg-transparent px-0 text-[30px] font-bold"
+                error={getFieldError(field)}
+              />
+            </View>
+          </FocusArea>
           {id
             ? <BudgetAverage id={id} onUse={(cents) => field.handleChange(cents == null ? null : String(centsToAmount(cents)))} />
             : field.state.value && (

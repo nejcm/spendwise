@@ -19,7 +19,7 @@ export default function OnboardingLayout({ step, title, subtitle, onBack, childr
 
   return (
     <View className="flex-1">
-      <View className="h-12 flex-row items-center gap-4 px-6">
+      <View className="mt-4 h-12 flex-row items-center gap-4 px-6">
         <IconButton color="secondary" size="md" onPress={onBack} accessibilityLabel={translate('common.back')}>
           <ArrowLeftIcon size={20} colorClassName="accent-foreground" />
         </IconButton>

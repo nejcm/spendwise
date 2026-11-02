@@ -89,6 +89,7 @@ export type AppState = {
   density: DensityType;
   homeScreenChart: HomeScreenChartType;
   lastPrimaryTabPath: PrimaryTabPath;
+  setupChecklistHidden?: boolean;
 
   // Security
   lockEnabled: boolean;
@@ -226,6 +227,9 @@ export function updateProfile(profile: Partial<AppState['profile']>) {
 export const selectProfile = (state: AppState) => state.profile;
 
 // Preference actions
+export function hideSetupChecklist() {
+  return updateAppState({ setupChecklistHidden: true });
+}
 export function setCurrency(currency: CurrencyKey) {
   return updateAppState({ currency: currency.length > 0 ? currency : DEFAULT_USER_CURRENCY });
 }

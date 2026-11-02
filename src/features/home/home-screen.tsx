@@ -38,17 +38,18 @@ export function HomeScreen() {
 
   return (
     <ScrollView className="flex-1" style={defaultStyles.transparentBg} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-      <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[340px] bg-linear-to-b from-wash to-background" />
-      <View className="px-5 pt-2 pb-6">
+      <View pointerEvents="none" className="absolute inset-x-0 top-0 h-85 bg-linear-to-b from-wash to-background" />
+      <View className="px-5 pt-4 pb-6">
         <HomeHeader isEmpty={!isLoading && isEmpty} />
         {!isLoading && (
           <View className="mt-5">
             <BalanceCard total={total} accountCount={accounts.length} isEmpty={isEmpty} />
             {isEmpty
-              ? <SetupChecklist accountCount={accounts.length} />
+              ? <SetupChecklist accountCount={accounts.length} hasTransactions={false} />
               : (
                   <>
                     <QuickActions />
+                    <SetupChecklist accountCount={accounts.length} hasTransactions />
                     <InsightCard />
                     {homeScreenChart === 'category_spending' && <View className="mt-3.5"><CategorySpendingChartCard /></View>}
                     <MonthBudgetCard />

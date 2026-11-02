@@ -247,14 +247,19 @@ function TextRow({ name, label, value, placeholder, onChange, onBlur, error }: {
   error?: string;
 }) {
   const fieldNode = useFieldNode(name);
+  const inputRef = React.useRef<TextInput>(null);
   return (
     <ListRow
+      focusInput={inputRef}
       className={rowClassName()}
       title={<RowLabel>{label}</RowLabel>}
       meta={<RowError message={error} />}
       trailing={(
         <Input
-          ref={fieldNode}
+          ref={(node) => {
+            inputRef.current = node;
+            fieldNode(node);
+          }}
           value={value ?? ''}
           onChangeText={onChange}
           onBlur={onBlur}

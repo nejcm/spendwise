@@ -1,14 +1,14 @@
 import * as React from 'react';
-import Svg, { Circle, Path } from 'react-native-svg';
-import { useCSSVariable } from 'uniwind';
+import Svg, { Path } from 'react-native-svg';
+import { useCSSVariable, useUniwind } from 'uniwind';
 
-import { AmountText, IconTile, ScrollView, SolidButton, Text, View } from '@/components/ui';
+import { AmountText, IconTile, Image, ScrollView, SolidButton, Text, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 
-const SPARKLINE = 'M0 26 L12 42 L40 43 L70 45 L100 46 L130 48 L160 49 L190 50 L220 51 L250 52 L278 53 L282 12 L310 14 L340 16 L350 17';
+const SPARKLINE = 'M0 52 C30 50 45 44 70 45 S110 52 140 46 S185 32 210 34 S250 42 275 36 S320 16 350 12';
 
 export type WelcomeStepProps = {
   onNext: () => void;
@@ -57,18 +57,17 @@ function Preview({ accent }: { accent: string }) {
 
 export default function WelcomeStep({ onNext, onRestore, restoring }: WelcomeStepProps) {
   const accent = String(useCSSVariable('--color-accent'));
-  const track = String(useCSSVariable('--color-track'));
+  const { theme } = useUniwind();
 
   return (
     <View className="flex-1">
       <ScrollView className="flex-1" contentContainerClassName="px-6 pt-6">
-        <View className="flex-row items-center gap-2.5">
-          <Svg width={28} height={28} viewBox="0 0 28 28">
-            <Circle cx={14} cy={14} r={10} fill="none" strokeWidth={5} stroke={track} />
-            <Path d="M14 4a10 10 0 0 1 10 10" fill="none" strokeWidth={5} stroke={accent} />
-          </Svg>
-          <Text className="text-[19px] font-bold">{translate('onboarding.title')}</Text>
-        </View>
+        <Image
+          source={theme === 'dark' ? require('../../../../assets/spendwise-white.svg') : require('../../../../assets/spendwise.svg')}
+          contentFit="contain"
+          accessibilityLabel={translate('onboarding.title')}
+          className="h-7 w-35"
+        />
         <Preview accent={accent} />
         <View className="gap-3 pt-7">
           <Text accessibilityRole="header" className="text-[34px]/[37px] font-bold tracking-page-title">{translate('onboarding.welcome_headline')}</Text>

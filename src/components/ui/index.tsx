@@ -10,6 +10,7 @@ export * from './checkbox';
 export * from './chip';
 export * from './empty-state';
 export * from './flag-circle';
+export * from './focus-area';
 export * from './focus-aware-status-bar';
 export * from './formatted-text';
 export * from './ghost-button';

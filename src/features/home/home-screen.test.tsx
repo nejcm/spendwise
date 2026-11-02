@@ -39,7 +39,8 @@ describe('home screen empty state', () => {
     mockQueries({ hasUserTransactions: true });
     render(<HomeScreen />);
     expect(screen.getByTestId('quick-actions')).toBeOnTheScreen();
-    expect(screen.queryByTestId('setup')).not.toBeOnTheScreen();
+    // The checklist stays until every step is done; it hides itself.
+    expect(screen.getByTestId('setup')).toBeOnTheScreen();
   });
 
   it('shows the setup checklist when there are no user transactions', () => {
@@ -56,9 +57,9 @@ describe('home screen empty state', () => {
     expect(screen.queryByTestId('quick-actions')).not.toBeOnTheScreen();
   });
 
-  it('does not show the setup checklist when the existence query errored without data', () => {
+  it('shows Home when the existence query errored without data', () => {
     mockQueries({});
     render(<HomeScreen />);
-    expect(screen.queryByTestId('setup')).not.toBeOnTheScreen();
+    expect(screen.getByTestId('quick-actions')).toBeOnTheScreen();
   });
 });

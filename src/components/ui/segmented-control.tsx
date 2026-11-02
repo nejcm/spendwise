@@ -20,7 +20,7 @@ export function SegmentedControl<T extends string>({ options, value, onChange, f
     <View
       accessibilityRole="radiogroup"
       accessibilityLabel={accessibilityLabel}
-      className={cn('flex-row rounded-full bg-segment-track p-1', !fill && 'self-start', className)}
+      className={cn('flex-row rounded-full border border-border bg-segment-track p-1 dark:border-transparent', !fill && 'self-start', className)}
     >
       {options.map((option) => {
         const selected = option.value === value;

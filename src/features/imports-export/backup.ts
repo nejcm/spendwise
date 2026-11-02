@@ -78,16 +78,13 @@ export function validateBackup(parsed: unknown): BackupData {
 }
 
 export async function importBackup(db: SQLiteDatabase, backup: BackupData): Promise<void> {
-  // Clear all existing data (FK constraints disabled inside clearDbData)
-  await clearDbData(db);
-
   await db.withTransactionAsync(async () => {
-    await db.execAsync('PRAGMA foreign_keys = ON;');
+    await clearDbData(db);
     for (const row of backup.categories) {
       await db.runAsync(
         `INSERT INTO categories (id, name, icon, color, kind, budget, sort_order, created_at)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [row.id, row.name, row.icon ?? null, row.color, row.kind ?? 'expense', row.budget ?? null, row.sort_order ?? 999999, row.created_at],
+        [row.id, row.name, row.icon ?? null, row.color, row.kind === 'income' ? 'income' : 'expense', row.budget ?? null, row.sort_order ?? 999999, row.created_at],
       );
     }
 
@@ -123,7 +120,7 @@ export async function importBackup(db: SQLiteDatabase, backup: BackupData): Prom
           row.type,
           row.amount,
           row.currency ?? 'EUR',
-          row.baseAmount,
+          row.type === 'transfer' ? Math.abs(row.baseAmount) : row.baseAmount,
           row.baseCurrency,
           row.date,
           row.note || null,
@@ -131,7 +128,7 @@ export async function importBackup(db: SQLiteDatabase, backup: BackupData): Prom
           row.merchant_logo_slug || null,
           row.location || null,
           row.transfer_id ?? null,
-          row.is_adjustment ?? 0,
+          row.is_adjustment ? 1 : 0,
           row.created_at,
           row.updated_at,
         ],

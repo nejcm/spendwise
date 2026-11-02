@@ -132,4 +132,52 @@ describe('backup v4', () => {
       { id: 'cat_salary', kind: 'income' },
     ]);
   });
+
+  it('leaves existing data intact when a restore fails mid-way', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    const raw = db._raw;
+    const atomicDb = {
+      ...db,
+      async withTransactionAsync(cb: () => Promise<void>) {
+        raw.exec('BEGIN');
+        try {
+          await cb();
+          raw.exec('COMMIT');
+        }
+        catch (error) {
+          raw.exec('ROLLBACK');
+          throw error;
+        }
+      },
+    };
+    const backup = {
+      version: 4,
+      exported_at: '2026-01-01T00:00:00.000Z',
+      accounts: [],
+      categories: [{ id: 'cat_x', name: 'X', color: '#000', kind: 'bogus', created_at: 1 }],
+      transactions: [{ id: 't1', account_id: 'missing_acc', type: 'expense', amount: 1, baseAmount: 1, baseCurrency: 'EUR', date: 1 }],
+      recurring_rules: [],
+      recurring_rule_runs: [],
+    };
+
+    await expect(importBackup(atomicDb as any, backup as any)).rejects.toHaveProperty('message', expect.stringMatching(/constraint failed/));
+
+    expect(await db.getAllAsync('SELECT id FROM accounts')).toEqual([{ id: 'acc_1' }]);
+    expect(await db.getAllAsync('SELECT id FROM categories')).toEqual([{ id: 'cat_1' }]);
+  });
+
+  it('normalizes an unknown category kind to expense', async () => {
+    const db = await createTestDb();
+    await importBackup(db as any, {
+      version: 4,
+      exported_at: '2026-01-01T00:00:00.000Z',
+      accounts: [],
+      categories: [{ id: 'cat_x', name: 'X', color: '#000', kind: 'bogus', created_at: 1 }],
+      transactions: [],
+      recurring_rules: [],
+      recurring_rule_runs: [],
+    } as any);
+    expect(await db.getAllAsync('SELECT id, kind FROM categories')).toEqual([{ id: 'cat_x', kind: 'expense' }]);
+  });
 });

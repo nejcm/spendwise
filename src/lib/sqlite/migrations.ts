@@ -181,6 +181,7 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
         ALTER TABLE categories ADD COLUMN kind TEXT NOT NULL DEFAULT 'expense' CHECK(kind IN ('expense','income'));
       `);
       await db.execAsync(BACKFILL_CATEGORY_KIND_SQL);
+      await db.execAsync(`UPDATE transactions SET baseAmount = ABS(baseAmount) WHERE type = 'transfer' AND baseAmount < 0`);
       await db.execAsync(`PRAGMA user_version = 6`);
     });
   }

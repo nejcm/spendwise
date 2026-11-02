@@ -83,8 +83,8 @@ function SpendHero({ title, spent, income, prevSpent, prevLabel, selection, star
   const delta = prevSpent != null ? spent - prevSpent : null;
 
   return (
-    <Card variant="hero" className="mt-4 gap-3.5 p-5">
-      <View className="flex-row items-end justify-between gap-2">
+    <Card variant="hero" className="mt-4 gap-4 p-5">
+      <View className="mb-2 flex-row items-end justify-between gap-4">
         <View className="shrink gap-0.5">
           <Text className="text-sm text-muted-foreground" numberOfLines={1}>{title}</Text>
           <AmountText size="hero" value={spent} currency={currency} numberOfLines={1} adjustsFontSizeToFit />
@@ -183,7 +183,7 @@ function WhereItWent({ selection, startDate, endDate, onShowBudgets }: PeriodPro
   if (total === 0) return null;
 
   return (
-    <Card variant="hero" className="mt-3.5 gap-3.5 p-5">
+    <Card variant="hero" className="mt-4 gap-4 p-5">
       <View className="flex-row items-baseline justify-between">
         <Text accessibilityRole="header" className="text-base font-semibold">{translate('stats.where_it_went')}</Text>
         <Pressable accessibilityRole="button" onPress={onShowBudgets} hitSlop={8}>
@@ -206,10 +206,10 @@ function WhereItWent({ selection, startDate, endDate, onShowBudgets }: PeriodPro
             <Text className="flex-1 text-row" numberOfLines={1}>
               {`${categoryIcon(c.category_id, c.category_icon, c.category_name)} ${categoryName(c.category_id, c.category_name)}`}
             </Text>
-            <Text className="w-[52px] text-right text-meta text-muted-foreground tabular-nums">
+            <Text className="w-13 text-right text-meta text-muted-foreground tabular-nums">
               {`${formatNumber((c.expense_total / total) * 100, numberFormat, 1)}%`}
             </Text>
-            <Text className="min-w-[84px] text-right text-row font-semibold tabular-nums">{format(c.expense_total)}</Text>
+            <Text className="min-w-21 text-right text-row font-semibold tabular-nums">{format(c.expense_total)}</Text>
           </Pressable>
         ))}
       </View>
@@ -235,8 +235,8 @@ function SixMonths({ month }: { month: number | undefined }) {
   ].filter(Boolean).join(' · ');
 
   return (
-    <Card variant="hero" className="mt-3.5 gap-3.5 p-5">
-      <View className="flex-row items-baseline justify-between gap-2">
+    <Card variant="hero" className="mt-4 gap-4 p-5">
+      <View className="mb-4 flex-row items-baseline justify-between gap-2">
         <Text accessibilityRole="header" className="text-base font-semibold">{translate('categories.last_six_months')}</Text>
         {!!meta && <Text className="shrink text-meta text-muted-foreground" numberOfLines={1}>{meta}</Text>}
       </View>

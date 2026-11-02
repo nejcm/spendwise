@@ -57,9 +57,9 @@ export function SearchRow({ search, onChangeSearch, filterCount, onOpenFilters }
 function SummaryCell({ label, value, prefix, className, first }: { label: string; value: number; prefix?: string; className?: string; first?: boolean }) {
   const currency = useAppStore.use.currency();
   return (
-    <View className={cn('min-w-0 flex-1 px-4', !first && 'border-l border-border')}>
+    <View className={cn('min-w-0 flex-1 px-3', !first && 'border-l border-border')}>
       <Text className="text-xs text-muted-foreground">{label}</Text>
-      <FormattedCurrency value={value} currency={currency} prefix={prefix} numberOfLines={1} adjustsFontSizeToFit className={cn('text-base font-semibold', className)} />
+      <FormattedCurrency value={value} currency={currency} prefix={prefix} shorten fractionDigits={Math.abs(value) >= 100_000 ? 1 : 2} numberOfLines={1} adjustsFontSizeToFit className={cn('text-base font-semibold', className)} />
     </View>
   );
 }

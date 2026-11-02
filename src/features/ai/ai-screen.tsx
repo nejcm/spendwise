@@ -73,7 +73,7 @@ function ChatHeader({ hasKey, canStartNewChat, onNewChat }: { hasKey: boolean; c
 
   return (
     <View className="h-12 flex-row items-center justify-between gap-2 px-5">
-      <View className="w-[84px]">
+      <View className="w-14">
         <HeaderButton icon={ChevronLeft} label={translate('common.back')} onPress={() => goBackOrFallback(router)} />
       </View>
       <View className="min-w-0 flex-1 items-center">
@@ -82,14 +82,14 @@ function ChatHeader({ hasKey, canStartNewChat, onNewChat }: { hasKey: boolean; c
         </Text>
         {hasKey && (
           <View className="flex-row items-center gap-1.5">
-            <View className="size-[7px] rounded-full bg-positive" />
+            <View className="size-2 rounded-full bg-positive" />
             <Text numberOfLines={1} className="text-xs text-muted-foreground">
               {translate('ai.key_on_device', { provider: translate(`settings.provider_${provider}`) })}
             </Text>
           </View>
         )}
       </View>
-      <View className="w-[84px] items-end">
+      <View className="w-21 items-end">
         {hasKey && (
           <View className="flex-row items-center rounded-full bg-card p-0.5">
             <Pressable

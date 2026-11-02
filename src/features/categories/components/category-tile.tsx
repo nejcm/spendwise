@@ -35,7 +35,7 @@ export function CategoryTile({ item, kind, budget, onPress }: CategoryTileProps)
       accessibilityLabel={label}
       onPress={onPress}
       style={getPressedStyle}
-      className="h-16 flex-1 flex-row items-center gap-2.5 rounded-[18px] bg-card px-3"
+      className="h-16 flex-1 flex-row items-center gap-2.5 rounded-[18px] border-[1.5px] border-transparent bg-card px-2"
     >
       <BudgetRing
         ratio={budget ? amount / budget : 0}
@@ -63,7 +63,7 @@ export function NewCategoryTile({ onPress, className }: { onPress: () => void; c
       accessibilityRole="button"
       onPress={onPress}
       style={getPressedStyle}
-      className={cn('h-16 flex-1 flex-row items-center justify-center gap-2 rounded-[18px] border-[1.5px] border-dashed border-track', className)}
+      className={cn('h-16 flex-1 flex-row items-center justify-center gap-2 rounded-[18px] border-[1.5px] border-dashed border-track px-2', className)}
     >
       <Plus size={18} colorClassName="accent-muted-foreground" />
       <Text className="text-sm font-medium text-muted-foreground">{translate('categories.new')}</Text>

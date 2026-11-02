@@ -244,13 +244,28 @@ function Tile({ label, selected, onPress, className }: { label: string; selected
   );
 }
 
-function YearBody({ selectedYear, onSelect }: { selectedYear: number; onSelect: (year: number) => void }) {
+function TileGrid({ columns, children }: { columns: number; children: React.ReactNode[] }) {
+  const rows = Array.from({ length: Math.ceil(children.length / columns) }, (_, r) => children.slice(r * columns, (r + 1) * columns));
   return (
-    <View className="flex-row flex-wrap gap-2">
-      {YEAR_LIST.map((year) => (
-        <Tile key={year} className="w-[31.5%]" label={year.toString()} selected={year === selectedYear} onPress={() => onSelect(year)} />
+    <View className="gap-2">
+      {rows.map((row, r) => (
+
+        <View key={r} className="flex-row gap-2">
+          {row}
+          {Array.from({ length: columns - row.length }, (_, i) => <View key={`pad-${i}`} className="flex-1" />)}
+        </View>
       ))}
     </View>
+  );
+}
+
+function YearBody({ selectedYear, onSelect }: { selectedYear: number; onSelect: (year: number) => void }) {
+  return (
+    <TileGrid columns={3}>
+      {YEAR_LIST.map((year) => (
+        <Tile key={year} className="flex-1" label={year.toString()} selected={year === selectedYear} onPress={() => onSelect(year)} />
+      ))}
+    </TileGrid>
   );
 }
 
@@ -286,10 +301,12 @@ function MonthBody({
   return (
     <View>
       <YearNavRow year={year} onChangeYear={onChangeYear} />
-      <View className="mt-3 flex-row flex-wrap gap-2">
-        {MONTH_LABELS.map((label, i) => (
-          <Tile key={label} className="w-[23.5%]" label={label} selected={i + 1 === month} onPress={() => onChangeMonth(i + 1)} />
-        ))}
+      <View className="mt-3">
+        <TileGrid columns={4}>
+          {MONTH_LABELS.map((label, i) => (
+            <Tile key={label} className="flex-1" label={label} selected={i + 1 === month} onPress={() => onChangeMonth(i + 1)} />
+          ))}
+        </TileGrid>
       </View>
     </View>
   );

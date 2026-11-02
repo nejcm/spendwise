@@ -171,6 +171,7 @@
       "reactNativeDirectoryCheck": {
         "listUnknownPackages": false,
         "exclude": [
+          "react-native-edge-to-edge",
           "react-native-restart"
         ]
       }
@@ -179,9 +180,30 @@
       "exclude": [
         "eslint-config-expo",
         "expo",
+        "expo-build-properties",
         "expo-constants",
+        "expo-crypto",
+        "expo-dev-client",
+        "expo-document-picker",
+        "expo-file-system",
         "expo-font",
-        "expo-updates"
+        "expo-haptics",
+        "expo-image",
+        "expo-image-manipulator",
+        "expo-image-picker",
+        "expo-linear-gradient",
+        "expo-linking",
+        "expo-local-authentication",
+        "expo-localization",
+        "expo-notifications",
+        "expo-router",
+        "expo-sharing",
+        "expo-splash-screen",
+        "expo-sqlite",
+        "expo-system-ui",
+        "expo-updates",
+        "@expo/metro-runtime",
+        "jest-expo"
       ]
     }
   },

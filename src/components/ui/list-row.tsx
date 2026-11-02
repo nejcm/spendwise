@@ -2,6 +2,7 @@ import type { PressableProps, TextInput } from 'react-native';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { cn } from '@/lib/cn';
+import { useAppStore } from '@/lib/store/store';
 import { getPressedStyle } from './button';
 import { ChevronRight } from './icon';
 import { Text } from './text';
@@ -20,6 +21,7 @@ export type ListRowProps = Omit<PressableProps, 'children'> & {
 };
 
 export function ListRow({ title, meta, icon, trailing, chevron = false, focusInput, className, onPress, style, ...props }: ListRowProps) {
+  const isCompact = useAppStore.use.density() === 'compact';
   return (
     <Pressable
       // Pressable defaults to accessible, which would swallow a trailing Switch/Input into one inert element.
@@ -27,7 +29,7 @@ export function ListRow({ title, meta, icon, trailing, chevron = false, focusInp
       accessibilityRole={onPress ? 'button' : undefined}
       onPress={onPress ?? (focusInput && (() => focusInput.current?.focus()))}
       style={(state) => getPressedStyle(state, style, !!onPress)}
-      className={cn('min-h-16 flex-row items-center gap-3 py-2', className)}
+      className={cn('flex-row items-center gap-3', isCompact ? 'min-h-12 py-1' : 'min-h-16 py-2', className)}
       {...props}
     >
       {icon}

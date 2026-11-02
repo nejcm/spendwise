@@ -40,7 +40,7 @@ export function MonthBudgetCard() {
   return (
     <>
       <Pressable accessibilityRole="button" onPress={() => sheet.present()} style={getPressedStyle} className={`mt-4 rounded-card bg-card px-5 py-4 ${state === 'none' ? 'flex-row items-center justify-between gap-2' : 'flex-col'}`}>
-        <View className="gap-1">
+        <View className="gap-3">
           <View className="flex-row items-baseline justify-between gap-2">
             <Text className="shrink text-row font-semibold" numberOfLines={1}>{translate('home.budget.title', { month: monthName(selection.month - 1) })}</Text>
             {state !== 'none' && <Text className="text-meta text-muted-foreground">{endsLabel(daysLeftIn(startDate, endDate, todayUnix()) ?? 0)}</Text>}

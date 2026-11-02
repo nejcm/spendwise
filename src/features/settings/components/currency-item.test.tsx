@@ -46,6 +46,7 @@ jest.mock('@/lib/store/store', () => ({
     use: {
       currency: jest.fn(() => 'EUR'),
       dateFormat: jest.fn(() => 'yyyy-MM-dd'),
+      density: jest.fn(() => 'default'),
     },
   },
 }));

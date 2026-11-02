@@ -79,3 +79,32 @@ export function getGreetingPeriod(hour: number): 'morning' | 'afternoon' | 'even
   if (hour >= 12 && hour < 18) return 'afternoon';
   return 'evening';
 }
+
+export type BudgetOutlook
+  = | { state: 'on_track'; perDay: number; left: number }
+    | { state: 'fast'; perDay: number; left: number; overPace: number; plannedPerDay: number }
+    | { state: 'over'; over: number; left: 0 };
+
+const PACE_TOLERANCE = 0.05;
+
+/** Amounts in cents; `daysLeft` counts today, `totalDays` is the month length. */
+export function budgetOutlook({ limit, spent, billsPaid, billsComing, daysLeft, totalDays }: {
+  limit: number;
+  spent: number;
+  billsPaid: number;
+  billsComing: number;
+  daysLeft: number;
+  totalDays: number;
+}): BudgetOutlook {
+  const safe = limit - spent - billsComing;
+  if (safe < 0) return { state: 'over', over: spent > limit ? spent - limit : -safe, left: 0 };
+  const left = limit - spent;
+  const perDay = Math.floor(safe / Math.max(daysLeft, 1));
+  const everydayShare = Math.max(limit - billsPaid - billsComing, 0);
+  const expected = everydayShare * (totalDays - daysLeft) / totalDays;
+  const overPace = Math.round(spent - billsPaid - expected);
+  if (overPace > everydayShare * PACE_TOLERANCE) {
+    return { state: 'fast', perDay, left, overPace, plannedPerDay: Math.floor(everydayShare / totalDays) };
+  }
+  return { state: 'on_track', perDay, left };
+}

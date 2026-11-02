@@ -109,5 +109,7 @@ export const queryKeys = {
     all: ['global-budget'] as const,
     spend: (startDate: number, endDate: number) =>
       ['global-budget', 'spend', startDate, endDate] as const,
+    billSpend: (startDate: number, endDate: number) =>
+      ['global-budget', 'bill-spend', startDate, endDate] as const,
   },
 } as const;

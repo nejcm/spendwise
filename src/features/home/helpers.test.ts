@@ -1,5 +1,5 @@
 import type { ScheduledTransactionWithDetails } from '@/features/scheduled-transactions/types';
-import { buildDailyBalances, buildLinePath, getGreetingPeriod, getSetupSteps, percentChange, selectNextBill } from './helpers';
+import { budgetOutlook, buildDailyBalances, buildLinePath, getGreetingPeriod, getSetupSteps, percentChange, selectNextBill } from './helpers';
 
 const DAY = 86_400;
 const OCT_1 = Date.UTC(2026, 9, 1) / 1000;
@@ -121,5 +121,26 @@ describe('getSetupSteps', () => {
 describe('getGreetingPeriod', () => {
   it('maps hours to periods', () => {
     expect([4, 5, 11, 12, 17, 18].map(getGreetingPeriod)).toEqual(['evening', 'morning', 'morning', 'afternoon', 'afternoon', 'evening']);
+  });
+});
+
+describe('budgetOutlook', () => {
+  const base = { limit: 200_000, billsPaid: 84_900, billsComing: 3_297, totalDays: 30 };
+
+  it('is on track early in the month and spreads what is safe over the days left', () => {
+    expect(budgetOutlook({ ...base, spent: 94_540, daysLeft: 27 })).toEqual({ state: 'on_track', perDay: 3_783, left: 105_460 });
+  });
+
+  it('flags spending ahead of the everyday pace', () => {
+    const outlook = budgetOutlook({ ...base, spent: 156_160, daysLeft: 13 });
+    expect(outlook).toMatchObject({ state: 'fast', perDay: 3_118, overPace: 7_905, plannedPerDay: 3_726 });
+  });
+
+  it('reports the amount over once spending passes the budget', () => {
+    expect(budgetOutlook({ ...base, spent: 209_439, daysLeft: 4 })).toEqual({ state: 'over', over: 9_439, left: 0 });
+  });
+
+  it('counts bills still to come against the budget', () => {
+    expect(budgetOutlook({ ...base, spent: 199_000, daysLeft: 4 })).toEqual({ state: 'over', over: 2_297, left: 0 });
   });
 });

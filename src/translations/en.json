@@ -132,7 +132,7 @@
       "teal": "Teal",
       "yellow": "Yellow"
     },
-    "colour": "Colour",
+    "colour": "Color",
     "create": "Create category",
     "delete": {
       "and": " and ",
@@ -197,7 +197,7 @@
     "transactions_count_one": "1 transaction",
     "uncategorised": "Uncategorised",
     "use_amount": "Use {{amount}}",
-    "use_colour": "Use this colour"
+    "use_colour": "Use this color"
   },
   "common": {
     "add": "Add",
@@ -307,6 +307,7 @@
     }
   },
   "errors": {
+    "database_locked_desc": "Spendwise is already open in another tab. Close it, then retry.",
     "database_unavailable": "Database unavailable",
     "database_unavailable_desc": "The database storage is in a broken state.",
     "db_clear_btn": "Clear storage",
@@ -521,8 +522,8 @@
     "account_title": "Where is your money now?",
     "add_account": "Add account",
     "amount_preview": "Amounts will look like {{amount}}",
-    "avatar_color": "Avatar colour",
-    "avatar_color_n": "Colour {{index}}",
+    "avatar_color": "Avatar color",
+    "avatar_color_n": "Color {{index}}",
     "choose_avatar": "Choose an avatar",
     "continue": "Continue",
     "enter_name": "Enter your name",
@@ -761,7 +762,7 @@
       "spendwise": "Spendwise",
       "spendwise_hint": "Light uses lilac, dark uses lime",
       "stone": "Stone",
-      "title": "Accent colour",
+      "title": "Accent color",
       "wave": "Wave"
     },
     "accounts": "Accounts",
@@ -1088,7 +1089,7 @@
       "income": "Income saved",
       "transfer": "Transfer saved"
     },
-    "search": "Search merchants, notes, amounts",
+    "search": "Merchant, note or amount",
     "select_transaction": "Select transaction",
     "selected_count": "{{count}} selected",
     "title": "Transactions",

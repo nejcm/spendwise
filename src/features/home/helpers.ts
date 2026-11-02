@@ -101,10 +101,10 @@ export function budgetOutlook({ limit, spent, billsPaid, billsComing, daysLeft, 
   const left = limit - spent;
   const perDay = Math.floor(safe / Math.max(daysLeft, 1));
   const everydayShare = Math.max(limit - billsPaid - billsComing, 0);
-  const expected = everydayShare * (totalDays - daysLeft) / totalDays;
+  const expected = everydayShare * (totalDays - daysLeft + 1) / totalDays;
   const overPace = Math.round(spent - billsPaid - expected);
   if (overPace > everydayShare * PACE_TOLERANCE) {
-    return { state: 'fast', perDay, left, overPace, plannedPerDay: Math.floor(everydayShare / totalDays) };
+    return { state: 'fast', perDay, left, overPace, plannedPerDay: Math.round(everydayShare / totalDays) };
   }
   return { state: 'on_track', perDay, left };
 }

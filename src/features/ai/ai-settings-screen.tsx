@@ -45,15 +45,16 @@ export function AiSettingsScreen() {
 
   return (
     <SettingsPage title={translate('settings.spendwise_ai')}>
-      <KeyCard key={provider} provider={provider} providerName={providerName} savedKey={savedKey} />
-
       <SegmentedControl
         accessibilityLabel={translate('settings.ai_provider')}
-        className="mt-4"
         options={PROVIDERS.map((value) => ({ value, label: translate(`settings.provider_${value}`) }))}
         value={provider}
         onChange={setAiProvider}
       />
+
+      <View className="mt-4">
+        <KeyCard key={provider} provider={provider} providerName={providerName} savedKey={savedKey} />
+      </View>
 
       <SectionHeader title={translate('settings.ai_use_for')} />
       <Card className="px-4">

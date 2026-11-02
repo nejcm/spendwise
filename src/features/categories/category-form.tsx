@@ -11,6 +11,7 @@ import { getFieldError } from '@/components/ui/form-utils';
 import { ChevronRight } from '@/components/ui/icon';
 import { CURRENCIES_MAP } from '@/features/currencies';
 import { centsToAmount } from '@/features/formatting/helpers';
+import { cn } from '@/lib/cn';
 import { useCurrentYearMonth } from '@/lib/hooks/use-current-year-month';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
@@ -107,7 +108,7 @@ function IdentityCard({ form }: { form: CategoryFormApi }) {
                   placeholder={translate('categories.icon_placeholder')}
                   accessibilityLabel={translate('categories.icon')}
                   containerClassName="shrink-0"
-                  className="size-16 rounded-card border-0 px-0 text-center text-3xl"
+                  className={cn('size-16 rounded-card border-0 px-0 text-center', field.state.value ? 'text-3xl' : 'text-sm')}
                   style={{ backgroundColor: hexWithOpacity(values.color, 26) }}
                 />
               )}

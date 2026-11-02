@@ -120,7 +120,7 @@ function CategoriesOverview() {
                   ))}
                 </View>
               )}
-          {kind === 'expense' && <BudgetLegend />}
+          {kind === 'expense' && items.some((item) => budgetFor(item)) && <BudgetLegend />}
         </View>
       </ScrollView>
     </>

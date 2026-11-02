@@ -1,4 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
+import { setDefaultOptions } from 'date-fns';
+import { de, enUS } from 'date-fns/locale';
 import { getLocales } from 'expo-localization';
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
@@ -8,6 +10,9 @@ import { resources } from './resources';
 import { getLanguage } from './utils';
 
 export * from './utils';
+
+// Lets every bare date-fns `format` call pick up the app language.
+i18n.on('languageChanged', () => setDefaultOptions({ locale: i18n.resolvedLanguage === 'de' ? de : enUS }));
 
 i18n.use(initReactI18next).init({
   resources,

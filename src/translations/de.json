@@ -307,6 +307,7 @@
     }
   },
   "errors": {
+    "database_locked_desc": "Spendwise ist bereits in einem anderen Tab geöffnet. Schließe ihn und versuche es erneut.",
     "database_unavailable": "Datenbank nicht verfügbar",
     "database_unavailable_desc": "Der Datenbankspeicher befindet sich in einem fehlerhaften Zustand.",
     "db_clear_btn": "Speicher leeren",
@@ -1088,7 +1089,7 @@
       "income": "Einnahme gespeichert",
       "transfer": "Umbuchung gespeichert"
     },
-    "search": "Händler, Notizen, Beträge suchen",
+    "search": "Händler, Notiz oder Betrag",
     "select_transaction": "Transaktion auswählen",
     "selected_count": "{{count}} ausgewählt",
     "title": "Transaktionen",

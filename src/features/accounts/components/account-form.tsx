@@ -13,6 +13,7 @@ import { getFieldError } from '@/components/ui/form-utils';
 import { ChevronRight } from '@/components/ui/icon';
 import { CURRENCY_VALUES } from '@/features/currencies';
 import { CurrencySheet } from '@/features/currencies/components/currency-sheet';
+import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
 import { toNumber } from '@/lib/number';
 import { addLastUsedCurrency, selectAccountFormPrefs, setAccountFormPrefs, useAppStore } from '@/lib/store/store';
@@ -43,7 +44,7 @@ const defaultValues: AccountFormData = {
 };
 
 const fieldInputClassName = 'rounded-tile border-0 bg-card';
-const rowInputClassName = 'h-auto min-w-[120px] rounded-none border-0 bg-transparent px-0 text-right text-base font-medium';
+const rowInputClassName = 'h-auto w-32 rounded-none border-0 bg-transparent px-0 text-right text-base font-medium';
 
 function useAccountForm(
   initialData?: AccountFormData,
@@ -115,7 +116,7 @@ function IdentityCard({ form }: { form: AccountFormApi }) {
                 placeholder={translate('accounts.icon_placeholder')}
                 accessibilityLabel={translate('accounts.icon_placeholder')}
                 containerClassName="shrink-0"
-                className="size-16 rounded-card border-0 px-0 text-center text-3xl"
+                className={cn('size-16 rounded-card border-0 px-0 text-center', field.state.value ? 'text-3xl' : 'text-sm')}
                 style={{ backgroundColor: hexWithOpacity(color || DEFAULT_COLOR, 26) }}
               />
             )}

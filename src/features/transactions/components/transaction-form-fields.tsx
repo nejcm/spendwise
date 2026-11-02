@@ -153,7 +153,7 @@ function CategoryTile({ category, selected, invalid, onPress }: {
       accessibilityHint={invalid ? translate('transactions.form.category_error') : undefined}
       onPress={onPress}
       className={cn(
-        'size-19.5 items-center justify-center gap-1 rounded-[18px] border-2 px-1',
+        'h-19.5 max-w-28 min-w-19.5 items-center justify-center gap-1 rounded-[18px] border-2 px-2',
         selected ? 'border-foreground bg-card' : invalid ? 'border-negative/40 bg-negative/10' : 'border-transparent bg-card',
       )}
     >

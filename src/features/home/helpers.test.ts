@@ -132,8 +132,12 @@ describe('budgetOutlook', () => {
   });
 
   it('flags spending ahead of the everyday pace', () => {
-    const outlook = budgetOutlook({ ...base, spent: 156_160, daysLeft: 13 });
-    expect(outlook).toMatchObject({ state: 'fast', perDay: 3_118, overPace: 7_905, plannedPerDay: 3_726 });
+    const outlook = budgetOutlook({ ...base, spent: 160_000, daysLeft: 13 });
+    expect(outlook).toMatchObject({ state: 'fast', perDay: 2_823, overPace: 8_018, plannedPerDay: 3_727 });
+  });
+
+  it('counts today as elapsed so first-day spending within the daily share stays on track', () => {
+    expect(budgetOutlook({ ...base, billsPaid: 0, billsComing: 0, spent: 6_000, daysLeft: 30 })).toMatchObject({ state: 'on_track' });
   });
 
   it('reports the amount over once spending passes the budget', () => {

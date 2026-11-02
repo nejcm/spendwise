@@ -115,7 +115,7 @@ function OverallCard({ startDate, endDate, scale, assigned, onEdit }: OverallPro
   const daysLeft = daysLeftIn(startDate, endDate, today);
   const ends = daysLeft === null
     ? null
-    : daysLeft === 0 ? translate('home.budget.ends_today') : daysLeft === 1 ? translate('home.budget.ends_tomorrow') : translate('home.budget.days_left', { count: daysLeft });
+    : daysLeft === 0 ? translate('home.budget.ends_today') : daysLeft === 1 ? translate('home.budget.ends_tomorrow') : translate('home.budget.days_left', { count: daysLeft + 1 });
   const title = translate(budget.type === 'yearly' ? 'stats.yearly_budget' : 'stats.monthly_budget');
   const unassigned = limit - assigned;
 

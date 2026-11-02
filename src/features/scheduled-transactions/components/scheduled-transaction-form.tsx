@@ -478,8 +478,7 @@ function ScheduledTransactionFormContent({
               <SolidButton
                 color="primary"
                 size="lg"
-                className="rounded-full"
-                textClassName="text-base font-semibold"
+                fullWidth
                 label={translate('scheduled.form.save')}
                 loading={isSubmitting || isLoading}
                 onPress={form.handleSubmit}

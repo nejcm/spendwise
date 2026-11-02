@@ -9,7 +9,7 @@ import { DEFAULT_DATE_FORMAT, DEFAULT_USER_CURRENCY } from '../../config';
 import { shortenNumberString } from '../../lib/number';
 import { CURRENCIES_MAP } from '../currencies';
 
-const TRAILING_DECIMAL_ZEROS = /\.?0+$/;
+const WHOLE_CENTS = /\.00$/;
 
 /**
  * Convert cents integer to display string.
@@ -24,7 +24,7 @@ export function formatMajorUnitsInputFromCents(cents: number): string {
   const n = centsToAmount(cents);
   if (!Number.isFinite(n)) return '';
   const s = n.toFixed(2);
-  return s.replace(TRAILING_DECIMAL_ZEROS, '');
+  return s.replace(WHOLE_CENTS, '');
 }
 
 /**

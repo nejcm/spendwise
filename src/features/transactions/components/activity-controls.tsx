@@ -28,7 +28,7 @@ export function SearchRow({ search, onChangeSearch, filterCount, onOpenFilters }
           placeholderTextColorClassName="accent-muted-foreground"
           accessibilityLabel={translate('transactions.search')}
           returnKeyType="search"
-          className="min-w-0 flex-1 font-sans text-row text-foreground"
+          className="min-w-0 flex-1 font-sans text-row text-foreground web:outline-none"
         />
         {search.length > 0 && (
           <Pressable onPress={() => onChangeSearch('')} hitSlop={8} accessibilityRole="button" accessibilityLabel={translate('common.clear')} className="p-1">

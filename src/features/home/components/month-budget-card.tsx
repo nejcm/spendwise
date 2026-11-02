@@ -26,7 +26,7 @@ const STATE_CLASSES: Record<BudgetOutlook['state'], { ink: string; bar: string }
 function endsLabel(daysLeft: number) {
   if (daysLeft === 0) return translate('home.budget.ends_today');
   if (daysLeft === 1) return translate('home.budget.ends_tomorrow');
-  return translate('home.budget.days_left', { count: daysLeft });
+  return translate('home.budget.days_left', { count: daysLeft + 1 });
 }
 
 export function MonthBudgetCard() {

@@ -299,7 +299,7 @@ function ChatFooter({
             autoCapitalize="sentences"
             autoCorrect
             multiline
-            className="max-h-32 min-w-0 flex-1 self-center py-2 font-sans text-base text-foreground"
+            className="max-h-32 min-w-0 flex-1 self-center py-2 font-sans text-base text-foreground web:outline-none"
           />
           <Pressable
             accessibilityRole="button"

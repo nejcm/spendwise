@@ -34,7 +34,8 @@ describe('migration 6', () => {
         ('t4', 'acc', 'cat_refunds', 'expense', 500, 500, 1),
         ('t5', 'acc', 'cat_job', 'income', 300000, 300000, 1),
         ('t6', 'acc', 'cat_freelance', 'expense', 900, 900, 1),
-        ('t7', 'acc', '_unknown', 'income', 9999, 9999, 1);
+        ('t7', 'acc', '_unknown', 'income', 9999, 9999, 1),
+        ('t8', 'acc', NULL, 'transfer', -700, -700, 1);
       INSERT INTO recurring_rules (id, account_id, category_id, type, amount, frequency, start_date, next_due_date) VALUES
         ('r1', 'acc', 'cat_rent_in', 'income', 80000, 'monthly', 1, 1);
     `);
@@ -54,6 +55,8 @@ describe('migration 6', () => {
     ]);
     expect(await db.getFirstAsync('SELECT transfer_id, is_adjustment FROM transactions WHERE id = ?', ['t1']))
       .toEqual({ transfer_id: null, is_adjustment: 0 });
+    expect(await db.getFirstAsync('SELECT amount, baseAmount FROM transactions WHERE id = ?', ['t8']))
+      .toEqual({ amount: -700, baseAmount: 700 });
     expect(await db.getFirstAsync(`SELECT name FROM sqlite_master WHERE type = 'index' AND name = 'idx_transactions_transfer'`))
       .toEqual({ name: 'idx_transactions_transfer' });
   });

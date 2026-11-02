@@ -151,13 +151,13 @@ export function SettingsScreen() {
     <>
       <FocusAwareStatusBar />
       <ScrollView className="flex-1" style={defaultStyles.transparentBg} contentContainerStyle={{ paddingBottom: NAV_BAR_HEIGHT + insets.bottom + 16 }}>
-        <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[340px] bg-linear-to-b from-wash to-background" />
+        <View pointerEvents="none" className="absolute inset-x-0 top-0 h-85 bg-linear-to-b from-wash to-background" />
         <View className="px-5 pt-2">
           <PageHeader
             title={translate('common.settings')}
             left={<HeaderButton icon={ChevronLeft} label={translate('common.back')} onPress={() => goBackOrFallback(router, '/')} />}
           />
-          <Card className="mt-5 flex-row items-center gap-3.5 p-[18px]">
+          <Card className="mt-5 flex-row items-center gap-3.5 p-4.5">
             <ProfileAvatar size={56} />
             <View className="min-w-0 flex-1">
               <Text className="text-lg font-semibold" numberOfLines={1}>{profile.name}</Text>

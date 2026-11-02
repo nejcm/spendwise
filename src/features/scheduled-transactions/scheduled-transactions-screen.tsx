@@ -55,7 +55,7 @@ export function ScheduledTransactionsScreen() {
         style={defaultStyles.transparentBg}
         contentContainerStyle={{ paddingBottom: NAV_BAR_HEIGHT + insets.bottom + 16, flexGrow: 1 }}
       >
-        <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[340px] bg-linear-to-b from-wash to-background" />
+        <View pointerEvents="none" className="absolute inset-x-0 top-0 h-85 bg-linear-to-b from-wash to-background" />
         <View className="flex-1 px-5 pt-2">
           <PageHeader
             title={translate('scheduled.title')}

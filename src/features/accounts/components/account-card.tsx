@@ -21,7 +21,7 @@ export function AccountCard({ account, monthDelta, onPress }: AccountCardProps) 
       accessibilityRole="button"
       onPress={onPress}
       style={getPressedStyle}
-      className="flex-row items-center gap-3.5 rounded-card bg-card px-[18px] py-4"
+      className="flex-row items-center gap-3.5 rounded-card bg-card px-4.5 py-4"
     >
       <IconTile size="lg" icon={account.icon || '💵'} color={account.color ?? ACCOUNT_TYPE_COLORS[account.type]} />
       <View className="min-w-0 flex-1">

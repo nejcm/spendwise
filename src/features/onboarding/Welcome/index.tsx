@@ -24,18 +24,18 @@ function Preview({ accent }: { accent: string }) {
   const [beforeAmount, afterAmount] = translate('onboarding.preview.ai_message', { amount: under }).split(under);
 
   return (
-    <View className="relative mt-7 h-[330px]" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      <View className="absolute top-0 left-0 w-[78%] overflow-hidden rounded-hero bg-card px-[18px] pt-[18px]">
+    <View className="relative mt-7 h-82.5" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <View className="absolute top-0 left-0 w-[78%] overflow-hidden rounded-hero bg-card px-4.5 pt-4.5">
         <Text className="text-meta text-muted-foreground">{translate('onboarding.preview.total_balance')}</Text>
         <AmountText value={740075} currency={currency} size="hero" />
-        <View className="mx-[-18px] mt-3 h-[52px]">
+        <View className="-mx-4.5 mt-3 h-13">
           <Svg width="100%" height="100%" viewBox="0 0 350 64" preserveAspectRatio="none">
             <Path d={`${SPARKLINE} L350 64 L0 64 Z`} fill={accent} fillOpacity={0.12} />
             <Path d={SPARKLINE} fill="none" stroke={accent} strokeWidth={2.4} strokeLinejoin="round" />
           </Svg>
         </View>
       </View>
-      <View className="absolute top-[150px] right-0 w-[62%] gap-2 rounded-card border border-accent-line bg-accent-soft px-4 py-3.5">
+      <View className="absolute top-37.5 right-0 w-[62%] gap-2 rounded-card border border-accent-line bg-accent-soft px-4 py-3.5">
         <Text className="text-xs font-semibold">{translate('onboarding.preview.ai_title')}</Text>
         <Text className="text-sm">
           {beforeAmount}
@@ -43,7 +43,7 @@ function Preview({ accent }: { accent: string }) {
           {afterAmount}
         </Text>
       </View>
-      <View className="absolute top-[252px] left-5 flex-row items-center gap-2.5 rounded-2xl bg-card py-2.5 pr-3.5 pl-2.5">
+      <View className="absolute top-63 left-5 flex-row items-center gap-2.5 rounded-2xl bg-card py-2.5 pr-3.5 pl-2.5">
         <IconTile icon="🛒" color="#3fb27f" size="sm" />
         <View>
           <Text className="text-sm font-medium">{translate('onboarding.preview.merchant')}</Text>

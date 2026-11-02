@@ -13,8 +13,8 @@ const iconTile = tv({
   variants: {
     size: {
       sm: { base: 'size-10 rounded-xl', emoji: 'text-lg' },
-      md: { base: 'size-[42px] rounded-xl', emoji: 'text-[19px]' },
-      lg: { base: 'size-[46px] rounded-tile', emoji: 'text-xl' },
+      md: { base: 'size-10.5 rounded-xl', emoji: 'text-[19px]' },
+      lg: { base: 'size-11.5 rounded-tile', emoji: 'text-xl' },
     },
   },
   defaultVariants: { size: 'md' },

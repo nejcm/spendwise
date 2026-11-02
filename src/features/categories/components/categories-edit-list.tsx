@@ -78,7 +78,7 @@ export function CategoriesEditList() {
             accessibilityRole="button"
             onPress={() => router.push('/categories/new')}
             style={getPressedStyle}
-            className="mt-3 h-[50px] flex-row items-center justify-center gap-2 rounded-full border-[1.5px] border-dashed border-track"
+            className="mt-3 h-12.5 flex-row items-center justify-center gap-2 rounded-full border-[1.5px] border-dashed border-track"
           >
             <Plus size={18} colorClassName="accent-muted-foreground" />
             <Text className="text-sm font-medium text-muted-foreground">{translate('categories.new')}</Text>
@@ -99,7 +99,7 @@ function EditRow({ category, onPress, onDelete }: { category: Category; onPress:
       : translate('categories.no_budget');
 
   return (
-    <View className="h-[58px] flex-row items-center gap-3 bg-card px-3">
+    <View className="h-14.5 flex-row items-center gap-3 bg-card px-3">
       <Sortable.Handle>
         <View accessibilityLabel={translate('categories.drag_handle')} className="h-full justify-center px-1">
           <GripVertical size={18} colorClassName="accent-muted-foreground" />

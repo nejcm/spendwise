@@ -88,7 +88,7 @@ export function TransactionsScreen() {
   const isNarrowed = filterCount > 0 || debouncedSearch.trim().length > 0;
   const header = (
     <View className="px-5 pt-2">
-      <View pointerEvents="none" className="absolute inset-x-0 -top-2 h-[340px] bg-linear-to-b from-wash to-background" />
+      <View pointerEvents="none" className="absolute inset-x-0 -top-2 h-85 bg-linear-to-b from-wash to-background" />
       <View className="h-12 flex-row items-center justify-between gap-3">
         <Text accessibilityRole="header" numberOfLines={1} className="shrink text-page-title font-bold tracking-page-title">{translate('nav.activity')}</Text>
         <PeriodPill selection={selection} />

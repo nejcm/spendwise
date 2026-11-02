@@ -94,7 +94,7 @@ function GlobalBudgetForm({ currentBudget, onSuccess }: { currentBudget: GlobalB
           const error = getFieldError(field);
           return (
             <>
-              <View className="flex-row items-baseline justify-center gap-0.5 pt-[22px]">
+              <View className="flex-row items-baseline justify-center gap-0.5 pt-5.5">
                 <Text className="text-[28px] font-semibold text-muted-foreground">{CURRENCIES_MAP[currency].symbol}</Text>
                 <Input
                   sheet
@@ -111,7 +111,7 @@ function GlobalBudgetForm({ currentBudget, onSuccess }: { currentBudget: GlobalB
               </View>
               {!!error && <Text className="mt-1 text-center text-meta text-negative">{error}</Text>}
               {chips.length > 0 && (
-                <View className="flex-row flex-wrap justify-center gap-2 pt-[18px]">
+                <View className="flex-row flex-wrap justify-center gap-2 pt-4.5">
                   {chips.map((chip) => (
                     <Pressable
                       key={chip.label}
@@ -129,7 +129,7 @@ function GlobalBudgetForm({ currentBudget, onSuccess }: { currentBudget: GlobalB
         }}
       />
       {amount > 0 && assigned > 0 && (
-        <View className="mt-[22px] gap-2 rounded-[18px] bg-card-2 px-4 py-3.5">
+        <View className="mt-5.5 gap-2 rounded-[18px] bg-card-2 px-4 py-3.5">
           <View className="h-2 flex-row gap-0.5 overflow-hidden rounded-full">
             <View className="bg-accent" style={{ flex: Math.min(assigned, amount) }} />
             {amount > assigned && <View className="bg-track" style={{ flex: amount - assigned }} />}
@@ -145,7 +145,7 @@ function GlobalBudgetForm({ currentBudget, onSuccess }: { currentBudget: GlobalB
         </View>
       )}
       <SolidButton
-        className="mt-[22px]"
+        className="mt-5.5"
         color="primary"
         size="lg"
         fullWidth

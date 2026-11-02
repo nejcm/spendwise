@@ -17,7 +17,7 @@ export function SettingsGroup({ title, rows }: { title: string; rows: SettingsRo
   return (
     <View>
       <SectionHeader title={title} />
-      <Card className="px-[18px]">
+      <Card className="px-4.5">
         {rows.map((row, index) => (
           <ListRow
             key={row.key}

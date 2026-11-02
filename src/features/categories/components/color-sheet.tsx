@@ -50,7 +50,7 @@ export function ColorSheet({ ref, value, name, icon, onSelect }: ColorSheetProps
                     onPress={() => setPicked(color)}
                     className={cn('size-8 items-center justify-center rounded-full border-2', selected ? 'border-foreground' : 'border-transparent')}
                   >
-                    <View className={cn('rounded-full', selected ? 'size-[22px]' : 'size-7')} style={{ backgroundColor: color }} />
+                    <View className={cn('rounded-full', selected ? 'size-5.5' : 'size-7')} style={{ backgroundColor: color }} />
                   </Pressable>
                 );
               })}

@@ -38,7 +38,7 @@ export default function ReadyStep({ onBack, onFinish, onImportCsv }: ReadyStepPr
         </>
       )}
     >
-      <View className="gap-[18px] pt-7">
+      <View className="gap-4.5 pt-7">
         {FEATURES.map(({ key, Icon }) => (
           <View key={key} className="flex-row gap-3.5">
             <View className="size-11 items-center justify-center rounded-tile bg-card">

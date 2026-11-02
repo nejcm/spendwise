@@ -23,7 +23,7 @@ export function NetWorthCard({ accounts }: { accounts: AccountWithBalance[] }) {
       </View>
       {shares.length > 0 && (
         <>
-          <View accessible accessibilityRole="image" accessibilityLabel={shares.map(({ label }) => label).join(', ')} className="h-2.5 flex-row gap-[3px] overflow-hidden rounded-full">
+          <View accessible accessibilityRole="image" accessibilityLabel={shares.map(({ label }) => label).join(', ')} className="h-2.5 flex-row gap-0.75 overflow-hidden rounded-full">
             {shares.map(({ type, share }) => (
               <View key={type} style={{ flex: share, minWidth: 4, backgroundColor: ACCOUNT_TYPE_COLORS[type] }} />
             ))}

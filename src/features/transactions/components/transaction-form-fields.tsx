@@ -26,7 +26,7 @@ import { FieldNodesContext } from '../hooks/form';
 const CATEGORY_TILE_LIMIT = 8;
 const rowInputClassName = 'h-auto min-w-[140px] rounded-none border-0 bg-transparent px-0 text-right text-row';
 function rowClassName(first = false) {
-  return cn('min-h-[54px] py-0', !first && 'border-t border-border');
+  return cn('min-h-13.5 py-0', !first && 'border-t border-border');
 }
 
 const errorEntering = FadeIn.duration(150).easing(easeOut);
@@ -116,7 +116,7 @@ export function AmountField({ form, amountRef, signed = false }: {
                     accessibilityRole="button"
                     accessibilityLabel={translate('common.currency')}
                     onPress={currencyModal.present}
-                    className="mt-2 h-[34px] flex-row items-center gap-1.5 rounded-full bg-card pr-2.5 pl-[5px]"
+                    className="mt-2 h-8.5 flex-row items-center gap-1.5 rounded-full bg-card pr-2.5 pl-1.25"
                   >
                     <FlagCircle currency={currencyField.state.value} size={24} />
                     <Text className="text-[13px] font-semibold">{currencyField.state.value}</Text>
@@ -153,7 +153,7 @@ function CategoryTile({ category, selected, invalid, onPress }: {
       accessibilityHint={invalid ? translate('transactions.form.category_error') : undefined}
       onPress={onPress}
       className={cn(
-        'size-[78px] items-center justify-center gap-1 rounded-[18px] border-2 px-1',
+        'size-19.5 items-center justify-center gap-1 rounded-[18px] border-2 px-1',
         selected ? 'border-foreground bg-card' : invalid ? 'border-negative/40 bg-negative/10' : 'border-transparent bg-card',
       )}
     >
@@ -337,7 +337,7 @@ export function DetailsCard({ form, accounts, isAdjustment, showBaseAmount, onBa
   const dateNode = useFieldNode('date');
   return (
     <>
-      <Card className="mx-5 mt-[18px] rounded-card px-4">
+      <Card className="mx-5 mt-4.5 rounded-card px-4">
         {!isAdjustment && <AccountRows form={form} accounts={accounts} />}
         <form.Field
           name="date"

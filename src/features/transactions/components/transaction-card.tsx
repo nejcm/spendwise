@@ -53,7 +53,7 @@ export const TransactionCard = React.memo(({
 
   return (
     <Pressable
-      className={cn('flex-row items-center gap-3', isCompact ? 'min-h-12 py-1' : 'min-h-[60px] py-2', selected && 'bg-accent-soft', className)}
+      className={cn('flex-row items-center gap-3', isCompact ? 'min-h-12 py-1' : 'min-h-15 py-2', selected && 'bg-accent-soft', className)}
       style={getPressedStyle}
       onPress={() => selectionMode ? toggleSelection() : router.push(`/transactions/${transaction.id}`)}
       onLongPress={() => selectionMode ? toggleSelection() : onStartSelection?.(transaction.id)}

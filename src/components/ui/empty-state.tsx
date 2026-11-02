@@ -17,7 +17,7 @@ export function EmptyState({ icon, title, body, actions, className }: EmptyState
     <View className={cn('items-center', className)}>
       {icon && <View className="pb-6">{icon}</View>}
       <Text className="text-center text-[22px] font-bold tracking-tight">{title}</Text>
-      {!!body && <Text className="max-w-[290px] pt-2 text-center text-row/snug text-foreground-2">{body}</Text>}
+      {!!body && <Text className="max-w-72.5 pt-2 text-center text-row/snug text-foreground-2">{body}</Text>}
       {actions && <View className="w-full gap-2.5 pt-7">{actions}</View>}
     </View>
   );

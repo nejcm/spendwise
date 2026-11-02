@@ -38,7 +38,7 @@ export function BudgetTab({ selection, startDate, endDate }: PeriodProps) {
       {hasPeriodBudgets
         ? <OverallCard startDate={startDate} endDate={endDate} scale={scale} assigned={assigned} onEdit={() => sheet.present()} />
         : <Text className="mt-6 text-center text-meta text-muted-foreground">{translate('stats.budget_needs_period')}</Text>}
-      <View className="flex-row items-baseline justify-between pt-[22px]">
+      <View className="flex-row items-baseline justify-between pt-5.5">
         <Text accessibilityRole="header" className="text-header-title font-semibold">{translate('stats.by_category')}</Text>
         <Pressable accessibilityRole="button" onPress={() => router.navigate('/categories')} hitSlop={8}>
           <Text className="text-sm text-muted-foreground">{translate('stats.manage_categories')}</Text>
@@ -59,7 +59,7 @@ export function BudgetTab({ selection, startDate, endDate }: PeriodProps) {
         : <Text className="py-6 text-center text-meta text-muted-foreground">{translate('stats.budget_no_categories')}</Text>}
       {unset.length > 0 && (
         <>
-          <Text accessibilityRole="header" className="pt-[18px] pb-2 text-row font-semibold">{translate('stats.no_budget_yet')}</Text>
+          <Text accessibilityRole="header" className="pt-4.5 pb-2 text-row font-semibold">{translate('stats.no_budget_yet')}</Text>
           <View className="flex-row flex-wrap gap-2">
             {unset.map((c) => (
               <Pressable
@@ -136,7 +136,7 @@ function OverallCard({ startDate, endDate, scale, assigned, onEdit }: OverallPro
         {pace !== null && (
           <View
             accessibilityLabel={translate('stats.pace_marker')}
-            className="absolute -top-1 h-[18px] w-0.5 rounded-sm bg-foreground"
+            className="absolute -top-1 h-4.5 w-0.5 rounded-sm bg-foreground"
             style={{ left: `${Math.min(100, pace * 100)}%`, marginLeft: -2 }}
           />
         )}
@@ -160,7 +160,7 @@ function CategoryBudgetRow({ row, onPress }: { row: BudgetRow; onPress: () => vo
     : spent === row.limit ? translate('stats.paid_in_full') : translate('categories.left_amount', { amount: format(row.limit - spent) });
 
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={getPressedStyle} className="gap-[9px] rounded-[18px] bg-card px-4 py-3">
+    <Pressable accessibilityRole="button" onPress={onPress} style={getPressedStyle} className="gap-2.25 rounded-[18px] bg-card px-4 py-3">
       <View className="flex-row items-center gap-3">
         <IconTile size="sm" color={row.category_color} icon={categoryIcon(row.category_id, row.category_icon, row.category_name)} />
         <View className="min-w-0 flex-1">

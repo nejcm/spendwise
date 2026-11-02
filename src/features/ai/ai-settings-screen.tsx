@@ -90,7 +90,7 @@ function KeyCard({ provider, providerName, savedKey }: { provider: AiProviderTyp
   };
 
   return (
-    <View className="mt-5 gap-3.5 rounded-card border border-accent-line bg-accent-soft p-[18px]">
+    <View className="mt-5 gap-3.5 rounded-card border border-accent-line bg-accent-soft p-4.5">
       <View className="flex-row items-center gap-3">
         <View className="size-11 items-center justify-center rounded-tile bg-primary">
           <Sparkle size={20} strokeWidth={2} colorClassName="accent-primary-foreground" />
@@ -102,7 +102,7 @@ function KeyCard({ provider, providerName, savedKey }: { provider: AiProviderTyp
           {savedKey
             ? (
                 <View className="flex-row items-center gap-1.5">
-                  <View className="size-[7px] rounded-full bg-positive" />
+                  <View className="size-1.75 rounded-full bg-positive" />
                   <Text className="text-meta text-muted-foreground">{translate('settings.ai_key_on_phone')}</Text>
                 </View>
               )

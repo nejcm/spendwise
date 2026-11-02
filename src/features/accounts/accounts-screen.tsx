@@ -47,7 +47,7 @@ export function AccountsScreen() {
         style={defaultStyles.transparentBg}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[340px] bg-linear-to-b from-wash to-background" />
+        <View pointerEvents="none" className="absolute inset-x-0 top-0 h-85 bg-linear-to-b from-wash to-background" />
         <View className="px-5 pt-2 pb-6">
           <PageHeader
             title={translate('settings.accounts')}
@@ -58,7 +58,7 @@ export function AccountsScreen() {
             ? <SkeletonRows count={3} className="mt-5" />
             : (
                 <>
-                  <View className="mt-5 mb-[22px]">
+                  <View className="mt-5 mb-5.5">
                     <NetWorthCard accounts={accounts} />
                   </View>
                   {accounts.length === 0

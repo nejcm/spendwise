@@ -62,7 +62,7 @@ export default function AccountStep({ onBack, onNext }: AccountStepProps) {
         </>
       )}
     >
-      <Card className="mt-[26px] flex-row items-center gap-3 p-3">
+      <Card className="mt-6.5 flex-row items-center gap-3 p-3">
         <Input
           value={icon}
           onChangeText={setIcon}

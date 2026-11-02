@@ -36,7 +36,7 @@ export function BalanceCard({ total, accountCount, isEmpty }: BalanceCardProps) 
         ? (
             <>
               <AmountText size="hero" value={total} currency={currency} className="pt-2.5" />
-              <View className="mt-[18px] border-t-[1.5px] border-dashed border-track pt-3">
+              <View className="mt-4.5 border-t-[1.5px] border-dashed border-track pt-3">
                 <Text className="text-sm text-muted-foreground">{translate('home.balance_line_empty')}</Text>
               </View>
             </>
@@ -66,7 +66,7 @@ function BalanceTrend({ total, showLine }: { total: number; showLine: boolean })
         <AmountText size="hero" value={total} currency={currency} className="shrink" numberOfLines={1} adjustsFontSizeToFit />
         {change !== null && (
           <View className="items-end gap-0.5 pb-0.5">
-            <Text className={cn('rounded-md px-[7px] py-0.5 text-xs font-semibold tabular-nums', isUp ? 'bg-positive/15 text-positive dark:bg-accent dark:text-accent-foreground' : 'bg-negative/15 text-negative')}>
+            <Text className={cn('rounded-md px-1.75 py-0.5 text-xs font-semibold tabular-nums', isUp ? 'bg-positive/15 text-positive dark:bg-accent dark:text-accent-foreground' : 'bg-negative/15 text-negative')}>
               {`${isUp ? '▲' : '▼'} ${formatNumber(Math.abs(change), numberFormat, 1)}%`}
             </Text>
             <Text className="text-xs text-muted-foreground">{translate('home.vs_end_of', { month: monthName((month + 11) % 12) })}</Text>

@@ -13,7 +13,7 @@ const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 export function BudgetRing({ ratio, state, icon, color }: { ratio: number; state: BudgetState; icon: string; color: string }) {
   const colors = useBudgetColors();
   return (
-    <View className="size-[52px] items-center justify-center">
+    <View className="size-13 items-center justify-center">
       {state !== 'none' && (
         <Svg width={SIZE} height={SIZE} style={{ position: 'absolute', transform: [{ rotate: '-90deg' }] }}>
           <Circle cx={SIZE / 2} cy={SIZE / 2} r={RADIUS} fill="none" stroke={colors.track} strokeWidth={3} />

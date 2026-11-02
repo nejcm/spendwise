@@ -35,9 +35,9 @@ export function LastBackupCard() {
   };
 
   return (
-    <Card className="mt-5 p-[18px]">
+    <Card className="mt-5 p-4.5">
       <Text className="text-meta text-muted-foreground">{translate('import-export.last_backup')}</Text>
-      <Text className="pt-0.5 text-[28px] leading-[34px] font-bold tracking-tight">
+      <Text className="pt-0.5 text-page-title/8.5 font-bold tracking-tight">
         {lastAutoBackupAt ? formatBackupTime(Date.parse(lastAutoBackupAt), dateFormat) : translate('import-export.auto_backup_never')}
       </Text>
       {lastBackupStats && (
@@ -75,7 +75,7 @@ export function LastBackupCard() {
             : backups.map((entry, index) => (
                 <ListRow
                   key={entry.uri}
-                  className={cn('min-h-[56px]', index > 0 && 'border-t border-border')}
+                  className={cn('min-h-14', index > 0 && 'border-t border-border')}
                   title={formatBackupTime(entry.ts, dateFormat)}
                   trailing={restore.isPending && restore.variables === entry.uri ? <ActivityIndicator /> : undefined}
                   chevron

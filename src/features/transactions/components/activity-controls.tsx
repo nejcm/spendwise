@@ -120,7 +120,7 @@ export function ActiveFilters({ chips, onRemove, onClearAll }: {
         </Animated.View>
       ))}
       <Animated.View layout={chipLayout}>
-        <Pressable onPress={onClearAll} hitSlop={6} accessibilityRole="button" className="h-[34px] justify-center px-1">
+        <Pressable onPress={onClearAll} hitSlop={6} accessibilityRole="button" className="h-8.5 justify-center px-1">
           <Text className="text-meta text-muted-foreground underline">{translate('transactions.filter.clear_all')}</Text>
         </Pressable>
       </Animated.View>

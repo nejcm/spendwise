@@ -16,7 +16,7 @@ export function AccountsCarousel({ accounts }: { accounts: AccountWithBalance[] 
 
   return (
     <View>
-      <SectionHeader title={translate('settings.accounts')} onSeeAll={() => router.push('/accounts')} className="px-0 pt-[22px] pb-2.5" titleClassName="text-header-title font-semibold text-foreground" />
+      <SectionHeader title={translate('settings.accounts')} onSeeAll={() => router.push('/accounts')} className="px-0 pt-5.5 pb-2.5" titleClassName="text-header-title font-semibold text-foreground" />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={defaultStyles.transparentBg} className="-mr-5" contentContainerClassName="gap-2.5 pr-5">
         {accounts.map((account) => (
           <Pressable

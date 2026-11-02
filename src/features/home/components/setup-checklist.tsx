@@ -33,14 +33,14 @@ export function SetupChecklist({ accountCount, hasTransactions }: { accountCount
 
   return (
     <View>
-      <View className="flex-row items-baseline justify-between pt-[26px] pb-3">
+      <View className="flex-row items-baseline justify-between pt-6.5 pb-3">
         <Text accessibilityRole="header" className="text-header-title font-semibold">{translate('home.setup.title')}</Text>
         <Text className="text-sm text-muted-foreground">{translate('home.setup.progress', { done: doneCount, total: steps.length })}</Text>
       </View>
       <View className="flex-row gap-1.5 pb-3.5">
         {steps.map((step, index) => <View key={step.key} className={cn('h-1 flex-1 rounded-full', index < doneCount ? 'bg-accent' : 'bg-track')} />)}
       </View>
-      <View className="rounded-card bg-card px-[18px] py-1">
+      <View className="rounded-card bg-card px-4.5 py-1">
         {steps.map(({ key, done }, index) => (
           <Pressable
             key={key}

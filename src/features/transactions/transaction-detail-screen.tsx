@@ -18,7 +18,7 @@ import { transactionToFormValues } from './components/transaction-form-schema';
 import { transactionFooterText } from './helpers';
 
 function Wash() {
-  return <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[340px] bg-linear-to-b from-wash to-background" />;
+  return <View pointerEvents="none" className="absolute inset-x-0 top-0 h-85 bg-linear-to-b from-wash to-background" />;
 }
 
 function useTransactionActions(transaction: TransactionWithCategory | null | undefined) {

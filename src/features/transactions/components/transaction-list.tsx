@@ -65,7 +65,7 @@ export function TransactionList({
     ({ item }: { item: Item }) => {
       if (isHeader(item)) {
         return (
-          <View className={`flex-row justify-between px-5 ${isCompact ? 'pt-2' : 'pt-[18px]'} pb-0.5`}>
+          <View className={`flex-row justify-between px-5 ${isCompact ? 'pt-2' : 'pt-4.5'} pb-0.5`}>
             <Text className="text-meta text-muted-foreground">{formatDate(item.day, 'EEEE, MMM d')}</Text>
             {item.total !== null && (
               <FormattedCurrency value={item.total} currency={currency} prefix={item.total > 0 ? '+' : ''} className="text-meta text-muted-foreground" />

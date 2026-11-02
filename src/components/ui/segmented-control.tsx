@@ -32,7 +32,7 @@ export function SegmentedControl<T extends string>({ options, value, onChange, f
             accessibilityRole="radio"
             accessibilityState={{ checked: selected }}
             onPress={() => onChange(option.value)}
-            className={cn('items-center justify-center rounded-full', isCompact ? 'h-[30px]' : 'h-[38px]', fill ? 'flex-1 px-1' : 'px-4', selected && 'bg-segment-selected')}
+            className={cn('items-center justify-center rounded-full', isCompact ? 'h-7.5' : 'h-9.5', fill ? 'flex-1 px-1' : 'px-4', selected && 'bg-segment-selected')}
           >
             <Text numberOfLines={1} className={cn('text-sm font-medium', selected ? 'text-foreground' : 'text-muted-foreground')}>
               {option.label}

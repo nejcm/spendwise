@@ -8,16 +8,16 @@ import { useAppStore } from '@/lib/store/store';
 
 function Illustration() {
   return (
-    <View className="h-32 w-[168px]">
-      <View className="absolute top-[18px] left-[18px] h-24 w-[132px] rotate-[-7deg] rounded-hero bg-card opacity-60" />
-      <View className="absolute top-3 left-[18px] h-24 w-[132px] gap-2.5 rounded-hero bg-card p-4 shadow-lg shadow-black/10">
+    <View className="h-32 w-42">
+      <View className="absolute top-4.5 left-4.5 h-24 w-33 rotate-[-7deg] rounded-hero bg-card opacity-60" />
+      <View className="absolute top-3 left-4.5 h-24 w-33 gap-2.5 rounded-hero bg-card p-4 shadow-lg shadow-black/10">
         <View className="flex-row items-center gap-2.5">
-          <View className="size-[26px] rounded-lg bg-accent-soft" />
+          <View className="size-6.5 rounded-lg bg-accent-soft" />
           <View className="h-2 flex-1 rounded-full bg-track" />
         </View>
         <View className="flex-row items-center gap-2.5">
-          <View className="size-[26px] rounded-lg bg-track" />
-          <View className="h-2 w-[52px] rounded-full bg-track" />
+          <View className="size-6.5 rounded-lg bg-track" />
+          <View className="h-2 w-13 rounded-full bg-track" />
         </View>
       </View>
       <View className="absolute right-1.5 bottom-1 size-10 items-center justify-center rounded-full bg-primary">
@@ -33,7 +33,7 @@ export function ActivityEmpty() {
   const longPressAction = useAppStore.use.longPressAction();
 
   return (
-    <View className="px-5 pt-[72px]">
+    <View className="px-5 pt-18">
       <EmptyState
         icon={<Illustration />}
         title={translate('transactions.no_transactions')}
@@ -58,7 +58,7 @@ export function ActivityEmpty() {
           </>
         )}
       />
-      <View className="mt-[22px] flex-row gap-2.5 rounded-[18px] border border-accent-line bg-accent-soft px-4 py-3.5">
+      <View className="mt-5.5 flex-row gap-2.5 rounded-[18px] border border-accent-line bg-accent-soft px-4 py-3.5">
         <Sparkle size={16} colorClassName="accent-accent" className="mt-0.5" />
         <Text className="flex-1 text-sm/snug">{translate(`transactions.empty.tip_${longPressAction}`)}</Text>
       </View>

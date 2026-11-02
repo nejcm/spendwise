@@ -19,7 +19,7 @@ export function ArchivedAccounts({ accounts }: { accounts: Account[] }) {
         accessibilityRole="button"
         onPress={sheet.present}
         style={getPressedStyle}
-        className="mt-2.5 flex-row items-center gap-3.5 rounded-card border-[1.5px] border-dashed border-track px-[18px] py-3"
+        className="mt-2.5 flex-row items-center gap-3.5 rounded-card border-[1.5px] border-dashed border-track px-4.5 py-3"
       >
         <View className="size-10 items-center justify-center rounded-xl bg-card-2">
           <Archive size={18} strokeWidth={1.8} colorClassName="accent-muted-foreground" />

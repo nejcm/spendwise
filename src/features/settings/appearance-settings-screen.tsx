@@ -60,7 +60,7 @@ export function AppearanceSettingsScreen() {
             onPress={() => updateAppState({ density: value })}
             className="p-3"
           >
-            <View className={cn('h-[76px] justify-center', gap)}>
+            <View className={cn('h-19 justify-center', gap)}>
               {Array.from({ length: rows }, (_, i) => <View key={i} className={cn('bg-card-2', row)} />)}
             </View>
           </ChoiceTile>

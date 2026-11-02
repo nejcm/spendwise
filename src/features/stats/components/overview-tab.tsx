@@ -150,7 +150,7 @@ function SpendBars({ selection, startDate, endDate, rows, today }: PeriodProps &
 
   return (
     <View className="gap-1.5">
-      <View className="flex-row items-end justify-between gap-[3px] border-b border-border" style={{ height: CHART_HEIGHT }}>
+      <View className="flex-row items-end justify-between gap-0.75 border-b border-border" style={{ height: CHART_HEIGHT }}>
         {bars.map((bar) => (
           <View
             key={bar.key}

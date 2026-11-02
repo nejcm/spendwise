@@ -76,7 +76,7 @@ export function NavTabBar() {
                   )}
                 delayLongPress={400}
                 scaleTo={0.95}
-                className="-mt-1.5 size-[52px] items-center justify-center rounded-full bg-fab"
+                className="-mt-1.5 size-13 items-center justify-center rounded-full bg-fab"
               >
                 <Icon colorClassName="accent-fab-foreground" size={22} strokeWidth={2.2} />
               </PressableScale>
@@ -103,7 +103,7 @@ export function NavTabBar() {
             />
             <Text
               numberOfLines={1}
-              className={cn('text-[11px] leading-[14px]', isActive ? 'font-semibold text-foreground' : 'text-muted-foreground')}
+              className={cn('text-[11px]/3.5', isActive ? 'font-semibold text-foreground' : 'text-muted-foreground')}
             >
               {label}
             </Text>

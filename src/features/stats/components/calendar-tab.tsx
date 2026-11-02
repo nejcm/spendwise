@@ -48,11 +48,11 @@ export function CalendarTab({ startDate, endDate }: PeriodProps) {
   return (
     <>
       <Card variant="hero" className="mt-4 gap-2 px-3.5 py-4">
-        <View className="flex-row gap-[5px]">
+        <View className="flex-row gap-1.25">
           {WEEKDAYS.map((day) => <Text key={day} className="flex-1 text-center text-xs text-muted-foreground">{formatDateFull(day, 'EEE')}</Text>)}
         </View>
         {weeks.map((week) => (
-          <View key={week.find(Boolean)?.date} className="flex-row gap-[5px]">
+          <View key={week.find(Boolean)?.date} className="flex-row gap-1.25">
             {week.map((cell, i) => cell
               ? (
                   <Pressable
@@ -62,7 +62,7 @@ export function CalendarTab({ startDate, endDate }: PeriodProps) {
                     accessibilityLabel={`${formatDateFull(cell.date, 'MMMM d')}, ${cell.value > 0 ? format(cell.value) : translate('stats.no_spending')}`}
                     onPress={() => setPicked(cell.date)}
                     className={cn(
-                      'h-[52px] flex-1 items-center justify-center rounded-xl border-2',
+                      'h-13 flex-1 items-center justify-center rounded-xl border-2',
                       HEAT_CLASSES[cell.level],
                       cell.date === selected ? 'border-foreground' : 'border-transparent',
                     )}
@@ -94,7 +94,7 @@ function DayList({ day, monthStart, monthEnd, spent }: { day: number; monthStart
 
   return (
     <>
-      <View className="flex-row items-baseline justify-between pt-[22px] pb-1">
+      <View className="flex-row items-baseline justify-between pt-5.5 pb-1">
         <Text accessibilityRole="header" className="text-header-title font-semibold">{formatDateFull(day, 'EEEE, MMM d')}</Text>
         {spent > 0 && <Text className="text-sm text-muted-foreground tabular-nums">{translate('stats.spent_amount', { amount: format(spent) })}</Text>}
       </View>

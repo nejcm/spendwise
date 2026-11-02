@@ -60,8 +60,8 @@ export function FormattingSettingsScreen() {
   return (
     <SettingsPage title={translate('settings.formatting')}>
       <SectionHeader title={translate('settings.formatting_preview')} />
-      <View className="gap-1 rounded-card border border-accent-line bg-accent-soft px-[18px] py-4">
-        <Text className="text-[32px] leading-[35px] font-bold tracking-tight tabular-nums" numberOfLines={1} adjustsFontSizeToFit>
+      <View className="gap-1 rounded-card border border-accent-line bg-accent-soft px-4.5 py-4">
+        <Text className="text-[32px]/8.75 font-bold tracking-tight tabular-nums" numberOfLines={1} adjustsFontSizeToFit>
           {formatCurrency(-SAMPLE_CENTS, currency, { numberFormat, currencyFormat })}
         </Text>
         <Text className="text-sm text-muted-foreground">{translate('settings.formatting_preview_meta', { date: formatDateFull(SAMPLE_DATE, dateFormat) })}</Text>
@@ -76,7 +76,7 @@ export function FormattingSettingsScreen() {
               key={value}
               accessibilityRole="radio"
               accessibilityState={{ checked: selected }}
-              className={cn('min-h-[50px]', index > 0 && 'border-t border-border')}
+              className={cn('min-h-12.5', index > 0 && 'border-t border-border')}
               title={<Text className="text-row tabular-nums">{formatCurrency(SAMPLE_CENTS, currency, { numberFormat, currencyFormat: value })}</Text>}
               trailing={selected && <Check size={20} strokeWidth={2.4} colorClassName="accent-accent" />}
               onPress={() => setCurrencyFormat(value)}
@@ -88,27 +88,27 @@ export function FormattingSettingsScreen() {
       <SectionHeader title={translate('settings.dates_and_currency')} />
       <Card className="px-4">
         <ListRow
-          className="min-h-[50px]"
+          className="min-h-12.5"
           title={translate('settings.number_format')}
           trailing={<Text className="text-row text-muted-foreground tabular-nums">{sheets.numberFormat.options.find((o) => o.value === numberFormat)?.label}</Text>}
           chevron
           onPress={() => openSheet('numberFormat')}
         />
         <ListRow
-          className="min-h-[50px] border-t border-border"
+          className="min-h-12.5 border-t border-border"
           title={translate('settings.date_format')}
           trailing={<Text className="text-row text-muted-foreground">{formatDateFull(SAMPLE_DATE, dateFormat)}</Text>}
           chevron
           onPress={() => openSheet('dateFormat')}
         />
         <ListRow
-          className="min-h-[50px] border-t border-border"
+          className="min-h-12.5 border-t border-border"
           title={translate('settings.month_start_day')}
           trailing={<Text className="text-row text-muted-foreground tabular-nums">{monthStartDay}</Text>}
           chevron
           onPress={() => openSheet('monthStartDay')}
         />
-        <CurrencyItem className="min-h-[50px] border-t border-border" />
+        <CurrencyItem className="min-h-12.5 border-t border-border" />
       </Card>
       <Text className="px-1 pt-2.5 text-meta text-muted-foreground">
         {ratesDate

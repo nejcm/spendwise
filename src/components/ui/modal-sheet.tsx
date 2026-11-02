@@ -63,7 +63,7 @@ export function ModalSheet<T>({
   const renderHandleComponent = React.useCallback(
     () => (
       <>
-        <View className="mt-2.5 h-[5px] w-10 self-center rounded-full bg-track" />
+        <View className="mt-2.5 h-1.25 w-10 self-center rounded-full bg-track" />
         <ModalSheetHeader title={title} close={modal.close} />
       </>
     ),

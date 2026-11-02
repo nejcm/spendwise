@@ -35,7 +35,7 @@ const SINCE_DATE_FORMAT = 'MMM d, yyyy';
 const PAYMENT_DATE_FORMAT = 'MMM d';
 
 function Wash() {
-  return <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[340px] bg-linear-to-b from-wash to-background" />;
+  return <View pointerEvents="none" className="absolute inset-x-0 top-0 h-85 bg-linear-to-b from-wash to-background" />;
 }
 
 function useMutedBillRule(ruleId: string) {
@@ -145,7 +145,7 @@ function Hero({ rule, today }: { rule: ScheduledTransactionWithDetails; today: s
 
   return (
     <View className="items-center px-5 pt-4">
-      <IconTile color={rule.category_color} className="size-[68px] rounded-hero">
+      <IconTile color={rule.category_color} className="size-17 rounded-hero">
         <Text className="text-[32px]">{rule.category_icon ?? '🔁'}</Text>
       </IconTile>
       <Text className="pt-2 text-center text-xl font-semibold" numberOfLines={2}>{rule.note || rule.category_name}</Text>
@@ -178,7 +178,7 @@ function Rows({ rule }: { rule: ScheduledTransactionWithDetails }) {
     : translate('scheduled.no_end_date');
 
   return (
-    <Card className="mx-5 mt-6 rounded-card px-[18px]">
+    <Card className="mx-5 mt-6 rounded-card px-4.5">
       <DetailRow first label={translate('scheduled.repeats')} value={frequency} />
       <DetailRow
         label={translate(rule.type === 'income' ? 'transactions.form.to' : 'transactions.form.from')}
@@ -193,7 +193,7 @@ function Rows({ rule }: { rule: ScheduledTransactionWithDetails }) {
       <DetailRow label={translate('scheduled.since')} value={`${since} · ${ends}`} />
       {rule.type === 'expense' && !!rule.is_active && (
         <ListRow
-          className="min-h-[52px] border-t border-border"
+          className="min-h-13 border-t border-border"
           onPress={remindersOn ? undefined : () => router.push('/settings/notifications')}
           title={<Text className="text-sm text-muted-foreground">{remindLabel}</Text>}
           meta={remindersOn ? undefined : translate('scheduled.reminders_off')}

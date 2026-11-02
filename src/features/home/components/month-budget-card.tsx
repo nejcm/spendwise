@@ -99,13 +99,13 @@ function BudgetOutlookCard({ title, limit, startDate, endDate, yearMonth, onPres
             currency={currency}
             numberOfLines={1}
             adjustsFontSizeToFit
-            className={cn('shrink text-[34px] leading-[38px] font-bold tracking-tight tabular-nums', outlook.state === 'over' && 'text-negative')}
+            className={cn('shrink text-[34px]/9.5 font-bold tracking-tight tabular-nums', outlook.state === 'over' && 'text-negative')}
           />
           <Text className="text-[15px] text-muted-foreground">{outlook.state === 'over' ? translate('common.over') : translate('home.budget.a_day')}</Text>
         </View>
         <View className="flex-row items-start gap-2">
-          <View className={cn('mt-[6px] size-2 rounded-full', classes.bar)} />
-          <Text className="shrink text-[13px] leading-[18px] text-foreground-2">
+          <View className={cn('mt-1.5 size-2 rounded-full', classes.bar)} />
+          <Text className="shrink text-meta/4.5 text-foreground-2">
             <Text className={cn('text-[13px] font-semibold', classes.ink)}>{status}</Text>
             {detail && ` · ${detail}`}
           </Text>

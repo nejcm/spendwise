@@ -159,7 +159,7 @@ function DetailsCard({ form, isCreate }: { form: AccountFormApi; isCreate: boole
       name="currency"
       children={(currencyField) => (
         <>
-          <Card className="mt-5 px-[18px]">
+          <Card className="mt-5 px-4.5">
             <ListRow
               className="border-b border-border"
               chevron={isCreate}

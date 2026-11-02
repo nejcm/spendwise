@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { DEFAULT_COLOR } from '@/components/color-selector';
 import { FormattedCurrency, getPressedStyle, IconTile, SectionHeader, Text } from '@/components/ui';
+import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -11,6 +12,7 @@ import { defaultStyles } from '@/lib/theme/styles';
 export function AccountsCarousel({ accounts }: { accounts: AccountWithBalance[] }) {
   const router = useRouter();
   const currency = useAppStore.use.currency();
+  const isCompact = useAppStore.use.density() === 'compact';
 
   return (
     <View>
@@ -22,11 +24,14 @@ export function AccountsCarousel({ accounts }: { accounts: AccountWithBalance[] 
             accessibilityRole="button"
             onPress={() => router.push(`/accounts/${account.id}`)}
             style={getPressedStyle}
-            className="w-38 gap-2 rounded-card bg-card p-4"
+            className={cn('w-38 rounded-card bg-card', isCompact ? 'gap-1.5 p-3' : 'gap-2 p-4')}
           >
-            <IconTile icon={account.icon || '💵'} color={account.color ?? DEFAULT_COLOR} className="size-9 rounded-[11px]" />
+            <View className={cn(isCompact && 'flex-row items-center gap-2')}>
+              <IconTile icon={account.icon || '💵'} color={account.color ?? DEFAULT_COLOR} className={isCompact ? 'size-7 rounded-lg' : 'size-9 rounded-[11px]'} />
+              {isCompact && <Text className="shrink text-meta text-muted-foreground" numberOfLines={1}>{account.name}</Text>}
+            </View>
             <View>
-              <Text className="text-meta text-muted-foreground" numberOfLines={1}>{account.name}</Text>
+              {!isCompact && <Text className="text-meta text-muted-foreground" numberOfLines={1}>{account.name}</Text>}
               <FormattedCurrency value={account.baseBalance} currency={currency} className="text-header-title font-semibold" numberOfLines={1} adjustsFontSizeToFit />
             </View>
           </Pressable>

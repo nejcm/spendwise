@@ -20,6 +20,7 @@ import { calendarDateToUnix, getPeriodRange, isNavigablePeriodMode, navigatePeri
 import { getPeriodLabel } from '@/lib/date/labels';
 import { translate } from '@/lib/i18n';
 import { selectIsAiFeatureOn, useAppStore } from '@/lib/store/store';
+import { hexWithOpacity } from '@/lib/theme/colors';
 import { customRanges, elapsedSpendStats, monthlyGlobalBudget, savedRatio, trendBars, trendRanges } from '../helpers';
 import { useGlobalBudget } from '../hooks';
 
@@ -187,7 +188,7 @@ function PeriodTrend({ selection, startDate, endDate }: Pick<PeriodProps, 'selec
         ))}
         {!!budget && width > 0 && (
           <Svg pointerEvents="none" width={width} height={2} style={{ position: 'absolute', left: 0, bottom: heightOf(budget) - 1 }}>
-            <Line x1={0} x2={width} y1={1} y2={1} stroke={colors.muted} strokeWidth={1.5} strokeDasharray="4 4" />
+            <Line x1={0} x2={width} y1={1} y2={1} stroke={hexWithOpacity(colors.muted, 45)} strokeWidth={1.5} strokeDasharray="4 4" />
           </Svg>
         )}
       </View>

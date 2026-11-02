@@ -1,5 +1,5 @@
+import type { SettingsRow } from './components/settings-group';
 import type { OptionType } from '@/components/ui';
-import type { UniwindLucideIcon } from '@/components/ui/icon';
 import type { Language } from '@/features/languages/types';
 import { useQuery } from '@tanstack/react-query';
 import * as Linking from 'expo-linking';
@@ -7,7 +7,7 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderButton, PageHeader } from '@/components/page-header';
-import { Card, FocusAwareStatusBar, IconTile, ListRow, Options, ScrollView, SectionHeader, Switch, Text, useModalSheet, View } from '@/components/ui';
+import { Card, FocusAwareStatusBar, Options, ScrollView, Switch, Text, useModalSheet, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import {
   ALargeSmall,
@@ -38,7 +38,6 @@ import { countNotificationsOn } from '@/features/notifications/helpers';
 import { notificationsQuery } from '@/features/notifications/notifications';
 import { lockTimeoutLabel, toggleAppLock } from '@/features/security/app-lock';
 import { setAnalyticsEnabled } from '@/lib/analytics';
-import { cn } from '@/lib/cn';
 import { translate, useSelectedLanguage } from '@/lib/i18n';
 import { goBackOrFallback } from '@/lib/routing';
 import { selectIsAiEnabled, selectProfile, useAppStore } from '@/lib/store/store';
@@ -49,16 +48,7 @@ import { useDataCounts } from './api';
 import { AppInfoTrigger } from './components/app-info-trigger';
 import { DeleteDataSheet } from './components/delete-data-sheet';
 import DevSection from './components/dev-section';
-
-type Row = {
-  key: string;
-  icon: UniwindLucideIcon;
-  title: string;
-  meta?: string | null;
-  danger?: boolean;
-  trailing?: React.ReactNode;
-  onPress?: () => void;
-};
+import { SettingsGroup } from './components/settings-group';
 
 export function SettingsScreen() {
   const router = useRouter();
@@ -100,7 +90,7 @@ export function SettingsScreen() {
   const lastBackup = lastBackupAt ? formatInstant(Math.floor(Date.parse(lastBackupAt) / 1000), dateFormat) : null;
   const notificationsOn = canNotify ? countNotificationsOn(notifications, recommendationsEnabled) : 0;
 
-  const groups: { title: string; rows: Row[] }[] = [
+  const groups: { title: string; rows: SettingsRow[] }[] = [
     {
       title: translate('settings.money'),
       rows: [
@@ -178,29 +168,7 @@ export function SettingsScreen() {
             <GhostButton accessibilityLabel={translate('settings.edit_profile')} label={translate('common.edit')} onPress={() => router.push('/settings/profile')} />
           </Card>
 
-          {groups.map((group) => (
-            <View key={group.title}>
-              <SectionHeader title={group.title} />
-              <Card className="px-[18px]">
-                {group.rows.map((row, index) => (
-                  <ListRow
-                    key={row.key}
-                    className={cn(index > 0 && 'border-t border-border')}
-                    icon={(
-                      <IconTile size="sm">
-                        <row.icon size={20} colorClassName={row.danger ? 'accent-negative' : 'accent-foreground'} />
-                      </IconTile>
-                    )}
-                    title={row.danger ? <Text className="text-row font-medium text-negative">{row.title}</Text> : row.title}
-                    meta={row.meta ?? undefined}
-                    trailing={row.trailing}
-                    chevron={!!row.onPress}
-                    onPress={row.onPress}
-                  />
-                ))}
-              </Card>
-            </View>
-          ))}
+          {groups.map((group) => <SettingsGroup key={group.title} {...group} />)}
 
           <DevSection />
           <View className="items-center pt-6">

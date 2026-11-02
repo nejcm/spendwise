@@ -1,5 +1,6 @@
-import type { PressableProps, TextProps, View } from 'react-native';
+import type { TextProps, View } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
+import type { PressableScaleProps } from './pressable-scale';
 import * as React from 'react';
 import { tv } from '@/lib/cn';
 import { Button, buttonTv } from './button';
@@ -70,7 +71,7 @@ export type OutlineButtonProps = {
   textClassName?: string;
   textProps?: TextProps;
 } & ButtonVariants
-& Omit<PressableProps, 'disabled' | 'color' | 'size'>;
+& Omit<PressableScaleProps, 'disabled' | 'color' | 'size'>;
 
 export function OutlineButton({
   ref,

@@ -2,6 +2,7 @@ import type { HostInstance, TextInput, View } from 'react-native';
 import type { KeyboardAwareScrollViewRef } from 'react-native-keyboard-controller';
 import type { TransactionFormInitialValues, TransactionFormValues } from '@/features/transactions/components/transaction-form-schema';
 import { useForm } from '@tanstack/react-form';
+import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 
 import * as React from 'react';
@@ -120,6 +121,7 @@ export function useTransactionForm({ initialValues, onSaved, isAdjustment = fals
     },
     onSubmitMeta: { addAnother: false } as SubmitMeta,
     onSubmitInvalid: ({ formApi }) => {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       const failing = FIELD_ORDER.find((name) => formApi.getFieldMeta(name)?.errors.length);
       if (!failing) return;
       const node = fieldNodesRef.current[failing];

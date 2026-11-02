@@ -1,8 +1,10 @@
 /* eslint-disable react-refresh/only-export-components */
-import type { PressableProps, PressableStateCallbackType, StyleProp, TextProps, View, ViewStyle } from 'react-native';
+import type { PressableStateCallbackType, StyleProp, TextProps, ViewStyle } from 'react-native';
+import type { PressableScaleProps } from './pressable-scale';
 import * as React from 'react';
-import { ActivityIndicator, Pressable, Text } from 'react-native';
+import { ActivityIndicator, Text } from 'react-native';
 import { tv } from '@/lib/cn';
+import { PressableScale } from './pressable-scale';
 
 export const buttonTv = tv({
   slots: {
@@ -133,7 +135,7 @@ export type ButtonProps = {
   textClassName?: string;
   textProps?: TextProps;
   indicatorSize?: 'small' | 'large' | number;
-} & PressableProps;
+} & PressableScaleProps;
 
 export function Button({
   ref,
@@ -149,11 +151,11 @@ export function Button({
   style,
   disabled = false,
   ...props
-}: ButtonProps & { ref?: React.RefObject<View | null> }) {
+}: ButtonProps) {
   return (
-    <Pressable
+    <PressableScale
       disabled={disabled || loading}
-      style={(state) => getPressedStyle(state, style, !(disabled || loading))}
+      style={style}
       {...props}
       ref={ref}
       testID={testID}
@@ -183,6 +185,6 @@ export function Button({
               )}
         </>
       )}
-    </Pressable>
+    </PressableScale>
   );
 }

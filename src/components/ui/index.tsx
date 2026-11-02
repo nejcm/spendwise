@@ -26,7 +26,7 @@ export * from './modal';
 export * from './modal-sheet';
 export * from './outline-button';
 export * from './overflow-menu';
-export * from './progress-bar-animated';
+export * from './pressable-scale';
 export * from './section-header';
 export * from './segmented-control';
 export * from './select';

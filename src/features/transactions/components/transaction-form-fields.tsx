@@ -6,6 +6,7 @@ import type { Category } from '@/features/categories/types';
 import { useStore } from '@tanstack/react-form';
 import * as React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { Card, FlagCircle, Input, ListRow, Options, Text, useModalSheet } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
@@ -19,6 +20,7 @@ import { categoryTiles } from '@/features/transactions/helpers';
 import { cn } from '@/lib/cn';
 import { dateToUnix, isValidISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
+import { easeOut } from '@/lib/theme/motion';
 import { FieldNodesContext } from '../hooks/form';
 
 const CATEGORY_TILE_LIMIT = 8;
@@ -27,13 +29,22 @@ function rowClassName(first = false) {
   return cn('min-h-[54px] py-0', !first && 'border-t border-border');
 }
 
-function FieldError({ message }: { message?: string }) {
+const errorEntering = FadeIn.duration(150).easing(easeOut);
+const errorExiting = FadeOut.duration(120);
+
+function AnimatedError({ message, children }: { message?: string; children: React.ReactNode }) {
   if (!message) return null;
+  return <Animated.View entering={errorEntering} exiting={errorExiting}>{children}</Animated.View>;
+}
+
+function FieldError({ message }: { message?: string }) {
   return (
-    <View className="flex-row items-center justify-center gap-1.5 pt-2">
-      <CircleAlert size={15} colorClassName="accent-negative" />
-      <Text className="text-sm font-medium text-negative">{message}</Text>
-    </View>
+    <AnimatedError message={message}>
+      <View className="flex-row items-center justify-center gap-1.5 pt-2">
+        <CircleAlert size={15} colorClassName="accent-negative" />
+        <Text className="text-sm font-medium text-negative">{message}</Text>
+      </View>
+    </AnimatedError>
   );
 }
 
@@ -48,7 +59,7 @@ function useFieldNode(name?: string) {
 const selectSubmitted = (s: { submissionAttempts: number }) => s.submissionAttempts > 0;
 
 export function RowError({ message }: { message?: string }) {
-  return message ? <Text className="text-meta text-negative">{message}</Text> : null;
+  return <AnimatedError message={message}><Text className="text-meta text-negative">{message}</Text></AnimatedError>;
 }
 
 export function RowLabel({ children }: { children: string }) {
@@ -169,7 +180,7 @@ export function CategorySection({ form }: { form: TransactionFormApi }) {
           <View>
             <View className="flex-row items-center gap-2 px-5 pb-2.5">
               <Text ref={fieldNode} className="text-sm font-semibold">{translate('transactions.category')}</Text>
-              {!!error && <Text className="text-sm text-negative">{error}</Text>}
+              <AnimatedError message={error}><Text className="text-sm text-negative">{error}</Text></AnimatedError>
               <CategoryPicker
                 type={type}
                 selectedId={field.state.value}

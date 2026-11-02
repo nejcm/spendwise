@@ -1,5 +1,6 @@
-import type { PressableProps, View } from 'react-native';
+import type { View } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
+import type { PressableScaleProps } from './pressable-scale';
 import * as React from 'react';
 import { Button, buttonTv } from './button';
 
@@ -12,7 +13,7 @@ export type SolidButtonProps = {
   className?: string;
   textClassName?: string;
 } & ButtonVariants
-& Omit<PressableProps, 'disabled'>;
+& Omit<PressableScaleProps, 'disabled'>;
 
 export function SolidButton({
   ref,

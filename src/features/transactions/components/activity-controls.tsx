@@ -2,11 +2,13 @@ import type { ActiveFilterChip } from '../filters';
 import type { TransactionSort, TransactionType } from '../types';
 import * as React from 'react';
 import { Pressable, TextInput, View } from 'react-native';
+import Animated, { FadeOut, LinearTransition } from 'react-native-reanimated';
 import { FilterChip, FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
 import { ArrowDownUp, ListFilter, Search, X } from '@/components/ui/icon';
 import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
+import { easeOut } from '@/lib/theme/motion';
 
 export function SearchRow({ search, onChangeSearch, filterCount, onOpenFilters }: {
   search: string;
@@ -102,6 +104,9 @@ export function TypeTabs({ value, onChange }: { value: TransactionType | null; o
   );
 }
 
+const chipExiting = FadeOut.duration(150);
+const chipLayout = LinearTransition.duration(200).easing(easeOut);
+
 export function ActiveFilters({ chips, onRemove, onClearAll }: {
   chips: ActiveFilterChip[];
   onRemove: (chip: ActiveFilterChip) => void;
@@ -109,10 +114,16 @@ export function ActiveFilters({ chips, onRemove, onClearAll }: {
 }) {
   return (
     <View className="flex-row flex-wrap items-center gap-1.5 pt-3">
-      {chips.map((chip) => <FilterChip key={chip.key} label={chip.label} icon={chip.icon ?? undefined} onRemove={() => onRemove(chip)} />)}
-      <Pressable onPress={onClearAll} hitSlop={6} accessibilityRole="button" className="h-[34px] justify-center px-1">
-        <Text className="text-meta text-muted-foreground underline">{translate('transactions.filter.clear_all')}</Text>
-      </Pressable>
+      {chips.map((chip) => (
+        <Animated.View key={chip.key} exiting={chipExiting} layout={chipLayout}>
+          <FilterChip label={chip.label} icon={chip.icon ?? undefined} onRemove={() => onRemove(chip)} />
+        </Animated.View>
+      ))}
+      <Animated.View layout={chipLayout}>
+        <Pressable onPress={onClearAll} hitSlop={6} accessibilityRole="button" className="h-[34px] justify-center px-1">
+          <Text className="text-meta text-muted-foreground underline">{translate('transactions.filter.clear_all')}</Text>
+        </Pressable>
+      </Animated.View>
     </View>
   );
 }

@@ -2,8 +2,8 @@ import type { Href } from 'expo-router';
 import type { UniwindLucideIcon } from '@/components/ui/icon';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
-import { Pressable, View } from 'react-native';
-import { getPressedStyle, Text } from '@/components/ui';
+import { View } from 'react-native';
+import { PressableScale, Text } from '@/components/ui';
 import { ArrowLeftRight, Calendar, Plus, ScanLine } from '@/components/ui/icon';
 import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
@@ -30,18 +30,17 @@ export function QuickActions() {
       {ACTIONS.map(({ key, Icon, href }) => {
         const isPrimary = key === 'add';
         return (
-          <Pressable
+          <PressableScale
             key={key}
             accessibilityRole="button"
             onPress={() => (href ? router.push(href) : triggerScanPicker())}
-            style={getPressedStyle}
             className="flex-1 items-center gap-2"
           >
             <View className={cn('size-15 items-center justify-center rounded-card', isPrimary ? 'bg-primary' : 'bg-card')}>
               <Icon size={28} strokeWidth={isPrimary ? 2 : 1.8} colorClassName={isPrimary ? 'accent-primary-foreground' : 'accent-foreground'} />
             </View>
             <Text className="text-meta text-foreground-2" numberOfLines={1}>{translate(`home.actions.${key}`)}</Text>
-          </Pressable>
+          </PressableScale>
         );
       })}
     </View>

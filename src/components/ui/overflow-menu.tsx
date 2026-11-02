@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Modal, Pressable, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { cn } from '@/lib/cn';
-import { getPressedStyle } from './button';
 import { GhostButton } from './ghost-button';
 import { EllipsisVertical } from './icon';
 import { IconButton } from './icon-button';
@@ -81,7 +80,6 @@ export function OverflowMenu({ items, accessibilityLabel, className, containerCl
             {visibleItems.map((item) => (
               <GhostButton
                 key={item.label}
-                style={getPressedStyle}
                 onPress={() => {
                   close();
                   item.onPress();

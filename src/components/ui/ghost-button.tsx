@@ -1,5 +1,6 @@
-import type { PressableProps, View } from 'react-native';
+import type { View } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
+import type { PressableScaleProps } from './pressable-scale';
 import * as React from 'react';
 import { tv } from '@/lib/cn';
 import { Button, buttonTv } from './button';
@@ -75,7 +76,7 @@ export type GhostButtonProps = {
   className?: string;
   textClassName?: string;
 } & ButtonVariants
-& Omit<PressableProps, 'disabled' | 'color' | 'size'>;
+& Omit<PressableScaleProps, 'disabled' | 'color' | 'size'>;
 
 export function GhostButton({
   ref,

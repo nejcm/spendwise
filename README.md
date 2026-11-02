@@ -2,7 +2,7 @@
 
 Spendwise is a free personal finance app built with Expo and React Native. It is local-first and offline-friendly: core financial data lives on-device, with optional AI features that use your own provider key.
 
-<img src="screenshot.jpg" alt="Spendwise app" width="198" height="420" />
+<img src=".docs/overview.png" alt="Spendwise home, categories, insights and budget in light and dark themes" width="720" />
 
 ## What the app includes
 

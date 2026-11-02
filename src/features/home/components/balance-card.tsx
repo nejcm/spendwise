@@ -79,7 +79,7 @@ function BalanceTrend({ total, showLine }: { total: number; showLine: boolean })
         )}
       </View>
       {!!(summary?.income || summary?.expense) && (
-        <View className="mt-4 flex-row gap-3">
+        <View className="mt-3 flex-row gap-3">
           <SummaryFigure label={translate('common.income')} value={summary.income} currency={currency} icon={ArrowUpRight} tone="positive" />
           <SummaryFigure label={translate('common.expenses')} value={summary.expense} currency={currency} icon={ArrowDownRight} tone="negative" />
         </View>
@@ -102,14 +102,9 @@ type SummaryFigureProps = { label: string; value: number; currency: CurrencyKey;
 
 function SummaryFigure({ label, value, currency, icon: Icon, tone }: SummaryFigureProps) {
   return (
-    <View className="flex-1 flex-row items-center gap-2.5">
-      <View className={cn('size-8 items-center justify-center rounded-full', TONE_CLASSES[tone].tile)}>
-        <Icon size={16} strokeWidth={2.2} colorClassName={TONE_CLASSES[tone].icon} />
-      </View>
-      <View className="shrink">
-        <Text className="text-meta text-muted-foreground">{label}</Text>
-        <AmountText value={value} currency={currency} numberOfLines={1} />
-      </View>
+    <View accessible accessibilityLabel={label} className={cn('shrink flex-row items-center gap-1.5 rounded-full py-1 pr-2.5 pl-1.5', TONE_CLASSES[tone].tile)}>
+      <Icon size={14} strokeWidth={2.2} colorClassName={TONE_CLASSES[tone].icon} />
+      <AmountText value={value} currency={currency} numberOfLines={1} className="shrink text-sm" />
     </View>
   );
 }

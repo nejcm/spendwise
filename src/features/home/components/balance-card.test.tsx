@@ -17,15 +17,15 @@ describe('balance card income row', () => {
   it('shows this month\'s income and expenses', () => {
     mockQueries(210_000, 134_020);
     render(<BalanceCard total={500_000} accountCount={1} isEmpty={false} />);
-    expect(screen.getByText('Income')).toBeOnTheScreen();
+    expect(screen.getByLabelText('Income')).toBeOnTheScreen();
     expect(screen.getByText(/2,?100/)).toBeOnTheScreen();
-    expect(screen.getByText('Expenses')).toBeOnTheScreen();
+    expect(screen.getByLabelText('Expenses')).toBeOnTheScreen();
     expect(screen.getByText(/1,?340/)).toBeOnTheScreen();
   });
 
   it('hides the row when there is no income or expense this month', () => {
     mockQueries(0);
     render(<BalanceCard total={500_000} accountCount={1} isEmpty={false} />);
-    expect(screen.queryByText('Income')).not.toBeOnTheScreen();
+    expect(screen.queryByLabelText('Income')).not.toBeOnTheScreen();
   });
 });

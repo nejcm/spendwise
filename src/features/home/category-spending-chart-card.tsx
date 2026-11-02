@@ -15,7 +15,7 @@ import { getCategorySpendingChartData } from './category-spending-chart';
 export function CategorySpendingChartCard() {
   const router = useRouter();
   const currentMonth = useCurrentYearMonth();
-  const [startDate, endDate] = React.useMemo(() => getCurrentMonthRange(currentMonth), [currentMonth]);
+  const [startDate, endDate] = getCurrentMonthRange(currentMonth);
   const { data, isLoading } = useCategorySpendByRange(startDate, endDate);
   const density = useAppStore.use.density();
   const currency = useAppStore.use.currency();

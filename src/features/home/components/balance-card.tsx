@@ -1,8 +1,13 @@
+import type { UniwindLucideIcon } from '@/components/ui/icon';
+import type { CurrencyKey } from '@/features/currencies';
 import * as React from 'react';
 import { View } from 'react-native';
 import { AmountText, Card, FlagCircle, Text } from '@/components/ui';
+import { ArrowDownRight, ArrowUpRight } from '@/components/ui/icon';
 import { useBalanceSeries } from '@/features/accounts/api';
+import { SHORTEN_TIGHT } from '@/features/formatting/constants';
 import { formatNumber, todayUnix } from '@/features/formatting/helpers';
+import { useMonthSummary } from '@/features/transactions/api';
 import { cn } from '@/lib/cn';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { useCurrentYearMonth } from '@/lib/hooks/use-current-year-month';
@@ -36,7 +41,7 @@ export function BalanceCard({ total, accountCount, isEmpty }: BalanceCardProps) 
         ? (
             <>
               <AmountText size="hero" value={total} currency={currency} className="pt-2.5" />
-              <View className="mt-[18px] border-t-[1.5px] border-dashed border-track pt-3">
+              <View className="mt-4.5 border-t-[1.5px] border-dashed border-track pt-3">
                 <Text className="text-sm text-muted-foreground">{translate('home.balance_line_empty')}</Text>
               </View>
             </>
@@ -49,10 +54,11 @@ export function BalanceCard({ total, accountCount, isEmpty }: BalanceCardProps) 
 function BalanceTrend({ total, showLine }: { total: number; showLine: boolean }) {
   const currency = useAppStore.use.currency();
   const numberFormat = useAppStore.use.numberFormat();
-  const now = new Date();
   const yearMonth = useCurrentYearMonth();
-  const [startDate, endDate] = React.useMemo(() => getCurrentMonthRange(yearMonth), [yearMonth]);
+  const month = Number(yearMonth.slice(5)) - 1;
+  const [startDate, endDate] = getCurrentMonthRange(yearMonth);
   const { data: series } = useBalanceSeries(startDate, endDate);
+  const { data: summary } = useMonthSummary(yearMonth);
   const change = series ? percentChange(total, series.opening) : null;
   const values = React.useMemo(
     () => series ? buildDailyBalances(series.opening, series.deltas, startDate, todayUnix()) : [],
@@ -66,18 +72,40 @@ function BalanceTrend({ total, showLine }: { total: number; showLine: boolean })
         <AmountText size="hero" value={total} currency={currency} className="shrink" numberOfLines={1} adjustsFontSizeToFit />
         {change !== null && (
           <View className="items-end gap-0.5 pb-0.5">
-            <Text className={cn('rounded-md px-[7px] py-0.5 text-xs font-semibold tabular-nums', isUp ? 'bg-positive/15 text-positive dark:bg-accent dark:text-accent-foreground' : 'bg-negative/15 text-negative')}>
+            <Text className={cn('rounded-md px-1.75 py-0.5 text-xs font-semibold tabular-nums', isUp ? 'bg-positive/15 text-positive dark:bg-accent dark:text-accent-foreground' : 'bg-negative/15 text-negative')}>
               {`${isUp ? '▲' : '▼'} ${formatNumber(Math.abs(change), numberFormat, 1)}%`}
             </Text>
-            <Text className="text-xs text-muted-foreground">{translate('home.vs_end_of', { month: monthName((now.getMonth() + 11) % 12) })}</Text>
+            <Text className="text-xs text-muted-foreground">{translate('home.vs_end_of', { month: monthName((month + 11) % 12) })}</Text>
           </View>
         )}
       </View>
+      {!!(summary?.income || summary?.expense) && (
+        <View className="mt-3 flex-row gap-3">
+          <SummaryFigure label={translate('common.income')} value={summary.income} currency={currency} icon={ArrowUpRight} tone="positive" />
+          <SummaryFigure label={translate('common.expenses')} value={summary.expense} currency={currency} icon={ArrowDownRight} tone="negative" />
+        </View>
+      )}
       {showLine && (
         <View className="-mx-5 mt-3.5">
-          <BalanceLine values={values} accessibilityLabel={translate('home.balance_chart_label', { month: monthName(now.getMonth()) })} />
+          <BalanceLine values={values} accessibilityLabel={translate('home.balance_chart_label', { month: monthName(month) })} />
         </View>
       )}
     </>
+  );
+}
+
+const TONE_CLASSES = {
+  positive: { tile: 'bg-positive/12', icon: 'accent-positive' },
+  negative: { tile: 'bg-negative/12', icon: 'accent-negative' },
+};
+
+type SummaryFigureProps = { label: string; value: number; currency: CurrencyKey; icon: UniwindLucideIcon; tone: keyof typeof TONE_CLASSES };
+
+function SummaryFigure({ label, value, currency, icon: Icon, tone }: SummaryFigureProps) {
+  return (
+    <View accessible accessibilityLabel={label} className={cn('shrink flex-row items-center gap-1.5 rounded-full py-1 pr-2.5 pl-1.5', TONE_CLASSES[tone].tile)}>
+      <Icon size={14} strokeWidth={2.2} colorClassName={TONE_CLASSES[tone].icon} />
+      <AmountText value={value} currency={currency} shorten={SHORTEN_TIGHT} numberOfLines={1} className="shrink text-sm" />
+    </View>
   );
 }

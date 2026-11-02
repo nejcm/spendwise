@@ -59,7 +59,7 @@ type DeleteCategoryBodyProps = {
 function DeleteCategoryBody({ category, usage, onDeleted, onClose }: DeleteCategoryBodyProps) {
   const format = useFormatMoney();
   const yearMonth = useCurrentYearMonth();
-  const [spendStart, spendEnd] = React.useMemo(() => monthBarsRange(yearMonth, 3), [yearMonth]);
+  const [spendStart, spendEnd] = monthBarsRange(yearMonth, 3);
   const { data: categories = [] } = useCategories();
   const { data: spend = [] } = useCategorySpendByRange(spendStart, spendEnd);
   const deleteCategory = useDeleteCategory(onDeleted);
@@ -161,14 +161,14 @@ function TargetRow({ selected, onPress, icon, color, name, hint }: TargetRowProp
       accessibilityState={{ checked: selected }}
       onPress={onPress}
       style={getPressedStyle}
-      className="min-h-[58px] flex-row items-center gap-3 px-3 py-2"
+      className="min-h-14.5 flex-row items-center gap-3 px-3 py-2"
     >
       <IconTile size="sm" color={color} icon={icon} />
       <View className="min-w-0 flex-1">
         <Text className="text-row font-medium" numberOfLines={1}>{name}</Text>
         {hint && <Text className="text-meta text-muted-foreground">{hint}</Text>}
       </View>
-      <View className={cn('size-[22px] items-center justify-center rounded-full border-2', selected ? 'border-primary' : 'border-track')}>
+      <View className={cn('size-5.5 items-center justify-center rounded-full border-2', selected ? 'border-primary' : 'border-track')}>
         {selected && <View className="size-3 rounded-full bg-primary" />}
       </View>
     </Pressable>

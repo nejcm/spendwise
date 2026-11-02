@@ -4,6 +4,9 @@ export const SEED_ACCOUNT_ID = 'acc_main_checking';
 
 export async function seedDefaults(db: SQLiteDatabase): Promise<void> {
   await db.execAsync(`
+    DELETE FROM recurring_rule_runs;
+    DELETE FROM recurring_rules;
+    DELETE FROM transactions;
     DELETE FROM categories;
     DELETE FROM accounts;
   `);

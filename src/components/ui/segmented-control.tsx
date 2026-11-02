@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { cn } from '@/lib/cn';
+import { useAppStore } from '@/lib/store/store';
 import { Text } from './text';
 
 export type SegmentedOption<T extends string> = { value: T; label: string };
@@ -16,11 +17,12 @@ export type SegmentedControlProps<T extends string> = {
 };
 
 export function SegmentedControl<T extends string>({ options, value, onChange, fill = true, accessibilityLabel, className }: SegmentedControlProps<T>) {
+  const isCompact = useAppStore.use.density() === 'compact';
   return (
     <View
       accessibilityRole="radiogroup"
       accessibilityLabel={accessibilityLabel}
-      className={cn('flex-row rounded-full bg-segment-track p-1', !fill && 'self-start', className)}
+      className={cn('flex-row rounded-full border border-border bg-segment-track p-1 dark:border-transparent', !fill && 'self-start', className)}
     >
       {options.map((option) => {
         const selected = option.value === value;
@@ -30,7 +32,7 @@ export function SegmentedControl<T extends string>({ options, value, onChange, f
             accessibilityRole="radio"
             accessibilityState={{ checked: selected }}
             onPress={() => onChange(option.value)}
-            className={cn('h-[38px] items-center justify-center rounded-full', fill ? 'flex-1 px-1' : 'px-4', selected && 'bg-segment-selected')}
+            className={cn('items-center justify-center rounded-full', isCompact ? 'h-7.5' : 'h-9.5', fill ? 'flex-1 px-1' : 'px-4', selected && 'bg-segment-selected')}
           >
             <Text numberOfLines={1} className={cn('text-sm font-medium', selected ? 'text-foreground' : 'text-muted-foreground')}>
               {option.label}

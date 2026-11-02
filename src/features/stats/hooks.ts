@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
-import { getGlobalBudget, getGlobalBudgetSpend, setGlobalBudget } from './global-budget-queries';
+import { getBillSpend, getGlobalBudget, getGlobalBudgetSpend, setGlobalBudget } from './global-budget-queries';
 
 export function useGlobalBudget() {
   const db = useSQLiteContext();
@@ -31,5 +31,14 @@ export function useGlobalBudgetSpend(startDate: number, endDate: number, enabled
     queryKey: queryKeys.globalBudget.spend(startDate, endDate),
     enabled,
     queryFn: () => getGlobalBudgetSpend(db, startDate, endDate),
+  });
+}
+
+export function useBillSpend(startDate: number, endDate: number, enabled = true) {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: queryKeys.globalBudget.billSpend(startDate, endDate),
+    enabled,
+    queryFn: () => getBillSpend(db, startDate, endDate),
   });
 }

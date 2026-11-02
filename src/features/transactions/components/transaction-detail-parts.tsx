@@ -34,7 +34,7 @@ export function DetailHero({ transaction: t, onAmountPress }: { transaction: Tra
 
   return (
     <View className="items-center px-5 pt-4">
-      <IconTile color={t.category_color ?? DEFAULT_COLOR} className="size-[68px] rounded-hero">
+      <IconTile color={t.category_color ?? DEFAULT_COLOR} className="size-17 rounded-hero">
         {t.merchant_logo_slug
           ? <MerchantLogo slug={t.merchant_logo_slug} size={36} withBg={false} />
           : <Text className="text-[32px]">{t.category_icon || (t.type === 'transfer' ? '⇄' : '?')}</Text>}
@@ -75,7 +75,7 @@ export function DetailRow({ label, value, first, onPress, full }: { label: strin
   }
   return (
     <ListRow
-      className={cn('min-h-[52px]', !first && 'border-t border-border')}
+      className={cn('min-h-13', !first && 'border-t border-border')}
       onPress={onPress}
       chevron={!!onPress}
       title={<Text className="text-sm text-muted-foreground">{label}</Text>}
@@ -116,7 +116,7 @@ export function DetailRows({ transaction: t, rule }: { transaction: TransactionW
   ];
 
   return (
-    <Card className="mx-5 mt-6 rounded-card px-[18px]">
+    <Card className="mx-5 mt-6 rounded-card px-4.5">
       {rows.map(({ key, ...row }, i) => <DetailRow key={key} first={i === 0} {...row} />)}
     </Card>
   );

@@ -35,7 +35,7 @@ jest.mock('@/components/ui/icon', () => ({
   ChevronDown: () => null,
   ChevronLeft: () => null,
   SlidersHorizontal: () => null,
-  Sparkle: () => null,
+  Bot: () => null,
   SquarePen: () => null,
   X: () => null,
 }));

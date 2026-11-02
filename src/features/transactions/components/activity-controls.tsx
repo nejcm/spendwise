@@ -2,11 +2,13 @@ import type { ActiveFilterChip } from '../filters';
 import type { TransactionSort, TransactionType } from '../types';
 import * as React from 'react';
 import { Pressable, TextInput, View } from 'react-native';
+import Animated, { FadeOut, LinearTransition } from 'react-native-reanimated';
 import { FilterChip, FormattedCurrency, getPressedStyle, Text } from '@/components/ui';
 import { ArrowDownUp, ListFilter, Search, X } from '@/components/ui/icon';
 import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
+import { easeOut } from '@/lib/theme/motion';
 
 export function SearchRow({ search, onChangeSearch, filterCount, onOpenFilters }: {
   search: string;
@@ -26,7 +28,7 @@ export function SearchRow({ search, onChangeSearch, filterCount, onOpenFilters }
           placeholderTextColorClassName="accent-muted-foreground"
           accessibilityLabel={translate('transactions.search')}
           returnKeyType="search"
-          className="min-w-0 flex-1 font-sans text-row text-foreground"
+          className="min-w-0 flex-1 font-sans text-row text-foreground web:outline-none"
         />
         {search.length > 0 && (
           <Pressable onPress={() => onChangeSearch('')} hitSlop={8} accessibilityRole="button" accessibilityLabel={translate('common.clear')} className="p-1">
@@ -57,9 +59,9 @@ export function SearchRow({ search, onChangeSearch, filterCount, onOpenFilters }
 function SummaryCell({ label, value, prefix, className, first }: { label: string; value: number; prefix?: string; className?: string; first?: boolean }) {
   const currency = useAppStore.use.currency();
   return (
-    <View className={cn('min-w-0 flex-1 px-4', !first && 'border-l border-border')}>
+    <View className={cn('min-w-0 flex-1 px-3', !first && 'border-l border-border')}>
       <Text className="text-xs text-muted-foreground">{label}</Text>
-      <FormattedCurrency value={value} currency={currency} prefix={prefix} numberOfLines={1} adjustsFontSizeToFit className={cn('text-base font-semibold', className)} />
+      <FormattedCurrency value={value} currency={currency} prefix={prefix} shorten fractionDigits={Math.abs(value) >= 100_000 ? 1 : 2} numberOfLines={1} adjustsFontSizeToFit className={cn('text-base font-semibold', className)} />
     </View>
   );
 }
@@ -102,6 +104,9 @@ export function TypeTabs({ value, onChange }: { value: TransactionType | null; o
   );
 }
 
+const chipExiting = FadeOut.duration(150);
+const chipLayout = LinearTransition.duration(200).easing(easeOut);
+
 export function ActiveFilters({ chips, onRemove, onClearAll }: {
   chips: ActiveFilterChip[];
   onRemove: (chip: ActiveFilterChip) => void;
@@ -109,10 +114,16 @@ export function ActiveFilters({ chips, onRemove, onClearAll }: {
 }) {
   return (
     <View className="flex-row flex-wrap items-center gap-1.5 pt-3">
-      {chips.map((chip) => <FilterChip key={chip.key} label={chip.label} icon={chip.icon ?? undefined} onRemove={() => onRemove(chip)} />)}
-      <Pressable onPress={onClearAll} hitSlop={6} accessibilityRole="button" className="h-[34px] justify-center px-1">
-        <Text className="text-meta text-muted-foreground underline">{translate('transactions.filter.clear_all')}</Text>
-      </Pressable>
+      {chips.map((chip) => (
+        <Animated.View key={chip.key} exiting={chipExiting} layout={chipLayout}>
+          <FilterChip label={chip.label} icon={chip.icon ?? undefined} onRemove={() => onRemove(chip)} />
+        </Animated.View>
+      ))}
+      <Animated.View layout={chipLayout}>
+        <Pressable onPress={onClearAll} hitSlop={6} accessibilityRole="button" className="h-8.5 justify-center px-1">
+          <Text className="text-meta text-muted-foreground underline">{translate('transactions.filter.clear_all')}</Text>
+        </Pressable>
+      </Animated.View>
     </View>
   );
 }
@@ -123,7 +134,7 @@ export function FilterResultCard({ count, total, sort, onSortPress }: { count: n
     <View className="mt-3.5 flex-row items-center justify-between gap-3 rounded-[18px] bg-card px-4 py-3">
       <View className="min-w-0 shrink">
         <Text className="text-meta text-muted-foreground">{count === 1 ? translate('transactions.count_one') : translate('transactions.count_many', { count })}</Text>
-        <FormattedCurrency value={total} currency={currency} prefix={total > 0 ? '+' : ''} numberOfLines={1} className="text-xl font-bold tracking-tight" />
+        <FormattedCurrency value={total} currency={currency} prefix={total > 0 ? '+' : ''} numberOfLines={1} adjustsFontSizeToFit className="text-xl font-bold tracking-tight" />
       </View>
       <Pressable
         onPress={onSortPress}

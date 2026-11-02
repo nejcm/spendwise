@@ -10,6 +10,8 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback } from 'react';
 
 import { Alert } from '@/components/ui';
+import { CircleAlert, TrashIcon } from '@/components/ui/icon';
+import { showSnackbar } from '@/components/ui/snackbar';
 import { computeBaseAmount } from '@/features/currencies/conversion';
 import { useCurrencyRates } from '@/features/currencies/hooks';
 import { todayUnix } from '@/features/formatting/helpers';
@@ -17,7 +19,7 @@ import { captureError } from '@/lib/analytics';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryKeys } from '@/lib/data/query-keys';
 import { translate } from '@/lib/i18n';
-import { useAppStore } from '@/lib/store/store';
+import { getAppState, updateNotifications, useAppStore } from '@/lib/store/store';
 import * as queries from './queries';
 
 import { processDueScheduledTransactions } from './scheduler';
@@ -85,6 +87,10 @@ export function useRulePayments(ruleId: string) {
 }
 
 function onError(error: unknown) {
+  if (error instanceof queries.RuleAccountArchivedError) {
+    Alert.alert(translate('common.error'), translate('scheduled.resume_archived_account'));
+    return;
+  }
   if (error instanceof Error) captureError(error, { context: 'scheduled-transactions' });
   Alert.alert(translate('common.error'), error instanceof Error ? error.message : translate('common.error_description'));
 }
@@ -124,14 +130,55 @@ export function useUpdateScheduledTransaction() {
   });
 }
 
-export function useDeleteScheduledTransaction() {
+export function setBillRuleMuted(ruleId: string, muted: boolean) {
+  const rest = (getAppState().notifications.mutedBillRules ?? []).filter((id) => id !== ruleId);
+  updateNotifications({ mutedBillRules: muted ? [...rest, ruleId] : rest });
+}
+
+type RuleRestore = { deleted: queries.DeletedScheduledTransaction; wasMuted: boolean };
+
+function useRestoreScheduledTransaction() {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationFn: async ({ deleted, wasMuted }: RuleRestore) => {
+      const ruleId = deleted.rule?.id;
+      // Re-mute before the row exists again, so no reminder check can see it unmuted.
+      if (wasMuted && ruleId) setBillRuleMuted(ruleId, true);
+      try {
+        await queries.restoreScheduledTransaction(db, deleted);
+      }
+      catch (error) {
+        if (wasMuted && ruleId) setBillRuleMuted(ruleId, false);
+        throw error;
+      }
+    },
+    onSuccess: async () => {
+      invalidateFor(queryClient, 'scheduledTransaction', 'transaction');
+      await syncDueScheduledTransactions(db, queryClient);
+    },
+    onError: (error) => {
+      if (error instanceof Error) captureError(error, { context: 'scheduled-transactions' });
+      showSnackbar({ title: translate('common.undo_failed'), icon: CircleAlert });
+    },
+  });
+}
+
+/** Deletes with an Undo snackbar; hook-level callbacks so it still fires after the screen unmounts. */
+export function useDeleteScheduledTransaction() {
+  const db = useSQLiteContext();
+  const queryClient = useQueryClient();
+  const restore = useRestoreScheduledTransaction();
+
+  return useMutation({
     mutationFn: (id: string) => queries.deleteScheduledTransaction(db, id),
-    onSuccess: () => {
+    onSuccess: (deleted, id) => {
       invalidateFor(queryClient, 'scheduledTransaction');
+      if (!deleted.rule) return;
+      const wasMuted = !!getAppState().notifications.mutedBillRules?.includes(id);
+      if (wasMuted) setBillRuleMuted(id, false);
+      showSnackbar({ title: translate('scheduled.deleted'), icon: TrashIcon, undo: () => restore.mutate({ deleted, wasMuted }) });
     },
     onError,
   });

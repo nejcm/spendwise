@@ -38,7 +38,7 @@ export function MonthBars({ bars, budget }: { bars: MonthBar[]; budget?: number 
         ))}
         {!!budget && width > 0 && (
           <Svg pointerEvents="none" width={width} height={2} style={{ position: 'absolute', left: 0, bottom: heightOf(budget) - 1 }}>
-            <Line x1={0} x2={width} y1={1} y2={1} stroke={colors.muted} strokeWidth={1.5} strokeDasharray="4 4" />
+            <Line x1={0} x2={width} y1={1} y2={1} stroke={hexWithOpacity(colors.muted, 45)} strokeWidth={1.5} strokeDasharray="4 4" />
           </Svg>
         )}
       </View>

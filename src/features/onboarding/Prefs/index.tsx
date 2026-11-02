@@ -82,15 +82,15 @@ export default function PrefsStep({ onBack, onNext, onBeforeLanguageReload }: Pr
       onBack={onBack}
       footer={<SolidButton color="primary" size="lg" fullWidth label={translate('onboarding.continue')} loading={saving} onPress={onContinue} />}
     >
-      <Card className="mt-7 px-[18px]">
+      <Card className="mt-7 px-4.5">
         <ListRow
-          className="min-h-[60px] border-b border-border"
+          className="min-h-15 border-b border-border"
           chevron
           onPress={languageModal.present}
           title={<SettingLabel label={translate('settings.language')} value={<Text className="text-base font-medium">{language.name}</Text>} />}
         />
         <ListRow
-          className="min-h-[60px]"
+          className="min-h-15"
           chevron
           onPress={currencyModal.present}
           title={(
@@ -115,7 +115,7 @@ export default function PrefsStep({ onBack, onNext, onBeforeLanguageReload }: Pr
       <Text accessibilityRole="header" className="pt-7 pb-3 text-[15px] font-semibold">{translate('settings.theme.title')}</Text>
       <ThemePicker />
 
-      <Card className="mt-6 flex-row items-center gap-4 px-[18px] py-3.5">
+      <Card className="mt-6 flex-row items-center gap-4 px-4.5 py-3.5">
         <View className="flex-1">
           <Text className="text-base font-medium">{translate('onboarding.reminders')}</Text>
           <Text className="text-meta text-muted-foreground">{translate('onboarding.reminders_hint')}</Text>

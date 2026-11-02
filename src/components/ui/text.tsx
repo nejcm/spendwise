@@ -11,7 +11,7 @@ type Props = {
   tx?: TxKeyPath;
 } & TextProps;
 
-export function Text({ className = '', style, tx, children, ...props }: Props) {
+export function Text({ ref, className = '', style, tx, children, ...props }: Props & { ref?: React.Ref<NNText> }) {
   const textStyle = React.useMemo(
     () => cn('font-sans text-base font-normal text-foreground', className),
     [className],
@@ -28,7 +28,7 @@ export function Text({ className = '', style, tx, children, ...props }: Props) {
     [style],
   );
   return (
-    <NNText className={textStyle} style={nStyle} {...props}>
+    <NNText ref={ref} className={textStyle} style={nStyle} {...props}>
       {tx ? translate(tx) : children}
     </NNText>
   );

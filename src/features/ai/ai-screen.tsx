@@ -16,7 +16,7 @@ import {
   useModalSheet,
   View,
 } from '@/components/ui';
-import { ArrowUp, Brain, Calendar, ChevronDown, ChevronLeft, SlidersHorizontal, Sparkle, SquarePen } from '@/components/ui/icon';
+import { ArrowUp, Bot, Brain, Calendar, ChevronDown, ChevronLeft, SlidersHorizontal, SquarePen } from '@/components/ui/icon';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAccounts } from '@/features/accounts/api';
 import AssistantMessage from '@/features/ai/components/assistant-message';
@@ -41,10 +41,10 @@ function AiSetup({ hasKey }: { hasKey: boolean }) {
   const router = useRouter();
   return (
     <View className="flex-1 px-5">
-      <View className="mt-[26px] size-14 items-center justify-center rounded-[18px] bg-primary">
-        <Sparkle size={22} strokeWidth={2} colorClassName="accent-primary-foreground" />
+      <View className="mt-6.5 size-14 items-center justify-center rounded-[18px] bg-primary">
+        <Bot size={22} strokeWidth={2} colorClassName="accent-primary-foreground" />
       </View>
-      <Text accessibilityRole="header" className="mt-[18px] text-[30px]/[34px] font-bold tracking-page-title">{translate(hasKey ? 'ai.chat_off_title' : 'ai.setup_required_title')}</Text>
+      <Text accessibilityRole="header" className="mt-4.5 text-[30px]/[34px] font-bold tracking-page-title">{translate(hasKey ? 'ai.chat_off_title' : 'ai.setup_required_title')}</Text>
       <Text className="mt-2 text-base/normal text-muted-foreground">{translate(hasKey ? 'ai.chat_off_body' : 'ai.setup_required_body')}</Text>
       <View className="mt-auto gap-1.5 pb-6">
         <SolidButton
@@ -73,7 +73,7 @@ function ChatHeader({ hasKey, canStartNewChat, onNewChat }: { hasKey: boolean; c
 
   return (
     <View className="h-12 flex-row items-center justify-between gap-2 px-5">
-      <View className="w-[84px]">
+      <View className="w-14">
         <HeaderButton icon={ChevronLeft} label={translate('common.back')} onPress={() => goBackOrFallback(router)} />
       </View>
       <View className="min-w-0 flex-1 items-center">
@@ -82,14 +82,14 @@ function ChatHeader({ hasKey, canStartNewChat, onNewChat }: { hasKey: boolean; c
         </Text>
         {hasKey && (
           <View className="flex-row items-center gap-1.5">
-            <View className="size-[7px] rounded-full bg-positive" />
+            <View className="size-2 rounded-full bg-positive" />
             <Text numberOfLines={1} className="text-xs text-muted-foreground">
               {translate('ai.key_on_device', { provider: translate(`settings.provider_${provider}`) })}
             </Text>
           </View>
         )}
       </View>
-      <View className="w-[84px] items-end">
+      <View className="w-21 items-end">
         {hasKey && (
           <View className="flex-row items-center rounded-full bg-card p-0.5">
             <Pressable
@@ -167,7 +167,7 @@ function Intro() {
   return (
     <View className="flex-1 items-center justify-center px-8 py-10">
       <View className="size-12 items-center justify-center rounded-full bg-primary">
-        <Sparkle size={18} strokeWidth={2} colorClassName="accent-primary-foreground" />
+        <Bot size={18} strokeWidth={2} colorClassName="accent-primary-foreground" />
       </View>
       <Text className="mt-4 text-center text-row text-muted-foreground">{translate('ai.ask_prompt')}</Text>
     </View>
@@ -203,8 +203,8 @@ const ChatMessageRow = React.memo(({
 
   return (
     <View onLayout={handleLayout} className="mx-5 mt-4 flex-row gap-2.5">
-      <View className="size-[30px] items-center justify-center rounded-full bg-primary">
-        <Sparkle size={13} strokeWidth={2.5} colorClassName="accent-primary-foreground" />
+      <View className="size-7.5 items-center justify-center rounded-full bg-primary">
+        <Bot size={13} strokeWidth={2.5} colorClassName="accent-primary-foreground" />
       </View>
       {isLiveStreaming && !displayContent
         ? <Skeleton height={44} className="flex-1 rounded-card rounded-tl-md" />
@@ -229,7 +229,7 @@ function SuggestedPrompts({ disabled, onSend }: { disabled: boolean; onSend: (qu
           disabled={disabled}
           onPress={() => onSend(q)}
           style={getPressedStyle}
-          className={cn('h-[38px] justify-center rounded-full bg-card px-3.5', disabled && 'opacity-50')}
+          className={cn('h-9.5 justify-center rounded-full bg-card px-3.5', disabled && 'opacity-50')}
         >
           <Text className="text-sm">{q}</Text>
         </Pressable>
@@ -287,7 +287,7 @@ function ChatFooter({
       {shouldShowBottomFiller && <View style={bottomFillerStyle} />}
       <View onLayout={onComposerLayout} className="gap-2.5 pt-2 pb-3">
         <SuggestedPrompts disabled={isStreaming} onSend={onSendPrompt} />
-        <View className="mx-4 min-h-[58px] flex-row items-end gap-2 rounded-[29px] bg-card py-[7px] pr-[7px] pl-5">
+        <View className="mx-4 min-h-14.5 flex-row items-end gap-2 rounded-[29px] bg-card py-1.75 pr-1.75 pl-5">
           <TextInput
             ref={inputRef}
             nativeID={AI_INPUT_NATIVE_ID}
@@ -299,7 +299,7 @@ function ChatFooter({
             autoCapitalize="sentences"
             autoCorrect
             multiline
-            className="max-h-32 min-w-0 flex-1 self-center py-2 font-sans text-base text-foreground"
+            className="max-h-32 min-w-0 flex-1 self-center py-2 font-sans text-base text-foreground web:outline-none"
           />
           <Pressable
             accessibilityRole="button"
@@ -380,7 +380,7 @@ export function AiScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[340px] bg-linear-to-b from-wash to-background" />
+      <View pointerEvents="none" className="absolute inset-x-0 top-0 h-85 bg-linear-to-b from-wash to-background" />
       <KeyboardAvoidingView
         behavior="padding"
         keyboardVerticalOffset={bottom}

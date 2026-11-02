@@ -1,5 +1,6 @@
 import type { ScheduledTransactionWithDetails } from '@/features/scheduled-transactions/types';
 import type { TxKeyPath } from '@/lib/i18n';
+import { yearMonthOf } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 
 const DAY = 86_400;
@@ -43,7 +44,7 @@ export function buildLinePath(values: number[], width: number, height: number, i
 export type NextBill = {
   rule: ScheduledTransactionWithDetails;
   daysUntil: number;
-  /** Other upcoming bills due in the same calendar month as `rule`. */
+  /** Other upcoming bills due in the same month as `rule`. */
   moreInMonth: number;
 };
 
@@ -53,11 +54,8 @@ export function selectNextBill(rules: ScheduledTransactionWithDetails[], activeA
     .sort((a, b) => a.next_due_date - b.next_due_date);
   const [next, ...rest] = bills;
   if (!next) return null;
-  const due = new Date(next.next_due_date * 1000);
-  const sameMonth = (rule: ScheduledTransactionWithDetails) => {
-    const date = new Date(rule.next_due_date * 1000);
-    return date.getUTCFullYear() === due.getUTCFullYear() && date.getUTCMonth() === due.getUTCMonth();
-  };
+  const dueMonth = yearMonthOf(next.next_due_date);
+  const sameMonth = (rule: ScheduledTransactionWithDetails) => yearMonthOf(rule.next_due_date) === dueMonth;
   return {
     rule: next,
     daysUntil: Math.max(0, Math.round((next.next_due_date - today) / DAY)),
@@ -80,4 +78,33 @@ export function getGreetingPeriod(hour: number): 'morning' | 'afternoon' | 'even
   if (hour >= 5 && hour < 12) return 'morning';
   if (hour >= 12 && hour < 18) return 'afternoon';
   return 'evening';
+}
+
+export type BudgetOutlook
+  = | { state: 'on_track'; perDay: number; left: number }
+    | { state: 'fast'; perDay: number; left: number; overPace: number; plannedPerDay: number }
+    | { state: 'over'; over: number; left: 0 };
+
+const PACE_TOLERANCE = 0.05;
+
+/** Amounts in cents; `daysLeft` counts today, `totalDays` is the month length. */
+export function budgetOutlook({ limit, spent, billsPaid, billsComing, daysLeft, totalDays }: {
+  limit: number;
+  spent: number;
+  billsPaid: number;
+  billsComing: number;
+  daysLeft: number;
+  totalDays: number;
+}): BudgetOutlook {
+  const safe = limit - spent - billsComing;
+  if (safe < 0) return { state: 'over', over: spent > limit ? spent - limit : -safe, left: 0 };
+  const left = limit - spent;
+  const perDay = Math.floor(safe / Math.max(daysLeft, 1));
+  const everydayShare = Math.max(limit - billsPaid - billsComing, 0);
+  const expected = everydayShare * (totalDays - daysLeft + 1) / totalDays;
+  const overPace = Math.round(spent - billsPaid - expected);
+  if (overPace > everydayShare * PACE_TOLERANCE) {
+    return { state: 'fast', perDay, left, overPace, plannedPerDay: Math.round(everydayShare / totalDays) };
+  }
+  return { state: 'on_track', perDay, left };
 }

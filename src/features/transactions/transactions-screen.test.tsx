@@ -6,7 +6,7 @@ import { useAppStore } from '@/lib/store/store';
 import { fireEvent, render, screen } from '@/lib/test-utils';
 import { TransactionsScreen } from './transactions-screen';
 
-jest.mock('expo-router', () => ({ useLocalSearchParams: jest.fn() }));
+jest.mock('expo-router', () => ({ useLocalSearchParams: jest.fn(), useNavigation: () => ({ addListener: () => () => {} }) }));
 jest.mock('expo-sqlite', () => ({ useSQLiteContext: () => ({}) }));
 jest.mock('@/components/period-pill', () => ({ PeriodPill: () => null }));
 jest.mock('@/components/ui/focus-aware-status-bar', () => ({ FocusAwareStatusBar: () => null }));

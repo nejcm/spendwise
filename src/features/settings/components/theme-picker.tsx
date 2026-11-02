@@ -13,11 +13,11 @@ const THEME_PREVIEWS: { value: ThemeType; swatch: string; card: string; bar: str
 
 function ThemePreview({ swatch, card, bar, split }: { swatch: string; card: string; bar: string; split: boolean }) {
   return (
-    <View className="h-[72px] overflow-hidden rounded-[10px]" style={{ backgroundColor: swatch }}>
+    <View className="h-18 overflow-hidden rounded-[10px]" style={{ backgroundColor: swatch }}>
       {split && <View className="absolute inset-y-0 right-0 w-1/2 bg-[#111214]" />}
       <View className="absolute inset-x-2 top-2.5 h-4 rounded-[5px]" style={{ backgroundColor: card }} />
-      <View className="absolute top-[34px] left-2 h-2 w-[34px] rounded-sm" style={{ backgroundColor: bar }} />
-      <View className="absolute top-12 left-2 h-2 w-[52px] rounded-sm" style={{ backgroundColor: card }} />
+      <View className="absolute top-8.5 left-2 h-2 w-8.5 rounded-sm" style={{ backgroundColor: bar }} />
+      <View className="absolute top-12 left-2 h-2 w-13 rounded-sm" style={{ backgroundColor: card }} />
     </View>
   );
 }

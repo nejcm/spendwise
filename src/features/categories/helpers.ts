@@ -5,6 +5,7 @@ import type { TxKeyPath } from '@/lib/i18n';
 import type { PeriodSelection } from '@/lib/store/store';
 import { DEFAULT_CATEGORY_ID } from '@/config';
 import { formatDateFull } from '@/features/formatting/helpers';
+import { getMonthBoundaries, yearMonthOf } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { COLORS } from '@/lib/theme/colors';
 
@@ -81,20 +82,20 @@ export function rankMoveTargets<T extends Pick<Category, 'id' | 'name' | 'kind' 
 
 export type MonthBar = { month: string; start: number; value: number };
 
-/** `count` calendar months ending with `endYearMonth` (yyyy-MM), zero-filled. */
+/** `count` months ending with `endYearMonth` (yyyy-MM), zero-filled. */
 export function buildMonthBars(rows: MonthlyTotals[], endYearMonth: string, kind: Category['kind'], count = 6): MonthBar[] {
   const [year, month] = endYearMonth.split('-').map(Number);
   const byMonth = new Map(rows.map((row) => [row.month, row[kind]]));
   return Array.from({ length: count }, (_, i) => {
-    const start = Date.UTC(year, month - count + i, 1) / 1000;
-    const key = new Date(start * 1000).toISOString().slice(0, 7);
+    const [start] = getMonthBoundaries(year, month - count + 1 + i);
+    const key = yearMonthOf(start);
     return { month: key, start, value: byMonth.get(key) ?? 0 };
   });
 }
 
 export function monthBarsRange(endYearMonth: string, count = 6): [number, number] {
   const [year, month] = endYearMonth.split('-').map(Number);
-  return [Date.UTC(year, month - count, 1) / 1000, Date.UTC(year, month, 1) / 1000];
+  return [getMonthBoundaries(year, month - count + 1)[0], getMonthBoundaries(year, month)[1]];
 }
 
 export function averageOfLast(bars: MonthBar[], count = 3): number {

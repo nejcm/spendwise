@@ -16,7 +16,7 @@ export function PrivacyScreen() {
 
   return (
     <SettingsPage title={translate('settings.privacy')}>
-      <View className="mt-5 gap-1.5 rounded-card border border-accent-line bg-accent-soft p-[18px]">
+      <View className="mt-5 gap-1.5 rounded-card border border-accent-line bg-accent-soft p-4.5">
         <Text className="text-lg font-semibold">{translate('privacy.hero_title')}</Text>
         <Text className="text-sm/snug text-muted-foreground">{translate('privacy.hero_body')}</Text>
       </View>

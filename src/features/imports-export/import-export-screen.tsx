@@ -95,7 +95,7 @@ export function ImportScreen() {
                     </>
                   )
                 : (
-                    <Card className="mt-5 gap-1 p-[18px]">
+                    <Card className="mt-5 gap-1 p-4.5">
                       <Text className="text-row font-medium">{translate('import-export.auto_backup_web_unavailable_title')}</Text>
                       <Text className="text-meta text-muted-foreground">{translate('import-export.auto_backup_web_unavailable_description')}</Text>
                     </Card>

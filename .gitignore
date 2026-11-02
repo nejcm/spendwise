@@ -2,6 +2,8 @@ node_modules/
 .expo/
 .pnpm-store/
 dist/
+temp/
+.assets/
 npm-debug.*
 *.jks
 *.p8
@@ -35,3 +37,4 @@ TODO.md
 .firecrawl
 .plans
 brag-output/
+.assets/

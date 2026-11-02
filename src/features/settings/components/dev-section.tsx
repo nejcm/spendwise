@@ -5,11 +5,9 @@ import { useSQLiteContext } from 'expo-sqlite';
 import * as React from 'react';
 import { Database, DatabaseBackupIcon, DatabaseZap, Printer } from '@/components/ui/icon';
 import { clearData, dumpDbTables, resetDb, seedData, seedMockData } from '@/lib/dev';
+import { translate } from '@/lib/i18n';
 import { clearAppStore } from '@/lib/store/store';
-import { SettingsContainer } from './settings-container';
-import { SettingsItem } from './settings-item';
-
-const iconColor = 'accent-foreground';
+import { SettingsGroup } from './settings-group';
 
 export default function DevSection() {
   const db = useSQLiteContext();
@@ -17,17 +15,16 @@ export default function DevSection() {
 
   if (Env.EXPO_PUBLIC_APP_ENV !== 'development') return null;
   return (
-    <SettingsContainer title="settings.dev">
-      <SettingsItem text="settings.reset_storage" icon={<DatabaseBackupIcon colorClassName={iconColor} size={20} />} onPress={() => clearAppStore()} />
-      <SettingsItem text="settings.reset_db" icon={<DatabaseBackupIcon colorClassName={iconColor} size={20} />} onPress={() => resetDb(db, queryClient)} />
-      <SettingsItem text="settings.clear" icon={<DatabaseZap colorClassName={iconColor} size={20} />} onPress={() => clearData(db, queryClient)} />
-      <SettingsItem text="settings.seed" icon={<DatabaseZap colorClassName={iconColor} size={20} />} onPress={() => seedData(db, queryClient)} />
-      <SettingsItem
-        text="settings.mock_data"
-        icon={<Database colorClassName={iconColor} size={20} />}
-        onPress={() => seedMockData(db, queryClient)}
-      />
-      <SettingsItem text="settings.dump_db" icon={<Printer colorClassName={iconColor} size={20} />} onPress={() => dumpDbTables(db)} />
-    </SettingsContainer>
+    <SettingsGroup
+      title={translate('settings.dev')}
+      rows={[
+        { key: 'reset_storage', icon: DatabaseBackupIcon, title: translate('settings.reset_storage'), onPress: () => clearAppStore() },
+        { key: 'reset_db', icon: DatabaseBackupIcon, title: translate('settings.reset_db'), onPress: () => resetDb(db, queryClient) },
+        { key: 'clear', icon: DatabaseZap, title: translate('settings.clear'), onPress: () => clearData(db, queryClient) },
+        { key: 'seed', icon: DatabaseZap, title: translate('settings.seed'), onPress: () => seedData(db, queryClient) },
+        { key: 'mock_data', icon: Database, title: translate('settings.mock_data'), onPress: () => seedMockData(db, queryClient) },
+        { key: 'dump_db', icon: Printer, title: translate('settings.dump_db'), onPress: () => dumpDbTables(db) },
+      ]}
+    />
   );
 }

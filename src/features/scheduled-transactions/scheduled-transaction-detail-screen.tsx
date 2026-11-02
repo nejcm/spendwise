@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderButton, PageHeader } from '@/components/page-header';
-import { Alert, AmountText, Card, FocusAwareStatusBar, getPressedStyle, GhostButton, IconTile, ListRow, PauseIcon, PlayIcon, SectionHeader, Switch, Text } from '@/components/ui';
+import { AmountText, Card, FocusAwareStatusBar, getPressedStyle, GhostButton, IconTile, ListRow, PauseIcon, PlayIcon, SectionHeader, Switch, Text } from '@/components/ui';
 import { ChevronLeft, Pencil } from '@/components/ui/icon';
 import { NAV_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
 import { translateCount } from '@/features/categories/helpers';
@@ -18,8 +18,9 @@ import { unixToISODate } from '@/lib/date/helpers';
 import { useCurrentDay } from '@/lib/hooks/use-current-year-month';
 import { translate } from '@/lib/i18n';
 import { goBackOrFallback } from '@/lib/routing';
-import { getAppState, updateNotifications, useAppStore } from '@/lib/store/store';
+import { getAppState, useAppStore } from '@/lib/store/store';
 import {
+  setBillRuleMuted,
   useDeleteScheduledTransaction,
   useRulePayments,
   useScheduledTransaction,
@@ -34,15 +35,14 @@ const SINCE_DATE_FORMAT = 'MMM d, yyyy';
 const PAYMENT_DATE_FORMAT = 'MMM d';
 
 function Wash() {
-  return <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[340px] bg-linear-to-b from-wash to-background" />;
+  return <View pointerEvents="none" className="absolute inset-x-0 top-0 h-85 bg-linear-to-b from-wash to-background" />;
 }
 
 function useMutedBillRule(ruleId: string) {
   const db = useSQLiteContext();
   const mutedIds = useAppStore((s) => s.notifications.mutedBillRules);
   const setMuted = (muted: boolean) => {
-    const rest = (mutedIds ?? []).filter((id) => id !== ruleId);
-    updateNotifications({ mutedBillRules: muted ? [...rest, ruleId] : rest });
+    setBillRuleMuted(ruleId, muted);
     // The daily processor may already have skipped this rule today.
     if (!muted) runUpcomingBillsCheck(db, getAppState().notifications).catch((error) => captureError(error instanceof Error ? error : new Error(String(error))));
   };
@@ -55,8 +55,8 @@ export function ScheduledTransactionDetailScreen() {
   const insets = useSafeAreaInsets();
   const [isEditing, setIsEditing] = React.useState(false);
   const { data: rule, isLoading } = useScheduledTransaction(id);
-  const [, setMuted] = useMutedBillRule(id);
   const deleteMut = useDeleteScheduledTransaction();
+  const deletingRef = React.useRef(false);
   const updateMut = useUpdateScheduledTransaction();
   const today = useCurrentDay();
 
@@ -82,18 +82,12 @@ export function ScheduledTransactionDetailScreen() {
   }
 
   const remove = () => {
-    Alert.alert(translate('scheduled.remove'), translate('scheduled.remove_confirm'), [
-      { text: translate('common.cancel'), style: 'cancel' },
-      {
-        text: translate('common.delete'),
-        style: 'destructive',
-        onPress: async () => {
-          await deleteMut.mutateAsync(id);
-          setMuted(false);
-          goBackOrFallback(router, '/scheduled');
-        },
-      },
-    ]);
+    if (deletingRef.current) return;
+    deletingRef.current = true;
+    deleteMut.mutate(id, {
+      onSuccess: () => goBackOrFallback(router, '/scheduled'),
+      onSettled: () => { deletingRef.current = false; },
+    });
   };
 
   const togglePause = () => {
@@ -151,7 +145,7 @@ function Hero({ rule, today }: { rule: ScheduledTransactionWithDetails; today: s
 
   return (
     <View className="items-center px-5 pt-4">
-      <IconTile color={rule.category_color} className="size-[68px] rounded-hero">
+      <IconTile color={rule.category_color} className="size-17 rounded-hero">
         <Text className="text-[32px]">{rule.category_icon ?? '🔁'}</Text>
       </IconTile>
       <Text className="pt-2 text-center text-xl font-semibold" numberOfLines={2}>{rule.note || rule.category_name}</Text>
@@ -184,7 +178,7 @@ function Rows({ rule }: { rule: ScheduledTransactionWithDetails }) {
     : translate('scheduled.no_end_date');
 
   return (
-    <Card className="mx-5 mt-6 rounded-card px-[18px]">
+    <Card className="mx-5 mt-6 rounded-card px-4.5">
       <DetailRow first label={translate('scheduled.repeats')} value={frequency} />
       <DetailRow
         label={translate(rule.type === 'income' ? 'transactions.form.to' : 'transactions.form.from')}
@@ -199,7 +193,7 @@ function Rows({ rule }: { rule: ScheduledTransactionWithDetails }) {
       <DetailRow label={translate('scheduled.since')} value={`${since} · ${ends}`} />
       {rule.type === 'expense' && !!rule.is_active && (
         <ListRow
-          className="min-h-[52px] border-t border-border"
+          className="min-h-13 border-t border-border"
           onPress={remindersOn ? undefined : () => router.push('/settings/notifications')}
           title={<Text className="text-sm text-muted-foreground">{remindLabel}</Text>}
           meta={remindersOn ? undefined : translate('scheduled.reminders_off')}

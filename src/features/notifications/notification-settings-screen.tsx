@@ -69,7 +69,7 @@ export function NotificationSettingsScreen() {
   return (
     <SettingsPage title={translate('settings.notifications')}>
       <Card className="mt-5 flex-row gap-3 px-4 py-3.5">
-        <View className="size-[38px] items-center justify-center rounded-[10px] bg-primary">
+        <View className="size-9.5 items-center justify-center rounded-[10px] bg-primary">
           <Bell size={20} colorClassName="accent-primary-foreground" />
         </View>
         <View className="min-w-0 flex-1">
@@ -83,7 +83,7 @@ export function NotificationSettingsScreen() {
       <Text className="px-1 pt-2 text-meta text-muted-foreground">{translate('notifications.preview_caption')}</Text>
 
       {settings.global && canNotify === false && (
-        <Card className="mt-4 min-h-[54px] flex-row items-center justify-between gap-3 px-4">
+        <Card className="mt-4 min-h-13.5 flex-row items-center justify-between gap-3 px-4">
           <Text className="min-w-0 flex-1 text-row">{translate('notifications.system_off')}</Text>
           <Pressable accessibilityRole="button" hitSlop={8} onPress={() => { void Linking.openSettings(); }}>
             <Text className="text-row font-semibold text-accent">{translate('notifications.open_settings')}</Text>

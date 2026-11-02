@@ -5,6 +5,7 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { DEFAULT_COLOR } from '@/components/color-selector';
 import { Checkbox, FormattedCurrency, getPressedStyle, IconTile, Text } from '@/components/ui';
+import { SHORTEN_ROW } from '@/features/formatting/constants';
 import { formatShortDate } from '@/features/formatting/helpers';
 import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
@@ -53,7 +54,7 @@ export const TransactionCard = React.memo(({
 
   return (
     <Pressable
-      className={cn('flex-row items-center gap-3', isCompact ? 'min-h-12 py-1' : 'min-h-[60px] py-2', selected && 'bg-accent-soft', className)}
+      className={cn('flex-row items-center gap-3', isCompact ? 'min-h-12 py-1' : 'min-h-15 py-2', selected && 'bg-accent-soft', className)}
       style={getPressedStyle}
       onPress={() => selectionMode ? toggleSelection() : router.push(`/transactions/${transaction.id}`)}
       onLongPress={() => selectionMode ? toggleSelection() : onStartSelection?.(transaction.id)}
@@ -78,9 +79,10 @@ export const TransactionCard = React.memo(({
           value={transaction.baseAmount}
           currency={transaction.baseCurrency}
           prefix={isInflow ? '+' : '-'}
+          shorten={SHORTEN_ROW}
           className={cn('text-row font-semibold', isIncome && 'text-positive', isTransfer && 'text-muted-foreground')}
         />
-        {isForeign && <FormattedCurrency value={Math.abs(transaction.amount)} currency={transaction.currency} className="text-xs text-muted-foreground" />}
+        {isForeign && <FormattedCurrency value={Math.abs(transaction.amount)} currency={transaction.currency} shorten={SHORTEN_ROW} className="text-xs text-muted-foreground" />}
         {isTransfer && !isAdjustment && <Text className="text-xs text-muted-foreground">{translate('transactions.not_spending')}</Text>}
       </View>
     </Pressable>

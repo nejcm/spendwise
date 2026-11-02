@@ -20,7 +20,7 @@ export function SecuritySettingsScreen() {
               key={minutes}
               accessibilityRole="radio"
               accessibilityState={{ checked: selected }}
-              className={cn('min-h-[50px]', index > 0 && 'border-t border-border')}
+              className={cn('min-h-12.5', index > 0 && 'border-t border-border')}
               title={lockTimeoutLabel(minutes)}
               trailing={selected && <Check size={20} strokeWidth={2.4} colorClassName="accent-accent" />}
               onPress={() => setLockTimeoutMinutes(minutes)}

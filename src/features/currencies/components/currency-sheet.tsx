@@ -86,7 +86,7 @@ function CurrencyRow({ currency, selected, onPress }: { currency: CurrencyKey; s
       accessibilityLabel={[name, currency, rate].filter(Boolean).join(', ')}
       onPress={() => onPress(currency)}
       style={getPressedStyle}
-      className="h-[58px] flex-row items-center gap-3"
+      className="h-14.5 flex-row items-center gap-3"
     >
       <FlagCircle currency={currency} size={40} />
       <View className="min-w-0 flex-1">

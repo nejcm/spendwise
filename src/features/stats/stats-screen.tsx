@@ -3,8 +3,7 @@ import { RefreshControl, ScrollView, View } from 'react-native';
 import { PeriodPill } from '@/components/period-pill';
 import { FocusAwareStatusBar, SegmentedControl, Text } from '@/components/ui';
 import { useActivityCount } from '@/features/insights/api';
-import { getPeriodRange } from '@/lib/date/helpers';
-import { useCurrentDay } from '@/lib/hooks/use-current-year-month';
+import { usePeriodRange } from '@/lib/hooks/use-current-year-month';
 import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
@@ -19,8 +18,7 @@ type StatsTab = 'overview' | 'calendar' | 'budget';
 
 export function StatsScreen() {
   const selection = useAppStore.use.periodSelection();
-  useCurrentDay(); // re-renders at a date rollover so dynamic Periods (Today, This month…) re-derive
-  const [startDate, endDate] = getPeriodRange(selection);
+  const [startDate, endDate] = usePeriodRange(selection);
   const { refreshing, onRefresh } = useRefresh();
   const [tab, setTab] = React.useState<StatsTab>('overview');
   const period = { selection, startDate, endDate };
@@ -34,7 +32,7 @@ export function StatsScreen() {
         style={defaultStyles.transparentBg}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[340px] bg-linear-to-b from-wash to-background" />
+        <View pointerEvents="none" className="absolute inset-x-0 top-0 h-85 bg-linear-to-b from-wash to-background" />
         <View className="px-5 pt-2 pb-6">
           <View className="h-12 flex-row items-center gap-2">
             <Text accessibilityRole="header" className="flex-1 text-page-title font-bold tracking-page-title" numberOfLines={1}>

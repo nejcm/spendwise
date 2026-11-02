@@ -7,6 +7,7 @@ import { BUDGET_STATE_CLASSES, getBudgetState } from '@/components/ui/budget-sta
 import { Plus } from '@/components/ui/icon';
 import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
+import { useAppStore } from '@/lib/store/store';
 import { categoryIcon, categoryName } from '../helpers';
 import { useFormatMoney } from '../hooks';
 import { BudgetRing } from './budget-ring';
@@ -29,13 +30,14 @@ export function CategoryTile({ item, kind, budget, onPress }: CategoryTileProps)
     ? translate('categories.tile_label_no_budget', { name, amount: format(amount) })
     : translate('categories.tile_label', { name, amount: format(amount), budget: format(budget!) });
 
+  const isCompact = useAppStore.use.density() === 'compact';
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
       style={getPressedStyle}
-      className="h-16 flex-1 flex-row items-center gap-2.5 rounded-[18px] bg-card px-3"
+      className={cn('flex-1 flex-row items-center gap-2.5 rounded-[18px] border-[1.5px] border-transparent bg-card px-2', isCompact ? 'h-14' : 'h-16')}
     >
       <BudgetRing
         ratio={budget ? amount / budget : 0}
@@ -58,12 +60,13 @@ export function CategoryTile({ item, kind, budget, onPress }: CategoryTileProps)
 }
 
 export function NewCategoryTile({ onPress, className }: { onPress: () => void; className?: string }) {
+  const isCompact = useAppStore.use.density() === 'compact';
   return (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
       style={getPressedStyle}
-      className={cn('h-16 flex-1 flex-row items-center justify-center gap-2 rounded-[18px] border-[1.5px] border-dashed border-track', className)}
+      className={cn('flex-1 flex-row items-center justify-center gap-2 rounded-[18px] border-[1.5px] border-dashed border-track px-2', isCompact ? 'h-14' : 'h-16', className)}
     >
       <Plus size={18} colorClassName="accent-muted-foreground" />
       <Text className="text-sm font-medium text-muted-foreground">{translate('categories.new')}</Text>

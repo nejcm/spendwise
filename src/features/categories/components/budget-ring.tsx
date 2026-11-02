@@ -6,20 +6,20 @@ import { Text } from '@/components/ui';
 import { hexWithOpacity } from '@/lib/theme/colors';
 import { useBudgetColors } from '../hooks';
 
-const SIZE = 42;
-const RADIUS = 19;
+const SIZE = 52;
+const RADIUS = 24;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 export function BudgetRing({ ratio, state, icon, color }: { ratio: number; state: BudgetState; icon: string; color: string }) {
   const colors = useBudgetColors();
   return (
-    <View className="size-[42px] items-center justify-center">
+    <View className="size-13 items-center justify-center">
       {state !== 'none' && (
         <Svg width={SIZE} height={SIZE} style={{ position: 'absolute', transform: [{ rotate: '-90deg' }] }}>
-          <Circle cx={21} cy={21} r={RADIUS} fill="none" stroke={colors.track} strokeWidth={3} />
+          <Circle cx={SIZE / 2} cy={SIZE / 2} r={RADIUS} fill="none" stroke={colors.track} strokeWidth={3} />
           <Circle
-            cx={21}
-            cy={21}
+            cx={SIZE / 2}
+            cy={SIZE / 2}
             r={RADIUS}
             fill="none"
             stroke={colors[state]}
@@ -29,8 +29,8 @@ export function BudgetRing({ ratio, state, icon, color }: { ratio: number; state
           />
         </Svg>
       )}
-      <View className="size-8 items-center justify-center rounded-full" style={{ backgroundColor: hexWithOpacity(color, 26) }}>
-        <Text className="text-base">{icon}</Text>
+      <View className="size-10 items-center justify-center rounded-full" style={{ backgroundColor: hexWithOpacity(color, 26) }}>
+        <Text className="text-xl">{icon}</Text>
       </View>
     </View>
   );

@@ -13,7 +13,7 @@ import { fitsTransactionType } from '@/features/categories/helpers';
 import { TransactionBaseAmountSync } from '@/features/transactions/components/transaction-base-amount-sync';
 import { translate } from '@/lib/i18n';
 import { triggerScanPicker } from '@/lib/store/local-store';
-import { useTransactionForm } from '../hooks/form';
+import { FieldNodesContext, useTransactionForm } from '../hooks/form';
 import { FormDataGate } from './form-data-gate';
 import { AmountField, CategorySection, DetailsCard } from './transaction-form-fields';
 
@@ -110,6 +110,9 @@ function TransactionFormContent({ initialValues, onSaved, onClose, bottomMenuOff
   const {
     form,
     amountRef,
+    scrollRef,
+    contentRef,
+    registerFieldNode,
     isEdit,
     accounts,
     isLoading,
@@ -139,6 +142,7 @@ function TransactionFormContent({ initialValues, onSaved, onClose, bottomMenuOff
         )}
       />
       <KeyboardAwareScrollView
+        ref={scrollRef}
         style={{ flex: 1 }}
         bottomOffset={footerSpace}
         extraKeyboardSpace={footerSpace}
@@ -146,20 +150,24 @@ function TransactionFormContent({ initialValues, onSaved, onClose, bottomMenuOff
         contentContainerStyle={{ paddingBottom: footerSpace }}
         keyboardShouldPersistTaps="handled"
       >
-        <AmountField form={form} amountRef={amountRef} signed={isAdjustment} />
-        {!isAdjustment && <CategorySection form={form} />}
-        <form.Subscribe
-          selector={(s) => s.values.currency !== preferredCurrency}
-          children={(showBaseAmount) => (
-            <DetailsCard
-              form={form}
-              accounts={accounts}
-              isAdjustment={isAdjustment}
-              showBaseAmount={showBaseAmount}
-              onBaseAmountEdited={() => setBaseAmountIsManual(true)}
+        <FieldNodesContext value={registerFieldNode}>
+          <View ref={contentRef}>
+            <AmountField form={form} amountRef={amountRef} signed={isAdjustment} />
+            {!isAdjustment && <CategorySection form={form} />}
+            <form.Subscribe
+              selector={(s) => s.values.currency !== preferredCurrency}
+              children={(showBaseAmount) => (
+                <DetailsCard
+                  form={form}
+                  accounts={accounts}
+                  isAdjustment={isAdjustment}
+                  showBaseAmount={showBaseAmount}
+                  onBaseAmountEdited={() => setBaseAmountIsManual(true)}
+                />
+              )}
             />
-          )}
-        />
+          </View>
+        </FieldNodesContext>
       </KeyboardAwareScrollView>
       <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom + bottomMenuOffset }}>
         <FormFooter form={form} isEdit={isEdit} isLoading={isLoading} />

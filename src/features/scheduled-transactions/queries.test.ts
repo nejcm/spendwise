@@ -1,5 +1,11 @@
 import { createTestDb } from '@/test-utils/sqlite-db';
-import { getRuleForTransaction, getRulePayments } from './queries';
+import { createScheduledTransaction, deleteScheduledTransaction, getRuleForTransaction, getRulePayments, restoreScheduledTransaction, RuleAccountArchivedError, updateScheduledTransaction } from './queries';
+import { isoDateToUnix, todayISODate } from './scheduler';
+
+let mockUuid = 0;
+jest.mock('expo-crypto', () => ({
+  randomUUID: jest.fn(() => `test-uuid-${++mockUuid}`),
+}));
 
 describe('getRuleForTransaction', () => {
   it('finds the rule that generated a transaction, and nothing for manual rows', async () => {
@@ -14,7 +20,7 @@ describe('getRuleForTransaction', () => {
       INSERT INTO recurring_rule_runs (id, rule_id, scheduled_for_date, transaction_id) VALUES ('run', 'rule', 100, 'generated');
     `);
 
-    expect(await getRuleForTransaction(db as any, 'generated')).toEqual({ id: 'rule', frequency: 'monthly', next_due_date: 200, is_active: 1 });
+    expect(await getRuleForTransaction(db as any, 'generated')).toEqual({ id: 'rule', frequency: 'monthly', next_due_date: 200, is_active: 1, generated: 1 });
     expect(await getRuleForTransaction(db as any, 'manual')).toBeNull();
   });
 });
@@ -37,5 +43,149 @@ describe('getRulePayments', () => {
 
     const payments = await getRulePayments(db as any, 'rule', 2);
     expect(payments.map((p) => p.id)).toEqual(['t3', 't2']);
+  });
+});
+
+describe('deleteScheduledTransaction undo', () => {
+  const seed = `
+    INSERT INTO accounts (id, name, type, currency, icon, color) VALUES ('acc', 'Main', 'checking', 'EUR', '🏦', '#000000');
+    INSERT INTO recurring_rules (id, account_id, type, amount, currency, frequency, start_date, next_due_date, created_at, updated_at)
+      VALUES ('rule', 'acc', 'expense', 1000, 'EUR', 'monthly', 100, 300, 111, 222);
+    INSERT INTO transactions (id, account_id, type, amount, currency, baseAmount, baseCurrency, date) VALUES
+      ('t1', 'acc', 'expense', 1000, 'EUR', 1000, 'EUR', 100),
+      ('t2', 'acc', 'expense', 1000, 'EUR', 1000, 'EUR', 200);
+    INSERT INTO recurring_rule_runs (id, rule_id, scheduled_for_date, transaction_id, created_at) VALUES
+      ('r1', 'rule', 100, 't1', 333), ('r2', 'rule', 200, 't2', 444);
+  `;
+  const snapshot = (db: Awaited<ReturnType<typeof createTestDb>>) => Promise.all([
+    db.getAllAsync('SELECT * FROM recurring_rules'),
+    db.getAllAsync('SELECT * FROM recurring_rule_runs ORDER BY id'),
+    db.getAllAsync('SELECT id FROM transactions ORDER BY id'),
+  ]);
+
+  it('keeps generated transactions on delete and restores the rule with its runs', async () => {
+    const db = await createTestDb();
+    await db.execAsync(seed);
+    const before = await snapshot(db);
+
+    const deleted = await deleteScheduledTransaction(db as any, 'rule');
+    expect(await snapshot(db)).toEqual([[], [], before[2]]);
+
+    await restoreScheduledTransaction(db as any, deleted);
+    expect(await snapshot(db)).toEqual(before);
+  });
+
+  it('writes nothing when a generated transaction is gone', async () => {
+    const db = await createTestDb();
+    await db.execAsync(seed);
+    const deleted = await deleteScheduledTransaction(db as any, 'rule');
+    await db.runAsync(`DELETE FROM transactions WHERE id = 't2'`);
+
+    await expect(restoreScheduledTransaction(db as any, deleted)).rejects.toHaveProperty('code', 'SQLITE_CONSTRAINT_FOREIGNKEY');
+    expect(await snapshot(db)).toEqual([[], [], [{ id: 't1' }]]);
+  });
+});
+
+describe('updateScheduledTransaction on an archived account', () => {
+  const data = (is_active: boolean) => ({
+    account_id: 'acc',
+    category_id: 'cat',
+    type: 'expense' as const,
+    currency: 'EUR' as const,
+    note: null,
+    frequency: 'monthly' as const,
+    start_date: Math.floor(Date.now() / 1000),
+    end_date: null,
+    amount: 10,
+    is_active,
+  });
+
+  it('blocks resuming but allows edits that keep the rule paused', async () => {
+    const db = await createTestDb();
+    await db.execAsync(`
+      INSERT INTO accounts (id, name, type, currency, is_archived) VALUES ('acc', 'Main', 'checking', 'EUR', 1);
+      INSERT INTO categories (id, name, color) VALUES ('cat', 'Bills', '#000');
+      INSERT INTO recurring_rules (id, account_id, type, amount, currency, frequency, start_date, next_due_date, is_active)
+        VALUES ('rule', 'acc', 'expense', 1000, 'EUR', 'monthly', 100, 200, 0);
+    `);
+
+    await expect(updateScheduledTransaction(db as any, 'rule', data(true))).rejects.toBeInstanceOf(RuleAccountArchivedError);
+    await updateScheduledTransaction(db as any, 'rule', data(false));
+    expect(await db.getFirstAsync('SELECT is_active, amount FROM recurring_rules')).toEqual({ is_active: 0, amount: 1000 });
+
+    await db.runAsync('UPDATE accounts SET is_archived = 0');
+    await updateScheduledTransaction(db as any, 'rule', data(true));
+    expect(await db.getFirstAsync('SELECT is_active FROM recurring_rules')).toEqual({ is_active: 1 });
+  });
+
+  it('blocks creating an active rule but allows a paused one', async () => {
+    const db = await createTestDb();
+    await db.execAsync(`
+      INSERT INTO accounts (id, name, type, currency, is_archived) VALUES ('acc', 'Main', 'checking', 'EUR', 1);
+      INSERT INTO categories (id, name, color) VALUES ('cat', 'Bills', '#000');
+    `);
+
+    await expect(createScheduledTransaction(db as any, data(true))).rejects.toBeInstanceOf(RuleAccountArchivedError);
+    await createScheduledTransaction(db as any, data(false));
+    expect(await db.getAllAsync('SELECT is_active FROM recurring_rules')).toEqual([{ is_active: 0 }]);
+  });
+});
+
+describe('createScheduledTransaction from a transaction', () => {
+  const today = isoDateToUnix(todayISODate());
+  const DAY = 86400;
+  const data = (source_transaction_id: string, overrides: object = {}) => ({
+    account_id: 'acc',
+    category_id: 'cat',
+    type: 'expense' as const,
+    currency: 'EUR' as const,
+    note: null,
+    frequency: 'daily' as const,
+    start_date: today,
+    end_date: null,
+    amount: 10,
+    is_active: true,
+    source_transaction_id,
+    ...overrides,
+  });
+  const runs = (db: Awaited<ReturnType<typeof createTestDb>>) =>
+    db.getAllAsync('SELECT scheduled_for_date, transaction_id FROM recurring_rule_runs');
+
+  async function seed() {
+    const db = await createTestDb();
+    await db.execAsync(`
+      INSERT INTO accounts (id, name, type, currency) VALUES ('acc', 'Main', 'checking', 'EUR');
+      INSERT INTO categories (id, name, color) VALUES ('cat', 'Bills', '#000');
+      INSERT INTO transactions (id, account_id, type, amount, currency, baseAmount, baseCurrency, date, created_at) VALUES
+        ('today', 'acc', 'expense', 1000, 'EUR', 1000, 'EUR', ${today}, 1),
+        ('noon', 'acc', 'expense', 1000, 'EUR', 1000, 'EUR', ${today + DAY / 2}, 1),
+        ('later', 'acc', 'expense', 1000, 'EUR', 1000, 'EUR', ${today + 2 * DAY}, 1);
+    `);
+    return db;
+  }
+
+  it('links the source as the run for its date and reports it as not generated', async () => {
+    const db = await seed();
+    const ruleId = await createScheduledTransaction(db as any, data('today'));
+    expect(await getRuleForTransaction(db as any, 'today')).toMatchObject({ id: ruleId, generated: 0 });
+  });
+
+  it('uses the calendar day of a timestamped source and any later occurrence', async () => {
+    const db = await seed();
+    await createScheduledTransaction(db as any, data('noon'));
+    await createScheduledTransaction(db as any, data('later'));
+    expect(await runs(db)).toEqual([
+      { scheduled_for_date: today, transaction_id: 'noon' },
+      { scheduled_for_date: today + 2 * DAY, transaction_id: 'later' },
+    ]);
+  });
+
+  it('skips a source that is not an occurrence or does not match the rule', async () => {
+    const db = await seed();
+    await createScheduledTransaction(db as any, data('later', { frequency: 'weekly' }));
+    await createScheduledTransaction(db as any, data('today', { type: 'income' }));
+    await createScheduledTransaction(db as any, data('today', { amount: 11 }));
+    await createScheduledTransaction(db as any, data('today', { currency: 'USD' }));
+    expect(await runs(db)).toEqual([]);
   });
 });

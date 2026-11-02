@@ -15,7 +15,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { DEFAULT_DATE_FORMAT, DEFAULT_USER_CURRENCY } from '@/config';
 import { CURRENCIES_MAP } from '@/features/currencies';
-import { currentPeriodSelection } from '@/lib/date/helpers';
+import { currentPeriodSelection, setPeriodMonthStartDay } from '@/lib/date/helpers';
 import { createSelectors } from '@/lib/utils';
 import { mmkvStorage } from '../storage';
 
@@ -89,6 +89,7 @@ export type AppState = {
   density: DensityType;
   homeScreenChart: HomeScreenChartType;
   lastPrimaryTabPath: PrimaryTabPath;
+  setupChecklistHidden?: boolean;
 
   // Security
   lockEnabled: boolean;
@@ -202,6 +203,9 @@ const _useAppStore = create<AppState>()(
 
 export const useAppStore = createSelectors(_useAppStore);
 
+setPeriodMonthStartDay(_useAppStore.getState().monthStartDay);
+_useAppStore.subscribe((state) => setPeriodMonthStartDay(state.monthStartDay));
+
 export function clearAppStore() {
   return _useAppStore.setState(getDefaultState());
 }
@@ -223,6 +227,9 @@ export function updateProfile(profile: Partial<AppState['profile']>) {
 export const selectProfile = (state: AppState) => state.profile;
 
 // Preference actions
+export function hideSetupChecklist() {
+  return updateAppState({ setupChecklistHidden: true });
+}
 export function setCurrency(currency: CurrencyKey) {
   return updateAppState({ currency: currency.length > 0 ? currency : DEFAULT_USER_CURRENCY });
 }
@@ -240,7 +247,11 @@ export function setNumberFormat(numberFormat: AppState['numberFormat']) {
 }
 
 export function setMonthStartDay(monthStartDay: number) {
-  return updateAppState({ monthStartDay });
+  const { periodSelection } = getAppState();
+  const current = currentPeriodSelection();
+  const wasCurrentMonth = periodSelection.mode === 'month' && periodSelection.year === current.year && periodSelection.month === current.month;
+  updateAppState({ monthStartDay });
+  if (wasCurrentMonth) setPeriodSelection(currentPeriodSelection());
 }
 
 export function setTheme(theme: ThemeType) {

@@ -27,7 +27,7 @@ export type CurrencyProps = BaseProps & {
   format?: NumberFormat;
   currency: CurrencyKey;
   prefix?: string;
-  shorten?: boolean;
+  shorten?: boolean | number;
   negativeSymbol?: boolean;
   fractionDigits?: number;
 };
@@ -67,24 +67,24 @@ const amountText = tv({
   defaultVariants: { size: 'row' },
 });
 
-export type AmountTextProps = Omit<CurrencyProps, 'shorten' | 'format'> & {
-  /** `hero` renders the fraction smaller and muted ("€7,400" + ".75"). */
+export type AmountTextProps = Omit<CurrencyProps, 'format'> & {
+  /** `hero` renders the fraction smaller and muted ("€7,400" + ".75"), shrinks to fit one line and is never shortened. */
   size?: 'hero' | 'row';
   centsClassName?: string;
 };
 
-export function AmountText({ value, currency, prefix = '', negativeSymbol = true, fractionDigits = 2, size = 'row', className, centsClassName, ...textProps }: AmountTextProps) {
+export function AmountText({ value, currency, prefix = '', shorten = false, negativeSymbol = true, fractionDigits = 2, size = 'row', className, centsClassName, ...textProps }: AmountTextProps) {
   const numberFormat = useAppStore.use.numberFormat();
   const currencyFormat = useAppStore.use.currencyFormat();
   const styles = amountText({ size });
-  const formatted = prefix + formatCurrency(value, currency, { numberFormat, currencyFormat, negativeSymbol, fractionDigits });
+  const formatted = prefix + formatCurrency(value, currency, { numberFormat, currencyFormat, shorten: size === 'row' && shorten, negativeSymbol, fractionDigits });
 
   if (size === 'row') {
     return <Text {...textProps} className={styles.base({ className })}>{formatted}</Text>;
   }
   const [whole, fraction, suffix] = splitFraction(formatted, numberFormat);
   return (
-    <Text {...textProps} className={styles.base({ className })}>
+    <Text numberOfLines={1} adjustsFontSizeToFit {...textProps} className={styles.base({ className })}>
       {whole}
       {!!fraction && <Text className={styles.cents({ className: centsClassName })}>{fraction}</Text>}
       {suffix}

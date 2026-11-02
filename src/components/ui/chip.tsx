@@ -29,7 +29,7 @@ export function Chip({ label, icon, selected = false, tone = 'soft', className, 
       accessibilityState={{ selected }}
       style={(state) => getPressedStyle(state, style)}
       className={cn(
-        'h-[38px] flex-row items-center gap-1.5 self-start rounded-full border pr-3.5 pl-2.5',
+        'h-9.5 flex-row items-center gap-1.5 self-start rounded-full border pr-3.5 pl-2.5',
         solid ? 'border-transparent bg-primary' : selected ? 'border-accent-line bg-accent-soft' : 'border-transparent bg-card-2',
         className,
       )}
@@ -56,7 +56,7 @@ export function FilterChip({ label, icon, onRemove, className, style, ...props }
       onPress={onRemove}
       hitSlop={4}
       style={(state) => getPressedStyle(state, style)}
-      className={cn('h-[34px] flex-row items-center gap-1.5 self-start rounded-full border border-accent-line bg-accent-soft pr-1.5 pl-2.5', className)}
+      className={cn('h-8.5 flex-row items-center gap-1.5 self-start rounded-full border border-accent-line bg-accent-soft pr-1.5 pl-2.5', className)}
       {...props}
     >
       {renderIcon(icon)}

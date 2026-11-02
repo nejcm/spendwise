@@ -17,8 +17,8 @@ import { TransactionCard } from '@/features/transactions/components/transaction-
 import { buildTransactionsHref } from '@/features/transactions/route-params';
 import { cn } from '@/lib/cn';
 import { queryKeys } from '@/lib/data/query-keys';
-import { getPeriodRange, scaleBudgetForPeriod } from '@/lib/date/helpers';
-import { useCurrentYearMonth } from '@/lib/hooks/use-current-year-month';
+import { scaleBudgetForPeriod } from '@/lib/date/helpers';
+import { useCurrentYearMonth, usePeriodRange } from '@/lib/hooks/use-current-year-month';
 import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
 import { goBackOrFallback } from '@/lib/routing';
@@ -35,7 +35,7 @@ export function CategoryDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const selection = useAppStore.use.periodSelection();
-  const [startDate, endDate] = React.useMemo(() => getPeriodRange(selection), [selection]);
+  const [startDate, endDate] = usePeriodRange(selection);
   const refreshKeys = React.useMemo(() => [
     queryKeys.insights.all,
     queryKeys.transactions.list(`${startDate}/${endDate}`),
@@ -60,7 +60,7 @@ export function CategoryDetailScreen() {
         contentContainerStyle={{ paddingBottom: 88 + insets.bottom }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[340px] bg-linear-to-b from-wash to-background" />
+        <View pointerEvents="none" className="absolute inset-x-0 top-0 h-85 bg-linear-to-b from-wash to-background" />
         <View className="px-5 pt-2">
           <PageHeader
             left={<HeaderButton icon={ChevronLeft} label={translate('common.back')} onPress={() => goBackOrFallback(router, '/categories')} />}
@@ -184,7 +184,7 @@ function SixMonths({ category, kind, selection, startDate }: { category: Categor
   const endYearMonth = periodMonthName(selection, startDate) && startDate !== undefined
     ? new Date(startDate * 1000).toISOString().slice(0, 7)
     : currentYearMonth;
-  const [start, end] = React.useMemo(() => monthBarsRange(endYearMonth), [endYearMonth]);
+  const [start, end] = monthBarsRange(endYearMonth);
   const { data: rows = [] } = useCategoryMonthlyTotals(category.category_id, start, end);
   const bars = buildMonthBars(rows, endYearMonth, kind);
   const budget = kind === 'expense' ? category.category_budget ?? undefined : undefined;

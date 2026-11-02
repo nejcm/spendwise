@@ -144,6 +144,7 @@ export default antfu(
     settings: {
       'better-tailwindcss': {
         entryPoint: path.resolve(__dirname, './src/global.css'),
+        rootFontSize: 16,
       },
     },
     rules: {

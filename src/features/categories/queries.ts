@@ -1,10 +1,11 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { Category, CategoryFormData, CategoryUsage } from './types';
-import type { MonthlyTotals } from '@/features/insights/types';
+import type { DailyTrendTotal, MonthlyTotals } from '@/features/insights/types';
 
 import { DEFAULT_CATEGORY_ID } from '@/config';
 import { amountToCents } from '@/features/formatting/helpers';
+import { monthlyFromDaily } from '@/features/stats/helpers';
 import { generateId, withWriteTransaction } from '@/lib/sqlite';
 
 export async function getCategories(db: SQLiteDatabase): Promise<Category[]> {
@@ -71,17 +72,18 @@ export async function getCategoryMonthlyTotals(
   startDate: number,
   endDate: number,
 ): Promise<MonthlyTotals[]> {
-  return db.getAllAsync<MonthlyTotals>(
+  const days = await db.getAllAsync<DailyTrendTotal>(
     `SELECT
-       strftime('%Y-%m', date, 'unixepoch') as month,
+       date,
        COALESCE(SUM(CASE WHEN type = 'income' THEN baseAmount ELSE 0 END), 0) as income,
        COALESCE(SUM(CASE WHEN type = 'expense' THEN baseAmount ELSE 0 END), 0) as expense
      FROM transactions
      WHERE category_id = ? AND date >= ? AND date < ?
-     GROUP BY month
-     ORDER BY month ASC`,
+     GROUP BY date
+     ORDER BY date ASC`,
     [categoryId, startDate, endDate],
   );
+  return monthlyFromDaily(days);
 }
 
 export async function updateCategoryOrder(

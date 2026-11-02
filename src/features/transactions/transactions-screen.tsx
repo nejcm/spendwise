@@ -13,7 +13,7 @@ import { useAccounts } from '@/features/accounts/hooks';
 import { useCategories } from '@/features/categories/api';
 import { formatCurrency } from '@/features/formatting/helpers';
 import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
-import { getPeriodRange } from '@/lib/date/helpers';
+import { usePeriodRange } from '@/lib/hooks/use-current-year-month';
 import { translate } from '@/lib/i18n';
 import { setPeriodSelection, useAppStore } from '@/lib/store/store';
 import { transactionsQueryOptions, useHasUserTransactions, useTransactions } from './api';
@@ -53,7 +53,7 @@ export function TransactionsScreen() {
   }, [routeSeed]);
   const updateFilters = React.useCallback((patch: Partial<FilterState>) => setFilters((prev) => ({ ...prev, ...patch })), []);
 
-  const [startDate, endDate] = useMemo(() => getPeriodRange(selection), [selection]);
+  const [startDate, endDate] = usePeriodRange(selection);
   const { data: transactions = [], isLoading, refetch } = useTransactions(startDate, endDate);
   const { data: accounts = [] } = useAccounts();
   const { data: categories = [] } = useCategories();
@@ -88,7 +88,7 @@ export function TransactionsScreen() {
   const isNarrowed = filterCount > 0 || debouncedSearch.trim().length > 0;
   const header = (
     <View className="px-5 pt-2">
-      <View pointerEvents="none" className="absolute inset-x-0 -top-2 h-[340px] bg-linear-to-b from-wash to-background" />
+      <View pointerEvents="none" className="absolute inset-x-0 -top-2 h-85 bg-linear-to-b from-wash to-background" />
       <View className="h-12 flex-row items-center justify-between gap-3">
         <Text accessibilityRole="header" numberOfLines={1} className="shrink text-page-title font-bold tracking-page-title">{translate('nav.activity')}</Text>
         <PeriodPill selection={selection} />

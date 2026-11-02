@@ -9,8 +9,9 @@ import { useTransactions } from '@/features/transactions/api';
 import { TransactionCard } from '@/features/transactions/components/transaction-card';
 import { isTransferInLeg } from '@/features/transactions/queries';
 import { cn } from '@/lib/cn';
-import { calendarDateToUnix, getMonthBoundaries, unixToDate } from '@/lib/date/helpers';
+import { calendarDateToUnix, getMonthBoundaries, monthOfDay, unixToDate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
+import { shortenNumberString } from '@/lib/number';
 import { useAppStore } from '@/lib/store/store';
 import { dailyExpenses, heatLevels } from '../helpers';
 
@@ -22,8 +23,8 @@ const HEAT_CLASSES = ['bg-card-2', 'bg-accent/20', 'bg-accent/55', 'bg-accent'];
 /** The month holding today when the Period does, else the Period's first month. */
 function calendarMonth(startDate: number | undefined, endDate: number | undefined, today: number): [number, number] {
   const inPeriod = startDate === undefined || (today >= startDate && (endDate === undefined || today < endDate));
-  const anchor = unixToDate(inPeriod ? today : startDate);
-  return getMonthBoundaries(anchor.getUTCFullYear(), anchor.getUTCMonth() + 1);
+  const { year, month } = monthOfDay(inPeriod ? today : startDate);
+  return getMonthBoundaries(year, month);
 }
 
 export function CalendarTab({ startDate, endDate }: PeriodProps) {
@@ -43,16 +44,16 @@ export function CalendarTab({ startDate, endDate }: PeriodProps) {
   const cells = [...Array.from({ length: leading }).fill(null) as null[], ...days.map((day, i) => ({ ...day, level: levels[i] }))];
   while (cells.length % 7) cells.push(null);
   const weeks = Array.from({ length: cells.length / 7 }, (_, i) => cells.slice(i * 7, i * 7 + 7));
-  const short = (value: number) => formatNumber(Math.round(value / 100), numberFormat, 0);
+  const short = (value: number) => shortenNumberString(Math.round(value / 100), 100_000, 1, (n) => formatNumber(n, numberFormat, 1));
 
   return (
     <>
       <Card variant="hero" className="mt-4 gap-2 px-3.5 py-4">
-        <View className="flex-row gap-[5px]">
+        <View className="flex-row gap-1.25">
           {WEEKDAYS.map((day) => <Text key={day} className="flex-1 text-center text-xs text-muted-foreground">{formatDateFull(day, 'EEE')}</Text>)}
         </View>
         {weeks.map((week) => (
-          <View key={week.find(Boolean)?.date} className="flex-row gap-[5px]">
+          <View key={week.find(Boolean)?.date} className="flex-row gap-1.25">
             {week.map((cell, i) => cell
               ? (
                   <Pressable
@@ -62,7 +63,7 @@ export function CalendarTab({ startDate, endDate }: PeriodProps) {
                     accessibilityLabel={`${formatDateFull(cell.date, 'MMMM d')}, ${cell.value > 0 ? format(cell.value) : translate('stats.no_spending')}`}
                     onPress={() => setPicked(cell.date)}
                     className={cn(
-                      'h-[52px] flex-1 items-center justify-center rounded-xl border-2',
+                      'h-13 flex-1 items-center justify-center rounded-xl border-2',
                       HEAT_CLASSES[cell.level],
                       cell.date === selected ? 'border-foreground' : 'border-transparent',
                     )}
@@ -94,7 +95,7 @@ function DayList({ day, monthStart, monthEnd, spent }: { day: number; monthStart
 
   return (
     <>
-      <View className="flex-row items-baseline justify-between pt-[22px] pb-1">
+      <View className="flex-row items-baseline justify-between pt-5.5 pb-1">
         <Text accessibilityRole="header" className="text-header-title font-semibold">{formatDateFull(day, 'EEEE, MMM d')}</Text>
         {spent > 0 && <Text className="text-sm text-muted-foreground tabular-nums">{translate('stats.spent_amount', { amount: format(spent) })}</Text>}
       </View>

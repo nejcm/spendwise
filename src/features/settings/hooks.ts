@@ -2,7 +2,7 @@ import type { DeleteDataSelection } from './queries';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
 import { invalidateFor, queryKeys } from '@/lib/data';
-import { getAppState, setTransactionFormPrefs } from '@/lib/store/store';
+import { getAppState, setMonthStartDay, setTransactionFormPrefs } from '@/lib/store/store';
 import * as queries from './queries';
 
 export function useDataCounts() {
@@ -28,4 +28,13 @@ export function useDeleteData() {
       invalidateFor(queryClient, 'transaction', 'scheduledTransaction', 'category', 'account');
     },
   });
+}
+
+/** Month-keyed (`yyyy-MM`) caches keep their key when the start day moves, so refetch them. */
+export function useSetMonthStartDay() {
+  const queryClient = useQueryClient();
+  return (day: number) => {
+    setMonthStartDay(day);
+    invalidateFor(queryClient, 'monthStartDay');
+  };
 }

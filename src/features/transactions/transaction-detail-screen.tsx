@@ -3,7 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 import { ScrollView } from 'react-native';
 import { HeaderButton, PageHeader } from '@/components/page-header';
-import { Alert, Copy, FocusAwareStatusBar, GhostButton, RepeatIcon, Text, View } from '@/components/ui';
+import { Copy, FocusAwareStatusBar, GhostButton, RepeatIcon, Text, View } from '@/components/ui';
 import { ChevronLeft, Pencil } from '@/components/ui/icon';
 import { NAV_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
 import { useRuleForTransaction } from '@/features/scheduled-transactions/hooks';
@@ -11,35 +11,30 @@ import { unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { goBackOrFallback } from '@/lib/routing';
 import { centsToAmount } from '../formatting/helpers';
-import { useCreateTransaction, useDeleteTransaction, useDuplicateTransfer, useTransaction } from './api';
+import { useCreateTransaction, useDeleteTransactionWithUndo, useDuplicateTransfer, useTransaction } from './api';
 import { DetailAction, DetailHero, DetailRows, FxNote } from './components/transaction-detail-parts';
 import { TransactionForm } from './components/transaction-form';
 import { transactionToFormValues } from './components/transaction-form-schema';
 import { transactionFooterText } from './helpers';
 
 function Wash() {
-  return <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[340px] bg-linear-to-b from-wash to-background" />;
+  return <View pointerEvents="none" className="absolute inset-x-0 top-0 h-85 bg-linear-to-b from-wash to-background" />;
 }
 
 function useTransactionActions(transaction: TransactionWithCategory | null | undefined) {
   const router = useRouter();
   const createMut = useCreateTransaction();
   const duplicateTransferMut = useDuplicateTransfer();
-  const deleteMut = useDeleteTransaction();
+  const deleteMut = useDeleteTransactionWithUndo();
+  const deletingRef = React.useRef(false);
 
   const remove = () => {
-    if (!transaction) return;
-    Alert.alert(translate('common.delete'), translate('transactions.delete_confirmation'), [
-      { text: translate('common.cancel'), style: 'cancel' },
-      {
-        text: translate('common.delete'),
-        style: 'destructive',
-        onPress: async () => {
-          await deleteMut.mutateAsync(transaction.id);
-          goBackOrFallback(router);
-        },
-      },
-    ]);
+    if (!transaction || deletingRef.current) return;
+    deletingRef.current = true;
+    deleteMut.mutate(transaction.id, {
+      onSuccess: () => goBackOrFallback(router),
+      onSettled: () => { deletingRef.current = false; },
+    });
   };
 
   const makeRecurring = () => {
@@ -54,6 +49,7 @@ function useTransactionActions(transaction: TransactionWithCategory | null | und
         account_id: transaction.account_id,
         note: transaction.note,
         start_date: unixToISODate(transaction.date),
+        source_transaction_id: transaction.id,
       },
     });
   };
@@ -144,7 +140,7 @@ export function TransactionDetailScreen() {
                 </View>
               )}
               <GhostButton color="danger" className="mt-4" textClassName="text-[15px] font-medium" label={translate('transactions.detail.delete')} onPress={actions.remove} />
-              <Text className="pt-2 text-center text-xs text-muted-foreground">{transactionFooterText(transaction, !!rule)}</Text>
+              <Text className="pt-2 text-center text-xs text-muted-foreground">{transactionFooterText(transaction, !!rule?.generated)}</Text>
             </ScrollView>
           )}
     </View>

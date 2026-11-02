@@ -1,5 +1,6 @@
 import type { AppStateStatus } from 'react-native';
 import { AppState } from 'react-native';
+import { setMonthStartDay } from '@/lib/store/store';
 import { act, renderHook } from '@/lib/test-utils';
 import { useCurrentDay, useCurrentYearMonth } from './use-current-year-month';
 
@@ -64,6 +65,23 @@ describe('useCurrentYearMonth', () => {
 
     act(() => jest.advanceTimersByTime(31 * 24 * 60 * 60_000));
     expect(result.current).toBe('2026-12');
+  });
+
+  it('follows the month start day and re-keys when it changes', () => {
+    const { result } = renderHook(() => useCurrentYearMonth());
+    expect(result.current).toBe('2026-10');
+
+    act(() => setMonthStartDay(25));
+    try {
+      expect(result.current).toBe('2026-10');
+      act(() => jest.advanceTimersByTime(24 * 24 * 60 * 60_000));
+      expect(result.current).toBe('2026-10');
+      act(() => jest.advanceTimersByTime(2 * 60 * 60_000));
+      expect(result.current).toBe('2026-11');
+    }
+    finally {
+      act(() => setMonthStartDay(1));
+    }
   });
 
   it('removes both listeners and the boundary timer on unmount', () => {

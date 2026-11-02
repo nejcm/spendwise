@@ -1,7 +1,9 @@
-import type { PressableProps, View } from 'react-native';
+import type { View } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
+import type { PressableScaleProps } from './pressable-scale';
 import * as React from 'react';
-import { Button, buttonTv } from './button';
+import { useAppStore } from '@/lib/store/store';
+import { Button, buttonTv, densitySize } from './button';
 
 type ButtonVariants = VariantProps<typeof buttonTv>;
 export type SolidButtonProps = {
@@ -12,7 +14,7 @@ export type SolidButtonProps = {
   className?: string;
   textClassName?: string;
 } & ButtonVariants
-& Omit<PressableProps, 'disabled'>;
+& Omit<PressableScaleProps, 'disabled'>;
 
 export function SolidButton({
   ref,
@@ -21,10 +23,11 @@ export function SolidButton({
   disabled = false,
   fullWidth = false,
   loading = false,
-  size = 'md',
+  size: sizeProp = 'md',
   textClassName = '',
   ...props
 }: SolidButtonProps & { ref?: React.RefObject<View | null> }) {
+  const size = densitySize(sizeProp, useAppStore.use.density());
   const styles = React.useMemo(() => buttonTv({ disabled, size, color, fullWidth }), [disabled, size, color, fullWidth]);
 
   return (

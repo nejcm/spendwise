@@ -103,8 +103,8 @@
   --color-danger-foreground: #ffffff;
 
   --color-track: #ebe8f3;
-  --color-segment-track: #ebe8f3;
-  --color-segment-selected: #ffffff;
+  --color-segment-track: #ffffff;
+  --color-segment-selected: #ebe8f3;
   --color-scrim: rgba(23, 21, 28, 0.42);
 
   /* Legacy names still used by callers */
@@ -144,8 +144,8 @@
       --color-danger-foreground: #ffffff;
 
       --color-track: #ebe8f3;
-      --color-segment-track: #ebe8f3;
-      --color-segment-selected: #ffffff;
+      --color-segment-track: #ffffff;
+      --color-segment-selected: #ebe8f3;
       --color-scrim: rgba(23, 21, 28, 0.42);
 
       --color-muted: #f1eff7;

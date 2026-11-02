@@ -1,8 +1,10 @@
 import type { PeriodSelection } from '@/lib/store/store';
 import { endOfISOWeek, format, isToday, isTomorrow, isYesterday, parseISO, setISOWeek, startOfISOWeek, startOfYear } from 'date-fns';
 import { translate } from '../i18n';
+import { currentPeriodSelection } from './helpers';
 
-export function getPeriodLabel(selection: PeriodSelection): string {
+/** `monthFormat` lets compact controls show e.g. "Nov 2026". */
+export function getPeriodLabel(selection: PeriodSelection, monthFormat = 'MMMM yyyy'): string {
   const now = new Date();
 
   switch (selection.mode) {
@@ -21,14 +23,14 @@ export function getPeriodLabel(selection: PeriodSelection): string {
       return `${format(weekStart, 'MMM d')} – ${format(weekEnd, 'MMM d')}`;
     }
     case 'this-month':
-      return format(now, 'MMMM yyyy');
+      return getPeriodLabel(currentPeriodSelection(), monthFormat);
     case 'this-year':
-      return format(now, 'yyyy');
+      return String(currentPeriodSelection().year);
     case 'year':
       return String(selection.year);
     case 'month': {
       const d = new Date(selection.year, selection.month - 1, 1);
-      return format(d, 'MMMM yyyy');
+      return format(d, monthFormat);
     }
     case 'week': {
       const weekStart = startOfISOWeek(setISOWeek(startOfYear(new Date(selection.year, 0, 4)), selection.week));

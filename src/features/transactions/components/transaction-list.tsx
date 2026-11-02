@@ -7,6 +7,7 @@ import { RefreshControl } from 'react-native';
 
 import NoData from '@/components/no-data';
 import { ActivityIndicator, FormattedCurrency, Text, View } from '@/components/ui';
+import { SHORTEN_ROW } from '@/features/formatting/constants';
 import { formatDate } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
@@ -65,10 +66,10 @@ export function TransactionList({
     ({ item }: { item: Item }) => {
       if (isHeader(item)) {
         return (
-          <View className={`flex-row justify-between px-5 ${isCompact ? 'pt-2' : 'pt-[18px]'} pb-0.5`}>
+          <View className={`flex-row justify-between px-5 ${isCompact ? 'pt-2' : 'pt-4.5'} pb-0.5`}>
             <Text className="text-meta text-muted-foreground">{formatDate(item.day, 'EEEE, MMM d')}</Text>
             {item.total !== null && (
-              <FormattedCurrency value={item.total} currency={currency} prefix={item.total > 0 ? '+' : ''} className="text-meta text-muted-foreground" />
+              <FormattedCurrency value={item.total} currency={currency} prefix={item.total > 0 ? '+' : ''} shorten={SHORTEN_ROW} className="text-meta text-muted-foreground" />
             )}
           </View>
         );

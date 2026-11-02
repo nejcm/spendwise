@@ -25,3 +25,7 @@ export const DATE_FORMAT_OPTIONS = [
   'MMM d, yyyy', // Mar 12, 2026
 ] as const;
 export type DateFormat = (typeof DATE_FORMAT_OPTIONS)[number];
+
+/** Major-unit magnitudes from which amounts shorten to e.g. `1.5m`: inline pills, and rows that share width with a title. */
+export const SHORTEN_TIGHT = 1_000_000;
+export const SHORTEN_ROW = 10_000_000;

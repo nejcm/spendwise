@@ -3,13 +3,16 @@ import { SEED_ACCOUNT_ID } from '@/lib/sqlite/seed';
 import { createTestDb } from '@/test-utils/sqlite-db';
 
 import {
+  AccountInUseError,
   archiveAccount,
   createAccount,
+  deleteAccount,
   getAccountFlows,
   getAccountNetChanges,
   getAccounts,
   getAccountsWithBalance,
   getAccountsWithBalanceForMonth,
+  getAccountUsage,
   getArchivedAccounts,
   getBalanceSeries,
   getTotalBalance,
@@ -578,6 +581,79 @@ describe('archiveAccount', () => {
 
     const result = await archiveAccount(db as any, 'acc_1');
     expect(result).toBeUndefined();
+  });
+});
+
+describe('archiveAccount recurring rules', () => {
+  it('pauses only that account\'s active rules, and unarchive does not resume them', async () => {
+    const db = await createTestDb();
+    await seedAccount(db);
+    await seedAccount(db, { id: 'acc_2', sort_order: 1 });
+    await db.execAsync(`
+      INSERT INTO recurring_rules (id, account_id, type, amount, currency, frequency, start_date, next_due_date, is_active) VALUES
+        ('mine', 'acc_1', 'expense', 1000, 'EUR', 'monthly', 100, 200, 1),
+        ('mine_paused', 'acc_1', 'expense', 1000, 'EUR', 'monthly', 100, 200, 0),
+        ('other', 'acc_2', 'expense', 1000, 'EUR', 'monthly', 100, 200, 1);
+    `);
+    const active = () => db.getAllAsync<{ id: string }>('SELECT id FROM recurring_rules WHERE is_active = 1 ORDER BY id');
+
+    expect((await getAccountUsage(db as any, 'acc_1')).activeRules).toBe(1);
+    await archiveAccount(db as any, 'acc_1');
+    expect(await active()).toEqual([{ id: 'other' }]);
+
+    await unarchiveAccount(db as any, 'acc_1');
+    expect(await active()).toEqual([{ id: 'other' }]);
+  });
+});
+
+describe('deleteAccount', () => {
+  const remaining = async (db: Awaited<ReturnType<typeof createTestDb>>) => ({
+    accounts: (await db.getAllAsync<{ id: string }>('SELECT id FROM accounts')).length,
+    transactions: (await db.getAllAsync<{ id: string }>('SELECT id FROM transactions')).length,
+  });
+
+  it('deletes an account whose only row is its opening balance', async () => {
+    const db = await createTestDb();
+    await seedAccount(db);
+    await seedTransaction(db, { type: 'transfer', is_adjustment: 1 });
+
+    expect(await getAccountUsage(db as any, 'acc_1')).toEqual({ transactions: 0, rules: 0, activeRules: 0 });
+    await deleteAccount(db as any, 'acc_1');
+    expect(await remaining(db)).toEqual({ accounts: 0, transactions: 0 });
+  });
+
+  it('blocks an account with a regular transaction', async () => {
+    const db = await createTestDb();
+    await seedAccount(db);
+    await seedTransaction(db, { type: 'transfer', is_adjustment: 1, id: 'opening' });
+    await seedTransaction(db);
+
+    await expect(deleteAccount(db as any, 'acc_1')).rejects.toBeInstanceOf(AccountInUseError);
+    expect(await remaining(db)).toEqual({ accounts: 1, transactions: 2 });
+  });
+
+  it('blocks an account with a transfer leg', async () => {
+    const db = await createTestDb();
+    await seedAccount(db);
+    await seedAccount(db, { id: 'acc_2', sort_order: 1 });
+    await seedTransaction(db, { id: 'out', type: 'transfer', amount: -500, account_id: 'acc_2' });
+    await seedTransaction(db, { id: 'in', type: 'transfer', amount: 500 });
+    await db.runAsync(`UPDATE transactions SET transfer_id = 'tr'`);
+
+    expect((await getAccountUsage(db as any, 'acc_1')).transactions).toBe(1);
+    await expect(deleteAccount(db as any, 'acc_1')).rejects.toBeInstanceOf(AccountInUseError);
+  });
+
+  it('blocks an account with a recurring rule, even a paused one', async () => {
+    const db = await createTestDb();
+    await seedAccount(db);
+    await db.runAsync(
+      `INSERT INTO recurring_rules (id, account_id, type, amount, currency, frequency, start_date, next_due_date, is_active)
+       VALUES ('rule', 'acc_1', 'expense', 1000, 'EUR', 'monthly', 100, 200, 0)`,
+    );
+
+    await expect(deleteAccount(db as any, 'acc_1')).rejects.toBeInstanceOf(AccountInUseError);
+    expect(await remaining(db)).toEqual({ accounts: 1, transactions: 0 });
   });
 });
 

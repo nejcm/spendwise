@@ -14,9 +14,9 @@ import { templateParams } from '../helpers';
 export function RecurringEmpty({ onAdd }: { onAdd: () => void }) {
   return (
     <View className="flex-1">
-      <Text accessibilityRole="header" className="pt-[26px] text-[26px]/tight font-bold tracking-page-title">{translate('scheduled.empty.title')}</Text>
+      <Text accessibilityRole="header" className="pt-6.5 text-[26px]/tight font-bold tracking-page-title">{translate('scheduled.empty.title')}</Text>
       <Text className="pt-2 text-row/snug text-muted-foreground">{translate('scheduled.empty.body')}</Text>
-      <Text accessibilityRole="header" className="pt-[22px] pb-2.5 text-sm font-semibold">{translate('scheduled.empty.templates')}</Text>
+      <Text accessibilityRole="header" className="pt-5.5 pb-2.5 text-sm font-semibold">{translate('scheduled.empty.templates')}</Text>
       <View className="flex-row flex-wrap gap-2.5">
         {RECURRING_TEMPLATES.map((template) => <TemplateTile key={template.key} template={template} />)}
       </View>
@@ -59,7 +59,7 @@ function TemplateTile({ template }: { template: RecurringTemplate }) {
       accessibilityLabel={`${name}, ${meta}`}
       onPress={onPress}
       style={getPressedStyle}
-      className="h-[60px] min-w-[45%] flex-1 basis-[45%] flex-row items-center gap-2.5 rounded-[18px] bg-card px-3"
+      className="h-15 min-w-[45%] flex-1 basis-[45%] flex-row items-center gap-2.5 rounded-[18px] bg-card px-3"
     >
       <IconTile color={template.color} icon={template.icon} className="size-9 rounded-[11px]" />
       <View className="min-w-0 shrink">

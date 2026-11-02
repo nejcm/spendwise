@@ -1,3 +1,4 @@
+import type { TextInput } from 'react-native';
 import type { AccountFormData, AccountType } from '../types';
 import type { CurrencyKey } from '@/features/currencies';
 import { useForm } from '@tanstack/react-form';
@@ -12,6 +13,7 @@ import { getFieldError } from '@/components/ui/form-utils';
 import { ChevronRight } from '@/components/ui/icon';
 import { CURRENCY_VALUES } from '@/features/currencies';
 import { CurrencySheet } from '@/features/currencies/components/currency-sheet';
+import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
 import { toNumber } from '@/lib/number';
 import { addLastUsedCurrency, selectAccountFormPrefs, setAccountFormPrefs, useAppStore } from '@/lib/store/store';
@@ -42,7 +44,7 @@ const defaultValues: AccountFormData = {
 };
 
 const fieldInputClassName = 'rounded-tile border-0 bg-card';
-const rowInputClassName = 'h-auto min-w-[120px] rounded-none border-0 bg-transparent px-0 text-right text-base font-medium';
+const rowInputClassName = 'h-12 w-32 rounded-none border-0 bg-transparent px-0 text-right text-base font-medium';
 
 function useAccountForm(
   initialData?: AccountFormData,
@@ -114,7 +116,7 @@ function IdentityCard({ form }: { form: AccountFormApi }) {
                 placeholder={translate('accounts.icon_placeholder')}
                 accessibilityLabel={translate('accounts.icon_placeholder')}
                 containerClassName="shrink-0"
-                className="size-16 rounded-card border-0 px-0 text-center text-3xl"
+                className={cn('size-16 rounded-card border-0 px-0 text-center', field.state.value ? 'text-3xl' : 'text-sm')}
                 style={{ backgroundColor: hexWithOpacity(color || DEFAULT_COLOR, 26) }}
               />
             )}
@@ -150,13 +152,15 @@ function IdentityCard({ form }: { form: AccountFormApi }) {
 function DetailsCard({ form, isCreate }: { form: AccountFormApi; isCreate: boolean }) {
   const preferredCurrency = useAppStore.use.currency();
   const currencyModal = useModalSheet();
+  const openingBalanceRef = React.useRef<TextInput>(null);
+  const budgetRef = React.useRef<TextInput>(null);
 
   return (
     <form.Field
       name="currency"
       children={(currencyField) => (
         <>
-          <Card className="mt-5 px-[18px]">
+          <Card className="mt-5 px-4.5">
             <ListRow
               className="border-b border-border"
               chevron={isCreate}
@@ -174,11 +178,13 @@ function DetailsCard({ form, isCreate }: { form: AccountFormApi; isCreate: boole
                 name="opening_balance"
                 children={(field) => (
                   <ListRow
+                    focusInput={openingBalanceRef}
                     className="border-b border-border"
                     title={translate('accounts.opening_balance')}
                     meta={getFieldError(field)}
                     trailing={(
                       <Input
+                        ref={openingBalanceRef}
                         value={field.state.value ?? ''}
                         onBlur={field.handleBlur}
                         onChangeText={field.handleChange}
@@ -196,10 +202,12 @@ function DetailsCard({ form, isCreate }: { form: AccountFormApi; isCreate: boole
               name="budget"
               children={(field) => (
                 <ListRow
+                  focusInput={budgetRef}
                   title={translate('accounts.budget')}
                   meta={translate('accounts.budget_hint', { currency: preferredCurrency })}
                   trailing={(
                     <Input
+                      ref={budgetRef}
                       value={field.state.value ?? ''}
                       onBlur={field.handleBlur}
                       onChangeText={field.handleChange}
@@ -227,9 +235,10 @@ export type AccountFormProps = {
   accountId?: string;
   onSuccess?: () => void;
   onArchive?: () => void;
+  onDelete?: () => void;
 };
 
-export function AccountForm({ initialData, accountId, onSuccess, onArchive }: AccountFormProps) {
+export function AccountForm({ initialData, accountId, onSuccess, onArchive, onDelete }: AccountFormProps) {
   const { form, isLoading } = useAccountForm(initialData, accountId, onSuccess);
   const insets = useSafeAreaInsets();
   const isCreate = !accountId;
@@ -305,6 +314,9 @@ export function AccountForm({ initialData, accountId, onSuccess, onArchive }: Ac
 
         {onArchive && (
           <GhostButton color="danger" className="mt-4" label={translate('accounts.archive_account')} onPress={onArchive} />
+        )}
+        {onDelete && (
+          <GhostButton color="danger" className="mt-2" label={translate('accounts.delete_account')} onPress={onDelete} />
         )}
       </KeyboardAwareScrollView>
       <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom }}>

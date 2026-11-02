@@ -63,3 +63,17 @@ export async function getGlobalBudgetSpend(
   );
   return row?.total ?? 0;
 }
+
+/** Expense total in the range that recurring rules generated. */
+export async function getBillSpend(db: SQLiteDatabase, startDate: number, endDate: number): Promise<number> {
+  const row = await db.getFirstAsync<{ total: number }>(
+    `SELECT COALESCE(SUM(t.baseAmount), 0) AS total
+     FROM transactions t
+     WHERE t.type = 'expense'
+       AND t.date >= ?
+       AND t.date < ?
+       AND EXISTS (SELECT 1 FROM recurring_rule_runs r WHERE r.transaction_id = t.id)`,
+    [startDate, endDate],
+  );
+  return row?.total ?? 0;
+}

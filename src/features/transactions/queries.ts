@@ -1,12 +1,13 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import type { MonthSummary, TransactionInsertData, TransactionWithCategory, TransferInsertData } from './types';
+import type { MonthSummary, Transaction, TransactionInsertData, TransactionWithCategory, TransferInsertData } from './types';
 import type { CurrencyKey } from '@/features/currencies';
 import type { RatesMap } from '@/features/currencies/queries';
+import type { ScheduledTransactionRun } from '@/features/scheduled-transactions/types';
 
 import { convertAmount } from '@/features/currencies/queries';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
-import { generateId, inFilter, withWriteTransaction } from '@/lib/sqlite';
+import { generateId, inFilter, insertRow, withWriteTransaction } from '@/lib/sqlite';
 
 // ─── Read Queries ───
 
@@ -138,7 +139,7 @@ export async function createTransaction(
   data: TransactionInsertData,
 ): Promise<string> {
   const id = generateId();
-  await createTransactionRow(db, id, data);
+  await withWriteTransaction(db, () => createTransactionRow(db, id, data));
   return id;
 }
 
@@ -194,7 +195,8 @@ export async function createTransfer(
   return outId;
 }
 
-async function createTransactionRow(db: SQLiteDatabase, id: string, data: TransactionInsertData) {
+/** Unqueued insert for callers already inside `withWriteTransaction`. */
+export async function createTransactionRow(db: SQLiteDatabase, id: string, data: TransactionInsertData) {
   await db.runAsync(
     `INSERT INTO transactions (${INSERT_COLUMNS.join(', ')}) VALUES (${INSERT_COLUMNS.map(() => '?').join(', ')})`,
     insertParams(id, data),
@@ -268,19 +270,52 @@ export async function updateTransaction(
   id: string,
   data: TransactionInsertData,
 ): Promise<void> {
-  await db.runAsync(
-    `UPDATE transactions
-     SET account_id = ?, category_id = ?, type = ?, amount = ?, currency = ?, baseAmount = ?, baseCurrency = ?, date = ?, note = ?, merchant_name = ?, merchant_logo_slug = ?, location = ?, updated_at = strftime('%s','now')
-     WHERE id = ?`,
-    [data.account_id, data.category_id || null, data.type, data.amount, data.currency, data.baseAmount, data.baseCurrency, data.date, data.note || null, data.merchant_name, data.merchant_logo_slug, data.location, id],
-  );
+  await withWriteTransaction(db, async () => {
+    await db.runAsync(
+      `UPDATE transactions
+       SET account_id = ?, category_id = ?, type = ?, amount = ?, currency = ?, baseAmount = ?, baseCurrency = ?, date = ?, note = ?, merchant_name = ?, merchant_logo_slug = ?, location = ?, updated_at = strftime('%s','now')
+       WHERE id = ?`,
+      [data.account_id, data.category_id || null, data.type, data.amount, data.currency, data.baseAmount, data.baseCurrency, data.date, data.note || null, data.merchant_name, data.merchant_logo_slug, data.location, id],
+    );
+  });
 }
 
+/** Everything a single delete removes, so Undo can put it back unchanged. */
+export type DeletedTransaction = {
+  transactions: Transaction[];
+  runs: ScheduledTransactionRun[];
+};
+
+/** Deletes the row (and its transfer pair) and returns the removed rows and their rule-run links. */
 export async function deleteTransaction(
   db: SQLiteDatabase,
   id: string,
+): Promise<DeletedTransaction> {
+  const deleted: DeletedTransaction = { transactions: [], runs: [] };
+  await withWriteTransaction(db, async () => {
+    deleted.transactions = await db.getAllAsync<Transaction>(
+      `SELECT * FROM transactions WHERE id = ?
+       OR transfer_id IN (SELECT transfer_id FROM transactions WHERE id = ? AND transfer_id IS NOT NULL)`,
+      [id, id],
+    );
+    const ids = deleted.transactions.map((t) => t.id);
+    if (ids.length === 0) return;
+    const placeholders = ids.map(() => '?').join(', ');
+    deleted.runs = await db.getAllAsync<ScheduledTransactionRun>(`SELECT * FROM recurring_rule_runs WHERE transaction_id IN (${placeholders})`, ids);
+    await db.runAsync(`DELETE FROM transactions WHERE id IN (${placeholders})`, ids);
+  });
+  return deleted;
+}
+
+/** Re-inserts a deleted transaction with its ids and timestamps; throws without writing if anything conflicts. */
+export async function restoreTransaction(
+  db: SQLiteDatabase,
+  deleted: DeletedTransaction,
 ): Promise<void> {
-  await deleteTransactions(db, [id]);
+  await withWriteTransaction(db, async () => {
+    for (const row of deleted.transactions) await insertRow(db, 'transactions', row);
+    for (const run of deleted.runs) await insertRow(db, 'recurring_rule_runs', run);
+  });
 }
 
 export async function deleteTransactions(

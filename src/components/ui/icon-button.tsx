@@ -2,7 +2,8 @@ import type { PressableProps, View } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
 import * as React from 'react';
 import { Pressable } from 'react-native';
-import { tv } from '@/lib/cn';
+import { cn, tv } from '@/lib/cn';
+import { useAppStore } from '@/lib/store/store';
 import { buttonTv, getPressedStyle } from './button';
 
 const iconButton = tv({
@@ -43,6 +44,8 @@ const iconButton = tv({
   },
 });
 
+const COMPACT_SIZE: Partial<Record<string, string>> = { sm: 'size-7', md: 'size-9', lg: 'size-11', xl: 'size-14' };
+
 type ButtonVariants = VariantProps<typeof iconButton>;
 export type IconButtonProps = {
   className?: string;
@@ -59,11 +62,12 @@ export function IconButton({
   style,
   ...props
 }: IconButtonProps & { ref?: React.RefObject<View | null> }) {
+  const isCompact = useAppStore.use.density() === 'compact';
   const styles = React.useMemo(() => iconButton({ disabled, size, color }), [disabled, size, color]);
 
   return (
     <Pressable
-      className={styles.container({ className })}
+      className={styles.container({ className: cn(isCompact && COMPACT_SIZE[size], className) })}
       style={(state) => getPressedStyle(state, style, !disabled)}
       disabled={disabled}
       {...props}

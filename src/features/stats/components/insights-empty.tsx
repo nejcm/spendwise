@@ -35,7 +35,7 @@ export function InsightsEmpty({ count, selection, startDate, endDate }: PeriodPr
         </View>
         <BaselineChart month={month ? startDate : undefined} />
       </Card>
-      <Card variant="hero" className="mt-3 gap-3 px-5 py-[18px]">
+      <Card variant="hero" className="mt-3 gap-3 px-5 py-4.5">
         <View className="flex-row items-center justify-between gap-2">
           <Text accessibilityRole="header" className="text-[17px] font-semibold">{translate('stats.empty.title')}</Text>
           <Text className="text-meta text-muted-foreground tabular-nums">
@@ -71,7 +71,7 @@ export function InsightsEmpty({ count, selection, startDate, endDate }: PeriodPr
       </Card>
       <Text accessibilityRole="header" className="pt-5 pb-1.5 text-meta font-medium text-muted-foreground">{translate('stats.empty.unlocks')}</Text>
       {LOCKED.map((key) => (
-        <View key={key} className="min-h-[46px] flex-row items-center gap-3">
+        <View key={key} className="min-h-11.5 flex-row items-center gap-3">
           <View className="size-8 items-center justify-center rounded-[10px] bg-card">
             <Lock size={15} colorClassName="accent-muted-foreground" />
           </View>
@@ -86,7 +86,7 @@ export function InsightsEmpty({ count, selection, startDate, endDate }: PeriodPr
 function BaselineChart({ month }: { month: number | undefined }) {
   const currentYearMonth = useCurrentYearMonth();
   const endYearMonth = month !== undefined ? new Date(month * 1000).toISOString().slice(0, 7) : currentYearMonth;
-  const [start, end] = React.useMemo(() => monthBarsRange(endYearMonth), [endYearMonth]);
+  const [start, end] = monthBarsRange(endYearMonth);
   const { data: rows = [] } = useTrendByRange(start, end);
   const bars = buildMonthBars(monthlyFromDaily(rows), endYearMonth, 'expense');
   const max = Math.max(1, ...bars.map((bar) => bar.value));
@@ -98,7 +98,7 @@ function BaselineChart({ month }: { month: number | undefined }) {
         {bars.map((bar, i) => (
           <View
             key={bar.month}
-            className={cn('flex-1 rounded-t-lg rounded-b-[2px]', i === last ? 'bg-accent' : 'bg-track')}
+            className={cn('flex-1 rounded-t-lg rounded-b-xs', i === last ? 'bg-accent' : 'bg-track')}
             style={{ height: bar.value > 0 ? Math.max(4, (bar.value / max) * CHART_HEIGHT) : 0 }}
           />
         ))}

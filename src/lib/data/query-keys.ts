@@ -29,6 +29,8 @@ export const queryKeys = {
     netChanges: (startDate: number, endDate: number) =>
       ['accounts', 'balance', 'net-changes', startDate, endDate] as const,
     archived: ['accounts', 'archived'] as const,
+    usageAll: ['accounts', 'usage'] as const,
+    usage: (id: string) => ['accounts', 'usage', id] as const,
     totalBalance: ['total-balance'] as const,
     totalBalanceForMonth: (yearMonth: string) =>
       ['total-balance', yearMonth] as const,
@@ -107,5 +109,7 @@ export const queryKeys = {
     all: ['global-budget'] as const,
     spend: (startDate: number, endDate: number) =>
       ['global-budget', 'spend', startDate, endDate] as const,
+    billSpend: (startDate: number, endDate: number) =>
+      ['global-budget', 'bill-spend', startDate, endDate] as const,
   },
 } as const;

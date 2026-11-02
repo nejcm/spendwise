@@ -1,8 +1,10 @@
 /* eslint-disable react-refresh/only-export-components */
-import type { PressableProps, PressableStateCallbackType, StyleProp, TextProps, View, ViewStyle } from 'react-native';
+import type { PressableStateCallbackType, StyleProp, TextProps, ViewStyle } from 'react-native';
+import type { PressableScaleProps } from './pressable-scale';
 import * as React from 'react';
-import { ActivityIndicator, Pressable, Text } from 'react-native';
+import { ActivityIndicator, Text } from 'react-native';
 import { tv } from '@/lib/cn';
+import { PressableScale } from './pressable-scale';
 
 export const buttonTv = tv({
   slots: {
@@ -116,6 +118,13 @@ export const buttonTv = tv({
   },
 });
 
+const BUTTON_SIZES = ['2xs', 'xs', 'sm', 'md', 'lg', 'xl', '2xl'] as const;
+type ButtonSize = (typeof BUTTON_SIZES)[number];
+
+export function densitySize(size: ButtonSize, density: string): ButtonSize {
+  return density === 'compact' ? BUTTON_SIZES[Math.max(BUTTON_SIZES.indexOf(size) - 1, 0)] : size;
+}
+
 export function getPressedStyle(state: PressableStateCallbackType, style?: StyleProp<ViewStyle> | ((state: PressableStateCallbackType) => StyleProp<ViewStyle>), enabled = true): StyleProp<ViewStyle> {
   return [
     typeof style === 'function' ? style(state) : style,
@@ -133,7 +142,7 @@ export type ButtonProps = {
   textClassName?: string;
   textProps?: TextProps;
   indicatorSize?: 'small' | 'large' | number;
-} & PressableProps;
+} & PressableScaleProps;
 
 export function Button({
   ref,
@@ -149,11 +158,11 @@ export function Button({
   style,
   disabled = false,
   ...props
-}: ButtonProps & { ref?: React.RefObject<View | null> }) {
+}: ButtonProps) {
   return (
-    <Pressable
+    <PressableScale
       disabled={disabled || loading}
-      style={(state) => getPressedStyle(state, style, !(disabled || loading))}
+      style={style}
       {...props}
       ref={ref}
       testID={testID}
@@ -183,6 +192,6 @@ export function Button({
               )}
         </>
       )}
-    </Pressable>
+    </PressableScale>
   );
 }

@@ -19,7 +19,7 @@ function accentCSSVariables({ accent, accentForeground, accentSoft, accentLine }
 function applyAccentColorVariables(colorTheme: AccentType) {
   const { light, dark } = ACCENT_VARIABLES[colorTheme] || ACCENT_VARIABLES[DEFAULT_ACCENT];
 
-  Uniwind.updateCSSVariables('light', accentCSSVariables(light));
+  Uniwind.updateCSSVariables('light', { ...accentCSSVariables(light), '--color-wash': `${light.accent}24` });
   Uniwind.updateCSSVariables('dark', accentCSSVariables(dark));
 }
 

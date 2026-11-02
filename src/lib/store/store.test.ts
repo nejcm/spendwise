@@ -1,5 +1,5 @@
 import { storage } from '@/lib/storage';
-import { clearAppStore, selectIsAiEnabled, selectIsAiFeatureOn, setLastPrimaryTabPath, setPeriodSelection, useAppStore } from './store';
+import { clearAppStore, selectIsAiEnabled, selectIsAiFeatureOn, setLastPrimaryTabPath, setMonthStartDay, setPeriodSelection, useAppStore } from './store';
 
 describe('app store selectors', () => {
   it('enables AI only when the active provider has a saved key', () => {
@@ -64,6 +64,18 @@ describe('app store actions', () => {
     await useAppStore.persist.rehydrate();
 
     expect(useAppStore.getState().periodSelection).toEqual({ mode: 'today' });
+  });
+
+  it('keeps the current month selected when the month start day moves', () => {
+    jest.useFakeTimers({ now: new Date(2026, 10, 2, 12) });
+    setPeriodSelection({ mode: 'month', year: 2026, month: 11 });
+    setMonthStartDay(25);
+    expect(useAppStore.getState().periodSelection).toEqual({ mode: 'month', year: 2026, month: 10 });
+
+    setPeriodSelection({ mode: 'month', year: 2026, month: 3 });
+    setMonthStartDay(1);
+    expect(useAppStore.getState().periodSelection).toEqual({ mode: 'month', year: 2026, month: 3 });
+    jest.useRealTimers();
   });
 });
 

@@ -54,12 +54,12 @@ describe('transaction detail parts', () => {
   });
 
   it('shows a paused rule without its next date', () => {
-    render(<DetailRows transaction={txn()} rule={{ id: 'r1', frequency: 'monthly', next_due_date: DAY, is_active: 0 }} />);
+    render(<DetailRows transaction={txn()} rule={{ id: 'r1', frequency: 'monthly', next_due_date: DAY, is_active: 0, generated: 1 }} />);
     expect(screen.getByText(`${translate('scheduled.frequencyOptions.monthly')} · ${translate('common.paused')}`)).toBeOnTheScreen();
   });
 
   it('shows the next date for an active rule', () => {
-    render(<DetailRows transaction={txn()} rule={{ id: 'r1', frequency: 'monthly', next_due_date: DAY, is_active: 1 }} />);
+    render(<DetailRows transaction={txn()} rule={{ id: 'r1', frequency: 'monthly', next_due_date: DAY, is_active: 1, generated: 1 }} />);
     expect(screen.getByText(translate('transactions.detail.repeats_value', { frequency: translate('scheduled.frequencyOptions.monthly'), date: 'Jan 15' }))).toBeOnTheScreen();
   });
 

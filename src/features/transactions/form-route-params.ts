@@ -30,6 +30,7 @@ type ScheduledFormRouteParams = {
   is_active?: ParamValue;
   note?: ParamValue;
   start_date?: ParamValue;
+  source_transaction_id?: ParamValue;
   type?: ParamValue;
 };
 
@@ -75,6 +76,7 @@ const scheduledFormRouteParamsSchema = z.object({
   is_active: booleanParamSchema,
   note: nullableStringParamSchema,
   start_date: singleParamSchema,
+  source_transaction_id: singleParamSchema,
   type: singleParamSchema.pipe(z.enum(['expense', 'income']).optional()).catch(undefined),
 });
 

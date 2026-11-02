@@ -10,6 +10,7 @@ import { AmountText, Card, FocusAwareStatusBar, IconTile, ListRow, ScrollView, S
 import { ChevronLeft, Plus } from '@/components/ui/icon';
 import { NAV_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
 import { SkeletonRows } from '@/components/ui/skeleton';
+import { SHORTEN_ROW } from '@/features/formatting/constants';
 import { formatCurrency, formatDate } from '@/features/formatting/helpers';
 import { monthName } from '@/features/home/helpers';
 import { cn } from '@/lib/cn';
@@ -55,7 +56,7 @@ export function ScheduledTransactionsScreen() {
         style={defaultStyles.transparentBg}
         contentContainerStyle={{ paddingBottom: NAV_BAR_HEIGHT + insets.bottom + 16, flexGrow: 1 }}
       >
-        <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[340px] bg-linear-to-b from-wash to-background" />
+        <View pointerEvents="none" className="absolute inset-x-0 top-0 h-85 bg-linear-to-b from-wash to-background" />
         <View className="flex-1 px-5 pt-2">
           <PageHeader
             title={translate('scheduled.title')}
@@ -135,6 +136,7 @@ function RuleRow({ rule, today, toPreferred }: { rule: ScheduledTransactionWithD
             value={converted ?? rule.amount}
             currency={converted != null ? preferred : rule.currency}
             prefix={isIncome ? '+' : '-'}
+            shorten={SHORTEN_ROW}
             className={cn('font-semibold', isIncome && 'text-positive')}
           />
           {resumable

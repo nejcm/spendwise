@@ -19,7 +19,7 @@ import { CategoryPicker } from '@/features/categories/category-picker';
 import { fitCategoryToType, fitsTransactionType, translateCount } from '@/features/categories/helpers';
 import { CURRENCIES_MAP, CURRENCY_VALUES } from '@/features/currencies';
 import { CurrencySheet } from '@/features/currencies/components/currency-sheet';
-import { formatDate, todayISO } from '@/features/formatting/helpers';
+import { formatDate, formatDateFull, todayISO } from '@/features/formatting/helpers';
 import { FormDataGate } from '@/features/transactions/components/form-data-gate';
 import { AccountRow, RowError, RowLabel } from '@/features/transactions/components/transaction-form-fields';
 import { cn } from '@/lib/cn';
@@ -63,6 +63,7 @@ const schema = z
     start_date: z.string().min(1, translate('scheduled.start_date_required')).refine(isValidISODate, translate('transactions.date_invalid')),
     end_date: z.string().nullable().refine((v) => v === null || isValidISODate(v), translate('transactions.date_invalid')),
     is_active: z.boolean(),
+    source_transaction_id: z.string().optional(),
   })
   .refine(
     (value) => !value.end_date || value.end_date >= value.start_date,
@@ -92,8 +93,8 @@ const defaultValues = {
 } satisfies FormValues;
 
 const HINT_DATE_FORMAT = 'EEE, MMM d';
-const rowClassName = (first = false) => cn('min-h-[54px] py-0', !first && 'border-t border-border');
-const rowInputClassName = 'h-auto min-w-[140px] rounded-none border-0 bg-transparent px-0 text-right text-row';
+const rowClassName = (first = false) => cn('min-h-13.5 py-0', !first && 'border-t border-border');
+const rowInputClassName = 'h-12 min-w-[140px] rounded-none border-0 bg-transparent px-0 text-right text-row';
 const selectSubmitted = (s: { submissionAttempts: number }) => s.submissionAttempts > 0;
 
 export type ScheduledTransactionFormProps = {
@@ -247,7 +248,7 @@ function AmountAndName({ form }: { form: FormApi }) {
             accessibilityRole="button"
             accessibilityLabel={translate('common.currency')}
             onPress={currencyModal.present}
-            className="mt-1 h-[34px] flex-row items-center gap-1.5 rounded-full bg-card pr-2.5 pl-[5px]"
+            className="mt-1 h-8.5 flex-row items-center gap-1.5 rounded-full bg-card pr-2.5 pl-1.25"
           >
             <FlagCircle currency={currencyField.state.value} size={24} />
             <Text className="text-[13px] font-semibold">{currencyField.state.value}</Text>
@@ -374,7 +375,7 @@ function DetailsCard({ form, accounts }: { form: FormApi; accounts: ReturnType<t
   const type = useStore(form.store, (s) => s.values.type);
   const submitted = useStore(form.store, selectSubmitted);
   return (
-    <Card className="mx-5 mt-[18px] rounded-card px-4">
+    <Card className="mx-5 mt-4.5 rounded-card px-4">
       <CategoryRow form={form} />
       <form.Field
         name="account_id"
@@ -423,7 +424,7 @@ function ScheduleHint({ form, isEdit }: { form: FormApi; isEdit: boolean }) {
   const firstDue = getFirstDueOnOrAfter({ startDate: values.start_date, frequency: values.frequency, targetDate: todayISO(), endDate: values.end_date });
   if (!firstDue) return null;
 
-  const date = formatDate(dateToUnix(firstDue), HINT_DATE_FORMAT);
+  const date = formatDateFull(dateToUnix(firstDue), HINT_DATE_FORMAT);
   const reminds = values.type === 'expense' && !!notifications.global && notifications.upcomingBills !== false;
   const text = [
     translate(isEdit ? 'scheduled.form.next_payment' : 'scheduled.form.first_payment', { date }),
@@ -477,8 +478,7 @@ function ScheduledTransactionFormContent({
               <SolidButton
                 color="primary"
                 size="lg"
-                className="rounded-full"
-                textClassName="text-base font-semibold"
+                fullWidth
                 label={translate('scheduled.form.save')}
                 loading={isSubmitting || isLoading}
                 onPress={form.handleSubmit}

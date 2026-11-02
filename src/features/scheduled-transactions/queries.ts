@@ -3,12 +3,13 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import type {
   ScheduledTransaction,
   ScheduledTransactionFormData,
+  ScheduledTransactionRun,
   ScheduledTransactionWithDetails,
 } from './types';
 import type { Transaction } from '@/features/transactions/types';
 
 import { amountToCents } from '@/features/formatting/helpers';
-import { generateId } from '@/lib/sqlite';
+import { generateId, insertRow, withWriteTransaction } from '@/lib/sqlite';
 import { getFirstDueOnOrAfter, isoDateToUnix, todayISODate, unixToISODate } from './scheduler';
 
 function normalizeText(value?: string | null): string | null {
@@ -80,17 +81,21 @@ export async function getScheduledTransactionById(
   );
 }
 
-export type TransactionRule = Pick<ScheduledTransaction, 'id' | 'frequency' | 'next_due_date' | 'is_active'>;
+export type TransactionRule = Pick<ScheduledTransaction, 'id' | 'frequency' | 'next_due_date' | 'is_active'> & {
+  /** 0 when an existing transaction was linked as a run (Make recurring) rather than posted by the rule. */
+  generated: number;
+};
 
-/** The rule that generated a transaction, via `recurring_rule_runs`. */
+/** The rule a transaction is a run of, via `recurring_rule_runs`. */
 export async function getRuleForTransaction(
   db: SQLiteDatabase,
   transactionId: string,
 ): Promise<TransactionRule | null> {
   return db.getFirstAsync<TransactionRule>(
-    `SELECT r.id, r.frequency, r.next_due_date, r.is_active
+    `SELECT r.id, r.frequency, r.next_due_date, r.is_active, rr.created_at <= t.created_at + 1 AS generated
      FROM recurring_rule_runs rr
      JOIN recurring_rules r ON r.id = rr.rule_id
+     JOIN transactions t ON t.id = rr.transaction_id
      WHERE rr.transaction_id = ?`,
     [transactionId],
   );
@@ -117,6 +122,42 @@ export async function getRulePayments(
 
 // ─── Write Queries ───
 
+export class RuleAccountArchivedError extends Error {
+  constructor() {
+    super('Cannot activate a recurring rule on an archived account');
+    this.name = 'RuleAccountArchivedError';
+  }
+}
+
+async function assertAccountUnarchived(db: SQLiteDatabase, accountId: string, isActive: boolean) {
+  if (!isActive) return;
+  const account = await db.getFirstAsync<{ is_archived: number }>('SELECT is_archived FROM accounts WHERE id = ?', [accountId]);
+  if (account?.is_archived) throw new RuleAccountArchivedError();
+}
+
+/** Counts a matching source transaction as the run for its date, so the scheduler does not post it again. */
+async function linkSourceTransaction(db: SQLiteDatabase, ruleId: string, sourceId: string, data: ScheduledTransactionFormData) {
+  const amount = amountToCents(Number(data.amount) || 0);
+  const source = await db.getFirstAsync<{ date: number }>(
+    `SELECT date FROM transactions
+     WHERE id = ? AND account_id = ? AND type = ? AND currency = ? AND ABS(amount) = ?`,
+    [sourceId, data.account_id, data.type, data.currency, amount],
+  );
+  if (!source) return;
+  const day = unixToISODate(source.date);
+  const occurrence = getFirstDueOnOrAfter({
+    startDate: unixToISODate(data.start_date),
+    frequency: data.frequency,
+    targetDate: day,
+    endDate: data.end_date != null ? unixToISODate(data.end_date) : null,
+  });
+  if (occurrence !== day) return;
+  await db.runAsync(
+    'INSERT INTO recurring_rule_runs (id, rule_id, scheduled_for_date, transaction_id) VALUES (?, ?, ?, ?)',
+    [generateId(), ruleId, isoDateToUnix(day), sourceId],
+  );
+}
+
 export async function createScheduledTransaction(
   db: SQLiteDatabase,
   data: ScheduledTransactionFormData,
@@ -125,37 +166,41 @@ export async function createScheduledTransaction(
   const amount = amountToCents(Number(data.amount) || 0);
   const scheduleState = deriveScheduleState(data);
 
-  await db.runAsync(
-    `INSERT INTO recurring_rules (
-      id,
-      account_id,
-      category_id,
-      type,
-      amount,
-      currency,
-      note,
-      frequency,
-      start_date,
-      end_date,
-      next_due_date,
-      is_active
-    )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      id,
-      data.account_id,
-      data.category_id,
-      data.type,
-      amount,
-      data.currency,
-      normalizeText(data.note),
-      data.frequency,
-      data.start_date,
-      data.end_date || null,
-      scheduleState.nextDueDate,
-      Number(scheduleState.isActive),
-    ],
-  );
+  await withWriteTransaction(db, async () => {
+    await assertAccountUnarchived(db, data.account_id, scheduleState.isActive);
+    await db.runAsync(
+      `INSERT INTO recurring_rules (
+        id,
+        account_id,
+        category_id,
+        type,
+        amount,
+        currency,
+        note,
+        frequency,
+        start_date,
+        end_date,
+        next_due_date,
+        is_active
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        data.account_id,
+        data.category_id,
+        data.type,
+        amount,
+        data.currency,
+        normalizeText(data.note),
+        data.frequency,
+        data.start_date,
+        data.end_date || null,
+        scheduleState.nextDueDate,
+        Number(scheduleState.isActive),
+      ],
+    );
+    if (data.source_transaction_id) await linkSourceTransaction(db, id, data.source_transaction_id, data);
+  });
 
   return id;
 }
@@ -168,42 +213,69 @@ export async function updateScheduledTransaction(
   const amount = amountToCents(Number(data.amount) || 0);
   const scheduleState = deriveScheduleState(data);
 
-  await db.runAsync(
-    `UPDATE recurring_rules
-     SET
-       account_id = ?,
-       category_id = ?,
-       type = ?,
-       amount = ?,
-       currency = ?,
-       note = ?,
-       frequency = ?,
-       start_date = ?,
-       end_date = ?,
-       next_due_date = ?,
-       is_active = ?,
-       updated_at = strftime('%s','now')
-     WHERE id = ?`,
-    [
-      data.account_id,
-      data.category_id,
-      data.type,
-      amount,
-      data.currency,
-      normalizeText(data.note),
-      data.frequency,
-      data.start_date,
-      data.end_date || null,
-      scheduleState.nextDueDate,
-      Number(scheduleState.isActive),
-      id,
-    ],
-  );
+  await withWriteTransaction(db, async () => {
+    await assertAccountUnarchived(db, data.account_id, scheduleState.isActive);
+    await db.runAsync(
+      `UPDATE recurring_rules
+       SET
+         account_id = ?,
+         category_id = ?,
+         type = ?,
+         amount = ?,
+         currency = ?,
+         note = ?,
+         frequency = ?,
+         start_date = ?,
+         end_date = ?,
+         next_due_date = ?,
+         is_active = ?,
+         updated_at = strftime('%s','now')
+       WHERE id = ?`,
+      [
+        data.account_id,
+        data.category_id,
+        data.type,
+        amount,
+        data.currency,
+        normalizeText(data.note),
+        data.frequency,
+        data.start_date,
+        data.end_date || null,
+        scheduleState.nextDueDate,
+        Number(scheduleState.isActive),
+        id,
+      ],
+    );
+  });
 }
+
+/** Everything a rule delete removes; its generated transactions stay. */
+export type DeletedScheduledTransaction = {
+  rule: ScheduledTransaction | null;
+  runs: ScheduledTransactionRun[];
+};
 
 export async function deleteScheduledTransaction(
   db: SQLiteDatabase,
   id: string,
+): Promise<DeletedScheduledTransaction> {
+  const deleted: DeletedScheduledTransaction = { rule: null, runs: [] };
+  await withWriteTransaction(db, async () => {
+    deleted.rule = await db.getFirstAsync<ScheduledTransaction>('SELECT * FROM recurring_rules WHERE id = ?', [id]);
+    deleted.runs = await db.getAllAsync<ScheduledTransactionRun>('SELECT * FROM recurring_rule_runs WHERE rule_id = ?', [id]);
+    await db.runAsync('DELETE FROM recurring_rules WHERE id = ?', [id]);
+  });
+  return deleted;
+}
+
+/** Re-inserts the rule as snapshotted, including its next_due_date; throws without writing if anything conflicts. */
+export async function restoreScheduledTransaction(
+  db: SQLiteDatabase,
+  { rule, runs }: DeletedScheduledTransaction,
 ): Promise<void> {
-  await db.runAsync('DELETE FROM recurring_rules WHERE id = ?', [id]);
+  if (!rule) return;
+  await withWriteTransaction(db, async () => {
+    await insertRow(db, 'recurring_rules', rule);
+    for (const run of runs) await insertRow(db, 'recurring_rule_runs', run);
+  });
 }

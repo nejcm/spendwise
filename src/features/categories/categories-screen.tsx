@@ -12,8 +12,9 @@ import { SkeletonGrid } from '@/components/ui/skeleton';
 import { categorySpendByRangeQueryOptions, useCategorySpendByRange } from '@/features/insights/api';
 import { cn } from '@/lib/cn';
 import { usePrefetchAdjacentPeriods } from '@/lib/data/prefetch';
-import { getPeriodRange, scaleBudgetForPeriod } from '@/lib/date/helpers';
+import { scaleBudgetForPeriod } from '@/lib/date/helpers';
 import { getPeriodLabel } from '@/lib/date/labels';
+import { usePeriodRange } from '@/lib/hooks/use-current-year-month';
 import { useRefresh } from '@/lib/hooks/use-refresh';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
@@ -33,7 +34,7 @@ function CategoriesOverview() {
   const db = useSQLiteContext();
   const format = useFormatMoney();
   const selection = useAppStore.use.periodSelection();
-  const [startDate, endDate] = React.useMemo(() => getPeriodRange(selection), [selection]);
+  const [startDate, endDate] = usePeriodRange(selection);
   const { data = [], isLoading } = useCategorySpendByRange(startDate, endDate);
   const { refreshing, onRefresh } = useRefresh();
   const [kind, setKind] = React.useState<CategoryType>('expense');
@@ -65,7 +66,7 @@ function CategoriesOverview() {
         style={defaultStyles.transparentBg}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
-        <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[340px] bg-linear-to-b from-wash to-background" />
+        <View pointerEvents="none" className="absolute inset-x-0 top-0 h-85 bg-linear-to-b from-wash to-background" />
         <View className="px-5 pt-2 pb-6">
           <View className="h-12 flex-row items-center gap-2">
             <Text accessibilityRole="header" className="flex-1 text-page-title font-bold tracking-page-title" numberOfLines={1}>
@@ -119,7 +120,7 @@ function CategoriesOverview() {
                   ))}
                 </View>
               )}
-          {kind === 'expense' && <BudgetLegend />}
+          {kind === 'expense' && items.some((item) => budgetFor(item)) && <BudgetLegend />}
         </View>
       </ScrollView>
     </>

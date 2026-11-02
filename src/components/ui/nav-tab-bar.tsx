@@ -15,10 +15,10 @@ import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
 import { triggerScan } from '@/lib/store/local-store';
 import { useAppStore } from '@/lib/store/store';
-import { getPressedStyle } from './button';
+import { PressableScale } from './pressable-scale';
 import { Text } from './text';
 
-export const NAV_BAR_HEIGHT = 50 as const;
+export const NAV_BAR_HEIGHT = 54 as const;
 // Bottom padding floor; the bar paints the safe-area gutter itself since the root SafeAreaView skips that edge.
 export const TAB_BAR_PADDING = 8;
 // Grows the 40dp tab into the bar's top padding and bottom padding floor for a 58dp target.
@@ -61,7 +61,7 @@ export function NavTabBar() {
         if (tab.name === '__add__') {
           return (
             <View key="add" className="h-10 w-16 items-center">
-              <Pressable
+              <PressableScale
                 accessibilityRole="button"
                 accessibilityLabel={label}
                 accessibilityHint={translate('nav.add_transaction_hint', {
@@ -75,11 +75,11 @@ export function NavTabBar() {
                       : 'camera',
                   )}
                 delayLongPress={400}
-                style={getPressedStyle}
-                className="-mt-1.5 size-[52px] items-center justify-center rounded-full bg-fab"
+                scaleTo={0.95}
+                className="-mt-1.5 size-13 items-center justify-center rounded-full bg-fab"
               >
                 <Icon colorClassName="accent-fab-foreground" size={22} strokeWidth={2.2} />
-              </Pressable>
+              </PressableScale>
             </View>
           );
         }
@@ -103,7 +103,7 @@ export function NavTabBar() {
             />
             <Text
               numberOfLines={1}
-              className={cn('text-[11px] leading-[14px]', isActive ? 'font-semibold text-foreground' : 'text-muted-foreground')}
+              className={cn('text-[11px]/3.5', isActive ? 'font-semibold text-foreground' : 'text-muted-foreground')}
             >
               {label}
             </Text>

@@ -6,8 +6,14 @@ import { captureError } from '@/lib/analytics';
 import { translate } from '@/lib/i18n';
 import { OPFS_CLEAR_FLAG } from './opfs-cleaner';
 
-function ErrorBody() {
+// Another tab holds the OPFS handle; wiping storage would destroy data that is fine.
+function isLockedByOtherTab(error: Error) {
+  return String(error?.message ?? error).includes('NoModificationAllowedError');
+}
+
+function ErrorBody({ error }: { error: Error }) {
   const [loading, setLoading] = React.useState(false);
+  const locked = isLockedByOtherTab(error);
 
   const handleClear = () => {
     setLoading(true);
@@ -19,21 +25,31 @@ function ErrorBody() {
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
-      <Text className="mb-2 text-xl font-bold">
+    <View className="flex-1 items-center justify-center bg-background p-6">
+      <Text className="mb-2 text-xl font-bold text-foreground">
         {translate('errors.database_unavailable')}
       </Text>
       <Text className="mb-6 text-center text-muted-foreground">
-        {translate('errors.database_unavailable_desc')}
+        {translate(locked ? 'errors.database_locked_desc' : 'errors.database_unavailable_desc')}
       </Text>
       <View className="items-center justify-center gap-2">
-        <SolidButton
-          onPress={handleClear}
-          color="danger"
-          className="min-w-40"
-          label={translate('errors.db_clear_btn')}
-          loading={loading}
-        />
+        {locked
+          ? (
+              <SolidButton
+                onPress={() => window.location.reload()}
+                className="min-w-40"
+                label={translate('common.retry')}
+              />
+            )
+          : (
+              <SolidButton
+                onPress={handleClear}
+                color="danger"
+                className="min-w-40"
+                label={translate('errors.db_clear_btn')}
+                loading={loading}
+              />
+            )}
       </View>
     </View>
   );
@@ -43,7 +59,7 @@ export class DatabaseErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { error: Error | null }
 > {
-  state = { error: null };
+  state: { error: Error | null } = { error: null };
 
   static getDerivedStateFromError(error: Error) {
     return { error };
@@ -57,7 +73,7 @@ export class DatabaseErrorBoundary extends React.Component<
   }
 
   render() {
-    if (this.state.error) return <ErrorBody />;
+    if (this.state.error) return <ErrorBody error={this.state.error} />;
     return this.props.children;
   }
 }

@@ -6,6 +6,7 @@ import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import * as React from 'react';
 import { I18nManager, TextInput as NTextInput, StyleSheet, View } from 'react-native';
 import { withUniwind } from 'uniwind';
+import { IS_WEB } from '@/lib/base';
 import { cn, tv } from '@/lib/cn';
 import { InputLabel, labelDefaults } from './input-label';
 import { Text } from './text';
@@ -103,7 +104,8 @@ export type InputProps = {
 
 export function Input({ ref, ...props }: InputProps & { ref?: React.Ref<NTextInput | null> }) {
   const { label, error, size = 'md', value, color = 'default', testID, onBlur: onBlurProp, onFocus: onFocusProp, containerClassName, rightSection, className, variant, showErrorMessage, sheet, ...inputProps } = props;
-  const TextInput = (sheet ? SheetTextInput : NTextInput) as typeof NTextInput;
+  // gorhom's sheet input calls TextInput.State.currentlyFocusedInput, which react-native-web lacks.
+  const TextInput = (sheet && !IS_WEB ? SheetTextInput : NTextInput) as typeof NTextInput;
   const [isFocussed, setIsFocussed] = React.useState(false);
 
   const onBlur = React.useCallback(

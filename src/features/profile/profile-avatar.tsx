@@ -38,7 +38,7 @@ export function AvatarPicker({ className }: { className?: string }) {
   const color = avatarColor ?? AVATAR_COLORS[0];
 
   return (
-    <View className={cn('items-center gap-[18px]', className)}>
+    <View className={cn('items-center gap-4.5', className)}>
       <ProfileAvatar size={112} />
       <View accessibilityRole="radiogroup" accessibilityLabel={translate('onboarding.avatar_color')} className="flex-row gap-3">
         {AVATAR_COLORS.map((hex, index) => {

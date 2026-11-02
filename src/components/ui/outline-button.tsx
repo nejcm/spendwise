@@ -1,8 +1,10 @@
-import type { PressableProps, TextProps, View } from 'react-native';
+import type { TextProps, View } from 'react-native';
 import type { VariantProps } from 'tailwind-variants';
+import type { PressableScaleProps } from './pressable-scale';
 import * as React from 'react';
 import { tv } from '@/lib/cn';
-import { Button, buttonTv } from './button';
+import { useAppStore } from '@/lib/store/store';
+import { Button, buttonTv, densitySize } from './button';
 
 const outlineButton = tv({
   extend: buttonTv,
@@ -70,7 +72,7 @@ export type OutlineButtonProps = {
   textClassName?: string;
   textProps?: TextProps;
 } & ButtonVariants
-& Omit<PressableProps, 'disabled' | 'color' | 'size'>;
+& Omit<PressableScaleProps, 'disabled' | 'color' | 'size'>;
 
 export function OutlineButton({
   ref,
@@ -79,10 +81,11 @@ export function OutlineButton({
   disabled = false,
   fullWidth = false,
   loading = false,
-  size = 'md',
+  size: sizeProp = 'md',
   textClassName = '',
   ...props
 }: OutlineButtonProps & { ref?: React.RefObject<View | null> }) {
+  const size = densitySize(sizeProp, useAppStore.use.density());
   const styles = React.useMemo(() => outlineButton({ disabled, size, color, fullWidth }), [disabled, size, color, fullWidth]);
 
   return (

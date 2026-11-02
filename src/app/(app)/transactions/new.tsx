@@ -15,7 +15,7 @@ export default function NewTransactionRoute() {
 
   return (
     <View className="flex-1 bg-background">
-      <View pointerEvents="none" className="absolute inset-x-0 top-0 h-[340px] bg-linear-to-b from-wash to-background" />
+      <View pointerEvents="none" className="absolute inset-x-0 top-0 h-85 bg-linear-to-b from-wash to-background" />
       <TransactionForm
         initialValues={initialValues}
         onClose={onClose}

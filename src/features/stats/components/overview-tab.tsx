@@ -7,7 +7,7 @@ import { Pressable, View } from 'react-native';
 import Svg, { Line } from 'react-native-svg';
 import { AmountText, Card, getPressedStyle, Text } from '@/components/ui';
 import { getBudgetState } from '@/components/ui/budget-state';
-import { Bot, ChevronRight } from '@/components/ui/icon';
+import { ArrowDown, ArrowUp, Bot, ChevronRight } from '@/components/ui/icon';
 import { setAiDraftQuestion } from '@/features/ai/store';
 import { categoryIcon, categoryName, periodMonthName } from '@/features/categories/helpers';
 import { useBudgetColors, useFormatMoney } from '@/features/categories/hooks';
@@ -49,7 +49,14 @@ export function OverviewTab({ selection, startDate, endDate, onShowBudgets }: Pe
         startDate={startDate}
         endDate={endDate}
       />
-      <WhereItWent selection={selection} startDate={startDate} endDate={endDate} onShowBudgets={onShowBudgets} />
+      <WhereItWent
+        selection={selection}
+        startDate={startDate}
+        endDate={endDate}
+        prevRange={previous ? [prevStart!, prevEnd!] : null}
+        prevLabel={prevLabels?.short}
+        onShowBudgets={onShowBudgets}
+      />
       {isAiEnabled && (
         <AskCard
           question={prevSpent != null && prevLabels && prevSpent !== spent
@@ -89,11 +96,9 @@ function SpendHero({ title, spent, income, prevSpent, prevLabel, selection, star
         </View>
         {delta != null && prevSpent! > 0 && (
           <View className="items-end gap-0.5">
-            <Text className={cn('rounded-md px-1.5 py-0.5 text-xs font-semibold tabular-nums', delta > 0 ? 'bg-negative/10 text-negative' : 'bg-positive/10 text-positive')}>
-              {`${delta > 0 ? '▲' : '▼'} ${percent(Math.abs(delta) / prevSpent!)}`}
-            </Text>
+            <ChangeBadge spent={spent} prevSpent={prevSpent!} decimals={1} />
             <Text className="text-xs text-muted-foreground tabular-nums">
-              {translate('stats.vs_period', { amount: `${delta > 0 ? '+' : '−'}${format(Math.abs(delta))}`, period: prevLabel })}
+              {translate('stats.vs_period', { amount: signed(delta, format), period: prevLabel })}
             </Text>
           </View>
         )}
@@ -210,11 +215,19 @@ function LegendDot({ color, label }: { color: string; label: string }) {
   );
 }
 
-function WhereItWent({ selection, startDate, endDate, onShowBudgets }: PeriodProps & { onShowBudgets: () => void }) {
+type WhereItWentProps = PeriodProps & {
+  prevRange: [number, number] | null;
+  prevLabel: string | undefined;
+  onShowBudgets: () => void;
+};
+
+function WhereItWent({ selection, startDate, endDate, prevRange, prevLabel, onShowBudgets }: WhereItWentProps) {
   const router = useRouter();
   const format = useFormatMoney();
   const numberFormat = useAppStore.use.numberFormat();
   const { data = [] } = useCategorySpendByRange(startDate, endDate);
+  const { data: prevData } = useCategorySpendByRange(prevRange?.[0], prevRange?.[1], !!prevRange);
+  const prevSpend = prevRange && prevData ? new Map(prevData.map((c) => [c.category_id, c.expense_total])) : null;
   const items = data.filter((c) => c.expense_total > 0).sort((a, b) => b.expense_total - a.expense_total);
   const total = items.reduce((sum, c) => sum + c.expense_total, 0);
   if (total === 0) return null;
@@ -231,26 +244,60 @@ function WhereItWent({ selection, startDate, endDate, onShowBudgets }: PeriodPro
         {items.map((c) => <View key={c.category_id} style={{ flex: c.expense_total, backgroundColor: c.category_color }} />)}
       </View>
       <View>
-        {items.map((c) => (
-          <Pressable
-            key={c.category_id}
-            accessibilityRole="button"
-            onPress={() => router.push(buildTransactionsHref({ categoryIds: [c.category_id], type: 'expense', periodSelection: selection }))}
-            style={getPressedStyle}
-            className="h-10 flex-row items-center gap-2.5"
-          >
-            <View className="size-2.5 rounded-[3px]" style={{ backgroundColor: c.category_color }} />
-            <Text className="flex-1 text-row" numberOfLines={1}>
-              {`${categoryIcon(c.category_id, c.category_icon, c.category_name)} ${categoryName(c.category_id, c.category_name)}`}
-            </Text>
-            <Text className="w-13 text-right text-meta text-muted-foreground tabular-nums">
-              {`${formatNumber((c.expense_total / total) * 100, numberFormat, 1)}%`}
-            </Text>
-            <Text className="min-w-21 text-right text-row font-semibold tabular-nums">{format(c.expense_total)}</Text>
-          </Pressable>
-        ))}
+        {items.map((c) => {
+          const prev = prevSpend?.get(c.category_id) ?? 0;
+
+          return (
+            <Pressable
+              key={c.category_id}
+              accessibilityRole="button"
+              accessibilityLabel={prevSpend ? `${categoryName(c.category_id, c.category_name)}, ${format(c.expense_total)}, ${translate('stats.vs_period', { amount: signed(c.expense_total - prev, format), period: prevLabel })}` : undefined}
+              onPress={() => router.push(buildTransactionsHref({ categoryIds: [c.category_id], type: 'expense', periodSelection: selection }))}
+              style={getPressedStyle}
+              className="h-10 flex-row items-center gap-2.5"
+            >
+              <View className="size-2.5 rounded-[3px]" style={{ backgroundColor: c.category_color }} />
+              <Text className="flex-1 text-row" numberOfLines={1}>
+                {`${categoryIcon(c.category_id, c.category_icon, c.category_name)} ${categoryName(c.category_id, c.category_name)}`}
+              </Text>
+              {prevSpend
+                ? <ChangeBadge spent={c.expense_total} prevSpent={prev} decimals={0} />
+                : (
+                    <Text className="w-13 text-right text-meta text-muted-foreground tabular-nums">
+                      {`${formatNumber((c.expense_total / total) * 100, numberFormat, 1)}%`}
+                    </Text>
+                  )}
+              <Text className="min-w-21 text-right text-row font-semibold tabular-nums">{format(c.expense_total)}</Text>
+            </Pressable>
+          );
+        })}
       </View>
     </Card>
+  );
+}
+
+function signed(amount: number, format: (cents: number) => string) {
+  return `${amount > 0 ? '+' : amount < 0 ? '−' : ''}${format(Math.abs(amount))}`;
+}
+
+const CHANGE_TONE = {
+  up: { badge: 'border-negative/25 bg-negative/10', text: 'text-negative', icon: 'accent-negative' },
+  down: { badge: 'border-positive/25 bg-positive/10', text: 'text-positive', icon: 'accent-positive' },
+  flat: { badge: 'border-muted-foreground/25 bg-muted-foreground/10', text: 'text-muted-foreground', icon: 'accent-muted-foreground' },
+};
+
+function ChangeBadge({ spent, prevSpent, decimals }: { spent: number; prevSpent: number; decimals: number }) {
+  const numberFormat = useAppStore.use.numberFormat();
+  const ratio = prevSpent === 0 ? null : (spent - prevSpent) / prevSpent;
+  const tone = CHANGE_TONE[ratio == null || ratio > 0 ? 'up' : ratio < 0 ? 'down' : 'flat'];
+  const Arrow = ratio == null || ratio === 0 ? null : ratio > 0 ? ArrowUp : ArrowDown;
+  return (
+    <View className={cn('flex-row items-center gap-0.5 rounded-full border px-1.5 py-0.5', tone.badge)}>
+      {Arrow && <Arrow size={11} colorClassName={tone.icon} />}
+      <Text className={cn('text-xs tabular-nums', tone.text)}>
+        {ratio == null ? translate('stats.new_spend') : `${ratio === 0 ? '±' : ''}${formatNumber(Math.abs(ratio) * 100, numberFormat, decimals)}%`}
+      </Text>
+    </View>
   );
 }
 

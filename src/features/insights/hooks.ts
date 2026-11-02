@@ -23,15 +23,16 @@ export function useSummaryByRange(startDate: number | undefined, endDate: number
   });
 }
 
-export function categorySpendByRangeQueryOptions(db: SQLiteDatabase, startDate: number | undefined, endDate: number | undefined) {
+export function categorySpendByRangeQueryOptions(db: SQLiteDatabase, startDate: number | undefined, endDate: number | undefined, enabled = true) {
   return {
+    enabled,
     queryKey: queryKeys.insights.categorySpendRange(startDate, endDate),
     queryFn: () => queries.getCategorySpendByRange(db, startDate, endDate),
   };
 }
-export function useCategorySpendByRange(startDate: number | undefined, endDate: number | undefined) {
+export function useCategorySpendByRange(startDate: number | undefined, endDate: number | undefined, enabled = true) {
   const db = useSQLiteContext();
-  return useQuery(categorySpendByRangeQueryOptions(db, startDate, endDate));
+  return useQuery(categorySpendByRangeQueryOptions(db, startDate, endDate, enabled));
 }
 
 function trendByRangeQueryOptions(db: SQLiteDatabase, startDate: number | undefined, endDate: number | undefined) {

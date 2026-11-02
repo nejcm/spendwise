@@ -11,6 +11,7 @@ import { isTransferInLeg } from '@/features/transactions/queries';
 import { cn } from '@/lib/cn';
 import { calendarDateToUnix, getMonthBoundaries, monthOfDay, unixToDate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
+import { shortenNumberString } from '@/lib/number';
 import { useAppStore } from '@/lib/store/store';
 import { dailyExpenses, heatLevels } from '../helpers';
 
@@ -43,7 +44,7 @@ export function CalendarTab({ startDate, endDate }: PeriodProps) {
   const cells = [...Array.from({ length: leading }).fill(null) as null[], ...days.map((day, i) => ({ ...day, level: levels[i] }))];
   while (cells.length % 7) cells.push(null);
   const weeks = Array.from({ length: cells.length / 7 }, (_, i) => cells.slice(i * 7, i * 7 + 7));
-  const short = (value: number) => formatNumber(Math.round(value / 100), numberFormat, 0);
+  const short = (value: number) => shortenNumberString(Math.round(value / 100), 100_000, 1, (n) => formatNumber(n, numberFormat, 1));
 
   return (
     <>

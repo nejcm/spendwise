@@ -10,6 +10,7 @@ import { AmountText, Card, FocusAwareStatusBar, IconTile, ListRow, ScrollView, S
 import { ChevronLeft, Plus } from '@/components/ui/icon';
 import { NAV_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
 import { SkeletonRows } from '@/components/ui/skeleton';
+import { SHORTEN_ROW } from '@/features/formatting/constants';
 import { formatCurrency, formatDate } from '@/features/formatting/helpers';
 import { monthName } from '@/features/home/helpers';
 import { cn } from '@/lib/cn';
@@ -135,6 +136,7 @@ function RuleRow({ rule, today, toPreferred }: { rule: ScheduledTransactionWithD
             value={converted ?? rule.amount}
             currency={converted != null ? preferred : rule.currency}
             prefix={isIncome ? '+' : '-'}
+            shorten={SHORTEN_ROW}
             className={cn('font-semibold', isIncome && 'text-positive')}
           />
           {resumable

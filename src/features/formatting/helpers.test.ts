@@ -187,6 +187,13 @@ describe('formatting helpers', () => {
     ).toBe('$500');
   });
 
+  it('shortens only from the given threshold when shorten is a number', () => {
+    const options = { numberFormat: 'stop' as const, currencyFormat: 'symbol-before' as const, shorten: 1_000_000 };
+    expect(formatCurrency(123_456_700, 'USD', options)).toBe('$1.23m');
+    expect(formatCurrency(-123_456_700, 'USD', options)).toBe('-$1.23m');
+    expect(formatCurrency(99_999_900, 'USD', options)).toBe('$999999');
+  });
+
   it('prefixes minus before currency for negative symbol-before when negativeSymbol is true', () => {
     expect(
       formatCurrency(negativeCents, 'USD', {

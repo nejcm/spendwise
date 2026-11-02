@@ -11,6 +11,7 @@ import { ArrowDown, ArrowUp, Bot, ChevronRight } from '@/components/ui/icon';
 import { setAiDraftQuestion } from '@/features/ai/store';
 import { categoryIcon, categoryName, periodMonthName } from '@/features/categories/helpers';
 import { useBudgetColors, useFormatMoney } from '@/features/categories/hooks';
+import { SHORTEN_ROW, SHORTEN_TIGHT } from '@/features/formatting/constants';
 import { formatDateFull, formatNumber } from '@/features/formatting/helpers';
 import { useCategorySpendByRange, useSummaryByRange, useTrendByRange } from '@/features/insights/api';
 import { buildTransactionsHref } from '@/features/transactions/route-params';
@@ -98,7 +99,7 @@ function SpendHero({ title, spent, income, prevSpent, prevLabel, selection, star
           <View className="items-end gap-0.5">
             <ChangeBadge spent={spent} prevSpent={prevSpent!} decimals={1} />
             <Text className="text-xs text-muted-foreground tabular-nums">
-              {translate('stats.vs_period', { amount: signed(delta, format), period: prevLabel })}
+              {translate('stats.vs_period', { amount: signed(delta, (cents) => format(cents, undefined, SHORTEN_TIGHT)), period: prevLabel })}
             </Text>
           </View>
         )}
@@ -267,7 +268,7 @@ function WhereItWent({ selection, startDate, endDate, prevRange, prevLabel, onSh
                       {`${formatNumber((c.expense_total / total) * 100, numberFormat, 1)}%`}
                     </Text>
                   )}
-              <Text className="min-w-21 text-right text-row font-semibold tabular-nums">{format(c.expense_total)}</Text>
+              <Text className="min-w-21 text-right text-row font-semibold tabular-nums">{format(c.expense_total, undefined, SHORTEN_ROW)}</Text>
             </Pressable>
           );
         })}

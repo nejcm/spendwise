@@ -112,7 +112,7 @@ export function useFormatMoney() {
   const currency = useAppStore((s) => s.currency);
   const numberFormat = useAppStore((s) => s.numberFormat);
   const currencyFormat = useAppStore((s) => s.currencyFormat);
-  return (cents: number, fractionDigits?: number) => formatCurrency(cents, currency, { numberFormat, currencyFormat, fractionDigits });
+  return (cents: number, fractionDigits?: number, shorten?: boolean | number) => formatCurrency(cents, currency, { numberFormat, currencyFormat, fractionDigits, shorten });
 }
 
 /** Hex fills for budget states, for svg marks that can't take class names. */

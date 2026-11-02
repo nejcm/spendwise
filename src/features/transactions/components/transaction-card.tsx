@@ -5,6 +5,7 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { DEFAULT_COLOR } from '@/components/color-selector';
 import { Checkbox, FormattedCurrency, getPressedStyle, IconTile, Text } from '@/components/ui';
+import { SHORTEN_ROW } from '@/features/formatting/constants';
 import { formatShortDate } from '@/features/formatting/helpers';
 import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
@@ -78,9 +79,10 @@ export const TransactionCard = React.memo(({
           value={transaction.baseAmount}
           currency={transaction.baseCurrency}
           prefix={isInflow ? '+' : '-'}
+          shorten={SHORTEN_ROW}
           className={cn('text-row font-semibold', isIncome && 'text-positive', isTransfer && 'text-muted-foreground')}
         />
-        {isForeign && <FormattedCurrency value={Math.abs(transaction.amount)} currency={transaction.currency} className="text-xs text-muted-foreground" />}
+        {isForeign && <FormattedCurrency value={Math.abs(transaction.amount)} currency={transaction.currency} shorten={SHORTEN_ROW} className="text-xs text-muted-foreground" />}
         {isTransfer && !isAdjustment && <Text className="text-xs text-muted-foreground">{translate('transactions.not_spending')}</Text>}
       </View>
     </Pressable>

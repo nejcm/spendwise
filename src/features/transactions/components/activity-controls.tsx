@@ -134,7 +134,7 @@ export function FilterResultCard({ count, total, sort, onSortPress }: { count: n
     <View className="mt-3.5 flex-row items-center justify-between gap-3 rounded-[18px] bg-card px-4 py-3">
       <View className="min-w-0 shrink">
         <Text className="text-meta text-muted-foreground">{count === 1 ? translate('transactions.count_one') : translate('transactions.count_many', { count })}</Text>
-        <FormattedCurrency value={total} currency={currency} prefix={total > 0 ? '+' : ''} numberOfLines={1} className="text-xl font-bold tracking-tight" />
+        <FormattedCurrency value={total} currency={currency} prefix={total > 0 ? '+' : ''} numberOfLines={1} adjustsFontSizeToFit className="text-xl font-bold tracking-tight" />
       </View>
       <Pressable
         onPress={onSortPress}

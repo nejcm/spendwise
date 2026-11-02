@@ -64,7 +64,8 @@ export function formatCurrency(
   options: {
     numberFormat: NumberFormat;
     currencyFormat: CurrencyFormat;
-    shorten?: boolean;
+    /** `true` shortens from 1000 up; a number shortens from that many major units up. */
+    shorten?: boolean | number;
     negativeSymbol?: boolean;
     fractionDigits?: number;
   } = {
@@ -74,6 +75,7 @@ export function formatCurrency(
   },
 ): string {
   const { numberFormat, currencyFormat, negativeSymbol = true, shorten = false, fractionDigits = 2 } = options;
+  const shortenAbove = shorten === true ? 1000 : shorten || Infinity;
   const number = typeof value === 'number' ? value : Number(value);
   if (!Number.isFinite(number)) return String(value);
   const curr = currency?.length ? currency : DEFAULT_USER_CURRENCY;
@@ -83,8 +85,8 @@ export function formatCurrency(
   const isCurrencyBeforeNumber = currencyFormat === 'symbol-before' || currencyFormat === 'code-before';
   const numberForFormatting = isNegative && isCurrencyBeforeNumber ? Math.abs(adjustedNumber) : adjustedNumber;
   const amount = centsToAmount(numberForFormatting);
-  const formattedNumber = shorten && Math.abs(amount) >= 1000
-    ? shortenNumberString(amount, 1000, fractionDigits)
+  const formattedNumber = Math.abs(amount) >= shortenAbove
+    ? shortenNumberString(amount, shortenAbove, fractionDigits)
     : formatNumber(amount, numberFormat, fractionDigits, Number.isInteger(amount) ? 0 : 2);
   const isCode = currencyFormat === 'code-before' || currencyFormat === 'code-after';
   const currencyTxt = isCode ? curr : CURRENCIES_MAP[curr]?.symbol ?? DEFAULT_USER_CURRENCY;

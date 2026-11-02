@@ -62,6 +62,14 @@ export function useRecentTransactions(limit: number = 5) {
   });
 }
 
+export function useMonthSummary(yearMonth: string) {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: queryKeys.monthSummary.byMonth(yearMonth),
+    queryFn: () => queries.getMonthSummary(db, yearMonth),
+  });
+}
+
 // ─── Write Hooks ───
 
 function errorMessage(error: unknown): string {

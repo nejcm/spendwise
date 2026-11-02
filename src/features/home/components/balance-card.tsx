@@ -1,8 +1,12 @@
+import type { UniwindLucideIcon } from '@/components/ui/icon';
+import type { CurrencyKey } from '@/features/currencies';
 import * as React from 'react';
 import { View } from 'react-native';
 import { AmountText, Card, FlagCircle, Text } from '@/components/ui';
+import { ArrowDownRight, ArrowUpRight } from '@/components/ui/icon';
 import { useBalanceSeries } from '@/features/accounts/api';
 import { formatNumber, todayUnix } from '@/features/formatting/helpers';
+import { useMonthSummary } from '@/features/transactions/api';
 import { cn } from '@/lib/cn';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { useCurrentYearMonth } from '@/lib/hooks/use-current-year-month';
@@ -53,6 +57,7 @@ function BalanceTrend({ total, showLine }: { total: number; showLine: boolean })
   const month = Number(yearMonth.slice(5)) - 1;
   const [startDate, endDate] = getCurrentMonthRange(yearMonth);
   const { data: series } = useBalanceSeries(startDate, endDate);
+  const { data: summary } = useMonthSummary(yearMonth);
   const change = series ? percentChange(total, series.opening) : null;
   const values = React.useMemo(
     () => series ? buildDailyBalances(series.opening, series.deltas, startDate, todayUnix()) : [],
@@ -73,11 +78,38 @@ function BalanceTrend({ total, showLine }: { total: number; showLine: boolean })
           </View>
         )}
       </View>
+      {!!(summary?.income || summary?.expense) && (
+        <View className="mt-4 flex-row gap-3">
+          <SummaryFigure label={translate('common.income')} value={summary.income} currency={currency} icon={ArrowUpRight} tone="positive" />
+          <SummaryFigure label={translate('common.expenses')} value={summary.expense} currency={currency} icon={ArrowDownRight} tone="negative" />
+        </View>
+      )}
       {showLine && (
         <View className="-mx-5 mt-3.5">
           <BalanceLine values={values} accessibilityLabel={translate('home.balance_chart_label', { month: monthName(month) })} />
         </View>
       )}
     </>
+  );
+}
+
+const TONE_CLASSES = {
+  positive: { tile: 'bg-positive/12', icon: 'accent-positive' },
+  negative: { tile: 'bg-negative/12', icon: 'accent-negative' },
+};
+
+type SummaryFigureProps = { label: string; value: number; currency: CurrencyKey; icon: UniwindLucideIcon; tone: keyof typeof TONE_CLASSES };
+
+function SummaryFigure({ label, value, currency, icon: Icon, tone }: SummaryFigureProps) {
+  return (
+    <View className="flex-1 flex-row items-center gap-2.5">
+      <View className={cn('size-8 items-center justify-center rounded-full', TONE_CLASSES[tone].tile)}>
+        <Icon size={16} strokeWidth={2.2} colorClassName={TONE_CLASSES[tone].icon} />
+      </View>
+      <View className="shrink">
+        <Text className="text-meta text-muted-foreground">{label}</Text>
+        <AmountText value={value} currency={currency} numberOfLines={1} />
+      </View>
+    </View>
   );
 }

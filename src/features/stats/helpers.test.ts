@@ -1,7 +1,7 @@
 import type { GlobalBudget } from './global-budget-queries';
-import { getMonthBoundaries, setPeriodMonthStartDay } from '@/lib/date/helpers';
+import { getMonthBoundaries, getYearBoundaries, setPeriodMonthStartDay } from '@/lib/date/helpers';
 
-import { chartCeiling, dailyExpenses, daysLeftIn, elapsedSpendStats, getBudgetSelectionBoundaries, hasEnoughForInsights, heatLevels, monthlyFromDaily, monthlyGlobalBudget, paceFraction, savedRatio, scaleGlobalBudget } from './helpers';
+import { customRanges, dailyExpenses, daysLeftIn, elapsedSpendStats, getBudgetSelectionBoundaries, hasEnoughForInsights, heatLevels, monthlyFromDaily, monthlyGlobalBudget, paceFraction, savedRatio, scaleGlobalBudget, trendBars, trendRanges } from './helpers';
 
 const MONTHLY: GlobalBudget = { amountCents: 100_000, type: 'monthly' };
 const YEARLY: GlobalBudget = { amountCents: 1_200_000, type: 'yearly' };
@@ -177,10 +177,43 @@ describe('insights helpers', () => {
     expect(savedRatio(1000, 1500)).toBeCloseTo(-0.5);
   });
 
-  it('chartCeiling clips a single outlier', () => {
-    expect(chartCeiling([83240, 2310, 17304, 0])).toBe(Math.round(17304 * 1.2));
-    expect(chartCeiling([3000, 2000])).toBe(3000);
-    expect(chartCeiling([0, 0])).toBe(1);
+  it('trendRanges walks back from the selected Period, oldest first', () => {
+    const ranges = trendRanges({ mode: 'month', year: 2026, month: 2 }, 3);
+    expect(ranges).toEqual([getMonthBoundaries(2025, 12), getMonthBoundaries(2026, 1), getMonthBoundaries(2026, 2)]);
+  });
+
+  it('trendRanges uses calendar years for All time', () => {
+    const year = new Date().getFullYear();
+    expect(trendRanges({ mode: 'all' }, 2)).toEqual([getYearBoundaries(year - 1), getYearBoundaries(year)]);
+  });
+
+  it('customRanges uses days, weeks, then months clipped to the range', () => {
+    expect(customRanges(D(1), D(4))).toEqual({ ranges: [[D(1), D(2)], [D(2), D(3)], [D(3), D(4)]], labelFormat: 'EEE' });
+    expect(customRanges(D(1), D(16))).toEqual({ ranges: [[D(1), D(8)], [D(8), D(15)], [D(15), D(16)]], labelFormat: 'MMM d' });
+    const jun15 = Date.UTC(2026, 5, 15) / 1000;
+    const nov3 = Date.UTC(2026, 10, 3) / 1000;
+    const months = customRanges(jun15, nov3);
+    expect(months.labelFormat).toBe('MMM');
+    expect(months.ranges).toHaveLength(6);
+    expect(months.ranges[0]).toEqual([jun15, getMonthBoundaries(2026, 6)[1]]);
+    expect(months.ranges[5]).toEqual([getMonthBoundaries(2026, 11)[0], nov3]);
+  });
+
+  it('customRanges keeps months up to 13 of them', () => {
+    expect(customRanges(Date.UTC(2025, 10, 1) / 1000, Date.UTC(2026, 10, 3) / 1000).ranges).toHaveLength(13);
+  });
+
+  it('customRanges switches to years past 13 months', () => {
+    const start = Date.UTC(2024, 5, 1) / 1000;
+    const end = Date.UTC(2026, 1, 1) / 1000;
+    expect(customRanges(start, end)).toEqual({ ranges: [[start, getYearBoundaries(2024)[1]], getYearBoundaries(2025), [getYearBoundaries(2026)[0], end]], labelFormat: 'yyyy' });
+  });
+
+  it('trendBars sums income and expense per range', () => {
+    expect(trendBars([[D(1), D(3)], [D(3), D(5)]], [row(1, 100, 5), row(2, 50), row(4, 7, 1000), row(9, 1)])).toEqual([
+      { start: D(1), end: D(3), income: 5, expense: 150 },
+      { start: D(3), end: D(5), income: 1000, expense: 7 },
+    ]);
   });
 
   it('heatLevels ranks by tertiles and keeps zero at 0', () => {

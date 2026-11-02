@@ -1,28 +1,27 @@
+import type { TrendBar } from '../helpers';
 import type { PeriodProps } from '../types';
+import type { PeriodMode } from '@/lib/store/store';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
+import Svg, { Line } from 'react-native-svg';
 import { AmountText, Card, getPressedStyle, Text } from '@/components/ui';
+import { getBudgetState } from '@/components/ui/budget-state';
 import { Bot, ChevronRight } from '@/components/ui/icon';
 import { setAiDraftQuestion } from '@/features/ai/store';
-import { MonthBars } from '@/features/categories/components/month-bars';
-import { averageOfLast, buildMonthBars, categoryIcon, categoryName, monthBarsRange, periodMonthName } from '@/features/categories/helpers';
-import { useFormatMoney } from '@/features/categories/hooks';
+import { categoryIcon, categoryName, periodMonthName } from '@/features/categories/helpers';
+import { useBudgetColors, useFormatMoney } from '@/features/categories/hooks';
 import { formatDateFull, formatNumber } from '@/features/formatting/helpers';
 import { useCategorySpendByRange, useSummaryByRange, useTrendByRange } from '@/features/insights/api';
-import { buildTrendSeries } from '@/features/insights/trend';
 import { buildTransactionsHref } from '@/features/transactions/route-params';
 import { cn } from '@/lib/cn';
 import { calendarDateToUnix, getPeriodRange, isNavigablePeriodMode, navigatePeriod } from '@/lib/date/helpers';
 import { getPeriodLabel } from '@/lib/date/labels';
-import { useCurrentYearMonth } from '@/lib/hooks/use-current-year-month';
 import { translate } from '@/lib/i18n';
 import { selectIsAiFeatureOn, useAppStore } from '@/lib/store/store';
-import { chartCeiling, dailyExpenses, elapsedSpendStats, monthlyFromDaily, monthlyGlobalBudget, savedRatio } from '../helpers';
+import { customRanges, elapsedSpendStats, monthlyGlobalBudget, savedRatio, trendBars, trendRanges } from '../helpers';
 import { useGlobalBudget } from '../hooks';
 
-const DAY = 86400;
-const MAX_DAILY_BARS = 62;
 const CHART_HEIGHT = 96;
 
 export function OverviewTab({ selection, startDate, endDate, onShowBudgets }: PeriodProps & { onShowBudgets: () => void }) {
@@ -51,7 +50,6 @@ export function OverviewTab({ selection, startDate, endDate, onShowBudgets }: Pe
         endDate={endDate}
       />
       <WhereItWent selection={selection} startDate={startDate} endDate={endDate} onShowBudgets={onShowBudgets} />
-      <SixMonths month={month ? startDate : undefined} />
       {isAiEnabled && (
         <AskCard
           question={prevSpent != null && prevLabels && prevSpent !== spent
@@ -100,7 +98,7 @@ function SpendHero({ title, spent, income, prevSpent, prevLabel, selection, star
           </View>
         )}
       </View>
-      <SpendBars selection={selection} startDate={startDate} endDate={endDate} rows={rows} today={today} />
+      <PeriodTrend selection={selection} startDate={startDate} endDate={endDate} />
       <View className="flex-row gap-2">
         <StatTile label={translate('stats.per_day')} value={format(stats.perDay)} />
         <StatTile label={translate('stats.zero_spend')} value={String(stats.zeroDays)} />
@@ -123,52 +121,91 @@ function StatTile({ label, value, className }: { label: string; value: string; c
   );
 }
 
-type Bar = { key: string; value: number; label: string; highlight: boolean };
+const TREND_LABEL_FORMAT: Record<Exclude<PeriodMode, 'custom'>, string> = {
+  'all': 'yyyy',
+  'year': 'yyyy',
+  'this-year': 'yyyy',
+  'month': 'MMM',
+  'this-month': 'MMM',
+  'week': 'MMM d',
+  'this-week': 'MMM d',
+  'day': 'EEE',
+  'today': 'EEE',
+};
+const BUDGET_MONTHS: Partial<Record<PeriodMode, number>> = { 'month': 1, 'this-month': 1, 'year': 12, 'this-year': 12, 'all': 12 };
+const DENSE_LABEL_FORMAT: Record<string, string> = { MMM: 'MMMMM', yyyy: '\'\'yy' };
+const PAST_OPACITY = 0.4;
 
-function SpendBars({ selection, startDate, endDate, rows, today }: PeriodProps & { rows: Parameters<typeof buildTrendSeries>[3]; today: number }) {
+/** Income and expense for the selected Period and the five before it; a Custom Period is split into slices instead. */
+function PeriodTrend({ selection, startDate, endDate }: Pick<PeriodProps, 'selection' | 'startDate' | 'endDate'>) {
   const format = useFormatMoney();
-  const daily = startDate !== undefined && endDate !== undefined && (endDate - startDate) / DAY <= MAX_DAILY_BARS;
-  const bars: Bar[] = daily
-    ? dailyExpenses(startDate, endDate, rows).map((day, i) => ({
-        key: String(day.date),
-        value: day.value,
-        label: i === 0 ? formatDateFull(day.date, 'MMM d') : formatDateFull(day.date, 'd'),
-        highlight: day.date === today,
-      }))
-    : buildTrendSeries(selection.mode, startDate, endDate, rows).map((point, i, all) => ({
-        key: `${point.label}-${i}`,
-        value: point.expense,
-        label: point.label,
-        highlight: i === all.length - 1 && (endDate === undefined || today < endDate),
-      }));
-  if (bars.length === 0) return null;
-
-  const ceiling = chartCeiling(bars.map((bar) => bar.value));
-  const tallest = bars.reduce((max, bar) => (bar.value > max.value ? bar : max), bars[0]);
+  const colors = useBudgetColors();
+  const [width, setWidth] = React.useState(0);
+  const isSplit = selection.mode === 'custom' && startDate !== undefined && endDate !== undefined;
+  const { ranges, labelFormat } = isSplit
+    ? customRanges(startDate, endDate)
+    : { ranges: trendRanges(selection), labelFormat: TREND_LABEL_FORMAT[selection.mode as Exclude<PeriodMode, 'custom'>] };
+  const { data: rows = [] } = useTrendByRange(ranges[0][0], ranges[ranges.length - 1][1]);
+  const { data: globalBudget } = useGlobalBudget();
+  const bars = trendBars(ranges, rows);
+  const monthlyBudget = monthlyGlobalBudget(globalBudget);
+  const budget = monthlyBudget && BUDGET_MONTHS[selection.mode] ? monthlyBudget * BUDGET_MONTHS[selection.mode]! : undefined;
+  const today = calendarDateToUnix(new Date());
+  const active = (isSplit ? bars.filter((bar) => bar.end <= today) : bars.slice(0, -1)).filter((bar) => bar.income > 0 || bar.expense > 0);
+  const average = active.length > 0 ? Math.round(active.reduce((sum, bar) => sum + bar.expense, 0) / active.length) : 0;
+  const max = Math.max(1, budget ?? 0, ...bars.flatMap((bar) => [bar.income, bar.expense]));
+  const heightOf = (value: number) => (value > 0 ? Math.max(3, Math.round((value / max) * CHART_HEIGHT)) : 2);
   const last = bars.length - 1;
-  const ticks = [0, 7, 14, 21].filter((i) => i < last - 3).concat(last);
+  const dense = bars.length > 7;
+  const label = (bar: TrendBar, narrow = false) => formatDateFull(bar.start, (narrow && DENSE_LABEL_FORMAT[labelFormat]) || labelFormat);
+  const gap = dense ? 'gap-1.5' : 'gap-3';
+  const meta = [
+    average > 0 && translate('stats.avg_amount', { amount: format(average, 0) }),
+    budget && translate('stats.budget_amount', { amount: format(budget, 0) }),
+  ].filter(Boolean).join(' · ');
 
   return (
-    <View className="gap-1.5">
-      <View className="flex-row items-end justify-between gap-0.75 border-b border-border" style={{ height: CHART_HEIGHT }}>
-        {bars.map((bar) => (
-          <View
-            key={bar.key}
-            className={cn('max-w-6 flex-1 rounded-t-[3px]', bar.highlight ? 'bg-accent' : 'bg-track')}
-            style={{ height: bar.value > 0 ? Math.max(4, (Math.min(bar.value, ceiling) / ceiling) * CHART_HEIGHT) : 2 }}
-          />
+    <View className="gap-2">
+      <View
+        accessible
+        accessibilityLabel={bars.map((bar) => `${label(bar)}: ${translate('common.expenses')} ${format(bar.expense)}, ${translate('common.income')} ${format(bar.income)}`).join('; ')}
+        className={cn('flex-row items-end border-b border-border', gap)}
+        style={{ height: CHART_HEIGHT }}
+        onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+      >
+        {bars.map((bar, i) => (
+          <View key={bar.start} className="flex-1 flex-row items-end justify-center gap-0.75" style={{ opacity: isSplit || i === last ? 1 : PAST_OPACITY }}>
+            <View className="max-w-4 flex-1 rounded-t-[3px]" style={{ height: heightOf(bar.expense), backgroundColor: i === last ? colors[getBudgetState(bar.expense, budget)] : colors.normal }} />
+            <View className="max-w-4 flex-1 rounded-t-[3px]" style={{ height: heightOf(bar.income), backgroundColor: colors.muted }} />
+          </View>
         ))}
-        {tallest.value > ceiling && (
-          <Text className="absolute top-0 left-3 bg-card px-1 text-[11px] text-muted-foreground">
-            {translate('stats.off_scale', { amount: format(tallest.value, 0) })}
-          </Text>
+        {!!budget && width > 0 && (
+          <Svg pointerEvents="none" width={width} height={2} style={{ position: 'absolute', left: 0, bottom: heightOf(budget) - 1 }}>
+            <Line x1={0} x2={width} y1={1} y2={1} stroke={colors.muted} strokeWidth={1.5} strokeDasharray="4 4" />
+          </Svg>
         )}
       </View>
-      <View className="flex-row justify-between">
-        {ticks.map((i) => (
-          <Text key={i} className={cn('text-[11px]', i === last ? 'font-semibold text-foreground' : 'text-muted-foreground')}>{bars[i].label}</Text>
+      <View className={cn('flex-row', gap)}>
+        {bars.map((bar, i) => (
+          <Text key={bar.start} className={cn('flex-1 text-center text-[11px]', i === last ? 'font-semibold text-foreground' : 'text-muted-foreground')} numberOfLines={1}>
+            {label(bar, dense)}
+          </Text>
         ))}
       </View>
+      <View className="flex-row items-center gap-3">
+        <LegendDot color={colors.normal} label={translate('common.expenses')} />
+        <LegendDot color={colors.muted} label={translate('common.income')} />
+        {!!meta && <Text className="flex-1 text-right text-[11px] text-muted-foreground" numberOfLines={1}>{meta}</Text>}
+      </View>
+    </View>
+  );
+}
+
+function LegendDot({ color, label }: { color: string; label: string }) {
+  return (
+    <View className="flex-row items-center gap-1.5">
+      <View className="size-2 rounded-xs" style={{ backgroundColor: color }} />
+      <Text className="text-[11px] text-muted-foreground">{label}</Text>
     </View>
   );
 }
@@ -213,34 +250,6 @@ function WhereItWent({ selection, startDate, endDate, onShowBudgets }: PeriodPro
           </Pressable>
         ))}
       </View>
-    </Card>
-  );
-}
-
-/** `month` is the start of the selected month Period; other Periods end at the current month. */
-function SixMonths({ month }: { month: number | undefined }) {
-  const format = useFormatMoney();
-  const currentYearMonth = useCurrentYearMonth();
-  const endYearMonth = month !== undefined ? new Date(month * 1000).toISOString().slice(0, 7) : currentYearMonth;
-  const [start, end] = monthBarsRange(endYearMonth);
-  const { data: rows = [] } = useTrendByRange(start, end);
-  const { data: globalBudget } = useGlobalBudget();
-  const bars = buildMonthBars(monthlyFromDaily(rows), endYearMonth, 'expense');
-  const complete = bars.filter((bar) => bar.month < currentYearMonth);
-  const average = averageOfLast(complete, complete.length);
-  const budget = monthlyGlobalBudget(globalBudget) ?? undefined;
-  const meta = [
-    average > 0 && translate('stats.avg_amount', { amount: format(average, 0) }),
-    budget && translate('stats.budget_amount', { amount: format(budget, 0) }),
-  ].filter(Boolean).join(' · ');
-
-  return (
-    <Card variant="hero" className="mt-4 gap-4 p-5">
-      <View className="mb-4 flex-row items-baseline justify-between gap-2">
-        <Text accessibilityRole="header" className="text-base font-semibold">{translate('categories.last_six_months')}</Text>
-        {!!meta && <Text className="shrink text-meta text-muted-foreground" numberOfLines={1}>{meta}</Text>}
-      </View>
-      <MonthBars bars={bars} budget={budget} />
     </Card>
   );
 }

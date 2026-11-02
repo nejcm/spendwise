@@ -1,7 +1,8 @@
 import type { GlobalBudget } from './global-budget-queries';
 import type { BudgetPeriodSelection, MonthSlice } from './types';
 import type { DailyTrendTotal, MonthlyTotals } from '@/features/insights/types';
-import { dateToUnix, getMonthBoundaries, getYearBoundaries, monthOfDay, yearMonthOf } from '@/lib/date/helpers';
+import type { PeriodSelection } from '@/lib/store/store';
+import { currentPeriodSelection, dateToUnix, getMonthBoundaries, getPeriodRange, getYearBoundaries, monthOfDay, navigatePeriod, yearMonthOf } from '@/lib/date/helpers';
 
 const MAX_MONTH_SLICES = 36;
 const DAY = 86400;
@@ -103,12 +104,54 @@ export function savedRatio(income: number, expense: number): number | null {
   return income > 0 ? (income - expense) / income : null;
 }
 
-const OFF_SCALE_FACTOR = 3;
+export type TrendBar = { start: number; end: number; income: number; expense: number };
 
-/** Chart ceiling that keeps one rent-sized outlier from flattening every other bar. */
-export function chartCeiling(values: number[]): number {
-  const [top = 0, next = 0] = values.filter((v) => v > 0).sort((a, b) => b - a);
-  return next > 0 && top > next * OFF_SCALE_FACTOR ? Math.round(next * 1.2) : Math.max(1, top);
+/** The selected Period and the `count - 1` before it as [start, end) ranges, oldest first; All time uses calendar years. Not for Custom. */
+export function trendRanges(selection: PeriodSelection, count = 6): [number, number][] {
+  let current: PeriodSelection = selection.mode === 'all' ? { mode: 'year', year: currentPeriodSelection().year } : selection;
+  const ranges = [getPeriodRange(current) as [number, number]];
+  for (let i = 1; i < count; i++) {
+    current = navigatePeriod(current, -1);
+    ranges.unshift(getPeriodRange(current) as [number, number]);
+  }
+  return ranges;
+}
+
+const MAX_MONTH_BARS = 13;
+
+/** A Custom Period split into days, weeks, months or years by its length, each slice clipped to the range. */
+export function customRanges(start: number, end: number): { ranges: [number, number][]; labelFormat: string } {
+  const days = Math.round((end - start) / DAY);
+  if (days <= 31) {
+    const step = days <= 7 ? DAY : 7 * DAY;
+    const ranges: [number, number][] = [];
+    for (let from = start; from < end; from += step) ranges.push([from, Math.min(from + step, end)]);
+    return { ranges, labelFormat: days <= 7 ? 'EEE' : 'MMM d' };
+  }
+  const first = monthOfDay(start);
+  const slices = (yearly: boolean) => {
+    const ranges: [number, number][] = [];
+    for (let i = 0; ; i++) {
+      const [from, to] = yearly ? getYearBoundaries(first.year + i) : getMonthBoundaries(first.year, first.month + i);
+      if (from >= end) return ranges;
+      ranges.push([Math.max(from, start), Math.min(to, end)]);
+    }
+  };
+  const months = slices(false);
+  return months.length <= MAX_MONTH_BARS ? { ranges: months, labelFormat: 'MMM' } : { ranges: slices(true), labelFormat: 'yyyy' };
+}
+
+/** Daily rows summed into each range. */
+export function trendBars(ranges: [number, number][], rows: DailyTrendTotal[]): TrendBar[] {
+  return ranges.map(([start, end]) => {
+    const inRange = rows.filter((row) => row.date >= start && row.date < end);
+    return {
+      start,
+      end,
+      income: inRange.reduce((sum, row) => sum + row.income, 0),
+      expense: inRange.reduce((sum, row) => sum + row.expense, 0),
+    };
+  });
 }
 
 /** Heat level 0–3 by tertiles of the positive values; zero is always 0. */

@@ -20,11 +20,12 @@ import { categoryTiles } from '@/features/transactions/helpers';
 import { cn } from '@/lib/cn';
 import { dateToUnix, isValidISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
+import { useAppStore } from '@/lib/store/store';
 import { easeOut } from '@/lib/theme/motion';
 import { FieldNodesContext } from '../hooks/form';
 
 const CATEGORY_TILE_LIMIT = 8;
-const rowInputClassName = 'h-auto min-w-[140px] rounded-none border-0 bg-transparent px-0 text-right text-row';
+const rowInputClassName = 'h-12 min-w-[140px] rounded-none border-0 bg-transparent px-0 text-right text-row';
 function rowClassName(first = false) {
   return cn('min-h-13.5 py-0', !first && 'border-t border-border');
 }
@@ -248,8 +249,10 @@ export function AccountRow({ name, label, accounts, value, onChange, error, firs
   );
 }
 
-function TextRow({ name, label, value, placeholder, onChange, onBlur, error }: {
+function TextRow({ name, label, value, placeholder, onChange, onBlur, error, symbol, inputClassName }: {
   name: string;
+  symbol?: string;
+  inputClassName?: string;
   label: string;
   value: string | null;
   placeholder: string;
@@ -259,6 +262,7 @@ function TextRow({ name, label, value, placeholder, onChange, onBlur, error }: {
 }) {
   const fieldNode = useFieldNode(name);
   const inputRef = React.useRef<TextInput>(null);
+  const currencyFormat = useAppStore.use.currencyFormat();
   return (
     <ListRow
       focusInput={inputRef}
@@ -266,19 +270,23 @@ function TextRow({ name, label, value, placeholder, onChange, onBlur, error }: {
       title={<RowLabel>{label}</RowLabel>}
       meta={<RowError message={error} />}
       trailing={(
-        <Input
-          ref={(node) => {
-            inputRef.current = node;
-            fieldNode(node);
-          }}
-          value={value ?? ''}
-          onChangeText={onChange}
-          onBlur={onBlur}
-          placeholder={placeholder}
-          accessibilityLabel={label}
-          accessibilityHint={error}
-          className={rowInputClassName}
-        />
+        <View className="flex-row items-center gap-1">
+          {symbol && currencyFormat.endsWith('before') && <Text className="text-row text-muted-foreground">{symbol}</Text>}
+          <Input
+            ref={(node) => {
+              inputRef.current = node;
+              fieldNode(node);
+            }}
+            value={value ?? ''}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            placeholder={placeholder}
+            accessibilityLabel={label}
+            accessibilityHint={error}
+            className={cn(rowInputClassName, inputClassName)}
+          />
+          {symbol && currencyFormat.endsWith('after') && <Text className="text-row text-muted-foreground">{symbol}</Text>}
+        </View>
       )}
     />
   );
@@ -332,6 +340,9 @@ export function DetailsCard({ form, accounts, isAdjustment, showBaseAmount, onBa
   showBaseAmount: boolean;
   onBaseAmountEdited: () => void;
 }) {
+  const preferredCurrency = useAppStore.use.currency();
+  const currencyFormat = useAppStore.use.currencyFormat();
+  const baseSymbol = currencyFormat.startsWith('code') ? preferredCurrency : CURRENCIES_MAP[preferredCurrency]?.symbol;
   const [showLocation, setShowLocation] = React.useState(() => !!form.getFieldValue('location'));
   const submitted = useStore(form.store, selectSubmitted);
   const dateNode = useFieldNode('date');
@@ -369,6 +380,8 @@ export function DetailsCard({ form, accounts, isAdjustment, showBaseAmount, onBa
               <TextRow
                 name="baseAmount"
                 label={translate('transactions.base_amount')}
+                symbol={baseSymbol}
+                inputClassName="min-w-0 w-24"
                 value={field.state.value}
                 placeholder="0.00"
                 error={submitted ? getFieldError(field) : undefined}

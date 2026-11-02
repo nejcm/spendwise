@@ -94,7 +94,7 @@ const defaultValues = {
 
 const HINT_DATE_FORMAT = 'EEE, MMM d';
 const rowClassName = (first = false) => cn('min-h-13.5 py-0', !first && 'border-t border-border');
-const rowInputClassName = 'h-auto min-w-[140px] rounded-none border-0 bg-transparent px-0 text-right text-row';
+const rowInputClassName = 'h-12 min-w-[140px] rounded-none border-0 bg-transparent px-0 text-right text-row';
 const selectSubmitted = (s: { submissionAttempts: number }) => s.submissionAttempts > 0;
 
 export type ScheduledTransactionFormProps = {

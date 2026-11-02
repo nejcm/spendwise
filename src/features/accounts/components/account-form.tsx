@@ -44,7 +44,7 @@ const defaultValues: AccountFormData = {
 };
 
 const fieldInputClassName = 'rounded-tile border-0 bg-card';
-const rowInputClassName = 'h-auto w-32 rounded-none border-0 bg-transparent px-0 text-right text-base font-medium';
+const rowInputClassName = 'h-12 w-32 rounded-none border-0 bg-transparent px-0 text-right text-base font-medium';
 
 function useAccountForm(
   initialData?: AccountFormData,

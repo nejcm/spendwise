@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import type { AccountFormData } from './types';
+import type { AccountFormData, FirstAccountData } from './types';
 import type { CurrencyKey } from '@/features/currencies';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -146,6 +146,20 @@ export function useUpdateAccount() {
   return useMutation({
     mutationFn: (params: { id: string; data: AccountFormData }) =>
       queries.updateAccount(db, params.id, params.data),
+    onSuccess: () => {
+      invalidateFor(queryClient, 'account');
+    },
+    onError,
+  });
+}
+
+export function useSetupFirstAccount() {
+  const db = useSQLiteContext();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (params: { data: FirstAccountData | null; preferredCurrency: CurrencyKey }) =>
+      queries.setupFirstAccount(db, params.data, params.preferredCurrency),
     onSuccess: () => {
       invalidateFor(queryClient, 'account');
     },

@@ -1,34 +1,20 @@
-import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import * as React from 'react';
-import { Pressable, View } from 'react-native';
 
-import { FocusAwareStatusBar, Image, Input, ModalSheet, ScrollView, Text, useModalSheet } from '@/components/ui';
+import { FocusAwareStatusBar, Input, ScrollView } from '@/components/ui';
 import { translate } from '@/lib/i18n';
 import { updateProfile, useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 
-import { AVATARS_LIST, getAvatar } from '.';
+import { AvatarPicker } from './profile-avatar';
 
 export function ProfileSettingsScreen() {
-  const { name, avatar } = useAppStore((state) => state.profile);
-  const avatarModal = useModalSheet();
+  const name = useAppStore((state) => state.profile.name);
 
   return (
     <>
       <FocusAwareStatusBar />
-      <ScrollView className="flex-1" contentContainerClassName="p-12" style={defaultStyles.transparentBg}>
-        <Pressable
-          className="mb-8 items-center justify-center"
-          onPress={() => avatarModal.present()}
-          accessibilityLabel="Open avatar picker"
-          accessibilityRole="button"
-        >
-          <Image source={getAvatar(avatar)} className="size-28 rounded-full" />
-          <Text className="mt-2 text-xs text-gray-400 dark:text-gray-400">
-            {translate('onboarding.tap_to_change')}
-          </Text>
-        </Pressable>
-
+      <ScrollView className="flex-1" contentContainerClassName="gap-8 p-12" style={defaultStyles.transparentBg}>
+        <AvatarPicker />
         <Input
           value={name}
           onChangeText={(text) => updateProfile({ name: text })}
@@ -37,38 +23,6 @@ export function ProfileSettingsScreen() {
           size="xl"
         />
       </ScrollView>
-
-      <ModalSheet ref={avatarModal.ref} title={translate('onboarding.choose_avatar')}>
-        <BottomSheetScrollView
-          style={defaultStyles.transparentBg}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 }}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View className="flex-row flex-wrap justify-center gap-3">
-            {AVATARS_LIST.map((imageSource, index) => {
-              const id = index + 1;
-              const isSelected = id === avatar;
-
-              return (
-                <Pressable
-                  key={id}
-                  onPress={() => {
-                    updateProfile({ avatar: id });
-                    avatarModal.close();
-                  }}
-                  className={`rounded-full p-1 ${
-                    isSelected ? 'border-2 border-gray-900 dark:border-white' : 'border border-transparent'
-                  }`}
-                  accessibilityLabel="Choose avatar"
-                  accessibilityRole="button"
-                >
-                  <Image source={imageSource} className="size-16 rounded-full" />
-                </Pressable>
-              );
-            })}
-          </View>
-        </BottomSheetScrollView>
-      </ModalSheet>
     </>
   );
 }

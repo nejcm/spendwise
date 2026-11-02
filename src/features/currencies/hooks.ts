@@ -5,6 +5,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 
 import { Alert } from '@/components/ui';
 import { writeAutoBackupFile } from '@/features/imports-export/backup-file';
+import { hasTransactions } from '@/features/transactions/queries';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { queryTimes } from '@/lib/data/query-helpers';
 import { queryKeys } from '@/lib/data/query-keys';
@@ -78,16 +79,18 @@ export function useChangeCurrency() {
 
   return useMutation({
     mutationFn: async (newCurrency: CurrencyKey) => {
-      try {
-        await writeAutoBackupFile(db);
+      if (await hasTransactions(db)) {
+        try {
+          await writeAutoBackupFile(db);
+        }
+        catch {
+          Alert.alert(
+            translate('settings.currencyBackupFailedTitle'),
+            translate('settings.currencyBackupFailedMessage'),
+          );
+        }
+        await recalculateAllBaseAmounts(db, newCurrency);
       }
-      catch {
-        Alert.alert(
-          translate('settings.currencyBackupFailedTitle'),
-          translate('settings.currencyBackupFailedMessage'),
-        );
-      }
-      await recalculateAllBaseAmounts(db, newCurrency);
       setCurrency(newCurrency);
     },
     onSuccess: () => {

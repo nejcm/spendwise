@@ -23,3 +23,5 @@ export const AVATARS = {
 
 export const AVATARS_LIST = Object.values(AVATARS);
 export const getAvatar = (id: number) => AVATARS_LIST[id - 1];
+
+export const AVATAR_COLORS = ['#c9b6f2', '#d4f05a', '#f6c3a8', '#a8e3c4', '#a9d4f5', '#eadbb4'] as const;

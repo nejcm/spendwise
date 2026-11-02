@@ -19,10 +19,10 @@
 - `src/app/(app)/accounts/[id].tsx`
 - `src/app/(app)/accounts/[id]/edit.tsx`
 - `src/app/(app)/categories/new.tsx`
+- `src/app/(app)/categories/[id].tsx`
 - `src/app/(app)/categories/[id]/edit.tsx`
 - `src/app/(app)/transactions/new.tsx`
 - `src/app/(app)/transactions/[id].tsx`
-- `src/app/(app)/stats/global-budget.tsx`
 - `src/app/(app)/scheduled/index.tsx`
 - `src/app/(app)/scheduled/new.tsx`
 - `src/app/(app)/scheduled/[id].tsx`

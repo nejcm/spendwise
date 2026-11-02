@@ -136,7 +136,7 @@ export function useImportBackup() {
         mimeNeedle: 'json',
         errorMessage: translate('import-export.backup_invalid_type_error'),
       });
-      if (!asset) return;
+      if (!asset) return false;
 
       const text = await (await fetch(asset.uri)).text();
       let parsed: unknown;
@@ -178,8 +178,10 @@ export function useImportBackup() {
         setCurrency(backupCurrency);
       }
       await importBackup(db, backup);
+      return true;
     },
-    onSuccess: () => {
+    onSuccess: (restored) => {
+      if (!restored) return;
       invalidateFor(
         queryClient,
         'transaction',

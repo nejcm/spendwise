@@ -2,11 +2,12 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { CurrencyKey } from '../currencies';
 import type { MonthSummary, TransactionType } from '../transactions/types';
-import type { Account, AccountFormData, AccountWithBalance } from './types';
+import type { Account, AccountFormData, AccountWithBalance, FirstAccountData } from './types';
 
 import { parseToCents } from '@/lib/data/money';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { generateId } from '@/lib/sqlite';
+import { SEED_ACCOUNT_ID } from '@/lib/sqlite/seed';
 
 // ─── Read Queries ───
 
@@ -214,6 +215,31 @@ export async function updateAccount(
      WHERE id = ?`,
     [data.name, data.description ?? null, data.type, data.currency, budgetCents, data.icon, data.color, id],
   );
+}
+
+const UNUSED_SEED_GUARD = `WHERE id = ? AND NOT EXISTS (SELECT 1 FROM transactions WHERE account_id = ?)`;
+
+/** Onboarding: rewrites the seeded account while it has no transactions; otherwise Add creates a new account and Skip is a no-op. */
+export async function setupFirstAccount(
+  db: SQLiteDatabase,
+  data: FirstAccountData | null,
+  preferredCurrency: CurrencyKey,
+): Promise<void> {
+  if (!data) {
+    await db.runAsync(
+      `UPDATE accounts SET currency = ?, updated_at = strftime('%s','now') ${UNUSED_SEED_GUARD}`,
+      [preferredCurrency, SEED_ACCOUNT_ID, SEED_ACCOUNT_ID],
+    );
+    return;
+  }
+
+  const { changes } = await db.runAsync(
+    `UPDATE accounts SET name = ?, icon = ?, type = ?, currency = ?, updated_at = strftime('%s','now') ${UNUSED_SEED_GUARD}`,
+    [data.name, data.icon, data.type, data.currency, SEED_ACCOUNT_ID, SEED_ACCOUNT_ID],
+  );
+  if (changes === 0) {
+    await createAccount(db, { ...data, description: null, budget: null, color: null });
+  }
 }
 
 export async function archiveAccount(

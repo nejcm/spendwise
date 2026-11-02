@@ -1,5 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
+export const SEED_ACCOUNT_ID = 'acc_main_checking';
+
 export async function seedDefaults(db: SQLiteDatabase): Promise<void> {
   await db.execAsync(`
     DELETE FROM categories;
@@ -26,6 +28,6 @@ export async function seedDefaults(db: SQLiteDatabase): Promise<void> {
 
     INSERT INTO accounts (id, name, type, icon, color, currency)
     VALUES
-      ('acc_main_checking', 'Main Checking', 'checking', '💳', '#4ECDC4', 'EUR');
+      ('${SEED_ACCOUNT_ID}', 'Main Checking', 'checking', '💳', '#4ECDC4', 'EUR');
   `);
 }

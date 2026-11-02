@@ -1,19 +1,20 @@
 import type { LayoutChangeEvent, ListRenderItemInfo, TextInput as NativeTextInput } from 'react-native';
 import type { ChatMessage } from './types';
-import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { FlatList, Keyboard, StyleSheet } from 'react-native';
 import { KeyboardAvoidingView, KeyboardGestureArea } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BackButton } from '@/components/screen-header';
 import {
+  EmptyState,
   FocusAwareStatusBar,
   Input,
   SolidButton,
   Text,
   View,
 } from '@/components/ui';
-import { Brain, Plus, SendHorizonal } from '@/components/ui/icon';
+import { Bot, Brain, Plus, SendHorizonal } from '@/components/ui/icon';
 import { IconButton } from '@/components/ui/icon-button';
 import { Skeleton } from '@/components/ui/skeleton';
 import AssistantMessage from '@/features/ai/components/assistant-message';
@@ -27,32 +28,31 @@ import { useChat } from './use-chat';
 // markdown library not supported on web
 const MessageComponent = IS_WEB ? AssistantMessageWeb : AssistantMessage;
 
+function AiSetup() {
+  const router = useRouter();
+  return (
+    <View className="flex-1 justify-center px-4 pb-16">
+      <EmptyState
+        icon={<Bot size={48} colorClassName="accent-muted-foreground" />}
+        title={translate('ai.setup_required_title')}
+        body={translate('ai.setup_required_body')}
+        actions={(
+          <SolidButton
+            color="primary"
+            label={translate('ai.setup_required_action')}
+            onPress={() => router.push('/settings/ai')}
+          />
+        )}
+      />
+    </View>
+  );
+}
+
 type EmptyProps = {
-  hasKey: boolean;
   hasMessages: boolean;
   onSend: (question: string) => void;
 };
-function Empty({ hasKey, hasMessages, onSend }: EmptyProps) {
-  if (!hasKey) {
-    return (
-      <View className="mb-4 rounded-xl bg-card p-4">
-        <Text className="mb-2 font-medium text-foreground">
-          {translate('ai.setup_required_title')}
-        </Text>
-        <Text className="mb-3 text-sm/snug text-muted-foreground">
-          {translate('ai.setup_required_body')}
-        </Text>
-        <Text className="text-sm text-muted-foreground">
-          <Link
-            href="/settings/ai"
-            className="mx-1 font-medium text-foreground underline"
-          >
-            {translate('ai.setup_required_action')}
-          </Link>
-        </Text>
-      </View>
-    );
-  }
+function Empty({ hasMessages, onSend }: EmptyProps) {
   if (hasMessages) return null;
   return (
     <View className="py-6">
@@ -289,13 +289,12 @@ export function AiScreen() {
     () => (
       <View className="mx-4">
         <Empty
-          hasKey={hasKey}
           hasMessages={hasMessages}
           onSend={sendQuestion}
         />
       </View>
     ),
-    [hasKey, hasMessages, sendQuestion],
+    [hasMessages, sendQuestion],
   );
 
   const renderMessage = React.useCallback(
@@ -365,7 +364,7 @@ export function AiScreen() {
                     />
                   </>
                 )
-              : listEmpty}
+              : <AiSetup />}
           </KeyboardGestureArea>
         </KeyboardAvoidingView>
       </View>

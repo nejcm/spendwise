@@ -92,7 +92,7 @@ export function CategoriesScreen() {
                   router.push({ pathname: '/categories/[id]/edit', params: { id: category.category_id } });
                   return;
                 }
-                router.push({ pathname: '/transactions/new', params: { category_id: category.category_id } });
+                router.push({ pathname: '/categories/[id]', params: { id: category.category_id } });
               }}
             />
           )}

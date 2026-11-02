@@ -1,7 +1,7 @@
 import type { CurrencyKey } from '@/features/currencies';
 import * as React from 'react';
+import { View } from 'react-native';
 import { CURRENCY_IMAGES } from '@/features/currencies/images';
-import { cn } from '@/lib/cn';
 import { Image } from './image';
 
 export type FlagCircleProps = {
@@ -12,11 +12,8 @@ export type FlagCircleProps = {
 
 export function FlagCircle({ currency, size = 20, className }: FlagCircleProps) {
   return (
-    <Image
-      source={CURRENCY_IMAGES[currency]}
-      className={cn('rounded-full bg-card-2', className)}
-      style={{ width: size, height: size }}
-      accessible={false}
-    />
+    <View className={className} style={{ width: size, height: size }} accessible={false}>
+      <Image source={CURRENCY_IMAGES[currency]} className="size-full rounded-full bg-card-2" />
+    </View>
   );
 }

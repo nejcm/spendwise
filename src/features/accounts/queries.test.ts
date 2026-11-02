@@ -1,3 +1,4 @@
+import { SEED_ACCOUNT_ID } from '@/lib/sqlite/seed';
 import { createTestDb } from '@/test-utils/sqlite-db';
 
 import {
@@ -9,6 +10,7 @@ import {
   getAccountsWithBalanceForMonth,
   getAccountsWithBalanceForRange,
   getTotalBalance,
+  setupFirstAccount,
   updateAccount,
   updateAccountOrder,
 } from './queries';
@@ -486,5 +488,78 @@ describe('archiveAccount', () => {
 
     const result = await archiveAccount(db as any, 'acc_1');
     expect(result).toBeUndefined();
+  });
+});
+
+// ─── setupFirstAccount ────────────────────────────────────────────────────────
+
+describe('setupFirstAccount', () => {
+  const data = { name: 'Wallet', icon: '👛', type: 'cash' as const, currency: 'GBP' as const };
+  const getSeed = (db: Awaited<ReturnType<typeof createTestDb>>) =>
+    db.getFirstAsync<{ name: string; icon: string | null; type: string; currency: string }>(
+      'SELECT name, icon, type, currency FROM accounts WHERE id = ?',
+      [SEED_ACCOUNT_ID],
+    );
+
+  it('rewrites the untouched seed account on Add', async () => {
+    const db = await createTestDb();
+    await seedAccount(db, { id: SEED_ACCOUNT_ID, name: 'Main Checking' });
+
+    await setupFirstAccount(db as any, data, 'USD');
+
+    expect(await getSeed(db)).toEqual({ name: 'Wallet', icon: '👛', type: 'cash', currency: 'GBP' });
+    expect(await getAccounts(db as any)).toHaveLength(1);
+  });
+
+  it('only sets the preferred currency on Skip', async () => {
+    const db = await createTestDb();
+    await seedAccount(db, { id: SEED_ACCOUNT_ID, name: 'Main Checking' });
+
+    await setupFirstAccount(db as any, null, 'USD');
+
+    expect(await getSeed(db)).toMatchObject({ name: 'Main Checking', type: 'checking', currency: 'USD' });
+  });
+
+  it('leaves a seed account with transactions untouched and creates a new account on Add', async () => {
+    const db = await createTestDb();
+    await seedAccount(db, { id: SEED_ACCOUNT_ID, name: 'Main Checking' });
+    await seedTransaction(db, { account_id: SEED_ACCOUNT_ID });
+
+    await setupFirstAccount(db as any, data, 'USD');
+
+    expect(await getSeed(db)).toMatchObject({ name: 'Main Checking', currency: 'EUR' });
+    const accounts = await getAccounts(db as any);
+    expect(accounts).toHaveLength(2);
+    expect(accounts.find((a) => a.id !== SEED_ACCOUNT_ID)).toMatchObject({ name: 'Wallet', type: 'cash', currency: 'GBP' });
+  });
+
+  it('does nothing on Skip when the seed account has transactions', async () => {
+    const db = await createTestDb();
+    await seedAccount(db, { id: SEED_ACCOUNT_ID });
+    await seedTransaction(db, { account_id: SEED_ACCOUNT_ID });
+
+    await setupFirstAccount(db as any, null, 'USD');
+
+    expect(await getSeed(db)).toMatchObject({ currency: 'EUR' });
+    expect(await getAccounts(db as any)).toHaveLength(1);
+  });
+
+  it('creates a new account on Add when the seed account is missing', async () => {
+    const db = await createTestDb();
+    await seedAccount(db);
+
+    await setupFirstAccount(db as any, data, 'USD');
+
+    const accounts = await getAccounts(db as any);
+    expect(accounts).toHaveLength(2);
+    expect(accounts.find((a) => a.id !== 'acc_1')).toMatchObject({ name: 'Wallet', currency: 'GBP' });
+  });
+
+  it('does nothing on Skip when the seed account is missing', async () => {
+    const db = await createTestDb();
+
+    await setupFirstAccount(db as any, null, 'USD');
+
+    expect(await getAccounts(db as any)).toHaveLength(0);
   });
 });

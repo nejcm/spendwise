@@ -2,7 +2,7 @@ import * as Linking from 'expo-linking';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
 
-import { FocusAwareStatusBar, Image, ScrollView, Text, useModalSheet, View } from '@/components/ui';
+import { FocusAwareStatusBar, ScrollView, Text, useModalSheet, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import {
   ALargeSmall,
@@ -29,7 +29,7 @@ import { config } from '@/config';
 import { triggerScanPicker } from '@/lib/store/local-store';
 import { selectProfile, useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
-import { getAvatar } from '../profile';
+import { ProfileAvatar } from '../profile/profile-avatar';
 import { AppInfoTrigger } from './components/app-info-trigger';
 import { DeleteDataSheet } from './components/delete-data-sheet';
 import DevSection from './components/dev-section';
@@ -51,7 +51,7 @@ export function SettingsScreen() {
         <View className="flex-1 px-4 pt-14 pb-8">
 
           <GhostButton className="mx-auto mb-8 h-auto flex-col justify-center" onPress={() => router.push('/settings/profile')}>
-            <Image source={getAvatar(profile.avatar)} className="mb-3 size-22 rounded-full" />
+            <ProfileAvatar size={88} className="mb-3" />
             <Text className="text-center text-lg">{profile.name}</Text>
           </GhostButton>
 

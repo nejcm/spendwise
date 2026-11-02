@@ -57,9 +57,9 @@ export default function AppLayout() {
         <Stack.Screen name="index" />
         <Stack.Screen name="categories" />
         <Stack.Screen name="categories/new" options={{ presentation: 'fullScreenModal' }} />
+        <Stack.Screen name="categories/[id]" />
         <Stack.Screen name="categories/[id]/edit" options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen name="stats" />
-        <Stack.Screen name="stats/global-budget" options={{ presentation: 'fullScreenModal' }} />
         <Stack.Screen name="settings" />
         <Stack.Screen name="transactions" />
         <Stack.Screen name="transactions/new" options={{ presentation: 'fullScreenModal' }} />

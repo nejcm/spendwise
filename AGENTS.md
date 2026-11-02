@@ -50,7 +50,7 @@ A transaction write already fans out to accounts, month summary, insights, recom
 
 The defect this repo ships is a change applied to the one path you tested. Before calling done, walk this:
 
-- **Route siblings** — `src/app/(app)/` splits list / new / `[id]` / `[id]/edit` into separate files, and the set differs per entity (accounts has all four; categories has no detail route; transactions and scheduled have no separate edit route). Changing one usually means changing its siblings.
+- **Route siblings** — `src/app/(app)/` splits list / new / `[id]` / `[id]/edit` into separate files, and the set differs per entity (accounts and categories have all four; transactions and scheduled have no separate edit route). Changing one usually means changing its siblings.
 - **Query keys + invalidation** — `src/lib/data/query-keys.ts` and the entity's entry in `src/lib/data/invalidation.ts`.
 - **Schema trio** — a new `user_version` block in `src/lib/sqlite/migrations.ts`, the feature's `types.ts`, and the backup module (bump the backup version and handle the old shape on restore).
 - **Importers** — a new transaction field means CSV column mapping *and* the backup JSON round-trip. Both have tests next to them; extend those rather than adding new suites.

@@ -29,6 +29,5 @@ function isModalPath(pathname: string): boolean {
     || isEditRoute(pathname, 'accounts')
     || pathname === '/categories/new'
     || isEditRoute(pathname, 'categories')
-    || pathname === '/scheduled/new'
-    || pathname === '/stats/global-budget';
+    || pathname === '/scheduled/new';
 }

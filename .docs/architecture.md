@@ -95,8 +95,8 @@ Do not move transactional finance records into Zustand.
 - Route files live in `src/app`
 - Most route files should stay thin and delegate to feature screens
 - Primary visible tabs are home, transactions, categories, and stats
-- `/transactions` is the shared route for seeded transaction drill-downs via search, filter, and date-range params
-- Additional routed flows include accounts, transactions, categories, scheduled transactions, global budget, AI, onboarding, and settings subpages
+- `/transactions` is the shared route for seeded transaction drill-downs via `accountId`, `categoryId`, `type`, `search`, and `period` params; build links with `buildTransactionsHref` (`src/features/transactions/route-params.ts`). A `period` param writes the global Period on mount
+- Additional routed flows include accounts, transactions, categories (list, detail, new, edit), scheduled transactions, AI, onboarding, and settings subpages
 - SDK 56 native tabs are deferred because the app uses a custom persistent tab bar with a central add/scan action. Keep route transitions simple unless a screen has a clear native affordance.
 
 ## Expo SDK 56

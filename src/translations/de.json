@@ -83,6 +83,7 @@
   },
   "categories": {
     "add": "Kategorie hinzufügen",
+    "add_to": "Zu {{name}} hinzufügen",
     "budget": "Monatsbudget",
     "budget_invalid": "Das Budget muss eine positive Zahl sein",
     "budget_placeholder": "Monatsbudget (z. B. 1000)",
@@ -97,6 +98,7 @@
     "not_found": "Diese Kategorie existiert nicht mehr.",
     "select_category": "Kategorie auswählen",
     "sorting_tips": "Gedrückt halten und ziehen, um Kategorien neu anzuordnen",
+    "spent": "Ausgegeben",
     "title": "Kategorien",
     "total_all_categories": "Gesamt (Alle Kategorien)"
   },
@@ -343,47 +345,68 @@
     "weekly_digest_title": "Wochenzusammenfassung"
   },
   "onboarding": {
+    "account_default_name": "Girokonto",
+    "account_emoji": "Konto-Emoji",
+    "account_name": "Kontoname",
+    "account_subtitle": "Beginne mit dem Konto, das du am meisten nutzt. Karten und Sparkonten können später folgen.",
+    "account_title": "Wo ist dein Geld gerade?",
+    "add_account": "Konto hinzufügen",
+    "amount_preview": "Beträge sehen so aus: {{amount}}",
+    "avatar_color": "Avatarfarbe",
+    "avatar_color_n": "Farbe {{index}}",
     "choose_avatar": "Wähle einen Avatar",
-    "create_profile": "Erstelle dein Profil",
+    "continue": "Weiter",
     "enter_name": "Gib deinen Namen ein",
-    "finish_setup": "Einrichtung abschließen",
-    "get_started": "Loslegen",
-    "highlights": {
-      "items": {
-        "accounts": {
-          "body": "Sieh Salden, Konten, Kategorien und Transaktionsverlauf in einem klaren Arbeitsbereich.",
-          "title": "Jedes Konto verfolgen"
-        },
-        "ai": {
-          "body": "Stelle Fragen zu deinen lokalen Daten und verwandle Belegfotos in prüfbereite Transaktionen.\nKI ist optional und nutzt deinen eigenen API-Schlüssel.",
-          "title": "Schneller mit KI"
-        },
-        "data": {
-          "body": "Nutze Spendwise kostenlos mit lokalen Offline-Daten, CSV-Import/Export und JSON-Backups unter deiner Kontrolle.",
-          "title": "Deine Daten gehören dir"
-        },
-        "insights": {
-          "body": "Nutze Statistiken, Trends, Kategorieauswertungen und Empfehlungen, um Veränderungen zu erkennen.",
-          "title": "Ausgaben verstehen"
-        },
-        "recurring": {
-          "body": "Plane wiederkehrende Transaktionen, verfolge anstehende Rechnungen und erhalte rechtzeitig Erinnerungen.",
-          "title": "Wiederkehrendes Geld planen"
-        }
+    "features": {
+      "accounts": {
+        "body": "Bargeld, Karten und Sparkonten mit einer Summe, die stimmt.",
+        "title": "Alle Konten auf einen Blick"
       },
-      "subtitle": "Ein kurzer Blick darauf, wobei Spendwise dir im Alltag hilft.",
-      "title": "Was du tun kannst"
+      "ai": {
+        "body": "Optionaler KI-Chat und Belegscan mit deinem eigenen Schlüssel.",
+        "title": "Frag nach deinem Geld"
+      },
+      "bills": {
+        "body": "Wiederkehrende Buchungen kommen pünktlich und erinnern dich vor der Fälligkeit.",
+        "title": "Rechnungen im Blick"
+      },
+      "budgets": {
+        "body": "Lege ein Monatslimit pro Kategorie fest und sieh, wie es sich füllt.",
+        "title": "Budgets, die früh warnen"
+      },
+      "privacy": {
+        "body": "Deine Finanzdaten bleiben auf diesem Gerät. Nur anonyme Nutzungsstatistiken werden geteilt.",
+        "title": "Privat von Grund auf"
+      }
     },
-    "name": "Name",
-    "select_language": "Wähle deine Sprache",
-    "select_theme": "Wähle dein Design",
-    "settings": "Einstellungen",
+    "get_started": "Loslegen",
+    "import_csv": "Transaktionen aus CSV importieren",
+    "main_currency": "Hauptwährung",
+    "name_label": "Dein Name",
+    "prefs_subtitle": "Du kannst all das später in den Einstellungen ändern.",
+    "prefs_title": "Mach es zu deinem",
+    "preview": {
+      "ai_message": "Lebensmittel sind {{amount}} unter Budget, und es bleibt noch ein Tag.",
+      "ai_title": "Spendwise KI",
+      "merchant": "Supermarkt",
+      "merchant_meta": "Lebensmittel · 18:12",
+      "total_balance": "Gesamtsaldo"
+    },
+    "profile_subtitle": "Nur ein Name für die Begrüßung. Er bleibt auf diesem Gerät.",
+    "profile_title": "Wie sollen wir dich nennen?",
+    "ready_subtitle": "Das macht Spendwise für dich.",
+    "ready_title": "Alles bereit, {{name}}",
+    "ready_title_anonymous": "Alles bereit",
+    "reminders": "Erinnerungen für Rechnungen und Budgets",
+    "reminders_hint": "Als Nächstes fragen wir dein Gerät um Erlaubnis",
+    "restore_backup": "Aus einem Backup wiederherstellen",
+    "skip": "Vorerst überspringen",
     "start_tracking": "Tracking starten",
-    "subtitle": "Kostenloses, privates, lokales Finanztracking",
-    "tap_to_change": "Tippen zum Ändern",
+    "step_of": "{{step}} von {{total}}",
     "title": "Spendwise",
-    "welcome_copy": "Verfolge Ausgaben, verwalte Budgets und entwickle bessere Geldgewohnheiten an einem Ort.",
-    "welcome_headline": "Intelligentes Finanzmanagement"
+    "use_illustrated_avatar": "Illustrierten Avatar verwenden",
+    "welcome_copy": "Konten, Budgets und Rechnungen an einem ruhigen Ort. Kostenlos, und deine Finanzdaten bleiben auf diesem Gerät.",
+    "welcome_headline": "Wisse, wohin jeder Cent geht"
   },
   "recommendations": {
     "actions": {
@@ -459,7 +482,7 @@
     "short_title": "Wiederkehrend",
     "start_date_required": "Startdatum ist erforderlich",
     "this_rule": "diese Regel",
-    "title": "Wiederkehrende Regeln"
+    "title": "Rechnungen und Daueraufträge"
   },
   "security": {
     "app_lock": "App-Sperre",
@@ -622,7 +645,7 @@
     "save_on_scan_description": "Transaktionen automatisch speichern, wenn ein Beleg gescannt wird.",
     "saved": "KI-Einstellungen gespeichert",
     "scan": "Beleg scannen",
-    "scheduled": "Wiederkehrende Regeln",
+    "scheduled": "Rechnungen und Daueraufträge",
     "security": "Sicherheit",
     "seed": "Seed",
     "share": "Teilen",
@@ -645,7 +668,7 @@
   "stats": {
     "breakdown_view_chart": "Diagramm",
     "breakdown_view_list": "Liste",
-    "budget": "Ausgabenlimit",
+    "budget": "Budgets",
     "budget_go_to_categories": "Zu Kategorien",
     "budget_legend_budget": "Budget",
     "budget_legend_spent": "Ausgegeben",

@@ -36,6 +36,10 @@ export async function getTransactionById(
   );
 }
 
+export async function hasTransactions(db: SQLiteDatabase): Promise<boolean> {
+  return (await db.getFirstAsync('SELECT 1 FROM transactions LIMIT 1')) !== null;
+}
+
 export async function getRecentTransactions(
   db: SQLiteDatabase,
   limit: number,

@@ -118,6 +118,13 @@ export const buttonTv = tv({
   },
 });
 
+const BUTTON_SIZES = ['2xs', 'xs', 'sm', 'md', 'lg', 'xl', '2xl'] as const;
+type ButtonSize = (typeof BUTTON_SIZES)[number];
+
+export function densitySize(size: ButtonSize, density: string): ButtonSize {
+  return density === 'compact' ? BUTTON_SIZES[Math.max(BUTTON_SIZES.indexOf(size) - 1, 0)] : size;
+}
+
 export function getPressedStyle(state: PressableStateCallbackType, style?: StyleProp<ViewStyle> | ((state: PressableStateCallbackType) => StyleProp<ViewStyle>), enabled = true): StyleProp<ViewStyle> {
   return [
     typeof style === 'function' ? style(state) : style,

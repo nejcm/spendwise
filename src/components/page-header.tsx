@@ -1,5 +1,7 @@
 import type { UniwindLucideIcon } from './ui/icon';
 import * as React from 'react';
+import { cn } from '@/lib/cn';
+import { useAppStore } from '@/lib/store/store';
 import { IconButton, Text, View } from './ui';
 
 export type PageHeaderProps = {
@@ -11,11 +13,13 @@ export type PageHeaderProps = {
 };
 
 export function PageHeader({ title, left, right, children }: PageHeaderProps) {
+  const isCompact = useAppStore.use.density() === 'compact';
+  const slot = isCompact ? 'w-9' : 'w-11';
   return (
-    <View className="h-12 flex-row items-center justify-between gap-2">
-      <View className="w-11">{left}</View>
+    <View className={cn('flex-row items-center justify-between gap-2', isCompact ? 'h-10' : 'h-12')}>
+      <View className={slot}>{left}</View>
       {children ?? <Text accessibilityRole="header" numberOfLines={1} className="min-w-0 flex-1 text-center text-header-title font-semibold">{title}</Text>}
-      <View className="w-11">{right}</View>
+      <View className={slot}>{right}</View>
     </View>
   );
 }

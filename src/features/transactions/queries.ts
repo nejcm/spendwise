@@ -8,12 +8,14 @@ import type { ScheduledTransactionRun } from '@/features/scheduled-transactions/
 import { convertAmount } from '@/features/currencies/queries';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { generateId, inFilter, insertRow, withWriteTransaction } from '@/lib/sqlite';
+import { normalizeTag, tagKey } from './helpers';
 
 // ─── Read Queries ───
 
 const TRANSACTION_SELECT = `SELECT t.*, a.name as account_name, c.name as category_name, c.icon as category_icon, c.color as category_color,
        tp.account_id as counter_account_id, ca.name as counter_account_name, ca.icon as counter_account_icon,
-       tp.amount as counter_amount, tp.currency as counter_currency
+       tp.amount as counter_amount, tp.currency as counter_currency,
+       (SELECT json_group_array(tag) FROM transaction_tags WHERE transaction_id = t.id) AS tags
      FROM transactions t
      LEFT JOIN accounts a ON a.id = t.account_id
      LEFT JOIN categories c ON t.category_id = c.id
@@ -21,6 +23,12 @@ const TRANSACTION_SELECT = `SELECT t.*, a.name as account_name, c.name as catego
      LEFT JOIN accounts ca ON ca.id = tp.account_id`;
 
 const HIDE_TRANSFER_IN_LEG = '(t.transfer_id IS NULL OR t.amount < 0)';
+
+type TransactionRow = Omit<TransactionWithCategory, 'tags'> & { tags: string | null };
+
+function withTags(row: TransactionRow): TransactionWithCategory {
+  return { ...row, tags: (JSON.parse(row.tags ?? '[]') as string[]).sort((a, b) => a.localeCompare(b)) };
+}
 
 /** All-accounts lists show a transfer pair once, as its out leg. */
 export function isTransferInLeg(t: Pick<TransactionWithCategory, 'transfer_id' | 'amount'>): boolean {
@@ -33,12 +41,13 @@ export async function getTransactions(
   endDate: number | undefined,
 ): Promise<TransactionWithCategory[]> {
   const hasRange = !!startDate && !!endDate;
-  return db.getAllAsync<TransactionWithCategory>(
+  const rows = await db.getAllAsync<TransactionRow>(
     `${TRANSACTION_SELECT}
      ${hasRange ? 'WHERE t.date >= ? AND t.date < ?' : ''}
      ORDER BY t.date DESC, t.created_at DESC`,
     hasRange ? [startDate, endDate] : [],
   );
+  return rows.map(withTags);
 }
 
 export async function getTransactionMatchFields(
@@ -56,11 +65,12 @@ export async function getTransactionById(
   db: SQLiteDatabase,
   id: string,
 ): Promise<TransactionWithCategory | null> {
-  return db.getFirstAsync<TransactionWithCategory>(
+  const row = await db.getFirstAsync<TransactionRow>(
     `${TRANSACTION_SELECT}
      WHERE t.id = ?`,
     [id],
   );
+  return row && withTags(row);
 }
 
 export async function hasTransactions(db: SQLiteDatabase): Promise<boolean> {
@@ -75,13 +85,14 @@ export async function getRecentTransactions(
   db: SQLiteDatabase,
   limit: number,
 ): Promise<TransactionWithCategory[]> {
-  return db.getAllAsync<TransactionWithCategory>(
+  const rows = await db.getAllAsync<TransactionRow>(
     `${TRANSACTION_SELECT}
      WHERE ${HIDE_TRANSFER_IN_LEG}
      ORDER BY t.date DESC, t.created_at DESC
      LIMIT ?`,
     [limit],
   );
+  return rows.map(withTags);
 }
 
 export async function getTransactionsSample(
@@ -95,13 +106,14 @@ export async function getTransactionsSample(
   const transferLegSql = accountIds
     ? `(${HIDE_TRANSFER_IN_LEG} OR tp.account_id NOT IN (${accountIds.map(() => '?').join(', ')}))`
     : HIDE_TRANSFER_IN_LEG;
-  return db.getAllAsync<TransactionWithCategory>(
+  const rows = await db.getAllAsync<TransactionRow>(
     `${TRANSACTION_SELECT}
      WHERE t.date >= ? AND t.date < ? AND ${transferLegSql}${accountSql}
      ORDER BY t.date DESC, t.created_at DESC
      LIMIT ?`,
     [startDate, endDate, ...(accountIds ?? []), ...accountParams, limit],
   );
+  return rows.map(withTags);
 }
 
 export async function getMonthSummary(
@@ -122,6 +134,14 @@ export async function getMonthSummary(
   const income = result?.income ?? 0;
   const expense = result?.expense ?? 0;
   return { income, expense, balance: income - expense };
+}
+
+/** Distinct tags, most used first. */
+export async function getTagNames(db: SQLiteDatabase): Promise<string[]> {
+  const rows = await db.getAllAsync<{ tag: string }>(
+    'SELECT tag, COUNT(*) AS n FROM transaction_tags GROUP BY tag ORDER BY n DESC, tag',
+  );
+  return rows.map((r) => r.tag);
 }
 
 // ─── Write Queries ───
@@ -145,12 +165,34 @@ function insertParams(id: string, data: TransactionInsertData): (string | number
   return [id, data.account_id, data.category_id || null, data.type, data.amount, data.currency, data.baseAmount, data.baseCurrency, data.date, data.note || null, data.merchant_name, data.merchant_logo_slug, data.location, data.transfer_id ?? null, data.is_adjustment ?? 0];
 }
 
+async function canonicalTags(db: SQLiteDatabase, tags: readonly string[]): Promise<string[]> {
+  if (tags.length === 0) return [];
+  const stored = await db.getAllAsync<{ tag: string }>(
+    `SELECT DISTINCT tag FROM transaction_tags WHERE tag IN (${tags.map(() => '?').join(', ')})`,
+    [...tags],
+  );
+  return tags.map((tag) => stored.find((s) => tagKey(s.tag) === tagKey(tag))?.tag ?? tag);
+}
+
+async function replaceTags(db: SQLiteDatabase, ids: readonly string[], tags: readonly string[]) {
+  const canonical = await canonicalTags(db, tags.map(normalizeTag).filter(Boolean));
+  await db.runAsync(`DELETE FROM transaction_tags WHERE transaction_id IN (${ids.map(() => '?').join(', ')})`, [...ids]);
+  for (const id of ids) {
+    for (const tag of canonical) {
+      await db.runAsync('INSERT INTO transaction_tags (transaction_id, tag) VALUES (?, ?) ON CONFLICT(transaction_id, tag) DO NOTHING', [id, tag]);
+    }
+  }
+}
+
 export async function createTransaction(
   db: SQLiteDatabase,
   data: TransactionInsertData,
 ): Promise<string> {
   const id = generateId();
-  await withWriteTransaction(db, () => createTransactionRow(db, id, data));
+  await withWriteTransaction(db, async () => {
+    await createTransactionRow(db, id, data);
+    if (data.tags) await replaceTags(db, [id], data.tags);
+  });
   return id;
 }
 
@@ -199,9 +241,11 @@ export async function createTransfer(
 ): Promise<string> {
   const [outLeg, inLeg] = await buildTransferLegs(db, data, rates, generateId());
   const outId = generateId();
+  const inId = generateId();
   await withWriteTransaction(db, async () => {
     await createTransactionRow(db, outId, outLeg);
-    await createTransactionRow(db, generateId(), inLeg);
+    await createTransactionRow(db, inId, inLeg);
+    if (data.tags) await replaceTags(db, [outId, inId], data.tags);
   });
   return outId;
 }
@@ -230,6 +274,10 @@ export async function updateTransfer(
         [leg.account_id, leg.category_id || null, leg.amount, leg.currency, leg.baseAmount, leg.baseCurrency, leg.date, leg.note || null, leg.merchant_name, leg.merchant_logo_slug, leg.location, transferId],
       );
     }
+    if (data.tags) {
+      const legIds = await db.getAllAsync<{ id: string }>('SELECT id FROM transactions WHERE transfer_id = ?', [transferId]);
+      await replaceTags(db, legIds.map((r) => r.id), data.tags);
+    }
   });
 }
 
@@ -247,6 +295,11 @@ export async function duplicateTransfer(
         `INSERT INTO transactions (id, ${copied}, transfer_id, is_adjustment)
          SELECT ?, ${copied}, ?, 0 FROM transactions WHERE transfer_id = ? AND ${side}`,
         [id, newTransferId, transferId],
+      );
+      await db.runAsync(
+        `INSERT INTO transaction_tags (transaction_id, tag)
+         SELECT ?, tag FROM transaction_tags WHERE transaction_id IN (SELECT id FROM transactions WHERE transfer_id = ? AND ${side})`,
+        [id, transferId],
       );
     }
   });
@@ -270,6 +323,9 @@ export async function createTransactions(
       const ids = chunk.map(() => generateId());
       const { sql, params } = buildTransactionsBatchInsert(chunk, ids);
       await db.runAsync(sql, params);
+      for (const [i, item] of chunk.entries()) {
+        if (item.tags) await replaceTags(db, [ids[i]!], item.tags);
+      }
       allIds.push(...ids);
     }
   });
@@ -288,6 +344,7 @@ export async function updateTransaction(
        WHERE id = ?`,
       [data.account_id, data.category_id || null, data.type, data.amount, data.currency, data.baseAmount, data.baseCurrency, data.date, data.note || null, data.merchant_name, data.merchant_logo_slug, data.location, id],
     );
+    if (data.tags) await replaceTags(db, [id], data.tags);
   });
 }
 
@@ -309,6 +366,7 @@ export async function setTransactionsCategory(
 export type DeletedTransaction = {
   transactions: Transaction[];
   runs: ScheduledTransactionRun[];
+  tags: { transaction_id: string; tag: string }[];
 };
 
 /** Deletes the row (and its transfer pair) and returns the removed rows and their rule-run links. */
@@ -316,7 +374,7 @@ export async function deleteTransaction(
   db: SQLiteDatabase,
   id: string,
 ): Promise<DeletedTransaction> {
-  const deleted: DeletedTransaction = { transactions: [], runs: [] };
+  const deleted: DeletedTransaction = { transactions: [], runs: [], tags: [] };
   await withWriteTransaction(db, async () => {
     deleted.transactions = await db.getAllAsync<Transaction>(
       `SELECT * FROM transactions WHERE id = ?
@@ -327,6 +385,7 @@ export async function deleteTransaction(
     if (ids.length === 0) return;
     const placeholders = ids.map(() => '?').join(', ');
     deleted.runs = await db.getAllAsync<ScheduledTransactionRun>(`SELECT * FROM recurring_rule_runs WHERE transaction_id IN (${placeholders})`, ids);
+    deleted.tags = await db.getAllAsync(`SELECT transaction_id, tag FROM transaction_tags WHERE transaction_id IN (${placeholders})`, ids);
     await db.runAsync(`DELETE FROM transactions WHERE id IN (${placeholders})`, ids);
   });
   return deleted;
@@ -340,6 +399,10 @@ export async function restoreTransaction(
   await withWriteTransaction(db, async () => {
     for (const row of deleted.transactions) await insertRow(db, 'transactions', row);
     for (const run of deleted.runs) await insertRow(db, 'recurring_rule_runs', run);
+    const tags = await canonicalTags(db, deleted.tags.map((r) => r.tag));
+    for (const [i, row] of deleted.tags.entries()) {
+      await db.runAsync('INSERT INTO transaction_tags (transaction_id, tag) VALUES (?, ?)', [row.transaction_id, tags[i]!]);
+    }
   });
 }
 

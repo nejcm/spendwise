@@ -38,6 +38,7 @@ function txn(overrides: Partial<TransactionWithCategory> = {}): TransactionWithC
     counter_account_icon: null,
     counter_amount: null,
     counter_currency: null,
+    tags: [],
     ...overrides,
   };
 }

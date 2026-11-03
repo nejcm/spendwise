@@ -40,6 +40,7 @@ function tx(overrides: Partial<TransactionWithCategory>): TransactionWithCategor
     counter_account_icon: null,
     counter_amount: null,
     counter_currency: null,
+    tags: [],
     ...overrides,
   };
 }

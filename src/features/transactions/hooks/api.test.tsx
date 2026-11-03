@@ -47,7 +47,7 @@ describe('useDeleteTransactionWithUndo', () => {
   });
 
   it('keeps the first snapshot when a second delete finds nothing left', async () => {
-    mockDelete.mockResolvedValueOnce(snapshot).mockResolvedValueOnce({ transactions: [], runs: [] });
+    mockDelete.mockResolvedValueOnce(snapshot).mockResolvedValueOnce({ transactions: [], runs: [], tags: [] });
     const { result } = renderDelete();
 
     act(() => {

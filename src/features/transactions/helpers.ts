@@ -31,6 +31,15 @@ export function fxRateText(
   return `${one} = ${formatCurrency(rate * 100, t.baseCurrency, { ...format, fractionDigits: 4 })}`;
 }
 
+export function normalizeTag(tag: string): string {
+  return tag.trim().replace(/\s+/g, ' ');
+}
+
+/** shortcut: ASCII-only case folding to match SQLite NOCASE, so `Ä` and `ä` stay distinct; upgrade with a Unicode collation. */
+export function tagKey(tag: string): string {
+  return tag.replace(/[A-Z]/g, (c) => c.toLowerCase());
+}
+
 const FOOTER_DATE_FORMAT = 'MMM d, HH:mm';
 
 export function transactionFooterText(t: Pick<Transaction, 'created_at' | 'updated_at'>, fromRule: boolean): string {

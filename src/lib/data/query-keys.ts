@@ -18,6 +18,10 @@ export const queryKeys = {
     exists: ['transactions', 'exists'] as const,
   },
 
+  tags: {
+    all: ['tags'] as const,
+  },
+
   // ─── Accounts ───
   accounts: {
     all: ['accounts'] as const,

@@ -42,7 +42,7 @@ describe('migration 6', () => {
 
     await migrateDb(db as any);
 
-    expect(await db.getFirstAsync('PRAGMA user_version')).toEqual({ user_version: 6 });
+    expect(await db.getFirstAsync('PRAGMA user_version')).toEqual({ user_version: 7 });
     expect(await db.getAllAsync('SELECT id, kind FROM categories ORDER BY id')).toEqual([
       { id: '_unknown', kind: 'expense' },
       { id: 'cat_empty', kind: 'expense' },
@@ -67,5 +67,62 @@ describe('migration 6', () => {
       // better-sqlite3 errors come from another realm under --runInBand, so toThrow's instanceof check fails
       .rejects
       .toHaveProperty('message', expect.stringMatching(/CHECK constraint failed/));
+  });
+});
+
+describe('migration 7', () => {
+  it('creates transaction_tags on a fresh database', async () => {
+    const db = await createTestDb();
+
+    expect(await db.getFirstAsync('PRAGMA user_version')).toEqual({ user_version: 7 });
+    expect(await db.getFirstAsync(`SELECT name FROM sqlite_master WHERE type = 'index' AND name = 'idx_transaction_tags_tag'`))
+      .toEqual({ name: 'idx_transaction_tags_tag' });
+  });
+
+  it('upgrades a populated v6 database without touching its rows', async () => {
+    const db = await createTestDb();
+    await db.execAsync(`
+      DROP TABLE transaction_tags;
+      PRAGMA user_version = 6;
+      INSERT INTO accounts (id, name, type) VALUES ('acc', 'Checking', 'checking');
+      INSERT INTO transactions (id, account_id, type, amount, baseAmount, date) VALUES ('t1', 'acc', 'expense', 1234, 1234, 1);
+    `);
+
+    await migrateDb(db as any);
+
+    expect(await db.getFirstAsync('PRAGMA user_version')).toEqual({ user_version: 7 });
+    expect(await db.getAllAsync('SELECT id, amount, baseAmount FROM transactions')).toEqual([{ id: 't1', amount: 1234, baseAmount: 1234 }]);
+    expect(await db.getAllAsync('SELECT * FROM transaction_tags')).toEqual([]);
+  });
+
+  it('is a no-op when run again', async () => {
+    const db = await createTestDb();
+    await db.execAsync(`
+      INSERT INTO accounts (id, name, type) VALUES ('acc', 'Checking', 'checking');
+      INSERT INTO transactions (id, account_id, type, amount, baseAmount, date) VALUES ('t1', 'acc', 'expense', 1, 1, 1);
+      INSERT INTO transaction_tags (transaction_id, tag) VALUES ('t1', 'Lisbon');
+    `);
+
+    await migrateDb(db as any);
+
+    expect(await db.getFirstAsync('PRAGMA user_version')).toEqual({ user_version: 7 });
+    expect(await db.getAllAsync('SELECT transaction_id, tag FROM transaction_tags')).toEqual([{ transaction_id: 't1', tag: 'Lisbon' }]);
+    expect(await db.getAllAsync('SELECT id FROM categories')).toEqual([]);
+  });
+
+  it('enforces foreign keys so tags go with their transaction', async () => {
+    const db = await createTestDb();
+    await db.execAsync(`
+      INSERT INTO accounts (id, name, type) VALUES ('acc', 'Checking', 'checking');
+      INSERT INTO transactions (id, account_id, type, amount, baseAmount, date) VALUES ('t1', 'acc', 'expense', 1, 1, 1), ('t2', 'acc', 'expense', 1, 1, 1);
+      INSERT INTO transaction_tags (transaction_id, tag) VALUES ('t1', 'Lisbon'), ('t2', 'Lisbon');
+    `);
+
+    expect(await db.getFirstAsync('PRAGMA foreign_keys')).toEqual({ foreign_keys: 1 });
+    await db.runAsync(`DELETE FROM transactions WHERE id = 't1'`);
+    expect(await db.getAllAsync('SELECT transaction_id FROM transaction_tags')).toEqual([{ transaction_id: 't2' }]);
+    await expect(db.runAsync(`INSERT INTO transaction_tags (transaction_id, tag) VALUES ('missing', 'x')`))
+      .rejects
+      .toHaveProperty('message', expect.stringMatching(/FOREIGN KEY constraint failed/));
   });
 });

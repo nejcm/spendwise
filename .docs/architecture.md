@@ -37,11 +37,14 @@ SQLite is the source of truth for core finance entities:
 - `accounts`
 - `categories`
 - `transactions`
+- `transaction_tags` — free-form tags, `NOCASE` per transaction; rows go with their transaction via `ON DELETE CASCADE`
 - `recurring_rules`
 - `recurring_rule_runs`
 - `currency_rates`
 
 Plus `_meta`, an internal bookkeeping table. Schema and migrations live in `src/lib/sqlite`.
+
+Foreign keys are enforced per connection: `migrateDb` runs `PRAGMA foreign_keys = ON`, and any future connection must set it too, or tag cascades silently stop.
 
 ### React Query
 

@@ -19,7 +19,8 @@ describe('invalidateFor', () => {
     const qc = createMockQueryClient();
     invalidateFor(qc, 'transaction');
 
-    expect(qc.invalidateQueries).toHaveBeenCalledTimes(12);
+    expect(qc.invalidateQueries).toHaveBeenCalledTimes(13);
+    expect(qc.invalidatedKeys).toContainEqual([...queryKeys.tags.all]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.transactions.all]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.withBalance]);
     expect(qc.invalidatedKeys).toContainEqual([...queryKeys.accounts.summaryAll]);

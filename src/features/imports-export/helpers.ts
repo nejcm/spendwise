@@ -1,5 +1,8 @@
 import type { Account } from '../accounts/types';
 import type { Category } from '../categories/types';
+import type { Transaction } from '../transactions/types';
+import type { ParsedRow } from './csv-parser';
+import type { CurrencyKey } from '@/features/currencies';
 import type { NumberFormat } from '@/features/formatting/constants';
 import Fuse from 'fuse.js';
 import { DEFAULT_CATEGORY_ID } from '@/config';
@@ -164,12 +167,7 @@ function normalizeAccountLabel(name: string): string {
   return name.trim().toLowerCase().replace(WHITESPACE_PATTERN, ' ');
 }
 
-/**
- * Find the best-matching account for a raw CSV account name.
- * Tries exact match first, then contains match (either direction).
- * Falls back to `fallbackId` when no match is found.
- */
-export function matchAccountNameToId(
+function matchAccountNameToId(
   name: string | undefined,
   accounts: Account[],
 ): string {
@@ -187,6 +185,39 @@ export function matchAccountNameToId(
   if (contains) return contains.id;
 
   return accounts[0].id;
+}
+
+type ImportMatchFields = Pick<Transaction, 'account_id' | 'type' | 'amount' | 'currency' | 'date'>;
+
+export function resolveImportRow(row: ParsedRow, accounts: Account[], fallbackCurrency: CurrencyKey): ImportMatchFields {
+  const type = row.type ?? (row.amount >= 0 ? 'income' : 'expense');
+  return {
+    account_id: matchAccountNameToId(row.accountName, accounts),
+    type,
+    amount: type === 'transfer' ? row.amount : Math.abs(row.amount),
+    currency: row.currency ?? fallbackCurrency,
+    date: Math.floor(new Date(row.date).getTime() / 1000),
+  };
+}
+
+const SECONDS_PER_DAY = 86400;
+
+// Dates are stored as UTC-midnight epochs, so the UTC day index is the calendar day.
+function matchKey({ account_id, type, amount, currency, date }: ImportMatchFields): string {
+  return `${account_id}|${type}|${amount}|${currency}|${Math.floor(date / SECONDS_PER_DAY)}`;
+}
+
+export function importDateRange(rows: ImportMatchFields[]): [number, number] | undefined {
+  const days = rows.map((r) => Math.floor(r.date / SECONDS_PER_DAY)).filter(Number.isFinite);
+  if (days.length === 0) return undefined;
+  const min = days.reduce((a, b) => Math.min(a, b));
+  const max = days.reduce((a, b) => Math.max(a, b));
+  return [min * SECONDS_PER_DAY, (max + 1) * SECONDS_PER_DAY];
+}
+
+export function flagDuplicates(rows: ParsedRow[], resolved: ImportMatchFields[], existing: ImportMatchFields[]): ParsedRow[] {
+  const keys = new Set(existing.map(matchKey));
+  return rows.map((row, i) => ({ ...row, isDuplicate: keys.has(matchKey(resolved[i])) }));
 }
 
 export function mapCategoryNameToId(

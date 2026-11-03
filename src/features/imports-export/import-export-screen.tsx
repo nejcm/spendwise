@@ -6,13 +6,14 @@ import { useState } from 'react';
 import { ActivityIndicator, Alert, Card, ListRow, SectionHeader, Text } from '@/components/ui';
 import { ArrowUp, FileText, Upload } from '@/components/ui/icon';
 import { IS_AUTO_BACKUP_SUPPORTED } from '@/features/imports-export/backup-file';
-import { autoDetectColumnMapping, parseCSV } from '@/features/imports-export/csv-parser';
+import { autoDetectColumnMapping, csvHeaderSignature, parseCSV } from '@/features/imports-export/csv-parser';
 import { useExportBackup, useImportBackup } from '@/features/imports-export/hooks';
 import Import from '@/features/imports-export/import';
 import { documentPickerTypeForCsv, pickValidatedFile } from '@/features/imports-export/pick-file';
 import { SettingsPage } from '@/features/settings/components/settings-page';
 import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
+import { getCsvMapping } from '@/lib/store/store';
 import { AutoBackupSection, LastBackupCard } from './auto-backup-section';
 
 const initialCsvState: ImportProps['state'] = {
@@ -56,7 +57,7 @@ export function ImportScreen() {
       return {
         headers: rows[0],
         allRows: rows,
-        mapping: autoDetectColumnMapping(rows),
+        mapping: getCsvMapping(csvHeaderSignature(rows[0])) ?? autoDetectColumnMapping(rows),
       } satisfies ImportProps['state'];
     },
     onSuccess: (state) => {

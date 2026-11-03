@@ -22,7 +22,8 @@ import { setCurrency, useAppStore } from '@/lib/store/store';
 import { useAccounts } from '../accounts/hooks';
 import { useCategories } from '../categories/hooks';
 import { useCreateTransactions } from '../transactions/hooks/api';
-import { mapCategoryNameToId, matchAccountNameToId } from './helpers';
+import { getTransactionMatchFields } from '../transactions/queries';
+import { flagDuplicates, importDateRange, mapCategoryNameToId, resolveImportRow } from './helpers';
 
 function inferBackupCurrency(backup: BackupData): CurrencyKey | undefined {
   if ('baseCurrency' in backup) {
@@ -34,13 +35,14 @@ function inferBackupCurrency(backup: BackupData): CurrencyKey | undefined {
   return txBaseCurrency as CurrencyKey;
 }
 
-export function useImportTransactions() {
+export function useImportTransactions(onImported?: () => void) {
   const db = useSQLiteContext();
   const router = useRouter();
   const preferredCurrency = useAppStore.use.currency();
   const { isLoading: isCategoriesLoading, data: categories = [] } = useCategories();
   const { isLoading: isAccountsLoading, data: accounts = [] } = useAccounts();
   const onImportSuccess = (data: string[]) => {
+    onImported?.();
     Alert.alert(
       translate('import-export.complete_title'),
       translate('import-export.complete_message', { count: data?.length }),
@@ -59,13 +61,13 @@ export function useImportTransactions() {
       }
       const transactions: TransactionFormData[] = [];
       for (const row of data) {
-        const type = row.type ?? (row.amount >= 0 ? 'income' : 'expense');
+        const { account_id, type, amount, currency, date } = resolveImportRow(row, accounts, preferredCurrency);
         transactions.push({
-          account_id: matchAccountNameToId(row.accountName, accounts),
-          amount: (type === 'transfer' ? row.amount : Math.abs(row.amount)) / 100,
-          currency: row.currency ?? preferredCurrency,
+          account_id,
+          amount: amount / 100,
+          currency,
           category_id: mapCategoryNameToId(row.categoryName, categories, row.note),
-          date: Math.floor(new Date(row.date).getTime() / 1000),
+          date,
           note: row.note,
           merchant_name: null,
           location: null,
@@ -79,10 +81,18 @@ export function useImportTransactions() {
     },
   });
 
+  const markDuplicates = async (rows: ParsedRow[]) => {
+    const resolved = rows.map((row) => resolveImportRow(row, accounts, preferredCurrency));
+    const range = importDateRange(resolved);
+    if (!range) return rows;
+    return flagDuplicates(rows, resolved, await getTransactionMatchFields(db, ...range));
+  };
+
   return {
     isLoading: prepareMutation.isPending || createTransactions.isPending,
     isInitializing: isCategoriesLoading || isAccountsLoading,
     onImport: prepareMutation.mutate,
+    markDuplicates,
   };
 }
 

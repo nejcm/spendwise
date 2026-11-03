@@ -41,6 +41,17 @@ export async function getTransactions(
   );
 }
 
+export async function getTransactionMatchFields(
+  db: SQLiteDatabase,
+  startDate: number,
+  endDate: number,
+): Promise<Pick<Transaction, 'account_id' | 'type' | 'amount' | 'currency' | 'date'>[]> {
+  return db.getAllAsync(
+    'SELECT account_id, type, amount, currency, date FROM transactions WHERE date >= ? AND date < ? AND is_adjustment = 0',
+    [startDate, endDate],
+  );
+}
+
 export async function getTransactionById(
   db: SQLiteDatabase,
   id: string,

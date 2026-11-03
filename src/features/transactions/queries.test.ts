@@ -11,6 +11,7 @@ import {
   getMonthSummary,
   getRecentTransactions,
   getTransactionById,
+  getTransactionMatchFields,
   getTransactions,
   getTransactionsSample,
   hasUserTransactions,
@@ -169,6 +170,23 @@ describe('hasUserTransactions', () => {
 
     await seedTransaction(db);
     expect(await hasUserTransactions(db as any)).toBe(true);
+  });
+});
+
+describe('getTransactionMatchFields', () => {
+  it('returns rows in the half-open range and skips opening-balance adjustments', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    await seedTransaction(db);
+    await seedTransaction(db, { id: 'txn_apr', date: APR_START });
+    await db.runAsync(
+      `INSERT INTO transactions (id, account_id, type, amount, currency, baseAmount, baseCurrency, date, is_adjustment)
+       VALUES ('adj', 'acc_1', 'transfer', 1000, 'EUR', 1000, 'EUR', ?, 1)`,
+      [MAR_MID],
+    );
+    expect(await getTransactionMatchFields(db as any, MAR_START, APR_START)).toEqual([
+      { account_id: 'acc_1', type: 'expense', amount: 5000, currency: 'EUR', date: MAR_MID },
+    ]);
   });
 });
 

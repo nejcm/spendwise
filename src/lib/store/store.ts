@@ -3,6 +3,7 @@ import type { AiProviderType } from '@/features/ai/types';
 import type { CurrencyKey } from '@/features/currencies';
 import type { CurrencyFormat, DateFormat, NumberFormat } from '@/features/formatting/constants';
 import type { AutoBackupInterval } from '@/features/imports-export/backup-file';
+import type { ColumnMapping } from '@/features/imports-export/csv-parser';
 import type { Language } from '@/features/languages/types';
 import type { NotificationSettings } from '@/features/notifications/types';
 
@@ -116,6 +117,9 @@ export type AppState = {
 
   // Period preference
   periodSelection: PeriodSelection;
+
+  // CSV column mappings by header signature, most recent first
+  csvMappings: { signature: string; mapping: ColumnMapping }[];
 };
 
 function getLocaleCurrency(): CurrencyKey {
@@ -178,6 +182,7 @@ function getDefaultState(): AppState {
       accountForm: {},
     },
     periodSelection: currentPeriodSelection(),
+    csvMappings: [],
   };
 }
 
@@ -346,6 +351,16 @@ export function addLastUsedCurrency(currency: CurrencyKey) {
       },
     };
   });
+}
+
+const MAX_CSV_MAPPINGS = 10;
+export function saveCsvMapping(signature: string, mapping: ColumnMapping) {
+  return updateAppState((prev) => ({
+    csvMappings: [{ signature, mapping }, ...prev.csvMappings.filter((m) => m.signature !== signature)].slice(0, MAX_CSV_MAPPINGS),
+  }));
+}
+export function getCsvMapping(signature: string): ColumnMapping | undefined {
+  return getAppState().csvMappings.find((m) => m.signature === signature)?.mapping;
 }
 
 // Form preference actions

@@ -1,5 +1,7 @@
+import type { Account } from '../accounts/types';
 import type { Category } from '../categories/types';
-import { formatFileSize, mapCategoryNameToId } from '@/features/imports-export/helpers';
+import type { ParsedRow } from './csv-parser';
+import { flagDuplicates, formatFileSize, importDateRange, mapCategoryNameToId, resolveImportRow } from '@/features/imports-export/helpers';
 
 function makeCategory(id: string, name: string): Category {
   return { id, name, icon: null, color: '#000000', kind: 'expense', budget: null, sort_order: 0, created_at: 0 };
@@ -120,5 +122,55 @@ describe('formatFileSize', () => {
 
   it('shows MB with one decimal in the number format', () => {
     expect(formatFileSize(1.5 * 1024 * 1024, 'comma')).toBe('1,5 MB');
+  });
+});
+
+describe('flagDuplicates', () => {
+  const accounts: Account[] = [
+    { id: 'acc-1', name: 'Checking', description: null, type: 'checking', currency: 'EUR', icon: null, color: null, is_archived: 0, sort_order: 0, created_at: 0, updated_at: 0 },
+    { id: 'acc-2', name: 'Savings', description: null, type: 'savings', currency: 'EUR', icon: null, color: null, is_archived: 0, sort_order: 1, created_at: 0, updated_at: 0 },
+  ];
+  const day = Date.UTC(2026, 2, 18) / 1000;
+  const existing = [{ account_id: 'acc-1', type: 'expense' as const, amount: 1234, currency: 'EUR' as const, date: day }];
+
+  function flag(rows: ParsedRow[], current = existing) {
+    return flagDuplicates(rows, rows.map((r) => resolveImportRow(r, accounts, 'EUR')), current).map((r) => r.isDuplicate);
+  }
+
+  it('matches account, calendar day, absolute amount and type', () => {
+    expect(flag([{ date: '2026-03-18', amount: -1234, note: 'Lunch', type: 'expense', accountName: 'Checking' }])).toEqual([true]);
+  });
+
+  it('ignores note and time of day', () => {
+    expect(flag([{ date: '2026-03-18', amount: -1234, note: 'different', type: 'expense' }], [{ ...existing[0], date: day + 3600 }])).toEqual([true]);
+  });
+
+  it('does not match when account, day, amount or type differ', () => {
+    expect(flag([
+      { date: '2026-03-18', amount: -1234, note: '', type: 'expense', accountName: 'Savings' },
+      { date: '2026-03-19', amount: -1234, note: '', type: 'expense' },
+      { date: '2026-03-18', amount: -1235, note: '', type: 'expense' },
+      { date: '2026-03-18', amount: 1234, note: '', type: 'income' },
+      { date: '2026-03-18', amount: -1234, note: '', type: 'expense', currency: 'USD' },
+    ])).toEqual([false, false, false, false, false]);
+  });
+
+  it('keeps rows with unparseable dates unflagged', () => {
+    expect(flag([{ date: 'not a date', amount: -1234, note: '', type: 'expense' }])).toEqual([false]);
+  });
+});
+
+describe('importDateRange', () => {
+  it('spans whole UTC days from the earliest to the latest row', () => {
+    const start = Date.UTC(2026, 2, 18) / 1000;
+    expect(importDateRange([
+      { account_id: 'a', type: 'expense', amount: 1, currency: 'EUR', date: start + 86400 },
+      { account_id: 'a', type: 'expense', amount: 1, currency: 'EUR', date: start },
+      { account_id: 'a', type: 'expense', amount: 1, currency: 'EUR', date: Number.NaN },
+    ])).toEqual([start, start + 2 * 86400]);
+  });
+
+  it('returns undefined without valid dates', () => {
+    expect(importDateRange([])).toBeUndefined();
   });
 });

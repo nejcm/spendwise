@@ -6,7 +6,7 @@
 # This workflow is used to create a new version of the app and push a new tag to the repo.
 # As this workflow will push code to the repo, we set up GitHub Bot as a Git user.
 # Runs on every push to main: the release type is derived from conventional commits since the last tag
-# (feat → minor, fix/perf → patch, `!`/BREAKING CHANGE → major; nothing else releases).
+# (feat → minor, fix/perf/refactor/style/build/revert/chore → patch, `!`/BREAKING CHANGE → major; docs/test/ci do not release).
 # Can also be triggered manually from the Actions tab to force a release type.
 #         1. Choose your release type (patch, minor, major)
 #         2. The workflow will run the np-release script which runs the following steps:

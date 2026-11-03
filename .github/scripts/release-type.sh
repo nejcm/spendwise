@@ -9,6 +9,6 @@ if grep -qE '^[a-z]+(\([^)]*\))?!:|^BREAKING[ -]CHANGE:' <<<"$log"; then
   echo major
 elif grep -qE '^feat(\([^)]*\))?:' <<<"$log"; then
   echo minor
-elif grep -qE '^(fix|perf)(\([^)]*\))?:' <<<"$log"; then
+elif grep -qE '^(fix|perf|refactor|style|build|revert|chore)(\([^)]*\))?:' <<<"$log"; then
   echo patch
 fi

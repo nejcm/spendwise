@@ -62,6 +62,14 @@ export function useRecentTransactions(limit: number = 5) {
   });
 }
 
+export function useTagNames() {
+  const db = useSQLiteContext();
+  return useQuery({
+    queryKey: queryKeys.tags.all,
+    queryFn: () => queries.getTagNames(db),
+  });
+}
+
 export function useMonthSummary(yearMonth: string) {
   const db = useSQLiteContext();
   return useQuery({

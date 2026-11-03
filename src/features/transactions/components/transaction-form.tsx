@@ -66,7 +66,7 @@ function FormHeader({ form, typeOptions, isEdit, isAdjustment, onClose }: {
   );
 }
 
-function FormFooter({ form, isEdit, isLoading }: { form: TransactionFormApi; isEdit: boolean; isLoading: boolean }) {
+function FormFooter({ form, submit, isEdit, isLoading }: { form: TransactionFormApi; submit: (addAnother: boolean) => Promise<void>; isEdit: boolean; isLoading: boolean }) {
   return (
     <form.Subscribe
       selector={(s) => s.isSubmitting}
@@ -80,7 +80,7 @@ function FormFooter({ form, isEdit, isLoading }: { form: TransactionFormApi; isE
               textClassName="text-[15px] font-medium"
               label={translate('transactions.form.save_add_another')}
               disabled={isSubmitting || isLoading}
-              onPress={() => form.handleSubmit({ addAnother: true })}
+              onPress={() => submit(true)}
             />
           )}
           <SolidButton
@@ -90,7 +90,7 @@ function FormFooter({ form, isEdit, isLoading }: { form: TransactionFormApi; isE
             textClassName="text-base font-semibold"
             label={translate('common.save')}
             loading={isSubmitting || isLoading}
-            onPress={() => form.handleSubmit({ addAnother: false })}
+            onPress={() => submit(false)}
           />
         </View>
       )}
@@ -109,6 +109,8 @@ export function TransactionForm(props: TransactionFormProps) {
 function TransactionFormContent({ initialValues, onSaved, onClose, bottomMenuOffset = 0, isAdjustment = false }: TransactionFormProps) {
   const {
     form,
+    submit,
+    commitTagRef,
     amountRef,
     scrollRef,
     contentRef,
@@ -163,6 +165,7 @@ function TransactionFormContent({ initialValues, onSaved, onClose, bottomMenuOff
                   isAdjustment={isAdjustment}
                   showBaseAmount={showBaseAmount}
                   onBaseAmountEdited={() => setBaseAmountIsManual(true)}
+                  commitTagRef={commitTagRef}
                 />
               )}
             />
@@ -170,7 +173,7 @@ function TransactionFormContent({ initialValues, onSaved, onClose, bottomMenuOff
         </FieldNodesContext>
       </KeyboardAwareScrollView>
       <KeyboardStickyView offset={{ closed: 0, opened: insets.bottom + bottomMenuOffset }}>
-        <FormFooter form={form} isEdit={isEdit} isLoading={isLoading} />
+        <FormFooter form={form} submit={submit} isEdit={isEdit} isLoading={isLoading} />
       </KeyboardStickyView>
     </>
   );

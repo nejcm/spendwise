@@ -5,6 +5,7 @@ import * as z from 'zod';
 import { DEFAULT_USER_CURRENCY } from '@/config';
 import { CURRENCY_VALUES } from '@/features/currencies';
 import { formatMajorUnitsInputFromCents, todayISO } from '@/features/formatting/helpers';
+import { MAX_TAG_LENGTH, MAX_TAGS } from '@/features/transactions/helpers';
 import { isValidISODate, unixToISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { toNumber } from '@/lib/number';
@@ -25,6 +26,7 @@ const transactionFormFields = z.object({
   note: z.string().max(500, translate('transactions.form.too_long', { max: 500 })).nullable(),
   merchant_name: z.string().max(100, translate('transactions.form.too_long', { max: 100 })).nullable(),
   location: z.string().max(250, translate('transactions.form.too_long', { max: 250 })).nullable(),
+  tags: z.array(z.string().trim().min(1).max(MAX_TAG_LENGTH, translate('transactions.form.too_long', { max: MAX_TAG_LENGTH }))).max(MAX_TAGS),
 });
 
 export const transactionFormSchema = transactionFormFields.superRefine((value, ctx) => {
@@ -69,9 +71,10 @@ export const transactionFormDefaultValues = {
   note: null,
   merchant_name: null,
   location: null,
+  tags: [],
 } satisfies TransactionFormValues;
 
-/** "Save & add another": clears what differs per entry, keeps type, accounts, date, currency and category. */
+/** "Save & add another": clears what differs per entry, keeps type, accounts, date, currency, category and tags. */
 export function nextEntryValues(values: TransactionFormValues): TransactionFormValues {
   return { ...values, amount: '', baseAmount: '', merchant_name: null, note: null, location: null };
 }
@@ -99,6 +102,7 @@ export function transactionToFormValues(t: TransactionWithCategory): Transaction
     note: t.note,
     merchant_name: t.merchant_name,
     location: t.location,
+    tags: t.tags,
   };
   if (!t.transfer_id || !t.counter_account_id) return values;
   const isOut = t.amount < 0;

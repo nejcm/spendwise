@@ -65,6 +65,8 @@ export type FilterState = {
   type: TransactionType | null;
   accountIds: string[];
   categoryIds: string[];
+  /** Any-of, compared by `tagKey`. */
+  tags: string[];
   /** Cents in Preferred Currency, compared against `baseAmount`. */
   minAmount: number | null;
   maxAmount: number | null;

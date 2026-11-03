@@ -55,6 +55,28 @@ describe('parseTransactionsRouteSeed', () => {
   });
 });
 
+describe('tags param', () => {
+  const tagsOf = (tags: string | string[]) => parseTransactionsRouteSeed({ tags }).filters.tags;
+
+  it('round-trips tags with commas as one JSON param', () => {
+    const href = buildTransactionsHref({ tags: ['Travel, work'] });
+    expect(href.params).toEqual({ tags: '["Travel, work"]' });
+    expect(tagsOf(href.params.tags!)).toEqual(['Travel, work']);
+  });
+
+  it('normalizes, drops oversize and non-string entries and dedupes by tagKey', () => {
+    expect(tagsOf(JSON.stringify([' Lisbon  trip ', 'lisbon TRIP', 'x'.repeat(41), 7, null, '', 'Ä', 'ä']))).toEqual(['Lisbon trip', 'Ä', 'ä']);
+  });
+
+  it('rejects junk and lists over the limit', () => {
+    expect(tagsOf('Lisbon,Work')).toEqual([]);
+    expect(tagsOf('{"a":1}')).toEqual([]);
+    expect(tagsOf('"Lisbon"')).toEqual([]);
+    expect(tagsOf(JSON.stringify(Array.from({ length: 21 }, (_, i) => `t${i}`)))).toEqual([]);
+    expect(tagsOf(JSON.stringify(Array.from({ length: 20 }, (_, i) => `t${i}`)))).toHaveLength(20);
+  });
+});
+
 describe('parsePeriodParam', () => {
   it.each([
     ['month:2026-10', { mode: 'month', year: 2026, month: 10 }],
@@ -112,7 +134,7 @@ describe('buildTransactionsHref', () => {
   });
 
   it('produces params that parse back into the same seed', () => {
-    const filters: FilterState = { type: 'income', accountIds: ['acc_1', 'acc_2'], categoryIds: ['cat_1'], minAmount: 0, maxAmount: 2500, sort: 'oldest' };
+    const filters: FilterState = { type: 'income', accountIds: ['acc_1', 'acc_2'], categoryIds: ['cat_1'], tags: ['Travel, work', 'Lisbon'], minAmount: 0, maxAmount: 2500, sort: 'oldest' };
     const href = buildTransactionsHref({
       ...filters,
       search: 'rent',

@@ -1,9 +1,12 @@
 import type { TransactionWithCategory } from '../types';
 import { translate } from '@/lib/i18n';
-import { cleanup, render, screen } from '@/lib/test-utils';
+import { cleanup, fireEvent, render, screen } from '@/lib/test-utils';
+import { filterTransactions, summarizeTransactions } from '../filters';
+import { parseTransactionsRouteSeed } from '../route-params';
 import { DetailHero, DetailRows } from './transaction-detail-parts';
 
-jest.mock('expo-router', () => ({ useRouter: () => ({ push: jest.fn() }) }));
+const mockPush = jest.fn();
+jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }));
 jest.mock('@/features/accounts/api', () => ({ useAccounts: () => ({ data: [] }) }));
 
 afterEach(cleanup);
@@ -68,5 +71,25 @@ describe('transaction detail parts', () => {
     const note = 'A very long note '.repeat(20).trim();
     render(<DetailRows transaction={txn({ note })} />);
     expect(screen.getByText(note).props.numberOfLines).toBeUndefined();
+  });
+
+  it('shows one chip per tag and opens only the tapped tag over all time', () => {
+    const trip = txn({ id: 'trip', type: 'expense', is_adjustment: 0, amount: -2000, baseAmount: 2000, tags: ['Lisbon', 'Work'] });
+    const office = txn({ id: 'office', type: 'expense', is_adjustment: 0, amount: -9900, baseAmount: 9900, tags: ['Work'] });
+    render(<DetailRows transaction={trip} />);
+    expect(screen.getByText('Work')).toBeOnTheScreen();
+
+    fireEvent.press(screen.getByText('Lisbon'));
+
+    expect(mockPush).toHaveBeenCalledTimes(1);
+    const seed = parseTransactionsRouteSeed(mockPush.mock.calls[0][0].params);
+    expect(seed.periodSelection).toEqual({ mode: 'all' });
+    expect(seed.filters.tags).toEqual(['Lisbon']);
+    expect(summarizeTransactions(filterTransactions([trip, office], seed.filters))).toMatchObject({ count: 1, expense: 2000, net: -2000 });
+  });
+
+  it('shows no tags row without tags', () => {
+    render(<DetailRows transaction={txn()} />);
+    expect(screen.queryByText(translate('transactions.tags'))).toBeNull();
   });
 });

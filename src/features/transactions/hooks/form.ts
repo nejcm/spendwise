@@ -42,7 +42,7 @@ export type UseTransactionFormProps = {
 
 type SubmitMeta = { addAnother: boolean };
 
-const FIELD_ORDER = ['amount', 'category_id', 'account_id', 'to_account_id', 'date', 'baseAmount', 'merchant_name', 'note', 'location'] as const;
+const FIELD_ORDER = ['amount', 'category_id', 'account_id', 'to_account_id', 'date', 'baseAmount', 'merchant_name', 'note', 'tags', 'location'] as const;
 const SCROLL_MARGIN = 16;
 
 /** Lets form rows register their node so a failed save can scroll to the first invalid one. */
@@ -122,7 +122,9 @@ export function useTransactionForm({ initialValues, onSaved, isAdjustment = fals
     onSubmitMeta: { addAnother: false } as SubmitMeta,
     onSubmitInvalid: ({ formApi }) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      const failing = FIELD_ORDER.find((name) => formApi.getFieldMeta(name)?.errors.length);
+      const failed = Object.entries(formApi.state.fieldMeta).filter(([, meta]) => meta?.errors.length);
+      const errorMetaOf = (name: string) => failed.find(([key]) => key === name || key.startsWith(`${name}[`))?.[1];
+      const failing = FIELD_ORDER.find(errorMetaOf);
       if (!failing) return;
       const node = fieldNodesRef.current[failing];
       if (failing === 'amount') {
@@ -134,7 +136,7 @@ export function useTransactionForm({ initialValues, onSaved, isAdjustment = fals
           AccessibilityInfo.sendAccessibilityEvent(node, 'focus');
         });
       }
-      const message = formApi.getFieldMeta(failing)?.errors[0]?.message;
+      const message = errorMetaOf(failing)?.errors[0]?.message;
       if (message) AccessibilityInfo.announceForAccessibility(message);
     },
     onSubmit: async ({ value, meta }) => {
@@ -175,8 +177,16 @@ export function useTransactionForm({ initialValues, onSaved, isAdjustment = fals
     },
   });
 
+  const commitTagRef = React.useRef<(() => void) | null>(null);
+  const submit = (addAnother: boolean) => {
+    commitTagRef.current?.();
+    return form.handleSubmit({ addAnother });
+  };
+
   return {
     form,
+    submit,
+    commitTagRef,
     amountRef,
     scrollRef,
     contentRef,

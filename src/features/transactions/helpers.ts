@@ -31,6 +31,9 @@ export function fxRateText(
   return `${one} = ${formatCurrency(rate * 100, t.baseCurrency, { ...format, fractionDigits: 4 })}`;
 }
 
+export const MAX_TAGS = 20;
+export const MAX_TAG_LENGTH = 40;
+
 export function normalizeTag(tag: string): string {
   return tag.trim().replace(/\s+/g, ' ');
 }

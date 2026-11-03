@@ -1065,10 +1065,12 @@
         "oldest": "Älteste zuerst",
         "smallest": "Kleinste zuerst"
       },
+      "tags": "Tags",
       "to": "Bis"
     },
     "form": {
       "add_location": "Ort hinzufügen",
+      "add_tag": "Tag hinzufügen",
       "all_categories": "Alle Kategorien",
       "amount_error": "Gib einen Betrag ein",
       "base_amount_invalid": "Gib einen positiven Betrag ein",
@@ -1102,6 +1104,7 @@
     "search": "Händler, Notiz oder Betrag",
     "select_transaction": "Transaktion auswählen",
     "selected_count": "{{count}} ausgewählt",
+    "tags": "Tags",
     "title": "Transaktionen",
     "to_account_required": "Wähle ein anderes Zielkonto",
     "transfer": "Umbuchung",

@@ -5,7 +5,9 @@
 # ✍️ Description:
 # This workflow is used to create a new version of the app and push a new tag to the repo.
 # As this workflow will push code to the repo, we set up GitHub Bot as a Git user.
-# This Workflow need to be triggered manually from the Actions tab in the repo.
+# Runs on every push to main: the release type is derived from conventional commits since the last tag
+# (feat → minor, fix/perf/refactor/style/build/revert/chore → patch, `!`/BREAKING CHANGE → major; docs/test/ci do not release).
+# Can also be triggered manually from the Actions tab to force a release type.
 #         1. Choose your release type (patch, minor, major)
 #         2. The workflow will run the np-release script which runs the following steps:
 #             - Bump the version in package.json based on the release type using np
@@ -22,6 +24,9 @@
 name: New App Version
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       release-type:
@@ -33,6 +38,10 @@ on:
           - patch
           - minor
           - major
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -51,16 +60,25 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: main
           token: ${{ secrets.GH_TOKEN }}
 
+      - name: 🔎 Detect release type
+        id: release
+        env:
+          INPUT_RELEASE_TYPE: ${{ github.event.inputs.release-type }}
+        run: echo "type=${INPUT_RELEASE_TYPE:-$(.github/scripts/release-type.sh)}" >> "$GITHUB_OUTPUT"
+
       - name: 📝 Git User Setup
+        if: steps.release.outputs.type != ''
         run: |
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
 
       - name: 📦 Setup Node + PNPM + install deps
+        if: steps.release.outputs.type != ''
         uses: ./.github/actions/setup-node-pnpm-install
 
       - name: 🏃‍♂️ Run App release
-        run: |
-          pnpm app-release ${{ github.event.inputs.release-type }}
+        if: steps.release.outputs.type != ''
+        run: pnpm app-release ${{ steps.release.outputs.type }}

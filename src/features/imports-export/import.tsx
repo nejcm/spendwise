@@ -2,13 +2,15 @@ import type { ColumnMapping, ParsedRow, SkippedRow } from './csv-parser';
 
 import * as React from 'react';
 import { View } from 'react-native';
-import { Alert, FormattedCurrency, FormattedDate, GhostButton, Select, SolidButton, Text } from '@/components/ui';
+import { Alert, Checkbox, FormattedCurrency, FormattedDate, GhostButton, Select, SolidButton, Text } from '@/components/ui';
 
 import { OutlineButton } from '@/components/ui/outline-button';
 import { DEFAULT_CURRENCY } from '@/config';
+import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
+import { saveCsvMapping } from '@/lib/store/store';
 
-import { mapRows } from './csv-parser';
+import { csvHeaderSignature, mapRows } from './csv-parser';
 import { useImportTransactions } from './hooks';
 
 type Step = 'map' | 'preview';
@@ -20,9 +22,10 @@ type MapStepProps = {
   mapping: ColumnMapping;
   onMapping: (m: ColumnMapping) => void;
   onNext: () => void;
+  loading?: boolean;
 };
 
-function MapStep({ headers, mapping, onMapping, onNext }: MapStepProps) {
+function MapStep({ headers, mapping, onMapping, onNext, loading }: MapStepProps) {
   const options = React.useMemo(() => {
     return [
       {
@@ -115,6 +118,7 @@ function MapStep({ headers, mapping, onMapping, onNext }: MapStepProps) {
         color="primary"
         fullWidth
         className="mt-8"
+        disabled={loading}
         label={translate('import-export.preview')}
         onPress={onNext}
       />
@@ -123,7 +127,7 @@ function MapStep({ headers, mapping, onMapping, onNext }: MapStepProps) {
 }
 
 export type PreviewStepProps = {
-  onImport: () => void;
+  onImport: (rows: ParsedRow[]) => void;
   preview: ParsedRow[];
   skipped: SkippedRow[];
   loading?: boolean;
@@ -138,8 +142,11 @@ function PreviewStep({
   loading,
 }: PreviewStepProps) {
   const [show, setShow] = React.useState(ITEMS_NUM);
+  const [includeDuplicates, setIncludeDuplicates] = React.useState(false);
   const hasMore = preview.length > show;
   const totalSkipped = skipped.length;
+  const duplicateCount = preview.filter((row) => row.isDuplicate).length;
+  const toImport = includeDuplicates ? preview : preview.filter((row) => !row.isDuplicate);
   return (
     <View>
       <Text className="mb-4 text-xl font-medium">
@@ -167,10 +174,19 @@ function PreviewStep({
           )}
         </View>
       )}
+      {duplicateCount > 0 && (
+        <Checkbox
+          className="mb-3"
+          checked={includeDuplicates}
+          onChange={setIncludeDuplicates}
+          label={translate('import-export.include_duplicates', { count: duplicateCount })}
+          accessibilityLabel={translate('import-export.include_duplicates', { count: duplicateCount })}
+        />
+      )}
       {preview.slice(0, show).map((row) => (
         <View
           key={`${row.date}-${row.amount}`}
-          className="mb-1 flex-row items-center justify-between rounded-lg bg-card p-2"
+          className={cn('mb-1 flex-row items-center justify-between rounded-lg bg-card p-2', row.isDuplicate && !includeDuplicates && 'opacity-50')}
         >
           <View className="flex-1">
             <Text className="text-sm font-medium">
@@ -185,6 +201,11 @@ function PreviewStep({
                 {row.accountName || '?'}
               </Text>
               <FormattedDate className="text-xs text-gray-500" value={new Date(row.date).getTime() / 1000} />
+              {row.isDuplicate && (
+                <Text className="text-xs font-medium text-yellow-700 dark:text-yellow-500">
+                  {translate('import-export.duplicate')}
+                </Text>
+              )}
             </View>
           </View>
           <FormattedCurrency
@@ -214,13 +235,13 @@ function PreviewStep({
         color="primary"
         className="mt-10"
         fullWidth
-        disabled={loading}
+        disabled={loading || toImport.length === 0}
         label={
           loading
             ? `${translate('common.loading')}`
-            : `${translate('import-export.import')} ${preview.length} ${translate('import-export.rows')}`
+            : `${translate('import-export.import')} ${toImport.length} ${translate('import-export.rows')}`
         }
-        onPress={onImport}
+        onPress={() => onImport(toImport)}
       />
     </View>
   );
@@ -241,15 +262,23 @@ export default function Import({ state, setMapping, onClose }: ImportProps) {
   const [step, setStep] = React.useState<Step>('map');
   const [preview, setPreview] = React.useState<ParsedRow[]>([]);
   const [skippedCurrencies, setSkippedCurrencies] = React.useState<SkippedRow[]>([]);
-  const { isLoading, isInitializing, onImport } = useImportTransactions();
+  const { isLoading, isInitializing, onImport, markDuplicates } = useImportTransactions(
+    () => saveCsvMapping(csvHeaderSignature(headers), mapping),
+  );
 
-  const buildPreview = () => {
+  const buildPreview = async () => {
     if (mapping.date === null || mapping.amount === null) {
       Alert.alert(translate('common.error'), translate('import-export.date_amount_required'));
       return;
     }
     const result = mapRows(allRows, mapping, true);
-    setPreview(result.rows);
+    try {
+      setPreview(await markDuplicates(result.rows));
+    }
+    catch (error) {
+      Alert.alert(translate('common.error'), error instanceof Error ? error.message : translate('common.error_description'));
+      return;
+    }
     setSkippedCurrencies(result.skipped);
     setStep('preview');
   };
@@ -262,13 +291,14 @@ export default function Import({ state, setMapping, onClose }: ImportProps) {
           mapping={mapping}
           onMapping={setMapping}
           onNext={buildPreview}
+          loading={isInitializing}
         />
       )}
       {step === 'preview' && (
         <PreviewStep
           preview={preview}
           skipped={skippedCurrencies}
-          onImport={() => onImport({ data: preview })}
+          onImport={(rows) => onImport({ data: rows })}
           loading={isLoading || isInitializing}
         />
       )}

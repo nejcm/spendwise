@@ -1,4 +1,4 @@
-import { autoDetectColumnMapping, mapRows, parseCSV } from '@/features/imports-export/csv-parser';
+import { autoDetectColumnMapping, csvHeaderSignature, mapRows, parseCSV } from '@/features/imports-export/csv-parser';
 
 describe('parseCSV', () => {
   it('keeps quoted multiline fields in the same row', () => {
@@ -119,3 +119,11 @@ describe('autoDetectColumnMapping', () => {
 "2/16/26","Expense","USD","Rent","933.75","USD","4200","MYR","","Rent"
 
  */
+
+describe('csvHeaderSignature', () => {
+  it('ignores case and surrounding whitespace but keeps column order', () => {
+    expect(csvHeaderSignature([' Date', 'AMOUNT '])).toBe(csvHeaderSignature(['date', 'amount']));
+    expect(csvHeaderSignature(['amount', 'date'])).not.toBe(csvHeaderSignature(['date', 'amount']));
+    expect(csvHeaderSignature(['note|memo'])).not.toBe(csvHeaderSignature(['note', 'memo']));
+  });
+});

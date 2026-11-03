@@ -1,5 +1,6 @@
+import type { ColumnMapping } from '@/features/imports-export/csv-parser';
 import { storage } from '@/lib/storage';
-import { clearAppStore, selectIsAiEnabled, selectIsAiFeatureOn, setLastPrimaryTabPath, setMonthStartDay, setPeriodSelection, useAppStore } from './store';
+import { clearAppStore, getCsvMapping, saveCsvMapping, selectIsAiEnabled, selectIsAiFeatureOn, setLastPrimaryTabPath, setMonthStartDay, setPeriodSelection, useAppStore } from './store';
 
 describe('app store selectors', () => {
   it('enables AI only when the active provider has a saved key', () => {
@@ -139,5 +140,33 @@ describe('app store persist migration', () => {
   it('keeps the old openTxOnCreate default for v1 state saved before the key existed', async () => {
     expect((await rehydrateFrom({ isFirstTime: false }, 1)).openTxOnCreate).toBe(true);
     expect((await rehydrateFrom({ openTxOnCreate: false }, 1)).openTxOnCreate).toBe(false);
+  });
+});
+
+const mapping = (date: number): ColumnMapping => ({ date, amount: 1, currency: null, note: null, type: null, category: null, account: null, fallbackAmount: null, fallbackCurrency: null });
+
+describe('csv mappings', () => {
+  beforeEach(() => clearAppStore());
+
+  it('returns the saved mapping for a header signature', () => {
+    saveCsvMapping('date|amount', mapping(0));
+    expect(getCsvMapping('date|amount')).toEqual(mapping(0));
+    expect(getCsvMapping('amount|date')).toBeUndefined();
+  });
+
+  it('replaces the mapping for an existing signature', () => {
+    saveCsvMapping('date|amount', mapping(0));
+    saveCsvMapping('date|amount', mapping(2));
+    expect(getCsvMapping('date|amount')).toEqual(mapping(2));
+  });
+
+  it('keeps only the 10 most recently used signatures', () => {
+    for (let i = 0; i < 11; i++) saveCsvMapping(`sig-${i}`, mapping(i));
+    saveCsvMapping('sig-1', mapping(1));
+    saveCsvMapping('sig-11', mapping(11));
+    expect(getCsvMapping('sig-0')).toBeUndefined();
+    expect(getCsvMapping('sig-2')).toBeUndefined();
+    expect(getCsvMapping('sig-1')).toEqual(mapping(1));
+    expect(getCsvMapping('sig-11')).toEqual(mapping(11));
   });
 });

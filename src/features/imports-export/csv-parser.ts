@@ -210,6 +210,10 @@ function normalizeDate(raw: string): string {
   return cleaned;
 }
 
+export function csvHeaderSignature(headers: string[]): string {
+  return JSON.stringify(headers.map((h) => h.trim().toLowerCase()));
+}
+
 export function autoDetectColumnMapping(rows: string[][]): ColumnMapping {
   const [headers, sampleRow] = rows;
   const mapping: ColumnMapping = { amount: null, date: null, note: null, type: null, currency: null, category: null, account: null, fallbackAmount: null, fallbackCurrency: null };

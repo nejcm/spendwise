@@ -71,6 +71,8 @@ function mockChat(overrides: Partial<UseChatReturn> = {}) {
       setDraft: jest.fn(),
       reset: jest.fn(),
       applyScope: jest.fn(),
+      confirmWrite: jest.fn(),
+      cancelWrite: jest.fn(),
     },
     scroll: {
       scrollViewRef: { current: null },
@@ -83,6 +85,7 @@ function mockChat(overrides: Partial<UseChatReturn> = {}) {
     getMessageRenderInfo: jest.fn(() => ({
       displayContent: '',
       isLiveStreaming: false,
+      pendingWrite: null,
     })),
     markdownStyle: {},
   };
@@ -124,7 +127,7 @@ describe('ai screen', () => {
     const reset = jest.fn();
     mockChat({
       messages: [{ id: 'user-1', role: 'user', content: 'Hi' }],
-      actions: { send: jest.fn(), setDraft: jest.fn(), reset, applyScope: jest.fn() },
+      actions: { send: jest.fn(), setDraft: jest.fn(), reset, applyScope: jest.fn(), confirmWrite: jest.fn(), cancelWrite: jest.fn() },
     });
 
     render(<AiScreen />);
@@ -143,6 +146,7 @@ describe('ai screen', () => {
       getMessageRenderInfo: jest.fn(() => ({
         displayContent: 'hello **world**',
         isLiveStreaming: true,
+        pendingWrite: null,
       })),
     });
 
@@ -151,4 +155,33 @@ describe('ai screen', () => {
     expect(screen.getByText('hello **world**')).toBeTruthy();
     expect(AssistantMessageMock).not.toHaveBeenCalled();
   });
+});
+
+it('shows a pending write with Confirm and Cancel on the streaming message', () => {
+  const confirmWrite = jest.fn();
+  const cancelWrite = jest.fn();
+  mockChat({
+    messages: [{ id: 'assistant-1', role: 'assistant', content: '' }],
+    isStreaming: true,
+    actions: { send: jest.fn(), setDraft: jest.fn(), reset: jest.fn(), applyScope: jest.fn(), confirmWrite, cancelWrite },
+    getMessageRenderInfo: jest.fn(() => ({
+      displayContent: '',
+      isLiveStreaming: true,
+      pendingWrite: { tool: 'recategorize_transactions' as const, transactions: [
+        { id: 't1', date: 0, amount: -1250, currency: 'EUR' as const, account_name: 'Checking', category_name: 'Food' },
+        { id: 't2', date: 0, amount: -800, currency: 'EUR' as const, account_name: 'Checking', category_name: null },
+      ], categoryId: 'c1', categoryName: 'Groceries' },
+    })),
+  });
+
+  render(<AiScreen />);
+
+  expect(screen.getByText('Change category')).toBeTruthy();
+  expect(screen.getByText('Groceries')).toBeTruthy();
+  expect(screen.getByText('Move to')).toBeTruthy();
+  expect(screen.getAllByText(/Checking/)).toHaveLength(2);
+  fireEvent.press(screen.getByText('Confirm'));
+  fireEvent.press(screen.getByText('Cancel'));
+  expect(confirmWrite).toHaveBeenCalledTimes(1);
+  expect(cancelWrite).toHaveBeenCalledTimes(1);
 });

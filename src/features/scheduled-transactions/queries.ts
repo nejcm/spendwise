@@ -8,6 +8,7 @@ import type {
 } from './types';
 import type { Transaction } from '@/features/transactions/types';
 
+import { fitsTransactionType } from '@/features/categories/helpers';
 import { amountToCents } from '@/features/formatting/helpers';
 import { generateId, insertRow, withWriteTransaction } from '@/lib/sqlite';
 import { getFirstDueOnOrAfter, isoDateToUnix, todayISODate, unixToISODate } from './scheduler';
@@ -135,6 +136,11 @@ async function assertAccountUnarchived(db: SQLiteDatabase, accountId: string, is
   if (account?.is_archived) throw new RuleAccountArchivedError();
 }
 
+async function assertCategoryFitsType(db: SQLiteDatabase, categoryId: string, type: ScheduledTransactionFormData['type']) {
+  const category = await db.getFirstAsync<{ id: string; kind: 'expense' | 'income' }>('SELECT id, kind FROM categories WHERE id = ?', [categoryId]);
+  if (category && !fitsTransactionType(category, type)) throw new Error(`Category kind ${category.kind} does not match a ${type} rule`);
+}
+
 /** Counts a matching source transaction as the run for its date, so the scheduler does not post it again. */
 async function linkSourceTransaction(db: SQLiteDatabase, ruleId: string, sourceId: string, data: ScheduledTransactionFormData) {
   const amount = amountToCents(Number(data.amount) || 0);
@@ -168,6 +174,7 @@ export async function createScheduledTransaction(
 
   await withWriteTransaction(db, async () => {
     await assertAccountUnarchived(db, data.account_id, scheduleState.isActive);
+    await assertCategoryFitsType(db, data.category_id, data.type);
     await db.runAsync(
       `INSERT INTO recurring_rules (
         id,

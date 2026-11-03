@@ -280,6 +280,20 @@ export async function updateTransaction(
   });
 }
 
+/** Moves income and expense rows to `categoryId`; transfer legs are never touched. */
+export async function setTransactionsCategory(
+  db: SQLiteDatabase,
+  ids: readonly string[],
+  categoryId: string,
+): Promise<void> {
+  const [idSql, idParams] = inFilter('id', ids);
+  await db.runAsync(
+    `UPDATE transactions SET category_id = ?, updated_at = strftime('%s','now')
+     WHERE type <> 'transfer' AND transfer_id IS NULL${idSql}`,
+    [categoryId, ...idParams],
+  );
+}
+
 /** Everything a single delete removes, so Undo can put it back unchanged. */
 export type DeletedTransaction = {
   transactions: Transaction[];

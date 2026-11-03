@@ -129,3 +129,59 @@ describe('useChat', () => {
     expect(contents()).toEqual(['Old question', 'Old answer', 'New question']);
   });
 });
+
+jest.mock('@tanstack/react-query', () => ({ useQueryClient: () => ({}) }));
+
+describe('useChat write confirmation', () => {
+  const action = { tool: 'recategorize_transactions', transactions: [], categoryId: 'c1', categoryName: 'Food' } as const;
+
+  function proposeWrite() {
+    const decisions: boolean[] = [];
+    streamMock.mockImplementation(async ({ confirmWrite }) => {
+      decisions.push(await confirmWrite(action));
+      return 'Done';
+    });
+    return decisions;
+  }
+
+  it('shows the pending write on the streaming message and settles it once', async () => {
+    const decisions = proposeWrite();
+    const { result } = renderHook(() => useChat());
+    act(() => result.current.actions.send('Move it'));
+    const assistant = useAiChatStore.getState().messages.at(-1)!;
+
+    expect(result.current.getMessageRenderInfo(assistant).pendingWrite).toEqual(action);
+    await act(async () => {
+      result.current.actions.confirmWrite();
+      result.current.actions.confirmWrite();
+      result.current.actions.cancelWrite();
+    });
+
+    expect(decisions).toEqual([true]);
+    expect(result.current.getMessageRenderInfo(assistant).pendingWrite).toBeNull();
+    expect(contents().at(-1)).toBe('Done');
+  });
+
+  it('cancels when the user declines', async () => {
+    const decisions = proposeWrite();
+    const { result } = renderHook(() => useChat());
+    act(() => result.current.actions.send('Move it'));
+
+    await act(async () => result.current.actions.cancelWrite());
+
+    expect(decisions).toEqual([false]);
+  });
+
+  it('cancels a pending write when the chat closes, and a reopened chat cannot confirm it', async () => {
+    const decisions = proposeWrite();
+    const view = renderHook(() => useChat());
+    act(() => view.result.current.actions.send('Move it'));
+
+    await act(async () => view.unmount());
+    const { result } = renderHook(() => useChat());
+    act(() => result.current.actions.confirmWrite());
+
+    expect(decisions).toEqual([false]);
+    expect(useAiChatStore.getState().messages.every((m) => result.current.getMessageRenderInfo(m).pendingWrite === null)).toBe(true);
+  });
+});

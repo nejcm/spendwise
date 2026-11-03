@@ -1,6 +1,7 @@
+import type { QueryClient } from '@tanstack/react-query';
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import type { AiProviderType, AiScope, ChatMessage, ProviderChatMessage, ToolCall } from '../types';
+import type { AiProviderType, AiScope, ChatMessage, ProviderChatMessage, ToolCall, WriteAction } from '../types';
 
 import { AI_MAX_TOOL_ROUNDS } from '@/config';
 import { getAccounts } from '@/features/accounts/queries';
@@ -20,7 +21,7 @@ import {
   buildOpenAiMessages,
   streamAskOpenAI,
 } from './openai';
-import { executeToolCall, getToolStatusMessage } from './tool-executor';
+import { executeToolCall, executeWriteToolCall, getToolStatusMessage, isWriteTool } from './tool-executor';
 
 function toProviderMessages(messages: readonly ChatMessage[]): ProviderChatMessage[] {
   return messages.map((m) => ({ role: m.role, content: m.content }));
@@ -39,7 +40,10 @@ function getChatKey(provider: AiProviderType) {
 type StreamAskWithToolsInput = {
   readonly messages: readonly ChatMessage[];
   readonly db: SQLiteDatabase;
+  readonly queryClient: QueryClient;
   readonly scope: AiScope;
+  /** Resolves true only when the user confirms the proposed write. */
+  readonly confirmWrite: (action: WriteAction) => Promise<boolean>;
   readonly onToken: (token: string) => void;
   readonly onToolStatus?: (status: string) => void;
   readonly signal?: AbortSignal;
@@ -48,7 +52,9 @@ type StreamAskWithToolsInput = {
 export async function streamAskWithTools({
   messages,
   db,
+  queryClient,
   scope,
+  confirmWrite,
   onToken,
   onToolStatus,
   signal,
@@ -58,7 +64,10 @@ export async function streamAskWithTools({
   const providerMessages = toProviderMessages(messages);
   const { accounts, limited } = resolveScopeAccounts(await getAccounts(db), scope.accountIds);
   const systemPrompt = buildSystemPrompt(scope.period, limited);
-  const runTool = (call: ToolCall) => executeToolCall(db, call.name, call.arguments, accounts.map((a) => a.id));
+  const accountIds = accounts.map((a) => a.id);
+  const runTool = (call: ToolCall) => isWriteTool(call.name)
+    ? executeWriteToolCall({ db, queryClient, accountIds, confirm: confirmWrite }, call.name, call.arguments)
+    : executeToolCall(db, call.name, call.arguments, accountIds);
   const providerFunction = provider === 'openai' ? streamWithToolsOpenAI : streamWithToolsAnthropic;
   return providerFunction({ getApiKey: () => getChatKey(provider), systemPrompt, providerMessages, runTool, onToken, onToolStatus, signal });
 }

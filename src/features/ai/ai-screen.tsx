@@ -1,5 +1,5 @@
 import type { LayoutChangeEvent, ListRenderItemInfo, TextInput as NativeTextInput } from 'react-native';
-import type { AiScope, ChatMessage } from './types';
+import type { AiScope, ChatMessage, WriteAction } from './types';
 import { format, isToday } from 'date-fns';
 import { useRouter } from 'expo-router';
 import * as React from 'react';
@@ -29,6 +29,7 @@ import { goBackOrFallback } from '@/lib/routing';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
 import { ScopeSheet } from './components/scope-sheet';
+import { WriteConfirmation } from './components/write-confirmation';
 import { AI_INPUT_NATIVE_ID, PRESET_QUESTIONS } from './constants';
 import { isSameAccountScope, resolveScopeAccounts } from './helpers';
 import { DEFAULT_AI_SCOPE, useAiChatStore } from './store';
@@ -180,6 +181,9 @@ type ChatMessageRowProps = {
   markdownStyle: React.ComponentProps<typeof MessageComponent>['markdownStyle'];
   message: ChatMessage;
   onMessageLayout: (messageId: string, event: LayoutChangeEvent) => void;
+  pendingWrite: WriteAction | null;
+  onConfirmWrite: () => void;
+  onCancelWrite: () => void;
 };
 
 const ChatMessageRow = React.memo(({
@@ -188,6 +192,9 @@ const ChatMessageRow = React.memo(({
   markdownStyle,
   message,
   onMessageLayout,
+  pendingWrite,
+  onConfirmWrite,
+  onCancelWrite,
 }: ChatMessageRowProps) => {
   const handleLayout = React.useCallback((event: LayoutChangeEvent) => {
     onMessageLayout(message.id, event);
@@ -206,15 +213,18 @@ const ChatMessageRow = React.memo(({
       <View className="size-7.5 items-center justify-center rounded-full bg-primary">
         <Bot size={13} strokeWidth={2.5} colorClassName="accent-primary-foreground" />
       </View>
-      {isLiveStreaming && !displayContent
-        ? <Skeleton height={44} className="flex-1 rounded-card rounded-tl-md" />
-        : (
-            <View className="min-w-0 flex-1 rounded-card rounded-tl-md bg-card px-4 py-3.5">
-              {isLiveStreaming
-                ? <Text className="text-row">{displayContent}</Text>
-                : <MessageComponent content={displayContent} streaming={false} markdownStyle={markdownStyle} />}
-            </View>
-          )}
+      <View className="min-w-0 flex-1 gap-2">
+        {isLiveStreaming && !displayContent
+          ? !pendingWrite && <Skeleton height={44} className="rounded-card rounded-tl-md" />
+          : (
+              <View className="rounded-card rounded-tl-md bg-card px-4 py-3.5">
+                {isLiveStreaming
+                  ? <Text className="text-row">{displayContent}</Text>
+                  : <MessageComponent content={displayContent} streaming={false} markdownStyle={markdownStyle} />}
+              </View>
+            )}
+        {pendingWrite && <WriteConfirmation action={pendingWrite} onConfirm={onConfirmWrite} onCancel={onCancelWrite} />}
+      </View>
     </View>
   );
 });
@@ -344,7 +354,7 @@ export function AiScreen() {
     scrollViewRef,
     shouldShowBottomFiller,
   } = scroll;
-  const { applyScope, reset, send, setDraft } = actions;
+  const { applyScope, cancelWrite, confirmWrite, reset, send, setDraft } = actions;
   const dismissComposer = React.useCallback(() => {
     inputRef.current?.blur();
     Keyboard.dismiss();
@@ -364,7 +374,7 @@ export function AiScreen() {
 
   const renderMessage = React.useCallback(
     ({ item: m }: ListRenderItemInfo<ChatMessage>) => {
-      const { displayContent, isLiveStreaming } = getMessageRenderInfo(m);
+      const { displayContent, isLiveStreaming, pendingWrite } = getMessageRenderInfo(m);
       return (
         <ChatMessageRow
           displayContent={displayContent}
@@ -372,10 +382,13 @@ export function AiScreen() {
           markdownStyle={markdownStyle}
           message={m}
           onMessageLayout={onMessageLayout}
+          pendingWrite={pendingWrite}
+          onConfirmWrite={confirmWrite}
+          onCancelWrite={cancelWrite}
         />
       );
     },
-    [getMessageRenderInfo, markdownStyle, onMessageLayout],
+    [cancelWrite, confirmWrite, getMessageRenderInfo, markdownStyle, onMessageLayout],
   );
 
   return (

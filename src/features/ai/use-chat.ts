@@ -1,6 +1,7 @@
 import type { FlatList, LayoutChangeEvent } from 'react-native';
 import type { MarkdownStyle } from 'react-native-enriched-markdown';
-import type { AiScope, ChatMessage, UseChatReturn } from '@/features/ai/types';
+import type { AiScope, ChatMessage, UseChatReturn, WriteAction } from '@/features/ai/types';
+import { useQueryClient } from '@tanstack/react-query';
 import { useSQLiteContext } from 'expo-sqlite';
 
 import * as React from 'react';
@@ -50,6 +51,7 @@ export type ChatState = {
   streamedAssistantContent: string;
   errorMessage: string | null;
   toolStatus: string | null;
+  pendingWrite: WriteAction | null;
   lastSubmittedUserMessageId: string | null;
   viewportHeight: number;
 };
@@ -61,6 +63,7 @@ function initialState(): ChatState {
     streamedAssistantContent: '',
     errorMessage: null,
     toolStatus: null,
+    pendingWrite: null,
     lastSubmittedUserMessageId: null,
     viewportHeight: 0,
   };
@@ -122,8 +125,51 @@ function useStreamedContentFlush(
   };
 }
 
+/** One write awaits the user at a time; it settles once, and aborting the request cancels it. */
+function usePendingWrite(setChatState: React.Dispatch<React.SetStateAction<ChatState>>) {
+  // Lives only in memory, so a restored chat can never re-trigger a write.
+  const settleRef = React.useRef<((confirmed: boolean) => void) | null>(null);
+
+  const requestWrite = React.useCallback((action: WriteAction, signal: AbortSignal) => new Promise<boolean>((resolve) => {
+    if (signal.aborted) {
+      resolve(false);
+      return;
+    }
+    const settle = (confirmed: boolean) => {
+      if (settleRef.current !== settle) return;
+      settleRef.current = null;
+      signal.removeEventListener('abort', cancel);
+      setChatState((prev) => ({ ...prev, pendingWrite: null }));
+      resolve(confirmed);
+    };
+    const cancel = () => settle(false);
+    settleRef.current = settle;
+    signal.addEventListener('abort', cancel);
+    setChatState((prev) => ({ ...prev, pendingWrite: action }));
+  }), [setChatState]);
+
+  const confirmWrite = React.useCallback(() => settleRef.current?.(true), []);
+  const cancelWrite = React.useCallback(() => settleRef.current?.(false), []);
+
+  return { requestWrite, confirmWrite, cancelWrite };
+}
+
+function useMessageRenderInfo({ isStreaming, pendingWrite, streamedAssistantContent, streamingAssistantId }: ChatState) {
+  return React.useCallback(
+    (message: ChatMessage) => ({
+      displayContent: message.id === streamingAssistantId
+        ? streamedAssistantContent
+        : message.content,
+      isLiveStreaming: isStreaming && message.id === streamingAssistantId,
+      pendingWrite: message.id === streamingAssistantId ? pendingWrite : null,
+    }),
+    [isStreaming, pendingWrite, streamedAssistantContent, streamingAssistantId],
+  );
+}
+
 export function useChat(): UseChatReturn {
   const db = useSQLiteContext();
+  const queryClient = useQueryClient();
   const theme = useThemeConfig();
   const messages = useAiChatStore.use.messages();
   const draftQuestion = useAiChatStore.use.draftQuestion();
@@ -142,6 +188,7 @@ export function useChat(): UseChatReturn {
     clearStreamFlushTimeout,
     resetStreamedContent,
   } = useStreamedContentFlush(setChatState);
+  const { requestWrite, confirmWrite, cancelWrite } = usePendingWrite(setChatState);
 
   const clearChat = React.useCallback((undoable: boolean) => {
     abortControllerRef.current?.abort();
@@ -218,7 +265,9 @@ export function useChat(): UseChatReturn {
         const finalContent = await streamAskWithTools({
           messages: [...existingMessages, userMessage],
           db,
+          queryClient,
           scope: getAiScope(),
+          confirmWrite: (action) => requestWrite(action, controller.signal),
           onToken: (token) => {
             if (!isMountedRef.current) return;
             appendStreamToken(token);
@@ -278,6 +327,8 @@ export function useChat(): UseChatReturn {
     chatState.isStreaming,
     draftQuestion,
     isChatOn,
+    queryClient,
+    requestWrite,
     resetStreamedContent,
     setChatState,
   ]);
@@ -287,20 +338,7 @@ export function useChat(): UseChatReturn {
     [theme.dark],
   );
 
-  // Streaming content resolution
-  const getMessageRenderInfo = React.useCallback(
-    (message: ChatMessage) => ({
-      displayContent: message.id === chatState.streamingAssistantId
-        ? chatState.streamedAssistantContent
-        : message.content,
-      isLiveStreaming: chatState.isStreaming && message.id === chatState.streamingAssistantId,
-    }),
-    [
-      chatState.streamingAssistantId,
-      chatState.streamedAssistantContent,
-      chatState.isStreaming,
-    ],
-  );
+  const getMessageRenderInfo = useMessageRenderInfo(chatState);
 
   // Scroll management
   const lastMessage = messages.at(-1);
@@ -357,6 +395,8 @@ export function useChat(): UseChatReturn {
       setDraft: setAiDraftQuestion,
       reset,
       applyScope,
+      confirmWrite,
+      cancelWrite,
     },
     scroll: {
       scrollViewRef,

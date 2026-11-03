@@ -155,7 +155,7 @@ describe('createScheduledTransaction from a transaction', () => {
     const db = await createTestDb();
     await db.execAsync(`
       INSERT INTO accounts (id, name, type, currency) VALUES ('acc', 'Main', 'checking', 'EUR');
-      INSERT INTO categories (id, name, color) VALUES ('cat', 'Bills', '#000');
+      INSERT INTO categories (id, name, color, kind) VALUES ('cat', 'Bills', '#000', 'expense'), ('pay', 'Salary', '#000', 'income');
       INSERT INTO transactions (id, account_id, type, amount, currency, baseAmount, baseCurrency, date, created_at) VALUES
         ('today', 'acc', 'expense', 1000, 'EUR', 1000, 'EUR', ${today}, 1),
         ('noon', 'acc', 'expense', 1000, 'EUR', 1000, 'EUR', ${today + DAY / 2}, 1),
@@ -183,9 +183,23 @@ describe('createScheduledTransaction from a transaction', () => {
   it('skips a source that is not an occurrence or does not match the rule', async () => {
     const db = await seed();
     await createScheduledTransaction(db as any, data('later', { frequency: 'weekly' }));
-    await createScheduledTransaction(db as any, data('today', { type: 'income' }));
+    await createScheduledTransaction(db as any, data('today', { type: 'income', category_id: 'pay' }));
     await createScheduledTransaction(db as any, data('today', { amount: 11 }));
     await createScheduledTransaction(db as any, data('today', { currency: 'USD' }));
     expect(await runs(db)).toEqual([]);
+  });
+});
+
+describe('createScheduledTransaction category kind', () => {
+  it('rejects a category whose kind does not match the rule type', async () => {
+    const db = await createTestDb();
+    await db.execAsync(`
+      INSERT INTO accounts (id, name, type, currency) VALUES ('acc', 'Main', 'checking', 'EUR');
+      INSERT INTO categories (id, name, color, kind) VALUES ('salary', 'Salary', '#000', 'income');
+    `);
+    const data = { account_id: 'acc', category_id: 'salary', type: 'expense' as const, currency: 'EUR' as const, note: null, frequency: 'monthly' as const, start_date: 0, end_date: null, amount: 10, is_active: false };
+
+    await expect(createScheduledTransaction(db as any, data)).rejects.toThrow('does not match');
+    expect(await db.getAllAsync('SELECT id FROM recurring_rules')).toEqual([]);
   });
 });

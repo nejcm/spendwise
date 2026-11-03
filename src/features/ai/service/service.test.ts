@@ -1,8 +1,9 @@
+import type { QueryClient } from '@tanstack/react-query';
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { clearAppStore, setAiFeature, setOpenaiApiKey } from '@/lib/store/store';
 import { streamAskOpenAI } from './openai';
 import { streamAskWithTools } from './service';
-import { executeToolCall } from './tool-executor';
+import { executeToolCall, executeWriteToolCall } from './tool-executor';
 
 jest.mock('@/features/accounts/queries', () => ({ getAccounts: jest.fn(async () => []) }));
 jest.mock('./openai', () => ({
@@ -11,16 +12,22 @@ jest.mock('./openai', () => ({
 }));
 jest.mock('./tool-executor', () => ({
   executeToolCall: jest.fn(),
+  executeWriteToolCall: jest.fn(async () => '{"status":"cancelled"}'),
+  isWriteTool: (name: string) => name === 'set_category_budget',
   getToolStatusMessage: () => '',
 }));
 
 const streamMock = streamAskOpenAI as jest.MockedFunction<typeof streamAskOpenAI>;
 const toolMock = executeToolCall as jest.MockedFunction<typeof executeToolCall>;
 
+const confirmWrite = jest.fn(async () => false);
+
 function ask() {
   return streamAskWithTools({
     messages: [{ id: 'q', role: 'user', content: 'Hi' }],
     db: {} as SQLiteDatabase,
+    queryClient: {} as QueryClient,
+    confirmWrite,
     scope: { period: { mode: 'this-month' }, accountIds: 'all' },
     onToken: jest.fn(),
   });
@@ -64,4 +71,14 @@ describe('streamAskWithTools', () => {
     await expect(ask()).rejects.toThrow();
     expect(streamMock).not.toHaveBeenCalled();
   });
+});
+
+it('routes write tools through the confirmation path', async () => {
+  streamMock.mockReset();
+  streamMock.mockResolvedValueOnce({ type: 'tool_calls', content: '', calls: [{ id: 'c1', name: 'set_category_budget', arguments: { category_id: 'c', budget_cents: 100 } }] });
+  streamMock.mockResolvedValue({ type: 'text', content: 'Answer' });
+
+  await expect(ask()).resolves.toBe('Answer');
+  expect(toolMock).not.toHaveBeenCalled();
+  expect(executeWriteToolCall).toHaveBeenCalledWith({ db: {}, queryClient: {}, accountIds: [], confirm: confirmWrite }, 'set_category_budget', { category_id: 'c', budget_cents: 100 });
 });

@@ -10,7 +10,7 @@ import { formatShortDate } from '@/features/formatting/helpers';
 import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
-import { transactionDisplayName } from '../helpers';
+import { isInflow, transactionDisplayName } from '../helpers';
 import { MerchantLogo } from './merchant-logo';
 
 export type TransactionCardProps = {
@@ -39,7 +39,7 @@ export const TransactionCard = React.memo(({
   const isCompact = useAppStore.use.density() === 'compact';
   const isIncome = transaction.type === 'income';
   const isTransfer = transaction.type === 'transfer';
-  const isInflow = isIncome || (isTransfer && transaction.amount > 0);
+  const inflow = isInflow(transaction);
   const isAdjustment = !!transaction.is_adjustment;
   const displayName = transactionDisplayName(transaction);
   const meta = [
@@ -78,7 +78,7 @@ export const TransactionCard = React.memo(({
         <FormattedCurrency
           value={transaction.baseAmount}
           currency={transaction.baseCurrency}
-          prefix={isInflow ? '+' : '-'}
+          prefix={inflow ? '+' : '-'}
           shorten={SHORTEN_ROW}
           className={cn('text-row font-semibold', isIncome && 'text-positive', isTransfer && 'text-muted-foreground')}
         />

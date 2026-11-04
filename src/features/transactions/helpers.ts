@@ -15,6 +15,10 @@ export function transactionDisplayName(t: DisplayNameFields): string {
   return t.merchant_name || t.category_name || translate(t.type === 'transfer' ? 'transactions.transfer' : 'transactions.unknown');
 }
 
+export function isInflow(t: Pick<Transaction, 'type' | 'amount'>): boolean {
+  return t.type === 'income' || (t.type === 'transfer' && t.amount > 0);
+}
+
 /** Display-only: one unit of `currency` in `baseCurrency`, derived from the stored amounts so corrections stay consistent. */
 export function deriveFxRate(t: Pick<Transaction, 'amount' | 'baseAmount' | 'currency' | 'baseCurrency'>): number | null {
   if (t.currency === t.baseCurrency || t.amount === 0) return null;

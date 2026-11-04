@@ -782,6 +782,20 @@ describe('transfer pairs', () => {
     expect((await getTransactionsSample(db as any, MAR_START, APR_START, { limit: 10 })).map((t) => t.id).sort()).toEqual([outId, 'legacy_in'].sort());
   });
 
+  it('list queries hide exactly the legs isTransferInLeg flags, zero-amount legs included', async () => {
+    const db = await createTestDb();
+    await seedAccounts(db);
+    await createTransfer(db as any, transfer, {});
+    await seedTransaction(db, { id: 'zero_a', type: 'transfer', amount: 0, baseAmount: 0, category_id: null });
+    await seedTransaction(db, { id: 'zero_b', account_id: 'acc_2', type: 'transfer', amount: 0, baseAmount: 0, category_id: null });
+    await db.runAsync(`UPDATE transactions SET transfer_id = 'zero_pair' WHERE id IN ('zero_a', 'zero_b')`);
+
+    const all = await getTransactions(db as any, MAR_START, APR_START);
+    const recent = await getRecentTransactions(db as any, 10);
+    expect(recent.map((t) => t.id).sort()).toEqual(all.filter((t) => !isTransferInLeg(t)).map((t) => t.id).sort());
+    expect(recent.map((t) => t.id)).toEqual(expect.arrayContaining(['zero_a', 'zero_b']));
+  });
+
   it('transfers never count as income or expense', async () => {
     const db = await createTestDb();
     await seedAccounts(db);

@@ -191,6 +191,19 @@ describe('getAccountsWithBalance', () => {
     expect(await getTotalBalance(db as any)).toBe(0);
   });
 
+  it('a zero-amount transfer leg moves no balance in any query', async () => {
+    const db = await createTestDb();
+    await seedAccount(db);
+    await seedTransaction(db, { id: 'income', type: 'income', amount: 1_000, baseAmount: 1_000 });
+    await seedTransaction(db, { id: 'zero', type: 'transfer', amount: 0, baseAmount: 500 });
+
+    const [account] = await getAccountsWithBalance(db as any);
+    expect([account.balance, account.baseBalance]).toEqual([1_000, 1_000]);
+    expect(await getTotalBalance(db as any)).toBe(1_000);
+    expect((await getBalanceSeries(db as any, APR_START, APR_START + 1)).opening).toBe(1_000);
+    expect(await getAccountNetChanges(db as any, MAR_START, APR_START)).toEqual({ acc_1: 1_000 });
+  });
+
   it('baseBalance uses baseAmount for multi-currency totals', async () => {
     const db = await createTestDb();
     await seedAccount(db);

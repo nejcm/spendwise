@@ -15,6 +15,19 @@ import { SEED_ACCOUNT_ID } from '@/lib/sqlite/seed';
 
 // ─── Read Queries ───
 
+// How much a row moves its account's balance; a transfer leg's direction is the sign of t.amount.
+function signedAmountSql(column: 'amount' | 'baseAmount'): string {
+  return `CASE
+  WHEN t.type = 'income' THEN t.${column}
+  WHEN t.type = 'expense' THEN -t.${column}
+  WHEN t.amount < 0 THEN -ABS(t.${column})
+  WHEN t.amount > 0 THEN t.${column}
+  ELSE 0
+END`;
+}
+
+export const SIGNED_BASE_AMOUNT = signedAmountSql('baseAmount');
+
 export async function getAccounts(db: SQLiteDatabase): Promise<Account[]> {
   return db.getAllAsync<Account>(
     'SELECT * FROM accounts WHERE is_archived = 0 ORDER BY sort_order ASC',
@@ -26,15 +39,9 @@ export async function getAccountsWithBalance(
 ): Promise<AccountWithBalance[]> {
   return db.getAllAsync<AccountWithBalance>(
     `SELECT a.*,
-       COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0)
-       - COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END), 0)
-       + COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount > 0 THEN t.amount ELSE 0 END), 0)
-       - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN ABS(t.amount) ELSE 0 END), 0)
+       COALESCE(SUM(${signedAmountSql('amount')}), 0)
        as balance,
-       COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0)
-       - COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0)
-       + COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount > 0 THEN t.baseAmount ELSE 0 END), 0)
-       - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN ABS(t.baseAmount) ELSE 0 END), 0)
+       COALESCE(SUM(${SIGNED_BASE_AMOUNT}), 0)
        as baseBalance,
        t.baseCurrency as baseCurrency
      FROM accounts a
@@ -53,15 +60,9 @@ export async function getAccountsWithBalanceForMonth(
 
   return db.getAllAsync<AccountWithBalance>(
     `SELECT a.*,
-       COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount ELSE 0 END), 0)
-       - COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount ELSE 0 END), 0)
-       + COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount > 0 THEN t.amount ELSE 0 END), 0)
-       - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN ABS(t.amount) ELSE 0 END), 0)
+       COALESCE(SUM(${signedAmountSql('amount')}), 0)
        as balance,
-       COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0)
-       - COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0)
-       + COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount > 0 THEN t.baseAmount ELSE 0 END), 0)
-       - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN ABS(t.baseAmount) ELSE 0 END), 0)
+       COALESCE(SUM(${SIGNED_BASE_AMOUNT}), 0)
        as baseBalance,
        t.baseCurrency as baseCurrency
      FROM accounts a
@@ -91,10 +92,7 @@ export async function getTotalBalance(
     FROM (
       SELECT
         a.id,
-        COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0)
-        - COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0)
-        + COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount > 0 THEN t.baseAmount ELSE 0 END), 0)
-        - COALESCE(SUM(CASE WHEN t.type = 'transfer' AND t.amount < 0 THEN ABS(t.baseAmount) ELSE 0 END), 0)
+        COALESCE(SUM(${SIGNED_BASE_AMOUNT}), 0)
         AS account_balance,
         t.baseCurrency as baseCurrency
       FROM accounts a
@@ -113,13 +111,6 @@ export async function getTotalBalance(
   const result = await db.getFirstAsync<{ total: number }>(sql, params);
   return result?.total ?? 0;
 }
-
-const SIGNED_BASE_AMOUNT = `CASE
-  WHEN t.type = 'income' THEN t.baseAmount
-  WHEN t.type = 'expense' THEN -t.baseAmount
-  WHEN t.amount < 0 THEN -ABS(t.baseAmount)
-  ELSE t.baseAmount
-END`;
 
 /** Balance (Preferred Currency) before `startDate`, plus per-date net changes in `[startDate, endDate)`; all active accounts unless `accountId` is given. */
 export async function getBalanceSeries(

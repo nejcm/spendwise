@@ -13,16 +13,12 @@ import { FREQUENCY_OPTIONS } from '@/features/scheduled-transactions/constants';
 import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
-import { fxRateText, tagKey, transactionDisplayName } from '../helpers';
+import { fxRateText, isInflow, tagKey, transactionDisplayName } from '../helpers';
 import { buildTransactionsHref } from '../route-params';
 import { MerchantLogo } from './merchant-logo';
 
 const HERO_DATE_FORMAT = 'EEEE, MMM d';
 const SHORT_DATE_FORMAT = 'MMM d';
-
-function isInflow(t: TransactionWithCategory) {
-  return t.type === 'income' || (t.type === 'transfer' && t.amount > 0);
-}
 
 export function DetailHero({ transaction: t, onAmountPress }: { transaction: TransactionWithCategory; onAmountPress?: () => void }) {
   const numberFormat = useAppStore.use.numberFormat();

@@ -25,7 +25,7 @@ const TRANSACTION_SELECT = `SELECT t.*, a.name as account_name, c.name as catego
      LEFT JOIN transactions tp ON t.transfer_id IS NOT NULL AND tp.transfer_id = t.transfer_id AND tp.id <> t.id
      LEFT JOIN accounts ca ON ca.id = tp.account_id`;
 
-const HIDE_TRANSFER_IN_LEG = '(t.transfer_id IS NULL OR t.amount < 0)';
+const HIDE_TRANSFER_IN_LEG = '(t.transfer_id IS NULL OR t.amount <= 0)';
 
 type TransactionRow = Omit<TransactionWithCategory, 'tags'> & { tags: string | null };
 

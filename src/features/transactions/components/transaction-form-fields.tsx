@@ -308,12 +308,17 @@ function TagsRow({ value, onChange, onBlur, error, commitRef }: {
   const query = tagKey(normalizeTag(text));
   const suggestions = tagNames.filter((name) => !chosen.has(tagKey(name)) && tagKey(name).includes(query)).slice(0, TAG_SUGGESTION_LIMIT);
   const [tooLong, setTooLong] = React.useState(false);
+  const inputRef = React.useRef<TextInput>(null);
   const add = (raw: string) => {
     const tag = normalizeTag(raw);
     setTooLong(tag.length > MAX_TAG_LENGTH);
     if (tag.length > MAX_TAG_LENGTH) return;
     if (tag && !chosen.has(tagKey(tag))) onChange([...value, tag]);
     setText('');
+  };
+  const addAndKeepFocus = (raw: string) => {
+    add(raw);
+    inputRef.current?.focus();
   };
   React.useImperativeHandle(commitRef, () => () => add(text));
   return (
@@ -326,9 +331,10 @@ function TagsRow({ value, onChange, onBlur, error, commitRef }: {
       )}
       {value.length < MAX_TAGS && (
         <Input
+          ref={inputRef}
           value={text}
           onChangeText={setText}
-          onSubmitEditing={() => add(text)}
+          onSubmitEditing={() => addAndKeepFocus(text)}
           onBlur={() => {
             add(text);
             onBlur();
@@ -343,7 +349,7 @@ function TagsRow({ value, onChange, onBlur, error, commitRef }: {
       )}
       {value.length < MAX_TAGS && suggestions.length > 0 && (
         <View className="flex-row flex-wrap gap-2">
-          {suggestions.map((name) => <Chip key={tagKey(name)} label={name} onPress={() => add(name)} />)}
+          {suggestions.map((name) => <Chip key={tagKey(name)} label={name} onPress={() => (text ? addAndKeepFocus(name) : add(name))} />)}
         </View>
       )}
       <RowError message={tooLong ? translate('transactions.form.too_long', { max: MAX_TAG_LENGTH }) : error} />

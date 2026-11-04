@@ -97,7 +97,7 @@ function SpendHero({ title, spent, income, prevSpent, prevLabel, selection, star
           <AmountText size="hero" value={spent} currency={currency} numberOfLines={1} adjustsFontSizeToFit />
         </View>
         {delta != null && prevSpent! > 0 && (
-          <View className="items-end gap-0.5">
+          <View className="mb-2 items-end gap-0.5">
             <ChangeBadge spent={spent} prevSpent={prevSpent!} decimals={1} />
             <Text className="text-xs text-muted-foreground tabular-nums">
               {translate('stats.vs_period', { amount: signed(delta, (cents) => format(cents, undefined, SHORTEN_TIGHT)), period: prevLabel })}

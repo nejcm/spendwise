@@ -3,7 +3,7 @@ import type { CurrencyKey } from '@/features/currencies';
 import * as React from 'react';
 import { View } from 'react-native';
 import { AmountText, Card, FlagCircle, Text } from '@/components/ui';
-import { ArrowDownRight, ArrowUpRight } from '@/components/ui/icon';
+import { ArrowDown, ArrowDownRight, ArrowUp, ArrowUpRight } from '@/components/ui/icon';
 import { useBalanceSeries } from '@/features/accounts/api';
 import { SHORTEN_TIGHT } from '@/features/formatting/constants';
 import { formatNumber, todayUnix } from '@/features/formatting/helpers';
@@ -64,7 +64,8 @@ function BalanceTrend({ total, showLine }: { total: number; showLine: boolean })
     () => series ? buildDailyBalances(series.opening, series.deltas, startDate, todayUnix()) : [],
     [series, startDate],
   );
-  const isUp = (change ?? 0) >= 0;
+  const tone = CHANGE_TONE[!change ? 'flat' : change > 0 ? 'up' : 'down'];
+  const Arrow = !change ? null : change > 0 ? ArrowUp : ArrowDown;
 
   return (
     <>
@@ -72,9 +73,12 @@ function BalanceTrend({ total, showLine }: { total: number; showLine: boolean })
         <AmountText size="hero" value={total} currency={currency} className="shrink" numberOfLines={1} adjustsFontSizeToFit />
         {change !== null && (
           <View className="items-end gap-0.5 pb-0.5">
-            <Text className={cn('rounded-md px-1.75 py-0.5 text-xs font-semibold tabular-nums', isUp ? 'bg-positive/15 text-positive dark:bg-accent dark:text-accent-foreground' : 'bg-negative/15 text-negative')}>
-              {`${isUp ? '▲' : '▼'} ${formatNumber(Math.abs(change), numberFormat, 1)}%`}
-            </Text>
+            <View className={cn('flex-row items-center gap-0.5 rounded-full border px-1.5 py-0.5', tone.badge)}>
+              {Arrow && <Arrow size={11} colorClassName={tone.icon} />}
+              <Text className={cn('text-xs tabular-nums', tone.text)}>
+                {`${change === 0 ? '±' : ''}${formatNumber(Math.abs(change), numberFormat, 1)}%`}
+              </Text>
+            </View>
             <Text className="text-xs text-muted-foreground">{translate('home.vs_end_of', { month: monthName((month + 11) % 12) })}</Text>
           </View>
         )}
@@ -93,6 +97,13 @@ function BalanceTrend({ total, showLine }: { total: number; showLine: boolean })
     </>
   );
 }
+
+// A rising balance is good news, unlike rising spend on the insights badge.
+const CHANGE_TONE = {
+  up: { badge: 'border-positive/25 bg-positive/10', text: 'text-positive', icon: 'accent-positive' },
+  down: { badge: 'border-negative/25 bg-negative/10', text: 'text-negative', icon: 'accent-negative' },
+  flat: { badge: 'border-muted-foreground/25 bg-muted-foreground/10', text: 'text-muted-foreground', icon: 'accent-muted-foreground' },
+};
 
 const TONE_CLASSES = {
   positive: { tile: 'bg-positive/12', icon: 'accent-positive' },

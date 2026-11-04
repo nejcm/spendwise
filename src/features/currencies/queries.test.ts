@@ -7,6 +7,7 @@ import {
   getLastFetchedAt,
   getLatestRates,
   getRatesForDate,
+  getRatesForDates,
   loadOrFetchRates,
   saveRates,
   toRatesMap,
@@ -15,15 +16,17 @@ import {
 jest.mock('./service', () => ({
   fetchRates: jest.fn(),
   fetchRatesForDate: jest.fn().mockResolvedValue(null),
+  fetchRatesForDateRange: jest.fn(),
 }));
 
 jest.mock('expo-crypto', () => ({
   randomUUID: jest.fn(() => 'test-uuid-1234'),
 }));
 
-const { fetchRates, fetchRatesForDate } = jest.requireMock('./service') as {
+const { fetchRates, fetchRatesForDate, fetchRatesForDateRange } = jest.requireMock('./service') as {
   fetchRates: jest.Mock;
   fetchRatesForDate: jest.Mock;
+  fetchRatesForDateRange: jest.Mock;
 };
 
 // Several tests freeze Date.now(); restore unconditionally so a failed
@@ -317,5 +320,52 @@ describe('convertAmount', () => {
   it('falls back to rate 1 when currency is missing from rates', () => {
     // Unknown currency treated as EUR-equivalent (rate ?? 1 = 1)
     expect(convertAmount(10_000, 'EUR', 'XXX' as CurrencyKey, {})).toBe(10_000);
+  });
+});
+
+describe('getRatesForDates', () => {
+  const FRI_MAR_6 = Date.UTC(2026, 2, 6) / 1000;
+  const MON_MAR_9 = Date.UTC(2026, 2, 9) / 1000;
+  const SAT_MAR_7_MORNING = Date.UTC(2026, 2, 7, 9) / 1000;
+  const SAT_MAR_7_EVENING = Date.UTC(2026, 2, 7, 21) / 1000;
+
+  beforeEach(() => {
+    fetchRatesForDateRange.mockReset();
+    fetchRatesForDate.mockReset().mockResolvedValue(null);
+  });
+
+  it('serves every timestamp of a day from a cached snapshot within a week, without fetching', async () => {
+    const db = await createTestDb();
+    await seedRateSnapshot(db, FRI_MAR_6, 1.08);
+
+    const rates = await getRatesForDates(db as any, [SAT_MAR_7_MORNING, SAT_MAR_7_EVENING]);
+
+    expect(rates.get(SAT_MAR_7_MORNING)?.USD).toBe(1.08);
+    expect(rates.get(SAT_MAR_7_EVENING)?.USD).toBe(1.08);
+    expect(fetchRatesForDateRange).not.toHaveBeenCalled();
+  });
+
+  it('fetches the year when nothing is cached, uses the closest earlier fetched day and caches it', async () => {
+    const db = await createTestDb();
+    fetchRatesForDateRange.mockResolvedValue({
+      ratesByDate: { '2026-03-06': rateSnapshot(1.09), '2026-03-09': rateSnapshot(1.11) },
+      source: 'currency-range',
+    });
+
+    const rates = await getRatesForDates(db as any, [SAT_MAR_7_MORNING]);
+
+    expect(rates.get(SAT_MAR_7_MORNING)?.USD).toBe(1.09);
+    expect(fetchRatesForDateRange).toHaveBeenCalledWith('2026-01-01', '2026-12-31');
+    expect(await getRatesForDate(db as any, MON_MAR_9, { fetchIfMissing: false })).toMatchObject({ USD: 1.11 });
+  });
+
+  it('falls back to the closest cached rate, however old, when offline', async () => {
+    const db = await createTestDb();
+    await seedRateSnapshot(db, FRI_MAR_6 - 60 * 86400, 1.05);
+    fetchRatesForDateRange.mockRejectedValue(new Error('offline'));
+
+    const rates = await getRatesForDates(db as any, [SAT_MAR_7_MORNING]);
+
+    expect(rates.get(SAT_MAR_7_MORNING)?.USD).toBe(1.05);
   });
 });

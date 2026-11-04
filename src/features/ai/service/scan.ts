@@ -11,7 +11,7 @@ import { scanReceiptOpenAI } from './openai';
 export const scannedReceiptSchema = z.object({
   /** Total amount in smallest currency unit (cents). Required — no fallback. */
   amount: z.number().positive().transform(Math.round),
-  currency: z.enum(CURRENCY_VALUES as CurrencyKey[]).optional(),
+  currency: z.string().toUpperCase().pipe(z.enum(CURRENCY_VALUES as CurrencyKey[])).optional().catch(undefined),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).catch(() => todayISO()),
   merchant_name: z.string().nullable().catch(null),
   location: z.string().nullable().catch(null),

@@ -1,7 +1,7 @@
+import type { QueryClient } from '@tanstack/react-query';
+import type { SQLiteDatabase } from 'expo-sqlite';
 import type { TransactionFormData } from '../transactions/types';
 import type { ParsedRow } from './csv-parser';
-import type { CurrencyKey } from '@/features/currencies';
-import type { BackupData } from '@/features/imports-export/backup';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { File, Paths } from 'expo-file-system';
 
@@ -10,30 +10,19 @@ import * as Sharing from 'expo-sharing';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Alert } from '@/components/ui';
 import { showSnackbar } from '@/components/ui/snackbar';
-import { CURRENCY_VALUES } from '@/features/currencies';
-import { exportBackup, importBackup, validateBackup } from '@/features/imports-export/backup';
+import { exportBackup, restoreBackup, validateBackup } from '@/features/imports-export/backup';
 import { buildManualBackupFileName, IS_AUTO_BACKUP_SUPPORTED, writeAutoBackupFile } from '@/features/imports-export/backup-file';
 import { documentPickerTypeForJson, pickValidatedFile } from '@/features/imports-export/pick-file';
 import { IS_WEB } from '@/lib/base';
 import { invalidateFor } from '@/lib/data/invalidation';
 import { translate } from '@/lib/i18n';
 import { goBackOrFallback } from '@/lib/routing';
-import { setCurrency, useAppStore } from '@/lib/store/store';
+import { useAppStore } from '@/lib/store/store';
 import { useAccounts } from '../accounts/hooks';
 import { useCategories } from '../categories/hooks';
 import { useCreateTransactions } from '../transactions/hooks/api';
 import { getTransactionMatchFields } from '../transactions/queries';
 import { flagDuplicates, importDateRange, mapCategoryNameToId, resolveImportRow } from './helpers';
-
-function inferBackupCurrency(backup: BackupData): CurrencyKey | undefined {
-  if ('baseCurrency' in backup) {
-    const candidate = backup.baseCurrency;
-    if (CURRENCY_VALUES.includes(candidate as CurrencyKey)) return candidate as CurrencyKey;
-  }
-  const txBaseCurrency = backup.transactions.at(0)?.baseCurrency;
-  if (!txBaseCurrency || !CURRENCY_VALUES.includes(txBaseCurrency as CurrencyKey)) return undefined;
-  return txBaseCurrency as CurrencyKey;
-}
 
 export function useImportTransactions(onImported?: () => void) {
   const db = useSQLiteContext();
@@ -147,6 +136,49 @@ export function useExportBackup() {
   });
 }
 
+async function readAndRestore(db: SQLiteDatabase, uri: string) {
+  const text = await (await fetch(uri)).text();
+  let backup;
+  try {
+    backup = validateBackup(JSON.parse(text));
+  }
+  catch {
+    throw new Error(translate('import-export.backup_invalid_error'));
+  }
+
+  const summary = translate('import-export.backup_restore_confirm_summary', {
+    transactions: backup.transactions.length,
+    accounts: backup.accounts.length,
+    categories: backup.categories.length,
+    recurringRules: backup.recurring_rules.length,
+  });
+
+  await new Promise<void>((resolve, reject) => {
+    Alert.alert(
+      translate('import-export.backup_restore_confirm_title'),
+      `${translate('import-export.backup_restore_confirm_message')}\n\n${summary}`,
+      [
+        { text: translate('common.cancel'), onPress: () => reject(new Error('cancelled')), style: 'cancel' },
+        { text: translate('common.yes'), onPress: () => resolve() },
+      ],
+    );
+  });
+  await restoreBackup(db, backup);
+}
+
+function onRestored(queryClient: QueryClient) {
+  invalidateFor(queryClient, 'transaction', 'account', 'category', 'scheduledTransaction', 'currencyRates');
+  Alert.alert(
+    translate('import-export.backup_complete_title'),
+    translate('import-export.backup_complete_message'),
+  );
+}
+
+function onRestoreError(error: unknown) {
+  if (error instanceof Error && error.message === 'cancelled') return;
+  Alert.alert(translate('common.error'), error instanceof Error ? error.message : String(error));
+}
+
 export function useImportBackup() {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
@@ -160,68 +192,13 @@ export function useImportBackup() {
         errorMessage: translate('import-export.backup_invalid_type_error'),
       });
       if (!asset) return false;
-
-      const text = await (await fetch(asset.uri)).text();
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(text);
-      }
-      catch {
-        throw new Error(translate('import-export.backup_invalid_error'));
-      }
-
-      let backup;
-      try {
-        backup = validateBackup(parsed);
-      }
-      catch {
-        throw new Error(translate('import-export.backup_invalid_error'));
-      }
-
-      const summary = translate('import-export.backup_restore_confirm_summary', {
-        transactions: backup.transactions.length,
-        accounts: backup.accounts.length,
-        categories: backup.categories.length,
-        recurringRules: backup.recurring_rules.length,
-      });
-
-      await new Promise<void>((resolve, reject) => {
-        Alert.alert(
-          translate('import-export.backup_restore_confirm_title'),
-          `${translate('import-export.backup_restore_confirm_message')}\n\n${summary}`,
-          [
-            { text: translate('common.cancel'), onPress: () => reject(new Error('cancelled')), style: 'cancel' },
-            { text: translate('common.yes'), onPress: () => resolve() },
-          ],
-        );
-      });
-      const previousCurrency = useAppStore.getState().currency;
-      const backupCurrency = inferBackupCurrency(backup);
-      if (backupCurrency && backupCurrency !== previousCurrency) {
-        setCurrency(backupCurrency);
-      }
-      await importBackup(db, backup);
+      await readAndRestore(db, asset.uri);
       return true;
     },
     onSuccess: (restored) => {
-      if (!restored) return;
-      invalidateFor(
-        queryClient,
-        'transaction',
-        'account',
-        'category',
-        'scheduledTransaction',
-      );
-
-      Alert.alert(
-        translate('import-export.backup_complete_title'),
-        translate('import-export.backup_complete_message'),
-      );
+      if (restored) onRestored(queryClient);
     },
-    onError: (error) => {
-      if (error instanceof Error && error.message === 'cancelled') return;
-      Alert.alert(translate('common.error'), error instanceof Error ? error.message : String(error));
-    },
+    onError: onRestoreError,
   });
 }
 
@@ -230,66 +207,8 @@ export function useRestoreAutoBackup() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (fileUri: string) => {
-      const text = await (await fetch(fileUri)).text();
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(text);
-      }
-      catch {
-        throw new Error(translate('import-export.backup_invalid_error'));
-      }
-
-      let backup;
-      try {
-        backup = validateBackup(parsed);
-      }
-      catch {
-        throw new Error(translate('import-export.backup_invalid_error'));
-      }
-
-      const summary = translate('import-export.backup_restore_confirm_summary', {
-        transactions: backup.transactions.length,
-        accounts: backup.accounts.length,
-        categories: backup.categories.length,
-        recurringRules: backup.recurring_rules.length,
-      });
-
-      await new Promise<void>((resolve, reject) => {
-        Alert.alert(
-          translate('import-export.backup_restore_confirm_title'),
-          `${translate('import-export.backup_restore_confirm_message')}\n\n${summary}`,
-          [
-            { text: translate('common.cancel'), onPress: () => reject(new Error('cancelled')), style: 'cancel' },
-            { text: translate('common.yes'), onPress: () => resolve() },
-          ],
-        );
-      });
-
-      const backupCurrency = inferBackupCurrency(backup);
-      const previousCurrency = useAppStore.getState().currency;
-      if (backupCurrency && backupCurrency !== previousCurrency) {
-        setCurrency(backupCurrency);
-      }
-      await importBackup(db, backup);
-    },
-    onSuccess: () => {
-      invalidateFor(
-        queryClient,
-        'transaction',
-        'account',
-        'category',
-        'scheduledTransaction',
-      );
-
-      Alert.alert(
-        translate('import-export.backup_complete_title'),
-        translate('import-export.backup_complete_message'),
-      );
-    },
-    onError: (error) => {
-      if (error instanceof Error && error.message === 'cancelled') return;
-      Alert.alert(translate('common.error'), error instanceof Error ? error.message : String(error));
-    },
+    mutationFn: (fileUri: string) => readAndRestore(db, fileUri),
+    onSuccess: () => onRestored(queryClient),
+    onError: onRestoreError,
   });
 }

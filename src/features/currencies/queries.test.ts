@@ -368,4 +368,15 @@ describe('getRatesForDates', () => {
 
     expect(rates.get(SAT_MAR_7_MORNING)?.USD).toBe(1.05);
   });
+
+  it('serves the closest cached rate without any network call when fetchIfMissing is false', async () => {
+    const db = await createTestDb();
+    await seedRateSnapshot(db, FRI_MAR_6 - 60 * 86400, 1.05);
+
+    const rates = await getRatesForDates(db as any, [SAT_MAR_7_MORNING], { fetchIfMissing: false });
+
+    expect(rates.get(SAT_MAR_7_MORNING)?.USD).toBe(1.05);
+    expect(fetchRatesForDateRange).not.toHaveBeenCalled();
+    expect(fetchRatesForDate).not.toHaveBeenCalled();
+  });
 });

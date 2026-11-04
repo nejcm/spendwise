@@ -12,9 +12,8 @@ import { queryKeys } from '@/lib/data/query-keys';
 import { time } from '@/lib/date/constants';
 
 import { translate } from '@/lib/i18n';
-import { setCurrency } from '@/lib/store/store';
 import * as queries from './queries';
-import { recalculateAllBaseAmounts } from './recalculate';
+import { changePreferredCurrency } from './recalculate';
 
 /** Historical EUR-based rates for the closest stored day to `dateUnix` (for transaction-date conversion). */
 export function useRatesForDate(dateUnix: number | null) {
@@ -69,8 +68,8 @@ export function useRefreshRates() {
 /**
  * Mutation for changing the user's preferred display currency.
  *
- * Recalculates baseAmount on all transactions using historical rates, then
- * updates the Zustand store and invalidates all affected caches.
+ * Recalculates baseAmount on all transactions using historical rates and sets
+ * Preferred Currency in one write, then invalidates all affected caches.
  * Show a loading indicator and warning before calling mutate().
  */
 export function useChangeCurrency() {
@@ -89,14 +88,11 @@ export function useChangeCurrency() {
             translate('settings.currencyBackupFailedMessage'),
           );
         }
-        await recalculateAllBaseAmounts(db, newCurrency);
       }
-      setCurrency(newCurrency);
+      await changePreferredCurrency(db, newCurrency);
     },
     onSuccess: () => {
       invalidateFor(queryClient, 'transaction', 'account');
-      queryClient.invalidateQueries({ queryKey: queryKeys.insights.all });
-      queryClient.invalidateQueries({ queryKey: queryKeys.monthSummary.all });
     },
     onError,
   });

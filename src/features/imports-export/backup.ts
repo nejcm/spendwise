@@ -3,10 +3,12 @@ import type { Account } from '../accounts/types';
 import type { Category } from '../categories/types';
 import type { ScheduledTransaction, ScheduledTransactionRun } from '../scheduled-transactions/types';
 import type { Transaction } from '../transactions/types';
+import type { CurrencyKey } from '@/features/currencies';
+import { CURRENCY_VALUES } from '@/features/currencies';
 import { withWriteTransaction } from '@/lib/sqlite';
 import { clearDbData } from '@/lib/sqlite/db';
 import { BACKFILL_CATEGORY_KIND_SQL } from '@/lib/sqlite/migrations';
-import { getAppState } from '@/lib/store/store';
+import { getAppState, setCurrency } from '@/lib/store/store';
 
 const CURRENT_BACKUP_VERSION = 5;
 
@@ -197,4 +199,21 @@ export async function importBackup(db: SQLiteDatabase, backup: BackupData): Prom
 
     if (backup.version < 4) await db.execAsync(BACKFILL_CATEGORY_KIND_SQL);
   });
+}
+
+function inferBackupCurrency(backup: BackupData): CurrencyKey | undefined {
+  if ('baseCurrency' in backup) {
+    const candidate = backup.baseCurrency;
+    if (CURRENCY_VALUES.includes(candidate as CurrencyKey)) return candidate as CurrencyKey;
+  }
+  const txBaseCurrency = backup.transactions.at(0)?.baseCurrency;
+  if (!txBaseCurrency || !CURRENCY_VALUES.includes(txBaseCurrency as CurrencyKey)) return undefined;
+  return txBaseCurrency as CurrencyKey;
+}
+
+/** Replaces all data with the backup, then adopts its Preferred Currency; a failed import changes neither. */
+export async function restoreBackup(db: SQLiteDatabase, backup: BackupData): Promise<void> {
+  await importBackup(db, backup);
+  const currency = inferBackupCurrency(backup);
+  if (currency && currency !== getAppState().currency) setCurrency(currency);
 }

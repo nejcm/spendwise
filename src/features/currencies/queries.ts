@@ -245,7 +245,9 @@ export async function bulkSaveRates(
 export async function getRatesForDates(
   db: SQLiteDatabase,
   dateUnixArray: number[],
+  options?: Pick<GetRatesForDateOptions, 'fetchIfMissing'>,
 ): Promise<Map<number, RatesMap>> {
+  const fetchIfMissing = options?.fetchIfMissing !== false;
   if (dateUnixArray.length === 0) return new Map();
 
   // Build mapping: original input → day-truncated. Results keyed by original.
@@ -320,7 +322,7 @@ export async function getRatesForDates(
 
   // Phase 4: Fetch entire years that have gaps
   const allMissDates = [...new Set(missDates)];
-  if (allMissDates.length > 0) {
+  if (allMissDates.length > 0 && fetchIfMissing) {
     const years = [...new Set(allMissDates.map((d) => new Date(d * 1000).getUTCFullYear()))];
     const fetches = await Promise.allSettled(
       years.map((y) => fetchRatesForDateRange(`${y}-01-01`, `${y}-12-31`)),
@@ -350,16 +352,16 @@ export async function getRatesForDates(
         ));
       }
     }
+  }
 
-    // Final fallback: any dates still unresolved, fetch individually
-    const stillMissing = unique.filter((d) => !truncResult.has(d));
-    if (stillMissing.length > 0) {
-      await Promise.all(
-        stillMissing.map(async (trunc) => {
-          truncResult.set(trunc, await getRatesForDate(db, trunc));
-        }),
-      );
-    }
+  // Final fallback: any dates still unresolved, per date (fetching only when allowed)
+  const stillMissing = unique.filter((d) => !truncResult.has(d));
+  if (stillMissing.length > 0) {
+    await Promise.all(
+      stillMissing.map(async (trunc) => {
+        truncResult.set(trunc, await getRatesForDate(db, trunc, { fetchIfMissing }));
+      }),
+    );
   }
 
   // Map truncated results back to all original input values

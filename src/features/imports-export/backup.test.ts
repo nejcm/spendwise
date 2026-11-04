@@ -1,5 +1,6 @@
-import { exportBackup, importBackup, validateBackup } from '@/features/imports-export/backup';
+import { exportBackup, importBackup, restoreBackup, validateBackup } from '@/features/imports-export/backup';
 import { deleteTransaction, getTransactionById } from '@/features/transactions/queries';
+import { getAppState, setCurrency } from '@/lib/store/store';
 import { createTestDb } from '@/test-utils/sqlite-db';
 
 async function seedBase(db: Awaited<ReturnType<typeof createTestDb>>) {
@@ -238,5 +239,28 @@ describe('backup v5', () => {
 
     expect(await db.getAllAsync('SELECT id FROM accounts')).toEqual([{ id: 'acc_1' }]);
     expect(await db.getAllAsync('SELECT id FROM transactions')).toEqual([]);
+  });
+  it('keeps Preferred Currency and rows when the restore rolls back', async () => {
+    setCurrency('EUR');
+    const db = await createTestDb();
+    await seedBase(db);
+    await db.runAsync(`INSERT INTO transactions (id, account_id, type, amount, currency, baseAmount, baseCurrency, date) VALUES ('t_keep', 'acc_1', 'expense', 100, 'EUR', 100, 'EUR', 1)`, []);
+    const orphan = { ...v5, baseCurrency: 'USD', transaction_tags: [{ transaction_id: 'missing', tag: 'Lisbon' }] };
+
+    await expect(restoreBackup(db as any, validateBackup(orphan))).rejects.toHaveProperty('message', expect.stringMatching(/FOREIGN KEY constraint failed/));
+
+    expect(getAppState().currency).toBe('EUR');
+    expect(await db.getAllAsync('SELECT id, baseCurrency FROM transactions')).toEqual([{ id: 't_keep', baseCurrency: 'EUR' }]);
+  });
+
+  it('adopts the backup currency once the restore commits', async () => {
+    setCurrency('EUR');
+    const db = await createTestDb();
+    const usd = { ...v5, baseCurrency: 'USD', transactions: [{ ...v5.transactions[0], baseCurrency: 'USD' }] };
+
+    await restoreBackup(db as any, validateBackup(usd));
+
+    expect(getAppState().currency).toBe('USD');
+    expect(await db.getAllAsync('SELECT id, baseCurrency FROM transactions')).toEqual([{ id: 't1', baseCurrency: 'USD' }]);
   });
 });

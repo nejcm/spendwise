@@ -72,6 +72,7 @@ function useTransactionActions(transaction: TransactionWithCategory | null | und
       note: transaction.note,
       merchant_name: transaction.merchant_name,
       location: transaction.location,
+      tags: transaction.tags,
     }, { onSuccess });
   };
 

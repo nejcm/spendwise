@@ -185,4 +185,18 @@ export async function migrateDb(db: SQLiteDatabase): Promise<void> {
       await db.execAsync(`PRAGMA user_version = 6`);
     });
   }
+
+  if (currentDbVersion < 7) {
+    await db.withTransactionAsync(async () => {
+      await db.execAsync(`
+        CREATE TABLE IF NOT EXISTS transaction_tags (
+          transaction_id TEXT NOT NULL REFERENCES transactions(id) ON DELETE CASCADE,
+          tag TEXT NOT NULL COLLATE NOCASE,
+          PRIMARY KEY (transaction_id, tag)
+        ) WITHOUT ROWID;
+        CREATE INDEX IF NOT EXISTS idx_transaction_tags_tag ON transaction_tags(tag, transaction_id);
+      `);
+      await db.execAsync(`PRAGMA user_version = 7`);
+    });
+  }
 }

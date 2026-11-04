@@ -39,6 +39,16 @@ describe('transactionFormSchema', () => {
   });
 });
 
+describe('tags', () => {
+  it('defaults to none and enforces the count and length limits', () => {
+    expect(transactionFormDefaultValues.tags).toEqual([]);
+    expect(issuePaths({ ...valid, tags: Array.from({ length: 20 }, (_, i) => `t${i}`) })).toEqual([]);
+    expect(issuePaths({ ...valid, tags: Array.from({ length: 21 }, (_, i) => `t${i}`) })).toEqual(['tags']);
+    expect(transactionFormSchema.safeParse({ ...valid, tags: ['x'.repeat(41)] }).error?.issues).toMatchObject([{ path: ['tags', 0], message: 'Max 40 characters' }]);
+    expect(issuePaths({ ...valid, tags: ['  '] })).toEqual(['tags.0']);
+  });
+});
+
 describe('transactionToFormValues', () => {
   const row = {
     id: 'in_leg',
@@ -52,6 +62,7 @@ describe('transactionToFormValues', () => {
     note: null,
     merchant_name: null,
     location: null,
+    tags: ['Lisbon', 'Work'],
     transfer_id: 'tr_1',
     counter_account_id: 'acc_1',
     counter_amount: -5000,
@@ -67,6 +78,7 @@ describe('transactionToFormValues', () => {
       currency: 'EUR',
       category_id: '',
       date: '2026-03-01',
+      tags: ['Lisbon', 'Work'],
     });
   });
 
@@ -84,7 +96,7 @@ describe('transactionToFormValues', () => {
 });
 
 describe('nextEntryValues', () => {
-  it('clears amount, merchant and note but keeps type, accounts, date and category', () => {
+  it('clears amount, merchant and note but keeps type, accounts, date, category and tags', () => {
     const filled = {
       ...valid,
       type: 'transfer' as const,
@@ -95,6 +107,7 @@ describe('nextEntryValues', () => {
       merchant_name: 'Pizzeria',
       note: 'Lunch',
       location: 'Ljubljana',
+      tags: ['Lisbon'],
     };
     expect(nextEntryValues(filled)).toEqual({
       ...filled,

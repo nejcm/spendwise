@@ -59,4 +59,11 @@ describe('transactions screen route seed', () => {
     expect(screen.getByTestId('filter-count')).toHaveTextContent('3');
     expect(useAppStore.getState().periodSelection).toEqual({ mode: 'month', year: 2025, month: 3 });
   });
+
+  it('seeds a tag filter over all time from a detail-screen tag tap', () => {
+    setParams({ tags: '["Lisbon"]', period: 'all' });
+    render(<TransactionsScreen />);
+    expect(screen.getByTestId('filter-count')).toHaveTextContent('1');
+    expect(useAppStore.getState().periodSelection).toEqual({ mode: 'all' });
+  });
 });

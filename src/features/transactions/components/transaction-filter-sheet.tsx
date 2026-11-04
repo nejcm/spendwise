@@ -10,10 +10,12 @@ import { useAccounts } from '@/features/accounts/hooks';
 import { useCategories } from '@/features/categories/api';
 import { CURRENCIES_MAP } from '@/features/currencies';
 import { formatMajorUnitsInputFromCents } from '@/features/formatting/helpers';
+import { useTagNames } from '@/features/transactions/api';
 import { parseToCents } from '@/lib/data';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { DEFAULT_FILTERS, SORT_OPTIONS } from '../filters';
+import { tagKey } from '../helpers';
 
 const SNAP_POINTS = ['88%'];
 const SheetTextInput = withUniwind(BottomSheetTextInput);
@@ -39,6 +41,10 @@ function toggle(ids: string[], id: string) {
   return ids.includes(id) ? ids.filter((x) => x !== id) : [...ids, id];
 }
 
+function toggleTag(tags: string[], tag: string) {
+  return tags.some((t) => tagKey(t) === tagKey(tag)) ? tags.filter((t) => tagKey(t) !== tagKey(tag)) : [...tags, tag];
+}
+
 export type TransactionFilterSheetProps = {
   ref?: ModalSheetRef<any>;
   filters: FilterState;
@@ -50,6 +56,7 @@ export type TransactionFilterSheetProps = {
 export function TransactionFilterSheet({ ref, filters, countFor, onApply }: TransactionFilterSheetProps) {
   const { data: accounts = [] } = useAccounts();
   const { data: categories = [] } = useCategories();
+  const { data: tagNames = [] } = useTagNames();
   const symbol = CURRENCIES_MAP[useAppStore.use.currency()]?.symbol ?? '';
   const [draft, setDraft] = React.useState(() => toDraft(filters));
   const patch = (next: Partial<Draft>) => setDraft((prev) => ({ ...prev, ...next }));
@@ -108,6 +115,26 @@ export function TransactionFilterSheet({ ref, filters, countFor, onApply }: Tran
               />
             ))}
           </View>
+
+          {tagNames.length > 0 && (
+            <>
+              <SectionTitle
+                title={translate('transactions.filter.tags')}
+                aside={draft.tags.length > 0 ? translate('transactions.selected_count', { count: draft.tags.length }) : undefined}
+              />
+              <View className="flex-row flex-wrap gap-2">
+                {tagNames.map((tag) => (
+                  <Chip
+                    key={tagKey(tag)}
+                    tone="solid"
+                    label={tag}
+                    selected={draft.tags.some((t) => tagKey(t) === tagKey(tag))}
+                    onPress={() => patch({ tags: toggleTag(draft.tags, tag) })}
+                  />
+                ))}
+              </View>
+            </>
+          )}
 
           <SectionTitle title={translate('transactions.filter.amount')} />
           <View className="flex-row gap-2.5">

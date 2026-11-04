@@ -1,4 +1,4 @@
-import { exportBackup, importBackup } from '@/features/imports-export/backup';
+import { exportBackup, importBackup, validateBackup } from '@/features/imports-export/backup';
 import { deleteTransaction, getTransactionById } from '@/features/transactions/queries';
 import { createTestDb } from '@/test-utils/sqlite-db';
 
@@ -67,7 +67,7 @@ describe('backup v4', () => {
     );
 
     const backup = await exportBackup(sourceDb as any);
-    expect(backup.version).toBe(4);
+    expect(backup.version).toBe(5);
 
     const restoredDb = await createTestDb();
     await importBackup(restoredDb as any, backup);
@@ -179,5 +179,64 @@ describe('backup v4', () => {
       recurring_rule_runs: [],
     } as any);
     expect(await db.getAllAsync('SELECT id, kind FROM categories')).toEqual([{ id: 'cat_x', kind: 'expense' }]);
+  });
+});
+
+describe('backup v5', () => {
+  const v4 = {
+    version: 4,
+    exported_at: '2026-01-01T00:00:00.000Z',
+    accounts: [{ id: 'acc_1', name: 'Checking', type: 'checking', currency: 'EUR', created_at: 1, updated_at: 1 }],
+    categories: [],
+    transactions: [{ id: 't1', account_id: 'acc_1', category_id: null, type: 'expense', amount: 100, currency: 'EUR', baseAmount: 100, baseCurrency: 'EUR', date: 1, note: null, created_at: 1, updated_at: 1 }],
+    recurring_rules: [],
+    recurring_rule_runs: [],
+  };
+  const v5 = { ...v4, version: 5, transaction_tags: [{ transaction_id: 't1', tag: 'Lisbon' }] };
+
+  it('round-trips transaction tags', async () => {
+    const sourceDb = await createTestDb();
+    await seedBase(sourceDb);
+    await sourceDb.execAsync(`
+      INSERT INTO transactions (id, account_id, type, amount, baseAmount, date) VALUES ('t1', 'acc_1', 'expense', 100, 100, 1);
+      INSERT INTO transaction_tags (transaction_id, tag) VALUES ('t1', 'Lisbon'), ('t1', 'Travel, work');
+    `);
+
+    const backup = validateBackup(JSON.parse(JSON.stringify(await exportBackup(sourceDb as any))));
+    expect(backup.version).toBe(5);
+    const restoredDb = await createTestDb();
+    await importBackup(restoredDb as any, backup);
+
+    expect((await getTransactionById(restoredDb as any, 't1'))!.tags).toEqual(['Lisbon', 'Travel, work']);
+  });
+
+  it('restores a v4 backup without tags', async () => {
+    const db = await createTestDb();
+    await importBackup(db as any, validateBackup(v4));
+
+    expect(await db.getAllAsync('SELECT id FROM transactions')).toEqual([{ id: 't1' }]);
+    expect(await db.getAllAsync('SELECT * FROM transaction_tags')).toEqual([]);
+  });
+
+  it('rejects unsupported versions, a v5 backup without tags and malformed tag rows', () => {
+    expect(validateBackup(v5).transaction_tags).toEqual([{ transaction_id: 't1', tag: 'Lisbon' }]);
+    for (const version of [999, 'future', -1, 0, 4.5]) {
+      expect(() => validateBackup({ ...v5, version })).toThrow('invalid');
+    }
+    expect(() => validateBackup({ ...v5, transaction_tags: undefined })).toThrow('invalid');
+    expect(() => validateBackup({ ...v5, transaction_tags: [{ transaction_id: 't1', tag: 1 }] })).toThrow('invalid');
+    expect(() => validateBackup({ ...v5, transaction_tags: [null] })).toThrow('invalid');
+    expect(() => validateBackup({ ...v4, transaction_tags: 'Lisbon' })).toThrow('invalid');
+  });
+
+  it('rolls back and keeps prior data when a tag points at a missing transaction', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    const orphan = { ...v5, transaction_tags: [{ transaction_id: 'missing', tag: 'Lisbon' }] };
+
+    await expect(importBackup(db as any, validateBackup(orphan))).rejects.toHaveProperty('message', expect.stringMatching(/FOREIGN KEY constraint failed/));
+
+    expect(await db.getAllAsync('SELECT id FROM accounts')).toEqual([{ id: 'acc_1' }]);
+    expect(await db.getAllAsync('SELECT id FROM transactions')).toEqual([]);
   });
 });

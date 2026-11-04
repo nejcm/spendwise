@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { Linking, Platform, Pressable, View } from 'react-native';
 import { DEFAULT_COLOR } from '@/components/color-selector';
-import { AmountText, Card, FlagCircle, getPressedStyle, IconTile, ListRow, Text } from '@/components/ui';
+import { AmountText, Card, Chip, FlagCircle, getPressedStyle, IconTile, ListRow, Text } from '@/components/ui';
 import { Info } from '@/components/ui/icon';
 import { useAccounts } from '@/features/accounts/api';
 import { formatCurrency, formatDate } from '@/features/formatting/helpers';
@@ -13,7 +13,8 @@ import { FREQUENCY_OPTIONS } from '@/features/scheduled-transactions/constants';
 import { cn } from '@/lib/cn';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
-import { fxRateText, transactionDisplayName } from '../helpers';
+import { fxRateText, tagKey, transactionDisplayName } from '../helpers';
+import { buildTransactionsHref } from '../route-params';
 import { MerchantLogo } from './merchant-logo';
 
 const HERO_DATE_FORMAT = 'EEEE, MMM d';
@@ -118,6 +119,16 @@ export function DetailRows({ transaction: t, rule }: { transaction: TransactionW
   return (
     <Card className="mx-5 mt-6 rounded-card px-4.5">
       {rows.map(({ key, ...row }, i) => <DetailRow key={key} first={i === 0} {...row} />)}
+      {t.tags.length > 0 && (
+        <View className="gap-2 border-t border-border py-3.5">
+          <Text className="text-sm text-muted-foreground">{translate('transactions.tags')}</Text>
+          <View className="flex-row flex-wrap gap-2">
+            {t.tags.map((tag) => (
+              <Chip key={tagKey(tag)} label={tag} onPress={() => router.push(buildTransactionsHref({ tags: [tag], periodSelection: { mode: 'all' } }))} />
+            ))}
+          </View>
+        </View>
+      )}
     </Card>
   );
 }

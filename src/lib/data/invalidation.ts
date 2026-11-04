@@ -19,6 +19,7 @@ type InvalidationEntity = keyof typeof INVALIDATION_RULES;
 const INVALIDATION_RULES = {
   transaction: [
     queryKeys.transactions.all,
+    queryKeys.tags.all,
     queryKeys.accounts.withBalance,
     queryKeys.accounts.summaryAll,
     queryKeys.accounts.totalBalance,

@@ -7,7 +7,7 @@ import { useStore } from '@tanstack/react-form';
 import * as React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { Card, FlagCircle, Input, ListRow, Options, Text, useModalSheet } from '@/components/ui';
+import { Card, Chip, FilterChip, FlagCircle, Input, ListRow, Options, Text, useModalSheet } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
 import { ChevronDown, ChevronRight, CircleAlert } from '@/components/ui/icon';
@@ -16,7 +16,8 @@ import { CategoryPicker } from '@/features/categories/category-picker';
 import { CURRENCIES_MAP } from '@/features/currencies';
 import { CurrencySheet } from '@/features/currencies/components/currency-sheet';
 import { formatDate } from '@/features/formatting/helpers';
-import { categoryTiles } from '@/features/transactions/helpers';
+import { useTagNames } from '@/features/transactions/api';
+import { categoryTiles, MAX_TAG_LENGTH, MAX_TAGS, normalizeTag, tagKey } from '@/features/transactions/helpers';
 import { cn } from '@/lib/cn';
 import { dateToUnix, isValidISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
@@ -25,6 +26,7 @@ import { easeOut } from '@/lib/theme/motion';
 import { FieldNodesContext } from '../hooks/form';
 
 const CATEGORY_TILE_LIMIT = 8;
+const TAG_SUGGESTION_LIMIT = 8;
 const rowInputClassName = 'h-12 min-w-[140px] rounded-none border-0 bg-transparent px-0 text-right text-row';
 function rowClassName(first = false) {
   return cn('min-h-13.5 py-0', !first && 'border-t border-border');
@@ -292,6 +294,65 @@ function TextRow({ name, label, value, placeholder, onChange, onBlur, error, sym
   );
 }
 
+function TagsRow({ value, onChange, onBlur, error, commitRef }: {
+  value: string[];
+  onChange: (tags: string[]) => void;
+  onBlur: () => void;
+  error?: string;
+  commitRef: React.Ref<() => void>;
+}) {
+  const fieldNode = useFieldNode('tags');
+  const { data: tagNames = [] } = useTagNames();
+  const [text, setText] = React.useState('');
+  const chosen = new Set(value.map(tagKey));
+  const query = tagKey(normalizeTag(text));
+  const suggestions = tagNames.filter((name) => !chosen.has(tagKey(name)) && tagKey(name).includes(query)).slice(0, TAG_SUGGESTION_LIMIT);
+  const [tooLong, setTooLong] = React.useState(false);
+  const add = (raw: string) => {
+    const tag = normalizeTag(raw);
+    setTooLong(tag.length > MAX_TAG_LENGTH);
+    if (tag.length > MAX_TAG_LENGTH) return;
+    if (tag && !chosen.has(tagKey(tag))) onChange([...value, tag]);
+    setText('');
+  };
+  React.useImperativeHandle(commitRef, () => () => add(text));
+  return (
+    <View ref={fieldNode} className={cn(rowClassName(), 'gap-2.5 py-3.5')}>
+      <RowLabel>{translate('transactions.tags')}</RowLabel>
+      {value.length > 0 && (
+        <View className="flex-row flex-wrap gap-2">
+          {value.map((tag) => <FilterChip key={tagKey(tag)} label={tag} onRemove={() => onChange(value.filter((t) => tagKey(t) !== tagKey(tag)))} />)}
+        </View>
+      )}
+      {value.length < MAX_TAGS && (
+        <Input
+          value={text}
+          onChangeText={setText}
+          onSubmitEditing={() => add(text)}
+          onBlur={() => {
+            add(text);
+            onBlur();
+          }}
+          maxLength={MAX_TAG_LENGTH}
+          returnKeyType="done"
+          submitBehavior="submit"
+          // react-native-web ignores submitBehavior and blurs on submit unless this is false
+          blurOnSubmit={false}
+          placeholder={translate('transactions.form.add_tag')}
+          accessibilityLabel={translate('transactions.form.add_tag')}
+          className="h-10 rounded-none border-0 bg-transparent px-0 text-row"
+        />
+      )}
+      {value.length < MAX_TAGS && suggestions.length > 0 && (
+        <View className="flex-row flex-wrap gap-2">
+          {suggestions.map((name) => <Chip key={tagKey(name)} size="sm" label={name} onPress={() => add(name)} />)}
+        </View>
+      )}
+      <RowError message={tooLong ? translate('transactions.form.too_long', { max: MAX_TAG_LENGTH }) : error} />
+    </View>
+  );
+}
+
 function AccountRows({ form, accounts }: { form: TransactionFormApi; accounts: Account[] }) {
   return (
     <form.Subscribe
@@ -333,18 +394,20 @@ function AccountRows({ form, accounts }: { form: TransactionFormApi; accounts: A
   );
 }
 
-export function DetailsCard({ form, accounts, isAdjustment, showBaseAmount, onBaseAmountEdited }: {
+export function DetailsCard({ form, accounts, isAdjustment, showBaseAmount, onBaseAmountEdited, commitTagRef }: {
   form: TransactionFormApi;
   accounts: Account[];
   isAdjustment: boolean;
   showBaseAmount: boolean;
   onBaseAmountEdited: () => void;
+  commitTagRef: React.Ref<() => void>;
 }) {
   const preferredCurrency = useAppStore.use.currency();
   const currencyFormat = useAppStore.use.currencyFormat();
   const baseSymbol = currencyFormat.startsWith('code') ? preferredCurrency : CURRENCIES_MAP[preferredCurrency]?.symbol;
   const [showLocation, setShowLocation] = React.useState(() => !!form.getFieldValue('location'));
   const submitted = useStore(form.store, selectSubmitted);
+  const tagItemError = useStore(form.store, (s) => Object.entries(s.fieldMeta).find(([name, meta]) => name.startsWith('tags[') && meta?.errors.length)?.[1]?.errors[0]?.message);
   const dateNode = useFieldNode('date');
   return (
     <>
@@ -404,6 +467,18 @@ export function DetailsCard({ form, accounts, isAdjustment, showBaseAmount, onBa
           name="note"
           children={(field) => (
             <TextRow name="note" label={translate('transactions.note')} value={field.state.value} placeholder={translate('transactions.form.note_placeholder')} onBlur={field.handleBlur} onChange={field.handleChange} error={submitted ? getFieldError(field) : undefined} />
+          )}
+        />
+        <form.Field
+          name="tags"
+          children={(field) => (
+            <TagsRow
+              value={field.state.value}
+              onChange={field.handleChange}
+              onBlur={field.handleBlur}
+              error={submitted ? getFieldError(field) ?? tagItemError : undefined}
+              commitRef={commitTagRef}
+            />
           )}
         />
         {showLocation && (

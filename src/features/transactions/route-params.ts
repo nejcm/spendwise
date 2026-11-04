@@ -2,10 +2,11 @@ import type { FilterState, TransactionSort, TransactionType } from './types';
 import type { PeriodSelection } from '@/lib/store/store';
 import { isValidISODate } from '@/lib/date/helpers';
 import { DEFAULT_FILTERS, SORT_OPTIONS } from './filters';
+import { MAX_TAG_LENGTH, MAX_TAGS, normalizeTag, tagKey } from './helpers';
 
 type ParamValue = string | string[] | undefined;
 
-/** `accountId` and `categoryId` take one id or a comma-separated list; amounts are cents. */
+/** `accountId` and `categoryId` take one id or a comma-separated list; `tags` is a JSON string array; amounts are cents. */
 export type TransactionRouteParams = {
   accountId?: ParamValue;
   categoryId?: ParamValue;
@@ -14,6 +15,7 @@ export type TransactionRouteParams = {
   period?: ParamValue;
   search?: ParamValue;
   sort?: ParamValue;
+  tags?: ParamValue;
   type?: ParamValue;
 };
 
@@ -38,6 +40,23 @@ function firstValue(value: ParamValue): string | undefined {
 function parseIds(value: ParamValue): string[] {
   const values = Array.isArray(value) ? value : [value ?? ''];
   return [...new Set(values.flatMap((v) => v.split(',')).map((id) => id.trim()).filter(Boolean))];
+}
+
+function parseTags(value: ParamValue): string[] {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(firstValue(value) ?? '[]');
+  }
+  catch {
+    return [];
+  }
+  if (!Array.isArray(parsed) || parsed.length > MAX_TAGS) return [];
+  const tags = new Map<string, string>();
+  for (const raw of parsed) {
+    const tag = typeof raw === 'string' ? normalizeTag(raw) : '';
+    if (tag && tag.length <= MAX_TAG_LENGTH && !tags.has(tagKey(tag))) tags.set(tagKey(tag), tag);
+  }
+  return [...tags.values()];
 }
 
 function parseCents(value: ParamValue): number | null {
@@ -124,6 +143,7 @@ export function parseTransactionsRouteSeed(params: TransactionRouteParams): Tran
       type: parseType(params.type),
       accountIds: parseIds(params.accountId),
       categoryIds: parseIds(params.categoryId),
+      tags: parseTags(params.tags),
       minAmount: parseCents(params.minAmount),
       maxAmount: parseCents(params.maxAmount),
       sort: parseSort(params.sort),
@@ -132,10 +152,11 @@ export function parseTransactionsRouteSeed(params: TransactionRouteParams): Tran
   };
 }
 
-export function buildTransactionsHref({ accountIds, categoryIds, minAmount, maxAmount, sort, search, type, periodSelection }: TransactionsHrefSeed) {
+export function buildTransactionsHref({ accountIds, categoryIds, tags, minAmount, maxAmount, sort, search, type, periodSelection }: TransactionsHrefSeed) {
   const params: Record<string, string> = {};
   if (accountIds?.length) params.accountId = accountIds.join(',');
   if (categoryIds?.length) params.categoryId = categoryIds.join(',');
+  if (tags?.length) params.tags = JSON.stringify(tags);
   if (minAmount != null) params.minAmount = String(minAmount);
   if (maxAmount != null) params.maxAmount = String(maxAmount);
   if (sort && sort !== DEFAULT_FILTERS.sort) params.sort = sort;

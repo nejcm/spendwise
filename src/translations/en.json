@@ -1065,10 +1065,12 @@
         "oldest": "Oldest first",
         "smallest": "Smallest first"
       },
+      "tags": "Tags",
       "to": "To"
     },
     "form": {
       "add_location": "Add location",
+      "add_tag": "Add tag",
       "all_categories": "All categories",
       "amount_error": "Enter an amount",
       "base_amount_invalid": "Enter a positive amount",
@@ -1102,6 +1104,7 @@
     "search": "Merchant, note or amount",
     "select_transaction": "Select transaction",
     "selected_count": "{{count}} selected",
+    "tags": "Tags",
     "title": "Transactions",
     "to_account_required": "Choose a different account to transfer to",
     "transfer": "Transfer",

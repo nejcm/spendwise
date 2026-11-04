@@ -40,6 +40,7 @@ function tx(overrides: Partial<TransactionWithCategory>): TransactionWithCategor
     counter_account_icon: null,
     counter_amount: null,
     counter_currency: null,
+    tags: [],
     ...overrides,
   };
 }
@@ -135,5 +136,42 @@ describe('active filters', () => {
     const label = (patch: Partial<FilterState>) => getActiveFilterChips(withFilters(patch), lookups, format)[0]!.label;
     expect(label({ maxAmount: 5000 })).toBe('Up to €50');
     expect(label({ minAmount: 1000, maxAmount: 5000 })).toBe('€10 – €50');
+  });
+});
+
+describe('tag filters', () => {
+  const lisbon = tx({ id: 'lisbon', tags: ['Lisbon', 'Work'] });
+  const work = tx({ id: 'work', tags: ['work'] });
+  const umlaut = tx({ id: 'umlaut', tags: ['Ärger'] });
+  const plain = tx({ id: 'plain' });
+  const rows = [lisbon, work, umlaut, plain];
+
+  it('matches any selected tag, ASCII case-insensitively, combined with other filters', () => {
+    expect(ids(filterTransactions(rows, withFilters({ tags: ['lisbon'] })))).toEqual(['lisbon']);
+    expect(ids(filterTransactions(rows, withFilters({ tags: ['WORK'] }))).sort()).toEqual(['lisbon', 'work']);
+    expect(ids(filterTransactions(rows, withFilters({ tags: ['Lisbon', 'Ärger'] }))).sort()).toEqual(['lisbon', 'umlaut']);
+    expect(ids(filterTransactions(rows, withFilters({ tags: ['work'], type: 'income' })))).toEqual([]);
+  });
+
+  it('keeps non-ASCII case variants distinct', () => {
+    expect(ids(filterTransactions(rows, withFilters({ tags: ['ärger'] })))).toEqual([]);
+  });
+
+  it('search matches tags', () => {
+    expect(ids(filterTransactions(rows, DEFAULT_FILTERS, 'lisb'))).toEqual(['lisbon']);
+    expect(ids(filterTransactions(rows, DEFAULT_FILTERS, ' ÄRGER '))).toEqual(['umlaut']);
+    expect(ids(filterTransactions(rows, DEFAULT_FILTERS, 'ärger'))).toEqual([]);
+    expect(ids(filterTransactions(rows, DEFAULT_FILTERS, 'Ärg'))).toEqual(['umlaut']);
+  });
+
+  it('adds one removable chip per tag and counts each', () => {
+    const filters = withFilters({ tags: ['Lisbon', 'Work'] });
+    const chips = getActiveFilterChips(filters, { accounts: [], categories: [] }, String);
+
+    expect(chips.map((c) => [c.key, c.label, c.remove])).toEqual([
+      ['tags:lisbon', 'Lisbon', { tags: ['Work'] }],
+      ['tags:work', 'Work', { tags: ['Lisbon'] }],
+    ]);
+    expect(countActiveFilters(filters)).toBe(2);
   });
 });

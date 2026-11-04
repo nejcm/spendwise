@@ -10,6 +10,7 @@ import {
   duplicateTransfer,
   getMonthSummary,
   getRecentTransactions,
+  getTagNames,
   getTransactionById,
   getTransactionMatchFields,
   getTransactions,
@@ -849,5 +850,167 @@ describe('transfer pairs', () => {
     await createTransactions(db as any, [{ ...base, transfer_id: 'tr_x', amount: -1 }]);
 
     expect((await legs(db)).map((r) => [r.amount, r.transfer_id, r.is_adjustment])).toEqual([[-1, 'tr_x', 0], [5000, null, 1]]);
+  });
+});
+
+describe('transaction tags', () => {
+  type Db = Awaited<ReturnType<typeof createTestDb>>;
+  const { randomUUID } = jest.requireMock<{ randomUUID: jest.Mock }>('expo-crypto');
+
+  beforeEach(() => {
+    let n = 0;
+    randomUUID.mockImplementation(() => `tag-uuid-${n++}`);
+  });
+
+  afterEach(() => {
+    randomUUID.mockImplementation(() => 'test-uuid-1234');
+  });
+
+  const row = {
+    account_id: 'acc_1',
+    category_id: 'cat_1',
+    type: 'expense' as const,
+    amount: 1000,
+    currency: 'EUR' as const,
+    baseAmount: 1000,
+    baseCurrency: 'EUR' as const,
+    date: MAR_MID,
+    note: null,
+    merchant_name: null,
+    merchant_logo_slug: null,
+    location: null,
+  };
+
+  const tagsOf = async (db: Db, id: string) => (await getTransactionById(db as any, id))!.tags;
+  const tagRows = (db: Db) => db.getAllAsync('SELECT transaction_id, tag FROM transaction_tags ORDER BY transaction_id, tag');
+
+  async function seedAccounts(db: Db) {
+    await seedBase(db);
+    await db.runAsync(`INSERT INTO accounts (id, name, type, currency) VALUES ('acc_2', 'Savings', 'savings', 'EUR')`);
+  }
+
+  it('creates sorted, normalized tags and reads them on every list', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+
+    const id = await createTransaction(db as any, { ...row, tags: ['  Lisbon   trip ', 'z', 'Ä', ' ', 'lisbon trip'] });
+    const expected = ['Ä', 'Lisbon trip', 'z'];
+
+    expect(await db.getAllAsync('SELECT tag FROM transaction_tags')).not.toEqual(expected.map((tag) => ({ tag })));
+    expect(await tagsOf(db, id)).toEqual(expected);
+    expect((await getTransactions(db as any, MAR_START, APR_START))[0]!.tags).toEqual(expected);
+    expect((await getRecentTransactions(db as any, 5))[0]!.tags).toEqual(expected);
+    expect((await getTransactionsSample(db as any, MAR_START, APR_START, { limit: 5 }))[0]!.tags).toEqual(expected);
+    expect(await tagsOf(db, await createTransaction(db as any, row))).toEqual([]);
+  });
+
+  it('update leaves tags untouched when omitted, replaces them when given and clears them with []', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    const id = await createTransaction(db as any, { ...row, tags: ['Lisbon'] });
+
+    await updateTransaction(db as any, id, { ...row, note: 'edited' });
+    expect(await tagsOf(db, id)).toEqual(['Lisbon']);
+
+    await updateTransaction(db as any, id, { ...row, tags: ['Work', 'Porto'] });
+    expect(await tagsOf(db, id)).toEqual(['Porto', 'Work']);
+
+    await updateTransaction(db as any, id, { ...row, tags: [] });
+    expect(await tagsOf(db, id)).toEqual([]);
+  });
+
+  it('keeps the stored spelling of an existing tag, also when a transaction re-tags itself', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    const a = await createTransaction(db as any, { ...row, tags: ['Lisbon'] });
+    const b = await createTransaction(db as any, { ...row, tags: ['LISBON'] });
+    expect(await tagsOf(db, b)).toEqual(['Lisbon']);
+
+    await deleteTransactions(db as any, [b]);
+    await updateTransaction(db as any, a, { ...row, tags: ['lisbon'] });
+    expect(await tagsOf(db, a)).toEqual(['Lisbon']);
+  });
+
+  it('keeps commas, non-ASCII case variants and JSON-like text intact', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+
+    const id = await createTransaction(db as any, { ...row, tags: ['Travel, work', 'Ä', 'ä', '["x"]'] });
+
+    const tags = await tagsOf(db, id);
+    expect(tags).toHaveLength(4);
+    expect(tags).toEqual(expect.arrayContaining(['Travel, work', 'Ä', 'ä', '["x"]']));
+  });
+
+  it('tags both transfer legs on create and update, and duplicateTransfer copies them', async () => {
+    const db = await createTestDb();
+    await seedAccounts(db);
+    const transfer = { ...row, category_id: null, to_account_id: 'acc_2', tags: ['Lisbon'] };
+
+    const outId = await createTransfer(db as any, transfer, {});
+    const transferId = (await getTransactionById(db as any, outId))!.transfer_id!;
+    expect((await tagRows(db)).map((r: any) => r.tag)).toEqual(['Lisbon', 'Lisbon']);
+
+    await updateTransfer(db as any, transferId, { ...transfer, tags: ['Porto'] }, {});
+    expect((await tagRows(db)).map((r: any) => r.tag)).toEqual(['Porto', 'Porto']);
+
+    await updateTransfer(db as any, transferId, { ...transfer, tags: undefined }, {});
+    const copyId = await duplicateTransfer(db as any, transferId);
+    expect(await tagsOf(db, copyId)).toEqual(['Porto']);
+    expect((await tagRows(db)).map((r: any) => r.tag)).toEqual(['Porto', 'Porto', 'Porto', 'Porto']);
+
+    await updateTransfer(db as any, transferId, { ...transfer, tags: [] }, {});
+    expect(await db.getAllAsync('SELECT tg.tag FROM transaction_tags tg JOIN transactions t ON t.id = tg.transaction_id WHERE t.transfer_id = ?', [transferId])).toEqual([]);
+    expect(await tagRows(db)).toHaveLength(2);
+  });
+
+  it('createTransactions persists tags only for rows that carry them', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+
+    const [tagged, plain] = await createTransactions(db as any, [{ ...row, tags: ['Lisbon', 'lisbon'] }, row]);
+
+    expect(await tagsOf(db, tagged!)).toEqual(['Lisbon']);
+    expect(await tagsOf(db, plain!)).toEqual([]);
+  });
+
+  it('undo restores deleted tags; bulk delete drops them by cascade', async () => {
+    const db = await createTestDb();
+    await seedAccounts(db);
+    const outId = await createTransfer(db as any, { ...row, category_id: null, to_account_id: 'acc_2', tags: ['Lisbon', 'Work'] }, {});
+    const before = await tagRows(db);
+
+    const deleted = await deleteTransaction(db as any, outId);
+    expect(deleted.tags).toHaveLength(4);
+    expect(await tagRows(db)).toEqual([]);
+
+    await restoreTransaction(db as any, deleted);
+    expect(await tagRows(db)).toEqual(before);
+
+    await deleteTransactions(db as any, [outId]);
+    expect(await tagRows(db)).toEqual([]);
+  });
+
+  it('undo after the tag was reused with another casing keeps one spelling', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    const a = await createTransaction(db as any, { ...row, tags: ['Lisbon'] });
+    const deleted = await deleteTransaction(db as any, a);
+    await createTransaction(db as any, { ...row, tags: ['lisbon'] });
+
+    await restoreTransaction(db as any, deleted);
+
+    expect(await tagsOf(db, a)).toEqual(['lisbon']);
+    expect(await getTagNames(db as any)).toEqual(['lisbon']);
+  });
+
+  it('getTagNames lists distinct tags by usage, then name', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    await createTransaction(db as any, { ...row, tags: ['beta', 'Work'] });
+    await createTransaction(db as any, { ...row, tags: ['work', 'alpha'] });
+    await createTransaction(db as any, { ...row, tags: ['Alpha'] });
+
+    expect(await getTagNames(db as any)).toEqual(['alpha', 'Work', 'beta']);
   });
 });

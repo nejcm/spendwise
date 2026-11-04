@@ -8,7 +8,9 @@ import { clearDbData } from '@/lib/sqlite/db';
 import { BACKFILL_CATEGORY_KIND_SQL } from '@/lib/sqlite/migrations';
 import { getAppState } from '@/lib/store/store';
 
-const CURRENT_BACKUP_VERSION = 4;
+const CURRENT_BACKUP_VERSION = 5;
+
+type TransactionTagRow = { transaction_id: string; tag: string };
 
 export type BackupData = {
   version: number;
@@ -19,6 +21,8 @@ export type BackupData = {
   transactions: Transaction[];
   recurring_rules: ScheduledTransaction[];
   recurring_rule_runs: ScheduledTransactionRun[];
+  /** Absent before v5. */
+  transaction_tags?: TransactionTagRow[];
 };
 
 export async function exportBackup(db: SQLiteDatabase): Promise<BackupData> {
@@ -28,12 +32,14 @@ export async function exportBackup(db: SQLiteDatabase): Promise<BackupData> {
     transactions,
     recurring_rules,
     recurring_rule_runs,
+    transaction_tags,
   ] = await Promise.all([
     db.getAllAsync<Account>('SELECT * FROM accounts'),
     db.getAllAsync<Category>('SELECT * FROM categories'),
     db.getAllAsync<Transaction>('SELECT * FROM transactions ORDER BY date DESC'),
     db.getAllAsync<ScheduledTransaction>('SELECT * FROM recurring_rules'),
     db.getAllAsync<ScheduledTransactionRun>('SELECT * FROM recurring_rule_runs'),
+    db.getAllAsync<TransactionTagRow>('SELECT transaction_id, tag FROM transaction_tags'),
   ]);
 
   const baseCurrency = getAppState().currency;
@@ -47,6 +53,7 @@ export async function exportBackup(db: SQLiteDatabase): Promise<BackupData> {
     transactions,
     recurring_rules,
     recurring_rule_runs,
+    transaction_tags,
   };
 }
 
@@ -57,7 +64,8 @@ export function validateBackup(parsed: unknown): BackupData {
 
   const data = parsed as Record<string, unknown>;
 
-  if (!data.version) {
+  const version = data.version;
+  if (typeof version !== 'number' || !Number.isInteger(version) || version < 1 || version > CURRENT_BACKUP_VERSION) {
     throw new Error('invalid');
   }
 
@@ -69,13 +77,25 @@ export function validateBackup(parsed: unknown): BackupData {
     'recurring_rule_runs',
   ];
 
+  if (version >= 5) requiredArrays.push('transaction_tags');
+
   for (const key of requiredArrays) {
     if (!Array.isArray(data[key])) {
       throw new TypeError('invalid');
     }
   }
 
+  const tags = data.transaction_tags ?? [];
+  if (!Array.isArray(tags) || !tags.every(isTransactionTagRow)) {
+    throw new TypeError('invalid');
+  }
+
   return data as BackupData;
+}
+
+function isTransactionTagRow(row: unknown): row is TransactionTagRow {
+  const r = row as Partial<Record<keyof TransactionTagRow, unknown>> | null;
+  return typeof r === 'object' && r !== null && typeof r.transaction_id === 'string' && typeof r.tag === 'string';
 }
 
 export async function importBackup(db: SQLiteDatabase, backup: BackupData): Promise<void> {
@@ -164,6 +184,14 @@ export async function importBackup(db: SQLiteDatabase, backup: BackupData): Prom
         `INSERT INTO recurring_rule_runs (id, rule_id, scheduled_for_date, transaction_id, created_at)
          VALUES (?, ?, ?, ?, ?)`,
         [row.id, row.rule_id, row.scheduled_for_date, row.transaction_id, row.created_at],
+      );
+    }
+
+    for (const row of backup.transaction_tags ?? []) {
+      await db.runAsync(
+        `INSERT INTO transaction_tags (transaction_id, tag) VALUES (?, ?)
+         ON CONFLICT(transaction_id, tag) DO NOTHING`,
+        [row.transaction_id, row.tag],
       );
     }
 

@@ -25,10 +25,15 @@ export type Transaction = {
 export type TransactionFormData = Pick<Transaction, 'account_id' | 'category_id' | 'amount' | 'currency' | 'note' | 'type' | 'date' | 'merchant_name' | 'location'> & {
   baseAmount?: number;
   to_account_id?: string | null;
+  tags?: string[];
 };
 
 export type TransactionInsertData = Omit<Transaction, 'id' | 'created_at' | 'updated_at' | 'transfer_id' | 'is_adjustment'>
-  & Partial<Pick<Transaction, 'transfer_id' | 'is_adjustment'>>;
+  & Partial<Pick<Transaction, 'transfer_id' | 'is_adjustment'>>
+  & {
+    /** Omitted leaves stored tags untouched; `[]` clears them. */
+    tags?: string[];
+  };
 
 /** `account_id` is the source; `amount` is positive cents in `currency`. */
 export type TransferInsertData = Omit<TransactionInsertData, 'type' | 'transfer_id' | 'is_adjustment'> & {
@@ -45,6 +50,7 @@ export type TransactionWithCategory = Transaction & {
   counter_account_icon: string | null;
   counter_amount: number | null;
   counter_currency: CurrencyKey | null;
+  tags: string[];
 };
 
 export type MonthSummary = {
@@ -59,6 +65,8 @@ export type FilterState = {
   type: TransactionType | null;
   accountIds: string[];
   categoryIds: string[];
+  /** Any-of, compared by `tagKey`. */
+  tags: string[];
   /** Cents in Preferred Currency, compared against `baseAmount`. */
   minAmount: number | null;
   maxAmount: number | null;

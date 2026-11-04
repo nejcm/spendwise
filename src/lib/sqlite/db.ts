@@ -5,6 +5,7 @@ export type ClearSelectedDataOptions = {
   deleteCategories: boolean;
 };
 
+const deleteTransactionTagsSql = 'DELETE FROM transaction_tags;';
 const deleteTransactionsSql = 'DELETE FROM transactions;';
 const deleteRecurringRuleRunsSql = 'DELETE FROM recurring_rule_runs;';
 const deleteRecurringRulesSql = 'DELETE FROM recurring_rules;';
@@ -19,6 +20,7 @@ export async function clearDbData(db: SQLiteDatabase): Promise<void> {
   await db.execAsync(`
     ${deleteRecurringRuleRunsSql}
     ${deleteRecurringRulesSql}
+    ${deleteTransactionTagsSql}
     ${deleteTransactionsSql}
     ${deleteAccountsSql}
     ${deleteCategoriesSql}
@@ -46,6 +48,7 @@ export async function clearSelectedDataDb(
   const sql = `
     ${deleteRecurringRuleRunsSql}
     ${deleteRecurringRulesSql}
+    ${deleteTransactionTagsSql}
     ${deleteTransactionsSql}
     ${deleteAccounts ? deleteAccountsSql : ''}
     ${deleteCategories ? deleteCategoriesSql : ''}
@@ -69,6 +72,7 @@ export async function clearSelectedDataDb(
  */
 export async function dropDb(db: SQLiteDatabase): Promise<void> {
   await db.execAsync(`
+    DROP TABLE IF EXISTS transaction_tags;
     DROP TABLE IF EXISTS _meta;
     DROP TABLE IF EXISTS accounts;
     DROP TABLE IF EXISTS categories;

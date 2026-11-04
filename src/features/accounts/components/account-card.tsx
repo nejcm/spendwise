@@ -17,6 +17,8 @@ export type AccountCardProps = {
 export function AccountCard({ account, monthDelta, onPress }: AccountCardProps) {
   const currency = useAppStore.use.currency();
 
+  const deltaClass = cn('text-xs', monthDelta > 0 ? 'text-positive' : 'text-muted-foreground');
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -30,9 +32,9 @@ export function AccountCard({ account, monthDelta, onPress }: AccountCardProps) 
         <Text className="text-meta text-muted-foreground" numberOfLines={1}>{`${ACCOUNT_TYPE_LABELS[account.type]} · ${account.currency}`}</Text>
       </View>
       <View className="shrink-0 items-end">
-        <FormattedCurrency value={account.baseBalance} currency={currency} shorten={SHORTEN_ROW} className="text-[17px] font-semibold" numberOfLines={1} />
-        <Text className={cn('text-xs', monthDelta > 0 ? 'text-positive' : 'text-muted-foreground')} numberOfLines={1}>
-          <FormattedCurrency value={monthDelta} currency={currency} shorten={SHORTEN_ROW} prefix={monthDelta > 0 ? '+' : ''} />
+        <FormattedCurrency value={account.baseBalance} currency={currency} shorten={SHORTEN_ROW} className="text-[17px] font-medium" numberOfLines={1} />
+        <Text className={deltaClass} numberOfLines={1}>
+          <FormattedCurrency value={monthDelta} currency={currency} shorten={SHORTEN_ROW} prefix={monthDelta > 0 ? '+' : ''} className={deltaClass} />
           {` ${translate('accounts.this_month')}`}
         </Text>
       </View>

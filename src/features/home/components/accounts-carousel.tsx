@@ -32,7 +32,7 @@ export function AccountsCarousel({ accounts }: { accounts: AccountWithBalance[] 
             </View>
             <View>
               {!isCompact && <Text className="text-meta text-muted-foreground" numberOfLines={1}>{account.name}</Text>}
-              <FormattedCurrency value={account.baseBalance} currency={currency} className="text-header-title font-semibold" numberOfLines={1} adjustsFontSizeToFit />
+              <FormattedCurrency value={account.baseBalance} currency={currency} className="text-header-title font-medium" numberOfLines={1} adjustsFontSizeToFit />
             </View>
           </Pressable>
         ))}

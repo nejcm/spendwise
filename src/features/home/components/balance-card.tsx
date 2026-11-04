@@ -116,7 +116,7 @@ function SummaryFigure({ label, value, currency, icon: Icon, tone }: SummaryFigu
   return (
     <View accessible accessibilityLabel={label} className={cn('shrink flex-row items-center gap-1.5 rounded-full py-1 pr-2.5 pl-1.5', TONE_CLASSES[tone].tile)}>
       <Icon size={14} strokeWidth={2.2} colorClassName={TONE_CLASSES[tone].icon} />
-      <AmountText value={value} currency={currency} shorten={SHORTEN_TIGHT} numberOfLines={1} className="shrink text-sm" />
+      <AmountText value={value} currency={currency} shorten={SHORTEN_TIGHT} numberOfLines={1} className="shrink text-sm font-medium" />
     </View>
   );
 }

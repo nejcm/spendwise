@@ -98,7 +98,7 @@ function CommittedCard({ rules, yearMonth, toPreferred }: { rules: ScheduledTran
       </View>
       <View className="mt-4 self-start rounded-tile bg-card-2 px-3.5 py-3">
         <Text className="text-meta text-muted-foreground">{translate('scheduled.coming_in')}</Text>
-        <AmountText value={comingIn} currency={currency} prefix="+" className="font-semibold text-positive" />
+        <AmountText value={comingIn} currency={currency} prefix="+" className="font-medium text-positive" />
       </View>
       {missingRate && <Text className="mt-3 text-meta text-muted-foreground">{translate('scheduled.committed_missing_rate')}</Text>}
     </Card>
@@ -137,7 +137,7 @@ function RuleRow({ rule, today, toPreferred }: { rule: ScheduledTransactionWithD
             currency={converted != null ? preferred : rule.currency}
             prefix={isIncome ? '+' : '-'}
             shorten={SHORTEN_ROW}
-            className={cn('font-semibold', isIncome && 'text-positive')}
+            className={cn('font-medium', isIncome && 'text-positive')}
           />
           {resumable
             ? (

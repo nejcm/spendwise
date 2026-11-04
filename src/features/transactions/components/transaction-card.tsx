@@ -80,7 +80,7 @@ export const TransactionCard = React.memo(({
           currency={transaction.baseCurrency}
           prefix={inflow ? '+' : '-'}
           shorten={SHORTEN_ROW}
-          className={cn('text-row font-semibold', isIncome && 'text-positive', isTransfer && 'text-muted-foreground')}
+          className={cn('text-row font-medium', isIncome && 'text-positive', isTransfer && 'text-muted-foreground')}
         />
         {isForeign && <FormattedCurrency value={Math.abs(transaction.amount)} currency={transaction.currency} shorten={SHORTEN_ROW} className="text-xs text-muted-foreground" />}
         {isTransfer && !isAdjustment && <Text className="text-xs text-muted-foreground">{translate('transactions.not_spending')}</Text>}

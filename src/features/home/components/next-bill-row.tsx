@@ -31,7 +31,7 @@ export function NextBillRow({ bill }: { bill: NextBill }) {
         <Text className="text-row font-semibold" numberOfLines={1}>{rule.note || rule.category_name}</Text>
       </View>
       <View className="items-end">
-        <AmountText value={rule.amount} currency={rule.currency} prefix="-" shorten={SHORTEN_ROW} />
+        <AmountText value={rule.amount} currency={rule.currency} prefix="-" shorten={SHORTEN_ROW} className="font-medium" />
         {moreInMonth > 0 && (
           <Text className="text-xs text-muted-foreground">
             {translate('home.next_bill.more', { count: moreInMonth, month: monthName(monthOfDay(rule.next_due_date).month - 1) })}

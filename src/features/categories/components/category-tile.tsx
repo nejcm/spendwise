@@ -48,7 +48,7 @@ export function CategoryTile({ item, kind, budget, onPress }: CategoryTileProps)
       <View className="min-w-0 flex-1">
         <Text className="text-meta text-muted-foreground" numberOfLines={1}>{name}</Text>
         <Text
-          className={cn('text-base font-bold tracking-tight tabular-nums', state === 'over' && BUDGET_STATE_CLASSES.over.text)}
+          className={cn('text-base font-semibold tracking-tight tabular-nums', state === 'over' && BUDGET_STATE_CLASSES.over.text)}
           numberOfLines={1}
           adjustsFontSizeToFit
         >

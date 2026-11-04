@@ -3,6 +3,7 @@ import { createTestDb } from '@/test-utils/sqlite-db';
 
 import {
   createTransaction,
+  createTransactionFromForm,
   createTransactions,
   createTransfer,
   deleteTransaction,
@@ -20,6 +21,7 @@ import {
   restoreTransaction,
   TRANSFER_LEG_ROUNDS_TO_ZERO,
   updateTransaction,
+  updateTransactionFromForm,
   updateTransfer,
 } from './queries';
 
@@ -1012,5 +1014,141 @@ describe('transaction tags', () => {
     await createTransaction(db as any, { ...row, tags: ['Alpha'] });
 
     expect(await getTagNames(db as any)).toEqual(['alpha', 'Work', 'beta']);
+  });
+});
+
+describe('form writes', () => {
+  const { randomUUID } = jest.requireMock<{ randomUUID: jest.Mock }>('expo-crypto');
+
+  beforeEach(() => {
+    let n = 0;
+    randomUUID.mockImplementation(() => `uuid-${n++}`);
+  });
+
+  afterEach(() => {
+    randomUUID.mockImplementation(() => 'test-uuid-1234');
+  });
+
+  const form = {
+    account_id: 'acc_1',
+    category_id: 'cat_1',
+    type: 'expense' as const,
+    amount: 12.34,
+    currency: 'EUR' as const,
+    date: MAR_MID,
+    note: null,
+    merchant_name: null,
+    location: null,
+  };
+
+  async function seed() {
+    const db = await createTestDb();
+    await seedBase(db);
+    await db.runAsync(
+      `INSERT INTO accounts (id, name, type, currency) VALUES (?, ?, ?, ?)`,
+      ['acc_2', 'Savings', 'savings', 'EUR'],
+    );
+    return db;
+  }
+
+  const rows = (db: Awaited<ReturnType<typeof createTestDb>>) => db.getAllAsync<Record<string, unknown>>(
+    'SELECT account_id, type, amount, currency, baseAmount, baseCurrency, merchant_name, merchant_logo_slug, location, transfer_id FROM transactions ORDER BY amount',
+  );
+
+  it.each(['expense', 'income'] as const)('creates an %s in cents', async (type: 'expense' | 'income') => {
+    const db = await seed();
+
+    await createTransactionFromForm(db as any, { ...form, type }, undefined, 'EUR');
+
+    expect(await rows(db)).toEqual([expect.objectContaining({ type, amount: 1234, baseAmount: 1234, baseCurrency: 'EUR' })]);
+  });
+
+  it('uses an explicit baseAmount over the rates', async () => {
+    const db = await seed();
+
+    await createTransactionFromForm(db as any, { ...form, currency: 'USD', baseAmount: 10 }, { USD: 2 }, 'EUR');
+
+    expect((await rows(db))[0]).toMatchObject({ amount: 1234, currency: 'USD', baseAmount: 1000 });
+  });
+
+  it('computes a cross-currency baseAmount from the absolute amount', async () => {
+    const db = await seed();
+
+    await createTransactionFromForm(db as any, { ...form, amount: -10 }, { USD: 1.1 }, 'USD');
+
+    expect((await rows(db))[0]).toMatchObject({ amount: -1000, baseAmount: 1100, baseCurrency: 'USD' });
+  });
+
+  it('stores a zero baseAmount for a zero amount', async () => {
+    const db = await seed();
+
+    await createTransactionFromForm(db as any, { ...form, amount: 0, baseAmount: 5 }, undefined, 'EUR');
+
+    expect((await rows(db))[0]).toMatchObject({ amount: 0, baseAmount: 0 });
+  });
+
+  it('trims merchant and location and infers the logo slug', async () => {
+    const db = await seed();
+
+    await createTransactionFromForm(db as any, { ...form, merchant_name: '  Netflix.com ', location: ' Berlin ' }, undefined, 'EUR');
+
+    expect((await rows(db))[0]).toMatchObject({ merchant_name: 'Netflix.com', merchant_logo_slug: 'netflix', location: 'Berlin' });
+  });
+
+  it('stores blank merchant and location as null', async () => {
+    const db = await seed();
+
+    await createTransactionFromForm(db as any, { ...form, merchant_name: '  ', location: ' ' }, undefined, 'EUR');
+
+    expect((await rows(db))[0]).toMatchObject({ merchant_name: null, merchant_logo_slug: null, location: null });
+  });
+
+  it('creates and updates a transfer as a leg pair', async () => {
+    const db = await seed();
+    const transfer = { ...form, type: 'transfer' as const, category_id: null, to_account_id: 'acc_2' };
+
+    const outId = await createTransactionFromForm(db as any, transfer, {}, 'EUR');
+    await updateTransactionFromForm(db as any, { id: outId, data: { ...transfer, amount: 20 } }, {}, 'EUR');
+
+    const legs = await rows(db);
+    expect(legs.map((r) => [r.account_id, r.amount, r.baseAmount])).toEqual([['acc_1', -2000, 2000], ['acc_2', 2000, 2000]]);
+    expect(legs[0]!.transfer_id).toEqual(expect.any(String));
+    expect(legs[1]!.transfer_id).toBe(legs[0]!.transfer_id);
+  });
+
+  it('keeps the sign of a legacy single-leg transfer on update', async () => {
+    const db = await seed();
+    await seedTransaction(db, { id: 'legacy', type: 'transfer', amount: -5000, category_id: null });
+
+    await updateTransactionFromForm(db as any, { id: 'legacy', data: { ...form, type: 'transfer', category_id: null, amount: 20 } }, {}, 'EUR');
+
+    expect((await rows(db))[0]).toMatchObject({ type: 'transfer', amount: -2000, baseAmount: 2000, transfer_id: null });
+  });
+
+  it('creates a transfer without a counter account as a single row, without rates', async () => {
+    const db = await seed();
+
+    await createTransactionFromForm(db as any, { ...form, type: 'transfer', category_id: null, currency: 'USD', baseAmount: 10 }, undefined, 'EUR');
+
+    expect(await rows(db)).toEqual([expect.objectContaining({ type: 'transfer', amount: 1234, baseAmount: 1000, transfer_id: null })]);
+  });
+
+  it('stores the signed amount of an opening balance on update', async () => {
+    const db = await seed();
+    await seedTransaction(db, { id: 'opening', type: 'transfer', amount: 5000, category_id: null });
+    await db.runAsync('UPDATE transactions SET is_adjustment = 1');
+
+    await updateTransactionFromForm(db as any, { id: 'opening', data: { ...form, type: 'transfer', category_id: null, amount: -20 } }, {}, 'EUR');
+
+    expect((await rows(db))[0]).toMatchObject({ amount: -2000, baseAmount: 2000 });
+  });
+
+  it('updates an expense in place', async () => {
+    const db = await seed();
+    await seedTransaction(db);
+
+    await updateTransactionFromForm(db as any, { id: 'txn_1', data: { ...form, amount: 7.5 } }, undefined, 'EUR');
+
+    expect(await rows(db)).toEqual([expect.objectContaining({ amount: 750, baseAmount: 750 })]);
   });
 });

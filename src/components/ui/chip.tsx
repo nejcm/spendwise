@@ -18,10 +18,11 @@ export type ChipProps = Omit<PressableProps, 'children'> & {
   selected?: boolean;
   /** `solid` fills the selected chip with primary, for pickers inside sheets. */
   tone?: 'soft' | 'solid';
+  size?: 'sm' | 'md';
   className?: string;
 };
 
-export function Chip({ label, icon, selected = false, tone = 'soft', className, style, ...props }: ChipProps) {
+export function Chip({ label, icon, selected = false, tone = 'soft', size = 'md', className, style, ...props }: ChipProps) {
   const solid = selected && tone === 'solid';
   return (
     <Pressable
@@ -29,14 +30,15 @@ export function Chip({ label, icon, selected = false, tone = 'soft', className, 
       accessibilityState={{ selected }}
       style={(state) => getPressedStyle(state, style)}
       className={cn(
-        'h-9.5 flex-row items-center gap-1.5 self-start rounded-full border pr-3.5 pl-2.5',
+        'flex-row items-center gap-1.5 self-start rounded-full border',
+        size === 'sm' ? 'h-8 pr-3 pl-2' : 'h-9.5 pr-3.5 pl-2.5',
         solid ? 'border-transparent bg-primary' : selected ? 'border-accent-line bg-accent-soft' : 'border-transparent bg-card-2',
         className,
       )}
       {...props}
     >
       {renderIcon(icon)}
-      <Text className={cn('text-sm font-medium', solid && 'text-primary-foreground')}>{label}</Text>
+      <Text className={cn(size === 'sm' ? 'text-xs' : 'text-sm', 'font-medium', solid && 'text-primary-foreground')}>{label}</Text>
     </Pressable>
   );
 }

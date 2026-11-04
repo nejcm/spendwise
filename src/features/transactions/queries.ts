@@ -1,14 +1,17 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import type { MonthSummary, Transaction, TransactionInsertData, TransactionWithCategory, TransferInsertData } from './types';
+import type { MonthSummary, Transaction, TransactionFormData, TransactionInsertData, TransactionWithCategory, TransferInsertData } from './types';
 import type { CurrencyKey } from '@/features/currencies';
 import type { RatesMap } from '@/features/currencies/queries';
 import type { ScheduledTransactionRun } from '@/features/scheduled-transactions/types';
 
+import { computeBaseAmount } from '@/features/currencies/conversion';
 import { convertAmount } from '@/features/currencies/queries';
+import { amountToCents } from '@/features/formatting/helpers';
 import { getCurrentMonthRange } from '@/lib/date/helpers';
 import { generateId, inFilter, insertRow, withWriteTransaction } from '@/lib/sqlite';
 import { normalizeTag, tagKey } from './helpers';
+import { inferMerchantLogoSlug } from './merchant-logo/infer';
 
 // ─── Read Queries ───
 
@@ -346,6 +349,55 @@ export async function updateTransaction(
     );
     if (data.tags) await replaceTags(db, [id], data.tags);
   });
+}
+
+export function prepareTransactionData(
+  item: TransactionFormData,
+  rates: RatesMap | undefined,
+  baseCurrency: CurrencyKey,
+): TransactionInsertData {
+  const amount = item.amount || 0;
+  return {
+    ...item,
+    amount: amountToCents(amount),
+    baseAmount: amount === 0 ? 0 : (item.baseAmount ? amountToCents(item.baseAmount) : computeBaseAmount(Math.abs(amountToCents(amount)), item.currency, baseCurrency, rates ?? {})),
+    baseCurrency,
+    merchant_name: item.merchant_name?.trim() || null,
+    merchant_logo_slug: inferMerchantLogoSlug({ merchant_name: item.merchant_name, note: item.note }),
+    location: item.location?.trim() || null,
+  };
+}
+
+/** `rates` must be loaded for a transfer or when `data.baseAmount` is missing. */
+export async function createTransactionFromForm(
+  db: SQLiteDatabase,
+  data: TransactionFormData,
+  rates: RatesMap | undefined,
+  baseCurrency: CurrencyKey,
+): Promise<string> {
+  const prepared = prepareTransactionData(data, rates, baseCurrency);
+  if (data.type === 'transfer' && data.to_account_id) {
+    return createTransfer(db, { ...prepared, to_account_id: data.to_account_id }, rates ?? {});
+  }
+  return createTransaction(db, prepared);
+}
+
+/** `rates` must be loaded for a transfer or when `data.baseAmount` is missing. */
+export async function updateTransactionFromForm(
+  db: SQLiteDatabase,
+  { id, data }: { id: string; data: TransactionFormData },
+  rates: RatesMap | undefined,
+  baseCurrency: CurrencyKey,
+): Promise<void> {
+  const prepared = prepareTransactionData(data, rates, baseCurrency);
+  if (data.type !== 'transfer') return updateTransaction(db, id, prepared);
+  const leg = await getTransactionById(db, id);
+  if (leg?.transfer_id && data.to_account_id) {
+    return updateTransfer(db, leg.transfer_id, { ...prepared, to_account_id: data.to_account_id }, rates ?? {});
+  }
+  // Legacy single leg: the form edits the absolute amount, the row keeps its direction. An opening balance is edited signed.
+  const amount = leg?.is_adjustment ? prepared.amount : (leg && leg.amount < 0 ? -1 : 1) * Math.abs(prepared.amount);
+  return updateTransaction(db, id, { ...prepared, amount });
 }
 
 /** Moves income and expense rows to `categoryId`; transfer legs are never touched. */

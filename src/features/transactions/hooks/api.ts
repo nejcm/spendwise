@@ -1,9 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import type { CurrencyKey } from '../../currencies';
-
 import type { TransactionFormData, TransactionInsertData } from '../types';
-import type { RatesMap } from '@/features/currencies/queries';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import * as Haptics from 'expo-haptics';
@@ -11,7 +8,6 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { Alert } from '@/components/ui';
 import { CircleAlert, TrashIcon } from '@/components/ui/icon';
 import { showSnackbar } from '@/components/ui/snackbar';
-import { computeBaseAmount } from '@/features/currencies/conversion';
 import { getRatesForDate, getRatesForDates } from '@/features/currencies/queries';
 import { captureError } from '@/lib/analytics';
 import { invalidateFor } from '@/lib/data/invalidation';
@@ -19,8 +15,6 @@ import { queryKeys } from '@/lib/data/query-keys';
 
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
-import { amountToCents } from '../../formatting/helpers';
-import { inferMerchantLogoSlug } from '../merchant-logo/infer';
 import * as queries from '../queries';
 
 // ─── Read Hooks ───
@@ -95,21 +89,8 @@ function onUndoError(error: unknown) {
   showSnackbar({ title: translate('common.undo_failed'), icon: CircleAlert });
 }
 
-function prepareTransactionData(
-  item: TransactionFormData,
-  rates: RatesMap | undefined,
-  baseCurrency: CurrencyKey,
-): TransactionInsertData {
-  const amount = item.amount || 0;
-  return {
-    ...item,
-    amount: amountToCents(amount),
-    baseAmount: amount === 0 ? 0 : (item.baseAmount ? amountToCents(item.baseAmount) : computeBaseAmount(Math.abs(amountToCents(amount)), item.currency, baseCurrency, rates ?? {})),
-    baseCurrency,
-    merchant_name: item.merchant_name?.trim() || null,
-    merchant_logo_slug: inferMerchantLogoSlug({ merchant_name: item.merchant_name, note: item.note }),
-    location: item.location?.trim() || null,
-  };
+function ratesForForm(db: SQLiteDatabase, data: TransactionFormData) {
+  return (data.type === 'transfer' && data.to_account_id) || !data.baseAmount ? getRatesForDate(db, data.date) : Promise.resolve(undefined);
 }
 
 export async function prepareTransactionsForInsert(
@@ -125,7 +106,7 @@ export async function prepareTransactionsForInsert(
   const baseCurrency = useAppStore.getState().currency;
   return items.map((item) => {
     const rates = item.baseAmount ? undefined : ratesByDate.get(item.date);
-    return prepareTransactionData(item, rates, baseCurrency);
+    return queries.prepareTransactionData(item, rates, baseCurrency);
   });
 }
 
@@ -135,14 +116,8 @@ export function useCreateTransaction(onSuccess?: (transactionId: string) => void
 
   return useMutation({
     mutationFn: async (data: TransactionFormData) => {
-      const baseCurrency = useAppStore.getState().currency;
-      if (data.type === 'transfer' && data.to_account_id) {
-        const rates = await getRatesForDate(db, data.date);
-        return queries.createTransfer(db, { ...prepareTransactionData(data, rates, baseCurrency), to_account_id: data.to_account_id }, rates);
-      }
-      // fetch rates only if baseAmount is not provided
-      const rates = data.baseAmount ? undefined : await getRatesForDate(db, data.date);
-      return queries.createTransaction(db, prepareTransactionData(data, rates, baseCurrency));
+      const rates = await ratesForForm(db, data);
+      return queries.createTransactionFromForm(db, data, rates, useAppStore.getState().currency);
     },
     onSuccess: (data) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -177,22 +152,8 @@ export function useUpdateTransaction(onSuccess?: (transactionId: string) => void
 
   return useMutation({
     mutationFn: async (params: { id: string; data: TransactionFormData }) => {
-      const { id, data } = params;
-      const baseCurrency = useAppStore.getState().currency;
-      if (data.type === 'transfer') {
-        const leg = await queries.getTransactionById(db, id);
-        const rates = await getRatesForDate(db, data.date);
-        const prepared = prepareTransactionData(data, rates, baseCurrency);
-        if (leg?.transfer_id && data.to_account_id) {
-          return queries.updateTransfer(db, leg.transfer_id, { ...prepared, to_account_id: data.to_account_id }, rates);
-        }
-        // Legacy single leg: the form edits the absolute amount, the row keeps its direction. An opening balance is edited signed.
-        const amount = leg?.is_adjustment ? prepared.amount : (leg && leg.amount < 0 ? -1 : 1) * Math.abs(prepared.amount);
-        return queries.updateTransaction(db, id, { ...prepared, amount });
-      }
-      // fetch rates only if baseAmount is not provided
-      const rates = data.baseAmount ? undefined : await getRatesForDate(db, data.date);
-      return queries.updateTransaction(db, id, prepareTransactionData(data, rates, baseCurrency));
+      const rates = await ratesForForm(db, params.data);
+      return queries.updateTransactionFromForm(db, params, rates, useAppStore.getState().currency);
     },
     onSuccess: (_, vars) => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

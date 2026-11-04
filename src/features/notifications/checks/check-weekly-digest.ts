@@ -2,9 +2,11 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import type { NotificationSettings } from '../types';
 import { addDays, getISOWeek, startOfISOWeek } from 'date-fns';
+import { formatCurrency } from '@/features/formatting/helpers';
 import { calendarDateToUnix } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { storage } from '@/lib/storage';
+import { getAppState } from '@/lib/store/store';
 import { getWeeklySpendSummary } from '../queries';
 import { send } from '../send';
 
@@ -32,7 +34,8 @@ export async function checkWeeklyDigest(
   const weekEnd = addDays(weekStart, 7);
   const summary = await getWeeklySpendSummary(db, calendarDateToUnix(weekStart), calendarDateToUnix(weekEnd));
 
-  const formatAmount = (cents: number) => (cents / 100).toFixed(2);
+  const { currency, numberFormat, currencyFormat } = getAppState();
+  const formatAmount = (cents: number) => formatCurrency(cents, currency, { numberFormat, currencyFormat });
 
   await send(
     translate('notifications.weekly_digest_title'),

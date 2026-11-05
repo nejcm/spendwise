@@ -1,0 +1,6 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["scripts/i18next-syntax-validation.js"],
+  "ignoreBinaries": ["eas", "maestro", "xed"],
+  "ignoreDependencies": ["eslint-plugin-react-hooks"]
+}

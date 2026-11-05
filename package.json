@@ -46,7 +46,7 @@
     "format": "eslint . --fix",
     "lint:translations": "eslint ./src/translations/ --fix --ext .json",
     "test": "jest --runInBand",
-    "verify": "pnpm run lint && pnpm run lint:ts && pnpm run lint:translations && pnpm run test",
+    "verify": "pnpm run lint && pnpm run lint:ts && pnpm run lint:translations && pnpm run knip:check && pnpm run test",
     "test:ci": "pnpm run test --coverage",
     "test:watch": "pnpm run test --watch",
     "install-maestro": "curl -Ls 'https://get.maestro.mobile.dev' | bash",

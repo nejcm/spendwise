@@ -73,10 +73,11 @@ Anything that toggles ships its un-toggle in the same change, tested:
 
 pnpm only — `preinstall` runs `only-allow pnpm`. Node per `engines` in `package.json` (`^22.13.0 || >=24`).
 
-- `pnpm verify` — lint + `tsc --noEmit` + translations + Jest. The gate.
+- `pnpm verify` — lint + `tsc --noEmit` + translations + knip + Jest. The gate.
 - `pnpm lint:ts` — types only, fastest signal.
 - `pnpm test -- path/to/file.test.ts` — targeted. Tests are colocated next to source.
 - `pnpm lint:translations` — required after touching `src/translations/`. Runs with `--fix`, so it rewrites key order.
+- `pnpm knip:check` — dead exports.
 - `pnpm doctor` — Expo dependency alignment; only when touching native deps.
 
 Verify UI changes in the browser pane via the `spendwise-web` config in `.claude/launch.json` (Expo web, port 8081) before calling them done. Web SQLite holds one open handle per origin: a "createSyncAccessHandle … already has the database file open" error means another 8081 tab is open — close it, or use `127.0.0.1:8081` for separate storage.

@@ -54,6 +54,9 @@ jobs:
         if: github.event_name != 'pull_request'
         run: pnpm run lint
 
+      - name: 🏃‍♂️ Run Knip
+        run: pnpm knip:check
+
       - name: 🏃‍♂️ Run Tests
         # ponytail: serialize native better-sqlite3 tests; revisit if worker crashes are resolved.
         run: pnpm run test:ci

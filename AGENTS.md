@@ -77,10 +77,9 @@ pnpm only — `preinstall` runs `only-allow pnpm`. Node per `engines` in `packag
 - `pnpm lint:ts` — types only, fastest signal.
 - `pnpm test -- path/to/file.test.ts` — targeted. Tests are colocated next to source.
 - `pnpm lint:translations` — required after touching `src/translations/`. Runs with `--fix`, so it rewrites key order.
-- `pnpm knip:check` — dead exports.
 - `pnpm doctor` — Expo dependency alignment; only when touching native deps.
 
-Assume a dev server is already running. Don't start one, don't kill one.
+Verify UI changes in the browser pane via the `spendwise-web` config in `.claude/launch.json` (Expo web, port 8081) before calling them done. Web SQLite holds one open handle per origin: a "createSyncAccessHandle … already has the database file open" error means another 8081 tab is open — close it, or use `127.0.0.1:8081` for separate storage.
 
 Fix lint and test failures your change introduced. Don't hand off a "done" task with a red `verify` unless you say plainly what is blocked and why, and state any checks you skipped.
 
@@ -89,6 +88,7 @@ Fix lint and test failures your change introduced. Don't hand off a "done" task 
 - **Migrations run at startup against real money.** `src/lib/sqlite/migrations.ts` is `PRAGMA user_version` gated and forward-only. Add a new `if (currentDbVersion < N)` block and set `PRAGMA user_version = N` at its end. Never edit an existing block, never renumber, never reorder — a shipped version has already run on someone's device.
 - The DB bootstrap module drops every table, and the seed and mock-data modules delete rows. Never call them from app code, from a test helper that touches the real DB, or from a "let me just reset it" debug path.
 - Deleting a column or index: SQLite will not give the rows back.
+- A pnpm `trustPolicy` rejection or an Expo Doctor failure on upgrade is a stop-and-report, not something to route around. Never loosen `trustPolicy`, and never add to `expo.install.exclude` or the doctor excludes in `package.json`.
 - No `git push`, no branch deletion, no `eas build` or release script unless asked — the release script tags and bumps the version.
 
 ## Conventions

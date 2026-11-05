@@ -199,7 +199,6 @@ export default antfu(
     rules: {
       'import/first': 'off',
       'import/newline-after-import': 'off',
-      'react-hooks/rules-of-hooks': 'off',
       'react/rules-of-hooks': 'off',
       'style/semi': 'off',
       'ts/no-unused-vars': 'off',

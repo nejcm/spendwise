@@ -94,7 +94,7 @@ Fix lint and test failures your change introduced. Don't hand off a "done" task 
 
 ## Conventions
 
-`@/` absolute imports. Route files thin — logic lives in `src/features/[feature]`. Relational finance data in SQLite, not Zustand; Zustand + MMKV for preferences and non-relational state only. TanStack Form + Zod for non-trivial forms. Reach for `src/components/ui` primitives before building a new control. Style with Uniwind `className` and shared tokens. All user-facing copy is translatable.
+ESLint rule names come from `@antfu/eslint-config`: `react/exhaustive-deps`, `react/rules-of-hooks`, `ts/…`, `style/…` — not `react-hooks/…` or `@typescript-eslint/…`. Check with `npx eslint --print-config <file>` before writing a disable comment. `@/` absolute imports. Route files thin — logic lives in `src/features/[feature]`. Relational finance data in SQLite, not Zustand; Zustand + MMKV for preferences and non-relational state only. TanStack Form + Zod for non-trivial forms. Reach for `src/components/ui` primitives before building a new control. Style with Uniwind `className` and shared tokens. All user-facing copy is translatable.
 
 ## Reference
 

@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Uniwind, useUniwind } from 'uniwind';
 import { setTheme, useAppStore } from '@/lib/store/store';
 
-export type { ThemeType as ColorSchemeType };
+;
 
 /**
  * this hooks should only be used while selecting the theme

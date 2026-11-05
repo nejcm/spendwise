@@ -9,16 +9,10 @@ export type OpenAiRequestMessage
     | { role: 'assistant'; content: string | null; tool_calls: readonly OpenAiToolCallPayload[] }
     | { role: 'tool'; tool_call_id: string; content: string };
 
-export type OpenAiToolCallPayload = {
+type OpenAiToolCallPayload = {
   id: string;
   type: 'function';
   function: { name: string; arguments: string };
-};
-
-export type OpenAiSendInput = {
-  apiKey: string;
-  systemPrompt: string;
-  messages: readonly OpenAiRequestMessage[];
 };
 
 function parseToolArguments(raw: string): Record<string, unknown> {
@@ -66,48 +60,6 @@ export function appendOpenAiToolResult(
     ...messages,
     { role: 'tool', tool_call_id: toolCallId, content: result },
   ];
-}
-
-export async function askOpenAI(apiKey: string, messages: readonly OpenAiRequestMessage[]) {
-  const body = {
-    model: OPEN_AI_MODEL,
-    messages,
-    tools: TOOL_DEFINITIONS_OPENAI,
-  };
-
-  const res = await expoFetch(OPEN_AI_API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    throw new Error('Failed to get response from OpenAI');
-  }
-
-  const json = await res.json();
-  const message = json.choices?.[0]?.message;
-  const finishReason = json.choices?.[0]?.finish_reason;
-
-  if (finishReason === 'tool_calls' && message?.tool_calls) {
-    const calls: ToolCall[] = (message.tool_calls as OpenAiToolCallPayload[]).map((tc) => ({
-      id: tc.id,
-      name: tc.function.name,
-      arguments: parseToolArguments(tc.function.arguments),
-    }));
-
-    return {
-      type: 'tool_calls' as const,
-      content: message.content ?? '',
-      calls,
-    };
-  }
-
-  const content = message?.content ?? '';
-  return { type: 'text' as const, content: typeof content === 'string' ? content : String(content) };
 }
 
 export async function streamAskOpenAI(

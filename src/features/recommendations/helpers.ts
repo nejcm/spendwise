@@ -20,7 +20,7 @@ function formatMoney(amountCents: number | null | undefined, currency: CurrencyK
   return formatCurrency(amountCents ?? 0, currency);
 }
 
-export function getPrimaryActionLabel(target: Recommendation['primaryTarget']) {
+function getPrimaryActionLabel(target: Recommendation['primaryTarget']) {
   switch (target) {
     case 'accounts':
       return translate('recommendations.actions.review_accounts');

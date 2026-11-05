@@ -215,7 +215,7 @@ async function insertCurrencyRateRows(
 }
 
 /** Saves all rates in a single transaction (upsert — refetching a day overwrites its rates). */
-export async function bulkSaveRates(
+async function bulkSaveRates(
   db: SQLiteDatabase,
   ratesByDate: Record<string, RateMap>,
 ): Promise<void> {
@@ -388,7 +388,7 @@ export async function saveRates(
 }
 
 /** Saves rates for a specific day-truncated Unix timestamp (upsert per day). */
-export async function saveRatesForDate(
+async function saveRatesForDate(
   db: SQLiteDatabase,
   rateMap: RateMap,
   dayTimestamp: number,
@@ -431,7 +431,7 @@ export async function loadOrFetchRates(db: SQLiteDatabase): Promise<RatesMap | u
   }
 }
 
-export async function refreshRates(db: SQLiteDatabase): Promise<RatesMap | undefined> {
+async function refreshRates(db: SQLiteDatabase): Promise<RatesMap | undefined> {
   const result = await fetchRates();
   if (!result) return undefined;
   await saveRates(db, result.rates);

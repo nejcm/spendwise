@@ -75,16 +75,6 @@ export function useAccountFlows(accountId: string, startDate: number | undefined
   });
 }
 
-export function useTotalBalance(yearMonth?: string) {
-  const db = useSQLiteContext();
-  return useQuery({
-    queryKey: yearMonth
-      ? queryKeys.accounts.totalBalanceForMonth(yearMonth)
-      : queryKeys.accounts.totalBalance,
-    queryFn: () => queries.getTotalBalance(db, yearMonth),
-  });
-}
-
 // ─── Write Hooks ───
 
 function onError(error: unknown) {
@@ -154,7 +144,7 @@ export function useUpdateAccountOrder() {
   });
 }
 
-export function useArchiveAccount(onSuccess?: () => void) {
+function useArchiveAccount(onSuccess?: () => void) {
   const db = useSQLiteContext();
   const queryClient = useQueryClient();
 

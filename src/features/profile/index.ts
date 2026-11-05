@@ -1,4 +1,4 @@
-export const AVATARS = {
+const AVATARS = {
   1: require('../../../assets/avatars/1.png'),
   2: require('../../../assets/avatars/2.png'),
   3: require('../../../assets/avatars/3.png'),

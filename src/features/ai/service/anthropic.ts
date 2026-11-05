@@ -40,17 +40,11 @@ async function buildAnthropicError(res: Response) {
 type AnthropicTextBlock = { type: 'text'; text: string };
 type AnthropicToolUseBlock = { type: 'tool_use'; id: string; name: string; input: Record<string, unknown> };
 type AnthropicToolResultBlock = { type: 'tool_result'; tool_use_id: string; content: string };
-export type AnthropicContentBlock = AnthropicTextBlock | AnthropicToolUseBlock | AnthropicToolResultBlock;
+type AnthropicContentBlock = AnthropicTextBlock | AnthropicToolUseBlock | AnthropicToolResultBlock;
 
 export type AnthropicRequestMessage = {
   role: 'user' | 'assistant';
   content: string | readonly AnthropicContentBlock[];
-};
-
-export type AnthropicSendInput = {
-  apiKey: string;
-  systemPrompt: string;
-  messages: readonly AnthropicRequestMessage[];
 };
 
 function parseToolArguments(raw: string): Record<string, unknown> {
@@ -121,54 +115,6 @@ const ANTHROPIC_HEADERS = {
 
 function buildHeaders(apiKey: string) {
   return { ...ANTHROPIC_HEADERS, 'x-api-key': apiKey };
-}
-
-export async function askAnthropic(
-  apiKey: string,
-  systemPrompt: string,
-  messages: readonly AnthropicRequestMessage[],
-): Promise<StreamResponse> {
-  const body = {
-    model: ANTHROPIC_MODEL,
-    max_tokens: ANTHROPIC_MAX_TOKENS,
-    system: systemPrompt,
-    messages,
-    tools: TOOL_DEFINITIONS_ANTHROPIC,
-  };
-
-  const res = await expoFetch(ANTHROPIC_API_URL, {
-    method: 'POST',
-    headers: buildHeaders(apiKey),
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    throw await buildAnthropicError(res);
-  }
-
-  const json = await res.json();
-  const content = json.content as AnthropicContentBlock[] | undefined;
-  const stopReason = json.stop_reason as string | undefined;
-
-  if (stopReason === 'tool_use' && content) {
-    const textContent = content
-      .filter((b): b is AnthropicTextBlock => b.type === 'text')
-      .map((b) => b.text)
-      .join('');
-
-    const calls: ToolCall[] = content
-      .filter((b): b is AnthropicToolUseBlock => b.type === 'tool_use')
-      .map((b) => ({ id: b.id, name: b.name, arguments: b.input }));
-
-    return { type: 'tool_calls', content: textContent, calls };
-  }
-
-  const textContent = content
-    ?.filter((b): b is AnthropicTextBlock => b.type === 'text')
-    .map((b) => b.text)
-    .join('') ?? '';
-
-  return { type: 'text', content: textContent };
 }
 
 type StreamAnthropicInput = {

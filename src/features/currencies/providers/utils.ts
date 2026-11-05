@@ -7,7 +7,7 @@ import { CURRENCY_VALUES } from '../index';
 /** Attempts per provider before giving up (handles rate limits / transient errors). */
 const RATE_FETCH_MAX_ATTEMPTS = 3;
 const RATE_FETCH_INITIAL_BACKOFF_MS = 400;
-export const RATE_FETCH_TIMEOUT_MS = 12_000;
+const RATE_FETCH_TIMEOUT_MS = 12_000;
 export const HISTORICAL_DATE_WALKBACK_DAYS = 5;
 /** Overall wall-clock budget for one historical lookup across walkback dates + providers. */
 export const HISTORICAL_WALKBACK_BUDGET_MS = 30_000;
@@ -24,7 +24,7 @@ function rateFetchBackoffDelayMs(attemptIndex: number): number {
   return exponential + jitter;
 }
 
-export function isRetryableHttpStatus(status: number): boolean {
+function isRetryableHttpStatus(status: number): boolean {
   return (
     status === 408
     || status === 429

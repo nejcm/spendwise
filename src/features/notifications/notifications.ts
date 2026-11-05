@@ -11,7 +11,7 @@ import { checkRecommendations } from './checks/check-recommendations';
 import { checkUpcomingBills } from './checks/check-upcoming-bills';
 import { checkWeeklyDigest } from './checks/check-weekly-digest';
 
-export { send } from './send';
+;
 
 export const notificationsQuery = {
   queryKey: queryKeys.canNotify,
@@ -40,7 +40,7 @@ export async function ensureAndroidChannel(): Promise<void> {
 }
 
 /** Request OS notification permissions. Call only when the user enables notifications. */
-export async function requestNotificationPermissions(): Promise<void> {
+async function requestNotificationPermissions(): Promise<void> {
   await Notifications.requestPermissionsAsync();
 }
 

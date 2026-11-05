@@ -15,7 +15,7 @@ const _useLocalStore = create<LocalStoreState>(() => (defaultState));
 
 export const useLocalStore = createSelectors(_useLocalStore);
 
-export function updateLocalState(state: Partial<LocalStoreState> | ((prev: LocalStoreState) => Partial<LocalStoreState>)): void {
+function updateLocalState(state: Partial<LocalStoreState> | ((prev: LocalStoreState) => Partial<LocalStoreState>)): void {
   useLocalStore.setState((prev) => ({ ...prev, ...(typeof state === 'function' ? state(prev) : state) }));
 }
 export function triggerScan(type: ScanTriggeredType = 'select'): void {

@@ -45,7 +45,7 @@ function clearChatHistory(undoable: boolean) {
   });
 }
 
-export type ChatState = {
+type ChatState = {
   isStreaming: boolean;
   streamingAssistantId: string | null;
   streamedAssistantContent: string;

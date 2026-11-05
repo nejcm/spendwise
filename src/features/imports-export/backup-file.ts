@@ -6,8 +6,8 @@ import { exportBackup } from '@/features/imports-export/backup';
 import { IS_WEB } from '@/lib/base';
 import { getAppState, updateAutoBackup } from '@/lib/store/store';
 
-export const BACKUP_FILE_NAME_PREFIX = 'spendwise-backup-';
-export const AUTO_BACKUP_SUBDIR = 'spendwise-auto-backups';
+const BACKUP_FILE_NAME_PREFIX = 'spendwise-backup-';
+const AUTO_BACKUP_SUBDIR = 'spendwise-auto-backups';
 export const DEFAULT_AUTO_BACKUP_RETENTION = 12;
 
 export type AutoBackupInterval = 'daily' | 'weekly' | 'monthly';
@@ -22,7 +22,7 @@ export function buildManualBackupFileName(date = new Date()): string {
   return `${BACKUP_FILE_NAME_PREFIX}${date.toISOString().slice(0, 10)}.json`;
 }
 
-export function getAutoBackupDirectory(): Directory | null {
+function getAutoBackupDirectory(): Directory | null {
   if (IS_WEB) return null;
   return new Directory(Paths.document, AUTO_BACKUP_SUBDIR);
 }

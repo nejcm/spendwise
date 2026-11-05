@@ -105,7 +105,7 @@ export function planScheduledRuns(
   };
 }
 
-export function buildGeneratedTransactionNote(note?: string | null): string | null {
+function buildGeneratedTransactionNote(note?: string | null): string | null {
   const normalized = note?.trim();
   return normalized || null;
 }

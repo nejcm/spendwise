@@ -114,7 +114,7 @@ type InferInput = {
   note?: string | null;
 };
 
-export const MerchantsMap: Dict<{ contains: string[]; icon: SimpleIcon }> = {
+const MerchantsMap: Dict<{ contains: string[]; icon: SimpleIcon }> = {
   adidas: { contains: ['adidas'], icon: siAdidas },
   afterpay: { contains: ['afterpay'], icon: siAfterpay },
   airbnb: { contains: ['airbnb', 'air bnb'], icon: siAirbnb },

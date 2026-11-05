@@ -1,12 +1,12 @@
 import type { Language } from './types';
 
-export type LanguageOption = {
+type LanguageOption = {
   name: string;
   value: Language;
   image: string;
 };
 
-export const LANGUAGES: LanguageOption[] = [
+const LANGUAGES: LanguageOption[] = [
   { name: 'English', value: 'en', image: require('../../../assets/flags/us.jpg') },
   { name: 'Deutsch', value: 'de', image: require('../../../assets/flags/de.jpg') },
 ];

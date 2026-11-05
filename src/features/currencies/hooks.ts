@@ -52,19 +52,6 @@ function onError(error: unknown) {
   Alert.alert(translate('common.error'), error instanceof Error ? error.message : translate('common.error_description'));
 }
 
-export function useRefreshRates() {
-  const db = useSQLiteContext();
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: () => queries.refreshRates(db),
-    onSuccess: () => {
-      invalidateFor(queryClient, 'currencyRates');
-    },
-    onError,
-  });
-}
-
 /**
  * Mutation for changing the user's preferred display currency.
  *

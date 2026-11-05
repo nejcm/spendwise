@@ -126,7 +126,7 @@ function MapStep({ headers, mapping, onMapping, onNext, loading }: MapStepProps)
   );
 }
 
-export type PreviewStepProps = {
+type PreviewStepProps = {
   onImport: (rows: ParsedRow[]) => void;
   preview: ParsedRow[];
   skipped: SkippedRow[];

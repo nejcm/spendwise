@@ -2,8 +2,8 @@
 
 import type { OptionType } from '@/components/ui';
 
-export const expenseColor = 'rgba(248, 60, 78, 0.88)';
-export const incomeColor = 'rgba(37, 174, 94, 0.88)';
+const expenseColor = 'rgba(248, 60, 78, 0.88)';
+const incomeColor = 'rgba(37, 174, 94, 0.88)';
 
 export const chartColors = [
   expenseColor,
@@ -159,12 +159,8 @@ export function getRandomColor() {
   return COLORS[Math.floor(Math.random() * COLORS.length)];
 }
 
-export function isHexColor(value: Maybe<string>) {
+function isHexColor(value: Maybe<string>) {
   return !!value?.startsWith('#');
-}
-
-export function isBgColor(value: Maybe<string>) {
-  return !!value?.startsWith('bg-');
 }
 
 /**

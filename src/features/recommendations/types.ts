@@ -1,18 +1,18 @@
 import type { CurrencyKey } from '@/features/currencies';
 
-export type RecommendationKind
+type RecommendationKind
   = | 'unusual_spending'
     | 'upcoming_cashflow'
     | 'category_anomaly'
     | 'subscription_reminder'
     | 'budget_suggestion';
 
-export type RecommendationSeverity
+type RecommendationSeverity
   = | 'high'
     | 'medium'
     | 'low';
 
-export type RecommendationActionTarget
+type RecommendationActionTarget
   = | 'transactions'
     | 'scheduled'
     | 'accounts'

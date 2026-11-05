@@ -6,7 +6,7 @@ import { memo } from 'react';
 import { cn } from '@/lib/cn';
 import { useThemeConfig } from '../../lib/theme/use-theme-config';
 
-export type SkeletonContainerProps = {
+type SkeletonContainerProps = {
   className?: string;
   children: (props: Parameters<typeof TMSkeleton>[0]) => React.ReactNode;
 };
@@ -32,8 +32,7 @@ function SkeletonWrapperComponent({ className, children }: SkeletonContainerProp
   );
 }
 
-export const SkeletonWrapper = memo(SkeletonWrapperComponent);
-export default SkeletonWrapper;
+const SkeletonWrapper = memo(SkeletonWrapperComponent);
 
 export type SkeletonBoxProps = {
   height?: number | DimensionValue;
@@ -49,7 +48,7 @@ export function Skeleton({ height, width, className }: SkeletonBoxProps) {
   );
 }
 
-export type LoaderDimensions = [number | DimensionValue, number | DimensionValue, string?][];
+type LoaderDimensions = [number | DimensionValue, number | DimensionValue, string?][];
 export type SkeletonRowsProps = {
   count?: number;
   /** Array of [width, height] pairs */

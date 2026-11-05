@@ -28,16 +28,16 @@ export type HomeScreenChartType = 'none' | 'balance' | 'category_spending';
 
 export type PeriodMode = 'year' | 'month' | 'week' | 'custom' | 'all' | 'today' | 'day' | 'this-week' | 'this-month' | 'this-year';
 
-export type PeriodSelectionYear = { mode: 'year'; year: number };
+type PeriodSelectionYear = { mode: 'year'; year: number };
 export type PeriodSelectionMonth = { mode: 'month'; year: number; month: number };
 export type PeriodSelectionWeek = { mode: 'week'; year: number; week: number };
-export type PeriodSelectionCustom = { mode: 'custom'; startDate: string; endDate: string };
-export type PeriodSelectionAll = { mode: 'all' };
-export type PeriodSelectionToday = { mode: 'today' };
-export type PeriodSelectionDay = { mode: 'day'; date: string };
-export type PeriodSelectionThisWeek = { mode: 'this-week' };
-export type PeriodSelectionThisMonth = { mode: 'this-month' };
-export type PeriodSelectionThisYear = { mode: 'this-year' };
+type PeriodSelectionCustom = { mode: 'custom'; startDate: string; endDate: string };
+type PeriodSelectionAll = { mode: 'all' };
+type PeriodSelectionToday = { mode: 'today' };
+type PeriodSelectionDay = { mode: 'day'; date: string };
+type PeriodSelectionThisWeek = { mode: 'this-week' };
+type PeriodSelectionThisMonth = { mode: 'this-month' };
+type PeriodSelectionThisYear = { mode: 'this-year' };
 export type PeriodSelection
   = | PeriodSelectionYear
     | PeriodSelectionMonth
@@ -221,11 +221,6 @@ export const getAppState = () => _useAppStore.getState();
 export function updateAppState(state: Partial<AppState> | ((prev: AppState) => Partial<AppState>)) {
   return _useAppStore.setState((prev) => ({ ...prev, ...(typeof state === 'function' ? state(prev) : state) }));
 };
-
-// Profile actions
-export function setProfile(profile: AppState['profile']) {
-  return updateAppState({ profile });
-}
 export function updateProfile(profile: Partial<AppState['profile']>) {
   return updateAppState((prev) => ({ profile: { ...prev.profile, ...profile } }));
 }
@@ -265,10 +260,6 @@ export function setTheme(theme: ThemeType) {
 
 export function setAccentColor(colorTheme: AccentType) {
   return updateAppState({ colorTheme });
-}
-
-export function setDensity(density: DensityType) {
-  return updateAppState({ density });
 }
 
 export function setLastPrimaryTabPath(lastPrimaryTabPath: PrimaryTabPath) {
@@ -330,15 +321,6 @@ export function setPeriodSelection(periodSelection: PeriodSelection) {
   return updateAppState({ periodSelection });
 }
 
-// Other actions
-export function setLastUsed(lastUsed: AppState['lastUsed']) {
-  return updateAppState({ lastUsed });
-}
-export function updateLastUsed(lastUsed: Partial<AppState['lastUsed']>) {
-  return updateAppState((prev) => ({ lastUsed: { ...prev.lastUsed, ...lastUsed } }));
-}
-export const selectLastUsed = (state: AppState) => state.lastUsed;
-
 export function addLastUsedCurrency(currency: CurrencyKey) {
   return _useAppStore.setState((prev) => {
     const existing = prev.lastUsed.currencies ?? [];
@@ -381,10 +363,7 @@ export const selectAccountFormPrefs = (state: AppState) => state.formPrefs.accou
 export function updateNotifications(notifications: Partial<AppState['notifications']>) {
   return updateAppState((prev) => ({ notifications: { ...prev.notifications, ...notifications } }));
 }
-export const selectNotifications = (state: AppState) => state.notifications;
-export const selectNotificationSettings = (state: AppState) => state.notifications;
 
 export function updateAutoBackup(partial: Partial<AutoBackupSettings>) {
   return updateAppState((prev) => ({ autoBackup: { ...prev.autoBackup, ...partial } }));
 }
-export const selectAutoBackup = (state: AppState) => state.autoBackup;

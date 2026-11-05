@@ -16,8 +16,6 @@ import { IS_WEB } from '../base';
 type DefaultLocale = typeof resources.en.translation;
 export type TxKeyPath = RecursiveKeyOf<DefaultLocale>;
 
-export const LOCAL = 'local';
-
 export const getLanguage = () => getAppState().language;
 
 export const translate = memoize(
@@ -25,7 +23,7 @@ export const translate = memoize(
   (key: TxKeyPath, options: typeof TranslateOptions) => (options ? key + JSON.stringify(options) : key),
 );
 
-export function changeLanguage(lang: Language) {
+function changeLanguage(lang: Language) {
   i18n.changeLanguage(lang);
   I18nManager.forceRTL(false);
   if (Platform.OS === 'ios' || Platform.OS === 'android') {

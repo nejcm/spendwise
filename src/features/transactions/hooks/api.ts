@@ -93,7 +93,7 @@ function ratesForForm(db: SQLiteDatabase, data: TransactionFormData) {
   return (data.type === 'transfer' && data.to_account_id) || !data.baseAmount ? getRatesForDate(db, data.date) : Promise.resolve(undefined);
 }
 
-export async function prepareTransactionsForInsert(
+async function prepareTransactionsForInsert(
   db: SQLiteDatabase,
   items: TransactionFormData[],
 ): Promise<TransactionInsertData[]> {

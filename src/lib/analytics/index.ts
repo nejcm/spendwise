@@ -1,1 +1,1 @@
-export { captureError, captureEvent, setAnalyticsEnabled } from './posthog';
+export { captureError, setAnalyticsEnabled } from './posthog';

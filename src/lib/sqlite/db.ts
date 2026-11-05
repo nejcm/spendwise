@@ -29,15 +29,6 @@ export async function clearDbData(db: SQLiteDatabase): Promise<void> {
 };
 
 /**
- * Clears all transactions from the database.
- */
-export async function clearTransactionsDb(db: SQLiteDatabase): Promise<void> {
-  await db.execAsync(`
-    ${deleteTransactionsSql}
-  `);
-}
-
-/**
  * Clears core transactional data and optionally accounts/categories.
  * Transactions and recurring rules are always removed.
  */

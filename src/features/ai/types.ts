@@ -20,13 +20,13 @@ export type AiScope = {
   readonly accountIds: readonly string[] | 'all';
 };
 
-export type MessageRenderInfo = {
+type MessageRenderInfo = {
   readonly displayContent: string;
   readonly isLiveStreaming: boolean;
   readonly pendingWrite: WriteAction | null;
 };
 
-export type ChatActions = {
+type ChatActions = {
   readonly send: (text?: string) => void;
   readonly setDraft: (text: string) => void;
   readonly reset: () => void;
@@ -35,7 +35,7 @@ export type ChatActions = {
   readonly cancelWrite: () => void;
 };
 
-export type ChatScrollHandlers = {
+type ChatScrollHandlers = {
   readonly scrollViewRef: RefObject<FlatList<ChatMessage> | null>;
   readonly onContentSizeChange: () => void;
   readonly onScrollViewLayout: (event: LayoutChangeEvent) => void;
@@ -66,10 +66,6 @@ export type ProviderChatMessage = {
   readonly content: string;
 };
 
-export type AskInput = {
-  readonly messages: readonly ChatMessage[];
-};
-
 // ─── Tool Calling Types ───
 
 export type ToolCall = {
@@ -78,7 +74,7 @@ export type ToolCall = {
   readonly arguments: Record<string, unknown>;
 };
 
-export type RecategorizedTransaction = Pick<TransactionWithCategory, 'id' | 'date' | 'amount' | 'currency' | 'account_name' | 'category_name'>;
+type RecategorizedTransaction = Pick<TransactionWithCategory, 'id' | 'date' | 'amount' | 'currency' | 'account_name' | 'category_name'>;
 
 /** A change the model proposed; written only after the user confirms it. Names are resolved for display. */
 export type WriteAction

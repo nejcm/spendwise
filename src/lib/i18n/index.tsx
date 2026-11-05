@@ -30,9 +30,7 @@ i18n.use(initReactI18next).init({
 });
 
 // Is it a RTL language?
-export const isRTL: boolean = i18n.dir() === 'rtl';
+const isRTL: boolean = i18n.dir() === 'rtl';
 
 I18nManager.allowRTL(isRTL);
 I18nManager.forceRTL(isRTL);
-
-export default i18n;

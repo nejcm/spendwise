@@ -20,13 +20,6 @@ export type MonthlyTotals = {
   expense: number;
 };
 
-export type WeeklyTotals = {
-  week: number;
-  label: string;
-  income: number;
-  expense: number;
-};
-
 export type DailyTrendTotal = {
   date: number; // Unix seconds
   income: number;

@@ -8,7 +8,7 @@ import { useAppStore } from '@/lib/store/store';
 import { scanReceiptAnthropic } from './anthropic';
 import { scanReceiptOpenAI } from './openai';
 
-export const scannedReceiptSchema = z.object({
+const scannedReceiptSchema = z.object({
   /** Total amount in smallest currency unit (cents). Required — no fallback. */
   amount: z.number().positive().transform(Math.round),
   currency: z.string().toUpperCase().pipe(z.enum(CURRENCY_VALUES as CurrencyKey[])).optional().catch(undefined),

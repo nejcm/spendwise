@@ -45,19 +45,3 @@ export function useTrendByRange(startDate: number | undefined, endDate: number |
   const db = useSQLiteContext();
   return useQuery(trendByRangeQueryOptions(db, startDate, endDate));
 }
-
-export function useYearlySummary(year: number) {
-  const db = useSQLiteContext();
-  return useQuery({
-    queryKey: queryKeys.insights.yearlySummary(year),
-    queryFn: () => queries.getYearlySummary(db, year),
-  });
-}
-
-export function useCategorySpendForYear(year: number) {
-  const db = useSQLiteContext();
-  return useQuery({
-    queryKey: queryKeys.insights.categorySpendYear(year),
-    queryFn: () => queries.getCategorySpendForYear(db, year),
-  });
-}

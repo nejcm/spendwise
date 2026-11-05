@@ -1,4 +1,4 @@
-import type { CurrencyRatesProvider, DateRangeRatesResult, FetchRatesResult, RateMap } from './providers/types';
+import type { CurrencyRatesProvider, FetchRatesResult, RateMap } from './providers/types';
 import { captureError } from '@/lib/analytics';
 
 import { splitBy } from '@/lib/date/helpers';
@@ -11,7 +11,7 @@ import {
   priorCalendarDates,
 } from './providers/utils';
 
-export type { CurrencyRatesProvider, DateRangeRatesResult, FetchRatesResult, RateMap };
+export type { CurrencyRatesProvider, FetchRatesResult, RateMap };
 
 export type FetchRatesOptions = {
   reportToAnalytics?: boolean;

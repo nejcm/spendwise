@@ -24,50 +24,6 @@ export async function insertRow(db: SQLiteDatabase, table: string, data: Record<
   return id;
 }
 
-type UpdateRowArgs = {
-  db: SQLiteDatabase;
-  table: string;
-  id: string;
-  data: Record<string, unknown>;
-};
-
-/**
- * Update a row by ID.
- */
-export async function updateRow(args: UpdateRowArgs): Promise<void> {
-  const { db, table, id, data } = args;
-  const entries = Object.entries(data);
-  const setClause = entries.map(([key]) => `${key} = ?`).join(', ');
-  const values = entries.map(([_, value]) => value);
-
-  await db.runAsync(`UPDATE ${table} SET ${setClause}, updated_at = datetime('now') WHERE id = ?`, [...values, id] as (
-    | string
-    | number
-    | null
-  )[]);
-}
-
-/**
- * Delete a row by ID.
- */
-export async function deleteRow(db: SQLiteDatabase, table: string, id: string): Promise<void> {
-  await db.runAsync(`DELETE FROM ${table} WHERE id = ?`, [id]);
-}
-
-/**
- * Get a single row by ID.
- */
-export async function getById<T>(db: SQLiteDatabase, table: string, id: string): Promise<T | null> {
-  return db.getFirstAsync<T>(`SELECT * FROM ${table} WHERE id = ?`, [id]);
-}
-
-/**
- * Get all rows from a table with optional ordering.
- */
-export async function getAll<T>(db: SQLiteDatabase, table: string, orderBy: string = 'created_at DESC'): Promise<T[]> {
-  return db.getAllAsync<T>(`SELECT * FROM ${table} ORDER BY ${orderBy}`);
-}
-
 const writeQueues = new WeakMap<SQLiteDatabase, Promise<void>>();
 
 /** Runs `task` in a transaction, one at a time per connection: expo-sqlite lets a second BEGIN interleave and roll back the first. Never nest calls. */

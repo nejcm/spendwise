@@ -5,7 +5,7 @@ import { queryKeys } from '@/lib/data/query-keys';
 import { getRecommendations } from './queries';
 import { dismissRecommendation, getDismissedRecommendationIds } from './storage';
 
-export function useRecommendations() {
+function useRecommendations() {
   const db = useSQLiteContext();
   return useQuery({
     queryKey: queryKeys.recommendations.home,

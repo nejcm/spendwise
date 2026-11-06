@@ -177,6 +177,7 @@
     "legend_over": "Über Budget",
     "legend_used": "Budget genutzt",
     "legend_warning": "Über 90 %",
+    "long_press_hint": "Kategorie lange drücken, um eine Transaktion hinzuzufügen",
     "name_placeholder": "z. B. Essen",
     "name_required": "Name ist erforderlich",
     "new": "Neue Kategorie",

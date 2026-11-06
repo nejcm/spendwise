@@ -113,6 +113,7 @@ function CategoriesOverview() {
                               kind={kind}
                               budget={budgetFor(cell)}
                               onPress={() => router.push({ pathname: '/categories/[id]', params: { id: cell.category_id, kind } })}
+                              onLongPress={() => router.push({ pathname: '/transactions/new', params: { category_id: cell.category_id } })}
                             />
                           ))}
                       {row.length === 1 && <View className="flex-1" />}
@@ -121,6 +122,7 @@ function CategoriesOverview() {
                 </View>
               )}
           {kind === 'expense' && items.some((item) => budgetFor(item)) && <BudgetLegend />}
+          {items.length > 0 && <Text className="mt-3 text-center text-meta text-muted-foreground">{translate('categories.long_press_hint')}</Text>}
         </View>
       </ScrollView>
     </>

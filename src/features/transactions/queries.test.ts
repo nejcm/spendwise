@@ -288,6 +288,17 @@ describe('getMonthSummary', () => {
     expect(result.expense).toBe(0);
   });
 
+  it('excludes archived accounts', async () => {
+    const db = await createTestDb();
+    await seedBase(db);
+    await db.runAsync(`INSERT INTO accounts (id, name, type, currency, is_archived) VALUES ('acc_old', 'Old', 'checking', 'EUR', 1)`);
+    await seedTransaction(db, { id: 'txn_1', type: 'income', baseAmount: 200_000 });
+    await seedTransaction(db, { id: 'txn_2', account_id: 'acc_old', type: 'income', baseAmount: 70_000 });
+    await seedTransaction(db, { id: 'txn_3', account_id: 'acc_old', type: 'expense', baseAmount: 30_000 });
+
+    expect(await getMonthSummary(db as any, '2026-03')).toEqual({ income: 200_000, expense: 0, balance: 200_000 });
+  });
+
   it('includes a transaction at exactly startDate of the month', async () => {
     const db = await createTestDb();
     await seedBase(db);

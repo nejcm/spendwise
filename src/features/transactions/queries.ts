@@ -113,10 +113,11 @@ export async function getMonthSummary(
 
   const result = await db.getFirstAsync<{ income: number; expense: number }>(
     `SELECT
-       COALESCE(SUM(CASE WHEN type = 'income' THEN baseAmount ELSE 0 END), 0) as income,
-       COALESCE(SUM(CASE WHEN type = 'expense' THEN baseAmount ELSE 0 END), 0) as expense
-     FROM transactions
-     WHERE date >= ? AND date < ?`,
+       COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.baseAmount ELSE 0 END), 0) as income,
+       COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.baseAmount ELSE 0 END), 0) as expense
+     FROM transactions t
+     JOIN accounts a ON a.id = t.account_id
+     WHERE a.is_archived = 0 AND t.date >= ? AND t.date < ?`,
     [startDate, endDate],
   );
 

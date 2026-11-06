@@ -1,7 +1,7 @@
 import type { Account } from '../accounts/types';
 import type { Category } from '../categories/types';
 import type { ParsedRow } from './csv-parser';
-import { flagDuplicates, formatFileSize, importDateRange, mapCategoryNameToId, resolveImportRow } from '@/features/imports-export/helpers';
+import { flagDuplicates, formatFileSize, importDateRange, importRowToTransaction, mapCategoryNameToId, resolveImportRow } from '@/features/imports-export/helpers';
 
 function makeCategory(id: string, name: string): Category {
   return { id, name, icon: null, color: '#000000', kind: 'expense', budget: null, sort_order: 0, created_at: 0 };
@@ -157,6 +157,22 @@ describe('flagDuplicates', () => {
 
   it('keeps rows with unparseable dates unflagged', () => {
     expect(flag([{ date: 'not a date', amount: -1234, note: '', type: 'expense' }])).toEqual([false]);
+  });
+});
+
+describe('importRowToTransaction', () => {
+  const accounts: Account[] = [
+    { id: 'acc-1', name: 'Checking', description: null, type: 'checking', currency: 'EUR', icon: null, color: null, is_archived: 0, sort_order: 0, created_at: 0, updated_at: 0 },
+  ];
+
+  it('imports a transfer as an uncategorized signed leg', () => {
+    expect(importRowToTransaction({ date: '2026-03-18', amount: -5000, note: 'To savings', type: 'transfer', categoryName: 'Food & Dining', accountName: 'Checking' }, accounts, CATEGORIES, 'EUR'))
+      .toMatchObject({ account_id: 'acc-1', type: 'transfer', amount: -50, category_id: null });
+  });
+
+  it('categorizes income and expense rows', () => {
+    expect(importRowToTransaction({ date: '2026-03-18', amount: -1234, note: '', type: 'expense', categoryName: 'Food & Dining' }, accounts, CATEGORIES, 'EUR'))
+      .toMatchObject({ type: 'expense', amount: 12.34, category_id: 'food-id' });
   });
 });
 

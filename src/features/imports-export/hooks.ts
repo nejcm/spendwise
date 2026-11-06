@@ -1,6 +1,5 @@
 import type { QueryClient } from '@tanstack/react-query';
 import type { SQLiteDatabase } from 'expo-sqlite';
-import type { TransactionFormData } from '../transactions/types';
 import type { ParsedRow } from './csv-parser';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { File, Paths } from 'expo-file-system';
@@ -22,7 +21,7 @@ import { useAccounts } from '../accounts/hooks';
 import { useCategories } from '../categories/hooks';
 import { useCreateTransactions } from '../transactions/hooks/api';
 import { getTransactionMatchFields } from '../transactions/queries';
-import { flagDuplicates, importDateRange, mapCategoryNameToId, resolveImportRow } from './helpers';
+import { flagDuplicates, importDateRange, importRowToTransaction, resolveImportRow } from './helpers';
 
 export function useImportTransactions(onImported?: () => void) {
   const db = useSQLiteContext();
@@ -48,22 +47,7 @@ export function useImportTransactions(onImported?: () => void) {
       if (IS_AUTO_BACKUP_SUPPORTED) {
         await writeAutoBackupFile(db);
       }
-      const transactions: TransactionFormData[] = [];
-      for (const row of data) {
-        const { account_id, type, amount, currency, date } = resolveImportRow(row, accounts, preferredCurrency);
-        transactions.push({
-          account_id,
-          amount: amount / 100,
-          currency,
-          category_id: mapCategoryNameToId(row.categoryName, categories, row.note),
-          date,
-          note: row.note,
-          merchant_name: null,
-          location: null,
-          type,
-        });
-      }
-      return transactions;
+      return data.map((row) => importRowToTransaction(row, accounts, categories, preferredCurrency));
     },
     onSuccess: (txs) => {
       createTransactions.mutate(txs);

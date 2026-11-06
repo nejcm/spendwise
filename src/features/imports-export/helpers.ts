@@ -1,6 +1,6 @@
 import type { Account } from '../accounts/types';
 import type { Category } from '../categories/types';
-import type { Transaction } from '../transactions/types';
+import type { Transaction, TransactionFormData } from '../transactions/types';
 import type { ParsedRow } from './csv-parser';
 import type { CurrencyKey } from '@/features/currencies';
 import type { NumberFormat } from '@/features/formatting/constants';
@@ -197,6 +197,22 @@ export function resolveImportRow(row: ParsedRow, accounts: Account[], fallbackCu
     amount: type === 'transfer' ? row.amount : Math.abs(row.amount),
     currency: row.currency ?? fallbackCurrency,
     date: Math.floor(new Date(row.date).getTime() / 1000),
+  };
+}
+
+// The CSV names one account per row, so a transfer row imports as a single signed leg without a counter account.
+export function importRowToTransaction(row: ParsedRow, accounts: Account[], categories: Category[], fallbackCurrency: CurrencyKey): TransactionFormData {
+  const { account_id, type, amount, currency, date } = resolveImportRow(row, accounts, fallbackCurrency);
+  return {
+    account_id,
+    amount: amount / 100,
+    currency,
+    category_id: type === 'transfer' ? null : mapCategoryNameToId(row.categoryName, categories, row.note),
+    date,
+    note: row.note,
+    merchant_name: null,
+    location: null,
+    type,
   };
 }
 

@@ -6,6 +6,8 @@ import { SkeletonRows } from '@/components/ui/skeleton';
 import { formatCurrency, formatShortDate, todayUnix } from '@/features/formatting/helpers';
 import { BalanceLine } from '@/features/home/components/balance-line';
 import { cn } from '@/lib/cn';
+import { getCurrentMonthRange } from '@/lib/date/helpers';
+import { useCurrentYearMonth } from '@/lib/hooks/use-current-year-month';
 import { translate } from '@/lib/i18n';
 import { useAppStore } from '@/lib/store/store';
 import { useAccountFlows, useBalanceSeries } from '../api';
@@ -28,6 +30,9 @@ export function AccountHero({ account, startDate, endDate }: AccountHeroProps) {
   const budget = account.budget
     ? translate('accounts.budget_per_month', { amount: formatCurrency(account.budget, currency, { numberFormat, currencyFormat, fractionDigits: account.budget % 100 ? 2 : 0 }) })
     : null;
+  const [monthStart, monthEnd] = getCurrentMonthRange(useCurrentYearMonth());
+  const isThisMonth = startDate === monthStart && endDate === monthEnd;
+  const net = summary?.net ?? 0;
   const endLabel = summary && (summary.lastDay === todayUnix() ? translate('common.today') : formatShortDate(summary.lastDay));
 
   return (
@@ -47,13 +52,21 @@ export function AccountHero({ account, startDate, endDate }: AccountHeroProps) {
         ? <SkeletonRows count={3} />
         : (
             <>
-              <AmountText size="hero" value={summary.closing} currency={currency} numberOfLines={1} adjustsFontSizeToFit />
+              <View>
+                <Text className="text-sm text-muted-foreground">{translate(isThisMonth ? 'accounts.net_this_month' : 'accounts.net_in_period')}</Text>
+                <AmountText size="hero" value={net} prefix={net > 0 ? '+' : ''} currency={currency} className={cn(net > 0 && 'text-positive')} numberOfLines={1} adjustsFontSizeToFit />
+                {startDate !== undefined && (
+                  <Text className="text-meta text-muted-foreground">
+                    {`${translate('accounts.balance')} `}
+                    <FormattedCurrency value={summary.closing} currency={currency} className="text-foreground" />
+                  </Text>
+                )}
+              </View>
               {summary.values.length > 1 && (
                 <View className="gap-1">
                   <BalanceLine
                     testID="account-balance-line"
                     values={summary.values}
-                    lowIndex={summary.low.index}
                     height={76}
                     accessibilityLabel={translate('accounts.balance_chart_label', { start: formatShortDate(summary.start), end: endLabel })}
                   />
@@ -68,13 +81,6 @@ export function AccountHero({ account, startDate, endDate }: AccountHeroProps) {
                 <FlowTile label={translate('accounts.flow_spent')} value={flows.expense} prefix="-" />
                 <FlowTile label={translate('accounts.flow_moved_out')} value={flows.movedOut} prefix="-" />
               </View>
-              <Text className="text-meta text-muted-foreground">
-                {`${translate('accounts.started_at')} `}
-                <FormattedCurrency value={summary.opening} currency={currency} className="text-foreground" />
-                {` · ${translate('accounts.low_of')} `}
-                <FormattedCurrency value={summary.low.value} currency={currency} className="text-foreground" />
-                {` ${translate('accounts.low_on', { date: formatShortDate(summary.low.date) })}`}
-              </Text>
             </>
           )}
     </Card>

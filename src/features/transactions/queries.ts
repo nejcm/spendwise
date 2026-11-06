@@ -84,20 +84,6 @@ export async function hasUserTransactions(db: SQLiteDatabase): Promise<boolean> 
   return (await db.getFirstAsync('SELECT 1 FROM transactions WHERE is_adjustment = 0 LIMIT 1')) !== null;
 }
 
-export async function getRecentTransactions(
-  db: SQLiteDatabase,
-  limit: number,
-): Promise<TransactionWithCategory[]> {
-  const rows = await db.getAllAsync<TransactionRow>(
-    `${TRANSACTION_SELECT}
-     WHERE ${HIDE_TRANSFER_IN_LEG}
-     ORDER BY t.date DESC, t.created_at DESC
-     LIMIT ?`,
-    [limit],
-  );
-  return rows.map(withTags);
-}
-
 export async function getTransactionsSample(
   db: SQLiteDatabase,
   startDate: number,

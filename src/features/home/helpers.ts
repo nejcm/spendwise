@@ -10,11 +10,6 @@ export function monthName(monthIndex: number): string {
   return translate(`date.months.m${monthIndex + 1}` as TxKeyPath);
 }
 
-export function percentChange(current: number, previous: number): number | null {
-  if (previous === 0) return null;
-  return ((current - previous) / Math.abs(previous)) * 100;
-}
-
 /** `[opening, close of day 1, …, close of today]`; dates are UTC-midnight Unix seconds. */
 export function buildDailyBalances(opening: number, deltas: { date: number; delta: number }[], start: number, today: number): number[] {
   const days = Math.max(0, Math.floor((today - start) / DAY) + 1);
@@ -28,17 +23,23 @@ export function buildDailyBalances(opening: number, deltas: { date: number; delt
   return balances;
 }
 
-export function chartPoints(values: number[], width: number, height: number, inset = 8): [number, number][] {
+const MIN_RANGE_SHARE = 0.05;
+const INSET = 8;
+
+export function chartPoints(values: number[], width: number, height: number): [number, number][] {
   if (values.length < 2 || width <= 0) return [];
   const min = Math.min(...values);
-  const range = Math.max(...values) - min;
+  const max = Math.max(...values);
+  // A floor on the range keeps small wobbles small instead of stretching them to full height.
+  const range = Math.max(max - min, MIN_RANGE_SHARE * Math.max(Math.abs(max), Math.abs(min)));
+  const low = (max + min - range) / 2;
   const step = width / (values.length - 1);
-  const y = (value: number) => range === 0 ? height / 2 : inset + (1 - (value - min) / range) * (height - inset * 2);
+  const y = (value: number) => range === 0 ? height / 2 : INSET + (1 - (value - low) / range) * (height - INSET * 2);
   return values.map((value, i) => [i * step, y(value)]);
 }
 
-export function buildLinePath(values: number[], width: number, height: number, inset = 8): string {
-  return chartPoints(values, width, height, inset).map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
+export function buildLinePath(points: [number, number][]): string {
+  return points.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
 }
 
 export type NextBill = {

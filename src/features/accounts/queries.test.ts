@@ -303,6 +303,7 @@ describe('getBalanceSeries', () => {
 
     expect(await getBalanceSeries(db as any, MAR_START, APR_START)).toEqual({
       opening: 100_000,
+      adjusted: 0,
       deltas: [{ date: MAR_MID, delta: -2_000 }, { date: MAR_MID + 86_400, delta: 0 }],
     });
   });
@@ -318,6 +319,7 @@ describe('getBalanceSeries', () => {
 
     expect(await getBalanceSeries(db as any, MAR_START, APR_START, 'acc_1')).toEqual({
       opening: 150_000,
+      adjusted: 0,
       deltas: [{ date: MAR_MID, delta: -132_000 }],
     });
   });
@@ -331,7 +333,21 @@ describe('getBalanceSeries', () => {
 
     expect(await getBalanceSeries(db as any, MAR_START, APR_START)).toEqual({
       opening: 0,
+      adjusted: 0,
       deltas: [{ date: MAR_MID, delta: -10_000 }],
+    });
+  });
+
+  it('reports opening-balance entries inside the range as adjusted', async () => {
+    const db = await createTestDb();
+    await seedAccount(db);
+    await seedTransaction(db, { id: 'opening', type: 'transfer', amount: 150_000, baseAmount: 150_000, date: MAR_MID, is_adjustment: 1 });
+    await seedTransaction(db, { id: 'rent', type: 'expense', baseAmount: 2_000, date: MAR_MID });
+
+    expect(await getBalanceSeries(db as any, MAR_START, APR_START)).toEqual({
+      opening: 0,
+      adjusted: 150_000,
+      deltas: [{ date: MAR_MID, delta: 148_000 }],
     });
   });
 });

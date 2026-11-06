@@ -10,7 +10,6 @@ import {
   deleteTransactions,
   duplicateTransfer,
   getMonthSummary,
-  getRecentTransactions,
   getTagNames,
   getTransactionById,
   getTransactionMatchFields,
@@ -190,32 +189,6 @@ describe('getTransactionMatchFields', () => {
     expect(await getTransactionMatchFields(db as any, MAR_START, APR_START)).toEqual([
       { account_id: 'acc_1', type: 'expense', amount: 5000, currency: 'EUR', date: MAR_MID },
     ]);
-  });
-});
-
-// ─── getRecentTransactions ────────────────────────────────────────────────────
-
-describe('getRecentTransactions', () => {
-  it('returns up to the requested number of transactions', async () => {
-    const db = await createTestDb();
-    await seedBase(db);
-    await seedTransaction(db, { id: 'txn_1', date: MAR_MID });
-    await seedTransaction(db, { id: 'txn_2', date: MAR_MID + 1 });
-    await seedTransaction(db, { id: 'txn_3', date: MAR_MID + 2 });
-
-    const result = await getRecentTransactions(db as any, 2);
-    expect(result).toHaveLength(2);
-  });
-
-  it('orders by date descending', async () => {
-    const db = await createTestDb();
-    await seedBase(db);
-    await seedTransaction(db, { id: 'txn_1', date: MAR_MID });
-    await seedTransaction(db, { id: 'txn_2', date: MAR_MID + 1000 });
-
-    const result = await getRecentTransactions(db as any, 10);
-    expect(result[0].id).toBe('txn_2');
-    expect(result[1].id).toBe('txn_1');
   });
 });
 
@@ -778,7 +751,6 @@ describe('transfer pairs', () => {
     const outId = await createTransfer(db as any, transfer, {});
     await seedTransaction(db, { id: 'legacy_in', type: 'transfer', amount: 100, category_id: null });
 
-    expect((await getRecentTransactions(db as any, 10)).map((t) => t.id).sort()).toEqual([outId, 'legacy_in'].sort());
     expect((await getTransactionsSample(db as any, MAR_START, APR_START, { limit: 10 })).map((t) => t.id).sort()).toEqual([outId, 'legacy_in'].sort());
   });
 
@@ -791,7 +763,7 @@ describe('transfer pairs', () => {
     await db.runAsync(`UPDATE transactions SET transfer_id = 'zero_pair' WHERE id IN ('zero_a', 'zero_b')`);
 
     const all = await getTransactions(db as any, MAR_START, APR_START);
-    const recent = await getRecentTransactions(db as any, 10);
+    const recent = await getTransactionsSample(db as any, MAR_START, APR_START, { limit: 10 });
     expect(recent.map((t) => t.id).sort()).toEqual(all.filter((t) => !isTransferInLeg(t)).map((t) => t.id).sort());
     expect(recent.map((t) => t.id)).toEqual(expect.arrayContaining(['zero_a', 'zero_b']));
   });
@@ -915,7 +887,6 @@ describe('transaction tags', () => {
     expect(await db.getAllAsync('SELECT tag FROM transaction_tags')).not.toEqual(expected.map((tag) => ({ tag })));
     expect(await tagsOf(db, id)).toEqual(expected);
     expect((await getTransactions(db as any, MAR_START, APR_START))[0]!.tags).toEqual(expected);
-    expect((await getRecentTransactions(db as any, 5))[0]!.tags).toEqual(expected);
     expect((await getTransactionsSample(db as any, MAR_START, APR_START, { limit: 5 }))[0]!.tags).toEqual(expected);
     expect(await tagsOf(db, await createTransaction(db as any, row))).toEqual([]);
   });

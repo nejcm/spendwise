@@ -1,4 +1,5 @@
 import type { CategorySpend, CategoryType } from '@/features/insights/types';
+import * as Haptics from 'expo-haptics';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { DEFAULT_COLOR } from '@/components/color-selector';
@@ -18,9 +19,10 @@ type CategoryTileProps = {
   /** Budget scaled to the selected Period; undefined hides the ring. */
   budget: number | undefined;
   onPress: () => void;
+  onLongPress?: () => void;
 };
 
-export function CategoryTile({ item, kind, budget, onPress }: CategoryTileProps) {
+export function CategoryTile({ item, kind, budget, onPress, onLongPress }: CategoryTileProps) {
   const isIncome = kind === 'income';
   const amount = isIncome ? item.income_total : item.expense_total;
   const state = isIncome ? 'none' : getBudgetState(amount, budget);
@@ -36,6 +38,12 @@ export function CategoryTile({ item, kind, budget, onPress }: CategoryTileProps)
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
+      onLongPress={onLongPress && (() => {
+        Haptics.selectionAsync().catch(() => {});
+        onLongPress();
+      })}
+      accessibilityActions={onLongPress ? [{ name: 'longpress', label: translate('categories.add_to', { name }) }] : undefined}
+      onAccessibilityAction={onLongPress ? () => onLongPress() : undefined}
       style={getPressedStyle}
       className={cn('flex-1 flex-row items-center gap-2.5 rounded-[18px] border-[1.5px] border-transparent bg-card px-2', isCompact ? 'h-14' : 'h-16')}
     >

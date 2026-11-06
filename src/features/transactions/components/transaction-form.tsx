@@ -5,7 +5,7 @@ import { View } from 'react-native';
 import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboard-controller';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderButton, PageHeader } from '@/components/page-header';
-import { SolidButton } from '@/components/ui';
+import { OutlineButton, SolidButton } from '@/components/ui';
 import { ScanLine, X } from '@/components/ui/icon';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { useCategories } from '@/features/categories/api';
@@ -73,8 +73,8 @@ function FormFooter({ form, submit, isEdit, isLoading }: { form: TransactionForm
       children={(isSubmitting) => (
         <View className="flex-row gap-2.5 px-5 py-2">
           {!isEdit && (
-            <SolidButton
-              color="secondary"
+            <OutlineButton
+              color="default"
               size="lg"
               className="rounded-full"
               textClassName="text-[15px] font-medium"

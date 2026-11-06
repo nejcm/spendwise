@@ -2,7 +2,6 @@ import type { HostInstance, TextInput } from 'react-native';
 import type { TransactionFormApi } from '../hooks/form';
 import type { OptionType } from '@/components/ui';
 import type { Account } from '@/features/accounts/types';
-import type { Category } from '@/features/categories/types';
 import { useStore } from '@tanstack/react-form';
 import * as React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
@@ -142,27 +141,71 @@ export function AmountField({ form, amountRef, signed = false }: {
   );
 }
 
-function CategoryTile({ category, selected, invalid, onPress }: {
-  category: Category;
+const PillRowContext = React.createContext<((x: number, width: number) => void) | null>(null);
+
+function PillRow({ children }: { children: React.ReactNode }) {
+  const ref = React.useRef<ScrollView>(null);
+  const viewWidthRef = React.useRef(0);
+  const targetRef = React.useRef<{ x: number; width: number } | null>(null);
+  const center = React.useCallback((x: number, width: number) => {
+    targetRef.current = { x, width };
+    if (viewWidthRef.current) ref.current?.scrollTo({ x: Math.max(0, x + width / 2 - viewWidthRef.current / 2), animated: false });
+  }, []);
+  return (
+    <PillRowContext value={center}>
+      <ScrollView
+        ref={ref}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerClassName="gap-2 px-5"
+        accessibilityRole="radiogroup"
+        keyboardShouldPersistTaps="handled"
+        onLayout={(e) => {
+          viewWidthRef.current = e.nativeEvent.layout.width;
+          if (targetRef.current) center(targetRef.current.x, targetRef.current.width);
+        }}
+        onContentSizeChange={() => targetRef.current && center(targetRef.current.x, targetRef.current.width)}
+      >
+        {children}
+      </ScrollView>
+    </PillRowContext>
+  );
+}
+
+function Pill({ label, icon, selected, invalid = false, onPress }: {
+  label: string;
+  icon?: string | null;
   selected: boolean;
-  invalid: boolean;
+  invalid?: boolean;
   onPress: () => void;
 }) {
+  const center = React.use(PillRowContext);
+  const layoutRef = React.useRef<{ x: number; width: number } | null>(null);
+  React.useEffect(() => {
+    if (selected && layoutRef.current) center?.(layoutRef.current.x, layoutRef.current.width);
+  }, [selected, center]);
   return (
-    <Pressable
-      accessibilityRole="radio"
-      accessibilityState={{ checked: selected }}
-      accessibilityLabel={category.name}
-      accessibilityHint={invalid ? translate('transactions.form.category_error') : undefined}
-      onPress={onPress}
-      className={cn(
-        'h-19.5 max-w-28 min-w-19.5 items-center justify-center gap-1 rounded-[18px] border-2 px-2',
-        selected ? 'border-foreground bg-card' : invalid ? 'border-negative/40 bg-negative/10' : 'border-transparent bg-card',
-      )}
+    <View
+      onLayout={(e) => {
+        layoutRef.current = e.nativeEvent.layout;
+        if (selected) center?.(layoutRef.current.x, layoutRef.current.width);
+      }}
     >
-      <Text className="text-[22px]">{category.icon}</Text>
-      <Text numberOfLines={1} className="text-xs font-medium">{category.name}</Text>
-    </Pressable>
+      <Pressable
+        accessibilityRole="radio"
+        accessibilityState={{ checked: selected }}
+        accessibilityLabel={label}
+        accessibilityHint={invalid ? translate('transactions.form.category_error') : undefined}
+        onPress={onPress}
+        className={cn(
+          'h-10 flex-row items-center gap-1.5 rounded-full border-2 px-3.5',
+          selected ? 'border-foreground bg-card' : invalid ? 'border-negative/40 bg-negative/10' : 'border-transparent bg-card',
+        )}
+      >
+        {!!icon && <Text className="text-base">{icon}</Text>}
+        <Text numberOfLines={1} className="max-w-40 text-sm font-medium">{label}</Text>
+      </Pressable>
+    </View>
   );
 }
 
@@ -194,17 +237,18 @@ export function CategorySection({ form }: { form: TransactionFormApi }) {
                 renderSelectedItem={() => <Text className="text-[13px] text-muted-foreground">{translate('transactions.form.all_categories')}</Text>}
               />
             </View>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2 px-5" accessibilityRole="radiogroup">
+            <PillRow>
               {tiles.map((category) => (
-                <CategoryTile
+                <Pill
                   key={category.id}
-                  category={category}
+                  label={category.name}
+                  icon={category.icon}
                   selected={field.state.value === category.id}
                   invalid={!!error}
                   onPress={() => field.handleChange(category.id)}
                 />
               ))}
-            </ScrollView>
+            </PillRow>
           </View>
         );
       }}
@@ -353,6 +397,28 @@ function TagsRow({ value, onChange, onBlur, error, commitRef }: {
   );
 }
 
+function AccountPills({ name, label, accounts, value, onChange, error }: {
+  name: string;
+  label: string;
+  accounts: Account[];
+  value: string | null;
+  onChange: (id: string) => void;
+  error?: string;
+}) {
+  const fieldNode = useFieldNode(name);
+  return (
+    <View className="mt-4.5">
+      <View className="flex-row items-center gap-2 px-5 pb-2.5">
+        <Text ref={fieldNode} className="text-sm font-semibold">{label}</Text>
+        <RowError message={error} />
+      </View>
+      <PillRow>
+        {accounts.map((a) => <Pill key={a.id} label={a.name} icon={a.icon} selected={value === a.id} onPress={() => onChange(a.id)} />)}
+      </PillRow>
+    </View>
+  );
+}
+
 function AccountRows({ form, accounts }: { form: TransactionFormApi; accounts: Account[] }) {
   return (
     <form.Subscribe
@@ -362,8 +428,7 @@ function AccountRows({ form, accounts }: { form: TransactionFormApi; accounts: A
           <form.Field
             name="account_id"
             children={(field) => (
-              <AccountRow
-                first
+              <AccountPills
                 name="account_id"
                 label={translate(type === 'income' ? 'transactions.form.to' : type === 'transfer' && !paired ? 'transactions.account' : 'transactions.form.from')}
                 accounts={accounts}
@@ -377,7 +442,7 @@ function AccountRows({ form, accounts }: { form: TransactionFormApi; accounts: A
             <form.Field
               name="to_account_id"
               children={(field) => (
-                <AccountRow
+                <AccountPills
                   name="to_account_id"
                   label={translate('transactions.form.to')}
                   accounts={accounts}
@@ -411,13 +476,13 @@ export function DetailsCard({ form, accounts, isAdjustment, showBaseAmount, onBa
   const dateNode = useFieldNode('date');
   return (
     <>
+      {!isAdjustment && <AccountRows form={form} accounts={accounts} />}
       <Card className="mx-5 mt-4.5 rounded-card px-4">
-        {!isAdjustment && <AccountRows form={form} accounts={accounts} />}
         <form.Field
           name="date"
           children={(field) => (
             <ListRow
-              className={rowClassName(isAdjustment)}
+              className={rowClassName(true)}
               title={<RowLabel>{translate('transactions.form.when')}</RowLabel>}
               meta={<RowError message={submitted ? getFieldError(field) : undefined} />}
               trailing={(

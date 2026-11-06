@@ -12,7 +12,6 @@ export type BalanceSummary = {
   opening: number;
   /** Balance at the end of the period, future-dated rows included. */
   closing: number;
-  low: { value: number; index: number; date: number };
 };
 
 /** Undefined bounds mean all time: the line then starts on the first transaction day. */
@@ -21,17 +20,12 @@ export function summarizeBalance(series: BalanceSeries, startDate: number | unde
   const start = startDate ?? (firstDate === undefined ? today : Math.floor(firstDate / DAY) * DAY);
   const lastDay = endDate === undefined ? today : Math.min(today, endDate - DAY);
   const values = buildDailyBalances(series.opening, series.deltas, start, lastDay);
-  let lowIndex = 0;
-  values.forEach((value, i) => {
-    if (value < values[lowIndex]) lowIndex = i;
-  });
   return {
     values,
     start,
     lastDay,
     opening: series.opening,
     closing: series.deltas.reduce((sum, { delta }) => sum + delta, series.opening),
-    low: { value: values[lowIndex], index: lowIndex, date: start + Math.max(0, lowIndex - 1) * DAY },
   };
 }
 

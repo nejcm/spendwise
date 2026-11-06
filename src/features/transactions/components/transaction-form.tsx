@@ -71,7 +71,7 @@ function FormFooter({ form, submit, isEdit, isLoading }: { form: TransactionForm
     <form.Subscribe
       selector={(s) => s.isSubmitting}
       children={(isSubmitting) => (
-        <View className="flex-row gap-2.5 px-5 py-2">
+        <View className="flex-row gap-2.5 bg-background px-5 py-2">
           {!isEdit && (
             <OutlineButton
               color="default"

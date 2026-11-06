@@ -474,7 +474,7 @@ function ScheduledTransactionFormContent({
         <form.Subscribe
           selector={(s) => s.isSubmitting}
           children={(isSubmitting) => (
-            <View className="px-5 py-2">
+            <View className="bg-background px-5 py-2">
               <SolidButton
                 color="primary"
                 size="lg"

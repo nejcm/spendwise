@@ -1,25 +1,10 @@
 import type { ScheduledTransactionWithDetails } from '@/features/scheduled-transactions/types';
-import { budgetOutlook, buildDailyBalances, buildLinePath, getGreetingPeriod, getSetupSteps, percentChange, selectNextBill } from './helpers';
+import { budgetOutlook, buildDailyBalances, buildLinePath, chartPoints, getGreetingPeriod, getSetupSteps, selectNextBill } from './helpers';
 
 const DAY = 86_400;
 const OCT_1 = Date.UTC(2026, 9, 1) / 1000;
 const OCT_31 = Date.UTC(2026, 9, 31) / 1000;
 const NOV_1 = Date.UTC(2026, 10, 1) / 1000;
-
-describe('percentChange', () => {
-  it('returns the change relative to the previous value', () => {
-    expect(percentChange(740_075, 629_316)).toBeCloseTo(17.6, 1);
-    expect(percentChange(50, 100)).toBe(-50);
-  });
-
-  it('uses the magnitude of a negative previous value', () => {
-    expect(percentChange(0, -100)).toBe(100);
-  });
-
-  it('is null without a previous value', () => {
-    expect(percentChange(100, 0)).toBeNull();
-  });
-});
 
 describe('buildDailyBalances', () => {
   it('starts at the opening balance and closes each day up to today', () => {
@@ -39,16 +24,35 @@ describe('buildDailyBalances', () => {
 
 describe('buildLinePath', () => {
   it('spans the width and maps the max to the top inset', () => {
-    expect(buildLinePath([0, 10], 100, 64)).toBe('M0.0 56.0 L100.0 8.0');
+    expect(buildLinePath(chartPoints([0, 10], 100, 64))).toBe('M0.0 56.0 L100.0 8.0');
   });
 
   it('draws a flat series through the middle', () => {
-    expect(buildLinePath([5, 5, 5], 10, 64)).toBe('M0.0 32.0 L5.0 32.0 L10.0 32.0');
+    expect(buildLinePath(chartPoints([5, 5, 5], 10, 64))).toBe('M0.0 32.0 L5.0 32.0 L10.0 32.0');
+    expect(buildLinePath(chartPoints([0, 0], 10, 64))).toBe('M0.0 32.0 L10.0 32.0');
   });
 
   it('needs two points and a width', () => {
-    expect(buildLinePath([1], 100, 64)).toBe('');
-    expect(buildLinePath([1, 2], 0, 64)).toBe('');
+    expect(buildLinePath(chartPoints([1], 100, 64))).toBe('');
+    expect(buildLinePath(chartPoints([1, 2], 0, 64))).toBe('');
+  });
+});
+
+describe('chartPoints', () => {
+  it('keeps a small change gentle against a large balance', () => {
+    const [[, from], [, to]] = chartPoints([100_000, 99_000], 100, 64);
+    expect(from).toBeCloseTo(27.2);
+    expect(to).toBeCloseTo(36.8);
+  });
+
+  it('uses the full height once the change beats the floor', () => {
+    expect(chartPoints([100_000, 50_000], 100, 64).map(([, y]) => y)).toEqual([8, 56]);
+  });
+
+  it('floors the range by magnitude across zero', () => {
+    const [[, from], [, to]] = chartPoints([-100, -99], 100, 64);
+    expect(from).toBeCloseTo(36.8);
+    expect(to).toBeCloseTo(27.2);
   });
 });
 

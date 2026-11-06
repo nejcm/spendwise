@@ -13,6 +13,7 @@ function mockStub(testID: string) {
 
 jest.mock('@/features/accounts/api', () => ({ useAccountsWithBalance: jest.fn() }));
 jest.mock('@/features/transactions/api', () => ({ useHasUserTransactions: jest.fn(), useRecentTransactions: jest.fn() }));
+jest.mock('expo-router', () => ({ useNavigation: () => ({ addListener: () => jest.fn() }) }));
 jest.mock('@/features/scheduled-transactions/hooks', () => ({ useScheduledTransactions: () => ({ data: [] }) }));
 jest.mock('@/lib/hooks/use-refresh', () => ({ useRefresh: () => ({ refreshing: false, onRefresh: jest.fn() }) }));
 jest.mock('./category-spending-chart-card', () => ({ CategorySpendingChartCard: mockStub('chart') }));
@@ -28,9 +29,9 @@ jest.mock('./components/setup-checklist', () => ({ SetupChecklist: mockStub('set
 
 const adjustment = { id: 'adj', is_adjustment: 1 };
 
-function mockQueries({ hasUserTransactions, existsPending = false }: { hasUserTransactions?: boolean; existsPending?: boolean }) {
+function mockQueries({ hasUserTransactions, existsPending = false, recent = Array.from({ length: 5 }).fill(adjustment) }: { hasUserTransactions?: boolean; existsPending?: boolean; recent?: unknown[] }) {
   jest.mocked(useAccountsWithBalance).mockReturnValue({ data: [], isPending: false } as any);
-  jest.mocked(useRecentTransactions).mockReturnValue({ data: Array.from({ length: 5 }).fill(adjustment), isPending: false } as any);
+  jest.mocked(useRecentTransactions).mockReturnValue({ data: recent, isPending: false } as any);
   jest.mocked(useHasUserTransactions).mockReturnValue({ data: hasUserTransactions, isPending: existsPending } as any);
 }
 
@@ -61,5 +62,13 @@ describe('home screen empty state', () => {
     mockQueries({});
     render(<HomeScreen />);
     expect(screen.getByTestId('quick-actions')).toBeOnTheScreen();
+  });
+});
+
+describe('home screen recent activity', () => {
+  it('hides the section when the month has no transactions', () => {
+    mockQueries({ hasUserTransactions: true, recent: [] });
+    render(<HomeScreen />);
+    expect(screen.queryByTestId('recent')).not.toBeOnTheScreen();
   });
 });

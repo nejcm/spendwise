@@ -48,11 +48,11 @@ export function useHasUserTransactions(enabled = true) {
   });
 }
 
-export function useRecentTransactions(limit: number = 5) {
+export function useRecentTransactions(startDate: number, endDate: number, limit: number) {
   const db = useSQLiteContext();
   return useQuery({
-    queryKey: queryKeys.transactions.recent(limit),
-    queryFn: () => queries.getRecentTransactions(db, limit),
+    queryKey: queryKeys.transactions.recent(startDate, endDate, limit),
+    queryFn: () => queries.getTransactionsSample(db, startDate, endDate, { limit }),
   });
 }
 

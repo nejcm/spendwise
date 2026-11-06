@@ -5,6 +5,8 @@ import { useAccountsWithBalance } from '@/features/accounts/api';
 import { todayUnix } from '@/features/formatting/helpers';
 import { useScheduledTransactions } from '@/features/scheduled-transactions/hooks';
 import { useHasUserTransactions, useRecentTransactions } from '@/features/transactions/api';
+import { getCurrentMonthRange } from '@/lib/date/helpers';
+import { useCurrentYearMonth } from '@/lib/hooks/use-current-year-month';
 import { useRefresh } from '@/lib/hooks/use-refresh';
 import { useAppStore } from '@/lib/store/store';
 import { defaultStyles } from '@/lib/theme/styles';
@@ -27,11 +29,11 @@ export function HomeScreen() {
   const homeScreenChart = useAppStore.use.homeScreenChart();
   useAppStore.use.monthStartDay();
   const { data: accounts = [], isPending: accountsPending } = useAccountsWithBalance();
-  const { data: recent = [], isPending: recentPending } = useRecentTransactions(RECENT_LIMIT);
+  const [monthStart, monthEnd] = getCurrentMonthRange(useCurrentYearMonth());
+  const { data: recent = [], isPending: recentPending } = useRecentTransactions(monthStart, monthEnd, RECENT_LIMIT);
   const { data: hasUserTransactions, isPending: existsPending } = useHasUserTransactions();
   const { data: rules = [] } = useScheduledTransactions();
 
-  const total = accounts.reduce((sum, account) => sum + account.baseBalance, 0);
   const isEmpty = hasUserTransactions === false;
   const nextBill = selectNextBill(rules, new Set(accounts.map((account) => account.id)), todayUnix());
   const isLoading = accountsPending || recentPending || existsPending;
@@ -43,7 +45,7 @@ export function HomeScreen() {
         <HomeHeader isEmpty={!isLoading && isEmpty} />
         {!isLoading && (
           <View className="mt-5">
-            <BalanceCard total={total} accountCount={accounts.length} isEmpty={isEmpty} />
+            <BalanceCard isEmpty={isEmpty} />
             {isEmpty
               ? <SetupChecklist accountCount={accounts.length} hasTransactions={false} />
               : (
@@ -55,7 +57,7 @@ export function HomeScreen() {
                     {homeScreenChart === 'category_spending' && <View className="mt-3.5"><CategorySpendingChartCard /></View>}
                     {accounts.length > 0 && <AccountsCarousel accounts={accounts} />}
                     {nextBill && <NextBillRow bill={nextBill} />}
-                    <RecentActivity transactions={recent} />
+                    {recent.length > 0 && <RecentActivity transactions={recent} />}
                   </>
                 )}
           </View>

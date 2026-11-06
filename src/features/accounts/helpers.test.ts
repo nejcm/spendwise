@@ -14,13 +14,13 @@ describe('summarizeBalance', () => {
     ],
   };
 
-  it('runs from the opening balance to today and marks the low point', () => {
+  it('runs from the opening balance to today', () => {
     const summary = summarizeBalance(series, OCT_1, NOV_1, OCT_1 + 30 * DAY);
 
     expect(summary.values).toHaveLength(32);
     expect(summary.opening).toBe(150_000);
     expect(summary.closing).toBe(296_404);
-    expect(summary.low).toEqual({ value: 11_404, index: 24, date: OCT_1 + 23 * DAY });
+    expect(summary.values[24]).toBe(11_404);
   });
 
   it('stops a past period at its last day and still closes with every change', () => {
@@ -29,7 +29,6 @@ describe('summarizeBalance', () => {
     expect(summary.lastDay).toBe(NOV_1 - DAY);
     expect(summary.values).toHaveLength(32);
     expect(summary.closing).toBe(-500);
-    expect(summary.low.date).toBe(OCT_1 + 5 * DAY);
   });
 
   it('closes with future-dated rows the line has not reached yet', () => {
@@ -44,7 +43,6 @@ describe('summarizeBalance', () => {
 
     expect(summary.start).toBe(OCT_1);
     expect(summary.values).toEqual([0, 700, 700, 700]);
-    expect(summary.low).toEqual({ value: 0, index: 0, date: OCT_1 });
   });
 
   it('keeps a single point for a period that has not started', () => {

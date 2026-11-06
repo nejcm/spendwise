@@ -14,7 +14,7 @@ export const queryKeys = {
     all: ['transactions'] as const,
     list: (range: string) => ['transactions', 'list', range] as const,
     detail: (id: string) => ['transactions', 'detail', id] as const,
-    recent: (limit: number) => ['transactions', 'recent', limit] as const,
+    recent: (startDate: number, endDate: number, limit: number) => ['transactions', 'recent', startDate, endDate, limit] as const,
     exists: ['transactions', 'exists'] as const,
   },
 

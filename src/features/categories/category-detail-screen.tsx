@@ -3,7 +3,6 @@ import type { PeriodSelection } from '@/lib/store/store';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as React from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderButton, PageHeader } from '@/components/page-header';
 import { PeriodPill } from '@/components/period-pill';
 import { AmountText, Card, FocusAwareStatusBar, IconTile, SectionHeader, SolidButton, Text } from '@/components/ui';
@@ -33,7 +32,6 @@ const RECENT_COUNT = 5;
 export function CategoryDetailScreen() {
   const { id, kind: kindParam } = useLocalSearchParams<{ id: string; kind?: string }>();
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const selection = useAppStore.use.periodSelection();
   const [startDate, endDate] = usePeriodRange(selection);
   const refreshKeys = React.useMemo(() => [
@@ -57,7 +55,7 @@ export function CategoryDetailScreen() {
       <ScrollView
         className="flex-1"
         style={defaultStyles.transparentBg}
-        contentContainerStyle={{ paddingBottom: 88 + insets.bottom }}
+        contentContainerStyle={{ paddingBottom: 88 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <View pointerEvents="none" className="absolute inset-x-0 top-0 h-85 bg-linear-to-b from-wash to-background" />
@@ -97,7 +95,7 @@ export function CategoryDetailScreen() {
         </View>
       </ScrollView>
       {category && (
-        <View className="absolute inset-x-0 bottom-0 bg-background px-5 pt-2" style={{ paddingBottom: insets.bottom + 8 }}>
+        <View className="absolute inset-x-0 bottom-0 bg-background px-5 py-2">
           <SolidButton
             color="primary"
             size="lg"

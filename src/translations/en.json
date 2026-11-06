@@ -373,8 +373,8 @@
     },
     "month_intro": "Here's your {{month}}",
     "next_bill": {
+      "due": "Due {{when}}",
       "in_days": "in {{count}} days",
-      "label": "Next bill · {{when}}",
       "more": "+{{count}} more in {{month}}",
       "today": "today",
       "tomorrow": "tomorrow"
@@ -400,6 +400,7 @@
     "total_balance_many": "Total balance · {{count}} accounts",
     "total_balance_one": "Total balance · 1 account",
     "trend_vs_last_month": "vs last month",
+    "upcoming": "Upcoming",
     "vs_end_of": "vs end of {{month}}",
     "welcome": "Welcome",
     "welcome_subtitle": "Let's get your money in one place"

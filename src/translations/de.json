@@ -373,8 +373,8 @@
     },
     "month_intro": "Dein {{month}} im Überblick",
     "next_bill": {
+      "due": "Fällig {{when}}",
       "in_days": "in {{count}} Tagen",
-      "label": "Nächste Rechnung · {{when}}",
       "more": "+{{count}} weitere im {{month}}",
       "today": "heute",
       "tomorrow": "morgen"
@@ -400,6 +400,7 @@
     "total_balance_many": "Gesamtsaldo · {{count}} Konten",
     "total_balance_one": "Gesamtsaldo · 1 Konto",
     "trend_vs_last_month": "vs. letzten Monat",
+    "upcoming": "Anstehend",
     "vs_end_of": "vs. Ende {{month}}",
     "welcome": "Willkommen",
     "welcome_subtitle": "Bring dein Geld an einen Ort"

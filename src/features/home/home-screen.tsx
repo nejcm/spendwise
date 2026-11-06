@@ -53,8 +53,8 @@ export function HomeScreen() {
                     <SetupChecklist accountCount={accounts.length} hasTransactions />
                     <InsightCard />
                     {homeScreenChart === 'category_spending' && <View className="mt-3.5"><CategorySpendingChartCard /></View>}
-                    {nextBill && <NextBillRow bill={nextBill} />}
                     {accounts.length > 0 && <AccountsCarousel accounts={accounts} />}
+                    {nextBill && <NextBillRow bill={nextBill} />}
                     <RecentActivity transactions={recent} />
                   </>
                 )}

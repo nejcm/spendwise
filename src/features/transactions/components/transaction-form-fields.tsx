@@ -112,7 +112,7 @@ export function AmountField({ form, amountRef, signed = false }: {
                       accessibilityHint={error}
                       autoFocus={!form.getFieldValue('amount')}
                       containerClassName="min-w-[120px] shrink"
-                      className="h-auto rounded-none border-0 bg-transparent px-0 text-6xl font-bold tracking-tighter tabular-nums web:field-sizing-content"
+                      className="h-auto rounded-none border-0 bg-transparent px-0 text-6xl/tight font-bold tracking-tighter tabular-nums web:field-sizing-content"
                     />
                   </View>
                   <Pressable

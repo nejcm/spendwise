@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import { Card, Text } from '@/components/ui';
 import { useFormatMoney } from '@/features/categories/hooks';
-import { formatDateFull, formatNumber } from '@/features/formatting/helpers';
+import { formatDateFull } from '@/features/formatting/helpers';
 import { useTrendByRange } from '@/features/insights/api';
 import { useTransactions } from '@/features/transactions/api';
 import { TransactionCard } from '@/features/transactions/components/transaction-card';
@@ -11,8 +11,6 @@ import { isTransferInLeg } from '@/features/transactions/queries';
 import { cn } from '@/lib/cn';
 import { calendarDateToUnix, getMonthBoundaries, monthOfDay, unixToDate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
-import { shortenNumberString } from '@/lib/number';
-import { useAppStore } from '@/lib/store/store';
 import { dailyExpenses, heatLevels } from '../helpers';
 
 const DAY = 86400;
@@ -29,7 +27,6 @@ function calendarMonth(startDate: number | undefined, endDate: number | undefine
 
 export function CalendarTab({ startDate, endDate }: PeriodProps) {
   const format = useFormatMoney();
-  const numberFormat = useAppStore.use.numberFormat();
   const today = calendarDateToUnix(new Date());
   const [monthStart, monthEnd] = calendarMonth(startDate, endDate, today);
   const { data: rows = [] } = useTrendByRange(monthStart, monthEnd);
@@ -44,7 +41,6 @@ export function CalendarTab({ startDate, endDate }: PeriodProps) {
   const cells = [...Array.from({ length: leading }).fill(null) as null[], ...days.map((day, i) => ({ ...day, level: levels[i] }))];
   while (cells.length % 7) cells.push(null);
   const weeks = Array.from({ length: cells.length / 7 }, (_, i) => cells.slice(i * 7, i * 7 + 7));
-  const short = (value: number) => shortenNumberString(Math.round(value / 100), 100_000, 1, (n) => formatNumber(n, numberFormat, 1));
 
   return (
     <>
@@ -70,7 +66,7 @@ export function CalendarTab({ startDate, endDate }: PeriodProps) {
                   >
                     <Text className={cn('text-sm font-semibold', cell.level === 3 && 'text-accent-foreground')}>{unixToDate(cell.date).getUTCDate()}</Text>
                     <Text className={cn('text-[10px] tabular-nums opacity-85', cell.level === 3 && 'text-accent-foreground')} numberOfLines={1}>
-                      {cell.value > 0 ? short(cell.value) : '—'}
+                      {cell.value > 0 ? format(Math.round(cell.value / 100) * 100, 1, true) : '—'}
                     </Text>
                   </Pressable>
                 )

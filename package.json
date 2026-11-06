@@ -1,6 +1,6 @@
 {
   "name": "spendwise",
-  "version": "2.2.7",
+  "version": "2.2.8",
   "private": true,
   "packageManager": "pnpm@12.8.1",
   "engines": {

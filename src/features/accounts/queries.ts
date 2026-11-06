@@ -112,23 +112,24 @@ export async function getTotalBalance(
   return result?.total ?? 0;
 }
 
-/** Balance (Preferred Currency) before `startDate`, plus per-date net changes in `[startDate, endDate)`; all active accounts unless `accountId` is given. */
+/** Balance (Preferred Currency) before `startDate`, plus per-date changes in `[startDate, endDate)` and the opening-balance share of them (`adjusted`); all active accounts unless `accountId` is given. */
 export async function getBalanceSeries(
   db: SQLiteDatabase,
   startDate: number,
   endDate: number,
   accountId?: string,
-): Promise<{ opening: number; deltas: { date: number; delta: number }[] }> {
+): Promise<{ opening: number; adjusted: number; deltas: { date: number; delta: number }[] }> {
   const from = `FROM transactions t JOIN accounts a ON a.id = t.account_id WHERE ${accountId ? 't.account_id = ?' : 'a.is_archived = 0'}`;
   const scope = accountId ? [accountId] : [];
-  const [openingRow, deltas] = await Promise.all([
+  const [openingRow, adjustedRow, deltas] = await Promise.all([
     db.getFirstAsync<{ total: number }>(`SELECT COALESCE(SUM(${SIGNED_BASE_AMOUNT}), 0) AS total ${from} AND t.date < ?`, [...scope, startDate]),
+    db.getFirstAsync<{ total: number }>(`SELECT COALESCE(SUM(${SIGNED_BASE_AMOUNT}), 0) AS total ${from} AND t.is_adjustment = 1 AND t.date >= ? AND t.date < ?`, [...scope, startDate, endDate]),
     db.getAllAsync<{ date: number; delta: number }>(
       `SELECT t.date AS date, SUM(${SIGNED_BASE_AMOUNT}) AS delta ${from} AND t.date >= ? AND t.date < ? GROUP BY t.date ORDER BY t.date`,
       [...scope, startDate, endDate],
     ),
   ]);
-  return { opening: openingRow?.total ?? 0, deltas };
+  return { opening: openingRow?.total ?? 0, adjusted: adjustedRow?.total ?? 0, deltas };
 }
 
 /** Per-account net change in `[startDate, endDate)`, transfers included, opening-balance adjustments excluded. */

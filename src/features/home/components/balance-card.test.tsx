@@ -9,7 +9,7 @@ jest.mock('@/features/transactions/api', () => ({ useMonthSummary: jest.fn() }))
 jest.mock('./balance-line', () => ({ BalanceLine: () => null }));
 
 function mockQueries(income: number, expense = 0) {
-  jest.mocked(useBalanceSeries).mockReturnValue({ data: { opening: 0, deltas: [] } } as any);
+  jest.mocked(useBalanceSeries).mockReturnValue({ data: { opening: 0, adjusted: 0, deltas: [] } } as any);
   jest.mocked(useMonthSummary).mockReturnValue({ data: { income, expense, balance: income - expense } } as any);
 }
 
@@ -32,7 +32,7 @@ describe('balance card income row', () => {
 
 describe('balance card headline', () => {
   it('shows this month\'s net change, not the balance carried in', () => {
-    jest.mocked(useBalanceSeries).mockReturnValue({ data: { opening: 4_170_000, deltas: [{ date: 1, delta: 150_000 }, { date: 2, delta: -30_000 }] } } as any);
+    jest.mocked(useBalanceSeries).mockReturnValue({ data: { opening: 4_170_000, adjusted: 0, deltas: [{ date: 1, delta: 150_000 }, { date: 2, delta: -30_000 }] } } as any);
     jest.mocked(useMonthSummary).mockReturnValue({ data: { income: 0, expense: 0, balance: 0 } } as any);
     render(<BalanceCard isEmpty={false} />);
     expect(screen.getByText('Net this month')).toBeOnTheScreen();

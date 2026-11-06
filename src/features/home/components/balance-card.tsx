@@ -52,7 +52,7 @@ function BalanceTrend({ showLine }: { showLine: boolean }) {
   const [startDate, endDate] = getCurrentMonthRange(yearMonth);
   const { data: series } = useBalanceSeries(startDate, endDate);
   const { data: summary } = useMonthSummary(yearMonth);
-  const net = series?.deltas.reduce((sum, { delta }) => sum + delta, 0) ?? 0;
+  const net = series ? series.deltas.reduce((sum, { delta }) => sum + delta, 0) - series.adjusted : 0;
   const values = React.useMemo(
     () => series ? buildDailyBalances(series.opening, series.deltas, startDate, todayUnix()) : [],
     [series, startDate],

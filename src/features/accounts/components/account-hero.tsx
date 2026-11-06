@@ -32,7 +32,7 @@ export function AccountHero({ account, startDate, endDate }: AccountHeroProps) {
     : null;
   const [monthStart, monthEnd] = getCurrentMonthRange(useCurrentYearMonth());
   const isThisMonth = startDate === monthStart && endDate === monthEnd;
-  const net = summary ? summary.closing - summary.opening : 0;
+  const net = summary?.net ?? 0;
   const endLabel = summary && (summary.lastDay === todayUnix() ? translate('common.today') : formatShortDate(summary.lastDay));
 
   return (

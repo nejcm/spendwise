@@ -3,13 +3,15 @@ import { buildDailyBalances } from '@/features/home/helpers';
 
 const DAY = 86_400;
 
-type BalanceSeries = { opening: number; deltas: { date: number; delta: number }[] };
+type BalanceSeries = { opening: number; adjusted: number; deltas: { date: number; delta: number }[] };
 
 export type BalanceSummary = {
   values: number[];
   start: number;
   lastDay: number;
   opening: number;
+  /** Change over the period, opening-balance entries excluded. */
+  net: number;
   /** Balance at the end of the period, future-dated rows included. */
   closing: number;
 };
@@ -25,6 +27,7 @@ export function summarizeBalance(series: BalanceSeries, startDate: number | unde
     start,
     lastDay,
     opening: series.opening,
+    net: series.deltas.reduce((sum, { delta }) => sum + delta, 0) - series.adjusted,
     closing: series.deltas.reduce((sum, { delta }) => sum + delta, series.opening),
   };
 }

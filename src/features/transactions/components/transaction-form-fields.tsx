@@ -419,7 +419,7 @@ function AccountPills({ name, label, accounts, value, onChange, error }: {
   );
 }
 
-export function AccountRows({ form, accounts }: { form: TransactionFormApi; accounts: Account[] }) {
+function AccountRows({ form, accounts }: { form: TransactionFormApi; accounts: Account[] }) {
   return (
     <form.Subscribe
       selector={(s) => ({ type: s.values.type, paired: s.values.type === 'transfer' && s.values.to_account_id !== null, submitted: selectSubmitted(s) })}

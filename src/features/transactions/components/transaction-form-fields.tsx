@@ -118,7 +118,7 @@ export function AmountField({ form, amountRef, signed = false }: {
                     accessibilityRole="button"
                     accessibilityLabel={translate('common.currency')}
                     onPress={currencyModal.present}
-                    className="mt-2 h-8.5 flex-row items-center gap-1.5 rounded-full bg-card pr-2.5 pl-1.25"
+                    className="mt-2 h-8.5 flex-row items-center gap-1.5 rounded-full border border-edge bg-card pr-2.5 pl-1.25"
                   >
                     <FlagCircle currency={currencyField.state.value} size={24} />
                     <Text className="text-[13px] font-semibold">{currencyField.state.value}</Text>
@@ -199,7 +199,7 @@ function Pill({ label, icon, selected, invalid = false, onPress }: {
         onPress={onPress}
         className={cn(
           'h-10 flex-row items-center gap-1.5 rounded-full border-2 px-3.5',
-          selected ? 'border-foreground bg-card' : invalid ? 'border-negative/40 bg-negative/10' : 'border-transparent bg-card',
+          selected ? 'border-foreground bg-card' : invalid ? 'border-negative/40 bg-negative/10' : 'border-edge bg-card',
         )}
       >
         {!!icon && <Text className="text-base">{icon}</Text>}

@@ -15,7 +15,7 @@ export function PeriodPill({ selection }: { selection: PeriodSelection }) {
         accessibilityRole="button"
         onPress={present}
         style={getPressedStyle}
-        className="h-10 shrink flex-row items-center gap-1.5 rounded-full bg-card px-3.5"
+        className="h-10 shrink flex-row items-center gap-1.5 rounded-full border border-edge bg-card px-3.5"
       >
         <Text className="shrink text-sm font-medium" numberOfLines={1}>{getPeriodLabel(selection, 'MMM yyyy')}</Text>
         <ChevronDown size={16} colorClassName="accent-muted-foreground" />

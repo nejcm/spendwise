@@ -36,7 +36,7 @@ export function QuickActions() {
             onPress={() => (href ? router.push(href) : triggerScanPicker())}
             className="flex-1 items-center gap-2"
           >
-            <View className={cn('size-15 items-center justify-center rounded-card', isPrimary ? 'bg-primary' : 'bg-card')}>
+            <View className={cn('size-15 items-center justify-center rounded-card', isPrimary ? 'bg-primary' : 'border border-edge bg-card')}>
               <Icon size={28} strokeWidth={isPrimary ? 2 : 1.8} colorClassName={isPrimary ? 'accent-primary-foreground' : 'accent-foreground'} />
             </View>
             <Text className="text-meta text-foreground-2" numberOfLines={1}>{translate(`home.actions.${key}`)}</Text>

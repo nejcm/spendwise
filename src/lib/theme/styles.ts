@@ -7,7 +7,7 @@ export const defaultStyles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   background: {
-    backgroundColor: '#f7f6fb',
+    backgroundColor: '#efedf5',
   },
   backgroundDark: {
     backgroundColor: '#111214',
@@ -18,10 +18,10 @@ export const LightTheme = {
   ...DefaultTheme,
   colors: {
     primary: '#17151c',
-    background: '#f7f6fb',
+    background: '#efedf5',
     card: '#ffffff',
     text: '#17151c',
-    border: '#ebe9f1',
+    border: '#e3e0eb',
     notification: '#b42318',
   },
 } satisfies Theme;

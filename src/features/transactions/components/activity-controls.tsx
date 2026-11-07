@@ -19,7 +19,7 @@ export function SearchRow({ search, onChangeSearch, filterCount, onOpenFilters }
   const active = filterCount > 0;
   return (
     <View className="flex-row gap-2.5 pt-4">
-      <View className="h-12 min-w-0 flex-1 flex-row items-center gap-2.5 rounded-full bg-card pr-2 pl-4">
+      <View className="h-12 min-w-0 flex-1 flex-row items-center gap-2.5 rounded-full border border-edge bg-card pr-2 pl-4">
         <Search size={20} colorClassName="accent-muted-foreground" />
         <TextInput
           value={search}
@@ -43,7 +43,7 @@ export function SearchRow({ search, onChangeSearch, filterCount, onOpenFilters }
         accessibilityLabel={filterCount === 0
           ? translate('transactions.filter.button_none')
           : filterCount === 1 ? translate('transactions.filter.button_one') : translate('transactions.filter.button_many', { count: filterCount })}
-        className={cn('size-12 items-center justify-center rounded-full', active ? 'bg-primary' : 'bg-card')}
+        className={cn('size-12 items-center justify-center rounded-full', active ? 'bg-primary' : 'border border-edge bg-card')}
       >
         <ListFilter size={20} colorClassName={active ? 'accent-primary-foreground' : 'accent-foreground'} />
         {active && (
@@ -68,7 +68,7 @@ function SummaryCell({ label, value, prefix, className, first }: { label: string
 
 export function InOutNetCard({ income, expense, net }: { income: number; expense: number; net: number }) {
   return (
-    <View className="mt-4 flex-row rounded-card bg-card py-3.5">
+    <View className="mt-4 flex-row rounded-card border border-edge bg-card py-3.5">
       <SummaryCell first label={translate('transactions.in')} value={income} prefix={income > 0 ? '+' : ''} className={income > 0 ? 'text-positive' : undefined} />
       <SummaryCell label={translate('transactions.out')} value={expense ? -expense : 0} />
       <SummaryCell label={translate('common.net')} value={net} prefix={net > 0 ? '+' : ''} />
@@ -94,7 +94,7 @@ export function TypeTabs({ value, onChange }: { value: TransactionType | null; o
             accessibilityState={{ selected }}
             onPress={() => onChange(tab.value)}
             style={getPressedStyle}
-            className={cn('h-9 justify-center rounded-full px-3.5', selected ? 'bg-primary' : 'bg-card')}
+            className={cn('h-9 justify-center rounded-full border px-3.5', selected ? 'border-transparent bg-primary' : 'border-edge bg-card')}
           >
             <Text className={cn('text-sm font-medium', selected ? 'text-primary-foreground' : 'text-foreground')}>{tab.label}</Text>
           </Pressable>
@@ -131,7 +131,7 @@ export function ActiveFilters({ chips, onRemove, onClearAll }: {
 export function FilterResultCard({ count, total, sort, onSortPress }: { count: number; total: number; sort: TransactionSort; onSortPress: () => void }) {
   const currency = useAppStore.use.currency();
   return (
-    <View className="mt-3.5 flex-row items-center justify-between gap-3 rounded-[18px] bg-card px-4 py-3">
+    <View className="mt-3.5 flex-row items-center justify-between gap-3 rounded-[18px] border border-edge bg-card px-4 py-3">
       <View className="min-w-0 shrink">
         <Text className="text-meta text-muted-foreground">{count === 1 ? translate('transactions.count_one') : translate('transactions.count_many', { count })}</Text>
         <FormattedCurrency value={total} currency={currency} prefix={total > 0 ? '+' : ''} numberOfLines={1} adjustsFontSizeToFit className="text-xl font-bold tracking-tight" />

@@ -67,7 +67,7 @@ export function BudgetTab({ selection, startDate, endDate }: PeriodProps) {
                 accessibilityRole="button"
                 onPress={() => router.push({ pathname: '/categories/[id]/edit', params: { id: c.category_id } })}
                 style={getPressedStyle}
-                className="h-10 flex-row items-center gap-2 rounded-full bg-card pr-3.5 pl-2.5"
+                className="h-10 flex-row items-center gap-2 rounded-full border border-edge bg-card pr-3.5 pl-2.5"
               >
                 <Text className="text-sm font-medium">{`${categoryIcon(c.category_id, c.category_icon, c.category_name)} ${c.category_name}`}</Text>
                 <Text className="text-sm text-muted-foreground">{`· ${translate('stats.set_budget')}`}</Text>

@@ -30,7 +30,7 @@ export const buttonTv = tv({
         indicator: 'accent-foreground',
       },
       'secondary': {
-        container: 'bg-card',
+        container: 'border border-edge bg-card',
         label: 'text-foreground',
         indicator: 'accent-foreground',
       },

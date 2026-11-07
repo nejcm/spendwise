@@ -9,5 +9,5 @@ export type CardProps = ViewProps & {
 };
 
 export function Card({ className, variant = 'default', ...props }: CardProps) {
-  return <View className={cn('overflow-hidden bg-card', variant === 'hero' ? 'rounded-hero' : 'rounded-card', className)} {...props} />;
+  return <View className={cn('overflow-hidden border border-edge bg-card', variant === 'hero' ? 'rounded-hero' : 'rounded-card', className)} {...props} />;
 }

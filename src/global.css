@@ -77,7 +77,7 @@
   --color-danger-800: #991b1b;
   --color-danger-900: #7f1d1d;
 
-  --color-background: #f7f6fb;
+  --color-background: #efedf5;
   --color-wash: #dcd0f7;
   --color-card: #ffffff;
   --color-card-2: #f1eff7;
@@ -85,7 +85,8 @@
   --color-foreground: #17151c;
   --color-foreground-2: #3d3a47;
   --color-muted-foreground: #6f6b7a;
-  --color-border: #ebe9f1;
+  --color-border: #e3e0eb;
+  --color-edge: #e3e0eb;
 
   --color-accent: #6b4fd8;
   --color-accent-foreground: #ffffff;
@@ -109,7 +110,7 @@
 
   /* Legacy names still used by callers */
   --color-muted: #f1eff7;
-  --color-surface: #f7f6fb;
+  --color-surface: #efedf5;
   --color-input: #ffffff;
   --color-subtle-5: #3d3a47;
 }
@@ -118,7 +119,7 @@
 @layer theme {
   :root {
     @variant light {
-      --color-background: #f7f6fb;
+      --color-background: #efedf5;
       --color-wash: #dcd0f7;
       --color-card: #ffffff;
       --color-card-2: #f1eff7;
@@ -126,7 +127,8 @@
       --color-foreground: #17151c;
       --color-foreground-2: #3d3a47;
       --color-muted-foreground: #6f6b7a;
-      --color-border: #ebe9f1;
+      --color-border: #e3e0eb;
+      --color-edge: #e3e0eb;
 
       --color-accent: #6b4fd8;
       --color-accent-foreground: #ffffff;
@@ -149,7 +151,7 @@
       --color-scrim: rgba(23, 21, 28, 0.42);
 
       --color-muted: #f1eff7;
-      --color-surface: #f7f6fb;
+      --color-surface: #efedf5;
       --color-input: #ffffff;
       --color-subtle-5: #3d3a47;
     }
@@ -164,6 +166,7 @@
       --color-foreground-2: #d6d7da;
       --color-muted-foreground: #9a9ca1;
       --color-border: #26272c;
+      --color-edge: transparent;
 
       --color-accent: #d4f05a;
       --color-accent-foreground: #111214;

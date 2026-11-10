@@ -109,7 +109,7 @@ function GlobalBudgetForm({ currentBudget, onSuccess }: { currentBudget: GlobalB
                   accessibilityLabel={translate(type === 'yearly' ? 'stats.yearly_budget' : 'stats.monthly_budget')}
                   accessibilityHint={error}
                   containerClassName="min-w-[120px] shrink"
-                  className="h-auto rounded-none border-0 bg-transparent px-0 text-center text-[56px] font-bold tracking-tighter tabular-nums web:field-sizing-content"
+                  className="h-auto rounded-none border-0 bg-transparent px-0 text-center text-[56px] font-bold web:field-sizing-content"
                 />
               </FocusArea>
               {!!error && <Text className="mt-1 text-center text-meta text-negative">{error}</Text>}

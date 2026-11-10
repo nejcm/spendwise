@@ -226,7 +226,7 @@ function Amount({ form }: { form: FormApi }) {
                       autoFocus={!form.getFieldValue('amount')}
                       containerClassName="min-w-[120px] shrink"
                       // No line-height: Android applies it to typed text but not the placeholder, which then overflows the measured box.
-                      className="h-auto rounded-none border-0 bg-transparent px-0 text-[60px] font-bold tracking-tighter tabular-nums web:field-sizing-content web:leading-[normal]"
+                      className="h-auto rounded-none border-0 bg-transparent px-0 text-[60px] font-bold web:field-sizing-content web:leading-[normal]"
                     />
                   </FocusArea>
                   {!!error && <Text className="pt-1 text-sm font-medium text-negative">{error}</Text>}

@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderButton, PageHeader } from '@/components/page-header';
-import { AmountText, Card, FocusAwareStatusBar, getPressedStyle, GhostButton, IconTile, ListRow, PauseIcon, PlayIcon, SectionHeader, Switch, Text } from '@/components/ui';
+import { AmountText, Card, FocusAwareStatusBar, getPressedStyle, GhostButton, IconTile, ListRow, PauseIcon, PlayIcon, SectionHeader, Text } from '@/components/ui';
 import { ChevronLeft, Pencil } from '@/components/ui/icon';
 import { NAV_BAR_HEIGHT } from '@/components/ui/nav-tab-bar';
 import { translateCount } from '@/features/categories/helpers';
@@ -194,17 +194,11 @@ function Rows({ rule }: { rule: ScheduledTransactionWithDetails }) {
       {rule.type === 'expense' && !!rule.is_active && (
         <ListRow
           className="min-h-13 border-t border-border"
-          onPress={remindersOn ? undefined : () => router.push('/settings/notifications')}
+          onPress={remindersOn ? () => setMuted(!muted) : () => router.push('/settings/notifications')}
           title={<Text className="text-sm text-muted-foreground">{remindLabel}</Text>}
           meta={remindersOn ? undefined : translate('scheduled.reminders_off')}
-          trailing={(
-            <Switch
-              accessibilityLabel={remindLabel}
-              checked={remindersOn && !muted}
-              disabled={!remindersOn}
-              onChange={(checked) => setMuted(!checked)}
-            />
-          )}
+          checked={remindersOn && !muted}
+          accessibilityLabel={remindLabel}
         />
       )}
     </Card>

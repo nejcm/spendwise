@@ -1,3 +1,4 @@
+import type { TextInput } from 'react-native';
 import type { ScheduledTransactionFormData, ScheduledTransactionFrequency } from '../types';
 import type { CurrencyKey } from '@/features/currencies';
 import { useForm, useStore } from '@tanstack/react-form';
@@ -7,7 +8,7 @@ import { KeyboardAwareScrollView, KeyboardStickyView } from 'react-native-keyboa
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as z from 'zod';
 import { HeaderButton, PageHeader } from '@/components/page-header';
-import { Card, Chip, FlagCircle, Input, ListRow, SolidButton, Text, useModalSheet } from '@/components/ui';
+import { Card, Chip, FlagCircle, FocusArea, Input, ListRow, SolidButton, Text, useModalSheet } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
 import { ChevronDown, ChevronRight, X } from '@/components/ui/icon';
@@ -21,7 +22,7 @@ import { CURRENCIES_MAP, CURRENCY_VALUES } from '@/features/currencies';
 import { CurrencySheet } from '@/features/currencies/components/currency-sheet';
 import { formatDate, formatDateFull, todayISO } from '@/features/formatting/helpers';
 import { FormDataGate } from '@/features/transactions/components/form-data-gate';
-import { AccountRow, RowError, RowLabel } from '@/features/transactions/components/transaction-form-fields';
+import { AccountRow, RowError, RowLabel, TextRow } from '@/features/transactions/components/transaction-form-fields';
 import { cn } from '@/lib/cn';
 import { dateToUnix, isValidISODate } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
@@ -196,9 +197,10 @@ function FormHeader({ form, onClose }: { form: FormApi; onClose: () => void }) {
   );
 }
 
-function AmountAndName({ form }: { form: FormApi }) {
+function Amount({ form }: { form: FormApi }) {
   const currencyModal = useModalSheet();
   const submitted = useStore(form.store, selectSubmitted);
+  const amountRef = React.useRef<TextInput>(null);
   return (
     <form.Field
       name="currency"
@@ -210,9 +212,10 @@ function AmountAndName({ form }: { form: FormApi }) {
               const error = submitted ? getFieldError(field) : undefined;
               return (
                 <>
-                  <View className="max-w-full flex-row items-baseline justify-center gap-2 px-5">
+                  <FocusArea target={amountRef} className="max-w-full flex-row items-baseline justify-center gap-2 px-5">
                     <Text className="text-3xl font-semibold text-muted-foreground">{CURRENCIES_MAP[currencyField.state.value].symbol}</Text>
                     <Input
+                      ref={amountRef}
                       value={field.state.value}
                       onBlur={field.handleBlur}
                       onChangeText={field.handleChange}
@@ -222,27 +225,14 @@ function AmountAndName({ form }: { form: FormApi }) {
                       accessibilityHint={error}
                       autoFocus={!form.getFieldValue('amount')}
                       containerClassName="min-w-[120px] shrink"
-                      className="h-auto rounded-none border-0 bg-transparent px-0 text-6xl font-bold tracking-tighter tabular-nums web:field-sizing-content"
+                      // No line-height: Android applies it to typed text but not the placeholder, which then overflows the measured box.
+                      className="h-auto rounded-none border-0 bg-transparent px-0 text-[60px] font-bold tracking-tighter tabular-nums web:field-sizing-content web:leading-[normal]"
                     />
-                  </View>
+                  </FocusArea>
                   {!!error && <Text className="pt-1 text-sm font-medium text-negative">{error}</Text>}
                 </>
               );
             }}
-          />
-          <form.Field
-            name="note"
-            children={(field) => (
-              <Input
-                value={field.state.value ?? ''}
-                onBlur={field.handleBlur}
-                onChangeText={field.handleChange}
-                placeholder={translate('scheduled.form.name_placeholder')}
-                accessibilityLabel={translate('scheduled.form.name_placeholder')}
-                containerClassName="w-full px-5"
-                className="h-auto rounded-none border-0 bg-transparent px-0 text-center text-xl font-semibold"
-              />
-            )}
           />
           <Pressable
             accessibilityRole="button"
@@ -306,21 +296,20 @@ function CategoryRow({ form }: { form: FormApi }) {
       children={(field) => {
         const selected = categories.find((c) => c.id === field.state.value);
         return (
-          <View className={cn(rowClassName(true), 'flex-row items-center gap-3')}>
-            <View>
-              <RowLabel>{translate('transactions.category')}</RowLabel>
-              <RowError message={submitted ? getFieldError(field) : undefined} />
-            </View>
+          <View className={rowClassName()}>
             <CategoryPicker
               type={type}
               selectedId={field.state.value}
               onSelect={(category) => field.handleChange(category.id)}
-              containerClassName="min-w-0 flex-1"
               inputClassName="h-[54px] border-0 bg-transparent px-0"
               showChevron={false}
               renderSelectedItem={() => (
-                <View className="flex-1 flex-row items-center justify-end gap-3">
-                  <Text className={cn('shrink text-row', !selected && 'text-muted-foreground')} numberOfLines={1}>
+                <View className="flex-1 flex-row items-center gap-3">
+                  <View>
+                    <RowLabel>{translate('transactions.category')}</RowLabel>
+                    <RowError message={submitted ? getFieldError(field) : undefined} />
+                  </View>
+                  <Text className={cn('ml-auto shrink text-row', !selected && 'text-muted-foreground')} numberOfLines={1}>
                     {selected ? `${selected.icon ?? ''} ${selected.name}`.trim() : translate('common.select')}
                   </Text>
                   <ChevronRight size={18} colorClassName="accent-muted-foreground" />
@@ -342,14 +331,17 @@ function DateRow({ label, value, onChange, placeholder, error, onClear }: {
   error?: string;
   onClear?: () => void;
 }) {
+  const controlRef = React.useRef<{ focus: () => void }>(null);
   return (
     <ListRow
+      focusInput={controlRef}
       className={rowClassName()}
       title={<RowLabel>{label}</RowLabel>}
       meta={<RowError message={error} />}
       trailing={(
         <View className="flex-row items-center gap-1">
           <DateInput
+            controlRef={controlRef}
             value={value}
             onChange={onChange}
             placeholder={placeholder}
@@ -375,45 +367,62 @@ function DetailsCard({ form, accounts }: { form: FormApi; accounts: ReturnType<t
   const type = useStore(form.store, (s) => s.values.type);
   const submitted = useStore(form.store, selectSubmitted);
   return (
-    <Card className="mx-5 mt-4.5 rounded-card px-4">
-      <CategoryRow form={form} />
-      <form.Field
-        name="account_id"
-        children={(field) => (
-          <AccountRow
-            label={translate(type === 'income' ? 'transactions.form.to' : 'transactions.form.from')}
-            accounts={accounts}
-            value={field.state.value}
-            onChange={field.handleChange}
-            error={submitted ? getFieldError(field) : undefined}
-          />
-        )}
-      />
-      <form.Field
-        name="start_date"
-        children={(field) => (
-          <DateRow
-            label={translate('scheduled.form.starts')}
-            value={field.state.value}
-            onChange={field.handleChange}
-            error={submitted ? getFieldError(field) : undefined}
-          />
-        )}
-      />
-      <form.Field
-        name="end_date"
-        children={(field) => (
-          <DateRow
-            label={translate('scheduled.form.ends')}
-            value={field.state.value ?? ''}
-            onChange={(value) => field.handleChange(value || null)}
-            placeholder={translate('scheduled.form.never')}
-            error={submitted ? getFieldError(field) : undefined}
-            onClear={field.state.value ? () => field.handleChange(null) : undefined}
-          />
-        )}
-      />
-    </Card>
+    <>
+      <Card className="mx-5 mt-4.5 rounded-card px-4">
+        <form.Field
+          name="note"
+          children={(field) => (
+            <TextRow
+              first
+              name="note"
+              label={translate('scheduled.form.name_placeholder')}
+              value={field.state.value}
+              placeholder={translate('common.optional')}
+              onBlur={field.handleBlur}
+              onChange={field.handleChange}
+              error={submitted ? getFieldError(field) : undefined}
+            />
+          )}
+        />
+        <CategoryRow form={form} />
+        <form.Field
+          name="account_id"
+          children={(field) => (
+            <AccountRow
+              label={translate(type === 'income' ? 'transactions.form.to' : 'transactions.form.from')}
+              accounts={accounts}
+              value={field.state.value}
+              onChange={field.handleChange}
+              error={submitted ? getFieldError(field) : undefined}
+            />
+          )}
+        />
+        <form.Field
+          name="start_date"
+          children={(field) => (
+            <DateRow
+              label={translate('scheduled.form.starts')}
+              value={field.state.value}
+              onChange={field.handleChange}
+              error={submitted ? getFieldError(field) : undefined}
+            />
+          )}
+        />
+        <form.Field
+          name="end_date"
+          children={(field) => (
+            <DateRow
+              label={translate('scheduled.form.ends')}
+              value={field.state.value ?? ''}
+              onChange={(value) => field.handleChange(value || null)}
+              placeholder={translate('scheduled.form.never')}
+              error={submitted ? getFieldError(field) : undefined}
+              onClear={field.state.value ? () => field.handleChange(null) : undefined}
+            />
+          )}
+        />
+      </Card>
+    </>
   );
 }
 
@@ -465,7 +474,7 @@ function ScheduledTransactionFormContent({
         contentContainerStyle={{ paddingBottom: footerSpace }}
         keyboardShouldPersistTaps="handled"
       >
-        <AmountAndName form={form} />
+        <Amount form={form} />
         <FrequencyChips form={form} />
         <DetailsCard form={form} accounts={accounts} />
         <ScheduleHint form={form} isEdit={isEdit} />

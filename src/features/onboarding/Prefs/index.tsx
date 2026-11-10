@@ -3,7 +3,7 @@ import type { CurrencyKey } from '@/features/currencies';
 import type { Language } from '@/features/languages/types';
 import * as React from 'react';
 
-import { Card, FlagCircle, ListRow, Options, SolidButton, Switch, Text, useModalSheet, View } from '@/components/ui';
+import { Card, FlagCircle, ListRow, Options, SolidButton, Text, useModalSheet, View } from '@/components/ui';
 import { CURRENCIES_MAP } from '@/features/currencies';
 import { CurrencySheet } from '@/features/currencies/components/currency-sheet';
 import { useChangeCurrency } from '@/features/currencies/hooks';
@@ -115,12 +115,15 @@ export default function PrefsStep({ onBack, onNext, onBeforeLanguageReload }: Pr
       <Text accessibilityRole="header" className="pt-7 pb-3 text-[15px] font-semibold">{translate('settings.theme.title')}</Text>
       <ThemePicker />
 
-      <Card className="mt-6 flex-row items-center gap-4 px-4.5 py-3.5">
-        <View className="flex-1">
-          <Text className="text-base font-medium">{translate('onboarding.reminders')}</Text>
-          <Text className="text-meta text-muted-foreground">{translate('onboarding.reminders_hint')}</Text>
-        </View>
-        <Switch checked={reminders} onChange={setReminders} accessibilityLabel={translate('onboarding.reminders')} />
+      <Card className="mt-6 px-4.5">
+        <ListRow
+          className="gap-4 py-3.5"
+          title={<Text className="text-base font-medium">{translate('onboarding.reminders')}</Text>}
+          meta={<Text className="text-meta text-muted-foreground">{translate('onboarding.reminders_hint')}</Text>}
+          checked={reminders}
+          onPress={() => setReminders(!reminders)}
+          accessibilityLabel={translate('onboarding.reminders')}
+        />
       </Card>
 
       <Options ref={languageModal.ref} options={LANGUAGES_OPTIONS} onSelect={onSelectLanguage} value={language.value} />

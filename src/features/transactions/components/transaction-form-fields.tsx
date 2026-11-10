@@ -6,7 +6,7 @@ import { useStore } from '@tanstack/react-form';
 import * as React from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
-import { Card, Chip, FilterChip, FlagCircle, Input, ListRow, Options, Text, useModalSheet } from '@/components/ui';
+import { Card, Chip, FilterChip, FlagCircle, FocusArea, Input, ListRow, Options, Text, useModalSheet } from '@/components/ui';
 import { DateInput } from '@/components/ui/date-input';
 import { getFieldError } from '@/components/ui/form-utils';
 import { ChevronDown, ChevronRight, CircleAlert } from '@/components/ui/icon';
@@ -87,7 +87,7 @@ export function AmountField({ form, amountRef, signed = false }: {
               const error = submitted ? getFieldError(field) : undefined;
               return (
                 <>
-                  <View className="max-w-full flex-row items-baseline justify-center gap-2 px-5">
+                  <FocusArea target={amountRef} className="max-w-full flex-row items-baseline justify-center gap-2 px-5">
                     {signed && (
                       <Pressable
                         accessibilityRole="button"
@@ -111,9 +111,10 @@ export function AmountField({ form, amountRef, signed = false }: {
                       accessibilityHint={error}
                       autoFocus={!form.getFieldValue('amount')}
                       containerClassName="min-w-[120px] shrink"
-                      className="h-auto rounded-none border-0 bg-transparent px-0 text-6xl/none font-bold tracking-tighter tabular-nums web:field-sizing-content"
+                      // No line-height: Android applies it to typed text but not the placeholder, which then overflows the measured box.
+                      className="h-auto rounded-none border-0 bg-transparent px-0 text-[60px] font-bold tracking-tighter tabular-nums web:field-sizing-content web:leading-[normal]"
                     />
-                  </View>
+                  </FocusArea>
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel={translate('common.currency')}
@@ -295,7 +296,8 @@ export function AccountRow({ name, label, accounts, value, onChange, error, firs
   );
 }
 
-function TextRow({ name, label, value, placeholder, onChange, onBlur, error, symbol, inputClassName }: {
+export function TextRow({ first, name, label, value, placeholder, onChange, onBlur, error, symbol, inputClassName }: {
+  first?: boolean;
   name: string;
   symbol?: string;
   inputClassName?: string;
@@ -312,7 +314,7 @@ function TextRow({ name, label, value, placeholder, onChange, onBlur, error, sym
   return (
     <ListRow
       focusInput={inputRef}
-      className={rowClassName()}
+      className={rowClassName(first)}
       title={<RowLabel>{label}</RowLabel>}
       meta={<RowError message={error} />}
       trailing={(
@@ -360,8 +362,9 @@ function TagsRow({ value, onChange, onBlur, error, commitRef }: {
     setText('');
   };
   React.useImperativeHandle(commitRef, () => () => add(text));
+  const inputRef = React.useRef<TextInput>(null);
   return (
-    <View ref={fieldNode} className={cn(rowClassName(), 'gap-2.5 py-3.5')}>
+    <FocusArea ref={fieldNode} target={inputRef} className={cn(rowClassName(), 'gap-2.5 py-3.5')}>
       <RowLabel>{translate('transactions.tags')}</RowLabel>
       {value.length > 0 && (
         <View className="flex-row flex-wrap gap-2">
@@ -370,6 +373,7 @@ function TagsRow({ value, onChange, onBlur, error, commitRef }: {
       )}
       {value.length < MAX_TAGS && (
         <Input
+          ref={inputRef}
           value={text}
           onChangeText={setText}
           onSubmitEditing={() => add(text)}
@@ -393,7 +397,7 @@ function TagsRow({ value, onChange, onBlur, error, commitRef }: {
         </View>
       )}
       <RowError message={tooLong ? translate('transactions.form.too_long', { max: MAX_TAG_LENGTH }) : error} />
-    </View>
+    </FocusArea>
   );
 }
 
@@ -474,6 +478,7 @@ export function DetailsCard({ form, accounts, isAdjustment, showBaseAmount, onBa
   const submitted = useStore(form.store, selectSubmitted);
   const tagItemError = useStore(form.store, (s) => Object.entries(s.fieldMeta).find(([name, meta]) => name.startsWith('tags[') && meta?.errors.length)?.[1]?.errors[0]?.message);
   const dateNode = useFieldNode('date');
+  const dateControlRef = React.useRef<{ focus: () => void }>(null);
   return (
     <>
       {!isAdjustment && <AccountRows form={form} accounts={accounts} />}
@@ -482,6 +487,7 @@ export function DetailsCard({ form, accounts, isAdjustment, showBaseAmount, onBa
           name="date"
           children={(field) => (
             <ListRow
+              focusInput={dateControlRef}
               className={rowClassName(true)}
               title={<RowLabel>{translate('transactions.form.when')}</RowLabel>}
               meta={<RowError message={submitted ? getFieldError(field) : undefined} />}
@@ -489,6 +495,7 @@ export function DetailsCard({ form, accounts, isAdjustment, showBaseAmount, onBa
                 <View className="flex-row items-center gap-1">
                   <DateInput
                     ref={dateNode}
+                    controlRef={dateControlRef}
                     value={field.state.value}
                     onChange={field.handleChange}
                     accessibilityLabel={translate('transactions.form.when')}

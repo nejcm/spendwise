@@ -10,6 +10,7 @@ export type SettingsRow = {
   meta?: string | null;
   danger?: boolean;
   trailing?: React.ReactNode;
+  checked?: boolean;
   onPress?: () => void;
 };
 
@@ -30,7 +31,8 @@ export function SettingsGroup({ title, rows }: { title: string; rows: SettingsRo
             title={row.danger ? <Text className="text-row font-medium text-negative">{row.title}</Text> : row.title}
             meta={row.meta ?? undefined}
             trailing={row.trailing}
-            chevron={!!row.onPress}
+            checked={row.checked}
+            chevron={!!row.onPress && row.checked === undefined}
             onPress={row.onPress}
           />
         ))}

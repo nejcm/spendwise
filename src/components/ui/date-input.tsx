@@ -1,4 +1,4 @@
-import type { HostInstance } from 'react-native';
+import type { HostInstance, TextInput } from 'react-native';
 import type { InputProps } from '@/components/ui/input';
 import type { ModalSheetProps } from '@/components/ui/modal-sheet';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
@@ -21,9 +21,11 @@ export type DateInputProps = {
   modalProps?: Partial<ModalSheetProps>;
   /** Native only: replaces the user's date format, e.g. with "Today". */
   displayValue?: string;
+  /** `focus()` opens the picker (native) or focuses the field (web); lets a ListRow forward taps. */
+  controlRef?: React.Ref<{ focus: () => void }>;
 } & Omit<InputProps, 'value' | 'onChange'>;
 
-export function DateInput({ ref, label, value, onChange, error, modalProps, displayValue, ...rest }: DateInputProps & { ref?: (node: HostInstance | null) => void }) {
+export function DateInput({ ref, label, value, onChange, error, modalProps, displayValue, controlRef, ...rest }: DateInputProps & { ref?: (node: HostInstance | null) => void }) {
   const { ref: sheetRef, present, close } = useModalSheet();
   const dateFormat = useAppStore.use.dateFormat();
   const theme = useThemeConfig();
@@ -70,10 +72,16 @@ export function DateInput({ ref, label, value, onChange, error, modalProps, disp
     present();
   }, [commit, dateValue, present]);
 
+  const webInputRef = React.useRef<TextInput>(null);
+  React.useImperativeHandle(controlRef, () => ({ focus: IS_WEB ? () => webInputRef.current?.focus() : open }), [open]);
+
   if (IS_WEB) {
     return (
       <Input
-        ref={ref}
+        ref={(node) => {
+          webInputRef.current = node;
+          ref?.(node);
+        }}
         label={label}
         value={webText}
         placeholder={translate('common.select_date')}

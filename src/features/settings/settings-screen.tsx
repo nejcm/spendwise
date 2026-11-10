@@ -7,7 +7,7 @@ import { useRouter } from 'expo-router';
 import * as React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderButton, PageHeader } from '@/components/page-header';
-import { Card, FocusAwareStatusBar, Options, ScrollView, Switch, Text, useModalSheet, View } from '@/components/ui';
+import { Card, FocusAwareStatusBar, Options, ScrollView, Text, useModalSheet, View } from '@/components/ui';
 import { GhostButton } from '@/components/ui/ghost-button';
 import {
   ALargeSmall,
@@ -116,7 +116,8 @@ export function SettingsScreen() {
           key: 'lock',
           icon: Lock,
           title: translate('settings.app_lock'),
-          trailing: <Switch accessibilityLabel={translate('settings.app_lock')} checked={lockEnabled} onChange={(on) => { void toggleAppLock(on); }} />,
+          checked: lockEnabled,
+          onPress: () => { void toggleAppLock(!lockEnabled); },
         },
         ...(lockEnabled ? [{ key: 'lock-after', icon: Timer, title: translate('security.lock_after'), meta: lockTimeoutLabel(lockTimeoutMinutes), onPress: () => router.push('/settings/security') }] : []),
         {
@@ -124,7 +125,8 @@ export function SettingsScreen() {
           icon: Shield,
           title: translate('settings.error_reports'),
           meta: translate('settings.error_reports_meta'),
-          trailing: <Switch accessibilityLabel={translate('settings.error_reports')} checked={analyticsEnabled} onChange={setAnalyticsEnabled} />,
+          checked: analyticsEnabled,
+          onPress: () => setAnalyticsEnabled(!analyticsEnabled),
         },
         { key: 'import', icon: Import, title: translate('settings.import'), meta: lastBackup && translate('settings.last_backup', { date: lastBackup }), onPress: () => router.push('/settings/import-export') },
         { key: 'delete', icon: DatabaseZap, title: translate('settings.delete_data'), danger: true, onPress: deleteModal.present },

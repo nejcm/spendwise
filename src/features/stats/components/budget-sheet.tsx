@@ -1,11 +1,12 @@
 import type { BottomSheetModal } from '@gorhom/bottom-sheet';
+import type { TextInput } from 'react-native';
 import type { GlobalBudget, GlobalBudgetType } from '../global-budget-queries';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { useForm, useStore } from '@tanstack/react-form';
 import * as React from 'react';
 import { Pressable, View } from 'react-native';
 import * as z from 'zod';
-import { Input, ModalSheet, SegmentedControl, SolidButton, Text } from '@/components/ui';
+import { FocusArea, Input, ModalSheet, SegmentedControl, SolidButton, Text } from '@/components/ui';
 import { getFieldError } from '@/components/ui/form-utils';
 import { useCategories } from '@/features/categories/api';
 import { averageOfLast, buildMonthBars, monthBarsRange } from '@/features/categories/helpers';
@@ -69,6 +70,7 @@ function GlobalBudgetForm({ currentBudget, onSuccess }: { currentBudget: GlobalB
     assigned > 0 && { label: translate('stats.categories_total', { amount: money(assigned, 0) }), cents: assigned },
   ].filter((chip) => !!chip);
 
+  const amountRef = React.useRef<TextInput>(null);
   return (
     <View className="px-5 pb-6">
       <Text className="text-sm text-muted-foreground">{translate('stats.overall_budget_hint')}</Text>
@@ -94,9 +96,10 @@ function GlobalBudgetForm({ currentBudget, onSuccess }: { currentBudget: GlobalB
           const error = getFieldError(field);
           return (
             <>
-              <View className="flex-row items-baseline justify-center gap-0.5 pt-5.5">
+              <FocusArea target={amountRef} className="flex-row items-baseline justify-center gap-0.5 pt-5.5">
                 <Text className="text-[28px] font-semibold text-muted-foreground">{CURRENCIES_MAP[currency].symbol}</Text>
                 <Input
+                  ref={amountRef}
                   sheet
                   value={field.state.value}
                   onChangeText={field.handleChange}
@@ -108,7 +111,7 @@ function GlobalBudgetForm({ currentBudget, onSuccess }: { currentBudget: GlobalB
                   containerClassName="min-w-[120px] shrink"
                   className="h-auto rounded-none border-0 bg-transparent px-0 text-center text-[56px] font-bold tracking-tighter tabular-nums web:field-sizing-content"
                 />
-              </View>
+              </FocusArea>
               {!!error && <Text className="mt-1 text-center text-meta text-negative">{error}</Text>}
               {chips.length > 0 && (
                 <View className="flex-row flex-wrap justify-center gap-2 pt-4.5">

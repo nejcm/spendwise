@@ -1,8 +1,30 @@
 diff --git a/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt b/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt
-index ff5b1001e7bb3443482727cec48c22579465c73b..6f0ca91c684de896a15fc1b8acd20afea27d0b08 100644
+index ff5b1001e7bb3443482727cec48c22579465c73b..13a4755f0d38a9cf291681d2d19169e9086f3f6a 100644
 --- a/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt
 +++ b/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt
-@@ -196,8 +196,12 @@ class ExpoShareIntentModule : Module() {
+@@ -126,7 +126,7 @@ class ExpoShareIntentModule : Module() {
+                 // text / urls
+                 if (intent.action == Intent.ACTION_SEND) {
+                     notifyShareIntent(mapOf(
+-                        "text" to intent.getStringExtra(Intent.EXTRA_TEXT),
++                        "text" to intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString(),
+                         "type" to "text",
+                         "meta" to mapOf(
+                             "title" to intent.getCharSequenceExtra(Intent.EXTRA_TITLE),
+@@ -183,7 +183,11 @@ class ExpoShareIntentModule : Module() {
+             // get the Intent from onCreate activity (app not running in background)
+             ExpoShareIntentSingleton.isPending = false
+             if (ExpoShareIntentSingleton.intent?.type != null) {
+-                handleShareIntent(ExpoShareIntentSingleton.intent!!);
++                try {
++                    handleShareIntent(ExpoShareIntentSingleton.intent!!)
++                } catch (e: Exception) {
++                    notifyError("Cannot read share intent: ${e.message}")
++                }
+                 ExpoShareIntentSingleton.intent = null
+             }
+         }
+@@ -196,8 +200,12 @@ class ExpoShareIntentModule : Module() {
              ExpoShareIntentSingleton.isPending
          }
  
@@ -16,6 +38,16 @@ index ff5b1001e7bb3443482727cec48c22579465c73b..6f0ca91c684de896a15fc1b8acd20afe
          }
  
          OnCreate {
+@@ -303,7 +311,8 @@ class ExpoShareIntentModule : Module() {
+                     Log.i("FileDirectory", "File name: $fileName")
+                     val safeName = fileName?.let { File(it).name }.orEmpty()
+                     if (safeName.isNotEmpty()) {
+-                        val candidate = File(context.cacheDir, safeName)
++                        // Unique per share, so two files with the same display name never overwrite each other.
++                        val candidate = File(context.cacheDir, "${java.util.UUID.randomUUID()}_$safeName")
+                         val cacheRoot = context.cacheDir.canonicalPath + File.separator
+                         if (candidate.canonicalPath.startsWith(cacheRoot)) {
+                             targetFile = candidate
 diff --git a/android/src/main/java/expo/modules/shareintent/ExpoShareIntentReactActivityLifecycleListener.kt b/android/src/main/java/expo/modules/shareintent/ExpoShareIntentReactActivityLifecycleListener.kt
 index db573ecbd560de3c71aa443b7ad88d1b5e1c8dc7..87d33f6f35bf458828b86b0e13a686177c44d594 100644
 --- a/android/src/main/java/expo/modules/shareintent/ExpoShareIntentReactActivityLifecycleListener.kt

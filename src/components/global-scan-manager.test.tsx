@@ -209,6 +209,23 @@ describe('shared item sheet', () => {
     expect(nativeModule.clearShareIntent).toHaveBeenCalled();
   });
 
+  it('alerts and drops the open item when a newer share fails to read', () => {
+    render(<GlobalScanManager />);
+    shareText('Paid €12.50');
+    act(() => mockNativeHandlers.onError!({ value: 'Cannot read share intent: query failed' }));
+
+    expect(Alert.alert).toHaveBeenCalledWith('Error', 'Could not read the shared item. Please try sharing it again.');
+    expect(screen.queryByText('Shared item')).toBeNull();
+  });
+
+  it('alerts and resets when Android sends a file without a type', () => {
+    render(<GlobalScanManager />);
+    act(() => mockNativeHandlers.onChange!({ value: { files: [{ contentUri: 'content://r', filePath: null }], type: 'file' } }));
+
+    expect(Alert.alert).toHaveBeenCalledWith('Error', 'Could not read the shared item. Please try sharing it again.');
+    expect(nativeModule.clearShareIntent).toHaveBeenCalled();
+  });
+
   it('alerts and resets on a share with nothing usable', () => {
     render(<GlobalScanManager />);
     act(() => mockNativeHandlers.onChange!({ value: { files: [{ path: 'file:///v.mp4', mimeType: 'video/mp4', fileName: 'v.mp4' }], type: 'file' } }));

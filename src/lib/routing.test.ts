@@ -1,4 +1,6 @@
+import Env from 'env';
 import { extractExpoPathFromURL } from 'expo-router/build/fork/extractPathFromURL';
+import { redirectSystemPath } from '@/app/+native-intent';
 import { newTransactionLinkToPath, singleValueParams } from './routing';
 
 function routerSearchParams(url: string) {
@@ -15,9 +17,14 @@ describe('newTransactionLinkToPath', () => {
     expect(params.get('link_id')).toBe('id1');
   });
 
-  it('gives identical links distinct ids', () => {
-    const url = 'spendwise://transactions/new?amount=5&merchant_name=Bakery';
-    expect(newTransactionLinkToPath(url, 'spendwise', 'a')).not.toBe(newTransactionLinkToPath(url, 'spendwise', 'b'));
+  it('gives identical links distinct ids within the same millisecond', () => {
+    jest.spyOn(Date, 'now').mockReturnValue(1_700_000_000_000);
+    const url = `${Env.EXPO_PUBLIC_SCHEME}://transactions/new?amount=5&merchant_name=Bakery`;
+    const first = redirectSystemPath({ path: url, initial: false });
+    const second = redirectSystemPath({ path: url, initial: false });
+    jest.restoreAllMocks();
+    expect(first).toMatch(/link_id=/);
+    expect(first).not.toBe(second);
     expect(newTransactionLinkToPath('spendwise.preview://transactions/new', 'spendwise.preview', 'a')).toBe('/transactions/new?link_id=a');
   });
 

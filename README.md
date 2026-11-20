@@ -115,7 +115,7 @@ iOS 17+ can open Spendwise with a pre-filled new transaction every time you pay 
 
 1. Shortcuts → **Automation** → **+** → **Transaction**. Pick your cards, keep **Run Immediately**, tap **Next** → **New Blank Automation**.
 2. Add **URL Encode** with input **Shortcut Input → Amount**. Add a second **URL Encode** with **Shortcut Input → Merchant**.
-3. Add **Open URL** with `spendwise://transactions/new?type=expense&amount=[URL Encoded Text]&merchant_name=[URL Encoded Text 2]`, inserting the two encoded results as variables.
+3. Add **Open URLs** with `spendwise://transactions/new?type=expense&amount=[URL Encoded Text]&merchant_name=[URL Encoded Text 2]`, inserting the two encoded results as variables.
 4. Optional: append `&currency=EUR` (any supported ISO code) to fix the currency.
 5. Tap **Done**.
 

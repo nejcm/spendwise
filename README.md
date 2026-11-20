@@ -26,6 +26,7 @@ Spendwise is a free personal finance app built with Expo and React Native. It is
   - Low balance alerts
   - Weekly spending digest
 - Security: optional app lock using device authentication (biometrics/PIN)
+- iOS Wallet automation: open a pre-filled expense after an Apple Pay tap ([setup](#log-apple-pay-taps-with-shortcuts))
 - Optional AI:
   - AI chat (OpenAI/Anthropic) using your own provider key stored on-device
   - Receipt scanning with your own provider key; screenshots or text shared to Spendwise from other apps can be scanned or filled in manually
@@ -107,6 +108,20 @@ pnpm knip:check
 
 `pnpm e2e-test` currently targets the development app id and assumes Maestro is installed.
 `pnpm install-maestro` uses a shell installer and may need a Bash-compatible environment.
+
+## Log Apple Pay taps with Shortcuts
+
+iOS 17+ can open Spendwise with a pre-filled new transaction every time you pay with Wallet.
+
+1. Shortcuts → **Automation** → **+** → **Transaction**. Pick your cards, keep **Run Immediately**, tap **Next** → **New Blank Automation**.
+2. Add **URL Encode** with input **Shortcut Input → Amount**. Add a second **URL Encode** with **Shortcut Input → Merchant**.
+3. Add **Open URLs** with `spendwise://transactions/new?type=expense&amount=[URL Encoded Text]&merchant_name=[URL Encoded Text 2]`, inserting the two encoded results as variables.
+4. Optional: append `&currency=EUR` (any supported ISO code) to fix the currency.
+5. Tap **Done**.
+
+The amount is accepted as Shortcuts formats it (`12.50`, `12,50`, `€12.50`, `12,50 €`, `1.234,56`); a three-letter code such as `12,50 EUR` also sets the currency. If the app lock is on, the form opens after unlocking. A second payment while a form is open opens a new form on top, keeping the first draft. Nothing is saved until you confirm.
+
+Scheme per build: `spendwise` for production and development, `spendwise.preview` for preview builds (`SCHEMES` in `env.ts`).
 
 ## Environment Modes
 

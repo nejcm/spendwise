@@ -43,8 +43,8 @@ index ff5b1001e7bb3443482727cec48c22579465c73b..13a4755f0d38a9cf291681d2d19169e9
                      val safeName = fileName?.let { File(it).name }.orEmpty()
                      if (safeName.isNotEmpty()) {
 -                        val candidate = File(context.cacheDir, safeName)
-+                        // Unique per share, so two files with the same display name never overwrite each other.
-+                        val candidate = File(context.cacheDir, "${java.util.UUID.randomUUID()}_$safeName")
++                        // UUID name: equal display names never collide and long ones never pass the 255-byte limit.
++                        val candidate = File(context.cacheDir, "${java.util.UUID.randomUUID()}.${safeName.substringAfterLast('.', "bin").take(16)}")
                          val cacheRoot = context.cacheDir.canonicalPath + File.separator
                          if (candidate.canonicalPath.startsWith(cacheRoot)) {
                              targetFile = candidate

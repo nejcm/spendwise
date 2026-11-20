@@ -9,10 +9,10 @@ import { usePathname, useRouter } from 'expo-router';
 import { useShareIntent } from 'expo-share-intent';
 import * as React from 'react';
 import { useCallback } from 'react';
-import { Image } from 'react-native';
+import { AppState, Image } from 'react-native';
 import { Alert } from '@/components/ui';
 import { useAccounts } from '@/features/accounts/api';
-import { resolveShareAction } from '@/features/ai/share-intent';
+import { resolveShareAction, shareIntentKey } from '@/features/ai/share-intent';
 import { useScanReceipt } from '@/features/ai/use-scan-receipt';
 import { useCategories } from '@/features/categories/api';
 import { firstFittingCategoryId } from '@/features/categories/helpers';
@@ -97,6 +97,8 @@ export function GlobalScanManager() {
   const { data: categories = [] } = useCategories();
   const createTransaction = useCreateTransaction();
   const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntent(SHARE_INTENT_OPTIONS);
+  const handledShareKeyRef = React.useRef<string | null>(null);
+  const pendingShareKeysRef = React.useRef(new Set<string>());
 
   const handleScanSuccess = async (result: ScannedReceipt) => {
     const accountId = transactionFormPrefs.account_id || accounts[0]?.id;
@@ -197,10 +199,29 @@ export function GlobalScanManager() {
     void handleTrigger(scanTriggered);
   }, [scanTriggered, handleTrigger]);
 
+  // Sharing again needs a trip out of the app, so a repeat within one foreground is a late duplicate event.
   React.useEffect(() => {
-    if (!hasShareIntent || isLocked || isFirstTime) return;
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'background') handledShareKeyRef.current = null;
+    });
+    return () => subscription.remove();
+  }, []);
+
+  React.useEffect(() => {
+    if (!hasShareIntent) return;
+    const key = shareIntentKey(shareIntent);
+    if (key === handledShareKeyRef.current) {
+      resetShareIntent();
+      return;
+    }
+    pendingShareKeysRef.current.add(key);
+    if (isLocked || isFirstTime) return;
+    const replacedEarlierShare = pendingShareKeysRef.current.size > 1;
+    pendingShareKeysRef.current.clear();
+    handledShareKeyRef.current = key;
     const action = resolveShareAction(shareIntent, isScanOn);
     resetShareIntent();
+    if (replacedEarlierShare) Alert.alert(translate('scan.share_replaced'));
     if (!action) return;
     if (action.kind === 'scan-image') {
       mutatePrepare(action);

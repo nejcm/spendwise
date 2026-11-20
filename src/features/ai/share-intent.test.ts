@@ -1,5 +1,10 @@
 import type { ShareIntent, ShareIntentFile } from 'expo-share-intent';
-import { resolveShareAction } from './share-intent';
+import { isShareExtensionUrl, resolveShareAction } from './share-intent';
+
+jest.mock('expo-share-intent', () => ({
+  getScheme: () => 'spendwise',
+  getShareExtensionKey: () => 'spendwiseShareKey',
+}));
 
 function intent(overrides: Partial<ShareIntent>): ShareIntent {
   return { files: null, text: null, webUrl: null, type: null, ...overrides };
@@ -41,5 +46,24 @@ describe('resolveShareAction', () => {
     ['a non-image file', intent({ files: [file({ mimeType: 'video/mp4' })] })],
   ])('ignores %s', (_case: string, shareIntent: ShareIntent) => {
     expect(resolveShareAction(shareIntent, true)).toBeNull();
+  });
+});
+
+describe('isShareExtensionUrl', () => {
+  it.each([
+    'spendwise://dataUrl=spendwiseShareKey',
+    'spendwise://dataUrl=spendwiseShareKey?nonce=ABC#text',
+    'spendwise://dataUrl=spendwiseShareKey#media',
+  ])('matches the share extension link %s', (url: string) => {
+    expect(isShareExtensionUrl(url)).toBe(true);
+  });
+
+  it.each([
+    'spendwise://transactions/new?note=dataUrl=spendwiseShareKey',
+    'spendwise://dataUrl=spendwiseShareKeyX',
+    'other://dataUrl=spendwiseShareKey',
+    '/transactions/new',
+  ])('leaves %s to the router', (url: string) => {
+    expect(isShareExtensionUrl(url)).toBe(false);
   });
 });

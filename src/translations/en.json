@@ -656,6 +656,7 @@
     "no_key_title": "AI key not set up",
     "off_message": "Turn on receipt scanning in AI settings to scan receipts.",
     "off_title": "Receipt scanning is off",
+    "share_replaced": "Only the last item you shared was imported. Share the earlier one again to add it.",
     "source_camera": "Take Photo",
     "source_gallery": "Choose from Gallery",
     "source_title": "Scan Receipt"

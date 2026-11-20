@@ -656,6 +656,7 @@
     "no_key_title": "KI-Schlüssel fehlt",
     "off_message": "Schalte den Belegscan in den KI-Einstellungen ein, um Belege zu scannen.",
     "off_title": "Belegscan ist aus",
+    "share_replaced": "Nur das zuletzt geteilte Element wurde importiert. Teile das vorherige erneut, um es hinzuzufügen.",
     "source_camera": "Foto aufnehmen",
     "source_gallery": "Aus Galerie wählen",
     "source_title": "Beleg scannen"

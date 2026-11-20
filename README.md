@@ -28,7 +28,7 @@ Spendwise is a free personal finance app built with Expo and React Native. It is
 - Security: optional app lock using device authentication (biometrics/PIN)
 - Optional AI:
   - AI chat (OpenAI/Anthropic) using your own provider key stored on-device
-  - Receipt scanning with your own provider key
+  - Receipt scanning with your own provider key, including screenshots or text shared to Spendwise from other apps
 
 ## Stack
 

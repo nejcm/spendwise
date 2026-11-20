@@ -6,15 +6,19 @@ import { useMutation } from '@tanstack/react-query';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { usePathname, useRouter } from 'expo-router';
+import { useShareIntent } from 'expo-share-intent';
 import * as React from 'react';
 import { useCallback } from 'react';
+import { Image } from 'react-native';
 import { Alert } from '@/components/ui';
 import { useAccounts } from '@/features/accounts/api';
+import { resolveShareAction } from '@/features/ai/share-intent';
 import { useScanReceipt } from '@/features/ai/use-scan-receipt';
 import { useCategories } from '@/features/categories/api';
 import { firstFittingCategoryId } from '@/features/categories/helpers';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { useCreateTransaction } from '@/features/transactions/api';
+import { IS_WEB } from '@/lib/base';
 import { dateToUnix } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { closeScan, useLocalStore } from '@/lib/store/local-store';
@@ -28,14 +32,18 @@ import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import { ActivityIndicator, Modal, Text } from './ui';
 
 const MAX_IMAGE_DIMENSION = 1024;
+// Kept until handled so a Face ID prompt (inactive state) can't drop a share waiting behind the app lock.
+const SHARE_INTENT_OPTIONS = { resetOnBackground: false, disabled: IS_WEB };
 
-async function resizeForAI(asset: ImagePicker.ImagePickerAsset): Promise<{ base64: string; mimeType: 'image/jpeg' }> {
-  const longerSide = Math.max(asset.width, asset.height);
-  const actions: Action[] = longerSide > MAX_IMAGE_DIMENSION
-    ? [{ resize: asset.width >= asset.height ? { width: MAX_IMAGE_DIMENSION } : { height: MAX_IMAGE_DIMENSION } }]
+type ScanSourceImage = { uri: string; width: number | null; height: number | null };
+
+async function resizeForAI(source: ScanSourceImage): Promise<{ base64: string; mimeType: 'image/jpeg' }> {
+  const { width, height } = source.width && source.height ? { width: source.width, height: source.height } : await Image.getSize(source.uri);
+  const actions: Action[] = Math.max(width, height) > MAX_IMAGE_DIMENSION
+    ? [{ resize: width >= height ? { width: MAX_IMAGE_DIMENSION } : { height: MAX_IMAGE_DIMENSION } }]
     : [];
 
-  const context = ImageManipulator.manipulate(asset.uri);
+  const context = ImageManipulator.manipulate(source.uri);
   for (const action of actions) {
     if ('resize' in action) context.resize(action.resize);
     else if ('rotate' in action) context.rotate(action.rotate);
@@ -49,6 +57,17 @@ async function resizeForAI(asset: ImagePicker.ImagePickerAsset): Promise<{ base6
   image.release();
 
   return { base64: result.base64!, mimeType: 'image/jpeg' };
+}
+
+function showScanOffAlert(isAiEnabled: boolean, onGoToSettings: () => void) {
+  Alert.alert(
+    translate(isAiEnabled ? 'scan.off_title' : 'scan.no_key_title'),
+    translate(isAiEnabled ? 'scan.off_message' : 'scan.no_key_message'),
+    [
+      { text: translate('common.cancel'), style: 'cancel' },
+      { text: translate('scan.go_to_settings'), onPress: onGoToSettings },
+    ],
+  );
 }
 
 function ScanLoadingOverlay({ onClose }: { onClose: () => void }) {
@@ -68,6 +87,8 @@ export function GlobalScanManager() {
   const isTransactionFormRoute = pathname === '/transactions/new';
   const isAiEnabled = useAppStore(selectIsAiEnabled);
   const isScanOn = useAppStore(selectIsAiFeatureOn('scan'));
+  const isLocked = useAppStore((state) => state.lockEnabled && state.isLocked);
+  const isFirstTime = useAppStore.use.isFirstTime();
   const scanTriggered = useLocalStore.use.scanTriggered();
   const saveOnScan = useAppStore.use.saveOnScan();
   const preferredCurrency = useAppStore.use.currency();
@@ -75,6 +96,7 @@ export function GlobalScanManager() {
   const { data: accounts = [] } = useAccounts();
   const { data: categories = [] } = useCategories();
   const createTransaction = useCreateTransaction();
+  const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntent(SHARE_INTENT_OPTIONS);
 
   const handleScanSuccess = async (result: ScannedReceipt) => {
     const accountId = transactionFormPrefs.account_id || accounts[0]?.id;
@@ -109,8 +131,8 @@ export function GlobalScanManager() {
   const scanMutation = useScanReceipt(handleScanSuccess);
 
   const prepareMutation = useMutation({
-    mutationFn: async (asset: ImagePicker.ImagePickerAsset): Promise<ScanVariables> => {
-      const { base64, mimeType } = await resizeForAI(asset);
+    mutationFn: async (image: ScanSourceImage): Promise<ScanVariables> => {
+      const { base64, mimeType } = await resizeForAI(image);
       return { base64Image: base64, mimeType };
     },
     onSuccess: (variables) => {
@@ -122,6 +144,7 @@ export function GlobalScanManager() {
     },
   });
   const { mutate: mutatePrepare } = prepareMutation;
+  const { mutate: mutateScan } = scanMutation;
 
   const pickAndPrepare = useCallback(async (source: 'camera' | 'gallery') => {
     if (source === 'camera') {
@@ -150,14 +173,7 @@ export function GlobalScanManager() {
 
   const handleTrigger = useCallback((type: ScanTriggeredType) => {
     if (!isScanOn) {
-      Alert.alert(
-        translate(isAiEnabled ? 'scan.off_title' : 'scan.no_key_title'),
-        translate(isAiEnabled ? 'scan.off_message' : 'scan.no_key_message'),
-        [
-          { text: translate('common.cancel'), style: 'cancel' },
-          { text: translate('scan.go_to_settings'), onPress: () => router.push('/settings/ai') },
-        ],
-      );
+      showScanOffAlert(isAiEnabled, () => router.push('/settings/ai'));
       return;
     }
     if (type !== 'select') {
@@ -180,6 +196,25 @@ export function GlobalScanManager() {
     closeScan();
     void handleTrigger(scanTriggered);
   }, [scanTriggered, handleTrigger]);
+
+  React.useEffect(() => {
+    if (!hasShareIntent || isLocked || isFirstTime) return;
+    const action = resolveShareAction(shareIntent, isScanOn);
+    resetShareIntent();
+    if (!action) return;
+    if (action.kind === 'scan-image') {
+      mutatePrepare(action);
+      return;
+    }
+    if (action.kind === 'scan-text') {
+      mutateScan({ text: action.text });
+      return;
+    }
+    const formRoute = { pathname: '/transactions/new', params: { note: action.note } } as const;
+    if (isTransactionFormRoute) router.replace(formRoute);
+    else router.push(formRoute);
+    showScanOffAlert(isAiEnabled, () => router.push('/settings/ai'));
+  }, [hasShareIntent, shareIntent, resetShareIntent, isLocked, isFirstTime, isScanOn, isAiEnabled, isTransactionFormRoute, router, mutatePrepare, mutateScan]);
 
   if (!scanMutation.isPending) return null;
   return <ScanLoadingOverlay onClose={() => scanMutation.reset()} />;

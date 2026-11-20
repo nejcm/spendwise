@@ -133,6 +133,16 @@ export default ({ config }: ConfigContext): ExpoConfig =>
       ],
       'expo-localization',
       [
+        'expo-share-intent',
+        {
+          iosActivationRules: {
+            NSExtensionActivationSupportsText: true,
+            NSExtensionActivationSupportsImageWithMaxCount: 1,
+          },
+          androidIntentFilters: ['text/plain', 'image/*'],
+        },
+      ],
+      [
         'expo-router',
         {
           /* headers: {

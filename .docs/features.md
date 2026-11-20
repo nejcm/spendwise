@@ -70,7 +70,7 @@
 
 ### Optional / Starter-Carried Areas
 
-- `ai`: AI chat and provider settings using client-side provider calls. Exports a single `useChat` hook from `index.ts`; internals (context assembly, provider adapters, streaming, message persistence) are private.
+- `ai`: AI chat, receipt scanning (camera, gallery, or an image/text shared to the app via `expo-share-intent`), and provider settings using client-side provider calls. Exports a single `useChat` hook from `index.ts`; internals (context assembly, provider adapters, streaming, message persistence) are private.
 
 ## Contributor Notes
 

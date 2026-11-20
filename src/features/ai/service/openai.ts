@@ -1,4 +1,5 @@
 import type { ProviderChatMessage, StreamResponse, ToolCall } from '../types';
+import type { ScanImage } from './scan';
 import { fetch as expoFetch } from 'expo/fetch';
 import { OPEN_AI_API_URL, OPEN_AI_MODEL } from '@/config';
 import { streamSseEventsFromResponse } from './streaming';
@@ -163,10 +164,9 @@ export async function streamAskOpenAI(
 // ─── Receipt Scanning ───
 
 export async function scanReceiptOpenAI(
-  base64Image: string,
-  mimeType: 'image/jpeg' | 'image/png',
   prompt: string,
   apiKey: string,
+  image?: ScanImage,
 ): Promise<string> {
   const body = {
     model: OPEN_AI_MODEL,
@@ -175,10 +175,7 @@ export async function scanReceiptOpenAI(
       {
         role: 'user',
         content: [
-          {
-            type: 'image_url',
-            image_url: { url: `data:${mimeType};base64,${base64Image}`, detail: 'high' },
-          },
+          ...(image ? [{ type: 'image_url', image_url: { url: `data:${image.mimeType};base64,${image.base64}`, detail: 'high' } }] : []),
           { type: 'text', text: prompt },
         ],
       },

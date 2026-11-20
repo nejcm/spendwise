@@ -8,6 +8,11 @@ import { useAppStore } from '@/lib/store/store';
 import { scanReceiptAnthropic } from './anthropic';
 import { scanReceiptOpenAI } from './openai';
 
+export type ScanImage = {
+  base64: string;
+  mimeType: 'image/jpeg' | 'image/png';
+};
+
 const scannedReceiptSchema = z.object({
   /** Total amount in smallest currency unit (cents). Required — no fallback. */
   amount: z.number().positive().transform(Math.round),
@@ -24,16 +29,23 @@ const scannedReceiptSchema = z.object({
 export type ScannedReceipt = z.infer<typeof scannedReceiptSchema>;
 
 // Prompt
+const MAX_SHARED_TEXT_LENGTH = 5000;
+
 function buildPrompt(
   categories: Pick<Category, 'id' | 'name'>[],
   currency: CurrencyKey,
+  sharedText?: string,
 ): string {
   const today = todayISO();
   const categoryList = categories
     .map((c) => `  - id: "${c.id}", name: "${c.name}"`)
     .join('\n');
 
-  return `You are a receipt scanner. Extract transaction details from this receipt image and return ONLY valid JSON with no markdown, no code blocks, no extra text.
+  const source = sharedText === undefined
+    ? 'this receipt image'
+    : 'the text below (a receipt, bank or payment notification, or email)';
+
+  const prompt = `You are a receipt scanner. Extract transaction details from ${source} and return ONLY valid JSON with no markdown, no code blocks, no extra text.
 
 Required JSON fields:
 - "amount": integer, the total amount in cents (e.g. $12.50 → 1250)
@@ -49,6 +61,9 @@ Available categories:
 ${categoryList || '  (none)'}
 
 Respond with ONLY the JSON object, nothing else.`;
+
+  if (sharedText === undefined) return prompt;
+  return `${prompt}\n\nText:\n"""\n${sharedText.slice(0, MAX_SHARED_TEXT_LENGTH)}\n"""`;
 }
 
 // Parsing
@@ -76,18 +91,33 @@ function parseScannedReceipt(raw: string, currency: CurrencyKey): ScannedReceipt
   return result.data;
 }
 
-// Public API
-export async function scanReceiptImage(
-  base64Image: string,
-  mimeType: 'image/jpeg' | 'image/png',
+async function scanReceipt(
   categories: Pick<Category, 'id' | 'name'>[],
+  input: { image: ScanImage } | { text: string },
 ): Promise<ScannedReceipt> {
   const { aiProvider, anthropicApiKey, openaiApiKey, currency } = useAppStore.getState();
   const key = aiProvider === 'anthropic' ? anthropicApiKey : openaiApiKey;
   if (!key) throw new Error('No API key configured');
-  const prompt = buildPrompt(categories, currency);
+  const image = 'image' in input ? input.image : undefined;
+  const prompt = buildPrompt(categories, currency, 'text' in input ? input.text : undefined);
   const raw = aiProvider === 'anthropic'
-    ? await scanReceiptAnthropic(base64Image, mimeType, prompt, key)
-    : await scanReceiptOpenAI(base64Image, mimeType, prompt, key);
+    ? await scanReceiptAnthropic(prompt, key, image)
+    : await scanReceiptOpenAI(prompt, key, image);
   return parseScannedReceipt(raw, currency);
+}
+
+// Public API
+export function scanReceiptImage(
+  base64Image: string,
+  mimeType: ScanImage['mimeType'],
+  categories: Pick<Category, 'id' | 'name'>[],
+): Promise<ScannedReceipt> {
+  return scanReceipt(categories, { image: { base64: base64Image, mimeType } });
+}
+
+export function scanReceiptText(
+  text: string,
+  categories: Pick<Category, 'id' | 'name'>[],
+): Promise<ScannedReceipt> {
+  return scanReceipt(categories, { text });
 }

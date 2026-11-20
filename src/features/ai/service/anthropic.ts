@@ -1,4 +1,5 @@
 import type { ProviderChatMessage, StreamResponse, ToolCall } from '../types';
+import type { ScanImage } from './scan';
 import { fetch as expoFetch } from 'expo/fetch';
 import { ANTHROPIC_API_URL, ANTHROPIC_MAX_TOKENS, ANTHROPIC_MODEL } from '@/config';
 import { streamSseEventsFromResponse } from './streaming';
@@ -239,10 +240,9 @@ export async function streamAskAnthropic({
 // ─── Receipt Scanning ───
 
 export async function scanReceiptAnthropic(
-  base64Image: string,
-  mimeType: 'image/jpeg' | 'image/png',
   prompt: string,
   apiKey: string,
+  image?: ScanImage,
 ): Promise<string> {
   const body = {
     model: ANTHROPIC_MODEL,
@@ -251,10 +251,7 @@ export async function scanReceiptAnthropic(
       {
         role: 'user',
         content: [
-          {
-            type: 'image',
-            source: { type: 'base64', media_type: mimeType, data: base64Image },
-          },
+          ...(image ? [{ type: 'image', source: { type: 'base64', media_type: image.mimeType, data: image.base64 } }] : []),
           { type: 'text', text: prompt },
         ],
       },

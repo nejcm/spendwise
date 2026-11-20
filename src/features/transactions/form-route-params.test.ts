@@ -54,6 +54,30 @@ describe('parseTransactionFormInitialValues', () => {
     })).toBeUndefined();
   });
 
+  it.each([
+    ['12.50', '12.50'],
+    ['12,50', '12.50'],
+    ['€12.50', '12.50'],
+    ['12,50 €', '12.50'],
+    ['12,50\u00A0€', '12.50'],
+    ['1.234,56', '1234.56'],
+    ['1,234.56', '1234.56'],
+    ['$1,234', '1234'],
+    ['1 234,5', '1234.5'],
+    ['7', '7'],
+  ])('parses the Shortcuts amount %s', (amount: string, expected: string) => {
+    expect(parseTransactionFormInitialValues({ amount })).toEqual({ amount: expected });
+  });
+
+  it.each(['-12.50', '−12.50', '€0,00', '1e3', 'twelve', '12.50abcde'])('rejects the amount %s', (amount: string) => {
+    expect(parseTransactionFormInitialValues({ amount })).toBeUndefined();
+  });
+
+  it('takes the currency from an ISO code in the amount unless a currency param is given', () => {
+    expect(parseTransactionFormInitialValues({ amount: '12,50 EUR', merchant_name: 'Café Ü' })).toEqual({ amount: '12.50', currency: 'EUR', merchant_name: 'Café Ü' });
+    expect(parseTransactionFormInitialValues({ amount: 'USD 3.20', currency: 'GBP' })).toEqual({ amount: '3.20', currency: 'GBP' });
+  });
+
   it('normalizes blank nullable transaction params', () => {
     expect(parseTransactionFormInitialValues({
       location: '   ',

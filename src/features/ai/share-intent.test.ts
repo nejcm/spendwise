@@ -40,6 +40,13 @@ describe('resolveShareAction', () => {
     expect(resolveShareAction(intent({ text: 'x'.repeat(600) }), false)).toEqual({ kind: 'open-form', note: 'x'.repeat(500) });
   });
 
+  it('never cuts an emoji in half at the note limit', () => {
+    const action = resolveShareAction(intent({ text: `${'x'.repeat(499)}💳 paid` }), false);
+
+    expect(action).toEqual({ kind: 'open-form', note: 'x'.repeat(499) });
+    expect(() => encodeURIComponent((action as { note: string }).note)).not.toThrow();
+  });
+
   it.each([
     ['nothing', intent({})],
     ['blank text', intent({ text: '   ' })],

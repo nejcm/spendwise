@@ -6,19 +6,18 @@ import { useMutation } from '@tanstack/react-query';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { usePathname, useRouter } from 'expo-router';
-import { useShareIntent } from 'expo-share-intent';
 import * as React from 'react';
 import { useCallback } from 'react';
 import { AppState, Image } from 'react-native';
 import { Alert } from '@/components/ui';
 import { useAccounts } from '@/features/accounts/api';
-import { resolveShareAction, shareIntentKey } from '@/features/ai/share-intent';
+import { resolveShareAction } from '@/features/ai/share-intent';
+import { useIncomingShare } from '@/features/ai/use-incoming-share';
 import { useScanReceipt } from '@/features/ai/use-scan-receipt';
 import { useCategories } from '@/features/categories/api';
 import { firstFittingCategoryId } from '@/features/categories/helpers';
 import { centsToAmount } from '@/features/formatting/helpers';
 import { useCreateTransaction } from '@/features/transactions/api';
-import { IS_WEB } from '@/lib/base';
 import { dateToUnix } from '@/lib/date/helpers';
 import { translate } from '@/lib/i18n';
 import { closeScan, useLocalStore } from '@/lib/store/local-store';
@@ -32,8 +31,6 @@ import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import { ActivityIndicator, Modal, Text } from './ui';
 
 const MAX_IMAGE_DIMENSION = 1024;
-// Kept until handled so a Face ID prompt (inactive state) can't drop a share waiting behind the app lock.
-const SHARE_INTENT_OPTIONS = { resetOnBackground: false, disabled: IS_WEB };
 
 type ScanSourceImage = { uri: string; width: number | null; height: number | null };
 
@@ -96,9 +93,8 @@ export function GlobalScanManager() {
   const { data: accounts = [] } = useAccounts();
   const { data: categories = [] } = useCategories();
   const createTransaction = useCreateTransaction();
-  const { hasShareIntent, shareIntent, resetShareIntent } = useShareIntent(SHARE_INTENT_OPTIONS);
-  const handledShareKeyRef = React.useRef<string | null>(null);
-  const pendingShareKeysRef = React.useRef(new Set<string>());
+  const [incomingShare, clearIncomingShare] = useIncomingShare();
+  const [appState, setAppState] = React.useState(AppState.currentState);
 
   const handleScanSuccess = async (result: ScannedReceipt) => {
     const accountId = transactionFormPrefs.account_id || accounts[0]?.id;
@@ -199,29 +195,22 @@ export function GlobalScanManager() {
     void handleTrigger(scanTriggered);
   }, [scanTriggered, handleTrigger]);
 
-  // Sharing again needs a trip out of the app, so a repeat within one foreground is a late duplicate event.
   React.useEffect(() => {
-    const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'background') handledShareKeyRef.current = null;
-    });
+    const subscription = AppState.addEventListener('change', setAppState);
     return () => subscription.remove();
   }, []);
 
+  // Android can deliver a warm share before resume, i.e. before SecurityLock re-locks on 'active'.
+  const isShareBlocked = appState !== 'active' || isLocked || isFirstTime || prepareMutation.isPending || scanMutation.isPending;
   React.useEffect(() => {
-    if (!hasShareIntent) return;
-    const key = shareIntentKey(shareIntent);
-    if (key === handledShareKeyRef.current) {
-      resetShareIntent();
+    if (!incomingShare || isShareBlocked) return;
+    clearIncomingShare();
+    if ('error' in incomingShare) {
+      Alert.alert(translate('common.error'), translate('scan.share_error'));
       return;
     }
-    pendingShareKeysRef.current.add(key);
-    if (isLocked || isFirstTime) return;
-    const replacedEarlierShare = pendingShareKeysRef.current.size > 1;
-    pendingShareKeysRef.current.clear();
-    handledShareKeyRef.current = key;
-    const action = resolveShareAction(shareIntent, isScanOn);
-    resetShareIntent();
-    if (replacedEarlierShare) Alert.alert(translate('scan.share_replaced'));
+    if (incomingShare.replacedEarlier) Alert.alert(translate('scan.share_replaced'));
+    const action = resolveShareAction(incomingShare.shareIntent, isScanOn);
     if (!action) return;
     if (action.kind === 'scan-image') {
       mutatePrepare(action);
@@ -235,7 +224,7 @@ export function GlobalScanManager() {
     if (isTransactionFormRoute) router.replace(formRoute);
     else router.push(formRoute);
     showScanOffAlert(isAiEnabled, () => router.push('/settings/ai'));
-  }, [hasShareIntent, shareIntent, resetShareIntent, isLocked, isFirstTime, isScanOn, isAiEnabled, isTransactionFormRoute, router, mutatePrepare, mutateScan]);
+  }, [incomingShare, clearIncomingShare, isShareBlocked, isScanOn, isAiEnabled, isTransactionFormRoute, router, mutatePrepare, mutateScan]);
 
   if (!scanMutation.isPending) return null;
   return <ScanLoadingOverlay onClose={() => scanMutation.reset()} />;

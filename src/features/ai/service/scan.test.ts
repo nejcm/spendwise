@@ -1,4 +1,4 @@
-import { clearAppStore, setAiProvider, setAnthropicApiKey, setCurrency, setOpenaiApiKey } from '@/lib/store/store';
+import { clearAppStore, setAiFeature, setAiProvider, setAnthropicApiKey, setCurrency, setOpenaiApiKey } from '@/lib/store/store';
 import { scanReceiptAnthropic } from './anthropic';
 import { scanReceiptOpenAI } from './openai';
 import { scanReceiptImage, scanReceiptText } from './scan';
@@ -91,6 +91,14 @@ describe('scanReceiptText', () => {
     setOpenaiApiKey(undefined);
 
     await expect(scanReceiptText('Paid €12.50', CATEGORIES)).rejects.toThrow('No API key');
+    expect(scanMock).not.toHaveBeenCalled();
+  });
+
+  it('sends nothing once scanning has been switched off', async () => {
+    setAiFeature('scan', false);
+
+    await expect(scanReceiptText('Paid €12.50', CATEGORIES)).rejects.toThrow('Turn on receipt scanning');
+    await expect(scanReceiptImage('b64', 'image/jpeg', CATEGORIES)).rejects.toThrow('Turn on receipt scanning');
     expect(scanMock).not.toHaveBeenCalled();
   });
 

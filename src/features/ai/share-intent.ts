@@ -18,13 +18,15 @@ export function resolveShareAction(shareIntent: ShareIntent, isScanOn: boolean):
   }
   const text = shareIntent.text?.trim();
   if (text) {
-    return isScanOn ? { kind: 'scan-text', text } : { kind: 'open-form', note: text.slice(0, MAX_NOTE_LENGTH) };
+    return isScanOn ? { kind: 'scan-text', text } : { kind: 'open-form', note: truncate(text, MAX_NOTE_LENGTH) };
   }
   return null;
 }
 
-export function shareIntentKey(shareIntent: ShareIntent): string {
-  return shareIntent.text ?? shareIntent.files?.map((file) => file.path).join('\n') ?? '';
+// A lone surrogate makes Expo Router's encodeURIComponent throw.
+function truncate(text: string, maxLength: number): string {
+  const cut = text.slice(0, maxLength);
+  return /[\uD800-\uDBFF]$/.test(cut) ? cut.slice(0, -1) : cut;
 }
 
 // The iOS share extension opens `<scheme>://dataUrl=<scheme>ShareKey?nonce=…#<type>`.

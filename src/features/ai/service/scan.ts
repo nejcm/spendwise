@@ -4,7 +4,8 @@ import type { CurrencyKey } from '@/features/currencies';
 import * as z from 'zod';
 import { CURRENCY_VALUES } from '@/features/currencies';
 import { todayISO } from '@/features/formatting/helpers';
-import { useAppStore } from '@/lib/store/store';
+import { translate } from '@/lib/i18n';
+import { selectIsAiFeatureOn, useAppStore } from '@/lib/store/store';
 import { scanReceiptAnthropic } from './anthropic';
 import { scanReceiptOpenAI } from './openai';
 
@@ -95,9 +96,11 @@ async function scanReceipt(
   categories: Pick<Category, 'id' | 'name'>[],
   input: { image: ScanImage } | { text: string },
 ): Promise<ScannedReceipt> {
-  const { aiProvider, anthropicApiKey, openaiApiKey, currency } = useAppStore.getState();
+  const state = useAppStore.getState();
+  const { aiProvider, anthropicApiKey, openaiApiKey, currency } = state;
   const key = aiProvider === 'anthropic' ? anthropicApiKey : openaiApiKey;
   if (!key) throw new Error('No API key configured');
+  if (!selectIsAiFeatureOn('scan')(state)) throw new Error(translate('scan.off_message'));
   const image = 'image' in input ? input.image : undefined;
   const prompt = buildPrompt(categories, currency, 'text' in input ? input.text : undefined);
   const raw = aiProvider === 'anthropic'

@@ -1,5 +1,5 @@
 import type { Action } from 'expo-image-manipulator';
-import type { SharedItem } from '@/features/ai/share-intent';
+import type { IncomingShare, SharedItem } from '@/features/ai/share-intent';
 import type { ScannedReceipt, ScanVariables } from '@/features/ai/use-scan-receipt';
 import type { TransactionFormData } from '@/features/transactions/types';
 import type { ScanTriggeredType } from '@/lib/store/local-store';
@@ -7,13 +7,12 @@ import { useMutation } from '@tanstack/react-query';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { usePathname, useRouter } from 'expo-router';
-import { useShareIntent } from 'expo-share-intent';
 import * as React from 'react';
 import { useCallback } from 'react';
 import { AppState, Image as RNImage } from 'react-native';
 import { Alert } from '@/components/ui';
 import { useAccounts } from '@/features/accounts/api';
-import { getSharedItem, toNote } from '@/features/ai/share-intent';
+import { toNote, useIncomingShare } from '@/features/ai/share-intent';
 import { useScanReceipt } from '@/features/ai/use-scan-receipt';
 import { useCategories } from '@/features/categories/api';
 import { firstFittingCategoryId } from '@/features/categories/helpers';
@@ -32,8 +31,6 @@ import { useThemeConfig } from '@/lib/theme/use-theme-config';
 import { ActivityIndicator, GhostButton, Image, Modal, SolidButton, Text, View } from './ui';
 
 const MAX_IMAGE_DIMENSION = 1024;
-// Keep the pending share while the app is in the background.
-const SHARE_INTENT_OPTIONS = { resetOnBackground: false };
 
 type ScanSourceImage = { uri: string; width: number | null; height: number | null };
 
@@ -114,24 +111,28 @@ export function GlobalScanManager() {
   const { data: accounts = [] } = useAccounts();
   const { data: categories = [] } = useCategories();
   const createTransaction = useCreateTransaction();
-  const { hasShareIntent, shareIntent, resetShareIntent, error: shareError } = useShareIntent(SHARE_INTENT_OPTIONS);
-  const sharedItem = hasShareIntent ? getSharedItem(shareIntent) : null;
+  const { share, errorId, clearShare } = useIncomingShare();
   const appState = React.useSyncExternalStore(subscribeToAppState, () => AppState.currentState);
-  const hasUnreadShareRef = React.useRef(false);
-  const activeScanRef = React.useRef<{ variables: ScanVariables; shareKey: string | null } | null>(null);
-  const shareKeyRef = React.useRef('');
-  React.useEffect(() => {
-    shareKeyRef.current = JSON.stringify(shareIntent);
-  });
+  const alertedErrorIdRef = React.useRef(0);
+  const activeScanRef = React.useRef<{ variables: ScanVariables; shareId: number | null } | null>(null);
+  // Claimed synchronously by the first action, before React re-renders the sheet.
+  const claimedShareIdRef = React.useRef<number | null>(null);
+  const claimShare = (id: number) => {
+    if (claimedShareIdRef.current === id) return false;
+    claimedShareIdRef.current = id;
+    return true;
+  };
+  const releaseShare = (id: number | null) => {
+    if (claimedShareIdRef.current === id) claimedShareIdRef.current = null;
+  };
 
   const handleScanSuccess = async (result: ScannedReceipt, variables: ScanVariables) => {
     const scan = activeScanRef.current;
     // A dismissed or superseded scan must not save; a share must produce at most one transaction.
     if (scan?.variables !== variables) return;
     activeScanRef.current = null;
-    // Cleared only once handled, and not if a newer share replaced the scanned one meanwhile.
     const finishShare = () => {
-      if (scan.shareKey === shareKeyRef.current) resetShareIntent();
+      if (scan.shareId !== null) clearShare(scan.shareId);
     };
     const accountId = transactionFormPrefs.account_id || accounts[0]?.id;
     const categoryId = firstFittingCategoryId([result.category_id, transactionFormPrefs.category_id, categories[0]?.id], categories, result.type);
@@ -166,17 +167,17 @@ export function GlobalScanManager() {
   };
   const scanMutation = useScanReceipt(handleScanSuccess);
   const { mutate: mutateScan } = scanMutation;
-  const startScan = (variables: ScanVariables, shareKey: string | null) => {
-    activeScanRef.current = { variables, shareKey };
-    mutateScan(variables);
+  const startScan = (variables: ScanVariables, shareId: number | null) => {
+    activeScanRef.current = { variables, shareId };
+    mutateScan(variables, { onSettled: () => releaseShare(shareId) });
   };
 
   const prepareMutation = useMutation({
-    mutationFn: async ({ image }: { image: ScanSourceImage; shareKey: string | null }): Promise<ScanVariables> => {
+    mutationFn: async ({ image }: { image: ScanSourceImage; shareId: number | null }): Promise<ScanVariables> => {
       const { base64, mimeType } = await resizeForAI(image);
       return { base64Image: base64, mimeType };
     },
-    onSuccess: (variables, { shareKey }) => startScan(variables, shareKey),
+    onSuccess: (variables, { shareId }) => startScan(variables, shareId),
     onError: (error) => {
       const message = error instanceof Error ? error.message : translate('scan.error_generic');
       Alert.alert(translate('common.error'), message);
@@ -194,7 +195,7 @@ export function GlobalScanManager() {
       const result = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1 });
       if (result.canceled) return;
       const asset = result.assets[0];
-      if (asset) mutatePrepare({ image: asset, shareKey: null });
+      if (asset) mutatePrepare({ image: asset, shareId: null });
       return;
     }
 
@@ -206,7 +207,7 @@ export function GlobalScanManager() {
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1 });
     if (result.canceled) return;
     const asset = result.assets[0];
-    if (asset) mutatePrepare({ image: asset, shareKey: null });
+    if (asset) mutatePrepare({ image: asset, shareId: null });
   }, [mutatePrepare]);
 
   const handleTrigger = useCallback((type: ScanTriggeredType) => {
@@ -243,54 +244,51 @@ export function GlobalScanManager() {
   }, [scanTriggered, handleTrigger]);
 
   const isShareReady = appState === 'active' && !isLocked && !isFirstTime;
-  const isShareUnreadable = hasShareIntent && !sharedItem;
-  // An error batched with a good share keeps the share; a lone error is reset to re-arm the next one.
-  const shouldResetShare = isShareUnreadable || (Boolean(shareError) && !hasShareIntent);
   React.useEffect(() => {
-    if (shareError || isShareUnreadable) hasUnreadShareRef.current = true;
-  }, [shareError, isShareUnreadable]);
-  React.useEffect(() => {
-    if (shouldResetShare) resetShareIntent();
-  }, [shouldResetShare, resetShareIntent]);
-  React.useEffect(() => {
-    if (!hasUnreadShareRef.current || !isShareReady) return;
-    hasUnreadShareRef.current = false;
+    if (errorId === alertedErrorIdRef.current || !isShareReady) return;
+    alertedErrorIdRef.current = errorId;
     Alert.alert(translate('common.error'), translate('scan.share_error'));
-  }, [shareError, isShareUnreadable, isShareReady]);
+  }, [errorId, isShareReady]);
 
-  const canShowSheet = Boolean(sharedItem) && !isLocked && !isFirstTime && !scanMutation.isPending && !prepareMutation.isPending;
+  const canShowSheet = Boolean(share) && !isLocked && !isFirstTime && !scanMutation.isPending && !prepareMutation.isPending;
   const [wasSheetVisible, setWasSheetVisible] = React.useState(false);
   // iOS goes 'inactive' over an open sheet for Control Center or Face ID; a new sheet still waits for 'active'.
   const isSheetVisible = canShowSheet && (appState === 'active' || (appState === 'inactive' && wasSheetVisible));
   if (isSheetVisible !== wasSheetVisible) setWasSheetVisible(isSheetVisible);
 
-  const scanSharedItem = (item: SharedItem) => {
-    const shareKey = JSON.stringify(shareIntent);
-    if (item.kind === 'image') mutatePrepare({ image: item, shareKey });
-    else startScan({ text: item.text }, shareKey);
+  const scanShare = ({ id, item }: IncomingShare) => {
+    if (!claimShare(id)) return;
+    if (item.kind === 'image') mutatePrepare({ image: item, shareId: id }, { onError: () => releaseShare(id) });
+    else startScan({ text: item.text }, id);
   };
-  const fillSharedItemManually = (item: SharedItem) => {
-    resetShareIntent();
+  const fillShareManually = ({ id, item }: IncomingShare) => {
+    if (!claimShare(id)) return;
+    clearShare(id);
     // Pushed, not replaced, so an unsaved form underneath survives.
     router.push({ pathname: '/transactions/new', params: { note: item.kind === 'text' ? toNote(item.text) : undefined } });
+  };
+  const discardShare = ({ id }: IncomingShare) => {
+    if (claimShare(id)) clearShare(id);
   };
 
   const dismissScan = () => {
     // Once a result is being saved the scan can no longer be dismissed.
-    if (!activeScanRef.current) return;
+    const scan = activeScanRef.current;
+    if (!scan) return;
     activeScanRef.current = null;
+    releaseShare(scan.shareId);
     scanMutation.reset();
   };
 
   if (scanMutation.isPending) return <ScanLoadingOverlay onClose={dismissScan} />;
-  if (!sharedItem || !isSheetVisible) return null;
+  if (!share || !isSheetVisible) return null;
   return (
     <SharedItemSheet
-      item={sharedItem}
+      item={share.item}
       canScan={isScanOn}
-      onScan={() => scanSharedItem(sharedItem)}
-      onFillManually={() => fillSharedItemManually(sharedItem)}
-      onDiscard={() => resetShareIntent()}
+      onScan={() => scanShare(share)}
+      onFillManually={() => fillShareManually(share)}
+      onDiscard={() => discardShare(share)}
     />
   );
 }

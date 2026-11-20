@@ -22,8 +22,14 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush, replace: jest.fn() }),
 }));
 jest.mock('@/components/ui', () => {
+  const { useEffect } = require('react');
   const { Pressable, Text, View } = require('react-native');
-  const Button = ({ label, onPress }: { label: string; onPress: () => void }) => <Pressable onPress={onPress}><Text>{label}</Text></Pressable>;
+  const Button = ({ label, onPress }: { label: string; onPress: () => void }) => {
+    useEffect(() => {
+      mockButtonPresses[label] = onPress;
+    });
+    return <Pressable onPress={onPress}><Text>{label}</Text></Pressable>;
+  };
   return {
     Alert: { alert: jest.fn() },
     ActivityIndicator: () => null,
@@ -56,6 +62,7 @@ jest.mock('@tanstack/react-query', () => ({ useMutation: () => ({ mutate: mockPr
 const mockNativeHandlers: Record<string, (event: { value: unknown }) => void> = {};
 const mockLinking = { url: null as string | null };
 const mockPush = jest.fn();
+const mockButtonPresses: Record<string, () => void> = {};
 const mockScan = jest.fn();
 const mockPrepare = jest.fn();
 const mockScanState = { pending: false, onSuccess: (async () => {}) as (result: unknown, variables: unknown) => Promise<void> };
@@ -67,8 +74,13 @@ function setCurrentAppState(state: string) {
   Object.defineProperty(AppState, 'currentState', { value: state, configurable: true, writable: true });
 }
 
-async function finishScan(variables: unknown = mockScan.mock.lastCall![0]) {
-  await act(() => mockScanState.onSuccess({ amount: 1250, type: 'expense' }, variables));
+type ScanCall = [unknown, { onSettled: () => void }];
+
+async function succeedScan([variables, { onSettled }]: ScanCall = mockScan.mock.lastCall as ScanCall) {
+  await act(async () => {
+    await mockScanState.onSuccess({ amount: 1250, type: 'expense' }, variables);
+    onSettled();
+  });
 }
 
 function shareText(text: string) {
@@ -153,13 +165,20 @@ describe('shared item sheet', () => {
     expect(screen.getByText('Second')).toBeTruthy();
   });
 
-  it('discards the item and clears the native slot', () => {
+  it('clears the native slot as soon as a share is read', () => {
+    render(<GlobalScanManager />);
+    shareText('Paid €12.50');
+
+    expect(nativeModule.clearShareIntent).toHaveBeenCalledWith('spendwiseShareKey');
+    expect(screen.getByText('Paid €12.50')).toBeTruthy();
+  });
+
+  it('discards the item', () => {
     render(<GlobalScanManager />);
     shareText('Paid €12.50');
     fireEvent.press(screen.getByText('Discard'));
 
     expect(screen.queryByText('Shared item')).toBeNull();
-    expect(nativeModule.clearShareIntent).toHaveBeenCalled();
     expect(mockScan).not.toHaveBeenCalled();
     expect(mockPush).not.toHaveBeenCalled();
   });
@@ -190,17 +209,19 @@ describe('shared item sheet', () => {
     expect(screen.getByText('Fill in manually')).toBeTruthy();
     expect(screen.queryByText('Scan with AI')).toBeNull();
   });
+});
 
+describe('scanning a shared item', () => {
   it('scans text and images only when asked', () => {
     render(<GlobalScanManager />);
     shareText('Paid €12.50');
     fireEvent.press(screen.getByText('Scan with AI'));
 
-    expect(mockScan).toHaveBeenCalledWith({ text: 'Paid €12.50' });
+    expect(mockScan.mock.lastCall![0]).toEqual({ text: 'Paid €12.50' });
 
     shareImage('file:///r.jpg');
     fireEvent.press(screen.getByText('Scan with AI'));
-    expect(mockPrepare).toHaveBeenCalledWith({ image: { kind: 'image', uri: 'file:///r.jpg', width: 800, height: 600 }, shareKey: expect.any(String) });
+    expect(mockPrepare.mock.lastCall![0]).toEqual({ image: { kind: 'image', uri: 'file:///r.jpg', width: 800, height: 600 }, shareId: expect.any(Number) });
   });
 
   it('holds a share that arrives during a scan until the scan finishes', () => {
@@ -224,13 +245,14 @@ describe('shared item sheet', () => {
     expect(screen.queryByText('Shared item')).toBeNull();
 
     mockScanState.pending = false;
+    act(() => (mockScan.mock.lastCall as ScanCall)[1].onSettled());
     rerender(<GlobalScanManager />);
     expect(screen.getByText('Paid €12.50')).toBeTruthy();
 
     fireEvent.press(screen.getByText('Scan with AI'));
-    await finishScan();
+    expect(mockScan).toHaveBeenCalledTimes(2);
+    await succeedScan();
     expect(screen.queryByText('Shared item')).toBeNull();
-    expect(nativeModule.clearShareIntent).toHaveBeenCalled();
   });
 
   it('keeps a share that replaced the scanned one during the scan', async () => {
@@ -238,16 +260,67 @@ describe('shared item sheet', () => {
     shareText('First');
     fireEvent.press(screen.getByText('Scan with AI'));
     shareText('Second');
-    await finishScan();
+    await succeedScan();
 
     expect(screen.getByText('Second')).toBeTruthy();
+  });
+
+  it('keeps an identical newer share when the earlier one is saved', async () => {
+    render(<GlobalScanManager />);
+    shareText('Paid €12.50');
+    fireEvent.press(screen.getByText('Scan with AI'));
+    shareText('Paid €12.50');
+    await succeedScan();
+
+    expect(mockPush).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('Paid €12.50')).toBeTruthy();
+  });
+
+  it('keeps a newer share delivered in the same batch as the save', async () => {
+    render(<GlobalScanManager />);
+    shareText('First');
+    fireEvent.press(screen.getByText('Scan with AI'));
+    const [variables, { onSettled }] = mockScan.mock.lastCall as ScanCall;
+    await act(async () => {
+      mockNativeHandlers.onChange!({ value: { text: 'Second', type: 'text' } });
+      await mockScanState.onSuccess({ amount: 1250, type: 'expense' }, variables);
+      onSettled();
+    });
+
+    expect(screen.getByText('Second')).toBeTruthy();
+  });
+
+  it('acts once on a share pressed twice before the sheet re-renders', () => {
+    render(<GlobalScanManager />);
+    shareText('Paid €12.50');
+    const fill = mockButtonPresses['Fill in manually']!;
+    act(() => {
+      fill();
+      fill();
+    });
+
+    expect(mockPush).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores Fill after Scan on the same share', () => {
+    render(<GlobalScanManager />);
+    shareText('Paid €12.50');
+    const scan = mockButtonPresses['Scan with AI']!;
+    const fill = mockButtonPresses['Fill in manually']!;
+    act(() => {
+      scan();
+      fill();
+    });
+
+    expect(mockScan).toHaveBeenCalledTimes(1);
+    expect(mockPush).not.toHaveBeenCalled();
   });
 
   it('saves once when a dismissed scan finishes after a rescan', async () => {
     const { rerender } = render(<GlobalScanManager />);
     shareText('Paid €12.50');
     fireEvent.press(screen.getByText('Scan with AI'));
-    const dismissedScan = mockScan.mock.lastCall![0];
+    const [dismissedScan] = mockScan.mock.lastCall as ScanCall;
     mockScanState.pending = true;
     rerender(<GlobalScanManager />);
     fireEvent.press(screen.getByText('Close modal'));
@@ -255,12 +328,12 @@ describe('shared item sheet', () => {
     rerender(<GlobalScanManager />);
     fireEvent.press(screen.getByText('Scan with AI'));
 
-    await finishScan(dismissedScan);
+    await act(() => mockScanState.onSuccess({ amount: 1250, type: 'expense' }, dismissedScan));
     expect(mockPush).not.toHaveBeenCalled();
     expect(screen.getByText('Paid €12.50')).toBeTruthy();
 
-    await finishScan();
-    await finishScan();
+    await succeedScan();
+    await succeedScan();
     expect(mockPush).toHaveBeenCalledTimes(1);
     expect(screen.queryByText('Shared item')).toBeNull();
   });
@@ -300,7 +373,9 @@ describe('shared item sheet', () => {
 
     expect(screen.getByText('Paid €12.50')).toBeTruthy();
   });
+});
 
+describe('receiver errors', () => {
   it('shows a good share that follows a failed one, alerting once', () => {
     setCurrentAppState('background');
     render(<GlobalScanManager />);
@@ -331,7 +406,16 @@ describe('shared item sheet', () => {
     act(() => mockNativeHandlers.onError!({ value: 'Cannot retreive appGroupIdentifier' }));
 
     expect(Alert.alert).toHaveBeenCalledWith('Error', 'Could not read the shared item. Please try sharing it again.');
-    expect(nativeModule.clearShareIntent).toHaveBeenCalled();
+  });
+
+  it('alerts once per receiver error, even with the same message', () => {
+    render(<GlobalScanManager />);
+    shareText('Paid €12.50');
+    act(() => mockNativeHandlers.onError!({ value: 'No text in text share' }));
+    act(() => mockNativeHandlers.onError!({ value: 'No text in text share' }));
+
+    expect(Alert.alert).toHaveBeenCalledTimes(2);
+    expect(screen.getByText('Paid €12.50')).toBeTruthy();
   });
 
   it('alerts but keeps the open item when a newer share fails to read', () => {

@@ -54,10 +54,13 @@ jest.mock('@/features/transactions/api', () => ({ useCreateTransaction: () => ({
 jest.mock('@/features/ai/use-scan-receipt', () => ({
   useScanReceipt: (onSuccess: (result: unknown, variables: unknown) => Promise<void>) => {
     mockScanState.onSuccess = onSuccess;
-    return { mutate: mockScan, isPending: mockScanState.pending, reset: jest.fn() };
+    const mutateAsync = (variables: unknown) => new Promise((resolve) => mockScan(variables, { onSettled: () => resolve(undefined) }));
+    return { mutateAsync, isPending: mockScanState.pending, reset: jest.fn() };
   },
 }));
-jest.mock('@tanstack/react-query', () => ({ useMutation: () => ({ mutate: mockPrepare, isPending: false }) }));
+jest.mock('@tanstack/react-query', () => ({
+  useMutation: () => ({ mutate: mockPrepare, mutateAsync: (variables: unknown) => new Promise(() => mockPrepare(variables)), isPending: false }),
+}));
 
 const mockNativeHandlers: Record<string, (event: { value: unknown }) => void> = {};
 const mockLinking = { url: null as string | null };
@@ -221,7 +224,7 @@ describe('scanning a shared item', () => {
 
     shareImage('file:///r.jpg');
     fireEvent.press(screen.getByText('Scan with AI'));
-    expect(mockPrepare.mock.lastCall![0]).toEqual({ image: { kind: 'image', uri: 'file:///r.jpg', width: 800, height: 600 }, shareId: expect.any(Number) });
+    expect(mockPrepare.mock.lastCall![0]).toEqual({ image: { kind: 'image', uri: 'file:///r.jpg', width: 800, height: 600 }, claim: { id: expect.any(Number) } });
   });
 
   it('holds a share that arrives during a scan until the scan finishes', () => {
@@ -245,7 +248,7 @@ describe('scanning a shared item', () => {
     expect(screen.queryByText('Shared item')).toBeNull();
 
     mockScanState.pending = false;
-    act(() => (mockScan.mock.lastCall as ScanCall)[1].onSettled());
+    await act(async () => (mockScan.mock.lastCall as ScanCall)[1].onSettled());
     rerender(<GlobalScanManager />);
     expect(screen.getByText('Paid €12.50')).toBeTruthy();
 

@@ -33,6 +33,7 @@ import { ActivityIndicator, GhostButton, Image, Modal, SolidButton, Text, View }
 const MAX_IMAGE_DIMENSION = 1024;
 
 type ScanSourceImage = { uri: string; width: number | null; height: number | null };
+type ShareClaim = { id: number };
 
 async function resizeForAI(source: ScanSourceImage): Promise<{ base64: string; mimeType: 'image/jpeg' }> {
   const { width, height } = source.width && source.height ? { width: source.width, height: source.height } : await RNImage.getSize(source.uri);
@@ -114,16 +115,17 @@ export function GlobalScanManager() {
   const { share, errorId, clearShare } = useIncomingShare();
   const appState = React.useSyncExternalStore(subscribeToAppState, () => AppState.currentState);
   const alertedErrorIdRef = React.useRef(0);
-  const activeScanRef = React.useRef<{ variables: ScanVariables; shareId: number | null } | null>(null);
-  // Claimed synchronously by the first action, before React re-renders the sheet.
-  const claimedShareIdRef = React.useRef<number | null>(null);
-  const claimShare = (id: number) => {
-    if (claimedShareIdRef.current === id) return false;
-    claimedShareIdRef.current = id;
-    return true;
+  const activeScanRef = React.useRef<{ variables: ScanVariables; claim: ShareClaim | null } | null>(null);
+  // Claimed synchronously by the first action, before React re-renders the sheet; a fresh object per claim
+  // so a stale scan settling late can't release a newer claim on the same share.
+  const claimRef = React.useRef<ShareClaim | null>(null);
+  const claimShare = (id: number): ShareClaim | null => {
+    if (claimRef.current?.id === id) return null;
+    claimRef.current = { id };
+    return claimRef.current;
   };
-  const releaseShare = (id: number | null) => {
-    if (claimedShareIdRef.current === id) claimedShareIdRef.current = null;
+  const releaseClaim = (claim: ShareClaim | null) => {
+    if (claim && claimRef.current === claim) claimRef.current = null;
   };
 
   const handleScanSuccess = async (result: ScannedReceipt, variables: ScanVariables) => {
@@ -132,7 +134,7 @@ export function GlobalScanManager() {
     if (scan?.variables !== variables) return;
     activeScanRef.current = null;
     const finishShare = () => {
-      if (scan.shareId !== null) clearShare(scan.shareId);
+      if (scan.claim) clearShare(scan.claim.id);
     };
     const accountId = transactionFormPrefs.account_id || accounts[0]?.id;
     const categoryId = firstFittingCategoryId([result.category_id, transactionFormPrefs.category_id, categories[0]?.id], categories, result.type);
@@ -166,24 +168,25 @@ export function GlobalScanManager() {
     else router.push(`/transactions/${id}`);
   };
   const scanMutation = useScanReceipt(handleScanSuccess);
-  const { mutate: mutateScan } = scanMutation;
-  const startScan = (variables: ScanVariables, shareId: number | null) => {
-    activeScanRef.current = { variables, shareId };
-    mutateScan(variables, { onSettled: () => releaseShare(shareId) });
+  const { mutateAsync: mutateScanAsync } = scanMutation;
+  // Not per-call mutate callbacks: TanStack drops those once a newer mutate starts on the same observer.
+  const startScan = (variables: ScanVariables, claim: ShareClaim | null) => {
+    activeScanRef.current = { variables, claim };
+    void mutateScanAsync(variables).catch(() => {}).finally(() => releaseClaim(claim));
   };
 
   const prepareMutation = useMutation({
-    mutationFn: async ({ image }: { image: ScanSourceImage; shareId: number | null }): Promise<ScanVariables> => {
+    mutationFn: async ({ image }: { image: ScanSourceImage; claim: ShareClaim | null }): Promise<ScanVariables> => {
       const { base64, mimeType } = await resizeForAI(image);
       return { base64Image: base64, mimeType };
     },
-    onSuccess: (variables, { shareId }) => startScan(variables, shareId),
+    onSuccess: (variables, { claim }) => startScan(variables, claim),
     onError: (error) => {
       const message = error instanceof Error ? error.message : translate('scan.error_generic');
       Alert.alert(translate('common.error'), message);
     },
   });
-  const { mutate: mutatePrepare } = prepareMutation;
+  const { mutate: mutatePrepare, mutateAsync: mutatePrepareAsync } = prepareMutation;
 
   const pickAndPrepare = useCallback(async (source: 'camera' | 'gallery') => {
     if (source === 'camera') {
@@ -195,7 +198,7 @@ export function GlobalScanManager() {
       const result = await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 1 });
       if (result.canceled) return;
       const asset = result.assets[0];
-      if (asset) mutatePrepare({ image: asset, shareId: null });
+      if (asset) mutatePrepare({ image: asset, claim: null });
       return;
     }
 
@@ -207,7 +210,7 @@ export function GlobalScanManager() {
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], quality: 1 });
     if (result.canceled) return;
     const asset = result.assets[0];
-    if (asset) mutatePrepare({ image: asset, shareId: null });
+    if (asset) mutatePrepare({ image: asset, claim: null });
   }, [mutatePrepare]);
 
   const handleTrigger = useCallback((type: ScanTriggeredType) => {
@@ -257,9 +260,10 @@ export function GlobalScanManager() {
   if (isSheetVisible !== wasSheetVisible) setWasSheetVisible(isSheetVisible);
 
   const scanShare = ({ id, item }: IncomingShare) => {
-    if (!claimShare(id)) return;
-    if (item.kind === 'image') mutatePrepare({ image: item, shareId: id }, { onError: () => releaseShare(id) });
-    else startScan({ text: item.text }, id);
+    const claim = claimShare(id);
+    if (!claim) return;
+    if (item.kind === 'image') void mutatePrepareAsync({ image: item, claim }).catch(() => releaseClaim(claim));
+    else startScan({ text: item.text }, claim);
   };
   const fillShareManually = ({ id, item }: IncomingShare) => {
     if (!claimShare(id)) return;
@@ -276,7 +280,7 @@ export function GlobalScanManager() {
     const scan = activeScanRef.current;
     if (!scan) return;
     activeScanRef.current = null;
-    releaseShare(scan.shareId);
+    releaseClaim(scan.claim);
     scanMutation.reset();
   };
 

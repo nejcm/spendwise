@@ -16,3 +16,4 @@ trustPolicyExclude:
   - ua-parser-js@1.0.41 # false-positive trust downgrade; legit current release (real compromise was 0.7.29/0.8.0/1.0.0 in 2021)
 patchedDependencies:
   eslint-plugin-i18n-json@4.0.1: patches/eslint-plugin-i18n-json@4.0.1.patch
+  expo-share-intent@8.0.1: patches/expo-share-intent@8.0.1.patch

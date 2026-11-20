@@ -656,8 +656,11 @@
     "no_key_title": "KI-Schlüssel fehlt",
     "off_message": "Schalte den Belegscan in den KI-Einstellungen ein, um Belege zu scannen.",
     "off_title": "Belegscan ist aus",
+    "share_discard": "Verwerfen",
     "share_error": "Das geteilte Element konnte nicht gelesen werden. Bitte teile es erneut.",
-    "share_replaced": "Nur das zuletzt geteilte Element wurde importiert. Teile das vorherige erneut, um es hinzuzufügen.",
+    "share_manual": "Manuell ausfüllen",
+    "share_scan": "Mit KI scannen",
+    "share_title": "Geteiltes Element",
     "source_camera": "Foto aufnehmen",
     "source_gallery": "Aus Galerie wählen",
     "source_title": "Beleg scannen"

@@ -1,0 +1,55 @@
+diff --git a/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt b/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt
+index ff5b1001e7bb3443482727cec48c22579465c73b..6f0ca91c684de896a15fc1b8acd20afea27d0b08 100644
+--- a/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt
++++ b/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt
+@@ -196,8 +196,12 @@ class ExpoShareIntentModule : Module() {
+             ExpoShareIntentSingleton.isPending
+         }
+ 
++        // Stored for getShareIntent, so a share arriving before JS subscribes is not emitted into the void.
+         OnNewIntent {
+-            handleShareIntent(it)
++            if (it.type != null) {
++                ExpoShareIntentSingleton.intent = it
++                ExpoShareIntentSingleton.isPending = true
++            }
+         }
+ 
+         OnCreate {
+diff --git a/android/src/main/java/expo/modules/shareintent/ExpoShareIntentReactActivityLifecycleListener.kt b/android/src/main/java/expo/modules/shareintent/ExpoShareIntentReactActivityLifecycleListener.kt
+index db573ecbd560de3c71aa443b7ad88d1b5e1c8dc7..87d33f6f35bf458828b86b0e13a686177c44d594 100644
+--- a/android/src/main/java/expo/modules/shareintent/ExpoShareIntentReactActivityLifecycleListener.kt
++++ b/android/src/main/java/expo/modules/shareintent/ExpoShareIntentReactActivityLifecycleListener.kt
+@@ -14,7 +14,10 @@ class ExpoShareIntentReactActivityLifecycleListener(activityContext: Context) :
+ 
+     override fun onCreate(activity: Activity?, savedInstanceState: Bundle?) {
+         // only store when the new intent is not empty
+-        if (activity?.intent?.type != null) {
++        // A recreated or recents-launched activity still carries the original, already handled share.
++        val isRedelivery = savedInstanceState != null
++            || ((activity?.intent?.flags ?: 0) and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0
++        if (!isRedelivery && activity?.intent?.type != null) {
+             ExpoShareIntentSingleton.intent = activity?.intent
+             ExpoShareIntentSingleton.isPending = true
+         }
+diff --git a/ios/ExpoShareIntentModule.swift b/ios/ExpoShareIntentModule.swift
+index e52b6d089f8625d399c371daf14a9fe010d5fede..6389a39c7906c37193093c3896c3fcbef8279acd 100644
+--- a/ios/ExpoShareIntentModule.swift
++++ b/ios/ExpoShareIntentModule.swift
+@@ -136,14 +136,8 @@ public class ExpoShareIntentModule: Module {
+                     }
+                 }
+             } else {
+-                latestText = url.absoluteString
+-                let optionalString = latestText
+-                // now unwrap it
+-                if let unwrapwebUrl = optionalString {
+-                    return try? ShareIntentText(text: unwrapwebUrl, type: url.fragment!).toJSON()
+-                } else {
+-                    return "empty"
+-                }
++                // Not a link the share extension builds; the original force-unwrapped a missing fragment here.
++                return "empty"
+             }
+             self.sendEvent(
+                 "onError",

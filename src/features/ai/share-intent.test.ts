@@ -1,5 +1,5 @@
 import type { ShareIntent, ShareIntentFile } from 'expo-share-intent';
-import { isShareExtensionUrl, resolveShareAction } from './share-intent';
+import { getSharedItem, isShareExtensionUrl, toNote } from './share-intent';
 
 jest.mock('expo-share-intent', () => ({
   getScheme: () => 'spendwise',
@@ -14,45 +14,37 @@ function file(overrides: Partial<ShareIntentFile>): ShareIntentFile {
   return { fileName: 'shot.png', mimeType: 'image/png', path: 'file:///shot.png', size: 10, width: 1080, height: 2400, duration: null, ...overrides };
 }
 
-describe('resolveShareAction', () => {
-  it('scans a shared image when scanning is on', () => {
-    expect(resolveShareAction(intent({ type: 'media', files: [file({})] }), true))
-      .toEqual({ kind: 'scan-image', uri: 'file:///shot.png', width: 1080, height: 2400 });
-  });
-
-  it('picks the first image and skips other files', () => {
+describe('getSharedItem', () => {
+  it('takes the first image and skips other files', () => {
     const files = [file({ mimeType: 'application/pdf', path: 'file:///a.pdf' }), file({ path: 'file:///b.jpg', mimeType: 'image/jpeg' })];
 
-    expect(resolveShareAction(intent({ files }), true)).toMatchObject({ kind: 'scan-image', uri: 'file:///b.jpg' });
+    expect(getSharedItem(intent({ files }))).toEqual({ kind: 'image', uri: 'file:///b.jpg', width: 1080, height: 2400 });
   });
 
-  it('scans trimmed shared text when scanning is on', () => {
-    expect(resolveShareAction(intent({ type: 'text', text: '  Paid €12.50 at Lidl \n' }), true))
-      .toEqual({ kind: 'scan-text', text: 'Paid €12.50 at Lidl' });
-  });
-
-  it('opens an empty form for an image when scanning is off', () => {
-    expect(resolveShareAction(intent({ files: [file({})] }), false)).toEqual({ kind: 'open-form' });
-  });
-
-  it('opens the form with the text as a note, capped to the note limit, when scanning is off', () => {
-    expect(resolveShareAction(intent({ text: 'Paid €12.50' }), false)).toEqual({ kind: 'open-form', note: 'Paid €12.50' });
-    expect(resolveShareAction(intent({ text: 'x'.repeat(600) }), false)).toEqual({ kind: 'open-form', note: 'x'.repeat(500) });
-  });
-
-  it('never cuts an emoji in half at the note limit', () => {
-    const action = resolveShareAction(intent({ text: `${'x'.repeat(499)}💳 paid` }), false);
-
-    expect(action).toEqual({ kind: 'open-form', note: 'x'.repeat(499) });
-    expect(() => encodeURIComponent((action as { note: string }).note)).not.toThrow();
+  it('takes trimmed text', () => {
+    expect(getSharedItem(intent({ type: 'text', text: '  Paid €12.50 at Lidl \n' }))).toEqual({ kind: 'text', text: 'Paid €12.50 at Lidl' });
   });
 
   it.each([
     ['nothing', intent({})],
     ['blank text', intent({ text: '   ' })],
     ['a non-image file', intent({ files: [file({ mimeType: 'video/mp4' })] })],
-  ])('ignores %s', (_case: string, shareIntent: ShareIntent) => {
-    expect(resolveShareAction(shareIntent, true)).toBeNull();
+  ])('finds nothing usable in %s', (_case: string, shareIntent: ShareIntent) => {
+    expect(getSharedItem(shareIntent)).toBeNull();
+  });
+});
+
+describe('toNote', () => {
+  it('caps the text to the note limit', () => {
+    expect(toNote('Paid €12.50')).toBe('Paid €12.50');
+    expect(toNote('x'.repeat(600))).toBe('x'.repeat(500));
+  });
+
+  it('never cuts an emoji in half at the note limit', () => {
+    const note = toNote(`${'x'.repeat(499)}💳 paid`);
+
+    expect(note).toBe('x'.repeat(499));
+    expect(() => encodeURIComponent(note)).not.toThrow();
   });
 });
 

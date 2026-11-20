@@ -1,4 +1,5 @@
 import type { Action } from 'expo-image-manipulator';
+import type { SharedItem } from '@/features/ai/share-intent';
 import type { ScannedReceipt, ScanVariables } from '@/features/ai/use-scan-receipt';
 import type { TransactionFormData } from '@/features/transactions/types';
 import type { ScanTriggeredType } from '@/lib/store/local-store';
@@ -6,13 +7,13 @@ import { useMutation } from '@tanstack/react-query';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { usePathname, useRouter } from 'expo-router';
+import { useShareIntent } from 'expo-share-intent';
 import * as React from 'react';
 import { useCallback } from 'react';
-import { AppState, Image } from 'react-native';
+import { AppState, Image as RNImage } from 'react-native';
 import { Alert } from '@/components/ui';
 import { useAccounts } from '@/features/accounts/api';
-import { resolveShareAction } from '@/features/ai/share-intent';
-import { useIncomingShare } from '@/features/ai/use-incoming-share';
+import { getSharedItem, toNote } from '@/features/ai/share-intent';
 import { useScanReceipt } from '@/features/ai/use-scan-receipt';
 import { useCategories } from '@/features/categories/api';
 import { firstFittingCategoryId } from '@/features/categories/helpers';
@@ -28,14 +29,16 @@ import {
   useAppStore,
 } from '@/lib/store/store';
 import { useThemeConfig } from '@/lib/theme/use-theme-config';
-import { ActivityIndicator, Modal, Text } from './ui';
+import { ActivityIndicator, GhostButton, Image, Modal, SolidButton, Text, View } from './ui';
 
 const MAX_IMAGE_DIMENSION = 1024;
+// Keep the pending share while the app is in the background.
+const SHARE_INTENT_OPTIONS = { resetOnBackground: false };
 
 type ScanSourceImage = { uri: string; width: number | null; height: number | null };
 
 async function resizeForAI(source: ScanSourceImage): Promise<{ base64: string; mimeType: 'image/jpeg' }> {
-  const { width, height } = source.width && source.height ? { width: source.width, height: source.height } : await Image.getSize(source.uri);
+  const { width, height } = source.width && source.height ? { width: source.width, height: source.height } : await RNImage.getSize(source.uri);
   const actions: Action[] = Math.max(width, height) > MAX_IMAGE_DIMENSION
     ? [{ resize: width >= height ? { width: MAX_IMAGE_DIMENSION } : { height: MAX_IMAGE_DIMENSION } }]
     : [];
@@ -78,6 +81,30 @@ function ScanLoadingOverlay({ onClose }: { onClose: () => void }) {
   );
 }
 
+type SharedItemSheetProps = {
+  item: SharedItem;
+  canScan: boolean;
+  onScan: () => void;
+  onFillManually: () => void;
+  onDiscard: () => void;
+};
+
+function SharedItemSheet({ item, canScan, onScan, onFillManually, onDiscard }: SharedItemSheetProps) {
+  return (
+    <Modal visible={true} className="w-11/12 gap-4 pt-12" onClose={onDiscard}>
+      <Text accessibilityRole="header" className="self-start text-xl font-bold">{translate('scan.share_title')}</Text>
+      {item.kind === 'image'
+        ? <Image source={{ uri: item.uri }} contentFit="contain" className="h-48 w-full rounded-lg" accessibilityIgnoresInvertColors />
+        : <Text numberOfLines={6} className="self-start text-base">{item.text}</Text>}
+      <View className="w-full gap-2">
+        {canScan && <SolidButton color="primary" size="lg" fullWidth label={translate('scan.share_scan')} onPress={onScan} />}
+        <SolidButton color="tonal" size="lg" fullWidth label={translate('scan.share_manual')} onPress={onFillManually} />
+        <GhostButton color="secondary" size="lg" fullWidth label={translate('scan.share_discard')} onPress={onDiscard} />
+      </View>
+    </Modal>
+  );
+}
+
 export function GlobalScanManager() {
   const router = useRouter();
   const pathname = usePathname();
@@ -93,7 +120,8 @@ export function GlobalScanManager() {
   const { data: accounts = [] } = useAccounts();
   const { data: categories = [] } = useCategories();
   const createTransaction = useCreateTransaction();
-  const [incomingShare, clearIncomingShare] = useIncomingShare();
+  const { hasShareIntent, shareIntent, resetShareIntent, error: shareError } = useShareIntent(SHARE_INTENT_OPTIONS);
+  const sharedItem = hasShareIntent ? getSharedItem(shareIntent) : null;
   const [appState, setAppState] = React.useState(AppState.currentState);
 
   const handleScanSuccess = async (result: ScannedReceipt) => {
@@ -200,32 +228,34 @@ export function GlobalScanManager() {
     return () => subscription.remove();
   }, []);
 
-  // Android can deliver a warm share before resume, i.e. before SecurityLock re-locks on 'active'.
-  const isShareBlocked = appState !== 'active' || isLocked || isFirstTime || prepareMutation.isPending || scanMutation.isPending;
+  const isShareReady = appState === 'active' && !isLocked && !isFirstTime;
+  const isShareUnreadable = Boolean(shareError) || (hasShareIntent && !sharedItem);
   React.useEffect(() => {
-    if (!incomingShare || isShareBlocked) return;
-    clearIncomingShare();
-    if ('error' in incomingShare) {
-      Alert.alert(translate('common.error'), translate('scan.share_error'));
-      return;
-    }
-    if (incomingShare.replacedEarlier) Alert.alert(translate('scan.share_replaced'));
-    const action = resolveShareAction(incomingShare.shareIntent, isScanOn);
-    if (!action) return;
-    if (action.kind === 'scan-image') {
-      mutatePrepare(action);
-      return;
-    }
-    if (action.kind === 'scan-text') {
-      mutateScan({ text: action.text });
-      return;
-    }
-    const formRoute = { pathname: '/transactions/new', params: { note: action.note } } as const;
-    if (isTransactionFormRoute) router.replace(formRoute);
-    else router.push(formRoute);
-    showScanOffAlert(isAiEnabled, () => router.push('/settings/ai'));
-  }, [incomingShare, clearIncomingShare, isShareBlocked, isScanOn, isAiEnabled, isTransactionFormRoute, router, mutatePrepare, mutateScan]);
+    if (!isShareUnreadable || !isShareReady) return;
+    resetShareIntent();
+    Alert.alert(translate('common.error'), translate('scan.share_error'));
+  }, [isShareUnreadable, isShareReady, resetShareIntent]);
 
-  if (!scanMutation.isPending) return null;
-  return <ScanLoadingOverlay onClose={() => scanMutation.reset()} />;
+  const scanSharedItem = (item: SharedItem) => {
+    resetShareIntent();
+    if (item.kind === 'image') mutatePrepare(item);
+    else mutateScan({ text: item.text });
+  };
+  const fillSharedItemManually = (item: SharedItem) => {
+    resetShareIntent();
+    // Pushed, not replaced, so an unsaved form underneath survives.
+    router.push({ pathname: '/transactions/new', params: { note: item.kind === 'text' ? toNote(item.text) : undefined } });
+  };
+
+  if (scanMutation.isPending) return <ScanLoadingOverlay onClose={() => scanMutation.reset()} />;
+  if (!sharedItem || !isShareReady || prepareMutation.isPending) return null;
+  return (
+    <SharedItemSheet
+      item={sharedItem}
+      canScan={isScanOn}
+      onScan={() => scanSharedItem(sharedItem)}
+      onFillManually={() => fillSharedItemManually(sharedItem)}
+      onDiscard={() => resetShareIntent()}
+    />
+  );
 }

@@ -44,7 +44,7 @@ index ff5b1001e7bb3443482727cec48c22579465c73b..13a4755f0d38a9cf291681d2d19169e9
                      if (safeName.isNotEmpty()) {
 -                        val candidate = File(context.cacheDir, safeName)
 +                        // UUID name: equal display names never collide and long ones never pass the 255-byte limit.
-+                        val candidate = File(context.cacheDir, "${java.util.UUID.randomUUID()}.${safeName.substringAfterLast('.', "bin").take(16)}")
++                        val candidate = File(context.cacheDir, "${java.util.UUID.randomUUID()}.${safeName.substringAfterLast('.', "").takeIf { it.matches(Regex("[A-Za-z0-9]{1,10}")) } ?: "bin"}")
                          val cacheRoot = context.cacheDir.canonicalPath + File.separator
                          if (candidate.canonicalPath.startsWith(cacheRoot)) {
                              targetFile = candidate

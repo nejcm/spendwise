@@ -29,7 +29,14 @@ jest.mock('@/components/ui', () => {
     ActivityIndicator: () => null,
     GhostButton: Button,
     Image: () => <Text>image preview</Text>,
-    Modal: ({ visible, children }: { visible: boolean; children: React.ReactNode }) => (visible ? <View>{children}</View> : null),
+    Modal: ({ visible, children, onClose }: { visible: boolean; children: React.ReactNode; onClose?: () => void }) => (visible
+      ? (
+          <View>
+            {onClose && <Button label="Close modal" onPress={onClose} />}
+            {children}
+          </View>
+        )
+      : null),
     SolidButton: Button,
     Text,
     View,
@@ -39,12 +46,11 @@ jest.mock('@/features/accounts/api', () => ({ useAccounts: () => ({ data: [] }) 
 jest.mock('@/features/categories/api', () => ({ useCategories: () => ({ data: [] }) }));
 jest.mock('@/features/transactions/api', () => ({ useCreateTransaction: () => ({ mutateAsync: jest.fn() }) }));
 jest.mock('@/features/ai/use-scan-receipt', () => ({
-  useScanReceipt: (onSuccess: (result: unknown) => Promise<void>) => {
+  useScanReceipt: (onSuccess: (result: unknown, variables: unknown) => Promise<void>) => {
     mockScanState.onSuccess = onSuccess;
     return { mutate: mockScan, isPending: mockScanState.pending, reset: jest.fn() };
   },
 }));
-jest.mock('expo-file-system', () => ({ Paths: { cache: { uri: 'file:///cache/' } }, File: jest.fn(() => ({ delete: mockDeleteFile })) }));
 jest.mock('@tanstack/react-query', () => ({ useMutation: () => ({ mutate: mockPrepare, isPending: false }) }));
 
 const mockNativeHandlers: Record<string, (event: { value: unknown }) => void> = {};
@@ -52,14 +58,17 @@ const mockLinking = { url: null as string | null };
 const mockPush = jest.fn();
 const mockScan = jest.fn();
 const mockPrepare = jest.fn();
-const mockScanState = { pending: false, onSuccess: (async () => {}) as (result: unknown) => Promise<void> };
-const mockDeleteFile = jest.fn();
+const mockScanState = { pending: false, onSuccess: (async () => {}) as (result: unknown, variables: unknown) => Promise<void> };
 const nativeModule = jest.requireMock<{ default: { getShareIntent: jest.Mock; clearShareIntent: jest.Mock } }>('expo-share-intent/build/ExpoShareIntentModule').default;
 const appStateListeners = new Set<(state: string) => void>();
 const originalAppState = AppState.currentState;
 
 function setCurrentAppState(state: string) {
   Object.defineProperty(AppState, 'currentState', { value: state, configurable: true, writable: true });
+}
+
+async function finishScan(variables: unknown = mockScan.mock.lastCall![0]) {
+  await act(() => mockScanState.onSuccess({ amount: 1250, type: 'expense' }, variables));
 }
 
 function shareText(text: string) {
@@ -191,7 +200,7 @@ describe('shared item sheet', () => {
 
     shareImage('file:///r.jpg');
     fireEvent.press(screen.getByText('Scan with AI'));
-    expect(mockPrepare).toHaveBeenCalledWith({ kind: 'image', uri: 'file:///r.jpg', width: 800, height: 600 });
+    expect(mockPrepare).toHaveBeenCalledWith({ image: { kind: 'image', uri: 'file:///r.jpg', width: 800, height: 600 }, shareKey: expect.any(String) });
   });
 
   it('holds a share that arrives during a scan until the scan finishes', () => {
@@ -219,7 +228,7 @@ describe('shared item sheet', () => {
     expect(screen.getByText('Paid €12.50')).toBeTruthy();
 
     fireEvent.press(screen.getByText('Scan with AI'));
-    await act(() => mockScanState.onSuccess({ amount: 1250, type: 'expense' }));
+    await finishScan();
     expect(screen.queryByText('Shared item')).toBeNull();
     expect(nativeModule.clearShareIntent).toHaveBeenCalled();
   });
@@ -229,9 +238,44 @@ describe('shared item sheet', () => {
     shareText('First');
     fireEvent.press(screen.getByText('Scan with AI'));
     shareText('Second');
-    await act(() => mockScanState.onSuccess({ amount: 1250, type: 'expense' }));
+    await finishScan();
 
     expect(screen.getByText('Second')).toBeTruthy();
+  });
+
+  it('saves once when a dismissed scan finishes after a rescan', async () => {
+    const { rerender } = render(<GlobalScanManager />);
+    shareText('Paid €12.50');
+    fireEvent.press(screen.getByText('Scan with AI'));
+    const dismissedScan = mockScan.mock.lastCall![0];
+    mockScanState.pending = true;
+    rerender(<GlobalScanManager />);
+    fireEvent.press(screen.getByText('Close modal'));
+    mockScanState.pending = false;
+    rerender(<GlobalScanManager />);
+    fireEvent.press(screen.getByText('Scan with AI'));
+
+    await finishScan(dismissedScan);
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(screen.getByText('Paid €12.50')).toBeTruthy();
+
+    await finishScan();
+    await finishScan();
+    expect(mockPush).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText('Shared item')).toBeNull();
+  });
+
+  it('opens a new item only once iOS is active', () => {
+    setCurrentAppState('inactive');
+    render(<GlobalScanManager />);
+    shareText('Paid €12.50');
+    expect(screen.queryByText('Shared item')).toBeNull();
+
+    act(() => {
+      setCurrentAppState('active');
+      appStateListeners.forEach((listener) => listener('active'));
+    });
+    expect(screen.getByText('Paid €12.50')).toBeTruthy();
   });
 
   it('keeps the item open while iOS is briefly inactive', () => {
@@ -257,17 +301,6 @@ describe('shared item sheet', () => {
     expect(screen.getByText('Paid €12.50')).toBeTruthy();
   });
 
-  it('deletes the cached copy of a handled image but never a path outside the cache', () => {
-    render(<GlobalScanManager />);
-    shareImage('file:///cache/r.jpg');
-    fireEvent.press(screen.getByText('Discard'));
-    expect(mockDeleteFile).toHaveBeenCalledTimes(1);
-
-    shareImage('file:///photos/r.jpg');
-    fireEvent.press(screen.getByText('Discard'));
-    expect(mockDeleteFile).toHaveBeenCalledTimes(1);
-  });
-
   it('shows a good share that follows a failed one, alerting once', () => {
     setCurrentAppState('background');
     render(<GlobalScanManager />);
@@ -282,6 +315,17 @@ describe('shared item sheet', () => {
     expect(Alert.alert).toHaveBeenCalledTimes(1);
   });
 
+  it('keeps a good share that arrives in the same batch as an error, alerting once', () => {
+    render(<GlobalScanManager />);
+    act(() => {
+      mockNativeHandlers.onError!({ value: 'Cannot read share intent: query failed' });
+      mockNativeHandlers.onChange!({ value: { text: 'Paid €12.50', type: 'text' } });
+    });
+
+    expect(screen.getByText('Paid €12.50')).toBeTruthy();
+    expect(Alert.alert).toHaveBeenCalledTimes(1);
+  });
+
   it('alerts and resets on a receiver error', () => {
     render(<GlobalScanManager />);
     act(() => mockNativeHandlers.onError!({ value: 'Cannot retreive appGroupIdentifier' }));
@@ -290,13 +334,13 @@ describe('shared item sheet', () => {
     expect(nativeModule.clearShareIntent).toHaveBeenCalled();
   });
 
-  it('alerts and drops the open item when a newer share fails to read', () => {
+  it('alerts but keeps the open item when a newer share fails to read', () => {
     render(<GlobalScanManager />);
     shareText('Paid €12.50');
     act(() => mockNativeHandlers.onError!({ value: 'Cannot read share intent: query failed' }));
 
-    expect(Alert.alert).toHaveBeenCalledWith('Error', 'Could not read the shared item. Please try sharing it again.');
-    expect(screen.queryByText('Shared item')).toBeNull();
+    expect(Alert.alert).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('Paid €12.50')).toBeTruthy();
   });
 
   it('alerts and resets when Android sends a file without a type', () => {

@@ -1,8 +1,16 @@
 diff --git a/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt b/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt
-index ff5b1001e7bb3443482727cec48c22579465c73b..608fe323765fa181aa3cfcd1449f2b42449d31ff 100644
+index ff5b1001e7bb3443482727cec48c22579465c73b..d6e55ea68bb4708a204e3f72c9cdfa36303c5bad 100644
 --- a/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt
 +++ b/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt
-@@ -124,9 +124,12 @@ class ExpoShareIntentModule : Module() {
+@@ -31,7 +31,6 @@ import expo.modules.kotlin.modules.Module
+ import expo.modules.kotlin.modules.ModuleDefinition
+ import java.io.File
+ import java.io.FileOutputStream
+-import java.util.Date
+ 
+ 
+ class ExpoShareIntentModule : Module() {
+@@ -124,9 +123,12 @@ class ExpoShareIntentModule : Module() {
              if (intent.type == null) return
              if (intent.type!!.startsWith("text/plain")) {
                  // text / urls
@@ -17,16 +25,17 @@ index ff5b1001e7bb3443482727cec48c22579465c73b..608fe323765fa181aa3cfcd1449f2b42
                          "type" to "text",
                          "meta" to mapOf(
                              "title" to intent.getCharSequenceExtra(Intent.EXTRA_TITLE),
-@@ -182,9 +185,15 @@ class ExpoShareIntentModule : Module() {
+@@ -181,23 +183,27 @@ class ExpoShareIntentModule : Module() {
+ 
          AsyncFunction("getShareIntent") { _: String ->
              // get the Intent from onCreate activity (app not running in background)
-             ExpoShareIntentSingleton.isPending = false
+-            ExpoShareIntentSingleton.isPending = false
 -            if (ExpoShareIntentSingleton.intent?.type != null) {
 -                handleShareIntent(ExpoShareIntentSingleton.intent!!);
+-                ExpoShareIntentSingleton.intent = null
 +            // Taken before the slow file copy, so a share stored meanwhile survives for the next pull.
-+            val intent = ExpoShareIntentSingleton.intent
-+            if (intent?.type != null) {
-                 ExpoShareIntentSingleton.intent = null
++            val intent = ExpoShareIntentSingleton.take()
++            if (intent != null) {
 +                try {
 +                    handleShareIntent(intent)
 +                } catch (e: Exception) {
@@ -35,21 +44,24 @@ index ff5b1001e7bb3443482727cec48c22579465c73b..608fe323765fa181aa3cfcd1449f2b42
              }
          }
  
-@@ -196,8 +205,12 @@ class ExpoShareIntentModule : Module() {
+-        Function("clearShareIntent") { _: String ->
+-            ExpoShareIntentSingleton.intent = null
+-        }
++        // getShareIntent already took the intent JS read; anything stored now is a newer, unread share.
++        Function("clearShareIntent") { _: String -> }
+ 
+         Function("hasShareIntent") { _: String ->
              ExpoShareIntentSingleton.isPending
          }
  
 +        // Stored for getShareIntent, so a share arriving before JS subscribes is not emitted into the void.
          OnNewIntent {
 -            handleShareIntent(it)
-+            if (it.type != null) {
-+                ExpoShareIntentSingleton.intent = it
-+                ExpoShareIntentSingleton.isPending = true
-+            }
++            if (it.type != null) ExpoShareIntentSingleton.store(it)
          }
  
          OnCreate {
-@@ -300,10 +313,10 @@ class ExpoShareIntentModule : Module() {
+@@ -300,10 +306,10 @@ class ExpoShareIntentModule : Module() {
                  if (cursor != null && cursor.moveToFirst()) {
                      val columnIndex = cursor.getColumnIndexOrThrow(column)
                      val fileName = cursor.getString(columnIndex)
@@ -62,22 +74,56 @@ index ff5b1001e7bb3443482727cec48c22579465c73b..608fe323765fa181aa3cfcd1449f2b42
                          val cacheRoot = context.cacheDir.canonicalPath + File.separator
                          if (candidate.canonicalPath.startsWith(cacheRoot)) {
                              targetFile = candidate
+@@ -323,7 +329,7 @@ class ExpoShareIntentModule : Module() {
+                     }
+                 }
+                 val type = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
+-                targetFile = File(context.cacheDir, "${prefix}_${Date().time}.$type")
++                targetFile = File(context.cacheDir, "${prefix}_${java.util.UUID.randomUUID()}.$type")
+             }
+ 
+             resolver.openInputStream(uri)?.use { input ->
 diff --git a/android/src/main/java/expo/modules/shareintent/ExpoShareIntentReactActivityLifecycleListener.kt b/android/src/main/java/expo/modules/shareintent/ExpoShareIntentReactActivityLifecycleListener.kt
-index db573ecbd560de3c71aa443b7ad88d1b5e1c8dc7..87d33f6f35bf458828b86b0e13a686177c44d594 100644
+index db573ecbd560de3c71aa443b7ad88d1b5e1c8dc7..4a2b4b5e331b822a0b886d31aafc10cc44177afc 100644
 --- a/android/src/main/java/expo/modules/shareintent/ExpoShareIntentReactActivityLifecycleListener.kt
 +++ b/android/src/main/java/expo/modules/shareintent/ExpoShareIntentReactActivityLifecycleListener.kt
-@@ -14,7 +14,10 @@ class ExpoShareIntentReactActivityLifecycleListener(activityContext: Context) :
+@@ -14,9 +14,10 @@ class ExpoShareIntentReactActivityLifecycleListener(activityContext: Context) :
  
      override fun onCreate(activity: Activity?, savedInstanceState: Bundle?) {
          // only store when the new intent is not empty
 -        if (activity?.intent?.type != null) {
+-            ExpoShareIntentSingleton.intent = activity?.intent
+-            ExpoShareIntentSingleton.isPending = true
+-        }
 +        // A recreated or recents-launched activity still carries the original, already handled share.
 +        val isRedelivery = savedInstanceState != null
 +            || ((activity?.intent?.flags ?: 0) and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0
-+        if (!isRedelivery && activity?.intent?.type != null) {
-             ExpoShareIntentSingleton.intent = activity?.intent
-             ExpoShareIntentSingleton.isPending = true
-         }
++        val intent = activity?.intent
++        if (!isRedelivery && intent?.type != null) ExpoShareIntentSingleton.store(intent)
+     }
+ }
+\ No newline at end of file
+diff --git a/android/src/main/java/expo/modules/shareintent/ExpoShareIntentSingleton.kt b/android/src/main/java/expo/modules/shareintent/ExpoShareIntentSingleton.kt
+index 7f93abe410557d8f909148e57d7311cabbe75b36..ce3b4356f7c326d6c90c6d7a0b4c13f354fcb7a8 100644
+--- a/android/src/main/java/expo/modules/shareintent/ExpoShareIntentSingleton.kt
++++ b/android/src/main/java/expo/modules/shareintent/ExpoShareIntentSingleton.kt
+@@ -12,4 +12,15 @@ object ExpoShareIntentSingleton : SingletonModule {
+   // members to store the initial launch intent
+   var intent: Intent? = null
+   var isPending: Boolean = false
++
++  // Synchronized: the activity stores on the main thread while getShareIntent takes on the module queue.
++  @Synchronized fun store(next: Intent) {
++    intent = next
++    isPending = true
++  }
++
++  @Synchronized fun take(): Intent? = intent.also {
++    intent = null
++    isPending = false
++  }
+ }
+\ No newline at end of file
 diff --git a/ios/ExpoShareIntentModule.swift b/ios/ExpoShareIntentModule.swift
 index e52b6d089f8625d399c371daf14a9fe010d5fede..6389a39c7906c37193093c3896c3fcbef8279acd 100644
 --- a/ios/ExpoShareIntentModule.swift

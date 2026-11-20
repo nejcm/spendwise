@@ -11,7 +11,7 @@ export type ScanVariables
   = | { base64Image: string; mimeType: 'image/jpeg' | 'image/png' }
     | { text: string };
 
-export function useScanReceipt(onSuccess?: (result: ScannedReceipt) => void) {
+export function useScanReceipt(onSuccess?: (result: ScannedReceipt, variables: ScanVariables) => Promise<void> | void) {
   const { data: categories = [] } = useCategories();
   return useMutation({
     mutationFn: (variables: ScanVariables): Promise<ScannedReceipt> => {

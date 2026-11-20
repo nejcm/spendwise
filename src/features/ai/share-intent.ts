@@ -1,5 +1,6 @@
 import type { ShareIntent } from 'expo-share-intent';
 import { getScheme, getShareExtensionKey } from 'expo-share-intent';
+import { truncateText } from '@/lib/utils';
 
 // Matches the transaction form's note limit.
 const MAX_NOTE_LENGTH = 500;
@@ -15,10 +16,8 @@ export function getSharedItem(shareIntent: ShareIntent): SharedItem | null {
   return text ? { kind: 'text', text } : null;
 }
 
-// A lone surrogate makes Expo Router's encodeURIComponent throw.
 export function toNote(text: string): string {
-  const cut = text.slice(0, MAX_NOTE_LENGTH);
-  return /[\uD800-\uDBFF]$/.test(cut) ? cut.slice(0, -1) : cut;
+  return truncateText(text, MAX_NOTE_LENGTH);
 }
 
 // The iOS share extension opens `<scheme>://dataUrl=<scheme>ShareKey?nonce=…#<type>`.

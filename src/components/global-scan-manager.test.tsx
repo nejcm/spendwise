@@ -39,8 +39,12 @@ jest.mock('@/features/accounts/api', () => ({ useAccounts: () => ({ data: [] }) 
 jest.mock('@/features/categories/api', () => ({ useCategories: () => ({ data: [] }) }));
 jest.mock('@/features/transactions/api', () => ({ useCreateTransaction: () => ({ mutateAsync: jest.fn() }) }));
 jest.mock('@/features/ai/use-scan-receipt', () => ({
-  useScanReceipt: () => ({ mutate: mockScan, isPending: mockScanState.pending, reset: jest.fn() }),
+  useScanReceipt: (onSuccess: (result: unknown) => Promise<void>) => {
+    mockScanState.onSuccess = onSuccess;
+    return { mutate: mockScan, isPending: mockScanState.pending, reset: jest.fn() };
+  },
 }));
+jest.mock('expo-file-system', () => ({ Paths: { cache: { uri: 'file:///cache/' } }, File: jest.fn(() => ({ delete: mockDeleteFile })) }));
 jest.mock('@tanstack/react-query', () => ({ useMutation: () => ({ mutate: mockPrepare, isPending: false }) }));
 
 const mockNativeHandlers: Record<string, (event: { value: unknown }) => void> = {};
@@ -48,7 +52,8 @@ const mockLinking = { url: null as string | null };
 const mockPush = jest.fn();
 const mockScan = jest.fn();
 const mockPrepare = jest.fn();
-const mockScanState = { pending: false };
+const mockScanState = { pending: false, onSuccess: (async () => {}) as (result: unknown) => Promise<void> };
+const mockDeleteFile = jest.fn();
 const nativeModule = jest.requireMock<{ default: { getShareIntent: jest.Mock; clearShareIntent: jest.Mock } }>('expo-share-intent/build/ExpoShareIntentModule').default;
 const appStateListeners = new Set<(state: string) => void>();
 const originalAppState = AppState.currentState;
@@ -110,6 +115,7 @@ describe('shared item sheet', () => {
     shareText('Paid €12.50');
 
     act(() => {
+      setCurrentAppState('active');
       appStateListeners.forEach((listener) => listener('active'));
       setIsLocked(true);
     });
@@ -182,7 +188,6 @@ describe('shared item sheet', () => {
     fireEvent.press(screen.getByText('Scan with AI'));
 
     expect(mockScan).toHaveBeenCalledWith({ text: 'Paid €12.50' });
-    expect(screen.queryByText('Shared item')).toBeNull();
 
     shareImage('file:///r.jpg');
     fireEvent.press(screen.getByText('Scan with AI'));
@@ -199,6 +204,82 @@ describe('shared item sheet', () => {
     mockScanState.pending = false;
     rerender(<GlobalScanManager />);
     expect(screen.getByText('Paid €12.50')).toBeTruthy();
+  });
+
+  it('offers the item again when the scan fails and clears it once a scan succeeds', async () => {
+    const { rerender } = render(<GlobalScanManager />);
+    shareText('Paid €12.50');
+    fireEvent.press(screen.getByText('Scan with AI'));
+    mockScanState.pending = true;
+    rerender(<GlobalScanManager />);
+    expect(screen.queryByText('Shared item')).toBeNull();
+
+    mockScanState.pending = false;
+    rerender(<GlobalScanManager />);
+    expect(screen.getByText('Paid €12.50')).toBeTruthy();
+
+    fireEvent.press(screen.getByText('Scan with AI'));
+    await act(() => mockScanState.onSuccess({ amount: 1250, type: 'expense' }));
+    expect(screen.queryByText('Shared item')).toBeNull();
+    expect(nativeModule.clearShareIntent).toHaveBeenCalled();
+  });
+
+  it('keeps a share that replaced the scanned one during the scan', async () => {
+    render(<GlobalScanManager />);
+    shareText('First');
+    fireEvent.press(screen.getByText('Scan with AI'));
+    shareText('Second');
+    await act(() => mockScanState.onSuccess({ amount: 1250, type: 'expense' }));
+
+    expect(screen.getByText('Second')).toBeTruthy();
+  });
+
+  it('keeps the item open while iOS is briefly inactive', () => {
+    render(<GlobalScanManager />);
+    shareText('Paid €12.50');
+    act(() => {
+      setCurrentAppState('inactive');
+      appStateListeners.forEach((listener) => listener('inactive'));
+    });
+
+    expect(screen.getByText('Paid €12.50')).toBeTruthy();
+  });
+
+  it('sees a foreground that happened between render and subscribe', () => {
+    setCurrentAppState('background');
+    jest.mocked(AppState.addEventListener).mockImplementationOnce(() => {
+      setCurrentAppState('active');
+      return { remove: jest.fn() } as unknown as ReturnType<typeof AppState.addEventListener>;
+    });
+    render(<GlobalScanManager />);
+    shareText('Paid €12.50');
+
+    expect(screen.getByText('Paid €12.50')).toBeTruthy();
+  });
+
+  it('deletes the cached copy of a handled image but never a path outside the cache', () => {
+    render(<GlobalScanManager />);
+    shareImage('file:///cache/r.jpg');
+    fireEvent.press(screen.getByText('Discard'));
+    expect(mockDeleteFile).toHaveBeenCalledTimes(1);
+
+    shareImage('file:///photos/r.jpg');
+    fireEvent.press(screen.getByText('Discard'));
+    expect(mockDeleteFile).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a good share that follows a failed one, alerting once', () => {
+    setCurrentAppState('background');
+    render(<GlobalScanManager />);
+    act(() => mockNativeHandlers.onError!({ value: 'Cannot read share intent: query failed' }));
+    shareText('Paid €12.50');
+    act(() => {
+      setCurrentAppState('active');
+      appStateListeners.forEach((listener) => listener('active'));
+    });
+
+    expect(screen.getByText('Paid €12.50')).toBeTruthy();
+    expect(Alert.alert).toHaveBeenCalledTimes(1);
   });
 
   it('alerts and resets on a receiver error', () => {

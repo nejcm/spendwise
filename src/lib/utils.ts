@@ -11,3 +11,9 @@ export function createSelectors<S extends UseBoundStore<StoreApi<object>>>(_stor
 
   return store;
 }
+
+// A lone surrogate makes encodeURIComponent throw and garbles prompts.
+export function truncateText(text: string, maxLength: number): string {
+  const cut = text.slice(0, maxLength);
+  return /[\uD800-\uDBFF]$/.test(cut) ? cut.slice(0, -1) : cut;
+}

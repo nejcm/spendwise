@@ -4,6 +4,7 @@ import type { ScannedReceipt, ScanVariables } from '@/features/ai/use-scan-recei
 import type { TransactionFormData } from '@/features/transactions/types';
 import type { ScanTriggeredType } from '@/lib/store/local-store';
 import { useMutation } from '@tanstack/react-query';
+import { File, Paths } from 'expo-file-system';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { usePathname, useRouter } from 'expo-router';
@@ -59,15 +60,9 @@ async function resizeForAI(source: ScanSourceImage): Promise<{ base64: string; m
   return { base64: result.base64!, mimeType: 'image/jpeg' };
 }
 
-function showScanOffAlert(isAiEnabled: boolean, onGoToSettings: () => void) {
-  Alert.alert(
-    translate(isAiEnabled ? 'scan.off_title' : 'scan.no_key_title'),
-    translate(isAiEnabled ? 'scan.off_message' : 'scan.no_key_message'),
-    [
-      { text: translate('common.cancel'), style: 'cancel' },
-      { text: translate('scan.go_to_settings'), onPress: onGoToSettings },
-    ],
-  );
+function subscribeToAppState(onChange: () => void) {
+  const subscription = AppState.addEventListener('change', onChange);
+  return () => subscription.remove();
 }
 
 function ScanLoadingOverlay({ onClose }: { onClose: () => void }) {
@@ -122,9 +117,14 @@ export function GlobalScanManager() {
   const createTransaction = useCreateTransaction();
   const { hasShareIntent, shareIntent, resetShareIntent, error: shareError } = useShareIntent(SHARE_INTENT_OPTIONS);
   const sharedItem = hasShareIntent ? getSharedItem(shareIntent) : null;
-  const [appState, setAppState] = React.useState(AppState.currentState);
+  const appState = React.useSyncExternalStore(subscribeToAppState, () => AppState.currentState);
+  const hasUnreadShareRef = React.useRef(false);
+  const scannedShareRef = React.useRef<string | null>(null);
 
   const handleScanSuccess = async (result: ScannedReceipt) => {
+    // A share that replaced the scanned one while scanning stays pending.
+    if (scannedShareRef.current === JSON.stringify(shareIntent)) resetShareIntent();
+    scannedShareRef.current = null;
     const accountId = transactionFormPrefs.account_id || accounts[0]?.id;
     const categoryId = firstFittingCategoryId([result.category_id, transactionFormPrefs.category_id, categories[0]?.id], categories, result.type);
     if (!saveOnScan || !accountId || !categoryId) {
@@ -173,6 +173,7 @@ export function GlobalScanManager() {
   const { mutate: mutateScan } = scanMutation;
 
   const pickAndPrepare = useCallback(async (source: 'camera' | 'gallery') => {
+    scannedShareRef.current = null;
     if (source === 'camera') {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== 'granted') {
@@ -199,7 +200,14 @@ export function GlobalScanManager() {
 
   const handleTrigger = useCallback((type: ScanTriggeredType) => {
     if (!isScanOn) {
-      showScanOffAlert(isAiEnabled, () => router.push('/settings/ai'));
+      Alert.alert(
+        translate(isAiEnabled ? 'scan.off_title' : 'scan.no_key_title'),
+        translate(isAiEnabled ? 'scan.off_message' : 'scan.no_key_message'),
+        [
+          { text: translate('common.cancel'), style: 'cancel' },
+          { text: translate('scan.go_to_settings'), onPress: () => router.push('/settings/ai') },
+        ],
+      );
       return;
     }
     if (type !== 'select') {
@@ -223,21 +231,35 @@ export function GlobalScanManager() {
     void handleTrigger(scanTriggered);
   }, [scanTriggered, handleTrigger]);
 
-  React.useEffect(() => {
-    const subscription = AppState.addEventListener('change', setAppState);
-    return () => subscription.remove();
-  }, []);
-
-  const isShareReady = appState === 'active' && !isLocked && !isFirstTime;
+  // iOS reports 'inactive' only when resigning from 'active' (Control Center, Face ID), never on the way back from background.
+  const isShareReady = appState !== 'background' && !isLocked && !isFirstTime;
   const isShareUnreadable = Boolean(shareError) || (hasShareIntent && !sharedItem);
   React.useEffect(() => {
-    if (!isShareUnreadable || !isShareReady) return;
-    resetShareIntent();
+    // Reset at once so a stale error can't take a later good share with it; alert once visible.
+    if (isShareUnreadable) {
+      resetShareIntent();
+      hasUnreadShareRef.current = true;
+    }
+    if (!hasUnreadShareRef.current || !isShareReady) return;
+    hasUnreadShareRef.current = false;
     Alert.alert(translate('common.error'), translate('scan.share_error'));
   }, [isShareUnreadable, isShareReady, resetShareIntent]);
 
+  const sharedImageUri = sharedItem?.kind === 'image' ? sharedItem.uri : null;
+  React.useEffect(() => {
+    // Only the library's own copies; a shared path may also point at the user's real photo.
+    if (!sharedImageUri?.startsWith(Paths.cache.uri)) return;
+    return () => {
+      try {
+        new File(sharedImageUri).delete();
+      }
+      catch {}
+    };
+  }, [sharedImageUri]);
+
   const scanSharedItem = (item: SharedItem) => {
-    resetShareIntent();
+    // Cleared only on success, so a failed scan brings the sheet back.
+    scannedShareRef.current = JSON.stringify(shareIntent);
     if (item.kind === 'image') mutatePrepare(item);
     else mutateScan({ text: item.text });
   };

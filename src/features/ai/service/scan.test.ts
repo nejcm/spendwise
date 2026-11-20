@@ -130,6 +130,14 @@ describe('scanReceiptText', () => {
     expect(scanMock.mock.calls[0]![0]).not.toContain('TAIL');
   });
 
+  it('does not split an emoji at the cap', async () => {
+    scanMock.mockResolvedValue('{"amount": 100}');
+
+    await scanReceiptText(`${'a'.repeat(4999)}💳`, CATEGORIES);
+
+    expect(() => encodeURIComponent(scanMock.mock.calls[0]![0])).not.toThrow();
+  });
+
   it('uses the selected provider and its key', async () => {
     setAiProvider('anthropic');
     setAnthropicApiKey('sk-ant');

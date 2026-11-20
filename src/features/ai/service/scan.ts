@@ -6,6 +6,7 @@ import { CURRENCY_VALUES } from '@/features/currencies';
 import { todayISO } from '@/features/formatting/helpers';
 import { translate } from '@/lib/i18n';
 import { selectIsAiFeatureOn, useAppStore } from '@/lib/store/store';
+import { truncateText } from '@/lib/utils';
 import { scanReceiptAnthropic } from './anthropic';
 import { scanReceiptOpenAI } from './openai';
 
@@ -64,7 +65,7 @@ ${categoryList || '  (none)'}
 Respond with ONLY the JSON object, nothing else.`;
 
   if (sharedText === undefined) return prompt;
-  return `${prompt}\n\nText:\n"""\n${sharedText.slice(0, MAX_SHARED_TEXT_LENGTH)}\n"""`;
+  return `${prompt}\n\nText:\n"""\n${truncateText(sharedText, MAX_SHARED_TEXT_LENGTH)}\n"""`;
 }
 
 // Parsing

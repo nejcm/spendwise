@@ -1,30 +1,41 @@
 diff --git a/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt b/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt
-index ff5b1001e7bb3443482727cec48c22579465c73b..13a4755f0d38a9cf291681d2d19169e9086f3f6a 100644
+index ff5b1001e7bb3443482727cec48c22579465c73b..608fe323765fa181aa3cfcd1449f2b42449d31ff 100644
 --- a/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt
 +++ b/android/src/main/java/expo/modules/shareintent/ExpoShareIntentModule.kt
-@@ -126,7 +126,7 @@ class ExpoShareIntentModule : Module() {
+@@ -124,9 +124,12 @@ class ExpoShareIntentModule : Module() {
+             if (intent.type == null) return
+             if (intent.type!!.startsWith("text/plain")) {
                  // text / urls
-                 if (intent.action == Intent.ACTION_SEND) {
+-                if (intent.action == Intent.ACTION_SEND) {
++                val text = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString()
++                if (intent.action == Intent.ACTION_SEND && text.isNullOrBlank()) {
++                    notifyError("No text in text share")
++                } else if (intent.action == Intent.ACTION_SEND) {
                      notifyShareIntent(mapOf(
 -                        "text" to intent.getStringExtra(Intent.EXTRA_TEXT),
-+                        "text" to intent.getCharSequenceExtra(Intent.EXTRA_TEXT)?.toString(),
++                        "text" to text,
                          "type" to "text",
                          "meta" to mapOf(
                              "title" to intent.getCharSequenceExtra(Intent.EXTRA_TITLE),
-@@ -183,7 +183,11 @@ class ExpoShareIntentModule : Module() {
+@@ -182,9 +185,15 @@ class ExpoShareIntentModule : Module() {
+         AsyncFunction("getShareIntent") { _: String ->
              // get the Intent from onCreate activity (app not running in background)
              ExpoShareIntentSingleton.isPending = false
-             if (ExpoShareIntentSingleton.intent?.type != null) {
+-            if (ExpoShareIntentSingleton.intent?.type != null) {
 -                handleShareIntent(ExpoShareIntentSingleton.intent!!);
++            // Taken before the slow file copy, so a share stored meanwhile survives for the next pull.
++            val intent = ExpoShareIntentSingleton.intent
++            if (intent?.type != null) {
+                 ExpoShareIntentSingleton.intent = null
 +                try {
-+                    handleShareIntent(ExpoShareIntentSingleton.intent!!)
++                    handleShareIntent(intent)
 +                } catch (e: Exception) {
 +                    notifyError("Cannot read share intent: ${e.message}")
 +                }
-                 ExpoShareIntentSingleton.intent = null
              }
          }
-@@ -196,8 +200,12 @@ class ExpoShareIntentModule : Module() {
+ 
+@@ -196,8 +205,12 @@ class ExpoShareIntentModule : Module() {
              ExpoShareIntentSingleton.isPending
          }
  
@@ -38,8 +49,11 @@ index ff5b1001e7bb3443482727cec48c22579465c73b..13a4755f0d38a9cf291681d2d19169e9
          }
  
          OnCreate {
-@@ -303,7 +311,8 @@ class ExpoShareIntentModule : Module() {
-                     Log.i("FileDirectory", "File name: $fileName")
+@@ -300,10 +313,10 @@ class ExpoShareIntentModule : Module() {
+                 if (cursor != null && cursor.moveToFirst()) {
+                     val columnIndex = cursor.getColumnIndexOrThrow(column)
+                     val fileName = cursor.getString(columnIndex)
+-                    Log.i("FileDirectory", "File name: $fileName")
                      val safeName = fileName?.let { File(it).name }.orEmpty()
                      if (safeName.isNotEmpty()) {
 -                        val candidate = File(context.cacheDir, safeName)
@@ -85,3 +99,16 @@ index e52b6d089f8625d399c371daf14a9fe010d5fede..6389a39c7906c37193093c3896c3fcbe
              }
              self.sendEvent(
                  "onError",
+diff --git a/plugin/build/ios/writeIosShareExtensionFiles.js b/plugin/build/ios/writeIosShareExtensionFiles.js
+index 9ceec1c5c0a65a8aae55bcd658a8c3bf4deab982..d08197303acd37e99b86fc0dd1755d82e138919d 100644
+--- a/plugin/build/ios/writeIosShareExtensionFiles.js
++++ b/plugin/build/ios/writeIosShareExtensionFiles.js
+@@ -69,7 +69,7 @@ function getShareExtensionInfoFilePath(platformProjectRoot, parameters) {
+ function getShareExtensionInfoContent(appName, appIdentifier, parameters) {
+     return plist_1.default.build({
+         CFBundleName: "$(PRODUCT_NAME)",
+-        CFBundleDisplayName: parameters.iosShareExtensionName || `${appName} - Share Extension`,
++        CFBundleDisplayName: parameters.iosShareExtensionName || appName,
+         CFBundleIdentifier: "$(PRODUCT_BUNDLE_IDENTIFIER)",
+         CFBundleDevelopmentRegion: "$(DEVELOPMENT_LANGUAGE)",
+         CFBundleExecutable: "$(EXECUTABLE_NAME)",

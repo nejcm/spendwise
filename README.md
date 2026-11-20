@@ -115,10 +115,11 @@ iOS 17+ can open Spendwise with a pre-filled new transaction every time you pay 
 
 1. Shortcuts → **Automation** → **+** → **Transaction**. Pick your cards, keep **Run Immediately**, tap **Next** → **New Blank Automation**.
 2. Add **URL Encode** with input **Shortcut Input → Amount**. Add a second **URL Encode** with **Shortcut Input → Merchant**.
-3. Add **Open URL** with `spendwise://transactions/new?amount=[URL Encoded Text]&merchant_name=[URL Encoded Text 2]`, inserting the two encoded results as variables.
+3. Add **Open URL** with `spendwise://transactions/new?type=expense&amount=[URL Encoded Text]&merchant_name=[URL Encoded Text 2]`, inserting the two encoded results as variables.
 4. Optional: append `&currency=EUR` (any supported ISO code) to fix the currency.
+5. Tap **Done**.
 
-The amount is accepted as Shortcuts formats it (`12.50`, `12,50`, `€12.50`, `12,50 €`, `1.234,56`); a three-letter code such as `12,50 EUR` also sets the currency. If the app lock is on, the form opens after unlocking. Nothing is saved until you confirm.
+The amount is accepted as Shortcuts formats it (`12.50`, `12,50`, `€12.50`, `12,50 €`, `1.234,56`); a three-letter code such as `12,50 EUR` also sets the currency. If the app lock is on, the form opens after unlocking. A second payment while a form is open opens a new form on top, keeping the first draft. Nothing is saved until you confirm.
 
 Scheme per build: `spendwise` for production and development, `spendwise.preview` for preview builds (`SCHEMES` in `env.ts`).
 

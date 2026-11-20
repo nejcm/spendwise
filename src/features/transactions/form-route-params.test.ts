@@ -65,11 +65,12 @@ describe('parseTransactionFormInitialValues', () => {
     ['$1,234', '1234'],
     ['1 234,5', '1234.5'],
     ['7', '7'],
+    [',5', '0.5'],
   ])('parses the Shortcuts amount %s', (amount: string, expected: string) => {
     expect(parseTransactionFormInitialValues({ amount })).toEqual({ amount: expected });
   });
 
-  it.each(['-12.50', '−12.50', '€0,00', '1e3', 'twelve', '12.50abcde'])('rejects the amount %s', (amount: string) => {
+  it.each(['-12.50', '−12.50', '($12.50)', '€0,00', '1e3', 'twelve', '12.50abcde', '12.3456', '1..2', '1,23,456'])('rejects the amount %s', (amount: string) => {
     expect(parseTransactionFormInitialValues({ amount })).toBeUndefined();
   });
 

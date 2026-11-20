@@ -44,7 +44,8 @@ const nullableStringParamSchema = singleParamSchema.transform((value) => {
   if (value === undefined) return undefined;
   return value.trim() || null;
 });
-const AMOUNT_PATTERN = /^([^\d.,\-\u2212]{0,4})([\d.,]+)([^\d.,\-\u2212]{0,4})$/;
+const AMOUNT_PATTERN = /^([^\d.,()\-\u2212]{0,4})([\d.,]+)([^\d.,()\-\u2212]{0,4})$/;
+const INTEGER_PATTERN = /^(?:\d+|\d{1,3}(?:[.,]\d{3})+)$/;
 
 // Accepts locale-formatted currency text as iOS Shortcuts inserts it, e.g. `€1.234,56` or `12,50 EUR`.
 function parseAmountText(raw: string): { amount?: string; currency?: CurrencyKey } {
@@ -54,7 +55,9 @@ function parseAmountText(raw: string): { amount?: string; currency?: CurrencyKey
   const lastSeparator = Math.max(number.lastIndexOf('.'), number.lastIndexOf(','));
   const fraction = number.slice(lastSeparator + 1);
   const isDecimal = lastSeparator >= 0 && fraction.length > 0 && fraction.length <= 2;
-  const integer = (isDecimal ? number.slice(0, lastSeparator) : number).replace(/[.,]/g, '');
+  const groupedInteger = isDecimal ? number.slice(0, lastSeparator) : number;
+  if (groupedInteger && !INTEGER_PATTERN.test(groupedInteger)) return {};
+  const integer = groupedInteger.replace(/[.,]/g, '');
   const amount = isDecimal ? `${integer || '0'}.${fraction}` : integer;
   const cents = parseToCents(amount);
   const currency = currencySchema.safeParse(`${prefix}${suffix}`.toUpperCase()).data;

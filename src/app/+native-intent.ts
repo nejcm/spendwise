@@ -1,6 +1,6 @@
 import Env from 'env';
-import { appSchemeUrlToPath } from '@/lib/routing';
+import { newTransactionLinkToPath } from '@/lib/routing';
 
 export function redirectSystemPath({ path }: { path: string; initial: boolean }) {
-  return appSchemeUrlToPath(path, Env.EXPO_PUBLIC_SCHEME);
+  return newTransactionLinkToPath(path, Env.EXPO_PUBLIC_SCHEME, Date.now().toString(36));
 }

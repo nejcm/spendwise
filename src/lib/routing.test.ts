@@ -1,21 +1,40 @@
 import { extractExpoPathFromURL } from 'expo-router/build/fork/extractPathFromURL';
-import { appSchemeUrlToPath } from './routing';
+import { newTransactionLinkToPath, singleValueParams } from './routing';
 
 function routerSearchParams(url: string) {
-  const path = extractExpoPathFromURL([], appSchemeUrlToPath(url, 'spendwise'));
+  const path = extractExpoPathFromURL([], newTransactionLinkToPath(url, 'spendwise', 'id1'));
   return new URL(path, 'https://x/').searchParams;
 }
 
-describe('appSchemeUrlToPath', () => {
+describe('newTransactionLinkToPath', () => {
   it('keeps encoded delimiters inside query values through Expo Router path extraction', () => {
     const params = routerSearchParams('spendwise://transactions/new?amount=12%2C50%20%E2%82%AC&merchant_name=Coffee%20%26%20Co%20%231%20C%2B%2B&currency=EUR');
     expect(params.get('amount')).toBe('12,50 €');
     expect(params.get('merchant_name')).toBe('Coffee & Co #1 C++');
     expect(params.get('currency')).toBe('EUR');
+    expect(params.get('link_id')).toBe('id1');
   });
 
-  it('leaves other schemes untouched', () => {
-    expect(appSchemeUrlToPath('exp+spendwise://expo-development-client/?url=x', 'spendwise')).toBe('exp+spendwise://expo-development-client/?url=x');
-    expect(appSchemeUrlToPath('spendwise.preview://transactions/new?a=1', 'spendwise.preview')).toBe('/transactions/new?a=1');
+  it('gives identical links distinct ids', () => {
+    const url = 'spendwise://transactions/new?amount=5&merchant_name=Bakery';
+    expect(newTransactionLinkToPath(url, 'spendwise', 'a')).not.toBe(newTransactionLinkToPath(url, 'spendwise', 'b'));
+    expect(newTransactionLinkToPath('spendwise.preview://transactions/new', 'spendwise.preview', 'a')).toBe('/transactions/new?link_id=a');
+  });
+
+  it.each([
+    'spendwise://expo-development-client/?url=http%3A%2F%2F10.0.0.2%3A8081',
+    'exp+spendwise://expo-development-client/?url=x',
+    'spendwise://transactions/newer?amount=5',
+    'spendwise://transactions/abc',
+    'spendwise://',
+    'https://example.com/transactions/new?amount=5',
+  ])('leaves %s untouched', (url: string) => {
+    expect(newTransactionLinkToPath(url, 'spendwise', 'a')).toBe(url);
+  });
+});
+
+describe('singleValueParams', () => {
+  it('drops repeated and missing params', () => {
+    expect(singleValueParams({ amount: ['12', '34'], merchant_name: 'Bakery', note: undefined })).toEqual({ merchant_name: 'Bakery' });
   });
 });

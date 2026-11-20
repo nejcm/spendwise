@@ -3,7 +3,7 @@ import * as React from 'react';
 import { View } from 'react-native';
 import { TransactionForm } from '@/features/transactions/components/transaction-form';
 import { parseTransactionFormInitialValues } from '@/features/transactions/form-route-params';
-import { goBackOrFallback } from '@/lib/routing';
+import { goBackOrFallback, singleValueParams } from '@/lib/routing';
 import { useAppStore } from '@/lib/store/store';
 
 export default function NewTransactionRoute() {
@@ -18,7 +18,7 @@ export default function NewTransactionRoute() {
   React.useEffect(() => {
     if (paramsKey === mountedParamsKeyRef.current) return;
     mountedParamsKeyRef.current = paramsKey;
-    router.push({ pathname: '/transactions/new', params });
+    router.push({ pathname: '/transactions/new', params: singleValueParams(params) });
   }, [params, paramsKey, router]);
   const onClose = () => goBackOrFallback(router);
 
